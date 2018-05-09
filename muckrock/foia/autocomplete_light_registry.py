@@ -27,9 +27,9 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         by title, agency, and jurisdiction."""
         return (
             Q(title__icontains=string) | Q(agency__name__icontains=string)
-            | Q(jurisdiction__name__icontains=string)
-            | Q(jurisdiction__abbrev__iexact=string)
-            | Q(jurisdiction__parent__abbrev__iexact=string)
+            | Q(agency__jurisdiction__name__icontains=string)
+            | Q(agency__jurisdiction__abbrev__iexact=string)
+            | Q(agency__jurisdiction__parent__abbrev__iexact=string)
         )
 
     def choices_for_request(self):
