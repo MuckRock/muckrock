@@ -7,25 +7,16 @@ from django.core.validators import URLValidator
 
 # Standard Library
 import json
-import re
 
 # Third Party
 import unicodecsv as csv
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.crowdsource.constants import DOCUMENT_URL_RE, PROJECT_URL_RE
 from muckrock.crowdsource.fields import FIELD_DICT
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
 from muckrock.crowdsource.tasks import datum_per_page, import_doccloud_proj
-
-DOCUMENT_URL_RE = re.compile(
-    r'https?://www[.]documentcloud[.]org/documents/'
-    r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
-)
-PROJECT_URL_RE = re.compile(
-    r'https?://www[.]documentcloud[.]org/projects/'
-    r'(?:[0-9A-Za-z-]+)[.]html'
-)
 
 
 class CrowdsourceAssignmentForm(forms.Form):
@@ -140,7 +131,7 @@ class CrowdsourceForm(forms.ModelForm):
                 elif proj_match:
                     import_doccloud_proj.delay(
                         crowdsource.pk,
-                        url,
+                        proj_match.group('proj_id'),
                         data,
                         doccloud_each_page,
                     )
@@ -237,7 +228,10 @@ class CrowdsourceDataFormset(CrowdsourceDataFormsetBase):
                 )
             elif proj_match:
                 import_doccloud_proj.delay(
-                    self.instance.pk, instance.url, {}, doccloud_each_page
+                    self.instance.pk,
+                    proj_match.group('proj_id'),
+                    {},
+                    doccloud_each_page,
                 )
             else:
                 return_instances.append(instance)
