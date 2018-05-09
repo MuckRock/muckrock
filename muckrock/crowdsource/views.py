@@ -22,6 +22,7 @@ from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
     CrowdsourceDataFormset,
@@ -118,6 +119,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     query_pk_and_slug = True
     context_object_name = 'crowdsource'
     queryset = Crowdsource.objects.filter(status__in=['draft', 'open'])
+    minireg_source = 'Crowdsource'
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
@@ -245,6 +247,18 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             )
             response.create_values(form.cleaned_data)
             messages.success(self.request, 'Thank you!')
+            properties = {
+                'Crowdsource': crowdsource.title,
+                'Crowdsource ID': crowdsource.pk,
+                'Number': number,
+            }
+            if self.data:
+                properties['Data'] = self.data.url
+            mixpanel_event(
+                self.request,
+                'Assignment Completed',
+                properties,
+            )
 
         if self.request.POST['submit'] == 'Submit and Add Another':
             return self.render_to_response(

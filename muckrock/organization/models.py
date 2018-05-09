@@ -282,3 +282,15 @@ class Organization(models.Model):
         self.save()
         self.owner.profile.save()
         return subscription
+
+    def mixpanel_event(self):
+        """Return data for a mixpanel event"""
+        return {
+            'Organization': self.name,
+            'Organization ID': self.pk,
+            'Seats': self.max_users,
+            'Monthly Requests': self.monthly_requests,
+            'Monthly Cost': self.monthly_cost,
+            'Active': self.active,
+            'Private': self.private,
+        }

@@ -57,6 +57,7 @@ from muckrock.accounts.models import (
     Statistics,
 )
 from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
@@ -92,6 +93,12 @@ def create_new_user(request, valid_form):
         password=valid_form.cleaned_data['password1']
     )
     login(request, new_user)
+    mixpanel_event(
+        request,
+        'Sign Up',
+        {'Source': 'Sign Up Page'},
+        signup=True,
+    )
     return new_user
 
 
@@ -152,6 +159,10 @@ class ProfessionalSignupView(SignupView):
             )
             success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
             messages.success(self.request, success_msg)
+            mixpanel_event(
+                self.request,
+                'Pro Subscription Started',
+            )
         except (KeyError, AttributeError):
             # no payment information provided
             logger.warn('No payment information provided.')
@@ -193,6 +204,11 @@ class OrganizationSignupView(SignupView):
         """
         new_user = create_new_user(self.request, form)
         new_org = form.create_organization(new_user)
+        mixpanel_event(
+            self.request,
+            'Organization Created',
+            new_org.mixpanel_event(),
+        )
         welcome.delay(new_user)
         messages.success(
             self.request,
@@ -270,6 +286,7 @@ def upgrade(request):
             'Cannot upgrade this account, no Stripe token provided.'
         )
     request.user.profile.start_pro_subscription(token)
+    mixpanel_event(request, 'Pro Subscription Started')
 
 
 def downgrade(request):
@@ -281,6 +298,7 @@ def downgrade(request):
             'Cannot downgrade this account, it is not Professional.'
         )
     request.user.profile.cancel_pro_subscription()
+    mixpanel_event(request, 'Pro Subscription Cancelled')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -353,10 +371,21 @@ class ProfileSettings(TemplateView):
 
     def _handle_cancel_payments(self, attr, arg):
         """Handle cancelling recurring donations or crowdfunds"""
-        payments = getattr(self.request.user,
-                           attr).filter(pk__in=self.request.POST.getlist(arg))
+        payments = (
+            getattr(self.request.user, attr)
+            .filter(pk__in=self.request.POST.getlist(arg))
+        )
+        attr_type = {
+            'donations': 'Donation',
+            'recurring_crowdfund_payments': 'Recurring Crowdfund',
+        }
         for payment in payments:
             payment.cancel()
+            mixpanel_event(
+                self.request,
+                'Cancel {}'.format(attr_type[attr]),
+                {'Amount': payment.amount},
+            )
         msg = attr.replace('_', ' ')
         if payments:
             messages.success(
@@ -466,6 +495,7 @@ class ProfileView(BuyRequestsMixin, FormView):
             request.user.is_staff and request.POST.get('action') == 'cancel-pro'
         ):
             self.user.profile.cancel_pro_subscription()
+            mixpanel_event(request, 'Pro Subscription Cancelled')
             messages.success(request, 'Pro account has been cancelled')
             return redirect('acct-profile', username=self.user.username)
         else:

@@ -23,6 +23,7 @@ from stripe.error import StripeError
 
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
@@ -102,6 +103,11 @@ class GenericComposer(BuyRequestsMixin):
         else:
             messages.success(self.request, 'Request submitted')
             self.request.session['ga'] = 'request_submitted'
+            mixpanel_event(
+                self.request,
+                'Request Submitted',
+                self._composer_mixpanel_properties(composer),
+            )
             warning = self._proxy_warnings(composer)
             if warning:
                 messages.warning(self.request, warning)
@@ -142,9 +148,23 @@ class GenericComposer(BuyRequestsMixin):
         else:
             return ''
 
+    def _composer_mixpanel_properties(self, composer):
+        """Get properties for tracking composer events in mixpanel"""
+        return {
+            'Number': len(composer.agencies.all()),
+            'Title': composer.title,
+            'Agencies': [a.name for a in composer.agencies.all()],
+            'Embargo': composer.embargo,
+            'Permanent Embargo': composer.permanent_embargo,
+            'Created At': composer.datetime_created.isoformat(),
+            'Parent': composer.parent,
+            'ID': composer.pk,
+        }
+
 
 class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     """Create a new composer"""
+    minireg_source = 'Composer'
 
     # pylint: disable=attribute-defined-outside-init
 
@@ -225,6 +245,8 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                         'have not been subscribed to a professional account.  '
                         'You can subscribe from the settings page.'
                     )
+                else:
+                    mixpanel_event(self.request, 'Pro Subscription Started')
             return user
         else:
             login(self.request, form.user)
@@ -249,6 +271,11 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             ).update(user=user)
         if form.cleaned_data['action'] == 'save':
             self.request.session['ga'] = 'request_drafted'
+            mixpanel_event(
+                self.request,
+                'Request Saved',
+                self._composer_mixpanel_properties(composer),
+            )
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
             self._submit_composer(composer, form)
@@ -318,6 +345,11 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
         if form.cleaned_data['action'] == 'save':
             composer = form.save()
             self.request.session['ga'] = 'request_drafted'
+            mixpanel_event(
+                self.request,
+                'Request Saved',
+                self._composer_mixpanel_properties(composer),
+            )
             messages.success(self.request, 'Request saved')
         elif form.cleaned_data['action'] == 'submit':
             composer = form.save()

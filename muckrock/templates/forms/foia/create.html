@@ -301,4 +301,10 @@
 {% block scripts %}
   {% include 'lib/component/fine-uploader.html' %}
   <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+  {% url "foia-create" as create_url %}
+  {% if request.path == create_url %}
+    <script>
+      mixpanel.track("Request Drafted");
+    </script>
+  {% endif %}
 {% endblock scripts %}

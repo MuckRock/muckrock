@@ -173,12 +173,12 @@ class TestBuyRequestForm(TestCase):
         """Test getting the price for advanced users"""
         user = UserFactory(profile__acct_type='pro')
         form = BuyRequestForm(user=user)
-        eq_(form._get_price(19), 19 * 500)
-        eq_(form._get_price(20), 20 * 300)
+        eq_(form.get_price(19), 19 * 500)
+        eq_(form.get_price(20), 20 * 300)
 
     def test_get_price_basic(self):
         """Test getting the price for basic users"""
         user = UserFactory(profile__acct_type='basic')
         form = BuyRequestForm(user=user)
-        eq_(form._get_price(19), 19 * 500)
-        eq_(form._get_price(20), 20 * 400)
+        eq_(form.get_price(19), 19 * 500)
+        eq_(form.get_price(20), 20 * 400)

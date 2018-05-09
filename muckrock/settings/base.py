@@ -144,6 +144,7 @@ TEMPLATES = [{
             'django.contrib.messages.context_processors.messages',
             'muckrock.sidebar.context_processors.sidebar_info',
             'muckrock.context_processors.google_analytics',
+            'muckrock.context_processors.mixpanel',
             'muckrock.context_processors.domain',
             'muckrock.context_processors.cache_timeout',
         ],
@@ -675,3 +676,7 @@ VIEW_ID = os.environ.get('VIEW_ID', '')
 HIJACK_AUTHORIZE_STAFF = True
 
 MULTI_REVIEW_AMOUNT = 2
+
+MIXPANEL_TOKEN = os.environ.get(
+    'MIXPANEL_TOKEN', 'f0342a5341ddad56dfa73505aa604c74'
+)

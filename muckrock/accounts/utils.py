@@ -7,8 +7,10 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
 from django.forms import ValidationError
+from django.utils.safestring import mark_safe
 
 # Standard Library
+import json
 import logging
 import re
 
@@ -109,4 +111,30 @@ def mailchimp_subscribe(
             'Thank you for subscribing to our newsletter. We sent a '
             'confirmation email to your inbox.',
         )
+    mixpanel_event(
+        request,
+        'Newsletter Sign Up',
+        {
+            'Email': email,
+            'List': list_,
+        },
+    )
     return False
+
+
+def mixpanel_event(request, event, props=None, **kwargs):
+    """Add an event to the session to be sent via javascript on the next page
+    load
+    """
+    if props is None:
+        props = {}
+    if 'mp_events' in request.session:
+        request.session['mp_events'].append(
+            (event, mark_safe(json.dumps(props)))
+        )
+    else:
+        request.session['mp_events'] = [(event, mark_safe(json.dumps(props)))]
+    if kwargs.get('signup'):
+        request.session['mp_alias'] = True
+    if kwargs.get('charge'):
+        request.session['mp_charge'] = kwargs['charge']
