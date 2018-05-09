@@ -45,6 +45,7 @@ def split_name(name):
 
 class MiniregMixin(object):
     """A mixin to expose miniregister functionality to a view"""
+    minireg_source = 'Default'
 
     def miniregister(self, full_name, email, newsletter=False):
         """Create a new user from their full name and email and login"""
