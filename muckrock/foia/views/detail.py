@@ -844,14 +844,15 @@ class ComposerDetail(DetailView):
         # pylint: disable=attribute-defined-outside-init
         composer = self.get_object()
         is_owner = composer.user == self.request.user
-        if composer.status == 'started' and is_owner:
+        is_owner_or_staff = is_owner or self.request.user.is_staff
+        if composer.status == 'started' and is_owner_or_staff:
             return redirect('foia-draft', idx=composer.pk)
-        if composer.status == 'started' and not is_owner:
+        if composer.status == 'started' and not is_owner_or_staff:
             raise Http404
         self.foias = (
             composer.foias.get_viewable(self.request.user).select_related_view()
         )
-        if not is_owner and not self.foias:
+        if not is_owner_or_staff and not self.foias:
             raise Http404
         if len(self.foias) == 1:
             return redirect(self.foias[0])

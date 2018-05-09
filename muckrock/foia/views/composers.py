@@ -289,17 +289,14 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
 
     def get_queryset(self):
         """Restrict to composers you can view"""
+        kwargs = {}
+        # non staff may only see their own requests
+        if not self.request.user.is_staff:
+            kwargs['user'] = self.request.user
+        # can only post to draft composers
         if self.request.method == 'POST':
-            # can only post draft requests
-            return FOIAComposer.objects.filter(
-                status='started',
-                user=self.request.user,
-            )
-        else:
-            # can get recently submitted requests also, which will convert them
-            # back to drafts
-            # allow all composer's here - we don't want to 404 on non-drafts
-            return FOIAComposer.objects.filter(user=self.request.user)
+            kwargs['status'] = 'started'
+        return FOIAComposer.objects.filter(**kwargs)
 
     def get_object(self, queryset=None):
         """Convert object back to draft if it has been submitted recently"""
