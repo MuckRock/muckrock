@@ -21,7 +21,7 @@ import os.path
 import re
 import sys
 import urllib2
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from random import randint
 from urllib import quote_plus
@@ -572,9 +572,13 @@ def autoimport():
         if code not in CODES:
             raise ValueError('ERROR: %s uses an unknown code' % name)
         foia_pks = [pk[2:] for pk in m_name.group('docs').split()]
-        file_datetime = datetime(
-            int(m_name.group('year')) + 2000, int(m_name.group('month')),
-            int(m_name.group('day'))
+        file_datetime = datetime.combine(
+            datetime(
+                int(m_name.group('year')) + 2000,
+                int(m_name.group('month')),
+                int(m_name.group('day')),
+            ),
+            time(tzinfo=timezone.get_current_timezone()),
         )
         title, status, body = CODES[code]
         arg = m_name.group('arg')
