@@ -210,7 +210,7 @@ class TestFOIAViewsetCreate(TestCase):
                 'document_request': '',
             },
             code=400,
-            status='document_request required',
+            status='document_request or full_text required',
         )
 
     @requests_mock.Mocker()
