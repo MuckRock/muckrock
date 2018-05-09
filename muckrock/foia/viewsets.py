@@ -111,10 +111,14 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             )
         )
         cleaned_data['title'] = self._clean_title(data.get('title'))
-        cleaned_data['document_request'] = self._clean_document_request(
-            data.get('document_request')
+
+        cleaned_data['requested_docs'], cleaned_data['edited_boilerplate'] = (
+            self._clean_document_request(
+                data.get('document_request'),
+                data.get('full_text'),
+            )
         )
-        cleaned_data['full_text'] = data.get('full_text', False)
+
         cleaned_data['attachments'] = self._clean_attachments(
             data.get('attachments', [])
         )
@@ -158,11 +162,16 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             raise forms.ValidationError('title required')
         return title
 
-    def _clean_document_request(self, document_request):
+    def _clean_document_request(self, document_request, full_text):
         """Clean document_request"""
-        if not document_request:
-            raise forms.ValidationError('document_request required')
-        return document_request
+        if full_text:
+            return full_text, True
+        elif document_request:
+            return document_request, False
+        else:
+            raise forms.ValidationError(
+                'document_request or full_text required'
+            )
 
     def _clean_attachments(self, attachments):
         """Clean attachments"""
@@ -215,8 +224,8 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             user=request.user,
             title=data['title'],
             slug=slugify(data['title']) or 'untitled',
-            requested_docs=data['document_request'],
-            edited_boilerplate=data['full_text'],
+            requested_docs=data['requested_docs'],
+            edited_boilerplate=data['edited_boilerplate'],
             embargo=data['embargo'],
             permanent_embargo=data['permanent_embargo'],
         )
