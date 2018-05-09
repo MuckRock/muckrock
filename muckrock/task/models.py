@@ -387,7 +387,9 @@ class ReviewAgencyTask(Task):
                     '%s__status' % email_or_fax, email_or_fax
                 ).exclude(**{
                     email_or_fax: None
-                }).select_related(email_or_fax, 'jurisdiction').annotate(
+                }).select_related(
+                    email_or_fax, 'agency__jurisdiction'
+                ).annotate(
                     latest_response=ExtractDay(
                         Cast(
                             Now() - Max(
@@ -417,7 +419,7 @@ class ReviewAgencyTask(Task):
                     Prefetch(
                         'errors',
                         error_model.objects.select_related(
-                            '%s__communication__foia__jurisdiction' %
+                            '%s__communication__foia__agency__jurisdiction' %
                             email_or_fax
                         ).order_by('-datetime')
                     )
