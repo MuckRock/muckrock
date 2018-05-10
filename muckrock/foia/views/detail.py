@@ -260,7 +260,10 @@ class Detail(DetailView):
         context['cc_emails'] = json.dumps([
             unicode(e) for e in foia.cc_emails.all()
         ])
-        if foia.composer.status == 'submitted':
+        if (
+            foia.composer.status == 'submitted'
+            and foia.composer.datetime_submitted is not None
+        ):
             context['revoke_deadline'] = (
                 foia.composer.datetime_submitted +
                 timedelta(seconds=COMPOSER_EDIT_DELAY)
@@ -867,7 +870,10 @@ class ComposerDetail(DetailView):
             'admin:foia_foiacomposer_change',
             args=(composer.pk,),
         )
-        if composer.status == 'submitted':
+        if (
+            composer.status == 'submitted'
+            and composer.datetime_submitted is not None
+        ):
             context['edit_deadline'] = (
                 composer.datetime_submitted +
                 timedelta(seconds=COMPOSER_EDIT_DELAY)
