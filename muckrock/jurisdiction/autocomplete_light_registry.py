@@ -72,7 +72,7 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
         '-level', 'name'
     )
     split_words = 'and'
-    search_fields = ['^name', 'abbrev', 'parent__abbrev', 'aliases']
+    search_fields = ['name', 'abbrev', 'parent__abbrev', 'aliases']
     attrs = {
         'data-autocomplete-minimum-characters': 1,
         'placeholder': 'Search jurisdictions',

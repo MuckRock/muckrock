@@ -157,7 +157,7 @@ class GenericComposer(BuyRequestsMixin):
             'Embargo': composer.embargo,
             'Permanent Embargo': composer.permanent_embargo,
             'Created At': composer.datetime_created.isoformat(),
-            'Parent': composer.parent,
+            'Parent': composer.parent.pk if composer.parent else None,
             'ID': composer.pk,
         }
 
