@@ -1,56 +1,79 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe "the delete function" do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+describe 'delete' do
+  it { is_expected.not_to eq(nil) }
+  it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError) }
+  it { is_expected.to run.with_params([]).and_raise_error(Puppet::ParseError) }
+  it { is_expected.to run.with_params([], 'two') }
+  it { is_expected.to run.with_params([], 'two', 'three').and_raise_error(Puppet::ParseError) }
+  it { is_expected.to run.with_params(1, 'two').and_raise_error(TypeError) }
 
-  it "should exist" do
-    expect(Puppet::Parser::Functions.function("delete")).to eq("function_delete")
+  describe 'deleting from an array' do
+    it { is_expected.to run.with_params([], '').and_return([]) }
+    it { is_expected.to run.with_params([], 'two').and_return([]) }
+    it { is_expected.to run.with_params(['two'], 'two').and_return([]) }
+    it { is_expected.to run.with_params(%w[two two], 'two').and_return([]) }
+    it { is_expected.to run.with_params(%w[ab b c b], 'b').and_return(%w[ab c]) }
+    it { is_expected.to run.with_params(%w[one two three], 'four').and_return(%w[one two three]) }
+    it { is_expected.to run.with_params(%w[one two three], 'e').and_return(%w[one two three]) }
+    it { is_expected.to run.with_params(%w[one two three], 'two').and_return(%w[one three]) }
+    it { is_expected.to run.with_params(%w[two one two three two], 'two').and_return(%w[one three]) }
+    it { is_expected.to run.with_params(%w[one two three two], %w[one two]).and_return(['three']) }
+    it { is_expected.to run.with_params(['ồאּẻ', 'ŧẅơ', 'ŧңŗё℮', 'ŧẅơ'], %w[ồאּẻ ŧẅơ]).and_return(['ŧңŗё℮']) }
   end
 
-  it "should raise a ParseError if there are fewer than 2 arguments" do
-    expect { scope.function_delete([]) }.to( raise_error(Puppet::ParseError))
+  describe 'deleting from a string' do
+    it { is_expected.to run.with_params('', '').and_return('') }
+    it { is_expected.to run.with_params('bar', '').and_return('bar') }
+    it { is_expected.to run.with_params('', 'bar').and_return('') }
+    it { is_expected.to run.with_params('bar', 'bar').and_return('') }
+    it { is_expected.to run.with_params('barbar', 'bar').and_return('') }
+    it { is_expected.to run.with_params('barfoobar', 'bar').and_return('foo') }
+    it { is_expected.to run.with_params('foobarbabarz', 'bar').and_return('foobaz') }
+    it { is_expected.to run.with_params('foobarbabarz', %w[foo bar]).and_return('baz') }
+    it { is_expected.to run.with_params('ƒōōβậяβậβậяź', %w[ƒōō βậя]).and_return('βậź') }
+
+    it { is_expected.to run.with_params('barfoobar', %w[barbar foo]).and_return('barbar') }
+    it { is_expected.to run.with_params('barfoobar', %w[foo barbar]).and_return('') }
   end
 
-  it "should raise a ParseError if there are greater than 2 arguments" do
-    expect { scope.function_delete([[], 'foo', 'bar']) }.to( raise_error(Puppet::ParseError))
+  describe 'deleting from an array' do
+    it { is_expected.to run.with_params({}, '').and_return({}) }
+    it { is_expected.to run.with_params({}, 'key').and_return({}) }
+    it { is_expected.to run.with_params({ 'key' => 'value' }, 'key').and_return({}) }
+    it {
+      is_expected.to run \
+        .with_params({ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' }, 'key2') \
+        .and_return('key1' => 'value1', 'key3' => 'value3')
+    }
+    it {
+      is_expected.to run \
+        .with_params({ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' }, %w[key1 key2]) \
+        .and_return('key3' => 'value3')
+    }
+    it {
+      is_expected.to run \
+        .with_params({ 'ĸəұ1' => 'νãŀủĕ1', 'ĸəұ2' => 'νãŀủĕ2', 'ĸəұ3' => 'νãŀủĕ3' }, %w[ĸəұ1 ĸəұ2]) \
+        .and_return('ĸəұ3' => 'νãŀủĕ3')
+    }
   end
 
-  it "should raise a TypeError if a number is passed as the first argument" do
-    expect { scope.function_delete([1, 'bar']) }.to( raise_error(TypeError))
+  it 'leaves the original array intact' do
+    argument1 = %w[one two three]
+    original1 = argument1.dup
+    _result = subject.call([argument1, 'two'])
+    expect(argument1).to eq(original1)
   end
-
-  it "should delete all instances of an element from an array" do
-    result = scope.function_delete([['a','b','c','b'],'b'])
-    expect(result).to(eq(['a','c']))
+  it 'leaves the original string intact' do
+    argument1 = 'onetwothree'
+    original1 = argument1.dup
+    _result = subject.call([argument1, 'two'])
+    expect(argument1).to eq(original1)
   end
-
-  it "should delete all instances of a substring from a string" do
-    result = scope.function_delete(['foobarbabarz','bar'])
-    expect(result).to(eq('foobaz'))
+  it 'leaves the original hash intact' do
+    argument1 = { 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' }
+    original1 = argument1.dup
+    _result = subject.call([argument1, 'key2'])
+    expect(argument1).to eq(original1)
   end
-
-  it "should delete a key from a hash" do
-    result = scope.function_delete([{ 'a' => 1, 'b' => 2, 'c' => 3 },'b'])
-    expect(result).to(eq({ 'a' => 1, 'c' => 3 }))
-  end
-
-  it "should not change origin array passed as argument" do
-    origin_array = ['a','b','c','d']
-    result = scope.function_delete([origin_array, 'b'])
-    expect(origin_array).to(eq(['a','b','c','d']))
-  end
-
-  it "should not change the origin string passed as argument" do
-    origin_string = 'foobarbabarz'
-    result = scope.function_delete([origin_string,'bar'])
-    expect(origin_string).to(eq('foobarbabarz'))
-  end
-
-  it "should not change origin hash passed as argument" do
-    origin_hash = { 'a' => 1, 'b' => 2, 'c' => 3 }
-    result = scope.function_delete([origin_hash, 'b'])
-    expect(origin_hash).to(eq({ 'a' => 1, 'b' => 2, 'c' => 3 }))
-  end
-
 end

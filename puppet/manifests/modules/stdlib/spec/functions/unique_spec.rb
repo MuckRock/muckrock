@@ -1,33 +1,31 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe "the unique function" do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
-
-  it "should exist" do
-    expect(Puppet::Parser::Functions.function("unique")).to eq("function_unique")
-  end
-
-  it "should raise a ParseError if there is less than 1 arguments" do
-    expect { scope.function_unique([]) }.to( raise_error(Puppet::ParseError))
-  end
-
-  it "should remove duplicate elements in a string" do
-    result = scope.function_unique(["aabbc"])
-    expect(result).to(eq('abc'))
-  end
-
-  it "should remove duplicate elements in an array" do
-    result = scope.function_unique([["a","a","b","b","c"]])
-    expect(result).to(eq(['a','b','c']))
-  end
-
-  it "should accept objects which extend String" do
-    class AlsoString < String
+describe 'unique' do
+  if Puppet.version.to_f < 5.0
+    describe 'signature validation' do
+      it { is_expected.not_to eq(nil) }
+      it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+      it {
+        pending('Current implementation ignores parameters after the first.')
+        is_expected.to run.with_params([], 'extra').and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i)
+      }
+      it { is_expected.to run.with_params({}).and_raise_error(Puppet::ParseError, %r{Requires either array or string to work}) }
+      it { is_expected.to run.with_params(1).and_raise_error(Puppet::ParseError, %r{Requires either array or string to work}) }
+      it { is_expected.to run.with_params(true).and_raise_error(Puppet::ParseError, %r{Requires either array or string to work}) }
     end
 
-    value = AlsoString.new('aabbc')
-    result = scope.function_unique([value])
-    result.should(eq('abc'))
+    context 'when called with an array' do
+      it { is_expected.to run.with_params([]).and_return([]) }
+      it { is_expected.to run.with_params(['a']).and_return(['a']) }
+      it { is_expected.to run.with_params(%w[a b a]).and_return(%w[a b]) }
+      it { is_expected.to run.with_params(%w[ã ъ ã]).and_return(%w[ã ъ]) }
+    end
+
+    context 'when called with a string' do
+      it { is_expected.to run.with_params('').and_return('') }
+      it { is_expected.to run.with_params('a').and_return('a') }
+      it { is_expected.to run.with_params('aaba').and_return('ab') }
+      it { is_expected.to run.with_params('ããъã').and_return('ãъ') }
+    end
   end
 end

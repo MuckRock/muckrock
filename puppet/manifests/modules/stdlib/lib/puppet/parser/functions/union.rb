@@ -1,33 +1,26 @@
 #
 # union.rb
 #
-
 module Puppet::Parser::Functions
-  newfunction(:union, :type => :rvalue, :doc => <<-EOS
-This function returns a union of two arrays.
+  newfunction(:union, :type => :rvalue, :doc => <<-DOC
+    This function returns a union of two or more arrays.
 
-*Examples:*
+    *Examples:*
 
-    union(["a","b","c"],["b","c","d"])
+        union(["a","b","c"],["b","c","d"])
 
-Would return: ["a","b","c","d"]
-    EOS
-  ) do |arguments|
+    Would return: ["a","b","c","d"]
+    DOC
+             ) do |arguments|
 
-    # Two arguments are required
-    raise(Puppet::ParseError, "union(): Wrong number of arguments " +
-      "given (#{arguments.size} for 2)") if arguments.size != 2
+    # Check that 2 or more arguments have been given ...
+    raise(Puppet::ParseError, "union(): Wrong number of arguments given (#{arguments.size} for < 2)") if arguments.size < 2
 
-    first = arguments[0]
-    second = arguments[1]
-
-    unless first.is_a?(Array) && second.is_a?(Array)
-      raise(Puppet::ParseError, 'union(): Requires 2 arrays')
+    arguments.each do |argument|
+      raise(Puppet::ParseError, 'union(): Every parameter must be an array') unless argument.is_a?(Array)
     end
 
-    result = first | second
-
-    return result
+    arguments.reduce(:|)
   end
 end
 

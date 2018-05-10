@@ -1,76 +1,55 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe Puppet::Parser::Functions.function(:validate_re) do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
-
-  # The subject of these examplres is the method itself.
-  subject do
-    # This makes sure the function is loaded within each test
-    function_name = Puppet::Parser::Functions.function(:validate_re)
-    scope.method(function_name)
+describe 'validate_re' do
+  after(:each) do
+    ENV.delete('STDLIB_LOG_DEPRECATIONS')
   end
 
-  context 'Using Puppet::Parser::Scope.new' do
+  # Checking for deprecation warning
+  it 'displays a single deprecation' do
+    ENV['STDLIB_LOG_DEPRECATIONS'] = 'true'
+    scope.expects(:warning).with(includes('This method is deprecated'))
+    is_expected.to run.with_params('', '')
+  end
 
-    describe 'Garbage inputs' do
-      inputs = [
-        [ nil ],
-        [ [ nil ] ],
-        [ { 'foo' => 'bar' } ],
-        [ { } ],
-        [ '' ],
-        [ "one", "one", "MSG to User", "4th arg" ],
-      ]
+  describe 'signature validation' do
+    it { is_expected.not_to eq(nil) }
+    it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+    it { is_expected.to run.with_params('').and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+    it { is_expected.to run.with_params('', '', '', 'extra').and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
 
-      inputs.each do |input|
-        it "validate_re(#{input.inspect}) should fail" do
-          expect { subject.call [input] }.to raise_error Puppet::ParseError
-        end
-      end
+    describe 'valid inputs' do
+      it { is_expected.to run.with_params('', '') }
+      it { is_expected.to run.with_params('', ['']) }
+      it { is_expected.to run.with_params('', [''], 'custom error') }
+      it { is_expected.to run.with_params('one', '^one') }
+      it { is_expected.to run.with_params('one', ['^one', '^two']) }
+      it { is_expected.to run.with_params('one', ['^one', '^two'], 'custom error') }
     end
 
-    describe 'Valid inputs' do
-      inputs = [
-        [ '/full/path/to/something', '^/full' ],
-        [ '/full/path/to/something', 'full' ],
-        [ '/full/path/to/something', ['full', 'absent'] ],
-        [ '/full/path/to/something', ['full', 'absent'], 'Message to the user' ],
-      ]
-
-      inputs.each do |input|
-        it "validate_re(#{input.inspect}) should not fail" do
-          expect { subject.call input }.not_to raise_error
-        end
-      end
+    describe 'invalid inputs' do
+      it { is_expected.to run.with_params('', []).and_raise_error(Puppet::ParseError, %r{does not match}) }
+      it { is_expected.to run.with_params('one', 'two').and_raise_error(Puppet::ParseError, %r{does not match}) }
+      it { is_expected.to run.with_params('', 'two').and_raise_error(Puppet::ParseError, %r{does not match}) }
+      it { is_expected.to run.with_params('', ['two']).and_raise_error(Puppet::ParseError, %r{does not match}) }
+      it { is_expected.to run.with_params('', ['two'], 'custom error').and_raise_error(Puppet::ParseError, %r{custom error}) }
+      it { is_expected.to run.with_params('notone', '^one').and_raise_error(Puppet::ParseError, %r{does not match}) }
+      it { is_expected.to run.with_params('notone', ['^one', '^two']).and_raise_error(Puppet::ParseError, %r{does not match}) }
+      it { is_expected.to run.with_params('notone', ['^one', '^two'], 'custom error').and_raise_error(Puppet::ParseError, %r{custom error}) }
     end
-    describe "Valid inputs which should raise an exception without a message" do
-      # The intent here is to make sure valid inputs raise exceptions when they
-      # don't specify an error message to display.  This is the behvior in
-      # 2.2.x and prior.
-      inputs = [
-        [ "hello", [ "bye", "later", "adios" ] ],
-        [ "greetings", "salutations" ],
-      ]
 
-      inputs.each do |input|
-        it "validate_re(#{input.inspect}) should fail" do
-          expect { subject.call input }.to raise_error /validate_re.*?does not match/
-        end
-      end
-    end
-    describe "Nicer Error Messages" do
-      # The intent here is to make sure the function returns the 3rd argument
-      # in the exception thrown
-      inputs = [
-        [ "hello", [ "bye", "later", "adios" ], "MSG to User" ],
-        [ "greetings", "salutations", "Error, greetings does not match salutations" ],
-      ]
-
-      inputs.each do |input|
-        it "validate_re(#{input.inspect}) should fail" do
-          expect { subject.call input }.to raise_error /#{input[2]}/
-        end
+    describe 'non-string inputs' do
+      [
+        1,             # Fixnum
+        3.14,          # Float
+        nil,           # NilClass
+        true,          # TrueClass
+        false,         # FalseClass
+        ['10'],        # Array
+        :key,          # Symbol
+        { :key => 'val' }, # Hash
+      ].each do |input|
+        it { is_expected.to run.with_params(input, '.*').and_raise_error(Puppet::ParseError, %r{needs to be a String}) }
       end
     end
   end

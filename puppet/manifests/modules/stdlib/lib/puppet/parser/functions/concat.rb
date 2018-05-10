@@ -1,34 +1,36 @@
 #
 # concat.rb
 #
-
 module Puppet::Parser::Functions
-  newfunction(:concat, :type => :rvalue, :doc => <<-EOS
-Appends the contents of array 2 onto array 1.
+  newfunction(:concat, :type => :rvalue, :doc => <<-DOC
+    Appends the contents of multiple arrays into array 1.
 
-*Example:*
+    *Example:*
 
-    concat(['1','2','3'],['4','5','6'])
+        concat(['1','2','3'],['4','5','6'],['7','8','9'])
 
-Would result in:
+    Would result in:
 
-  ['1','2','3','4','5','6']
-    EOS
-  ) do |arguments|
+      ['1','2','3','4','5','6','7','8','9']
+  DOC
+             ) do |arguments|
 
-    # Check that 2 arguments have been given ...
-    raise(Puppet::ParseError, "concat(): Wrong number of arguments " +
-      "given (#{arguments.size} for 2)") if arguments.size != 2
+    # Check that more than 2 arguments have been given ...
+    raise(Puppet::ParseError, "concat(): Wrong number of arguments given (#{arguments.size} for < 2)") if arguments.size < 2
 
     a = arguments[0]
-    b = arguments[1]
 
     # Check that the first parameter is an array
     unless a.is_a?(Array)
       raise(Puppet::ParseError, 'concat(): Requires array to work with')
     end
 
-    result = a + Array(b)
+    result = a
+    arguments.shift
+
+    arguments.each do |x|
+      result += (x.is_a?(Array) ? x : [x])
+    end
 
     return result
   end

@@ -7,6 +7,12 @@
 # [*ensure*]
 #  present|absent. Default: present
 #
+# [*config_dir*]
+#  Configure the gunicorn config directory path. Default: /etc/gunicorn.d
+#
+# [*manage_config_dir*]
+#  Set if the gunicorn config directory should be created. Default: false
+#
 # [*virtualenv*]
 #  Run in virtualenv, specify directory. Default: disabled
 #
@@ -42,6 +48,9 @@
 # [*template*]
 #  Which ERB template to use. Default: python/gunicorn.erb
 #
+# [*args*]
+#  Custom arguments to add in gunicorn config file. Default: []
+#
 # === Examples
 #
 # python::gunicorn { 'vhost':
@@ -66,18 +75,26 @@
 # Marc Fournier
 #
 define python::gunicorn (
-  $ensure        = present,
-  $virtualenv    = false,
-  $mode          = 'wsgi',
-  $dir           = false,
-  $bind          = false,
-  $environment   = false,
-  $owner         = 'www-data',
-  $group         = 'www-data',
-  $appmodule     = 'app:app',
-  $osenv         = false,
-  $timeout       = 30,
-  $template      = 'python/gunicorn.erb',
+  $ensure            = present,
+  $config_dir        = '/etc/gunicorn.d',
+  $manage_config_dir = false,
+  $virtualenv        = false,
+  $mode              = 'wsgi',
+  $dir               = false,
+  $bind              = false,
+  $environment       = false,
+  $owner             = 'www-data',
+  $group             = 'www-data',
+  $appmodule         = 'app:app',
+  $osenv             = false,
+  $timeout           = 30,
+  $workers           = false,
+  $access_log_format = false,
+  $accesslog         = false,
+  $errorlog          = false,
+  $log_level          = 'error',
+  $template          = 'python/gunicorn.erb',
+  $args              = [],
 ) {
 
   # Parameter validation
@@ -85,12 +102,31 @@ define python::gunicorn (
     fail('python::gunicorn: dir parameter must not be empty')
   }
 
-  file { "/etc/gunicorn.d/${name}":
-    ensure  => $ensure,
-    mode    => '0644',
-    owner   => 'root',
-    group   => 'root',
-    content => template($template),
+  validate_re($log_level, 'debug|info|warning|error|critical', "Invalid \$log_level value ${log_level}")
+
+  if $manage_config_dir {
+    file { $config_dir:
+      ensure => directory,
+      mode   => '0755',
+      owner  => 'root',
+      group  => 'root',
+    }
+    file { "${config_dir}/${name}":
+      ensure  => $ensure,
+      mode    => '0644',
+      owner   => 'root',
+      group   => 'root',
+      content => template($template),
+      require => File[$config_dir],
+    }
+  } else {
+    file { "${config_dir}/${name}":
+      ensure  => $ensure,
+      mode    => '0644',
+      owner   => 'root',
+      group   => 'root',
+      content => template($template),
+    }
   }
 
 }

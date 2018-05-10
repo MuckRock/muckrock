@@ -1,0 +1,270 @@
+[
+    {
+        "pk": 2,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Amherst",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "amherst-ma"
+        }
+    },
+    {
+        "pk": 27,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Arizona",
+            "parent": 10,
+            "level": "s",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "AZ",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "arizona"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Boston",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "boston-ma"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Brookline",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "brookline-ma"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Cambridge",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "cambridge-ma"
+        }
+    },
+    {
+        "pk": 12,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "District of Columbia",
+            "parent": 10,
+            "level": "s",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "DC",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": true,
+            "slug": "district-of-columbia"
+        }
+    },
+    {
+        "pk": 15,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Florida",
+            "parent": 10,
+            "level": "s",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "FL",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "florida"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Groton",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "groton-ma"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Massachusetts",
+            "parent": 10,
+            "level": "s",
+            "public_notes": "",
+            "image": "jurisdiction_images/mass.jpg",
+            "holidays": [
+                1
+            ],
+            "abbrev": "MA",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "massachusetts"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Milford",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "milford-ma"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "New York",
+            "parent": 10,
+            "level": "s",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "NY",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "new-york"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Somerville",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "somerville-ma"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "United States of America",
+            "parent": null,
+            "level": "f",
+            "public_notes": "",
+            "image": "",
+            "holidays": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+            ],
+            "abbrev": "USA",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "united-states-of-america"
+        }
+    },
+    {
+        "pk": 13,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Washington",
+            "parent": 12,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "washington"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "jurisdiction.jurisdiction",
+        "fields": {
+            "name": "Worcester",
+            "parent": 1,
+            "level": "l",
+            "public_notes": "",
+            "image": "",
+            "holidays": [],
+            "abbrev": "",
+            "image_attr_line": "",
+            "observe_sat": false,
+            "hidden": false,
+            "slug": "worcester-ma"
+        }
+    }
+]

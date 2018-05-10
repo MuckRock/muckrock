@@ -24,6 +24,11 @@ CONFIG = {
   'python': '/usr/bin/python',
 <% end -%>
   'args': (
+<% if @args.any? -%>
+<% for arg in @args do -%>
+    '<%= arg %>',
+<% end -%>
+<% end -%>
 <% if !@virtualenv and !@bind -%>
     '--bind=unix:/tmp/gunicorn-<%= @name %>.socket',
 <% elsif @virtualenv and !@bind -%>
@@ -31,8 +36,24 @@ CONFIG = {
 <% else -%>
     '--bind=<%= @bind %>',
 <% end -%>
-    '--workers=<%= @processorcount.to_i*2 %>',
+<% if @workers -%>
+    '--workers=<%= @workers %>',
+<% else -%>
+    '--workers=<%= @processorcount.to_i*2 + 1 %>',
+<% end -%>
     '--timeout=<%= @timeout %>',
+<% if @access_log_format -%>
+    '--access-logformat=<%= @access_log_format %>',
+<% end -%>
+<% if @accesslog -%>
+    '--access-logfile=<%= @accesslog %>',
+<% end -%>
+<% if @errorlog -%>
+    '--error-logfile=<%= @errorlog %>',
+<% end -%>
+<% if @log_level %>
+    '--log-level=<%= @log_level %>',
+<% end -%>
 <% if @mode != 'django' -%>
     '<%= @appmodule %>',
 <% end -%>

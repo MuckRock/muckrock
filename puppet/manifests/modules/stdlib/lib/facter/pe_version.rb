@@ -8,16 +8,21 @@
 #
 # Caveats:
 #
-Facter.add("pe_version") do
+Facter.add('pe_version') do
   setcode do
-    pe_ver = Facter.value("puppetversion").match(/Puppet Enterprise (\d+\.\d+\.\d+)/)
-    pe_ver[1] if pe_ver
+    puppet_ver = Facter.value('puppetversion')
+    if !puppet_ver.nil?
+      pe_ver = puppet_ver.match(%r{Puppet Enterprise (\d+\.\d+\.\d+)})
+      pe_ver[1] if pe_ver
+    else
+      nil
+    end
   end
 end
 
-Facter.add("is_pe") do
+Facter.add('is_pe') do
   setcode do
-    if Facter.value(:pe_version).to_s.empty? then
+    if Facter.value(:pe_version).to_s.empty?
       false
     else
       true
@@ -25,28 +30,31 @@ Facter.add("is_pe") do
   end
 end
 
-Facter.add("pe_major_version") do
+Facter.add('pe_major_version') do
   confine :is_pe => true
   setcode do
-    if pe_version = Facter.value(:pe_version)
+    pe_version = Facter.value(:pe_version)
+    if pe_version
       pe_version.to_s.split('.')[0]
     end
   end
 end
 
-Facter.add("pe_minor_version") do
+Facter.add('pe_minor_version') do
   confine :is_pe => true
   setcode do
-    if pe_version = Facter.value(:pe_version)
+    pe_version = Facter.value(:pe_version)
+    if pe_version
       pe_version.to_s.split('.')[1]
     end
   end
 end
 
-Facter.add("pe_patch_version") do
+Facter.add('pe_patch_version') do
   confine :is_pe => true
   setcode do
-    if pe_version = Facter.value(:pe_version)
+    pe_version = Facter.value(:pe_version)
+    if pe_version
       pe_version.to_s.split('.')[2]
     end
   end

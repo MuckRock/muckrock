@@ -1,72 +1,59 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe Puppet::Parser::Functions.function(:validate_absolute_path) do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
-
-  # The subject of these examples is the method itself.
-  subject do
-    # This makes sure the function is loaded within each test
-    function_name = Puppet::Parser::Functions.function(:validate_absolute_path)
-    scope.method(function_name)
+describe 'validate_absolute_path' do
+  after(:each) do
+    ENV.delete('STDLIB_LOG_DEPRECATIONS')
   end
 
-  describe "Valid Paths" do
-    def self.valid_paths
-      %w{
-        C:/
-        C:\\
-        C:\\WINDOWS\\System32
-        C:/windows/system32
-        X:/foo/bar
-        X:\\foo\\bar
-        /var/tmp
-        /var/lib/puppet
-        /var/opt/../lib/puppet
-      }
-    end
+  # Checking for deprecation warning
+  it 'displays a single deprecation' do
+    ENV['STDLIB_LOG_DEPRECATIONS'] = 'true'
+    scope.expects(:warning).with(includes('This method is deprecated'))
+    is_expected.to run.with_params('c:/')
+  end
 
-    context "Without Puppet::Util.absolute_path? (e.g. Puppet <= 2.6)" do
-      before :each do
-        # The intent here is to mock Puppet to behave like Puppet 2.6 does.
-        # Puppet 2.6 does not have the absolute_path? method.  This is only a
-        # convenience test, stdlib should be run with the Puppet 2.6.x in the
-        # $LOAD_PATH in addition to 2.7.x and master.
-        Puppet::Util.expects(:respond_to?).with(:absolute_path?).returns(false)
-      end
-      valid_paths.each do |path|
-        it "validate_absolute_path(#{path.inspect}) should not fail" do
-          expect { subject.call [path] }.not_to raise_error
-        end
-      end
-    end
+  describe 'signature validation' do
+    it { is_expected.not_to eq(nil) }
+    it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+  end
 
-    context "Puppet without mocking" do
-      valid_paths.each do |path|
-        it "validate_absolute_path(#{path.inspect}) should not fail" do
-          expect { subject.call [path] }.not_to raise_error
-        end
-      end
+  describe 'valid paths handling' do
+    %w[
+      C:/
+      C:\\
+      C:\\WINDOWS\\System32
+      C:/windows/system32
+      X:/foo/bar
+      X:\\foo\\bar
+      \\\\host\\windows
+      //host/windows
+      /
+      /var/tmp
+      /var/opt/../lib/puppet
+    ].each do |path|
+      it { is_expected.to run.with_params(path) }
+      it { is_expected.to run.with_params(['/tmp', path]) }
     end
   end
 
-  describe 'Invalid paths' do
-    context 'Garbage inputs' do
+  describe 'invalid path handling' do
+    context 'with garbage inputs' do
       [
         nil,
-        [ nil ],
+        [nil],
+        [nil, nil],
         { 'foo' => 'bar' },
-        { },
+        {},
         '',
       ].each do |path|
-        it "validate_absolute_path(#{path.inspect}) should fail" do
-          expect { subject.call [path] }.to raise_error Puppet::ParseError
-        end
+        it { is_expected.to run.with_params(path).and_raise_error(Puppet::ParseError, %r{is not an absolute path}) }
+        it { is_expected.to run.with_params([path]).and_raise_error(Puppet::ParseError, %r{is not an absolute path}) }
+        it { is_expected.to run.with_params(['/tmp', path]).and_raise_error(Puppet::ParseError, %r{is not an absolute path}) }
       end
     end
 
-    context 'Relative paths' do
-      %w{
+    context 'with relative paths' do
+      %w[
         relative1
         .
         ..
@@ -74,10 +61,11 @@ describe Puppet::Parser::Functions.function(:validate_absolute_path) do
         ../foo
         etc/puppetlabs/puppet
         opt/puppet/bin
-      }.each do |path|
-        it "validate_absolute_path(#{path.inspect}) should fail" do
-          expect { subject.call [path] }.to raise_error Puppet::ParseError
-        end
+        relative\\windows
+      ].each do |path|
+        it { is_expected.to run.with_params(path).and_raise_error(Puppet::ParseError, %r{is not an absolute path}) }
+        it { is_expected.to run.with_params([path]).and_raise_error(Puppet::ParseError, %r{is not an absolute path}) }
+        it { is_expected.to run.with_params(['/tmp', path]).and_raise_error(Puppet::ParseError, %r{is not an absolute path}) }
       end
     end
   end
