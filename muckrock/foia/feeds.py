@@ -109,7 +109,7 @@ class UserSubmittedFeed(Feed):
         """The submitted requests are the items for this feed"""
         return (
             FOIARequest.objects.filter(
-                user=obj,
+                composer__user=obj,
                 embargo=False,
             ).order_by(
                 '-composer__datetime_submitted',
@@ -145,9 +145,12 @@ class UserDoneFeed(Feed):
     def items(self, obj):
         """The completed requests are the items for this feed"""
         return (
-            FOIARequest.objects.get_done().filter(user=obj, embargo=False)
-            .order_by('-datetime_submitted'
-                      ).select_related('agency__jurisdiction')
+            FOIARequest.objects.get_done().filter(
+                composer__user=obj,
+                embargo=False,
+            ).order_by(
+                '-datetime_submitted',
+            ).select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
 
@@ -179,7 +182,7 @@ class UserUpdateFeed(Feed):
     def items(self, obj):
         """The communications are the items for this feed"""
         communications = (
-            FOIACommunication.objects.filter(foia__user=obj)
+            FOIACommunication.objects.filter(foia__composer__user=obj)
             .exclude(foia__embargo=True)
             .select_related('foia__agency__jurisdiction').order_by('-date')
         )
