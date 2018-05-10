@@ -1,64 +1,40 @@
-#! /usr/bin/env ruby -S rspec
+require 'spec_helper'
 
-require "spec_helper"
+describe 'validate_ipv4_address' do
+  describe 'signature validation' do
+    it { is_expected.not_to eq(nil) }
+    it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+  end
 
-describe Puppet::Parser::Functions.function(:validate_ipv4_address) do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
-
-  describe "when calling validate_ipv4_address from puppet" do
-    describe "when given IPv4 address strings" do
-      it "should compile with one argument" do
-        Puppet[:code] = "validate_ipv4_address('1.2.3.4')"
-        scope.compiler.compile
-      end
-
-      it "should compile with multiple arguments" do
-        Puppet[:code] = "validate_ipv4_address('1.2.3.4', '5.6.7.8')"
-        scope.compiler.compile
-      end
+  context 'Checking for deprecation warning', :if => Puppet.version.to_f < 4.0 do
+    after(:each) do
+      ENV.delete('STDLIB_LOG_DEPRECATIONS')
     end
-
-    describe "when given an IPv6 address" do
-      it "should not compile" do
-        Puppet[:code] = "validate_ipv4_address('3ffe:505')"
-        expect {
-          scope.compiler.compile
-        }.to raise_error(Puppet::ParseError, /not a valid IPv4 address/)
-      end
+    # Checking for deprecation warning, which should only be provoked when the env variable for it is set.
+    it 'displays a single deprecation' do
+      ENV['STDLIB_LOG_DEPRECATIONS'] = 'true'
+      scope.expects(:warning).with(includes('This method is deprecated'))
+      is_expected.to run.with_params(SharedData::IPV4_PATTERNS.first)
     end
-
-    describe "when given other strings" do
-      it "should not compile" do
-        Puppet[:code] = "validate_ipv4_address('hello', 'world')"
-        expect {
-          scope.compiler.compile
-        }.to raise_error(Puppet::ParseError, /not a valid IPv4 address/)
-      end
+    it 'displays no warning for deprecation' do
+      ENV['STDLIB_LOG_DEPRECATIONS'] = 'false'
+      scope.expects(:warning).with(includes('This method is deprecated')).never
+      is_expected.to run.with_params(SharedData::IPV4_PATTERNS.first)
     end
+  end
 
-    describe "when given numbers" do
-      it "should not compile" do
-        Puppet[:code] = "validate_ipv4_address(1, 2)"
-        expect {
-          scope.compiler.compile
-        }.to raise_error(Puppet::ParseError, /is not a valid IPv4 address/)
-      end
-    end
+  SharedData::IPV4_PATTERNS.each do |value|
+    it { is_expected.to run.with_params(value) }
+  end
 
-    describe "when given booleans" do
-      it "should not compile" do
-        Puppet[:code] = "validate_ipv4_address(true, false)"
-        expect {
-          scope.compiler.compile
-        }.to raise_error(Puppet::ParseError, /is not a string/)
-      end
-    end
+  SharedData::IPV4_NEGATIVE_PATTERNS.each do |value|
+    it { is_expected.to run.with_params(value).and_raise_error(Puppet::ParseError, %r{is not a valid IPv4}) }
+  end
 
-    it "should not compile when no arguments are passed" do
-      Puppet[:code] = "validate_ipv4_address()"
-      expect {
-        scope.compiler.compile
-      }.to raise_error(Puppet::ParseError, /wrong number of arguments/)
+  describe 'invalid inputs' do
+    [{}, [], 1, true].each do |invalid|
+      it { is_expected.to run.with_params(invalid).and_raise_error(Puppet::ParseError, %r{is not a string}) }
+      it { is_expected.to run.with_params(SharedData::IPV4_PATTERNS.first, invalid).and_raise_error(Puppet::ParseError, %r{is not a string}) }
     end
   end
 end

@@ -1,0 +1,32 @@
+[
+	{
+		"pk": 1,
+		"model": "accounts.statistics",
+		"fields": {
+			"total_fees": 0,
+			"users_today": [1, 2],
+			"total_pages": 49,
+			"total_requests_success": 6,
+			"total_users": 21,
+			"total_requests_denied": 1,
+			"date": "2010-12-05",
+			"total_agencies": 8,
+			"total_requests": 40
+		}
+	},
+	{
+		"pk": 2,
+		"model": "accounts.statistics",
+		"fields": {
+			"total_fees": 5,
+			"users_today": [],
+			"total_pages": 23,
+			"total_requests_success": 8,
+			"total_users": 24,
+			"total_requests_denied": 2,
+			"date": "2010-12-06",
+			"total_agencies": 9,
+			"total_requests": 42
+		}
+	}
+]

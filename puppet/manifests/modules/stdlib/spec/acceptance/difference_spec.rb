@@ -1,10 +1,8 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper_acceptance'
 
-describe 'difference function', :unless => UNSUPPORTED_PLATFORMS.include?(fact('operatingsystem')) do
+describe 'difference function' do
   describe 'success' do
-    it 'returns non-duplicates in the first array' do
-      pp = <<-EOS
+    pp = <<-DOC
       $a = ['a','b','c']
       $b = ['b','c','d']
       $c = ['a']
@@ -12,10 +10,10 @@ describe 'difference function', :unless => UNSUPPORTED_PLATFORMS.include?(fact('
       if $o == $c {
         notify { 'output correct': }
       }
-      EOS
-
+    DOC
+    it 'returns non-duplicates in the first array' do
       apply_manifest(pp, :catch_failures => true) do |r|
-        expect(r.stdout).to match(/Notice: output correct/)
+        expect(r.stdout).to match(%r{Notice: output correct})
       end
     end
   end

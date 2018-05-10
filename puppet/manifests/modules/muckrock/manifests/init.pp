@@ -105,9 +105,9 @@ class muckrock {
 
 	class { 'python':
 		version    => "system",
-		pip        => true,
-		dev        => true,
-		virtualenv => true,
+		pip        => present,
+		dev        => present,
+		virtualenv => present,
 	}
 
 	package { 'libjpeg-dev':
@@ -117,9 +117,14 @@ class muckrock {
 		ensure       => present,
 		owner        => 'vagrant',
 		group        => 'vagrant',
-		requirements => '/home/vagrant/muckrock/requirements.txt',
 		require      => [File['/home/vagrant/ve'],
 						Package['zlib1g-dev'],],
+	} ->
+	python::requirements {'/home/vagrant/muckrock/requirements.txt' :
+		virtualenv  => '/home/vagrant/ve/muckrock',
+		owner       => 'vagrant',
+		group       => 'vagrant',
+		forceupdate => true,
 	} ->
 	python::requirements {'/home/vagrant/muckrock/pip/dev-requirements.txt' :
 		virtualenv  => '/home/vagrant/ve/muckrock',
@@ -222,7 +227,7 @@ class muckrock {
 	} ->
 	exec { "load data":
 		user => 'vagrant',
-		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py loaddata test_users test_profiles test_statistics jurisdictions agency_types test_agencies holidays test_foiarequests test_foiacommunications test_foiafiles test_news test_task tagged_item_base taggit tags sites'",
+		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py loaddata test_users test_profiles test_statistics jurisdictions agency_types test_agencies holidays test_news tagged_item_base taggit tags sites'",
 	} ->
 	exec { "install watson":
 		user => 'vagrant',

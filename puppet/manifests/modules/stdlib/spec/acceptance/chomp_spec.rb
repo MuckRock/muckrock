@@ -1,10 +1,8 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper_acceptance'
 
-describe 'chomp function', :unless => UNSUPPORTED_PLATFORMS.include?(fact('operatingsystem')) do
+describe 'chomp function' do
   describe 'success' do
-    it 'should eat the newline' do
-      pp = <<-EOS
+    pp = <<-DOC
       $input = "test\n"
       if size($input) != 5 {
         fail("Size of ${input} is not 5.")
@@ -13,8 +11,8 @@ describe 'chomp function', :unless => UNSUPPORTED_PLATFORMS.include?(fact('opera
       if size($output) != 4 {
         fail("Size of ${input} is not 4.")
       }
-      EOS
-
+    DOC
+    it 'eats the newline' do
       apply_manifest(pp, :catch_failures => true)
     end
   end

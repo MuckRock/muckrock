@@ -1,0 +1,47 @@
+[
+    {
+        "pk": 1,
+        "model": "foia.foiafile",
+        "fields": {
+            "description": "Test Meta FOI for development",
+            "title": "Test Meta FOI",
+            "access": "public",
+            "source": "Amherst",
+            "date": "2011-05-26 21:08:33+00:00",
+            "ffile": "foia_documents/meta-foi-request-for-amherst.pdf",
+            "doc_id": "8097-test-meta-foi",
+            "pages": 14,
+            "comm": 1
+        }
+    },
+    {
+        "pk": 2,
+        "model": "foia.foiafile",
+        "fields": {
+            "description": "Test",
+            "title": "Test AAA",
+            "access": "public",
+            "source": "Test",
+            "date": "2010-12-18 11:57:34+00:00",
+            "ffile": "foia_documents/collection-of-8-of-12-of-mbtas-dirty-dozen-wanted-fugitives_1.pdf",
+            "doc_id": "21157-test-aaa",
+            "pages": 8,
+            "comm": 2
+        }
+    },
+    {
+        "pk": 3,
+        "model": "foia.foiafile",
+        "fields": {
+            "description": "test",
+            "title": "test",
+            "access": "public",
+            "source": "test",
+            "date": "2011-11-19 13:56:02+00:00",
+            "ffile": "foia_documents/FOIA_Letter_11-0240_3.pdf",
+            "doc_id": "268012-test",
+            "pages": 2,
+            "comm": 3
+        }
+    }
+]

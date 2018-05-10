@@ -1,0 +1,66 @@
+[
+    {
+        "pk": 1,
+        "model": "agency.agency",
+        "fields": {
+            "contact_salutation": "",
+            "name": "Test Agency",
+            "slug": "test-agency",
+            "contact_last_name": "",
+            "url": "",
+            "jurisdiction": 5,
+            "status": "approved",
+            "user": 1,
+            "location": "{}",
+            "notes": "",
+            "contact_title": "",
+            "types": [
+                1,
+                8
+            ],
+            "contact_first_name": ""
+        }
+    },
+    {
+        "pk": 2,
+        "model": "agency.agency",
+        "fields": {
+            "contact_salutation": "",
+            "name": "MA Clerk",
+            "slug": "ma-clerk",
+            "contact_last_name": "",
+            "url": "",
+            "jurisdiction": 1,
+            "status": "approved",
+            "user": null,
+            "location": "{}",
+            "notes": "",
+            "contact_title": "",
+            "types": [
+                1
+            ],
+            "contact_first_name": ""
+        }
+    },
+    {
+        "pk": 3,
+        "model": "agency.agency",
+        "fields": {
+            "contact_salutation": "",
+            "name": "Test Agency 3",
+            "slug": "test-agency-3",
+            "contact_last_name": "",
+            "url": "",
+            "jurisdiction": 1,
+            "status": "approved",
+            "user": 1,
+            "location": "{}",
+            "notes": "",
+            "contact_title": "",
+            "types": [
+                1
+            ],
+            "contact_first_name": ""
+        }
+    }
+]

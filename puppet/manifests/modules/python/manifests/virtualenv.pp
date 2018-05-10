@@ -31,6 +31,9 @@
 # [*group*]
 #  The group relating to the virtualenv being manipulated. Default: root
 #
+# [*mode*]
+# Optionally specify directory mode. Default: 0755
+#
 # [*proxy*]
 #  Proxy server to use for outbound connections. Default: none
 #
@@ -46,6 +49,9 @@
 # [*timeout*]
 #  The maximum time in seconds the "pip install" command should take. Default: 1800
 #
+# [*pip_args*]
+#  Arguments to pass to pip during initialization.  Default: blank
+#
 # [*extra_pip_args*]
 #  Extra arguments to pass to pip after requirements file.  Default: blank
 #
@@ -57,15 +63,13 @@
 #   requirements => '/var/www/project1/requirements.txt',
 #   proxy        => 'http://proxy.domain.com:3128',
 #   systempkgs   => true,
-#   index        => 'http://www.example.com/simple/'
+#   index        => 'http://www.example.com/simple/',
 # }
 #
 # === Authors
 #
 # Sergey Stankevich
-# Ashley Penney
-# Marc Fournier
-# Fotis Gimian
+# Shiva Poudel
 #
 define python::virtualenv (
   $ensure           = present,
@@ -77,25 +81,29 @@ define python::virtualenv (
   $index            = false,
   $owner            = 'root',
   $group            = 'root',
+  $mode             = '0755',
   $proxy            = false,
   $environment      = [],
-  $path             = [ '/bin', '/usr/bin', '/usr/sbin' ],
+  $path             = [ '/bin', '/usr/bin', '/usr/sbin', '/usr/local/bin' ],
   $cwd              = undef,
   $timeout          = 1800,
-  $extra_pip_args   = ''
+  $pip_args         = '',
+  $extra_pip_args   = '',
+  $virtualenv       = undef
 ) {
+  include ::python
 
   if $ensure == 'present' {
-
     $python = $version ? {
       'system' => 'python',
       'pypy'   => 'pypy',
       default  => "python${version}",
     }
 
-    $virtualenv = $version ? {
-      'system' => 'virtualenv',
-      default  => "virtualenv-${version}",
+    if $virtualenv == undef {
+      $used_virtualenv = 'virtualenv'
+    } else {
+      $used_virtualenv = $virtualenv
     }
 
     $proxy_flag = $proxy ? {
@@ -112,9 +120,13 @@ define python::virtualenv (
     # --system-site-packages flag, default off for prior versions
     # Prior to version 1.7 the default was equal to --system-site-packages
     # and the flag --no-site-packages had to be passed to do the opposite
-    if (( versioncmp($::virtualenv_version,'1.7') > 0 ) and ( $systempkgs == true )) {
+    $_virtualenv_version = getvar('virtualenv_version') ? {
+      /.*/ => getvar('virtualenv_version'),
+      default => '',
+    }
+    if (( versioncmp($_virtualenv_version,'1.7') > 0 ) and ( $systempkgs == true )) {
       $system_pkgs_flag = '--system-site-packages'
-    } elsif (( versioncmp($::virtualenv_version,'1.7') < 0 ) and ( $systempkgs == false )) {
+    } elsif (( versioncmp($_virtualenv_version,'1.7') < 0 ) and ( $systempkgs == false )) {
       $system_pkgs_flag = '--no-site-packages'
     } else {
       $system_pkgs_flag = $systempkgs ? {
@@ -129,8 +141,8 @@ define python::virtualenv (
       default  => 'setuptools',
     }
     $pypi_index = $index ? {
-        false   => '',
-        default => "-i ${index}",
+      false   => '',
+      default => "-i ${index}",
     }
 
     # Python 2.6 and older does not support setuptools/distribute > 0.8 which
@@ -144,12 +156,16 @@ define python::virtualenv (
       ensure => directory,
       owner  => $owner,
       group  => $group,
+      mode   => $mode
     }
 
+    $virtualenv_cmd = "${python::exec_prefix}${used_virtualenv}"
 
+    $pip_cmd   = "${python::exec_prefix}${venv_dir}/bin/pip"
+    $pip_flags = "${pypi_index} ${proxy_flag} ${pip_args}"
 
     exec { "python_virtualenv_${venv_dir}":
-      command     => "true ${proxy_command} && ${virtualenv} ${system_pkgs_flag} -p ${python} ${venv_dir} && ${venv_dir}/bin/pip wheel --help > /dev/null 2>&1 && { ${venv_dir}/bin/pip wheel --version > /dev/null 2>&1 || wheel_support_flag='--no-use-wheel'; } ; { ${venv_dir}/bin/pip --log ${venv_dir}/pip.log install ${pypi_index} ${proxy_flag} \$wheel_support_flag --upgrade pip ${distribute_pkg} || ${venv_dir}/bin/pip --log ${venv_dir}/pip.log install ${pypi_index} ${proxy_flag}  --upgrade pip ${distribute_pkg} ;}",
+      command     => "true ${proxy_command} && ${virtualenv_cmd} ${system_pkgs_flag} -p ${python} ${venv_dir} && ${pip_cmd} --log ${venv_dir}/pip.log install ${pip_flags} --upgrade pip && ${pip_cmd} install ${pip_flags} --upgrade ${distribute_pkg}",
       user        => $owner,
       creates     => "${venv_dir}/bin/activate",
       path        => $path,
@@ -161,7 +177,7 @@ define python::virtualenv (
 
     if $requirements {
       exec { "python_requirements_initial_install_${requirements}_${venv_dir}":
-        command     => "${venv_dir}/bin/pip wheel --help > /dev/null 2>&1 && { ${venv_dir}/bin/pip wheel --version > /dev/null 2>&1 || wheel_support_flag='--no-use-wheel'; } ; ${venv_dir}/bin/pip --log ${venv_dir}/pip.log install ${pypi_index} ${proxy_flag} \$wheel_support_flag -r ${requirements} ${extra_pip_args}",
+        command     => "${pip_cmd} --log ${venv_dir}/pip.log install ${pypi_index} ${proxy_flag} --no-binary :all: -r ${requirements} ${extra_pip_args}",
         refreshonly => true,
         timeout     => $timeout,
         user        => $owner,
@@ -171,18 +187,17 @@ define python::virtualenv (
       }
 
       python::requirements { "${requirements}_${venv_dir}":
-        requirements    => $requirements,
-        virtualenv      => $venv_dir,
-        proxy           => $proxy,
-        owner           => $owner,
-        group           => $group,
-        cwd             => $cwd,
-        require         => Exec["python_virtualenv_${venv_dir}"],
-        extra_pip_args  => $extra_pip_args,
+        requirements   => $requirements,
+        virtualenv     => $venv_dir,
+        proxy          => $proxy,
+        owner          => $owner,
+        group          => $group,
+        cwd            => $cwd,
+        require        => Exec["python_virtualenv_${venv_dir}"],
+        extra_pip_args => $extra_pip_args,
       }
     }
   } elsif $ensure == 'absent' {
-
     file { $venv_dir:
       ensure  => absent,
       force   => true,

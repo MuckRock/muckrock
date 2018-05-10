@@ -1,18 +1,25 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper_acceptance'
 
-describe 'ensure_resource function', :unless => fact('osfamily') =~ /windows/i do
+describe 'ensure_resource function' do
   describe 'success' do
-    it 'ensure_resource a package' do
-      apply_manifest('package { "rake": ensure => absent, provider => "gem", }')
-      pp = <<-EOS
-      $a = "rake"
-      ensure_resource('package', $a, {'provider' => 'gem'})
-      EOS
+    pp1 = <<-DOC
+      notify { "test": loglevel => 'err' }
+      ensure_resource('notify', 'test', { 'loglevel' => 'err' })
+    DOC
+    it 'ensures a resource already declared' do
+      apply_manifest('')
 
-      apply_manifest(pp, :expect_changes => true)
+      apply_manifest(pp1, :expect_changes => true)
     end
-    it 'ensures a resource already declared'
+
+    pp2 = <<-DOC
+      ensure_resource('notify', 'test', { 'loglevel' => 'err' })
+    DOC
+    it 'ensures a undeclared resource' do
+      apply_manifest('')
+
+      apply_manifest(pp2, :expect_changes => true)
+    end
     it 'takes defaults arguments'
   end
   describe 'failure' do

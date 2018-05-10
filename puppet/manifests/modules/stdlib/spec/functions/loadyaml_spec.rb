@@ -1,25 +1,39 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe "the loadyaml function" do
-  include PuppetlabsSpec::Files
+describe 'loadyaml' do
+  it { is_expected.not_to eq(nil) }
+  it { is_expected.to run.with_params.and_raise_error(ArgumentError, %r{wrong number of arguments}i) }
 
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+  context 'when a non-existing file is specified' do
+    let(:filename) { '/tmp/doesnotexist' }
 
-  it "should exist" do
-    expect(Puppet::Parser::Functions.function("loadyaml")).to eq("function_loadyaml")
-  end
-
-  it "should raise a ParseError if there is less than 1 arguments" do
-    expect { scope.function_loadyaml([]) }.to raise_error(Puppet::ParseError)
-  end
-
-  it "should convert YAML file to a data structure" do
-    yaml_file = tmpfilename ('yamlfile')
-    File.open(yaml_file, 'w') do |fh|
-      fh.write("---\n aaa: 1\n bbb: 2\n ccc: 3\n ddd: 4\n")
+    before(:each) do
+      File.expects(:exists?).with(filename).returns(false).once
+      YAML.expects(:load_file).never
     end
-    result = scope.function_loadyaml([yaml_file])
-    expect(result).to eq({"aaa" => 1, "bbb" => 2, "ccc" => 3, "ddd" => 4 })
+    it { is_expected.to run.with_params(filename, 'default' => 'value').and_return('default' => 'value') }
+    it { is_expected.to run.with_params(filename, 'đẽƒằưļŧ' => '٧ẵłựέ').and_return('đẽƒằưļŧ' => '٧ẵłựέ') }
+    it { is_expected.to run.with_params(filename, 'デフォルト' => '値').and_return('デフォルト' => '値') }
+  end
+
+  context 'when an existing file is specified' do
+    let(:filename) { '/tmp/doesexist' }
+    let(:data) { { 'key' => 'value', 'ķęŷ' => 'νậŀųề', 'キー' => '値' } }
+
+    before(:each) do
+      File.expects(:exists?).with(filename).returns(true).once
+      YAML.expects(:load_file).with(filename).returns(data).once
+    end
+    it { is_expected.to run.with_params(filename).and_return(data) }
+  end
+
+  context 'when the file could not be parsed' do
+    let(:filename) { '/tmp/doesexist' }
+
+    before(:each) do
+      File.expects(:exists?).with(filename).returns(true).once
+      YAML.stubs(:load_file).with(filename).once.raises StandardError, 'Something terrible have happened!'
+    end
+    it { is_expected.to run.with_params(filename, 'default' => 'value').and_return('default' => 'value') }
   end
 end

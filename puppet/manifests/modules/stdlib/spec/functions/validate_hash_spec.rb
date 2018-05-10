@@ -1,43 +1,38 @@
-#! /usr/bin/env ruby -S rspec
-
 require 'spec_helper'
 
-describe Puppet::Parser::Functions.function(:validate_hash) do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+describe 'validate_hash' do
+  describe 'signature validation' do
+    it { is_expected.not_to eq(nil) }
+    it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
 
-  describe 'when calling validate_hash from puppet' do
-
-    %w{ true false }.each do |the_string|
-
-      it "should not compile when #{the_string} is a string" do
-        Puppet[:code] = "validate_hash('#{the_string}')"
-        expect { scope.compiler.compile }.to raise_error(Puppet::ParseError, /is not a Hash/)
+    describe 'check for deprecation warning' do
+      after(:each) do
+        ENV.delete('STDLIB_LOG_DEPRECATIONS')
       end
-
-      it "should not compile when #{the_string} is a bare word" do
-        Puppet[:code] = "validate_hash(#{the_string})"
-        expect { scope.compiler.compile }.to raise_error(Puppet::ParseError, /is not a Hash/)
+      # Checking for deprecation warning
+      it 'displays a single deprecation' do
+        ENV['STDLIB_LOG_DEPRECATIONS'] = 'true'
+        scope.expects(:warning).with(includes('This method is deprecated'))
+        is_expected.to run.with_params('key' => 'value')
       end
-
     end
 
-    it "should compile when multiple hash arguments are passed" do
-      Puppet[:code] = <<-'ENDofPUPPETcode'
-        $foo = {}
-        $bar = { 'one' => 'two' }
-        validate_hash($foo, $bar)
-      ENDofPUPPETcode
-      scope.compiler.compile
+    describe 'valid inputs' do
+      it { is_expected.to run.with_params({}) }
+      it { is_expected.to run.with_params('key' => 'value') }
+      it { is_expected.to run.with_params({}, 'key' => 'value') }
+      it { is_expected.to run.with_params({ 'key1' => 'value1' }, 'key2' => 'value2') }
     end
 
-    it "should not compile when an undef variable is passed" do
-      Puppet[:code] = <<-'ENDofPUPPETcode'
-        $foo = undef
-        validate_hash($foo)
-      ENDofPUPPETcode
-      expect { scope.compiler.compile }.to raise_error(Puppet::ParseError, /is not a Hash/)
+    describe 'invalid inputs' do
+      it { is_expected.to run.with_params([]).and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params(1).and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params(true).and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params('one').and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params({}, []).and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params({}, 1).and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params({}, true).and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
+      it { is_expected.to run.with_params({}, 'one').and_raise_error(Puppet::ParseError, %r{is not a Hash}) }
     end
-
   end
-
 end

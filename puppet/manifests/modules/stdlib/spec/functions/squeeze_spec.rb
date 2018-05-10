@@ -1,24 +1,50 @@
-#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe "the squeeze function" do
-  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+describe 'squeeze' do
+  it { is_expected.not_to eq(nil) }
+  it { is_expected.to run.with_params.and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+  it { is_expected.to run.with_params('', '', '').and_raise_error(Puppet::ParseError, %r{wrong number of arguments}i) }
+  it { is_expected.to run.with_params(1).and_raise_error(NoMethodError) }
+  it { is_expected.to run.with_params({}).and_raise_error(NoMethodError) }
+  it { is_expected.to run.with_params(true).and_raise_error(NoMethodError) }
 
-  it "should exist" do
-    expect(Puppet::Parser::Functions.function("squeeze")).to eq("function_squeeze")
+  context 'when squeezing a single string' do
+    it { is_expected.to run.with_params('').and_return('') }
+    it { is_expected.to run.with_params('a').and_return('a') }
+    it { is_expected.to run.with_params('aaaaaaaaa').and_return('a') }
+    it { is_expected.to run.with_params('aaaaaaaaa', 'a').and_return('a') }
+    it { is_expected.to run.with_params('aaaaaaaaabbbbbbbbbbcccccccccc', 'b-c').and_return('aaaaaaaaabc') }
   end
 
-  it "should raise a ParseError if there is less than 2 arguments" do
-    expect { scope.function_squeeze([]) }.to( raise_error(Puppet::ParseError))
+  context 'with UTF8 and double byte characters' do
+    it { is_expected.to run.with_params('ậậậậậậậậậậậậậậậậậậậậ').and_return('ậ') }
+    it { is_expected.to run.with_params('語語語語語語語', '語').and_return('語') }
+    it { is_expected.to run.with_params('ậậậậậậậậậậậậậậậậậ語語語語©©©©©', '©').and_return('ậậậậậậậậậậậậậậậậậ語語語語©') }
   end
 
-  it "should squeeze a string" do
-    result = scope.function_squeeze(["aaabbbbcccc"])
-    expect(result).to(eq('abc'))
+  context 'when squeezing values in an array' do
+    it {
+      is_expected.to run \
+        .with_params(['', 'a', 'aaaaaaaaa', 'aaaaaaaaabbbbbbbbbbcccccccccc']) \
+        .and_return(['', 'a', 'a', 'abc'])
+    }
+    it {
+      is_expected.to run \
+        .with_params(['', 'a', 'aaaaaaaaa', 'aaaaaaaaabbbbbbbbbbcccccccccc'], 'a') \
+        .and_return(['', 'a', 'a', 'abbbbbbbbbbcccccccccc'])
+    }
+    it {
+      is_expected.to run \
+        .with_params(['', 'a', 'aaaaaaaaa', 'aaaaaaaaabbbbbbbbbbcccccccccc'], 'b-c') \
+        .and_return(['', 'a', 'aaaaaaaaa', 'aaaaaaaaabc'])
+    }
   end
 
-  it "should squeeze all elements in an array" do
-    result = scope.function_squeeze([["aaabbbbcccc","dddfff"]])
-    expect(result).to(eq(['abc','df']))
+  context 'when using a class extending String' do
+    it 'calls its squeeze method' do
+      value = AlsoString.new('aaaaaaaaa')
+      value.expects(:squeeze).returns('foo')
+      expect(subject).to run.with_params(value).and_return('foo')
+    end
   end
 end

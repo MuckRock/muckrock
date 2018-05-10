@@ -38,11 +38,17 @@
 # [*extra_pip_args*]
 # Extra arguments to pass to pip after the requirements file
 #
+# [*manage_requirements*]
+# Create the requirements file if it doesn't exist. Default: true
+#
 # [*fix_requirements_owner*]
 # Change owner and group of requirements file. Default: true
 #
 # [*log_dir*]
 # String. Log directory.
+#
+# [*timeout*]
+#  The maximum time in seconds the "pip install" command should take. Default: 1800
 #
 # === Examples
 #
@@ -68,9 +74,13 @@ define python::requirements (
   $forceupdate            = false,
   $cwd                    = undef,
   $extra_pip_args         = '',
+  $manage_requirements    = true,
   $fix_requirements_owner = true,
   $log_dir                = '/tmp',
+  $timeout                = 1800,
 ) {
+
+  include ::python
 
   if $virtualenv == 'system' and ($owner != 'root' or $group != 'root') {
     fail('python::pip: root user must be used when virtualenv is system')
@@ -90,8 +100,8 @@ define python::requirements (
   }
 
   $pip_env = $virtualenv ? {
-    'system' => 'pip',
-    default  => "${virtualenv}/bin/pip",
+    'system' => "${::python::exec_prefix} pip",
+    default  => "${::python::exec_prefix} ${virtualenv}/bin/pip",
   }
 
   $proxy_flag = $proxy ? {
@@ -106,7 +116,7 @@ define python::requirements (
 
   # This will ensure multiple python::virtualenv definitions can share the
   # the same requirements file.
-  if !defined(File[$requirements]) {
+  if !defined(File[$requirements]) and $manage_requirements == true {
     file { $requirements:
       ensure  => present,
       mode    => '0644',
@@ -122,11 +132,10 @@ define python::requirements (
     provider    => shell,
     command     => "${pip_env} --log ${log}/pip.log install ${proxy_flag} ${src_flag} -r ${requirements} ${extra_pip_args}",
     refreshonly => !$forceupdate,
-    timeout     => 1800,
+    timeout     => $timeout,
     cwd         => $cwd,
     user        => $owner,
     subscribe   => File[$requirements],
     environment => $environment,
   }
-
 }

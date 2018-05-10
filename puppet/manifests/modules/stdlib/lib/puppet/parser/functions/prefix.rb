@@ -1,27 +1,25 @@
 #
 # prefix.rb
 #
-
 module Puppet::Parser::Functions
-  newfunction(:prefix, :type => :rvalue, :doc => <<-EOS
-This function applies a prefix to all elements in an array.
+  newfunction(:prefix, :type => :rvalue, :doc => <<-DOC
+    This function applies a prefix to all elements in an array or a hash.
 
-*Examples:*
+    *Examples:*
 
-    prefix(['a','b','c'], 'p')
+        prefix(['a','b','c'], 'p')
 
-Will return: ['pa','pb','pc']
-    EOS
-  ) do |arguments|
+    Will return: ['pa','pb','pc']
+    DOC
+             ) do |arguments|
 
     # Technically we support two arguments but only first is mandatory ...
-    raise(Puppet::ParseError, "prefix(): Wrong number of arguments " +
-      "given (#{arguments.size} for 1)") if arguments.size < 1
+    raise(Puppet::ParseError, "prefix(): Wrong number of arguments given (#{arguments.size} for 1)") if arguments.empty?
 
-    array = arguments[0]
+    enumerable = arguments[0]
 
-    unless array.is_a?(Array)
-      raise Puppet::ParseError, "prefix(): expected first argument to be an Array, got #{array.inspect}"
+    unless enumerable.is_a?(Array) || enumerable.is_a?(Hash)
+      raise Puppet::ParseError, "prefix(): expected first argument to be an Array or a Hash, got #{enumerable.inspect}"
     end
 
     prefix = arguments[1] if arguments[1]
@@ -32,11 +30,18 @@ Will return: ['pa','pb','pc']
       end
     end
 
-    # Turn everything into string same as join would do ...
-    result = array.collect do |i|
-      i = i.to_s
-      prefix ? prefix + i : i
-    end
+    result = if enumerable.is_a?(Array)
+               # Turn everything into string same as join would do ...
+               enumerable.map do |i|
+                 i = i.to_s
+                 prefix ? prefix + i : i
+               end
+             else
+               Hash[enumerable.map do |k, v|
+                 k = k.to_s
+                 [prefix ? prefix + k : k, v]
+               end]
+             end
 
     return result
   end

@@ -1,0 +1,65 @@
+[
+    {
+        "pk": 1, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Clerk"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Finance"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Fire"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Health"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Information Technology"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Planning and Inspections"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Police"
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "Public Works"
+        }
+    },
+    {
+        "pk": 9, 
+        "model": "agency.agencytype", 
+        "fields": {
+            "name": "FTC"
+        }
+    }
+]

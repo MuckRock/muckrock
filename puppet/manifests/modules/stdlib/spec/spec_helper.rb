@@ -1,34 +1,30 @@
-#! /usr/bin/env ruby -S rspec
-dir = File.expand_path(File.dirname(__FILE__))
-$LOAD_PATH.unshift File.join(dir, 'lib')
+require 'puppetlabs_spec_helper/module_spec_helper'
+require 'rspec-puppet-facts'
 
-# So everyone else doesn't have to include this base constant.
-module PuppetSpec
-  FIXTURE_DIR = File.join(dir = File.expand_path(File.dirname(__FILE__)), "fixtures") unless defined?(FIXTURE_DIR)
+begin
+  require 'spec_helper_local' if File.file?(File.join(File.dirname(__FILE__), 'spec_helper_local.rb'))
+rescue LoadError => loaderror
+  warn "Could not require spec_helper_local: #{loaderror.message}"
 end
 
-require 'puppet'
-require 'rspec-puppet'
-require 'puppetlabs_spec_helper/module_spec_helper'
-require 'puppet_spec/verbose'
-require 'puppet_spec/files'
-require 'puppet_spec/settings'
-require 'puppet_spec/fixtures'
-require 'puppet_spec/matchers'
-require 'puppet_spec/database'
-require 'monkey_patches/alias_should_to_must'
-require 'mocha/setup'
+include RspecPuppetFacts
 
+default_facts = {
+  puppetversion: Puppet.version,
+  facterversion: Facter.version,
+}
 
+default_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_facts.yml'))
+default_module_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_module_facts.yml'))
 
-RSpec.configure do |config|
-  config.before :each do
-    # Ensure that we don't accidentally cache facts and environment between
-    # test cases.  This requires each example group to explicitly load the
-    # facts being exercised with something like
-    # Facter.collection.loader.load(:ipaddress)
-    Facter::Util::Loader.any_instance.stubs(:load_all)
-    Facter.clear
-    Facter.clear_messages
-  end
+if File.exist?(default_facts_path) && File.readable?(default_facts_path)
+  default_facts.merge!(YAML.safe_load(File.read(default_facts_path)))
+end
+
+if File.exist?(default_module_facts_path) && File.readable?(default_module_facts_path)
+  default_facts.merge!(YAML.safe_load(File.read(default_module_facts_path)))
+end
+
+RSpec.configure do |c|
+  c.default_facts = default_facts
 end
