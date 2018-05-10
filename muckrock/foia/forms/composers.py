@@ -145,8 +145,9 @@ class BaseComposerForm(forms.ModelForm):
             del self.fields['embargo']
         if not self.user.has_perm('foia.embargo_perm_foiarequest'):
             del self.fields['permanent_embargo']
-        self.fields['parent'
-                    ].queryset = (FOIAComposer.objects.get_viewable(self.user))
+        self.fields['parent'].queryset = (
+            FOIAComposer.objects.get_viewable(self.user).distinct()
+        )
         self.fields['agencies'].user = self.user
         self.fields['agencies'].queryset = (
             Agency.objects.get_approved_and_pending(self.user)

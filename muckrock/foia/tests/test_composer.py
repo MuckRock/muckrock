@@ -7,11 +7,12 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
 # Third Party
-from nose.tools import assert_false, assert_true, eq_
+from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
 from muckrock.factories import OrganizationFactory, UserFactory
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
+from muckrock.foia.forms.composers import BaseComposerForm
 from muckrock.foia.models import FOIAComposer
 
 # pylint: disable=invalid-name
@@ -185,3 +186,24 @@ class TestFOIAComposerQueryset(TestCase):
         assert_false(FOIAComposer.objects.get_viewable(self.user).exists())
         assert_false(FOIAComposer.objects.get_viewable(org_user2).exists())
         assert_false(FOIAComposer.objects.get_viewable(self.anon).exists())
+
+
+class TestFOIAComposerForm(TestCase):
+    """Test FOIA composer form"""
+
+    def test_multi_clone(self):
+        """Test cloning a multirequest"""
+        foia = FOIARequestFactory(
+            composer__status='filed',
+            embargo=False,
+        )
+        FOIARequestFactory(composer=foia.composer)
+        form = BaseComposerForm(
+            {
+                'action': 'save',
+                'parent': foia.composer.pk,
+            },
+            user=foia.composer.user,
+            request=None,
+        )
+        ok_(form.is_valid())

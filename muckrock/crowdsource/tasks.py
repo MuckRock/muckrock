@@ -4,9 +4,10 @@ Celery tasks for the crowdsource application
 
 # Django
 from celery.task import task
+from django.conf import settings
 
 # Standard Library
-import re
+import logging
 from urllib import quote_plus
 
 # Third Party
@@ -15,10 +16,7 @@ import requests
 # MuckRock
 from muckrock.crowdsource.models import Crowdsource
 
-DOCUMENT_URL_RE = re.compile(
-    r'https?://www[.]documentcloud[.]org/documents/'
-    r'(?P<doc_id>[0-9A-Za-z-]+)[.]html'
-)
+logger = logging.getLogger(__name__)
 
 
 @task(name='muckrock.crowdsource.tasks.datum_per_page')
@@ -57,34 +55,42 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
 
 @task(name='muckrock.crowdsource.tasks.import_doccloud_proj')
 def import_doccloud_proj(
-    crowdsource_pk, url, metadata, doccloud_each_page, **kwargs
+    crowdsource_pk, proj_id, metadata, doccloud_each_page, **kwargs
 ):
     """Import documents from a document cloud project"""
 
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
-    json_url = url[:-4] + 'json'
+    json_url = (
+        'https://www.documentcloud.org/api/projects/{}.json'.format(proj_id)
+    )
 
-    resp = requests.get(json_url)
+    resp = requests.get(
+        json_url,
+        auth=(settings.DOCUMENTCLOUD_USERNAME, settings.DOCUMENTCLOUD_PASSWORD),
+    )
     try:
         resp_json = resp.json()
     except ValueError as exc:
         import_doccloud_proj.retry(
-            args=[crowdsource_pk, url, metadata],
+            args=[crowdsource_pk, proj_id, metadata],
             countdown=300,
             kwargs=kwargs,
             exc=exc,
         )
     else:
-        for document in resp_json['documents']:
-            doc_match = DOCUMENT_URL_RE.match(url)
-            if doccloud_each_page and doc_match:
+        if 'error' in resp_json:
+            logger.warn('Error importing DocCloud project: %s', proj_id)
+            return
+        for doc_id in resp_json['project']['document_ids']:
+            if doccloud_each_page:
                 datum_per_page.delay(
                     crowdsource.pk,
-                    doc_match.group('doc_id'),
+                    doc_id,
                     metadata,
                 )
             else:
                 crowdsource.data.create(
-                    url=document,
+                    url='https://www.documentcloud.org/documents/{}.html'
+                    .format(doc_id),
                     metadata=metadata,
                 )

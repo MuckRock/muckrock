@@ -396,10 +396,11 @@ class FOIARequestAdmin(VersionAdmin):
         'tracking_ids__tracking_id',
         'mail_id',
     ]
-    readonly_fields = ['composer', 'get_user', 'mail_id']
+    readonly_fields = ['composer_link', 'get_user', 'mail_id']
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
+    exclude = ['composer']
 
     def get_user(self, obj):
         """Get the user"""
@@ -407,6 +408,16 @@ class FOIARequestAdmin(VersionAdmin):
 
     get_user.short_description = 'User'
     get_user.admin_order_field = 'composer__user'
+
+    def composer_link(self, obj):
+        """Link to the Composer"""
+        link = reverse(
+            'admin:foia_foiacomposer_change', args=(obj.composer.pk,)
+        )
+        return '<a href="%s">%s</a>' % (link, obj.composer.title)
+
+    composer_link.allow_tags = True
+    composer_link.short_description = 'Composer'
 
     def get_jurisdiction(self, obj):
         """Get the jurisdiction"""
@@ -530,6 +541,27 @@ class FOIARequestAdmin(VersionAdmin):
         )
 
 
+class FOIARequestInline(admin.TabularInline):
+    """FOIA Request Inline admin options"""
+    model = FOIARequest
+    extra = 0
+    show_change_link = True
+    readonly_fields = ('title', 'status', 'agency', 'get_jurisdiction')
+    fields = ('title', 'status', 'agency', 'get_jurisdiction')
+
+    def get_jurisdiction(self, obj):
+        """Get the jurisdiction from the agency"""
+        return obj.agency.jurisdiction
+
+    get_jurisdiction.short_description = 'Jurisdiction'
+
+    def get_queryset(self, request):
+        return (
+            super(FOIARequestInline, self).get_queryset(request)
+            .select_related('agency__jurisdiction')
+        )
+
+
 class FOIAComposerAdminForm(forms.ModelForm):
     """Form for the FOIA composer admin"""
 
@@ -559,6 +591,7 @@ class FOIAComposerAdmin(VersionAdmin):
     list_display = ('title', 'user', 'status')
     search_fields = ['title', 'requested_docs']
     form = FOIAComposerAdminForm
+    inlines = [FOIARequestInline]
 
 
 class OutboundRequestAttachmentAdminForm(forms.ModelForm):
