@@ -3,6 +3,7 @@
 
 # Django
 from django.contrib.postgres.fields import JSONField
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -104,6 +105,7 @@ class Crowdsource(models.Model):
         help_text='Is the user limited to completing this form only once? '
         '(else, it is unlimited) - only used if not using data for this crowdsource',
     )
+    submission_email = models.EmailField(blank=True)
 
     objects = CrowdsourceQuerySet.as_manager()
 
@@ -388,6 +390,25 @@ class CrowdsourceResponse(models.Model):
                 )
             except CrowdsourceField.DoesNotExist:
                 pass
+
+    def send_email(self, email):
+        """Send an email of this response"""
+        metadata = self.crowdsource.get_metadata_keys()
+        text = '\n'.join(
+            '{}: {}'.format(k, v) for k, v in zip(
+                self.crowdsource.get_header_values(metadata),
+                self.get_values(metadata),
+            )
+        )
+        send_mail(
+            '[Assignment Response] {} by {}'.format(
+                self.crowdsource.title,
+                self.user.username,
+            ),
+            text,
+            'info@muckrock.com',
+            [email],
+        )
 
     class Meta:
         verbose_name = 'assignment response'

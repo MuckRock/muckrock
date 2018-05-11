@@ -27,6 +27,7 @@
         {% with form.data_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.multiple_per_page as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         {% with form.user_limit as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
+        {% with form.submission_email as field %} {% include 'lib/pattern/field.html' %} {% endwith %}
         <div class="{% if form.form_json.errors %}error {% endif %}field">
           <label>Form</label>
           {% if form.form_json.errors %} {{form.form_json.errors}} {% endif %}

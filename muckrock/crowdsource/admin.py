@@ -19,6 +19,7 @@ from muckrock.crowdsource.models import (
     CrowdsourceResponse,
     CrowdsourceValue,
 )
+from muckrock.project.models import Project
 
 
 class CrowdsourceAdminForm(forms.ModelForm):
@@ -27,6 +28,11 @@ class CrowdsourceAdminForm(forms.ModelForm):
     user = autocomplete_light.ModelChoiceField(
         'UserAutocomplete',
         queryset=User.objects.all(),
+    )
+    project = autocomplete_light.ModelChoiceField(
+        'ProjectAutocomplete',
+        queryset=Project.objects.all(),
+        required=False,
     )
 
     class Meta:
@@ -64,6 +70,13 @@ class CrowdsourceResponseInline(admin.TabularInline):
     form = CrowdsourceResponseAdminForm
     show_change_link = True
     readonly_fields = ('data',)
+
+    def get_queryset(self, request):
+        """Select related"""
+        return (
+            super(CrowdsourceResponseInline, self).get_queryset(request)
+            .select_related('user', 'data')
+        )
 
 
 @admin.register(Crowdsource)

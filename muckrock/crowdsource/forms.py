@@ -94,6 +94,7 @@ class CrowdsourceForm(forms.ModelForm):
             'data_csv',
             'multiple_per_page',
             'project_only',
+            'submission_email',
         )
 
     def clean_data_csv(self):
