@@ -250,7 +250,7 @@ class NewsletterSignupView(View):
 
     def form_invalid(self, request, form):
         """If the form is invalid, then either a bad or no email was provided."""
-        email = form.data['email']
+        email = form.data.get('email')
         # if they provided an email, then it is invalid
         # if they didn't, then they're just being dumb!
         if email:
