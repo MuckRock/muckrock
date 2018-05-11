@@ -5,6 +5,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.core.urlresolvers import reverse
 from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -109,6 +110,15 @@ class CrowdsourceDetailView(DetailView):
             crowdsource,
         )
         return redirect(dataset)
+
+    def get_context_data(self, **kwargs):
+        """Admin link"""
+        context = super(CrowdsourceDetailView, self).get_context_data(**kwargs)
+        context['sidebar_admin_url'] = reverse(
+            'admin:crowdsource_crowdsource_change',
+            args=(self.object.pk,),
+        )
+        return context
 
 
 class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
@@ -259,6 +269,8 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
                 'Assignment Completed',
                 properties,
             )
+            if crowdsource.submission_email:
+                response.send_email(crowdsource.submission_email)
 
         if self.request.POST['submit'] == 'Submit and Add Another':
             return self.render_to_response(
