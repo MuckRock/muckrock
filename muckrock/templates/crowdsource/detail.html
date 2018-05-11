@@ -44,12 +44,8 @@
       <dd>{{crowdsource.project_only}}</dd>
     {% endif %}
     {% if crowdsource.data.all %}
-      <dt>Data</dt>
-      <dd><ul>
-        {% for data in crowdsource.data.all %}
-          <li><a href="{{ data.url }}">{{ data.url }}</a></li>
-        {% endfor %}
-      </ul></dd>
+      <dt>Data Count</dt>
+      <dd>{{ crowdsource.data.all|length }}</dd>
       <dt>Data Limit</dt>
       <dd>{{crowdsource.data_limit}}</dd>
       <dt>Multiple Per Page</dt>
