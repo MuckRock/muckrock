@@ -60,14 +60,16 @@ class TaskQuerySet(models.QuerySet):
         # tasks that point to an agency
         if foia.agency:
             tasks += list(
-                task.models.NewAgencyTask.objects.filter(agency=foia.agency
-                                                         ).preload_list()
+                task.models.NewAgencyTask.objects.filter(agency=foia.agency)
+                .preload_list()
             )
         if foia.agency and user.is_staff:
-            tasks += list(
-                task.models.ReviewAgencyTask.objects.filter(agency=foia.agency
-                                                            ).preload_list()
-            )
+            pass
+            # skip these for now as they are slow
+            #tasks += list(
+            #    task.models.ReviewAgencyTask.objects.filter(agency=foia.agency)
+            #    .preload_list()
+            #)
         return tasks
 
     def get_undeferred(self):
