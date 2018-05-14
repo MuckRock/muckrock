@@ -26,7 +26,6 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'slug',
-            'full_name',
             'abbrev',
             'level',
             'parent',
