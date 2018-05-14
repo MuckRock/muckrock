@@ -403,6 +403,9 @@ $(document).ready(function(){
         // Now show them we saved
         changeText("Draft Saved");
         setTimeout(function(){$(".form-status-holder").addClass("hidden");}, 2000);
+        /* eslint-disable no-undef */
+        mixpanel.track("Request Autosaved");
+        /* eslint-enable no-undef */
       },
       error: function() {
         // Now show them there was an error
