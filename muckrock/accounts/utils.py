@@ -65,7 +65,7 @@ def stripe_get_customer(user, email, description):
 
 
 def mailchimp_subscribe(
-    request, email, list_=settings.MAILCHIMP_LIST_DEFAULT, suppress_msg=False
+    request, email, list_=settings.MAILCHIMP_LIST_DEFAULT, **kwargs
 ):
     """Adds the email to the mailing list throught the MailChimp API.
     http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
@@ -74,9 +74,15 @@ def mailchimp_subscribe(
         'Content-Type': 'application/json',
         'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
     }
+    merge_fields = {}
+    if 'url' in kwargs:
+        merge_fields['URL'] = kwargs['url']
+    if 'source' in kwargs:
+        merge_fields['SOURCE'] = kwargs['source']
     data = {
         'email_address': email,
         'status': 'pending',
+        'merge_fields': merge_fields,
     }
     response = retry_on_error(
         requests.ConnectionError,
@@ -92,12 +98,12 @@ def mailchimp_subscribe(
             response.status_code == 400
             and response.json()['title'] == 'Member Exists'
         ):
-            if not suppress_msg:
+            if not kwargs.get('suppress_msg'):
                 messages.error(
                     request, 'Email is already a member of this list'
                 )
         else:
-            if not suppress_msg:
+            if not kwargs.get('suppress_msg'):
                 messages.error(
                     request,
                     'Sorry, an error occurred while trying to subscribe you.',
@@ -105,7 +111,7 @@ def mailchimp_subscribe(
             logger.warning(exception)
         return True
 
-    if not suppress_msg:
+    if not kwargs.get('suppress_msg'):
         messages.success(
             request,
             'Thank you for subscribing to our newsletter. We sent a '

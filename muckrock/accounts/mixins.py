@@ -76,7 +76,14 @@ class MiniregMixin(object):
         )
         login(self.request, user)
         if newsletter:
-            mailchimp_subscribe(self.request, user.email)
+            mailchimp_subscribe(
+                self.request,
+                user.email,
+                source='Mini-Register: {}'.format(self.minireg_source),
+                url='https://{}{}'.format(
+                    settings.MUCKROCK_URL, self.request.path
+                ),
+            )
 
         mixpanel_event(
             self.request,
