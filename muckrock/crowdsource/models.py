@@ -394,8 +394,8 @@ class CrowdsourceResponse(models.Model):
     def send_email(self, email):
         """Send an email of this response"""
         metadata = self.crowdsource.get_metadata_keys()
-        text = '\n'.join(
-            '{}: {}'.format(k, v) for k, v in zip(
+        text = u'\n'.join(
+            u'{}: {}'.format(k, v) for k, v in zip(
                 self.crowdsource.get_header_values(metadata),
                 self.get_values(metadata),
             )
