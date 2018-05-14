@@ -81,7 +81,7 @@ def mailchimp_subscribe(
         merge_fields['SOURCE'] = kwargs['source']
     data = {
         'email_address': email,
-        'status': 'pending',
+        'status': 'subscribed',
         'merge_fields': merge_fields,
     }
     response = retry_on_error(
