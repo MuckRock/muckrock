@@ -177,7 +177,11 @@ class TestNewsletterSignupView(TestCase):
         ok_(form.is_valid(), 'The form should validate.')
         response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_called_with(
-            ANY, form.data['email'], form.data['list']
+            ANY,
+            form.data['email'],
+            form.data['list'],
+            source='Newsletter Sign Up Form',
+            url='https://localhost:8000/newsletter-post/',
         )
         eq_(
             response.status_code, 302,
@@ -196,13 +200,19 @@ class TestNewsletterSignupView(TestCase):
         mock_subscribe.return_value = False
         response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_any_call(
-            ANY, form.data['email'], form.data['list']
+            ANY,
+            form.data['email'],
+            form.data['list'],
+            source='Newsletter Sign Up Form',
+            url='https://localhost:8000/newsletter-post/',
         )
         mock_subscribe.assert_any_call(
             ANY,
             form.data['email'],
             settings.MAILCHIMP_LIST_DEFAULT,
             suppress_msg=True,
+            source='Newsletter Sign Up Form',
+            url='https://localhost:8000/newsletter-post/',
         )
         eq_(
             response.status_code, 302,
