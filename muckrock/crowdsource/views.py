@@ -315,6 +315,11 @@ class CrowdsourceEmbededFormView(CrowdsourceFormView):
     """A view to embed an assignment"""
     template_name = 'crowdsource/embed.html'
 
+    def form_valid(self, form):
+        """Redirect to embedded confirmation page"""
+        super(CrowdsourceEmbededFormView, self).form_valid(form)
+        return redirect('crowdsource-embed-confirm')
+
 
 class CrowdsourceListView(MROrderedListView):
     """List of crowdfunds"""
