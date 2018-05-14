@@ -3,6 +3,7 @@ Tasks for the messages application.
 """
 
 # Django
+from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.contrib.auth.models import User
@@ -27,15 +28,25 @@ from muckrock.utils import stripe_retry_on_error
 logger = logging.getLogger(__name__)
 
 
-@task(name='muckrock.message.tasks.send_activity_digest')
+@task(
+    time_limit=600,
+    soft_time_limit=570,
+    name='muckrock.message.tasks.send_activity_digest',
+)
 def send_activity_digest(user, subject, interval):
     """Individual task to create and send an activity digest to a user."""
-    email = digests.ActivityDigest(
-        user=user,
-        subject=subject,
-        interval=interval,
-    )
-    email.send()
+    try:
+        email = digests.ActivityDigest(
+            user=user,
+            subject=subject,
+            interval=interval,
+        )
+        email.send()
+    except SoftTimeLimitExceeded:
+        logger.error(
+            'Send Activity Digest took too long. '
+            'User: %s, Subject: %s, Interval %s', user, subject, interval
+        )
 
 
 def send_digests(preference, subject, interval):
