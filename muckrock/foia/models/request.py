@@ -975,8 +975,6 @@ class FOIARequest(models.Model):
         clone_params = QueryDict('', mutable=True)
         clone_params['clone'] = self.composer.pk
         clone_params['agency'] = self.agency.pk
-        import ipdb
-        ipdb.set_trace()
         return [
             {
                 'test':
