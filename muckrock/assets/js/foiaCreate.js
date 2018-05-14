@@ -273,7 +273,6 @@ $(document).ready(function(){
   });
 
   $("#id_edited_boilerplate").change(function(){
-    var textArea = $("form.create-request .requested_docs textarea");
     if (this.checked) {
       var requestedDocs = $("#id_requested_docs").val();
       var newText = "To Whom It May Concern:\n\nPursuant to the { law name }, " +
@@ -291,13 +290,19 @@ $(document).ready(function(){
         "Sincerely,\n\n" +
         "{ name }";
       $("#id_requested_docs").val(newText);
+      $("#id_requested_docs").change();
       $("form.create-request").addClass("edited-boilerplate");
-      textArea.height(textArea[0].scrollHeight);
       $(this).css("opacity", "0.5");
     } else {
       $(this).prop("checked", "checked");
     }
   });
+
+  $("#id_requested_docs").on("input propertychange change", function() {
+    var padding = parseFloat($(this).css('padding-top')) + parseFloat($(this).css('padding-bottom'));
+    $(this).height(this.scrollHeight - padding);
+  });
+  $("#id_requested_docs").change();
 
   $("#id_permanent_embargo").change(function(){
     if (this.checked) {
