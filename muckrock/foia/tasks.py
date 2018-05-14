@@ -78,6 +78,7 @@ def authenticate_documentcloud(request):
 @task(
     ignore_result=True,
     max_retries=10,
+    time_limit=600,
     name='muckrock.foia.tasks.upload_document_cloud'
 )
 def upload_document_cloud(doc_pk, change, **kwargs):
