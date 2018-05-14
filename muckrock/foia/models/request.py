@@ -975,6 +975,8 @@ class FOIARequest(models.Model):
         clone_params = QueryDict('', mutable=True)
         clone_params['clone'] = self.composer.pk
         clone_params['agency'] = self.agency.pk
+        import ipdb
+        ipdb.set_trace()
         return [
             {
                 'test':
@@ -1212,7 +1214,7 @@ class FOIARequest(models.Model):
             ('pay_foiarequest', 'Can pay for a request'),
             ('export_csv', 'Can export a CSV of search results'),
             (
-                'zip_download',
+                'zip_download_foiarequest',
                 'Can download a zip file of all communications and files'
             ),
         )
