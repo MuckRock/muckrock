@@ -1212,7 +1212,7 @@ class FOIARequest(models.Model):
             ('pay_foiarequest', 'Can pay for a request'),
             ('export_csv', 'Can export a CSV of search results'),
             (
-                'zip_download',
+                'zip_download_foiarequest',
                 'Can download a zip file of all communications and files'
             ),
         )
