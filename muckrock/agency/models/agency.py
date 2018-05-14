@@ -245,6 +245,7 @@ class Agency(models.Model, RequestHelper):
         # find any open requests, if none, not stale
         foias = (
             self.foiarequest_set.get_open()
+            .exclude(composer__datetime_submitted=None)
             .order_by('composer__datetime_submitted')
         )
         if not foias:
