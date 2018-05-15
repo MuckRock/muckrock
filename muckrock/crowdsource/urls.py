@@ -32,7 +32,7 @@ urlpatterns = [
     ),
     url(
         r'^confirm/$',
-        TemplateView.as_view(template_name='crowdsource/embed_confirm.html'),
+        views.CrowdsourceEmbededConfirmView.as_view(),
         name='crowdsource-embed-confirm',
     ),
     url(
