@@ -10,7 +10,13 @@ from django.http import Http404, StreamingHttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
-from django.views.generic import CreateView, DetailView, FormView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    FormView,
+    TemplateView,
+    UpdateView,
+)
 from django.views.generic.detail import BaseDetailView
 
 # Standard Library
@@ -319,6 +325,12 @@ class CrowdsourceEmbededFormView(CrowdsourceFormView):
         """Redirect to embedded confirmation page"""
         super(CrowdsourceEmbededFormView, self).form_valid(form)
         return redirect('crowdsource-embed-confirm')
+
+
+@method_decorator(frame_deny_exempt, name='dispatch')
+class CrowdsourceEmbededConfirmView(TemplateView):
+    """Embedded confirm page"""
+    template_name = 'crowdsource/embed_confirm.html'
 
 
 class CrowdsourceListView(MROrderedListView):
