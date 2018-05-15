@@ -4,7 +4,7 @@ URL mappings for the crowdsource app
 
 # Django
 from django.conf.urls import url
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
 # MuckRock
 from muckrock.crowdsource import views
@@ -29,6 +29,11 @@ urlpatterns = [
         r'^(?P<slug>[-\w]+)-(?P<idx>\d+)/embed/$',
         views.CrowdsourceEmbededFormView.as_view(),
         name='crowdsource-embed',
+    ),
+    url(
+        r'^confirm/$',
+        TemplateView.as_view(template_name='crowdsource/embed_confirm.html'),
+        name='crowdsource-embed-confirm',
     ),
     url(
         r'^$',
