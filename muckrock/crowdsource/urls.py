@@ -4,7 +4,7 @@ URL mappings for the crowdsource app
 
 # Django
 from django.conf.urls import url
-from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.base import RedirectView
 
 # MuckRock
 from muckrock.crowdsource import views
