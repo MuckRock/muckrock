@@ -6,14 +6,10 @@ Factories generate objects during testing for the FOIA app
 from django.utils import timezone
 from django.utils.text import slugify
 
-# Standard Library
-from datetime import timedelta
-
 # Third Party
 import factory
 
 # MuckRock
-from muckrock.agency.models import STALE_DURATION
 from muckrock.communication.models import EmailAddress
 from muckrock.foia.models import (
     FOIACommunication,
@@ -120,19 +116,3 @@ class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
     ffile = factory.django.FileField(filename=factory.Faker('file_name'))
     date_time_stamp = factory.LazyAttribute(lambda obj: timezone.now())
     sent = False
-
-
-class StaleFOIARequestFactory(FOIARequestFactory):
-    """A factory for creating stale FOIARequest test objects."""
-    status = 'ack'
-    stale_comm = factory.RelatedFactory(
-        'muckrock.foia.factories.StaleFOIACommunicationFactory', 'foia'
-    )
-
-
-class StaleFOIACommunicationFactory(FOIACommunicationFactory):
-    """A factory for creating stale FOIARequest test objects."""
-    response = True
-    datetime = factory.LazyAttribute(
-        lambda obj: timezone.now() - timedelta(STALE_DURATION + 1)
-    )

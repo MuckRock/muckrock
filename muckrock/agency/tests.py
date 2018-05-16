@@ -6,23 +6,18 @@ Tests for Agency application
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import RequestFactory, TestCase
-from django.utils import timezone
 
 # Standard Library
 import json
-from datetime import timedelta
 
 # Third Party
 from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
-from muckrock.agency.models import STALE_DURATION, Agency
+from muckrock.agency.models import Agency
 from muckrock.agency.views import AgencyList, boilerplate, contact_info, detail
-from muckrock.factories import AgencyFactory, StaleAgencyFactory, UserFactory
-from muckrock.foia.factories import FOIACommunicationFactory
-from muckrock.task.factories import StaleAgencyTaskFactory
-from muckrock.task.models import StaleAgencyTask
+from muckrock.factories import AgencyFactory, UserFactory
 from muckrock.test_utils import http_get_response, mock_middleware
 
 
@@ -68,88 +63,6 @@ class TestAgencyUnit(TestCase):
         eq_(
             set(e.email for e in self.agency1.get_emails(email_type='cc')),
             set(['other_a@agency1.gov', 'other_b@agency1.gov']),
-        )
-
-    def test_agency_is_stale(self):
-        """Should return the date of the last response by the agency"""
-        duration = STALE_DURATION + 1
-        FOIACommunicationFactory(
-            datetime=timezone.now() - timedelta(duration),
-            response=True,
-            foia__status='ack',
-            foia__agency=self.agency1,
-            foia__composer__datetime_submitted=timezone.now(),
-        )
-        eq_(
-            self.agency1.is_stale(), True,
-            "The agency should report the days since its latest response."
-        )
-
-    def test_agency_mark_stale(self):
-        """Should mark the agency as stale and return a stale agency task,
-        creating the task if one doesn't already exist."""
-        ok_(
-            not StaleAgencyTask.objects.filter(
-                resolved=False, agency=self.agency1
-            ).exists(),
-            'There should not be any unresolved StaleAgencyTasks for this request.'
-        )
-        task = self.agency1.mark_stale()
-        ok_(self.agency1.stale, 'The agency should be marked as stale.')
-        ok_(
-            not self.agency1.manual_stale,
-            'The agency should not be marked as manually stale.'
-        )
-        ok_(
-            isinstance(task, StaleAgencyTask),
-            'A StaleAgencyTask should be returned.'
-        )
-        second_task = self.agency1.mark_stale()
-        eq_(
-            task, second_task,
-            'Instead of creating another task, return the one that already exists.'
-        )
-
-    def test_agency_manual_stale(self):
-        """Should be able to manually mark an agency as stale."""
-        self.agency1.mark_stale(manual=True)
-        ok_(self.agency1.stale, 'The agency should be marked as stale.')
-        ok_(
-            self.agency1.manual_stale,
-            'The agency should be marked as manually stale.'
-        )
-        ok_(
-            self.agency1.is_stale(),
-            'An agency that is manually stale should always be stale.'
-        )
-
-    def test_agency_multiple_tasks(self):
-        """If multiple StaleAgencyTasks exist, only the first should be returned
-        when marking an agency as stale."""
-        stale_agency_tasks = [
-            StaleAgencyTaskFactory(agency=self.agency1),
-            StaleAgencyTaskFactory(agency=self.agency1),
-            StaleAgencyTaskFactory(agency=self.agency1),
-        ]
-        task = self.agency1.mark_stale()
-        eq_(
-            task, stale_agency_tasks[0],
-            'The returned task should be the first stale agency task.'
-        )
-
-    def test_agency_unmark_stale(self):
-        """Unmark the agency as stale."""
-        # first mark it as stale
-        self.agency1.mark_stale(manual=True)
-        # then unmark it as stale
-        self.agency1.unmark_stale()
-        ok_(
-            not self.agency1.stale,
-            'The agency should no longer be marked as stale.'
-        )
-        ok_(
-            not self.agency1.manual_stale,
-            'A manually stale agency should also be freed from staleness.'
         )
 
     def test_agency_get_proxy_info(self):
@@ -327,32 +240,3 @@ class TestAgencyForm(TestCase):
     def test_instance_form(self):
         """The form should validate given only instance data"""
         ok_(self.form.is_valid())
-
-
-class TestStaleAgency(TestCase):
-    """Tests the stale agency task"""
-
-    def setUp(self):
-        self.stale_agency = StaleAgencyFactory(stale=False)
-        self.unstale_agency = AgencyFactory(stale=True)
-        self.task = StaleAgencyTaskFactory(agency=self.unstale_agency)
-
-    def _test_stale_task(self):
-        """A stale agency should be marked as stale"""
-        from muckrock.agency.tasks import stale
-        stale()
-        self.stale_agency.refresh_from_db()
-        self.unstale_agency.refresh_from_db()
-        self.task.refresh_from_db()
-        ok_(
-            self.stale_agency.stale,
-            'The stale agency should be marked as stale'
-        )
-        ok_(
-            not self.unstale_agency.stale,
-            'The unstale agency should be unmarked as stale.'
-        )
-        ok_(
-            self.task.resolved,
-            'The task for the unstale agency should be resolved automatically.'
-        )

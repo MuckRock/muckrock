@@ -39,11 +39,6 @@ class ProjectReviewTaskForm(forms.Form):
     )
 
 
-class StaleAgencyTaskForm(forms.Form):
-    """Simple form for acting on a StaleAgencyTask"""
-    email = forms.EmailField()
-
-
 class ReviewAgencyTaskForm(forms.Form):
     """Simple form to allow selecting an email address or fax number"""
     email_or_fax = forms.CharField(

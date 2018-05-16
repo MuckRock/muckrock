@@ -20,7 +20,6 @@ from muckrock.task.models import (
     OrphanTask,
     ResponseTask,
     SnailMailTask,
-    StaleAgencyTask,
     Task,
 )
 
@@ -40,12 +39,6 @@ class TaskSerializer(serializers.ModelSerializer):
     )
     snailmailtask = serializers.PrimaryKeyRelatedField(
         queryset=SnailMailTask.objects.all(),
-        style={
-            'base_template': 'input.html'
-        }
-    )
-    staleagencytask = serializers.PrimaryKeyRelatedField(
-        queryset=StaleAgencyTask.objects.all(),
         style={
             'base_template': 'input.html'
         }
@@ -79,9 +72,8 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = (
             'id', 'date_created', 'date_done', 'resolved', 'assigned',
-            'orphantask', 'snailmailtask', 'rejectedemailtask',
-            'staleagencytask', 'flaggedtask', 'newagencytask', 'responsetask',
-            'newexemptiontask'
+            'orphantask', 'snailmailtask', 'rejectedemailtask', 'flaggedtask',
+            'newagencytask', 'responsetask', 'newexemptiontask'
         )
 
 
@@ -134,28 +126,6 @@ class SnailMailTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SnailMailTask
-
-
-class StaleAgencyTaskSerializer(serializers.ModelSerializer):
-    """Serializer for StaleAgencyTask model"""
-    assigned = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), style={
-            'base_template': 'input.html'
-        }
-    )
-    resolved_by = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), style={
-            'base_template': 'input.html'
-        }
-    )
-    agency = serializers.PrimaryKeyRelatedField(
-        queryset=Agency.objects.all(), style={
-            'base_template': 'input.html'
-        }
-    )
-
-    class Meta:
-        model = StaleAgencyTask
 
 
 class FlaggedTaskSerializer(serializers.ModelSerializer):

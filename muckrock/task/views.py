@@ -35,11 +35,7 @@ from PyPDF2 import PdfFileMerger
 # MuckRock
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
-from muckrock.communication.models import (
-    EmailAddress,
-    MailCommunication,
-    PortalCommunication,
-)
+from muckrock.communication.models import MailCommunication, PortalCommunication
 from muckrock.foia.models import STATUS, FOIARequest
 from muckrock.task.filters import (
     FlaggedTaskFilterSet,
@@ -48,7 +44,6 @@ from muckrock.task.filters import (
     ResponseTaskFilterSet,
     ReviewAgencyTaskFilterSet,
     SnailMailTaskFilterSet,
-    StaleAgencyTaskFilterSet,
     TaskFilterSet,
 )
 from muckrock.task.forms import (
@@ -59,7 +54,6 @@ from muckrock.task.forms import (
     ReplaceNewAgencyForm,
     ResponseTaskForm,
     ReviewAgencyTaskForm,
-    StaleAgencyTaskForm,
 )
 from muckrock.task.models import (
     CrowdfundTask,
@@ -73,7 +67,6 @@ from muckrock.task.models import (
     ResponseTask,
     ReviewAgencyTask,
     SnailMailTask,
-    StaleAgencyTask,
     StatusChangeTask,
     Task,
 )
@@ -89,7 +82,6 @@ def count_tasks():
             all=Count('id'),
             orphan=Count('orphantask'),
             snail_mail=Count('snailmailtask'),
-            stale_agency=Count('staleagencytask'),
             review_agency=Count('reviewagencytask'),
             flagged=Count('flaggedtask'),
             projectreview=Count('projectreviewtask'),
@@ -291,30 +283,6 @@ class SnailMailTaskList(TaskList):
         return super(SnailMailTaskList, self).task_post_helper(request, task)
 
 
-class StaleAgencyTaskList(TaskList):
-    """List view for Stale Agency Tasks"""
-    model = StaleAgencyTask
-    filter_class = StaleAgencyTaskFilterSet
-    title = 'Stale Agencies'
-    queryset = StaleAgencyTask.objects.preload_list()
-
-    def task_post_helper(self, request, task, form_data=None):
-        """Check the new email is valid and, if so, apply it"""
-        if request.POST.get('update'):
-            email_form = StaleAgencyTaskForm(request.POST)
-            if email_form.is_valid():
-                new_email = EmailAddress.objects.fetch(
-                    email_form.cleaned_data['email']
-                )
-                foia_pks = request.POST.getlist('foia')
-                foias = FOIARequest.objects.filter(pk__in=foia_pks)
-                task.update_email(new_email, foias)
-            else:
-                messages.error(request, 'The email is invalid.')
-                return
-        return super(StaleAgencyTaskList, self).task_post_helper(request, task)
-
-
 class ReviewAgencyTaskList(TaskList):
     """List view for Review Agency Tasks"""
     model = ReviewAgencyTask
@@ -337,7 +305,6 @@ class ReviewAgencyTaskList(TaskList):
                 foias = FOIARequest.objects.filter(pk__in=foia_pks)
                 update_info = form.cleaned_data['update_agency_info']
                 snail = form.cleaned_data['snail_mail']
-                task.agency.unmark_stale()
                 with transaction.atomic():
                     task.update_contact(email_or_fax, foias, update_info, snail)
                     # ensure th eupdated contact information is commited to the

@@ -79,10 +79,6 @@ router.register(
     'api-snailmailtask'
 )
 router.register(
-    r'staleagencytask', muckrock.task.viewsets.StaleAgencyTaskViewSet,
-    'api-staleagencytask'
-)
-router.register(
     r'flaggedtask', muckrock.task.viewsets.FlaggedTaskViewSet, 'api-flaggedtask'
 )
 router.register(

@@ -57,12 +57,6 @@
     </li>
 </ul>
 <ul class="nostyle list__sections">
-    <li class="{% active request '^/task/stale-agency/$' %}">
-        <a href="{% url 'stale-agency-task-list' %}">
-            <span class="counter">{{ counters.stale_agency }}</span>
-            Stale Agency
-        </a>
-    </li>
     <li class="{% active request '^/task/review-agency/$' %}">
         <a href="{% url 'review-agency-task-list' %}">
             <span class="counter">{{ counters.review_agency }}</span>

@@ -299,9 +299,6 @@ def _handle_request(request, mail_id):
         )
         comm.process_attachments(request.FILES)
 
-        # resolve any stale agency tasks for this agency
-        if foia.agency:
-            foia.agency.unmark_stale()
         comm.extract_tracking_id()
 
         if foia.portal:

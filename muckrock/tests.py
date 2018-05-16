@@ -128,7 +128,6 @@ class TestFunctional(TestCase):
             'task',
             'orphantask',
             'snailmailtask',
-            'staleagencytask',
             'flaggedtask',
             'newagencytask',
             'responsetask',

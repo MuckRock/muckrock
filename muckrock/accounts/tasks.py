@@ -58,7 +58,6 @@ from muckrock.task.models import (
     ResponseTask,
     ReviewAgencyTask,
     SnailMailTask,
-    StaleAgencyTask,
     Task,
 )
 
@@ -239,7 +238,7 @@ def store_statistics():
             'orphaned_communications':
                 FOIACommunication.objects.filter(foia=None).count(),
             'stale_agencies':
-                Agency.objects.filter(stale=True).count(),
+                0,
             'unapproved_agencies':
                 Agency.objects.filter(status='pending').count(),
             'portal_agencies':
@@ -279,12 +278,11 @@ def store_statistics():
             'total_deferred_rejected_tasks':
                 RejectedEmailTask.objects.get_deferred().count(),
             'total_staleagency_tasks':
-                StaleAgencyTask.objects.count(),
+                0,
             'total_unresolved_staleagency_tasks':
-                StaleAgencyTask.objects.filter(resolved=False).get_undeferred()
-                .count(),
+                0,
             'total_deferred_staleagency_tasks':
-                StaleAgencyTask.objects.get_deferred().count(),
+                0,
             'total_flagged_tasks':
                 FlaggedTask.objects.count(),
             'total_unresolved_flagged_tasks':

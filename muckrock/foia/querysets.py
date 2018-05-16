@@ -5,8 +5,7 @@ QuerySets for the FOIA application
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
-from django.db.models import Case, Count, F, Max, Q, Sum, When
-from django.db.models.functions import Cast, Now
+from django.db.models import Count, F, Max, OuterRef, Q, Subquery, Sum
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -14,7 +13,7 @@ from django.utils.text import slugify
 from datetime import date, datetime, time
 
 # MuckRock
-from muckrock.models import ExtractDay
+from muckrock.agency.constants import STALE_REPLIES
 
 
 class FOIARequestQuerySet(models.QuerySet):
@@ -125,30 +124,6 @@ class FOIARequestQuerySet(models.QuerySet):
             foias.append(foia)
         return foias
 
-    def get_stale(self, agency=None):
-        """Load requests for a stale agency"""
-        foia_qs = (
-            self.get_open().annotate(
-                latest_response=ExtractDay(
-                    Cast(
-                        Now() - Max(
-                            Case(
-                                When(
-                                    communications__response=True,
-                                    then='communications__datetime'
-                                )
-                            )
-                        ),
-                        models.DurationField(),
-                    )
-                )
-            ).order_by('-latest_response')
-            .select_related('agency__jurisdiction')
-        )
-        if agency is not None:
-            foia_qs = foia_qs.filter(agency=agency)
-        return foia_qs
-
     def get_featured(self, user):
         """Get featured requests"""
         return (
@@ -212,6 +187,29 @@ class FOIARequestQuerySet(models.QuerySet):
             proxy=proxy_info['proxy'],
         )
         foia.process_attachments(composer.user, composer=True)
+
+    def get_stale(self):
+        """Get stale requests"""
+        from muckrock.foia.models import FOIACommunication
+        with_response = (
+            self.filter(
+                communications__response=False,
+                communications__datetime__gt=Subquery(
+                    FOIACommunication.objects.filter(
+                        foia=OuterRef('pk'),
+                        response=True,
+                    ).order_by().values('foia').annotate(max=Max('datetime'))
+                    .values('max')
+                )
+            ).annotate(count=Count('communications')).filter(
+                count__gt=STALE_REPLIES, status__in=['processed', 'appealing']
+            )
+        )
+        without_response = (
+            self.annotate(count=Count('communications'))
+            .filter(status='ack', count__gt=STALE_REPLIES)
+        )
+        return with_response.union(without_response)
 
 
 class FOIAComposerQuerySet(models.QuerySet):

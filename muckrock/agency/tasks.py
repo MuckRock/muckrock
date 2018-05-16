@@ -12,8 +12,8 @@ from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 
 # MuckRock
-from muckrock.agency.models import Agency
-from muckrock.task.models import StaleAgencyTask
+from muckrock.foia.models import FOIARequest
+from muckrock.task.models import ReviewAgencyTask
 
 client = Client(os.environ.get('SENTRY_DSN'))
 register_logger_signal(client)
@@ -26,13 +26,8 @@ register_signal(client)
 )
 def stale():
     """Record all stale agencies once a week"""
-    for agency in Agency.objects.all():
-        is_stale = agency.is_stale()
-        if is_stale and not agency.stale:
-            agency.mark_stale()
-        elif not is_stale and agency.stale:
-            agency.unmark_stale()
-            for task in StaleAgencyTask.objects.filter(
-                resolved=False, agency=agency
-            ):
-                task.resolve()
+    for foia in FOIARequest.objects.get_stale():
+        ReviewAgencyTask.objects.ensure_one_created(
+            agency=foia.agency,
+            resolved=False,
+        )

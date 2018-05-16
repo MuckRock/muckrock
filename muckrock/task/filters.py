@@ -25,7 +25,6 @@ from muckrock.task.models import (
     ResponseTask,
     ReviewAgencyTask,
     SnailMailTask,
-    StaleAgencyTask,
     Task,
 )
 
@@ -173,16 +172,6 @@ class FlaggedTaskFilterSet(TaskFilterSet):
     class Meta:
         model = FlaggedTask
         fields = ['user', 'category', 'resolved', 'resolved_by']
-
-
-class StaleAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
-    """Allows a stale agency task to be filtered by jurisdiction."""
-
-    jurisdiction_field = 'agency__jurisdiction'
-
-    class Meta:
-        model = StaleAgencyTask
-        fields = ['jurisdiction', 'resolved', 'resolved_by']
 
 
 class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
