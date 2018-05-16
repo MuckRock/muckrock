@@ -9,7 +9,7 @@ from django.test import TestCase
 from nose.tools import ok_
 
 # MuckRock
-from muckrock.factories import AgencyFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.foiamachine import factories, forms
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
 

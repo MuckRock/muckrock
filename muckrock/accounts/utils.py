@@ -19,7 +19,7 @@ import requests
 import stripe
 
 # MuckRock
-from muckrock.utils import retry_on_error, stripe_retry_on_error
+from muckrock.core.utils import retry_on_error, stripe_retry_on_error
 
 logger = logging.getLogger(__name__)
 

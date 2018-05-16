@@ -20,13 +20,13 @@ import mock
 import nose.tools
 
 # MuckRock
-from muckrock.factories import ProjectFactory, UserFactory
-from muckrock.project import forms, models, views
-from muckrock.test_utils import (
+from muckrock.core.factories import ProjectFactory, UserFactory
+from muckrock.core.test_utils import (
     http_get_response,
     http_post_response,
     mock_middleware,
 )
+from muckrock.project import forms, models, views
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_

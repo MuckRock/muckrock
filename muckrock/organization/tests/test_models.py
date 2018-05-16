@@ -11,8 +11,8 @@ import nose.tools
 from mock import Mock, patch
 
 # MuckRock
-import muckrock.factories
-from muckrock.utils import get_stripe_token
+import muckrock.core.factories
+from muckrock.core.utils import get_stripe_token
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -44,7 +44,7 @@ class TestRations(TestCase):
 
     def setUp(self):
         """Create a basic organization"""
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.core.factories.OrganizationFactory()
 
     def test_no_change(self):
         """If the seats do not change, then the cost and requests shouldn't change."""
@@ -107,7 +107,7 @@ class TestSubscriptions(TestCase):
 
     def setUp(self):
         """Create a basic organization"""
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.core.factories.OrganizationFactory()
         ok_(
             not self.org.active and not self.org.stripe_id,
             'By default, an org should be inactive and subscription-less'
@@ -152,7 +152,7 @@ class TestSubscriptions(TestCase):
 
     def test_activate_as_pro(self):
         """A pro user should have their pro subscription cancelled in favor of an organization."""
-        pro = muckrock.factories.ProfileFactory(
+        pro = muckrock.core.factories.ProfileFactory(
             acct_type='pro', subscription_id='test-pro'
         )
         self.org.owner = pro.user
@@ -251,7 +251,7 @@ class TestStripeIntegration(TestCase):
     """
 
     def setUp(self):
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.core.factories.OrganizationFactory()
         self.token = get_stripe_token()
 
     @nose.tools.nottest
@@ -267,9 +267,9 @@ class TestMembership(TestCase):
 
     def setUp(self):
         """Create an owner, a member, and an organization"""
-        self.org = muckrock.factories.OrganizationFactory(active=True)
+        self.org = muckrock.core.factories.OrganizationFactory(active=True)
         self.owner = self.org.owner
-        self.member = muckrock.factories.UserFactory(
+        self.member = muckrock.core.factories.UserFactory(
             profile__organization=self.org
         )
 
@@ -289,7 +289,7 @@ class TestMembership(TestCase):
 
     def test_add_member(self):
         """Test adding a member to the organization."""
-        new_member = muckrock.factories.UserFactory()
+        new_member = muckrock.core.factories.UserFactory()
         self.org.add_member(new_member)
         eq_(
             self.org, new_member.profile.organization,
@@ -331,24 +331,26 @@ class TestMembership(TestCase):
     @nose.tools.raises(AttributeError)
     def test_add_member_without_seat(self):
         """An exception should be raised when trying to add a member without any available seat."""
-        muckrock.factories.UserFactory(profile__organization=self.org)
-        muckrock.factories.UserFactory(profile__organization=self.org)
+        muckrock.core.factories.UserFactory(profile__organization=self.org)
+        muckrock.core.factories.UserFactory(profile__organization=self.org)
         eq_(self.org.max_users, 3, 'The org should start with three seats.')
         eq_(self.org.members.count(), 3, 'The org should have 3 members.')
         # adding a new member should throw an error
-        self.org.add_member(muckrock.factories.UserFactory())
+        self.org.add_member(muckrock.core.factories.UserFactory())
 
     @nose.tools.raises(AttributeError)
     def test_add_other_org_member(self):
         """Cannot add a member of a different organization."""
-        other_org = muckrock.factories.OrganizationFactory()
-        member = muckrock.factories.UserFactory(profile__organization=other_org)
+        other_org = muckrock.core.factories.OrganizationFactory()
+        member = muckrock.core.factories.UserFactory(
+            profile__organization=other_org
+        )
         self.org.add_member(member)
 
     @nose.tools.raises(AttributeError)
     def test_add_other_owner(self):
         """Cannot add an owner of a different organization."""
-        other_org = muckrock.factories.OrganizationFactory()
+        other_org = muckrock.core.factories.OrganizationFactory()
         self.org.add_member(other_org.owner)
 
     @nose.tools.raises(AttributeError)
@@ -357,4 +359,4 @@ class TestMembership(TestCase):
         self.org.active = False
         self.org.save()
         ok_(not self.org.active)
-        self.org.add_member(muckrock.factories.UserFactory())
+        self.org.add_member(muckrock.core.factories.UserFactory())

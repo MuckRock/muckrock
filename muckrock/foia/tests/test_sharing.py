@@ -9,7 +9,7 @@ from django.test import TestCase
 from nose.tools import assert_false, assert_true, ok_
 
 # MuckRock
-from muckrock.factories import OrganizationFactory, UserFactory
+from muckrock.core.factories import OrganizationFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 
 

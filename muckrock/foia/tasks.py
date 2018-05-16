@@ -45,6 +45,7 @@ from muckrock.communication.models import (
     FaxError,
     MailCommunication,
 )
+from muckrock.core.utils import generate_status_action
 from muckrock.foia.codes import CODES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
@@ -54,7 +55,6 @@ from muckrock.foia.models import (
     FOIARequest,
 )
 from muckrock.task.models import ResponseTask, ReviewAgencyTask
-from muckrock.utils import generate_status_action
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'

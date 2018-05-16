@@ -19,8 +19,8 @@ import re
 import chardet
 
 # MuckRock
+from muckrock.core.utils import new_action
 from muckrock.foia.models.request import STATUS, FOIARequest
-from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 

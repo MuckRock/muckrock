@@ -20,10 +20,10 @@ import stripe
 
 # MuckRock
 from muckrock.accounts.utils import validate_stripe_email
+from muckrock.core.utils import new_action
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.foia.models import END_STATUS, FOIARequest
-from muckrock.utils import new_action
 
 logger = logging.getLogger(__name__)
 

@@ -27,11 +27,11 @@ from muckrock.communication.models import (
     FaxError,
     PhoneNumber,
 )
+from muckrock.core.models import ExtractDay
 from muckrock.foia.models import STATUS, FOIANote, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
-from muckrock.models import ExtractDay
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
     FlaggedTaskQuerySet,

@@ -9,7 +9,7 @@ from django.utils.text import slugify
 import factory
 
 # MuckRock
-from muckrock import factories as muckrock_factories
+from muckrock.core import factories as muckrock_factories
 from muckrock.foiamachine.models import (
     FoiaMachineCommunication,
     FoiaMachineFile,

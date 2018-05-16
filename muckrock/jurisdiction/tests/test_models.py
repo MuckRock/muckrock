@@ -14,7 +14,7 @@ from datetime import timedelta
 from nose.tools import eq_
 
 # MuckRock
-from muckrock.factories import UserFactory
+from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,

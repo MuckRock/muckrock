@@ -16,22 +16,22 @@ from nose.tools import eq_, ok_, raises
 # MuckRock
 from muckrock.accounts import views
 from muckrock.accounts.forms import RegistrationCompletionForm
-from muckrock.factories import (
+from muckrock.core.factories import (
     AgencyFactory,
     NotificationFactory,
     QuestionFactory,
     UserFactory,
 )
-from muckrock.foia.factories import FOIARequestFactory
-from muckrock.foia.views import Detail as FOIARequestDetail
-from muckrock.organization.models import Organization
-from muckrock.qanda.views import Detail as QuestionDetail
-from muckrock.test_utils import (
+from muckrock.core.test_utils import (
     http_get_response,
     http_post_response,
     mock_middleware,
 )
-from muckrock.utils import new_action, notify
+from muckrock.core.utils import new_action, notify
+from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.views import Detail as FOIARequestDetail
+from muckrock.organization.models import Organization
+from muckrock.qanda.views import Detail as QuestionDetail
 
 
 def http_get_post(url, view, data):

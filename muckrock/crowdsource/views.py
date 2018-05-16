@@ -30,14 +30,14 @@ from djangosecure.decorators import frame_deny_exempt
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
+from muckrock.core.utils import Echo
+from muckrock.core.views import MROrderedListView, class_view_decorator
 from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
     CrowdsourceDataFormset,
     CrowdsourceForm,
 )
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceResponse
-from muckrock.utils import Echo
-from muckrock.views import MROrderedListView, class_view_decorator
 
 
 class CrowdsourceDetailView(DetailView):

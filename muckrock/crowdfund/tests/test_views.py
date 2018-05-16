@@ -17,13 +17,17 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_
 
 # MuckRock
+from muckrock.core.factories import (
+    CrowdfundFactory,
+    ProjectFactory,
+    UserFactory,
+)
+from muckrock.core.test_utils import mock_middleware
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
-from muckrock.factories import CrowdfundFactory, ProjectFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.project.models import ProjectCrowdfunds
-from muckrock.test_utils import mock_middleware
 
 
 @patch(

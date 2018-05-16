@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import django.db.models.deletion
-import muckrock.fields
+import muckrock.core.fields
 from django.conf import settings
 
 
@@ -112,7 +112,7 @@ class Migration(migrations.Migration):
                 ('mail_id', models.CharField(max_length=255, editable=False, blank=True)),
                 ('updated', models.BooleanField()),
                 ('email', models.EmailField(max_length=75, blank=True)),
-                ('other_emails', muckrock.fields.EmailsListField(max_length=255, blank=True)),
+                ('other_emails', muckrock.core.fields.EmailsListField(max_length=255, blank=True)),
                 ('times_viewed', models.IntegerField(default=0)),
                 ('disable_autofollowups', models.BooleanField(default=False)),
                 ('block_incoming', models.BooleanField(default=False, help_text=b'Block emails incoming to this request from automatically being posted on the site')),

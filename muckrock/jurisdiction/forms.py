@@ -7,8 +7,8 @@ from django import forms
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.core.forms import MRFilterForm
 from muckrock.foia.models import FOIARequest
-from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import ExampleAppeal, Jurisdiction
 
 

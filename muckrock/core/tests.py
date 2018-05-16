@@ -20,12 +20,13 @@ from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.accounts.models import Notification
-from muckrock.factories import AnswerFactory, UserFactory
-from muckrock.fields import EmailsListField
-from muckrock.forms import NewsletterSignupForm, StripeForm
-from muckrock.test_utils import http_get_response, http_post_response
-from muckrock.utils import new_action, notify
-from muckrock.views import DonationFormView, NewsletterSignupView
+from muckrock.core.factories import AnswerFactory, UserFactory
+from muckrock.core.fields import EmailsListField
+from muckrock.core.forms import NewsletterSignupForm, StripeForm
+from muckrock.core.templatetags import tags
+from muckrock.core.test_utils import http_get_response, http_post_response
+from muckrock.core.utils import new_action, notify
+from muckrock.core.views import DonationFormView, NewsletterSignupView
 
 # pylint: disable=too-many-public-methods
 
@@ -166,7 +167,7 @@ class TestNewsletterSignupView(TestCase):
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 405)
 
-    @patch('muckrock.views.mailchimp_subscribe')
+    @patch('muckrock.core.views.mailchimp_subscribe')
     def test_post_view(self, mock_subscribe):
         """Posting an email to the list should add that email to our MailChimp list."""
         form = NewsletterSignupForm({
@@ -187,7 +188,7 @@ class TestNewsletterSignupView(TestCase):
             'Should redirect upon successful submission.'
         )
 
-    @patch('muckrock.views.mailchimp_subscribe')
+    @patch('muckrock.core.views.mailchimp_subscribe')
     def test_post_other_list(self, mock_subscribe):
         """Posting to a list other than the default should optionally subscribe to the default."""
         form = NewsletterSignupForm({
@@ -305,3 +306,24 @@ class TestDonations(TestCase):
             response.status_code, 302,
             'A successful donation will return a redirection.'
         )
+
+
+class TestTemplatetagsFunctional(TestCase):
+    """Functional tests for templatetags"""
+
+    def test_active(self):
+        """Test the active template tag"""
+        mock_request = Mock()
+        mock_request.user = 'adam'
+        mock_request.path = '/test1/adam/'
+
+        nose.tools.eq_(
+            tags.active(mock_request, '/test1/{{user}}/'), 'current-tab'
+        )
+        nose.tools.eq_(tags.active(mock_request, '/test2/{{user}}/'), '')
+
+    def test_company_title(self):
+        """Test the company_title template tag"""
+
+        nose.tools.eq_(tags.company_title('one\ntwo\nthree'), 'one, et al')
+        nose.tools.eq_(tags.company_title('company'), 'company')

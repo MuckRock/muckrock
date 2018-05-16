@@ -21,6 +21,7 @@ from nose.tools import (
 )
 
 # MuckRock
+from muckrock.core.factories import ProjectFactory, UserFactory
 from muckrock.crowdsource.factories import (
     CrowdsourceDataFactory,
     CrowdsourceFactory,
@@ -30,7 +31,6 @@ from muckrock.crowdsource.factories import (
     CrowdsourceValueFactory,
 )
 from muckrock.crowdsource.models import Crowdsource
-from muckrock.factories import ProjectFactory, UserFactory
 
 
 class TestCrowdsource(TestCase):

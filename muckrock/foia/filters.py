@@ -16,7 +16,11 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
+from muckrock.core.filters import (
+    BLANK_STATUS,
+    NULL_BOOLEAN_CHOICES,
+    RangeWidget,
+)
 from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag

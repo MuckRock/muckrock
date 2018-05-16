@@ -15,9 +15,9 @@ from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.accounts.models import Notification
 from muckrock.agency.models import Agency
 from muckrock.communication.utils import get_email_or_fax
+from muckrock.core.utils import generate_status_action
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.utils import generate_status_action
 
 
 class FlaggedTaskForm(forms.Form):

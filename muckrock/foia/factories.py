@@ -27,7 +27,7 @@ class FOIAComposerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FOIAComposer
 
-    user = factory.SubFactory('muckrock.factories.UserFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
     title = factory.Sequence('FOIA Composer #{}'.format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
 
@@ -51,7 +51,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence('FOIA Request {}'.format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
     composer = factory.SubFactory(FOIAComposerFactory)
     email = factory.SubFactory(
         'muckrock.communication.factories.EmailAddressFactory',
@@ -73,8 +73,8 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
         model = FOIACommunication
 
     foia = factory.SubFactory(FOIARequestFactory)
-    from_user = factory.SubFactory('muckrock.factories.UserFactory')
-    to_user = factory.SubFactory('muckrock.factories.UserFactory')
+    from_user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    to_user = factory.SubFactory('muckrock.core.factories.UserFactory')
     datetime = factory.LazyAttribute(lambda obj: timezone.now())
     email = factory.RelatedFactory(
         'muckrock.communication.factories.EmailCommunicationFactory',

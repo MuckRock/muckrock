@@ -10,7 +10,7 @@ from django.test import TestCase
 from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
-from muckrock.factories import OrganizationFactory, UserFactory
+from muckrock.core.factories import OrganizationFactory, UserFactory
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.forms.composers import BaseComposerForm
 from muckrock.foia.models import FOIAComposer

@@ -36,6 +36,7 @@ from PyPDF2 import PdfFileMerger
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.communication.models import MailCommunication, PortalCommunication
+from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.models import STATUS, FOIARequest
 from muckrock.task.filters import (
     FlaggedTaskFilterSet,
@@ -72,7 +73,6 @@ from muckrock.task.models import (
 )
 from muckrock.task.pdf import SnailMailPDF
 from muckrock.task.tasks import snail_mail_bulk_pdf_task, submit_review_update
-from muckrock.views import MRFilterListView, class_view_decorator
 
 
 def count_tasks():

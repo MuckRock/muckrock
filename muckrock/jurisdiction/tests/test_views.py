@@ -9,8 +9,8 @@ from django.test import TestCase
 from nose.tools import eq_, ok_
 
 # MuckRock
+from muckrock.core.test_utils import http_get_response
 from muckrock.jurisdiction import factories, views
-from muckrock.test_utils import http_get_response
 
 
 class TestExemptionDetailView(TestCase):

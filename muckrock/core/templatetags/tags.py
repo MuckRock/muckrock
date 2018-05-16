@@ -27,7 +27,7 @@ import bleach
 import markdown
 
 # MuckRock
-from muckrock.forms import NewsletterSignupForm, TagManagerForm
+from muckrock.core.forms import NewsletterSignupForm, TagManagerForm
 from muckrock.project.forms import ProjectManagerForm
 
 register = Library()

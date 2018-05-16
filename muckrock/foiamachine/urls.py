@@ -15,8 +15,8 @@ from django_hosts.resolvers import reverse_lazy
 
 # MuckRock
 from muckrock.agency.urls import agency_url
+from muckrock.core.forms import PasswordResetForm
 from muckrock.foiamachine import views
-from muckrock.forms import PasswordResetForm
 from muckrock.jurisdiction.urls import jur_url
 
 

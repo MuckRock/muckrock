@@ -17,12 +17,12 @@ import factory
 from muckrock.accounts.models import Notification, Profile, Statistics
 from muckrock.agency.models import Agency, AgencyEmail, AgencyPhone
 from muckrock.communication.models import EmailAddress
+from muckrock.core.utils import new_action
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Answer, Question
-from muckrock.utils import new_action
 
 
 class ProfileFactory(factory.django.DjangoModelFactory):
@@ -31,7 +31,9 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Profile
 
-    user = factory.SubFactory('muckrock.factories.UserFactory', profile=None)
+    user = factory.SubFactory(
+        'muckrock.core.factories.UserFactory', profile=None
+    )
     acct_type = 'basic'
     date_update = timezone.now()
     customer_id = "cus_RTW3KxBMCknuhB"
@@ -90,11 +92,11 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     )
     status = 'approved'
     email = factory.RelatedFactory(
-        'muckrock.factories.AgencyEmailFactory',
+        'muckrock.core.factories.AgencyEmailFactory',
         'agency',
     )
     fax = factory.RelatedFactory(
-        'muckrock.factories.AgencyPhoneFactory',
+        'muckrock.core.factories.AgencyPhoneFactory',
         'agency',
         request_type='primary',
         phone__type='fax',
@@ -121,7 +123,7 @@ class AgencyEmailFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AgencyEmail
 
-    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
     email = factory.SubFactory(
         'muckrock.communication.factories.EmailAddressFactory'
     )
@@ -135,7 +137,7 @@ class AgencyPhoneFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AgencyPhone
 
-    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
     phone = factory.SubFactory(
         'muckrock.communication.factories.PhoneNumberFactory'
     )
@@ -145,7 +147,7 @@ class AgencyPhoneFactory(factory.django.DjangoModelFactory):
 class AppealAgencyFactory(AgencyFactory):
     """A factory for creating an Agency that accepts email appeals."""
     email = factory.RelatedFactory(
-        'muckrock.factories.AgencyEmailFactory',
+        'muckrock.core.factories.AgencyEmailFactory',
         'agency',
         request_type='appeal',
     )

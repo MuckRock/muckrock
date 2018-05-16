@@ -15,7 +15,7 @@ from dateutil.relativedelta import relativedelta
 
 # MuckRock
 from muckrock.accounts.models import ReceiptEmail
-from muckrock.factories import (
+from muckrock.core.factories import (
     NotificationFactory,
     OrganizationFactory,
     ProfileFactory,

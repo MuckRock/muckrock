@@ -16,9 +16,9 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
 
 # MuckRock
+from muckrock.core.utils import get_image_storage
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
-from muckrock.utils import get_image_storage
 
 
 class ArticleQuerySet(models.QuerySet):

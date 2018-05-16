@@ -13,9 +13,9 @@ from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, PhoneNumber
-from muckrock.fields import EmptyLastModelChoiceField
+from muckrock.core.fields import EmptyLastModelChoiceField
+from muckrock.core.forms import TaggitWidget
 from muckrock.foia.models import FOIACommunication
-from muckrock.forms import TaggitWidget
 
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),

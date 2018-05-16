@@ -9,7 +9,7 @@ from django.test import Client, TestCase
 from nose.tools import eq_
 
 # MuckRock
-import muckrock.factories
+import muckrock.core.factories
 
 
 class OrganizationURLTests(TestCase):
@@ -17,7 +17,7 @@ class OrganizationURLTests(TestCase):
 
     def setUp(self):
         """Set up models for the organization"""
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.core.factories.OrganizationFactory()
         self.client = Client()
 
     def test_index(self):

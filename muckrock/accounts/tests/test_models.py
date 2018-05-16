@@ -15,14 +15,14 @@ from nose.tools import assert_false, assert_true, eq_, nottest, ok_, raises
 
 # MuckRock
 from muckrock.accounts.models import Notification
-from muckrock.factories import (
+from muckrock.core.factories import (
     NotificationFactory,
     OrganizationFactory,
     ProfileFactory,
     UserFactory,
 )
+from muckrock.core.utils import get_stripe_token, new_action
 from muckrock.foia.factories import FOIARequestFactory
-from muckrock.utils import get_stripe_token, new_action
 
 # Creates Mock items for testing methods that involve Stripe
 #

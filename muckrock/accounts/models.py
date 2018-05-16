@@ -24,12 +24,12 @@ from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
 
 # MuckRock
-from muckrock.foia.exceptions import InsufficientRequestsError
-from muckrock.utils import (
+from muckrock.core.utils import (
     generate_key,
     get_image_storage,
     stripe_retry_on_error,
 )
+from muckrock.foia.exceptions import InsufficientRequestsError
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY

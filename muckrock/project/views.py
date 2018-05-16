@@ -28,6 +28,8 @@ from datetime import date, timedelta
 from actstream.models import followers
 
 # MuckRock
+from muckrock.core.utils import new_action
+from muckrock.core.views import MRSearchFilterListView
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.tasks import notify_project_contributor
@@ -38,8 +40,6 @@ from muckrock.project.forms import (
     ProjectUpdateForm,
 )
 from muckrock.project.models import Project, ProjectCrowdfunds
-from muckrock.utils import new_action
-from muckrock.views import MRSearchFilterListView
 
 
 class ProjectExploreView(TemplateView):

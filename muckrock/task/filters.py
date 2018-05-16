@@ -12,7 +12,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
+from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.task.models import (

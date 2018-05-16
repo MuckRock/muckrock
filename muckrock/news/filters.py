@@ -11,7 +11,7 @@ import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
-from muckrock.filters import RangeWidget
+from muckrock.core.filters import RangeWidget
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag

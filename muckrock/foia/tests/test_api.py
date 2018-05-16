@@ -15,7 +15,7 @@ import requests_mock
 from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
-from muckrock.factories import AgencyFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.foia.models import FOIAComposer
 
 

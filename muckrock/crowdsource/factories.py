@@ -27,7 +27,7 @@ class CrowdsourceFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence('Crowdsource #{}'.format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory('muckrock.factories.UserFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
     description = factory.Faker('sentence')
 
 
@@ -94,7 +94,7 @@ class CrowdsourceResponseFactory(factory.django.DjangoModelFactory):
         model = CrowdsourceResponse
 
     crowdsource = factory.SubFactory(CrowdsourceFactory)
-    user = factory.SubFactory('muckrock.factories.UserFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
     data = factory.SubFactory(CrowdsourceDataFactory)
 
 

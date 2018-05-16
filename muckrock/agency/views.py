@@ -21,11 +21,11 @@ from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.agency.utils import initial_communication_template
+from muckrock.core.views import MRSearchFilterListView
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
-from muckrock.views import MRSearchFilterListView
 
 
 class AgencyList(MRSearchFilterListView):

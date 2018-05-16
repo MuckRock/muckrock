@@ -29,7 +29,7 @@ from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock import task, utils
+from muckrock import task
 from muckrock.accounts.models import Notification
 from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
@@ -37,6 +37,7 @@ from muckrock.communication.models import (
     EmailCommunication,
     PhoneNumber,
 )
+from muckrock.core import utils
 from muckrock.foia.querysets import FOIARequestQuerySet
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 

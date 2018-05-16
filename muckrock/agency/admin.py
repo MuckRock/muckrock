@@ -168,8 +168,6 @@ class AgencyAdmin(VersionAdmin):
                 'image',
                 'image_attr_line',
                 'public_notes',
-                'stale',
-                'manual_stale',
                 'location',
                 'portal',
                 'contact_salutation',

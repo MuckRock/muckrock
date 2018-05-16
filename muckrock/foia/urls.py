@@ -7,6 +7,7 @@ from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
 # MuckRock
+from muckrock.core.views import jurisdiction
 from muckrock.foia import views
 from muckrock.foia.feeds import (
     FOIAFeed,
@@ -16,7 +17,6 @@ from muckrock.foia.feeds import (
     UserSubmittedFeed,
     UserUpdateFeed,
 )
-from muckrock.views import jurisdiction
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'

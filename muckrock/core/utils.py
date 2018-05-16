@@ -23,7 +23,7 @@ import actstream
 import stripe
 
 # MuckRock
-from muckrock.storage import QueuedS3DietStorage
+from muckrock.core.storage import QueuedS3DietStorage
 
 logger = logging.getLogger(__name__)
 

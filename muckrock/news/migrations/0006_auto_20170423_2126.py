@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import easy_thumbnails.fields
-import muckrock.storage
+import muckrock.core.storage
 
 
 class Migration(migrations.Migration):
@@ -17,11 +17,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='article',
             name='image',
-            field=easy_thumbnails.fields.ThumbnailerImageField(blank=True, null=True, storage=muckrock.storage.QueuedS3DietStorage(), upload_to=b'news_images/%Y/%m/%d'),
+            field=easy_thumbnails.fields.ThumbnailerImageField(blank=True, null=True, storage=muckrock.core.storage.QueuedS3DietStorage(), upload_to=b'news_images/%Y/%m/%d'),
         ),
         migrations.AlterField(
             model_name='photo',
             name='image',
-            field=models.ImageField(storage=muckrock.storage.QueuedS3DietStorage(), upload_to=b'news_photos/%Y/%m/%d'),
+            field=models.ImageField(storage=muckrock.core.storage.QueuedS3DietStorage(), upload_to=b'news_photos/%Y/%m/%d'),
         ),
     ]

@@ -6,8 +6,8 @@ URL mappings for the jurisdiction application
 from django.conf.urls import url
 
 # MuckRock
+from muckrock.core.views import jurisdiction
 from muckrock.jurisdiction import views
-from muckrock.views import jurisdiction
 
 jur_url = r'(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?(?:/(?P<local_slug>[\w\d_-]+))?'
 old_jur_url = r'(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'

@@ -10,8 +10,8 @@ from django.views.generic import DetailView, ListView
 from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
+from muckrock.core.views import PaginationMixin
 from muckrock.foia.models import FOIAFile, FOIARequest
-from muckrock.views import PaginationMixin
 
 
 @method_decorator(frame_deny_exempt, name='dispatch')
