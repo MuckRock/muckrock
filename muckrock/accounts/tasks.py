@@ -230,12 +230,11 @@ def store_statistics():
                 ).get_submitted_range(yesterday_midnight, today_midnight)
                 .count(),
             'daily_articles':
-                Article.objects.filter(
-                    pub_date__range=(
-                        yesterday_midnight,
-                        today_midnight,
-                    )
-                ).count(),
+                Article.objects.
+                filter(pub_date__range=(
+                    yesterday_midnight,
+                    today_midnight,
+                )).count(),
             'orphaned_communications':
                 FOIACommunication.objects.filter(foia=None).count(),
             'stale_agencies':
@@ -506,9 +505,8 @@ def store_statistics():
             'total_close_crowdsources':
                 Crowdsource.objects.filter(status='close').count(),
             'num_crowdsource_responded_users':
-                CrowdsourceResponse.objects.aggregate(
-                    Count('user', distinct=True)
-                )['user__count'],
+                CrowdsourceResponse.objects.
+                aggregate(Count('user', distinct=True))['user__count'],
             'total_crowdsource_responses':
                 CrowdsourceResponse.objects.count(),
         }
