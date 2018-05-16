@@ -15,7 +15,11 @@ import mock
 from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
-from muckrock.factories import AgencyFactory, OrganizationFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyFactory,
+    OrganizationFactory,
+    UserFactory,
+)
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,

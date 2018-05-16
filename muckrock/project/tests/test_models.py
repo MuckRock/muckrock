@@ -12,7 +12,7 @@ from django.test import TestCase
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.factories import ArticleFactory, ProjectFactory, UserFactory
+from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.task.models import ProjectReviewTask
 

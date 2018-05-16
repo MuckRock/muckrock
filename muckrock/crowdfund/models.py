@@ -20,8 +20,8 @@ import stripe
 
 # MuckRock
 from muckrock.accounts.utils import stripe_get_customer
+from muckrock.core.utils import new_action, stripe_retry_on_error
 from muckrock.message.email import TemplateEmail
-from muckrock.utils import new_action, stripe_retry_on_error
 
 stripe.api_version = '2015-10-16'
 logger = logging.getLogger(__name__)

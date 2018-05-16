@@ -13,8 +13,8 @@ from datetime import date
 # MuckRock
 from muckrock import task
 from muckrock.communication.models import EmailCommunication
+from muckrock.core.models import ExtractDay
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
-from muckrock.models import ExtractDay
 
 
 class TaskQuerySet(models.QuerySet):

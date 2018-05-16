@@ -10,9 +10,9 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
 # MuckRock
+from muckrock.core.utils import cache_get_or_set
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.utils import cache_get_or_set
 
 register = template.Library()
 

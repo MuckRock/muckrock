@@ -23,8 +23,8 @@ from muckrock.accounts.utils import (
     mixpanel_event,
     unique_username,
 )
+from muckrock.core.utils import generate_key
 from muckrock.message.tasks import gift, welcome_miniregister
-from muckrock.utils import generate_key
 
 logger = logging.getLogger(__name__)
 

@@ -26,12 +26,12 @@ from rest_framework.response import Response
 
 # MuckRock
 from muckrock.accounts.models import Notification
+from muckrock.core.views import MRSearchFilterListView
 from muckrock.qanda.filters import QuestionFilterSet
 from muckrock.qanda.forms import AnswerForm, QuestionForm
 from muckrock.qanda.models import Answer, Question
 from muckrock.qanda.serializers import QuestionPermissions, QuestionSerializer
 from muckrock.tags.models import Tag, parse_tags
-from muckrock.views import MRSearchFilterListView
 
 
 class QuestionList(MRSearchFilterListView):

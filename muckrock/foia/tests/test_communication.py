@@ -16,7 +16,7 @@ from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
-from muckrock.factories import UserFactory
+from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,

@@ -14,10 +14,10 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 # MuckRock
 from muckrock.accounts.forms import BuyRequestForm
 from muckrock.agency.models import Agency
+from muckrock.core.forms import TaggitWidget
 from muckrock.foia.fields import ComposerAgencyField
 from muckrock.foia.forms.comms import ContactInfoForm
 from muckrock.foia.models import FOIAComposer
-from muckrock.forms import TaggitWidget
 
 
 class BaseComposerForm(forms.ModelForm):

@@ -11,7 +11,7 @@ from nose.tools import eq_, ok_
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
-from muckrock.factories import UserFactory
+from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.jurisdiction.factories import (
     ExemptionFactory,

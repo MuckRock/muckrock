@@ -19,7 +19,7 @@ from datetime import date
 import stripe
 
 # MuckRock
-from muckrock.utils import stripe_retry_on_error
+from muckrock.core.utils import stripe_retry_on_error
 
 logger = logging.getLogger(__name__)
 stripe.api_version = '2015-10-16'

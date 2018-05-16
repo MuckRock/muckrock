@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 
 # MuckRock
 import muckrock.accounts.views as views
-from muckrock.forms import PasswordResetForm
+from muckrock.core.forms import PasswordResetForm
 
 urlpatterns = [
     url(r'^$', views.AccountsView.as_view(), name='accounts'),

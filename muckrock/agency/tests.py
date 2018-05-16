@@ -17,8 +17,8 @@ from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.agency.views import AgencyList, boilerplate, contact_info, detail
-from muckrock.factories import AgencyFactory, UserFactory
-from muckrock.test_utils import http_get_response, mock_middleware
+from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import http_get_response, mock_middleware
 
 
 class TestAgencyUnit(TestCase):

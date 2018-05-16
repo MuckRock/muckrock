@@ -14,11 +14,11 @@ from datetime import date
 import taggit
 
 # MuckRock
+from muckrock.core.utils import get_image_storage
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.task.models import ProjectReviewTask
-from muckrock.utils import get_image_storage
 
 
 class ProjectQuerySet(models.QuerySet):

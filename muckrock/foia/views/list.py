@@ -26,6 +26,14 @@ from furl import furl
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.core.forms import TagManagerForm
+from muckrock.core.models import ExtractDay
+from muckrock.core.utils import Echo
+from muckrock.core.views import (
+    MRListView,
+    MRSearchFilterListView,
+    class_view_decorator,
+)
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
@@ -45,18 +53,10 @@ from muckrock.foia.models import (
     FOIASavedSearch,
 )
 from muckrock.foia.rules import can_embargo, can_embargo_permananently
-from muckrock.forms import TagManagerForm
-from muckrock.models import ExtractDay
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
-from muckrock.utils import Echo
-from muckrock.views import (
-    MRListView,
-    MRSearchFilterListView,
-    class_view_decorator,
-)
 
 
 class RequestExploreView(TemplateView):

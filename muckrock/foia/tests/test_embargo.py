@@ -12,13 +12,13 @@ import datetime
 from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
-from muckrock.factories import OrganizationFactory, UserFactory
+from muckrock.core.factories import OrganizationFactory, UserFactory
+from muckrock.core.test_utils import mock_middleware
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.foia.models import END_STATUS
 from muckrock.foia.tasks import embargo_expire
 from muckrock.foia.views import embargo
-from muckrock.test_utils import mock_middleware
 
 
 class TestEmbargo(TestCase):

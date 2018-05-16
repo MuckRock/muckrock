@@ -8,8 +8,8 @@ used as a fall back for automated portals when something goes wrong.
 import string
 
 # MuckRock
+from muckrock.core.utils import generate_key
 from muckrock.task.models import PortalTask
-from muckrock.utils import generate_key
 
 
 class ManualPortal(object):

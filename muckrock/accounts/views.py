@@ -60,6 +60,7 @@ from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
+from muckrock.core.views import MRFilterListView
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
@@ -73,7 +74,6 @@ from muckrock.message.tasks import (
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
 from muckrock.project.models import Project
-from muckrock.views import MRFilterListView
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY

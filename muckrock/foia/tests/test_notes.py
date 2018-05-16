@@ -9,10 +9,10 @@ from django.test import TestCase
 from nose.tools import eq_
 
 # MuckRock
-from muckrock.factories import UserFactory
+from muckrock.core.factories import UserFactory
+from muckrock.core.test_utils import http_post_response
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.views import Detail
-from muckrock.test_utils import http_post_response
 
 
 class TestFOIANotes(TestCase):

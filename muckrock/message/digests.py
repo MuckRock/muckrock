@@ -23,10 +23,10 @@ from muckrock.communication.models import (
     FaxCommunication,
     MailCommunication,
 )
+from muckrock.core.models import ExtractDay
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.message.email import TemplateEmail
-from muckrock.models import ExtractDay
 from muckrock.qanda.models import Question
 
 

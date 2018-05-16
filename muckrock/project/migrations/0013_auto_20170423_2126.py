@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import muckrock.storage
+import muckrock.core.storage
 
 
 class Migration(migrations.Migration):
@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='image',
-            field=models.ImageField(blank=True, null=True, storage=muckrock.storage.QueuedS3DietStorage(), upload_to=b'project_images/%Y/%m/%d'),
+            field=models.ImageField(blank=True, null=True, storage=muckrock.core.storage.QueuedS3DietStorage(), upload_to=b'project_images/%Y/%m/%d'),
         ),
     ]

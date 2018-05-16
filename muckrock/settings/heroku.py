@@ -15,7 +15,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
 THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
+STATICFILES_STORAGE = 'muckrock.core.storage.CachedS3BotoStorage'
 COMPRESS_STORAGE = STATICFILES_STORAGE
 AWS_S3_CUSTOM_DOMAIN = os.environ.get('CLOUDFRONT_DOMAIN')
 if AWS_S3_CUSTOM_DOMAIN:

@@ -143,10 +143,10 @@ TEMPLATES = [{
             'django.template.context_processors.request',
             'django.contrib.messages.context_processors.messages',
             'muckrock.sidebar.context_processors.sidebar_info',
-            'muckrock.context_processors.google_analytics',
-            'muckrock.context_processors.mixpanel',
-            'muckrock.context_processors.domain',
-            'muckrock.context_processors.cache_timeout',
+            'muckrock.core.context_processors.google_analytics',
+            'muckrock.core.context_processors.mixpanel',
+            'muckrock.core.context_processors.domain',
+            'muckrock.core.context_processors.cache_timeout',
         ],
     }
 }]
@@ -160,8 +160,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'muckrock.middleware.LOTMiddleware',
-    'muckrock.middleware.RemoveTokenMiddleware',
+    'muckrock.core.middleware.LOTMiddleware',
+    'muckrock.core.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -173,7 +173,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-ROOT_URLCONF = 'muckrock.urls'
+ROOT_URLCONF = 'muckrock.core.urls'
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -225,7 +225,7 @@ INSTALLED_APPS = (
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
-    'muckrock.templatetags',
+    'muckrock.core',
     'muckrock.tags',
     'muckrock.agency',
     'muckrock.jurisdiction',
@@ -477,7 +477,7 @@ DEFAULT_CACHE_TIMEOUT = 15 * 60
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
-        'muckrock.pagination.StandardPagination',
+        'muckrock.core.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter'
@@ -496,7 +496,7 @@ if 'ALLOWED_HOSTS' in os.environ:
 else:
     ALLOWED_HOSTS = []
 
-ACTSTREAM_SETTINGS = {'MANAGER': 'muckrock.managers.MRActionManager'}
+ACTSTREAM_SETTINGS = {'MANAGER': 'muckrock.core.managers.MRActionManager'}
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
@@ -522,7 +522,7 @@ PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = 'muckrock.tags.models.parse_tags'
 
-ROOT_HOSTCONF = 'muckrock.hosts'
+ROOT_HOSTCONF = 'muckrock.core.hosts'
 DEFAULT_HOST = 'default'
 
 # Organization Settings

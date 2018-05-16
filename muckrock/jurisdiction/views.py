@@ -17,6 +17,7 @@ from rest_framework import viewsets
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.core.views import MRFilterListView, MRSearchFilterListView
 from muckrock.jurisdiction.filters import (
     ExemptionFilterSet,
     JurisdictionFilterSet,
@@ -25,7 +26,6 @@ from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Exemption, Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.task.models import FlaggedTask
-from muckrock.views import MRFilterListView, MRSearchFilterListView
 
 
 class JurisdictionExploreView(TemplateView):

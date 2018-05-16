@@ -21,12 +21,13 @@ from freezegun import freeze_time
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.factories import (
+from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
     OrganizationFactory,
     UserFactory,
 )
+from muckrock.core.utils import new_action
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
@@ -34,7 +35,6 @@ from muckrock.foia.factories import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.models import SnailMailTask
-from muckrock.utils import new_action
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=too-many-public-methods

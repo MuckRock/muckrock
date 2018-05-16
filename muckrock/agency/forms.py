@@ -18,7 +18,7 @@ from muckrock.agency.models import (
     AgencyType,
 )
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
-from muckrock.fields import FullEmailField
+from muckrock.core.fields import FullEmailField
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES, Portal
 

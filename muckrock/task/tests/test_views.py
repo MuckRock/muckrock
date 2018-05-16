@@ -14,7 +14,13 @@ import nose
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
-from muckrock.factories import AgencyFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import (
+    http_get_response,
+    http_post_response,
+    mock_middleware,
+)
+from muckrock.core.views import MRFilterListView
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.models import FOIANote
 from muckrock.task.factories import (
@@ -38,12 +44,6 @@ from muckrock.task.views import (
     ResponseTaskList,
     TaskList,
 )
-from muckrock.test_utils import (
-    http_get_response,
-    http_post_response,
-    mock_middleware,
-)
-from muckrock.views import MRFilterListView
 
 eq_ = nose.tools.eq_
 ok_ = nose.tools.ok_

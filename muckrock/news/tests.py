@@ -15,12 +15,12 @@ import pytz
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.factories import ArticleFactory, ProjectFactory, UserFactory
+from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
+from muckrock.core.test_utils import mock_middleware
+from muckrock.core.tests import get_404, get_allowed
 from muckrock.news.models import Article
 from muckrock.news.views import NewsDetail
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.test_utils import mock_middleware
-from muckrock.tests import get_404, get_allowed
 
 
 class TestNewsUnit(TestCase):

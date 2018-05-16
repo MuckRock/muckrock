@@ -16,11 +16,11 @@ from mock import Mock, patch
 from nose.tools import eq_, nottest, ok_, raises
 
 # MuckRock
+from muckrock.core.factories import ProjectFactory
+from muckrock.core.utils import get_stripe_token
 from muckrock.crowdfund import models
-from muckrock.factories import ProjectFactory
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.task.models import CrowdfundTask
-from muckrock.utils import get_stripe_token
 
 
 def create_project_crowdfund():

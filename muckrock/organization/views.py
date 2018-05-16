@@ -21,6 +21,8 @@ import stripe
 
 # MuckRock
 from muckrock.accounts.utils import mixpanel_event
+from muckrock.core.utils import new_action
+from muckrock.core.views import MROrderedListView
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.forms import (
     AddMembersForm,
@@ -30,8 +32,6 @@ from muckrock.organization.forms import (
     UpdateForm,
 )
 from muckrock.organization.models import Organization
-from muckrock.utils import new_action
-from muckrock.views import MROrderedListView
 
 
 class OrganizationListView(MROrderedListView):

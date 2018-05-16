@@ -16,7 +16,7 @@ from muckrock.accounts.forms import (
     EmailSettingsForm,
     RegisterForm,
 )
-from muckrock.factories import ProfileFactory, UserFactory
+from muckrock.core.factories import ProfileFactory, UserFactory
 
 
 class TestEmailSettingsForm(TestCase):

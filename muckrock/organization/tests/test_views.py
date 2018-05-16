@@ -14,11 +14,11 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 # MuckRock
-import muckrock.factories
+import muckrock.core.factories
 import muckrock.organization
+from muckrock.core.test_utils import mock_middleware
+from muckrock.core.tests import get_allowed
 from muckrock.foia.factories import FOIARequestFactory
-from muckrock.test_utils import mock_middleware
-from muckrock.tests import get_allowed
 
 
 class TestCreateView(TestCase):
@@ -32,7 +32,7 @@ class TestCreateView(TestCase):
 
     def test_get_ok(self):
         """Regular users should be able to create a request."""
-        regular_user = muckrock.factories.UserFactory()
+        regular_user = muckrock.core.factories.UserFactory()
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = regular_user
@@ -50,7 +50,7 @@ class TestCreateView(TestCase):
 
     def test_owner_get_forbidden(self):
         """Users who already own an organization should be denied access."""
-        org = muckrock.factories.OrganizationFactory()
+        org = muckrock.core.factories.OrganizationFactory()
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = org.owner
@@ -62,8 +62,8 @@ class TestCreateView(TestCase):
 
     def test_member_get_forbidden(self):
         """Users who are already members of a different organization should be denied access."""
-        org = muckrock.factories.OrganizationFactory()
-        member = muckrock.factories.UserFactory(profile__organization=org)
+        org = muckrock.core.factories.OrganizationFactory()
+        member = muckrock.core.factories.UserFactory(profile__organization=org)
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = member
@@ -72,8 +72,8 @@ class TestCreateView(TestCase):
 
     def test_staff_get(self):
         """Staff should be able to create an org even if they own a different one."""
-        staff_user = muckrock.factories.UserFactory(is_staff=True)
-        muckrock.factories.OrganizationFactory(owner=staff_user)
+        staff_user = muckrock.core.factories.UserFactory(is_staff=True)
+        muckrock.core.factories.OrganizationFactory(owner=staff_user)
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = staff_user
@@ -94,7 +94,7 @@ class TestCreateView(TestCase):
         Regular users should be able to activate an org.
         When doing so, they should be made the owner.
         """
-        regular_user = muckrock.factories.UserFactory()
+        regular_user = muckrock.core.factories.UserFactory()
         org_name = 'Cool Org'
         data = {'name': org_name}
         form = muckrock.organization.forms.CreateForm(data)
@@ -119,8 +119,8 @@ class TestCreateView(TestCase):
 
     def test_staff_post(self):
         """Staff users should need to provide more information, including an owner."""
-        staff_user = muckrock.factories.UserFactory(is_staff=True)
-        org_owner = muckrock.factories.UserFactory()
+        staff_user = muckrock.core.factories.UserFactory(is_staff=True)
+        org_owner = muckrock.core.factories.UserFactory()
         org_name = 'Cool Org'
         org_max = 3
         org_cost = 10000
@@ -169,7 +169,7 @@ class TestActivateView(TestCase):
     """Test the expectations of organization activation"""
 
     def setUp(self):
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.core.factories.OrganizationFactory()
         self.request_factory = RequestFactory()
         self.url = reverse('org-activate', kwargs={'slug': self.org.slug})
         self.view = muckrock.organization.views.OrganizationActivateView.as_view(
@@ -179,7 +179,7 @@ class TestActivateView(TestCase):
         """Regular users should be denied access to the activation view."""
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory()
+        request.user = muckrock.core.factories.UserFactory()
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 302)
 
@@ -195,7 +195,7 @@ class TestActivateView(TestCase):
         """Staff should be allowed access to the activation view."""
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory(is_staff=True)
+        request.user = muckrock.core.factories.UserFactory(is_staff=True)
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 200)
 
@@ -234,7 +234,7 @@ class TestDeactivateView(TestCase):
 
     def setUp(self):
         # create an org with a plan, so we can cancel it
-        self.org = muckrock.factories.OrganizationFactory(active=True)
+        self.org = muckrock.core.factories.OrganizationFactory(active=True)
         self.request_factory = RequestFactory()
         self.url = reverse('org-deactivate', kwargs={'slug': self.org.slug})
         self.request = self.request_factory.post(self.url)
@@ -244,7 +244,7 @@ class TestDeactivateView(TestCase):
     @patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_regular_post(self, mock_cancellation):
         """Regular users should be denied the ability to POST."""
-        self.request.user = muckrock.factories.UserFactory()
+        self.request.user = muckrock.core.factories.UserFactory()
         self.view(self.request, self.org.slug)
         ok_(not mock_cancellation.called)
 
@@ -258,7 +258,7 @@ class TestDeactivateView(TestCase):
     @patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_staff_post(self, mock_cancellation):
         """Staff should be able to cancel the subscription."""
-        self.request.user = muckrock.factories.UserFactory(is_staff=True)
+        self.request.user = muckrock.core.factories.UserFactory(is_staff=True)
         self.view(self.request, self.org.slug)
         ok_(mock_cancellation.called)
 
@@ -282,7 +282,7 @@ class TestUpdateView(TestCase):
     """
 
     def setUp(self):
-        self.org = muckrock.factories.OrganizationFactory(
+        self.org = muckrock.core.factories.OrganizationFactory(
             active=True, stripe_id='test'
         )
         self.request_factory = RequestFactory()
@@ -291,7 +291,7 @@ class TestUpdateView(TestCase):
 
     def test_regular_get(self):
         """Regular users should not have access to the update view."""
-        regular_user = muckrock.factories.UserFactory()
+        regular_user = muckrock.core.factories.UserFactory()
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = regular_user
@@ -314,7 +314,7 @@ class TestUpdateView(TestCase):
 
     def test_staff_get(self):
         """Staff users should have access to the update view."""
-        staff_user = muckrock.factories.UserFactory(is_staff=True)
+        staff_user = muckrock.core.factories.UserFactory(is_staff=True)
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = staff_user
@@ -373,7 +373,7 @@ class TestUpdateView(TestCase):
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory(is_staff=True)
+        request.user = muckrock.core.factories.UserFactory(is_staff=True)
         response = self.view(request, slug=self.org.slug)
         self.org.refresh_from_db()
         eq_(self.org.max_users, data['max_users'])
@@ -391,7 +391,7 @@ class TestDeleteView(TestCase):
     """
 
     def setUp(self):
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.core.factories.OrganizationFactory()
         self.request_factory = RequestFactory()
         self.url = reverse('org-delete', kwargs={'slug': self.org.slug})
         self.request = self.request_factory.post(self.url)
@@ -401,14 +401,14 @@ class TestDeleteView(TestCase):
     @patch('muckrock.organization.models.Organization.delete')
     def test_regular_post(self, mock_delete):
         """Regular users cannot delete organizations."""
-        self.request.user = muckrock.factories.UserFactory()
+        self.request.user = muckrock.core.factories.UserFactory()
         self.view(self.request, slug=self.org.slug)
         ok_(not mock_delete.called)
 
     @patch('muckrock.organization.models.Organization.delete')
     def test_staff_post(self, mock_delete):
         """Staff users can delete organizations."""
-        self.request.user = muckrock.factories.UserFactory(is_staff=True)
+        self.request.user = muckrock.core.factories.UserFactory(is_staff=True)
         self.view(self.request, slug=self.org.slug)
         ok_(mock_delete.called)
 
@@ -433,7 +433,7 @@ class TestDetailView(TestCase):
     """From the organization detail view, owners can add and remove users."""
 
     def setUp(self):
-        self.org = muckrock.factories.OrganizationFactory(active=True)
+        self.org = muckrock.core.factories.OrganizationFactory(active=True)
         self.request_factory = RequestFactory()
         self.url = reverse('org-detail', kwargs={'slug': self.org.slug})
         self.view = muckrock.organization.views.OrganizationDetailView.as_view()
@@ -445,16 +445,16 @@ class TestDetailView(TestCase):
 
     def test_user_add_member(self):
         """Regular users should not be able to add members to an organization."""
-        user1 = muckrock.factories.UserFactory()
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
+        user1 = muckrock.core.factories.UserFactory()
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory()
+        request.user = muckrock.core.factories.UserFactory()
         self.view(request, slug=self.org.slug)
         ok_(
             not self.org.has_member(user1) and not self.org.has_member(user2)
@@ -463,9 +463,9 @@ class TestDetailView(TestCase):
 
     def test_owner_add_member(self):
         """Owners should be able to add members to an organization."""
-        user1 = muckrock.factories.UserFactory()
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
+        user1 = muckrock.core.factories.UserFactory()
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]
@@ -481,16 +481,16 @@ class TestDetailView(TestCase):
 
     def test_staff_add_member(self):
         """Staff should be able to add members to an organization."""
-        user1 = muckrock.factories.UserFactory()
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
+        user1 = muckrock.core.factories.UserFactory()
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory(is_staff=True)
+        request.user = muckrock.core.factories.UserFactory(is_staff=True)
         self.view(request, slug=self.org.slug)
         ok_(
             self.org.has_member(user1) and self.org.has_member(user2)
@@ -501,9 +501,9 @@ class TestDetailView(TestCase):
         """Members may only be added and removed from active organizations."""
         self.org.active = False
         self.org.save()
-        user1 = muckrock.factories.UserFactory()
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
+        user1 = muckrock.core.factories.UserFactory()
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]
@@ -519,10 +519,12 @@ class TestDetailView(TestCase):
 
     def test_existing_member(self):
         """A member cannot be added if they are a member of a different organization."""
-        other_org = muckrock.factories.OrganizationFactory()
-        user1 = muckrock.factories.UserFactory(profile__organization=other_org)
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
+        other_org = muckrock.core.factories.OrganizationFactory()
+        user1 = muckrock.core.factories.UserFactory(
+            profile__organization=other_org
+        )
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]
@@ -538,10 +540,10 @@ class TestDetailView(TestCase):
 
     def test_existing_owner(self):
         """A member cannot be added if they are an owner of a different organization."""
-        user1 = muckrock.factories.UserFactory()
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
-        muckrock.factories.OrganizationFactory(owner=user1)
+        user1 = muckrock.core.factories.UserFactory()
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
+        muckrock.core.factories.OrganizationFactory(owner=user1)
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]
@@ -557,10 +559,10 @@ class TestDetailView(TestCase):
 
     def test_no_seats(self):
         """A member cannot be added if there are no open seats for them."""
-        user1 = muckrock.factories.UserFactory()
-        user2 = muckrock.factories.UserFactory()
-        user3 = muckrock.factories.UserFactory()
-        user4 = muckrock.factories.UserFactory()
+        user1 = muckrock.core.factories.UserFactory()
+        user2 = muckrock.core.factories.UserFactory()
+        user3 = muckrock.core.factories.UserFactory()
+        user4 = muckrock.core.factories.UserFactory()
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk, user4.pk]
@@ -578,17 +580,21 @@ class TestDetailView(TestCase):
 
     def test_staff_remove(self):
         """A staff user should be able to remove members."""
-        member = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.core.factories.UserFactory(
+            profile__organization=self.org
+        )
         data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory(is_staff=True)
+        request.user = muckrock.core.factories.UserFactory(is_staff=True)
         self.view(request, slug=self.org.slug)
         ok_(not self.org.has_member(member))
 
     def test_owner_remove(self):
         """The owner should be able to remove members."""
-        member = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.core.factories.UserFactory(
+            profile__organization=self.org
+        )
         data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -598,17 +604,21 @@ class TestDetailView(TestCase):
 
     def test_user_remove(self):
         """Regular user should not be able to remove members."""
-        member = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.core.factories.UserFactory(
+            profile__organization=self.org
+        )
         data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
-        request.user = muckrock.factories.UserFactory()
+        request.user = muckrock.core.factories.UserFactory()
         self.view(request, slug=self.org.slug)
         ok_(self.org.has_member(member))
 
     def test_remove_self(self):
         """However, a member may remove themself from an org."""
-        member = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.core.factories.UserFactory(
+            profile__organization=self.org
+        )
         data = {'action': 'remove_member', 'member': member.pk}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)

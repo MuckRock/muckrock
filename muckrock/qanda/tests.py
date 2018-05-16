@@ -11,9 +11,9 @@ from django.test import RequestFactory, TestCase
 import nose.tools
 
 # MuckRock
-from muckrock.factories import AnswerFactory, QuestionFactory, UserFactory
+from muckrock.core.factories import AnswerFactory, QuestionFactory, UserFactory
+from muckrock.core.test_utils import mock_middleware
 from muckrock.qanda.views import block_user, report_spam
-from muckrock.test_utils import mock_middleware
 
 
 class TestQandA(TestCase):

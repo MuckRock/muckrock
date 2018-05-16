@@ -13,9 +13,9 @@ from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.core.utils import new_action, notify
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
-from muckrock.utils import new_action, notify
 
 
 class Question(models.Model):

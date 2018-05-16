@@ -10,11 +10,11 @@ from datetime import timedelta
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.core.utils import cache_get_or_set
 from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.sidebar.models import Broadcast
-from muckrock.utils import cache_get_or_set
 
 
 def get_recent_articles():

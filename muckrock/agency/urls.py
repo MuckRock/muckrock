@@ -7,7 +7,7 @@ from django.conf.urls import url
 
 # MuckRock
 from muckrock.agency import views
-from muckrock.views import jurisdiction
+from muckrock.core.views import jurisdiction
 
 # pylint: disable=bad-whitespace
 

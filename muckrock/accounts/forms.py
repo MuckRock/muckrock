@@ -20,10 +20,10 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.core.utils import stripe_retry_on_error
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.tasks import email_change
 from muckrock.organization.models import Organization
-from muckrock.utils import stripe_retry_on_error
 
 
 class ProfileSettingsForm(forms.ModelForm):

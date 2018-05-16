@@ -199,29 +199,29 @@ def store_statistics():
                     for p in Profile.objects.filter(acct_type='pro')
                 ),
             'daily_requests_pro':
-                FOIARequest.objects.
-                filter(composer__user__profile__acct_type='pro')
-                .get_submitted_range(yesterday_midnight, today_midnight)
+                FOIARequest.objects.filter(
+                    composer__user__profile__acct_type='pro'
+                ).get_submitted_range(yesterday_midnight, today_midnight)
                 .exclude_org_users().count(),
             'daily_requests_basic':
-                FOIARequest.objects.
-                filter(composer__user__profile__acct_type='basic')
-                .get_submitted_range(yesterday_midnight, today_midnight)
+                FOIARequest.objects.filter(
+                    composer__user__profile__acct_type='basic'
+                ).get_submitted_range(yesterday_midnight, today_midnight)
                 .exclude_org_users().count(),
             'daily_requests_beta':
-                FOIARequest.objects.
-                filter(composer__user__profile__acct_type='beta')
-                .get_submitted_range(yesterday_midnight, today_midnight)
+                FOIARequest.objects.filter(
+                    composer__user__profile__acct_type='beta'
+                ).get_submitted_range(yesterday_midnight, today_midnight)
                 .exclude_org_users().count(),
             'daily_requests_proxy':
-                FOIARequest.objects.
-                filter(composer__user__profile__acct_type='proxy')
-                .get_submitted_range(yesterday_midnight, today_midnight)
+                FOIARequest.objects.filter(
+                    composer__user__profile__acct_type='proxy'
+                ).get_submitted_range(yesterday_midnight, today_midnight)
                 .exclude_org_users().count(),
             'daily_requests_admin':
-                FOIARequest.objects.
-                filter(composer__user__profile__acct_type='admin')
-                .get_submitted_range(yesterday_midnight, today_midnight)
+                FOIARequest.objects.filter(
+                    composer__user__profile__acct_type='admin'
+                ).get_submitted_range(yesterday_midnight, today_midnight)
                 .exclude_org_users().count(),
             'daily_requests_org':
                 FOIARequest.objects.filter(
@@ -230,11 +230,12 @@ def store_statistics():
                 ).get_submitted_range(yesterday_midnight, today_midnight)
                 .count(),
             'daily_articles':
-                Article.objects.
-                filter(pub_date__range=(
-                    yesterday_midnight,
-                    today_midnight,
-                )).count(),
+                Article.objects.filter(
+                    pub_date__range=(
+                        yesterday_midnight,
+                        today_midnight,
+                    )
+                ).count(),
             'orphaned_communications':
                 FOIACommunication.objects.filter(foia=None).count(),
             'stale_agencies':
@@ -505,8 +506,9 @@ def store_statistics():
             'total_close_crowdsources':
                 Crowdsource.objects.filter(status='close').count(),
             'num_crowdsource_responded_users':
-                CrowdsourceResponse.objects.
-                aggregate(Count('user', distinct=True))['user__count'],
+                CrowdsourceResponse.objects.aggregate(
+                    Count('user', distinct=True)
+                )['user__count'],
             'total_crowdsource_responses':
                 CrowdsourceResponse.objects.count(),
         }

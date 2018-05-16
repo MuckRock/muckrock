@@ -16,7 +16,7 @@ from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_, raises
 
 # MuckRock
-from muckrock.factories import AgencyFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.foiamachine import factories, models
 
 

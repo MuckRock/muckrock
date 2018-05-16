@@ -30,6 +30,7 @@ from muckrock.communication.models import (
     FaxCommunication,
     WebCommunication,
 )
+from muckrock.core.utils import new_action
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY
 from muckrock.foia.exceptions import FoiaFormError
@@ -67,7 +68,6 @@ from muckrock.task.models import (
     StatusChangeTask,
     Task,
 )
-from muckrock.utils import new_action
 
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),

@@ -13,11 +13,11 @@ from django_hosts.resolvers import reverse, reverse_lazy
 from nose.tools import eq_, ok_, raises
 
 # MuckRock
-from muckrock.factories import UserFactory
+from muckrock.core.factories import UserFactory
+from muckrock.core.forms import PasswordResetForm
+from muckrock.core.test_utils import http_get_response, http_post_response
 from muckrock.foiamachine import factories, forms, models, views
-from muckrock.forms import PasswordResetForm
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
-from muckrock.test_utils import http_get_response, http_post_response
 
 
 class TestHomepage(TestCase):

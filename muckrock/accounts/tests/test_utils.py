@@ -14,8 +14,8 @@ from nose.tools import eq_, ok_
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin, split_name
 from muckrock.accounts.utils import unique_username
-from muckrock.factories import UserFactory
-from muckrock.test_utils import mock_middleware
+from muckrock.core.factories import UserFactory
+from muckrock.core.test_utils import mock_middleware
 
 
 class TestMiniregister(TestCase):

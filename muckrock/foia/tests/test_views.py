@@ -29,13 +29,15 @@ from nose.tools import (
 )
 
 # MuckRock
-from muckrock.crowdfund.models import Crowdfund
-from muckrock.factories import (
+from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
     ProjectFactory,
     UserFactory,
 )
+from muckrock.core.test_utils import http_post_response, mock_middleware
+from muckrock.core.tests import get_404, get_allowed
+from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
@@ -59,8 +61,6 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
 from muckrock.task.models import StatusChangeTask
-from muckrock.test_utils import http_post_response, mock_middleware
-from muckrock.tests import get_404, get_allowed
 
 # pylint: disable=invalid-name
 # pylint: disable=too-many-lines

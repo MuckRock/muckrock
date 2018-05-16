@@ -19,21 +19,21 @@ from rest_framework.routers import DefaultRouter
 # MuckRock
 import muckrock.accounts.views
 import muckrock.agency.views
+import muckrock.core.views as views
 import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.views
 import muckrock.qanda.views
 import muckrock.task.viewsets
-import muckrock.views as views
 from muckrock.agency.sitemap import AgencySitemap
+from muckrock.core.sitemap import FlatPageSitemap
+from muckrock.core.views import handler500  # pylint: disable=unused-import
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 from muckrock.project.sitemap import ProjectSitemap
 from muckrock.qanda.sitemap import QuestionSitemap
-from muckrock.sitemap import FlatPageSitemap
-from muckrock.views import handler500  # pylint: disable=unused-import
 
 admin.site.index_template = 'admin/custom_index.html'
 

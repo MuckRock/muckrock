@@ -13,7 +13,7 @@ from mock import patch
 from nose.tools import eq_
 
 # MuckRock
-from muckrock.factories import UserFactory
+from muckrock.core.factories import UserFactory
 from muckrock.sidebar.context_processors import sidebar_broadcast
 from muckrock.sidebar.models import Broadcast
 

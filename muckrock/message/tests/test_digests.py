@@ -16,16 +16,16 @@ from actstream.actions import follow
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
-from muckrock.factories import (
+from muckrock.core.factories import (
     AgencyFactory,
     AnswerFactory,
     QuestionFactory,
     StatisticsFactory,
     UserFactory,
 )
+from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.message import digests
-from muckrock.utils import new_action, notify
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_

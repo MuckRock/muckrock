@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import muckrock.fields
+import muckrock.core.fields
 import easy_thumbnails.fields
 from django.conf import settings
 import muckrock.jurisdiction.models
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('stale', models.BooleanField(default=False)),
                 ('address', models.TextField(blank=True)),
                 ('email', models.EmailField(max_length=75, blank=True)),
-                ('other_emails', muckrock.fields.EmailsListField(max_length=255, blank=True)),
+                ('other_emails', muckrock.core.fields.EmailsListField(max_length=255, blank=True)),
                 ('contact_salutation', models.CharField(max_length=30, blank=True)),
                 ('contact_first_name', models.CharField(max_length=100, blank=True)),
                 ('contact_last_name', models.CharField(max_length=100, blank=True)),

@@ -40,7 +40,7 @@ class FlaggedTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.FlaggedTask
 
-    user = factory.SubFactory('muckrock.factories.UserFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
     foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
 
 
@@ -50,7 +50,7 @@ class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.ProjectReviewTask
 
-    project = factory.SubFactory('muckrock.factories.ProjectFactory')
+    project = factory.SubFactory('muckrock.core.factories.ProjectFactory')
     notes = factory.Faker('paragraph')
 
 
@@ -61,7 +61,7 @@ class NewExemptionTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.NewExemptionTask
 
     foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
-    user = factory.SubFactory('muckrock.factories.UserFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
     language = factory.Faker('paragraph')
 
 
@@ -82,7 +82,7 @@ class StatusChangeTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.StatusChangeTask
 
-    user = factory.SubFactory('muckrock.factories.UserFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
     old_status = 'done'
     foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
 
@@ -93,5 +93,5 @@ class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.NewAgencyTask
 
-    user = factory.SubFactory('muckrock.factories.UserFactory')
-    agency = factory.SubFactory('muckrock.factories.AgencyFactory')
+    user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')

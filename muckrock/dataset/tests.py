@@ -17,10 +17,10 @@ from cStringIO import StringIO
 from nose.tools import assert_false, assert_true, eq_
 
 # MuckRock
+from muckrock.core.factories import UserFactory
+from muckrock.core.test_utils import mock_middleware
 from muckrock.dataset import fields, views
 from muckrock.dataset.models import DataField, DataRow, DataSet
-from muckrock.factories import UserFactory
-from muckrock.test_utils import mock_middleware
 
 
 class TestDataSetModels(TestCase):

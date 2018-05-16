@@ -23,12 +23,12 @@ from smart_open import smart_open
 
 # MuckRock
 from muckrock.accounts.models import Profile, Statistics
+from muckrock.core.models import ExtractDay
+from muckrock.core.utils import cache_get_or_set
 from muckrock.crowdsource.models import CrowdsourceResponse
 from muckrock.foia.models import FOIAFile, FOIARequest
-from muckrock.models import ExtractDay
 from muckrock.project.models import Project
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
-from muckrock.utils import cache_get_or_set
 
 RED = '#dc5945'
 GREEN = '#96bf48'
