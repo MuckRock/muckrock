@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.communication.models import EmailAddress
 from muckrock.crowdsource.models import (
     Crowdsource,
     CrowdsourceChoice,
@@ -32,6 +33,11 @@ class CrowdsourceAdminForm(forms.ModelForm):
     project = autocomplete_light.ModelChoiceField(
         'ProjectAutocomplete',
         queryset=Project.objects.all(),
+        required=False,
+    )
+    submission_emails = autocomplete_light.ModelMultipleChoiceField(
+        'EmailAddressAdminAutocomplete',
+        queryset=EmailAddress.objects.all(),
         required=False,
     )
 
