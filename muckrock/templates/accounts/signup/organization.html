@@ -16,3 +16,9 @@
     </form>
 </article>
 {% endblock %}
+
+{% block scripts %}
+    <script>
+      mixpanel.track("Viewed Org Sign Up Page");
+    </script>
+{% endblock scripts %}

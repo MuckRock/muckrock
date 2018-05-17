@@ -122,7 +122,7 @@ class BuyRequestsMixin(object):
                 'Recipient': recipient.username,
                 'Price': price / 100,
             },
-            charge=price,
+            charge=price / 100,
         )
         if recipient == self.request.user:
             msg = (

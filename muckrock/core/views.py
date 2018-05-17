@@ -481,7 +481,7 @@ class DonationFormView(StripeFormMixin, FormView):
                     self.request,
                     'Donate',
                     {'Amount': amount / 100},
-                    charge=amount,
+                    charge=amount / 100,
                 )
         return charge
 

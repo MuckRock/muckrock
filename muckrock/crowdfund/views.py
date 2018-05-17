@@ -142,7 +142,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
                 else:
                     crowdfund.make_payment(token, email, amount, show, user)
                     event = 'Crowdfund Payment',
-                    kwargs = {'charge': amount}
+                    kwargs = {'charge': float(amount)}
             except stripe.StripeError as payment_error:
                 logging.warn(payment_error)
                 return self.return_error(request, payment_error)

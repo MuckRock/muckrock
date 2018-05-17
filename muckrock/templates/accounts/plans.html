@@ -136,4 +136,7 @@
 
 {% block scripts %}
     <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+    <script>
+      mixpanel.track("Viewed Sign Up Page");
+    </script>
 {% endblock scripts %}

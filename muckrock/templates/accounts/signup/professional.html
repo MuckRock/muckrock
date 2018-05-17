@@ -28,4 +28,7 @@
 
 {% block scripts %}
     <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+    <script>
+      mixpanel.track("Viewed Pro Sign Up Page");
+    </script>
 {% endblock scripts %}
