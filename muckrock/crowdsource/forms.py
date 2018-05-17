@@ -13,6 +13,7 @@ import unicodecsv as csv
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.communication.models import EmailAddress
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE, PROJECT_URL_RE
 from muckrock.crowdsource.fields import FIELD_DICT
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
@@ -81,6 +82,10 @@ class CrowdsourceForm(forms.ModelForm):
         'up into one assignment per page',
         required=False,
     )
+    submission_emails = forms.CharField(
+        help_text='Comma seperated list of emails to send to on submission',
+        required=False,
+    )
 
     class Meta:
         model = Crowdsource
@@ -94,7 +99,7 @@ class CrowdsourceForm(forms.ModelForm):
             'data_csv',
             'multiple_per_page',
             'project_only',
-            'submission_email',
+            'submission_emails',
         )
 
     def clean_data_csv(self):
@@ -200,6 +205,13 @@ class CrowdsourceForm(forms.ModelForm):
                             'choice {} of {}'.format(choice_label, label)
                         )
         return form_json
+
+    def clean_submission_emails(self):
+        """Validate the submission emails field"""
+        return EmailAddress.objects.fetch_many(
+            self.cleaned_data['submission_emails'],
+            ignore_errors=False,
+        )
 
 
 CrowdsourceDataFormsetBase = forms.inlineformset_factory(

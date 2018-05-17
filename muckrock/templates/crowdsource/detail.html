@@ -54,9 +54,11 @@
       <dt>User Limit</dt>
       <dd>{{crowdsource.user_limit}}</dd>
     {% endif %}
-    {% if crowdsource.submission_email %}
+    {% if crowdsource.submission_emails.all %}
       <dt>Submission Email</dt>
-      <dd>{{crowdsource.submission_email}}</dd>
+      {% for email in crowdsource.submission_emails.all %}
+        <dd>{{ email }}</dd>
+      {% endfor %}
     {% endif %}
     <dt>
     <dt>Responses</dt>

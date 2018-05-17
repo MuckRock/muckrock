@@ -105,7 +105,7 @@ class Crowdsource(models.Model):
         help_text='Is the user limited to completing this form only once? '
         '(else, it is unlimited) - only used if not using data for this crowdsource',
     )
-    submission_email = models.EmailField(blank=True)
+    submission_emails = models.ManyToManyField('communication.EmailAddress')
 
     objects = CrowdsourceQuerySet.as_manager()
 
