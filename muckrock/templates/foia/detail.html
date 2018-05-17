@@ -287,7 +287,7 @@
                       <br class="nomargin">
                       <div class="contact-info">
                         <a class="see-where" href="#">See {% if user.profile.is_advanced %}where{% else %}how{% endif %} this followup will be sent</a>
-                        {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=cc_emails fax=foia.fax address=foia.address subject="follow up communication" is_advanced=request.user.profile.is_advanced form=contact_info_form portal_data=foia.agency.portal only %}
+                        {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=cc_emails fax=foia.fax address=foia.address subject="follow up communication" is_advanced=request.user.profile.is_advanced form=contact_info_form only %}
                       </div>
                     </header>
                     {% csrf_token %}
