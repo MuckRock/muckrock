@@ -236,7 +236,7 @@ def contact_info(request, idx):
         return JsonResponse({
             'portal': {
                 'type': agency.portal.get_type_display(),
-                'url': agency.url
+                'url': agency.portal.url,
             } if agency.portal else None,
             'emails': [{
                 'value': e.pk,

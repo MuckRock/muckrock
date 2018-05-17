@@ -37,12 +37,7 @@ from muckrock.communication.models import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
-from muckrock.task.models import (
-    FlaggedTask,
-    OrphanTask,
-    ResponseTask,
-    ReviewAgencyTask,
-)
+from muckrock.task.models import FlaggedTask, OrphanTask, ReviewAgencyTask
 
 logger = logging.getLogger(__name__)
 
@@ -304,7 +299,7 @@ def _handle_request(request, mail_id):
         if foia.portal:
             foia.portal.receive_msg(comm)
         else:
-            task = ResponseTask.objects.create(communication=comm)
+            task = comm.responsetask_set.create()
             classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
             comm.create_agency_notifications()
 

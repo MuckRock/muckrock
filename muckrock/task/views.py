@@ -591,11 +591,11 @@ class PortalTaskList(TaskList):
             save = True
         if save:
             foia.save()
-        if task.communication.foia.portal:
+        if task.communication.foia.agency.portal:
             PortalCommunication.objects.create(
                 communication=task.communication,
                 sent_datetime=timezone.now(),
-                portal=task.communication.foia.portal,
+                portal=task.communication.foia.agency.portal,
                 direction='outgoing',
             )
         form_data = {

@@ -10,6 +10,7 @@ PORTAL_TYPES = [
     ('nextrequest', 'NextRequest'),
     ('foiaxpress', 'FOIAXpress'),
     ('fbi', 'FBI eFOIPA Portal'),
+    ('webform', 'Web Form'),
     ('other', 'Other'),
 ]
 
@@ -42,12 +43,14 @@ class Portal(models.Model):
             ManualPortal,
             NextRequestPortal,
             FBIPortal,
+            WebFormPortal,
         )
         # pylint: disable=access-member-before-definition
         # pylint: disable=attribute-defined-outside-init
         portal_classes = {
             'nextrequest': NextRequestPortal,
             'fbi': FBIPortal,
+            'webform': WebFormPortal,
         }
         if hasattr(self, '_portal_type'):
             return self._portal_type
