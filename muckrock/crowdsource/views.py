@@ -275,8 +275,8 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
                 'Assignment Completed',
                 properties,
             )
-            if crowdsource.submission_email:
-                response.send_email(crowdsource.submission_email)
+            for email in crowdsource.submission_emails.all():
+                response.send_email(email.email)
 
         if self.request.POST['submit'] == 'Submit and Add Another':
             return self.render_to_response(
@@ -390,6 +390,7 @@ class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
         crowdsource.user = self.request.user
         crowdsource.status = status
         crowdsource.save()
+        form.save_m2m()
         crowdsource.create_form(form.cleaned_data['form_json'])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
@@ -424,7 +425,14 @@ class CrowdsourceUpdateView(UpdateView):
 
     def get_initial(self):
         """Set the form JSON in the initial form data"""
-        return {'form_json': self.get_object().get_form_json()}
+        crowdsource = self.get_object()
+        return {
+            'form_json':
+                crowdsource.get_form_json(),
+            'submission_emails':
+                ', '
+                .join(unicode(e) for e in crowdsource.submission_emails.all()),
+        }
 
     def get_context_data(self, **kwargs):
         """Add the data formset to the context"""
@@ -455,6 +463,7 @@ class CrowdsourceUpdateView(UpdateView):
         crowdsource.slug = slugify(crowdsource.title)
         crowdsource.status = status
         crowdsource.save()
+        form.save_m2m()
         crowdsource.create_form(form.cleaned_data['form_json'])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
