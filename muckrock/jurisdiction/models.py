@@ -104,7 +104,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def __unicode__(self):
         if self.level == 'l':
-            return '{}, {}'.format(self.name, self.parent.abbrev)
+            return u'{}, {}'.format(self.name, self.parent.abbrev)
         else:
             return self.name
 
