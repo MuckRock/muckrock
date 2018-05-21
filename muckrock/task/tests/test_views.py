@@ -506,12 +506,12 @@ class NewAgencyTaskViewTests(TestCase):
         eq_(updated_task.agency.status, 'approved')
         ok_(updated_task.resolved)
 
-    def test_post_reject(self):
-        """Rejecting the agency requires a replacement agency"""
+    def test_post_replace(self):
+        """Rejecting the agency with a replacement agency"""
         replacement = AgencyFactory()
         self.client.post(
             self.url, {
-                'reject': True,
+                'replace': True,
                 'task': self.task.pk,
                 'replace_agency': replacement.pk,
                 'replace_jurisdiction': replacement.jurisdiction.pk,

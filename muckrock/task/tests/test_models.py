@@ -577,27 +577,6 @@ class MultiRequestTaskTests(TestCase):
         eq_(self.composer.status, 'started')
         eq_(FOIARequest.objects.filter(composer=self.composer).count(), 0)
 
-    def test_calc_return_requests(self):
-        """Test calculating the return requests"""
-        values = [
-            (7, 4, 2, 1),
-            (6, 3, 2, 1),
-            (5, 3, 2, 0),
-            (4, 3, 1, 0),
-            (3, 3, 0, 0),
-            (2, 2, 0, 0),
-            (1, 1, 0, 0),
-        ]
-        for total, reg, monthly, org in values:
-            eq_(
-                self.task._calc_return_requests(total),
-                {
-                    'regular': reg,
-                    'monthly': monthly,
-                    'org': org,
-                },
-            )
-
 
 class TestTaskManager(TestCase):
     """Tests for a helpful and handy task object manager."""
