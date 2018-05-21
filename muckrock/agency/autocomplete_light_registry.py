@@ -8,6 +8,7 @@ from django.db.models import Count, Q
 # Standard Library
 import logging
 import re
+from string import capwords
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -122,7 +123,7 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     def _create_new_agency(self, query, jurisdiction, choices):
         """If there are no exact matches, give the option to create a new one"""
         if not query.lower() in [c.name.lower() for c in choices]:
-            name = re.sub(r'\$', '', query.title())
+            name = re.sub(r'\$', '', capwords(query))
             new_agency = Agency(
                 name=name,
                 jurisdiction=jurisdiction,
