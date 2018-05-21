@@ -67,6 +67,7 @@ class AgencyQuerySet(models.QuerySet):
     def create_new(self, name, jurisdiction_pk, user):
         """Create a pending agency with a NewAgency task"""
         user = user if user.is_authenticated else None
+        name = name.strip()
 
         existing_agency = self.filter(
             name=name,
