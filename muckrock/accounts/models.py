@@ -761,6 +761,31 @@ class Statistics(models.Model):
         null=True,
         blank=True,
     )
+    crowdsource_responses_pro = models.IntegerField(
+        'assignment responses pro',
+        null=True,
+        blank=True,
+    )
+    crowdsource_responses_basic = models.IntegerField(
+        'assignment responses basic',
+        null=True,
+        blank=True,
+    )
+    crowdsource_responses_beta = models.IntegerField(
+        'assignment responses beta',
+        null=True,
+        blank=True,
+    )
+    crowdsource_responses_proxy = models.IntegerField(
+        'assignment responses proxy',
+        null=True,
+        blank=True,
+    )
+    crowdsource_responses_admin = models.IntegerField(
+        'assignment responses admin',
+        null=True,
+        blank=True,
+    )
 
     def __unicode__(self):
         return 'Stats for %s' % self.date

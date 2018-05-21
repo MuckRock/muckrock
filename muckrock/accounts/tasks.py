@@ -509,6 +509,21 @@ def store_statistics():
                 aggregate(Count('user', distinct=True))['user__count'],
             'total_crowdsource_responses':
                 CrowdsourceResponse.objects.count(),
+            'crowdsource_responses_pro':
+                CrowdsourceResponse.objects.
+                filter(user__profile__acct_type='pro').count(),
+            'crowdsource_responses_basic':
+                CrowdsourceResponse.objects.
+                filter(user__profile__acct_type='basic').count(),
+            'crowdsource_responses_beta':
+                CrowdsourceResponse.objects.
+                filter(user__profile__acct_type='beta').count(),
+            'crowdsource_responses_proxy':
+                CrowdsourceResponse.objects.
+                filter(user__profile__acct_type='proxy').count(),
+            'crowdsource_responses_admin':
+                CrowdsourceResponse.objects.
+                filter(user__profile__acct_type='admin').count(),
         }
     )
     # stats needs to be saved before many to many relationships can be set

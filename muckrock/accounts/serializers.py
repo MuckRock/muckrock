@@ -141,6 +141,11 @@ class StatisticsSerializer(serializers.ModelSerializer):
                 'total_close_crowdsources',
                 'num_crowdsource_responded_users',
                 'total_crowdsource_responses',
+                'crowdsource_responses_pro',
+                'crowdsource_responses_basic',
+                'crowdsource_responses_beta',
+                'crowdsource_responses_proxy',
+                'crowdsource_responses_admin',
             )
             for field in staff_only:
                 self.fields.pop(field)
@@ -259,6 +264,11 @@ class StatisticsSerializer(serializers.ModelSerializer):
             'total_close_crowdsources',
             'num_crowdsource_responded_users',
             'total_crowdsource_responses',
+            'crowdsource_responses_pro',
+            'crowdsource_responses_basic',
+            'crowdsource_responses_beta',
+            'crowdsource_responses_proxy',
+            'crowdsource_responses_admin',
             'machine_requests',
             'machine_requests_success',
             'machine_requests_denied',
