@@ -54,7 +54,8 @@ def raw(request, idx):
     # pylint: disable=unused-argument
     comm = get_object_or_404(FOIACommunication, pk=idx)
     raw_email = comm.get_raw_email()
-    if raw_email:
+    permission = request.user.is_staff or request.user == comm.foia.user
+    if raw_email and permission:
         return HttpResponse(
             raw_email.raw_email,
             content_type='text/plain; charset=utf-8',
