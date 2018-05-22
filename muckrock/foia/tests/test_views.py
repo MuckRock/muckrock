@@ -701,7 +701,9 @@ class TestRawEmail(TestCase):
 
     def setUp(self):
         """Set up for tests"""
-        self.comm = FOIACommunicationFactory()
+        self.comm = FOIACommunicationFactory(
+            foia__composer__user__profile__acct_type='pro'
+        )
         self.request_factory = RequestFactory()
         self.url = reverse('foia-raw', kwargs={'idx': self.comm.id})
         self.view = raw
@@ -709,7 +711,7 @@ class TestRawEmail(TestCase):
     def test_raw_email_view(self):
         """Advanced users should be able to view raw emails"""
         basic_user = UserFactory(profile__acct_type='basic')
-        pro_user = UserFactory(profile__acct_type='pro')
+        pro_user = self.comm.foia.user
         request = self.request_factory.get(self.url)
         request.user = basic_user
         response = self.view(request, self.comm.id)
