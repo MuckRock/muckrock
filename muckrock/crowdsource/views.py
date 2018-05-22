@@ -31,7 +31,8 @@ from djangosecure.decorators import frame_deny_exempt
 from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.core.utils import Echo
-from muckrock.core.views import MROrderedListView, class_view_decorator
+from muckrock.core.views import MRFilterListView, class_view_decorator
+from muckrock.crowdsource.filters import CrowdsourceFilterSet
 from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
     CrowdsourceDataFormset,
@@ -333,7 +334,7 @@ class CrowdsourceEmbededConfirmView(TemplateView):
     template_name = 'crowdsource/embed_confirm.html'
 
 
-class CrowdsourceListView(MROrderedListView):
+class CrowdsourceListView(MRFilterListView):
     """List of crowdfunds"""
     model = Crowdsource
     template_name = 'crowdsource/list.html'
@@ -341,6 +342,7 @@ class CrowdsourceListView(MROrderedListView):
         'title': 'title',
         'user': 'user',
     }
+    filter_class = CrowdsourceFilterSet
 
     def get_queryset(self):
         """Get all open crowdsources and all crowdsources you own"""
@@ -353,6 +355,13 @@ class CrowdsourceListView(MROrderedListView):
             'responses',
         )
         return queryset.get_viewable(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        """Remove filter for non-staff users"""
+        context_data = super(CrowdsourceListView, self).get_context_data()
+        if not self.request.user.is_staff:
+            context_data.pop('filter', None)
+        return context_data
 
 
 class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
