@@ -816,7 +816,7 @@ class Detail(DetailView):
                         zip_file.writestr(ffile.name(), ffile.ffile.read())
             resp = HttpResponse(buff.getvalue(), 'application/x-zip-compressed')
             resp['Content-Disposition'
-                 ] = 'attachment; filename="{}.zip"'.format(foia.title)
+                 ] = u'attachment; filename="{}.zip"'.format(foia.title)
             return resp
         return redirect(foia.get_absolute_url() + '#')
 
