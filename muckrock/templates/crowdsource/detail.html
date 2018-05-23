@@ -28,45 +28,117 @@
 {% endblock actions %}
 
 {% block main %}
-  <dl>
-    <dt>User</dt>
-    <dd>{{ crowdsource.user }}</dd>
-    <dt>Created</dt>
-    <dd>{{ crowdsource.datetime_created|date }}</dd>
-    <dt>Status</dt>
-    <dd>{{ crowdsource.get_status_display }}</dd>
-    <dt>Description</dt>
-    <dd>{{ crowdsource.description|markdown }}</dd>
-    {% if crowdsource.project %}
-      <dt>Project</dt>
-      <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
-      <dt>Project Only</dt>
-      <dd>{{crowdsource.project_only}}</dd>
-    {% endif %}
-    {% if crowdsource.data.all %}
-      <dt>Data Count</dt>
-      <dd>{{ crowdsource.data.all|length }}</dd>
-      <dt>Data Limit</dt>
-      <dd>{{crowdsource.data_limit}}</dd>
-      <dt>Multiple Per Page</dt>
-      <dd>{{crowdsource.multiple_per_page}}</dd>
-    {% else %}
-      <dt>User Limit</dt>
-      <dd>{{crowdsource.user_limit}}</dd>
-    {% endif %}
-    {% if crowdsource.submission_emails.all %}
-      <dt>Submission Email</dt>
-      {% for email in crowdsource.submission_emails.all %}
-        <dd>{{ email }}</dd>
-      {% endfor %}
-    {% endif %}
-    <dt>
-    <dt>Responses</dt>
-    <dd>{{ crowdsource.responses.count }}</dd>
-    <dt>Embed Code</dt>
-    <dd>
-      <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-embed" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
-    </dd>
+  <div class="tab-container">
+    <ul role="tablist" class="tab-list">
+      <li>
+        <a role="tab" class="tab" aria-controls="info" href="#info">
+          <span class="label">Info</span>
+        </a>
+      </li>
+      <li>
+        <a role="tab" class="tab" aria-controls="responses" href="#assignment-responses">
+          {% with crowdsource.responses.count as count %}
+            <span class="counter">{{ count }}</span>
+            <span class="label">Response{{ count|pluralize }}</span>
+          {% endwith %}
+        </a>
+      </li>
+    </ul>
+  </div>
 
-  </dl>
+  <section role="tabpanel" class="tab-panel communications" id="info">
+    <h2 class="tab-panel-heading">Information</h2>
+    <dl>
+      <dt>User</dt>
+      <dd>{{ crowdsource.user }}</dd>
+      <dt>Created</dt>
+      <dd>{{ crowdsource.datetime_created|date }}</dd>
+      <dt>Status</dt>
+      <dd>{{ crowdsource.get_status_display }}</dd>
+      <dt>Description</dt>
+      <dd>{{ crowdsource.description|markdown }}</dd>
+      {% if crowdsource.project %}
+        <dt>Project</dt>
+        <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
+        <dt>Project Only</dt>
+        <dd>{{crowdsource.project_only}}</dd>
+      {% endif %}
+      {% if crowdsource.data.all %}
+        <dt>Data Count</dt>
+        <dd>{{ crowdsource.data.all|length }}</dd>
+        <dt>Data Limit</dt>
+        <dd>{{crowdsource.data_limit}}</dd>
+        <dt>Multiple Per Page</dt>
+        <dd>{{crowdsource.multiple_per_page}}</dd>
+      {% else %}
+        <dt>User Limit</dt>
+        <dd>{{crowdsource.user_limit}}</dd>
+      {% endif %}
+      {% if crowdsource.submission_emails.all %}
+        <dt>Submission Email</dt>
+        {% for email in crowdsource.submission_emails.all %}
+          <dd>{{ email }}</dd>
+        {% endfor %}
+      {% endif %}
+      <dt>
+      <dt>Embed Code</dt>
+      <dd>
+      <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-embed" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
+      </dd>
+    </dl>
+  </section>
+
+  <section role="tabpanel" class="tab-panel" id="assignment-responses">
+    <h2 class="tab-panel-heading">Responses</h2>
+    <section>
+      <form>
+        <label>Search: <input type="textbox" id="assignment-search"></label>
+        <label>
+          Filter:
+          <select id="filter">
+            <option value="">All</option>
+            <option value="flag">Flagged</option>
+            <option value="no-flag">Unflagged</option>
+          </select>
+        </label>
+      </form>
+      <nav class="pagination small">
+        <div class="pagination__control">
+          <p class="pagination__control__item">Showing <span class="first"></span> to <span class="last"></span> of <span class="total"></span></p>
+          <p class="pagination__control__item">
+            Page
+            <select id="page">
+            </select>
+            of <span class="total-pages"></span>
+          </p>
+          <p class="pagination__control__item">
+            <select id="per-page">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            items per page
+          </p>
+        </div>
+        <div class="pagination__links">
+          <span class="previous no-more">
+            <a class="pagination__link first-page" href="#">First Page</a>
+            <a class="pagination__link previous-page" href="#">Previous Page</a>
+            <span class="pagination__link">First Page</span>
+            <span class="pagination__link">Previous Page</span>
+          </span>
+          <span class="next no-more">
+            <a class="pagination__link next-page" href="#">Next Page</a>
+            <a class="pagination__link last-page" href="#">Last Page</a>
+            <span class="pagination__link">Next Page</span>
+            <span class="pagination__link">Last Page</span>
+          </span>
+        </div>
+      </nav>
+    </section>
+    <section class="assignment-responses" data-crowdsource="{{ crowdsource.pk }}">
+    </section>
+
+
+  </section>
 {% endblock main %}

@@ -66,4 +66,195 @@ $(document).ready(function(){
     $(selector).after(newElement);
   }
 
+  var
+    page = 1,
+    pageSize = 10,
+    lastPage = 1,
+    flag = null,
+    search = "";
+
+  function handleUpdateResponses(data) {
+    var response, values, dataValues, dataUrlP, checked;
+    var responses = $("section.assignment-responses");
+    responses.html("");
+
+    // generate the responses
+    for(var i = 0; i < data.results.length; i++) {
+      response = $("<section>").addClass("textbox assignment-response collapsable");
+      if (data.results[i].data) {
+        dataUrlP = `<p>Data:
+          <a href="${data.results[i].data}">${data.results[i].data}</a>
+          </p>`;
+      } else {
+        dataUrlP = "";
+      }
+      if (data.results[i].flag) {
+        checked = "checked";
+      } else {
+        checked = "";
+      }
+      response.append(`
+        <header class="textbox__header">
+          <p class="from">From: ${data.results[i].user}</p>
+          ${dataUrlP}
+          <time class="date">
+            ${data.results[i].datetime}
+          </time>
+        </header>
+        <section class="textbox__section actionables">
+          <label>
+            Flagged:
+            <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${checked}>
+          </label>
+        </section>
+      `);
+      values = $("<dl>");
+      dataValues = data.results[i].values;
+      for (var j = 0; j < dataValues.length; j++) {
+        values.append("<dt>" + dataValues[j].field + "</dt>");
+        values.append("<dd>" + dataValues[j].value + "</dd>");
+      }
+      response.append($("<section>").addClass("textbox__section").html(values));
+      responses.append(response);
+    }
+    $('.collapsable header').click(function(){
+      $(this).parent().toggleClass('collapsed');
+    });
+    $('.flag-checkbox').click(function(){
+      $.ajax({
+        url: "/api_v1/assignment-responses/" + $(this).data("crowdsource") + "/",
+        type: "PATCH",
+        data: {
+          'flag': $(this).prop("checked")
+        }
+      });
+    });
+
+    // update the pagination bar
+    $("#assignment-responses .pagination__control__item .first").text(
+      ((page - 1) * pageSize) + 1
+    );
+    $("#assignment-responses .pagination__control__item .last").text(
+      Math.min(((page - 1) * pageSize) + pageSize, data.count)
+    );
+    $("#assignment-responses .pagination__control__item .total").text(
+      data.count
+    );
+    lastPage = Math.ceil(data.count / pageSize);
+    $("#assignment-responses .pagination__control__item .total-pages").text(
+      lastPage
+    );
+    var select = $("#assignment-responses .pagination__control__item #page");
+    select.html("");
+    for (i = 1; i <= lastPage; i++) {
+      select.append($("<option value='" + i + "'>" + i + "</option>"));
+    }
+    select.val(page);
+    if (data.next) {
+      $("#assignment-responses .pagination__links .next")
+        .addClass("more").removeClass("no-more");
+    } else {
+      $("#assignment-responses .pagination__links .next")
+        .addClass("no-more").removeClass("more");
+    }
+    if (data.previous) {
+      $("#assignment-responses .pagination__links .previous")
+        .addClass("more").removeClass("no-more");
+    } else {
+      $("#assignment-responses .pagination__links .previous")
+        .addClass("no-more").removeClass("more");
+    }
+
+  }
+
+  function updateResponses() {
+    $.ajax({
+      url: "/api_v1/assignment-responses/",
+      type: 'GET',
+      data: {
+        'crowdsource': $("section.assignment-responses").data("crowdsource"),
+        'page_size': pageSize,
+        'page': page,
+        'flag': flag,
+        'search': search
+      },
+      success: handleUpdateResponses
+    });
+  }
+
+  if ($("section.assignment-responses")) {
+    updateResponses();
+  }
+
+  $("#assignment-responses .pagination__links .first-page").click(function(e) {
+    e.preventDefault();
+    page = 1;
+    updateResponses();
+  });
+  $("#assignment-responses .pagination__links .previous-page").click(function(e) {
+    e.preventDefault();
+    page = Math.max(page - 1, 1);
+    updateResponses();
+  });
+  $("#assignment-responses .pagination__links .next-page").click(function(e) {
+    e.preventDefault();
+    page = Math.min(page + 1, lastPage);
+    updateResponses();
+  });
+  $("#assignment-responses .pagination__links .last-page").click(function(e) {
+    e.preventDefault();
+    page = lastPage;
+    updateResponses();
+  });
+  $("#assignment-responses .pagination #page").change(function() {
+    var newPage = parseInt($(this).val());
+    if (isNaN(newPage)) {
+      page = 1;
+    } else if (newPage < 1) {
+      page = 1;
+    } else if (newPage > lastPage) {
+      page = lastPage;
+    } else {
+      page = newPage;
+    }
+    updateResponses();
+  });
+  $("#assignment-responses .pagination #per-page").change(function() {
+    var newPageSize = parseInt($(this).val());
+    if (isNaN(newPageSize)) {
+      pageSize = 10;
+    } else if (newPageSize < 10) {
+      pageSize = 10;
+    } else if (newPageSize > 50) {
+      pageSize = 50;
+    } else {
+      pageSize = newPageSize;
+    }
+    page = 1;
+    updateResponses();
+  });
+  $("#assignment-responses #filter").change(function() {
+    var newFlag = $(this).val();
+    if (newFlag === "flag") {
+      flag = true;
+    } else if (newFlag === "no-flag") {
+      flag = false;
+    } else {
+      flag = null;
+    }
+    updateResponses();
+  });
+
+  var timeoutId;
+  function searchHandler() {
+    search = $(this).val();
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(function() {
+      // Runs 1 second (1000 ms) after the last change
+      updateResponses();
+    }, 1000);
+  }
+  $("#assignment-responses #assignment-search").on(
+    "input propertychange change", searchHandler);
+
 });

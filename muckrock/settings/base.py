@@ -480,7 +480,8 @@ REST_FRAMEWORK = {
         'muckrock.core.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.DjangoFilterBackend',
-        'rest_framework.filters.OrderingFilter'
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',

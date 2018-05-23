@@ -1,0 +1,15 @@
+
+.assignment-response {
+  .actionables {
+    background-color: $color-grey-7;
+  }
+}
+
+#assignment-responses .pagination__links {
+  .more span {
+    display: none;
+  }
+  .no-more a {
+    display: none;
+  }
+}
