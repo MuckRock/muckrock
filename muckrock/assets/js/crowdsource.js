@@ -182,7 +182,7 @@ $(document).ready(function(){
     });
   }
 
-  if ($("section.assignment-responses")) {
+  if ($("section.assignment-responses").length) {
     updateResponses();
   }
 
