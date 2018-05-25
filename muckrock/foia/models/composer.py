@@ -19,6 +19,7 @@ from django.utils.text import slugify
 
 # Standard Library
 from datetime import timedelta
+from itertools import izip_longest
 
 # Third Party
 from taggit.managers import TaggableManager
@@ -94,7 +95,7 @@ class FOIAComposer(models.Model):
         return reverse(
             'foia-composer-detail', kwargs={
                 'slug': self.slug,
-                'idx': self.pk
+                'idx': self.pk,
             }
         )
 
@@ -138,15 +139,24 @@ class FOIAComposer(models.Model):
         """Short cut for checking a FOIA composer permission"""
         return user.has_perm('foia.%s_foiacomposer' % perm, self)
 
-    def return_requests(self, return_amts=None):
+    def return_requests(self, num_requests=None):
         """Return requests to the composer's author"""
-        if return_amts is None:
-            # if no return amts passed in, refund all requests
+        if num_requests is None:
+            # if no num_requests passed in, refund all requests
             return_amts = {
                 'regular': self.num_reg_requests,
                 'monthly': self.num_monthly_requests,
                 'org': self.num_org_requests,
             }
+        else:
+            return_amts = self._calc_return_requests(num_requests)
+
+        self._return_requests(return_amts)
+
+    def _return_requests(self, return_amts):
+        """Helper method for return requests
+        Does the actually returning
+        """
         with transaction.atomic():
             self.num_reg_requests -= min(
                 return_amts['regular'], self.num_reg_requests
@@ -179,6 +189,34 @@ class FOIAComposer(models.Model):
             else:
                 profile.monthly_requests += return_amts['org']
             profile.save()
+
+    def _calc_return_requests(self, num_requests):
+        """Determine how many of each type of request to return"""
+        used = [
+            self.num_reg_requests,
+            self.num_monthly_requests,
+            self.num_org_requests,
+        ]
+        ret = []
+        while num_requests:
+            try:
+                num_used = used.pop(0)
+            except IndexError:
+                ret.append(num_requests)
+                break
+            else:
+                num_ret = min(num_used, num_requests)
+                num_requests -= num_ret
+                ret.append(num_ret)
+        ret_dict = dict(
+            izip_longest(
+                ['regular', 'monthly', 'org', 'extra'],
+                ret,
+                fillvalue=0,
+            )
+        )
+        ret_dict['regular'] += ret_dict.pop('extra')
+        return ret_dict
 
     def revokable(self):
         """Is this composer revokable?"""

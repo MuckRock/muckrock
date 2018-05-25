@@ -17,7 +17,7 @@ from django.utils import timezone
 # Standard Library
 import logging
 from datetime import date
-from itertools import groupby, izip_longest
+from itertools import groupby
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
@@ -630,9 +630,46 @@ class NewAgencyTask(Task):
         """Approves agency, resends pending requests to it"""
         self._resolve_agency()
 
-    def reject(self, replacement_agency):
-        """Resends pending requests to replacement agency"""
-        self._resolve_agency(replacement_agency)
+    def reject(self, replacement_agency=None):
+        """Reject agency, resend to replacement if one is specified"""
+        if replacement_agency is not None:
+            self._resolve_agency(replacement_agency)
+        else:
+            self.agency.status = 'rejected'
+            self.agency.save()
+            foias = (
+                self.agency.foiarequest_set.select_related('composer')
+                .annotate(count=Count('composer__foias'))
+            )
+            if foias:
+                # only send an email if they submitted a request with it
+                subject = u'We need your help with your request, "{}"'.format(
+                    foias[0].title
+                )
+                if len(foias) > 1:
+                    subject += u', and others'
+                TemplateEmail(
+                    subject=subject,
+                    from_email='info@muckrock.com',
+                    user=self.user,
+                    text_template='task/email/agency_rejected.txt',
+                    html_template='task/email/agency_rejected.html',
+                    extra_context={
+                        'agency': self.agency,
+                        'foias': foias,
+                        'url': settings.MUCKROCK_URL,
+                    },
+                ).send(fail_silently=False)
+            for foia in foias:
+                foia.composer.return_requests(1)
+                foia.delete()
+            for composer in self.agency.composers.all():
+                composer.agencies.remove(self.agency)
+                if composer.foias.count() == 0:
+                    if composer.revokable():
+                        composer.revoke()
+                    composer.status = 'started'
+                    composer.save()
 
     def _resolve_agency(self, replacement_agency=None):
         """Approves or rejects an agency and re-submits the pending requests"""
@@ -751,47 +788,14 @@ class MultiRequestTask(Task):
                 self.composer.agencies.remove(agency)
                 self.composer.foias.filter(agency=agency).delete()
                 return_requests += 1
-        self._return_requests(return_requests)
+        self.composer.return_requests(return_requests)
         self.composer.approved()
 
     def reject(self):
         """Reject the composer and return the user their requests"""
-        self._return_requests(self.composer.agencies.count())
+        self.composer.return_requests()
         self.composer.status = 'started'
         self.composer.save()
-
-    def _return_requests(self, num_requests):
-        """Return some number of requests to the user"""
-        return_amts = self._calc_return_requests(num_requests)
-        self.composer.return_requests(return_amts)
-
-    def _calc_return_requests(self, num_requests):
-        """Determine how many of each type of request to return"""
-        used = [
-            self.composer.num_reg_requests,
-            self.composer.num_monthly_requests,
-            self.composer.num_org_requests,
-        ]
-        ret = []
-        while num_requests:
-            try:
-                num_used = used.pop(0)
-            except IndexError:
-                ret.append(num_requests)
-                break
-            else:
-                num_ret = min(num_used, num_requests)
-                num_requests -= num_ret
-                ret.append(num_ret)
-        ret_dict = dict(
-            izip_longest(
-                ['regular', 'monthly', 'org', 'extra'],
-                ret,
-                fillvalue=0,
-            )
-        )
-        ret_dict['regular'] += ret_dict.pop('extra')
-        return ret_dict
 
 
 class NewExemptionTask(Task):

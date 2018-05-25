@@ -15,7 +15,6 @@ from muckrock.communication.models import EmailAddress
 from muckrock.crowdsource.models import (
     Crowdsource,
     CrowdsourceChoice,
-    CrowdsourceData,
     CrowdsourceField,
     CrowdsourceResponse,
     CrowdsourceValue,
@@ -59,30 +58,10 @@ class CrowdsourceResponseAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
-class CrowdsourceDataInline(admin.TabularInline):
-    """Crowdsource Data inline options"""
-    model = CrowdsourceData
-
-
 class CrowdsourceFieldInline(admin.TabularInline):
     """Crowdsource Field inline options"""
     model = CrowdsourceField
     show_change_link = True
-
-
-class CrowdsourceResponseInline(admin.TabularInline):
-    """Crowdsource Response inline options"""
-    model = CrowdsourceResponse
-    form = CrowdsourceResponseAdminForm
-    show_change_link = True
-    readonly_fields = ('data',)
-
-    def get_queryset(self, request):
-        """Select related"""
-        return (
-            super(CrowdsourceResponseInline, self).get_queryset(request)
-            .select_related('user', 'data')
-        )
 
 
 @admin.register(Crowdsource)
@@ -90,11 +69,7 @@ class CrowdsourceAdmin(admin.ModelAdmin):
     """Crowdsource admin options"""
     form = CrowdsourceAdminForm
     prepopulated_fields = {'slug': ('title',)}
-    inlines = (
-        CrowdsourceDataInline,
-        CrowdsourceFieldInline,
-        CrowdsourceResponseInline,
-    )
+    inlines = (CrowdsourceFieldInline,)
 
 
 class CrowdsourceChoiceInline(admin.TabularInline):

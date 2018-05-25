@@ -410,19 +410,23 @@ class NewAgencyTaskList(TaskList):
                 form_data['jurisdiction'] = form_data['jurisdiction'].pk
             form_data.update({'approve': True})
             task.resolve(request.user, form_data)
-        elif request.POST.get('reject'):
+        elif request.POST.get('replace'):
             form = ReplaceNewAgencyForm(request.POST)
             if form.is_valid():
                 replace_agency = form.cleaned_data['replace_agency']
                 task.reject(replace_agency)
                 form_data = {
-                    'reject': True,
+                    'replace': True,
                     'replace_agency': replace_agency.pk
                 }
                 task.resolve(request.user, form_data)
             else:
                 messages.error(request, 'Bad form data')
                 return
+        elif request.POST.get('reject'):
+            task.reject()
+            form_data = {'reject': True}
+            task.resolve(request.user, form_data)
         elif request.POST.get('spam'):
             task.spam()
             form_data = {'spam': True}

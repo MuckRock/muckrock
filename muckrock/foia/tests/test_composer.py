@@ -10,12 +10,17 @@ from django.test import TestCase
 from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
-from muckrock.core.factories import OrganizationFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyFactory,
+    OrganizationFactory,
+    UserFactory,
+)
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.forms.composers import BaseComposerForm
 from muckrock.foia.models import FOIAComposer
 
 # pylint: disable=invalid-name
+# pylint: disable=protected-access
 
 
 class TestFOIAComposer(TestCase):
@@ -33,7 +38,7 @@ class TestFOIAComposer(TestCase):
             user__profile__monthly_requests=10,
             user__profile__organization=organization,
         )
-        composer.return_requests({
+        composer._return_requests({
             'regular': 2,
             'monthly': 0,
             'org': 1,
@@ -46,6 +51,37 @@ class TestFOIAComposer(TestCase):
         eq_(composer.user.profile.num_requests, 7)
         eq_(composer.user.profile.monthly_requests, 10)
         eq_(composer.user.profile.organization.num_requests, 101)
+
+    def test_calc_return_requests(self):
+        """Test calculating the return requests"""
+        composer = FOIAComposerFactory(
+            status='submitted',
+            agencies=AgencyFactory.create_batch(6),
+            num_org_requests=1,
+            num_monthly_requests=2,
+            num_reg_requests=3,
+            user__profile__num_requests=5,
+            user__profile__monthly_requests=10,
+            user__profile__organization=OrganizationFactory(num_requests=100),
+        )
+        values = [
+            (7, 4, 2, 1),
+            (6, 3, 2, 1),
+            (5, 3, 2, 0),
+            (4, 3, 1, 0),
+            (3, 3, 0, 0),
+            (2, 2, 0, 0),
+            (1, 1, 0, 0),
+        ]
+        for total, reg, monthly, org in values:
+            eq_(
+                composer._calc_return_requests(total),
+                {
+                    'regular': reg,
+                    'monthly': monthly,
+                    'org': org,
+                },
+            )
 
 
 class TestFOIAComposerQueryset(TestCase):

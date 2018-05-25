@@ -1,0 +1,25 @@
+{% extends 'message/base.txt' %}
+
+{% block body %}
+
+Hi,
+
+You recently submitted a request to "{{ agency.name }}", and we were not able to figure out to which agency you were referring.
+
+Since we weren’t sure where to send the request, we’ve credited it back your account, but we’d still like to help.
+
+There’s a copy of your request draft here if you want to clarify the agency’s name:
+
+{% for foia in foias %}
+    * {{ foia.composer.title }} - https://{{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}
+{% endfor %}
+
+If you’re filing a request to a local agency, type it in like "Library, Smallville, IL" (Agency Name, City, State Abbreviation); if it’s a state agency just type in "State Police, IL". For federal requests, you can just type the name.
+
+You can also reply to this email with some more information about the agency; we’ll work with you to get it out the door as soon as possible.
+
+Sincerely,
+The MuckRock Team
+
+{% endblock body %}
+

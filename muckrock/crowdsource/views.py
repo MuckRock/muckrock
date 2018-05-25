@@ -48,7 +48,9 @@ class CrowdsourceDetailView(DetailView):
     query_pk_and_slug = True
     context_object_name = 'crowdsource'
     queryset = (
-        Crowdsource.objects.select_related('user').prefetch_related('data')
+        Crowdsource.objects.select_related('user').prefetch_related(
+            'data', 'responses'
+        )
     )
 
     def dispatch(self, *args, **kwargs):
