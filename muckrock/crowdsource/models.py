@@ -346,6 +346,7 @@ class CrowdsourceResponse(models.Model):
     # keeping track of how many times a single user has submitted
     # per data item
     number = models.PositiveSmallIntegerField(default=1)
+    flag = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'Response by {} on {}'.format(
@@ -408,6 +409,15 @@ class CrowdsourceResponse(models.Model):
             text,
             'info@muckrock.com',
             [email],
+        )
+
+    # XXX
+    def get_response_values(self):
+        """replace me"""
+        metadata = self.crowdsource.get_metadata_keys()
+        return zip(
+            self.crowdsource.get_header_values(metadata),
+            self.get_values(metadata),
         )
 
     class Meta:

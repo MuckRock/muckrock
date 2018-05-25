@@ -20,6 +20,7 @@ from rest_framework.routers import DefaultRouter
 import muckrock.accounts.views
 import muckrock.agency.views
 import muckrock.core.views as views
+import muckrock.crowdsource.viewsets
 import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
@@ -88,6 +89,11 @@ router.register(
 router.register(
     r'responsetask', muckrock.task.viewsets.ResponseTaskViewSet,
     'api-responsetask'
+)
+router.register(
+    r'assignment-responses',
+    muckrock.crowdsource.viewsets.CrowdsourceResponseViewSet,
+    'api-crowdsource-response',
 )
 
 urlpatterns = [

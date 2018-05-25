@@ -344,7 +344,7 @@ DELIVERED_CHOICES = (
 
 
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
-    """API views for FOIARequest"""
+    """API views for FOIACommunication"""
     # pylint: disable=too-many-public-methods
     queryset = FOIACommunication.objects.prefetch_related(
         'files',

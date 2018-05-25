@@ -132,7 +132,7 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
-    username = serializers.StringRelatedField(source='composer.user',)
+    username = serializers.StringRelatedField(source='composer.user')
     user = serializers.PrimaryKeyRelatedField(
         source='composer.user',
         queryset=User.objects.all(),

@@ -87,7 +87,9 @@ def sidebar_broadcast(user):
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
-    if request.path.startswith(('/admin/', '/sitemap', '/news-sitemaps')):
+    if request.path.startswith(
+        ('/admin/', '/sitemap', '/news-sitemaps', '/api_v1/')
+    ):
         return {}
     sidebar_info_dict = {
         'dropdown_recent_articles': get_recent_articles(),
