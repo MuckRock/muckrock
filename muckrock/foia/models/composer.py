@@ -90,6 +90,13 @@ class FOIAComposer(models.Model):
         self.slug = slugify(self.title) or 'untitled'
         super(FOIAComposer, self).save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        """Resolve any pending new agency tasks"""
+        for agency in self.agencies.filter(status='pending'):
+            if agency.composers.count() == 1:
+                agency.delete()
+        super(FOIAComposer, self).delete(*args, **kwargs)
+
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(

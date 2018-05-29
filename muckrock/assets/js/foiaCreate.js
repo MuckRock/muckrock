@@ -159,35 +159,38 @@ $(document).ready(function(){
 
     // handle contact info
     if (requestCount === 1) {
-      $.ajax({
-        url: "/agency/contact-info/" + agencyField.find(".deck > .choice").data("value") + "/",
-        type: 'get',
-        success: function(data) {
-          if (data.type) {
-            $(".contact-info .info").data("type", data.type);
-          } else {
-            if (data.portal) {
-              $(".contact-info .info").data("portal-type", data.portal.type);
-              $(".contact-info .info").data("portal-url", data.portal.url);
-              if ($("#id_via option[value='portal']").length === 0) {
-                $("#id_via").prepend("<option value=\"portal\">Portal</option>");
-              }
+      var agencyId = agencyField.find(".deck > .choice").data("value");
+      if (!isNaN(parseInt(agencyId))) {
+        $.ajax({
+          url: "/agency/contact-info/" + agencyId + "/",
+          type: 'get',
+          success: function(data) {
+            if (data.type) {
+              $(".contact-info .info").data("type", data.type);
             } else {
-              $("#id_via option[value='portal']").remove();
+              if (data.portal) {
+                $(".contact-info .info").data("portal-type", data.portal.type);
+                $(".contact-info .info").data("portal-url", data.portal.url);
+                if ($("#id_via option[value='portal']").length === 0) {
+                  $("#id_via").prepend("<option value=\"portal\">Portal</option>");
+                }
+              } else {
+                $("#id_via option[value='portal']").remove();
+              }
+              $(".contact-info .info").data("email", data.email);
+              $(".contact-info .info").data("cc-emails", data.cc_emails);
+              $(".contact-info .info").data("fax", data.fax);
+              $(".contact-info .info").data("address", data.address);
+              setContactInfoOptions($("#id_email"), data.emails);
+              setContactInfoOptions($("#id_fax"), data.faxes);
             }
-            $(".contact-info .info").data("email", data.email);
-            $(".contact-info .info").data("cc-emails", data.cc_emails);
-            $(".contact-info .info").data("fax", data.fax);
-            $(".contact-info .info").data("address", data.address);
-            setContactInfoOptions($("#id_email"), data.emails);
-            setContactInfoOptions($("#id_fax"), data.faxes);
+            showOrigContactInfo();
+            $("#id_email").prop("disabled", "");
+            $("#id_fax").prop("disabled", "");
+            $(".contact-info").show();
           }
-          showOrigContactInfo();
-          $("#id_email").prop("disabled", "");
-          $("#id_fax").prop("disabled", "");
-          $(".contact-info").show();
-        }
-      });
+        });
+      }
     } else {
       $("#id_use_contact_information").val(false);
       $("#id_email").prop("disabled", "disabled");
