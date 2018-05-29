@@ -364,6 +364,7 @@ def autosave(request, idx):
         status='started',
         user=request.user,
     )
+    old_agencies = set(composer.agencies.all())
     data = request.POST.copy()
     # we are always just saving
     data['action'] = 'save'
@@ -374,7 +375,13 @@ def autosave(request, idx):
         request=request,
     )
     if form.is_valid():
-        form.save()
+        composer = form.save()
+        new_agencies = set(composer.agencies.all())
+        removed_agencies = old_agencies - new_agencies
+        # delete pending agencies which have been removed from all composers
+        for agency in removed_agencies:
+            if agency.status == 'pending' and agency.composers.count() == 0:
+                agency.delete()
         return HttpResponse('OK')
     else:
         return HttpResponseBadRequest(form.errors.as_json())

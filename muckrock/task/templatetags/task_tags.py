@@ -147,6 +147,9 @@ class NewAgencyTaskNode(TaskNode):
                 'replace_jurisdiction': self.task.agency.jurisdiction
             }
         )
+        extra_context['pending_drafts'] = self.task.agency.composers.filter(
+            status='started'
+        )
 
         return extra_context
 
