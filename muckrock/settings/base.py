@@ -222,6 +222,7 @@ INSTALLED_APPS = (
     'dashing',
     'constance',
     'constance.backends.database',
+    'django_extensions',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
