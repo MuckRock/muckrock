@@ -74,7 +74,7 @@ $(document).ready(function(){
     search = "";
 
   function handleUpdateResponses(data) {
-    var response, values, dataValues, dataUrlP, checked;
+    var response, values, dataValues, dataUrlP, checked, tags;
     var responses = $("section.assignment-responses");
     responses.html("");
 
@@ -93,6 +93,7 @@ $(document).ready(function(){
       } else {
         checked = "";
       }
+      tags = data.results[i].tags.join(', ');
       response.append(`
         <header class="textbox__header">
           <p class="from">From: ${data.results[i].user}</p>
@@ -105,6 +106,10 @@ $(document).ready(function(){
           <label>
             Flagged:
             <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${checked}>
+          </label>
+          <label>
+            Tags:
+            <input type="text" class="tag-box" data-crowdsource="${data.results[i].id}" value="${tags}">
           </label>
         </section>
       `);
@@ -129,6 +134,22 @@ $(document).ready(function(){
         }
       });
     });
+
+    var tagTimeoutIds = {};
+    function tagHandler() {
+      var crowdsource = $(this).data("crowdsource");
+      var tags = $(this).val();
+      clearTimeout(tagTimeoutIds[crowdsource]);
+      tagTimeoutIds[crowdsource] = setTimeout(function() {
+        // Runs 1 second (1000 ms) after the last change
+        $.ajax({
+          url: "/api_v1/assignment-responses/" + crowdsource + "/",
+          type: "PATCH",
+          data: {'tags': tags}
+        });
+      }, 1000);
+    }
+    $(".tag-box").on("input propertychange change", tagHandler);
 
     // update the pagination bar
     $("#assignment-responses .pagination__control__item .first").text(

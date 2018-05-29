@@ -21,10 +21,12 @@ from random import choice
 from bleach.sanitizer import Cleaner
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
+from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.crowdsource import fields
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE
+from muckrock.tags.models import TaggedItemBase
 
 DOCCLOUD_EMBED = """
 <div class="DC-embed DC-embed-document DV-container">
@@ -347,6 +349,8 @@ class CrowdsourceResponse(models.Model):
     # per data item
     number = models.PositiveSmallIntegerField(default=1)
     flag = models.BooleanField(default=False)
+
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
         return u'Response by {} on {}'.format(

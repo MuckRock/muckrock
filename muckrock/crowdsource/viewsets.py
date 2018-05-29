@@ -50,7 +50,13 @@ class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
 
         class Meta:
             model = CrowdsourceResponse
-            fields = ('flag',)
+            fields = (
+                'id',
+                'flag',
+            )
 
     filter_class = Filter
-    search_fields = ('values__value',)
+    search_fields = (
+        'values__value',
+        'tags__name',
+    )
