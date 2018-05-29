@@ -61,7 +61,6 @@ from muckrock.task.models import (
     FlaggedTask,
     MultiRequestTask,
     NewAgencyTask,
-    NewExemptionTask,
     OrphanTask,
     PortalTask,
     ProjectReviewTask,
@@ -90,7 +89,6 @@ def count_tasks():
             status_change=Count('statuschangetask'),
             crowdfund=Count('crowdfundtask'),
             multirequest=Count('multirequesttask'),
-            new_exemption=Count('newexemptiontask'),
             portal=Count('portaltask'),
         )
     )
@@ -498,12 +496,6 @@ class MultiRequestTaskList(TaskList):
             task.resolve(request.user, {'action': 'reject'})
             messages.error(request, 'Multirequest rejected')
         return super(MultiRequestTaskList, self).task_post_helper(request, task)
-
-
-class NewExemptionTaskList(TaskList):
-    """List view for New Exemption Tasks"""
-    title = 'New Exemptions'
-    queryset = NewExemptionTask.objects.preload_list()
 
 
 class PortalTaskList(TaskList):

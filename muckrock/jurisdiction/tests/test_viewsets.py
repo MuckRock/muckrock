@@ -19,8 +19,8 @@ from muckrock.jurisdiction.factories import (
 )
 from muckrock.jurisdiction.serializers import ExemptionSerializer
 from muckrock.jurisdiction.viewsets import ExemptionViewSet, JurisdictionViewSet
-from muckrock.task.models import NewExemptionTask
-from muckrock.task.serializers import NewExemptionTaskSerializer
+from muckrock.task.models import FlaggedTask
+from muckrock.task.serializers import FlaggedTaskSerializer
 
 
 class TestExemptionList(TestCase):
@@ -89,9 +89,10 @@ class TestExemptionList(TestCase):
 
 class TestExemptionCreation(TestCase):
     """
-    The exemption creation view allows new exemptions to be submitted for staff review.
-    When an exemption is submitted, we need to know the request it was invoked on and the
-    language the agency used to invoke it. Then, we should create a NewExemptionTask.
+    The exemption creation view allows new exemptions to be submitted for staff
+    review.  When an exemption is submitted, we need to know the request it was
+    invoked on and the language the agency used to invoke it. Then, we should
+    create a FlaggedTask.
     """
 
     def setUp(self):
@@ -119,19 +120,19 @@ class TestExemptionCreation(TestCase):
         eq_(response.status_code, 200)
 
     def test_task_created(self):
-        """A NewExemptionTask should be created."""
-        eq_(NewExemptionTask.objects.count(), 0)
+        """A FlaggedTask should be created."""
+        eq_(FlaggedTask.objects.count(), 0)
         request = self.factory.post(self.endpoint, self.data, format='json')
         force_authenticate(request, user=self.user)
         response = self.view(request)
         # Check that the task was created
-        eq_(NewExemptionTask.objects.count(), 1)
-        task = NewExemptionTask.objects.first()
+        eq_(FlaggedTask.objects.count(), 1)
+        task = FlaggedTask.objects.first()
         eq_(task.foia, self.foia)
-        eq_(task.language, self.data['language'])
+        eq_(task.text, self.data['language'])
         eq_(task.user, self.user)
         # Check that the task was included in the response
-        eq_(NewExemptionTaskSerializer(task).data, response.data)
+        eq_(FlaggedTaskSerializer(task).data, response.data)
 
     def test_missing_data(self):
         """If the request is missing data, the form should return a validation error."""

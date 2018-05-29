@@ -14,9 +14,7 @@ from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import (
     FlaggedTask,
-    GenericTask,
     NewAgencyTask,
-    NewExemptionTask,
     OrphanTask,
     ResponseTask,
     SnailMailTask,
@@ -61,19 +59,21 @@ class TaskSerializer(serializers.ModelSerializer):
             'base_template': 'input.html'
         }
     )
-    newexemptiontask = serializers.PrimaryKeyRelatedField(
-        queryset=NewExemptionTask.objects.all(),
-        style={
-            'base_template': 'input.html'
-        }
-    )
 
     class Meta:
         model = Task
         fields = (
-            'id', 'date_created', 'date_done', 'resolved', 'assigned',
-            'orphantask', 'snailmailtask', 'rejectedemailtask', 'flaggedtask',
-            'newagencytask', 'responsetask', 'newexemptiontask'
+            'id',
+            'date_created',
+            'date_done',
+            'resolved',
+            'assigned',
+            'orphantask',
+            'snailmailtask',
+            'rejectedemailtask',
+            'flaggedtask',
+            'newagencytask',
+            'responsetask',
         )
 
 
@@ -215,28 +215,3 @@ class ResponseTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ResponseTask
-
-
-class NewExemptionTaskSerializer(serializers.ModelSerializer):
-    """Serializer for NewExemptionTask model"""
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), style={
-            'base_template': 'input.html'
-        }
-    )
-    foia = serializers.PrimaryKeyRelatedField(
-        queryset=FOIARequest.objects.all(),
-        style={
-            'base_template': 'input.html'
-        }
-    )
-
-    class Meta:
-        model = NewExemptionTask
-
-
-class GenericTaskSerializer(serializers.ModelSerializer):
-    """Serializer for GenericTask model"""
-
-    class Meta:
-        model = GenericTask

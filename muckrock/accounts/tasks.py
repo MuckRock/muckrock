@@ -50,7 +50,6 @@ from muckrock.task.models import (
     CrowdfundTask,
     FailedFaxTask,
     FlaggedTask,
-    GenericTask,
     NewAgencyTask,
     OrphanTask,
     PortalTask,
@@ -250,12 +249,11 @@ def store_statistics():
             'total_deferred_tasks':
                 Task.objects.get_deferred().count(),
             'total_generic_tasks':
-                GenericTask.objects.count(),
+                0,
             'total_unresolved_generic_tasks':
-                GenericTask.objects.filter(resolved=False).get_undeferred()
-                .count(),
+                0,
             'total_deferred_generic_tasks':
-                GenericTask.objects.get_deferred().count(),
+                0,
             'total_orphan_tasks':
                 OrphanTask.objects.count(),
             'total_unresolved_orphan_tasks':

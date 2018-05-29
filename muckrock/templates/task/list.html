@@ -49,12 +49,6 @@
             Flagged
         </a>
     </li>
-    <li class="{% active request '^/task/new-exemption/$' %}">
-        <a href="{% url 'newexemption-task-list' %}">
-            <span class="blue counter">{{ counters.new_exemption }}</span>
-            New Exemptions
-        </a>
-    </li>
 </ul>
 <ul class="nostyle list__sections">
     <li class="{% active request '^/task/review-agency/$' %}">

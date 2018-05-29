@@ -352,14 +352,6 @@ class StatusChangeTaskNode(TaskNode):
     class_name = 'status-change'
 
 
-class NewExemptionTaskNode(TaskNode):
-    """Renders a new exemption task."""
-    model = task.models.NewExemptionTask
-    task_template = 'task/new_exemption.html'
-    endpoint_name = 'newexemption-task-list'
-    class_name = 'new-exemption'
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
@@ -448,9 +440,3 @@ def crowdfund_task(parser, token):
 def multi_request_task(parser, token):
     """Returns a MultiRequestTaskNode"""
     return MultiRequestTaskNode(get_id(token))
-
-
-@register.tag
-def new_exemption_task(parser, token):
-    """Returns a NewExemptionTaskNode"""
-    return NewExemptionTaskNode(get_id(token))

@@ -22,8 +22,8 @@ from muckrock.jurisdiction.serializers import (
     ExemptionSerializer,
     JurisdictionSerializer,
 )
-from muckrock.task.models import NewExemptionTask
-from muckrock.task.serializers import NewExemptionTaskSerializer
+from muckrock.task.models import FlaggedTask
+from muckrock.task.serializers import FlaggedTaskSerializer
 
 
 class JurisdictionViewSet(ModelViewSet):
@@ -142,17 +142,20 @@ class ExemptionViewSet(ModelViewSet):
     @list_route(methods=['post'])
     def submit(self, request):
         """
-        The exemption submission endpoint allows new exemptions to be submitted for staff review.
-        When an exemption is submitted, we need to know the request it was invoked on and the
-        language the agency used to invoke it. Then, we should create both an InvokedExemption
-        and a NewExemptionTask.
+        The exemption submission endpoint allows new exemptions to be submitted
+        for staff review.  When an exemption is submitted, we need to know the
+        request it was invoked on and the language the agency used to invoke it.
+        Then, we should create both an InvokedExemption and a FlaggedTask.
         """
         form = ExemptionSubmissionForm(request.data)
         if not form.is_valid():
             raise ValidationError(form.errors.as_json())
         foia = form.cleaned_data.get('foia')
         language = form.cleaned_data.get('language')
-        task = NewExemptionTask.objects.create(
-            foia=foia, language=language, user=request.user
+        task = FlaggedTask.objects.create(
+            foia=foia,
+            text=language,
+            user=request.user,
+            category='appeal',
         )
-        return Response(NewExemptionTaskSerializer(task).data)
+        return Response(FlaggedTaskSerializer(task).data)
