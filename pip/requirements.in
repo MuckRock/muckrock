@@ -18,6 +18,7 @@ django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dashing # Used to create the dashboard
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
+django-extensions # Nicer shell
 django-filter # Used for filtering in viewsets
 django-geojson # Used for storing geographic data
 django-hijack # Allows admins to log in to other user accounts
@@ -49,6 +50,7 @@ fuzzywuzzy # fuzzy string matching for FM agency import
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
+ipython # Interactive python shell
 jsonfield # Used for storing JSON data, required by django-geojson
 markdown # Used for rendering Markdown, obviously!
 newrelic # Interface to newrelic service
