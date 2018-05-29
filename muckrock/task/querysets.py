@@ -419,18 +419,6 @@ class MultiRequestTaskQuerySet(TaskQuerySet):
         )
 
 
-class NewExemptionTaskQuerySet(TaskQuerySet):
-    """Object manager for new exemption tasks"""
-
-    def preload_list(self):
-        """Preload relations for list display"""
-        return self.select_related(
-            'foia__agency__jurisdiction__parent',
-            'user',
-            'resolved_by',
-        )
-
-
 class PortalTaskQuerySet(TaskQuerySet):
     """Object manager for portal tasks"""
 

@@ -27,11 +27,7 @@ from muckrock.foia.factories import (
 )
 from muckrock.foia.models import FOIANote, FOIARequest
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
-from muckrock.task.factories import (
-    FlaggedTaskFactory,
-    NewExemptionTaskFactory,
-    ProjectReviewTaskFactory,
-)
+from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.forms import ResponseTaskForm
 from muckrock.task.models import (
     BlacklistDomain,
@@ -514,22 +510,6 @@ class ResponseTaskTests(TestCase):
     def test_bad_price(self):
         """Should raise an error if not given a value convertable to a float"""
         self.form.set_price('foo', [self.task.communication])
-
-
-class TestNewExemptionTask(TestCase):
-    """The NewExemptionTask allows staff to review user-submitted exemptions,
-    document the use of exemptions, and use them to create new ones."""
-
-    def setUp(self):
-        self.task = NewExemptionTaskFactory()
-
-    def test_get_absolute_url(self):
-        eq_(
-            self.task.get_absolute_url(),
-            reverse('newexemption-task', kwargs={
-                'pk': self.task.pk
-            })
-        )
 
 
 class MultiRequestTaskTests(TestCase):

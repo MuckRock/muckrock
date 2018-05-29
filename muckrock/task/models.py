@@ -37,7 +37,6 @@ from muckrock.task.querysets import (
     FlaggedTaskQuerySet,
     MultiRequestTaskQuerySet,
     NewAgencyTaskQuerySet,
-    NewExemptionTaskQuerySet,
     OrphanTaskQuerySet,
     PortalTaskQuerySet,
     ProjectReviewTaskQuerySet,
@@ -798,26 +797,6 @@ class MultiRequestTask(Task):
         self.composer.save()
 
 
-class NewExemptionTask(Task):
-    """Created when a new exemption is submitted for our review."""
-    type = 'NewExemptionTask'
-    foia = models.ForeignKey('foia.FOIARequest')
-    language = models.TextField()
-    user = models.ForeignKey(User)
-
-    objects = NewExemptionTaskQuerySet.as_manager()
-
-    def __unicode__(self):
-        return u'New Exemption Task'
-
-    def display(self):
-        """Display something useful and identifing"""
-        return self.foia.title
-
-    def get_absolute_url(self):
-        return reverse('newexemption-task', kwargs={'pk': self.pk})
-
-
 class PortalTask(Task):
     """An admin needs to interact with a portal"""
     type = 'PortalTask'
@@ -951,6 +930,24 @@ class StaleAgencyTask(Task):
         for foia in foia_list:
             foia.email = new_email
             foia.followup(switch=True)
+
+
+class NewExemptionTask(Task):
+    """Created when a new exemption is submitted for our review."""
+    type = 'NewExemptionTask'
+    foia = models.ForeignKey('foia.FOIARequest')
+    language = models.TextField()
+    user = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return u'New Exemption Task'
+
+    def display(self):
+        """Display something useful and identifing"""
+        return self.foia.title
+
+    def get_absolute_url(self):
+        return reverse('newexemption-task', kwargs={'pk': self.pk})
 
 
 # Not a task, but used by tasks

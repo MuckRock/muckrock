@@ -10,9 +10,7 @@ from rest_framework.permissions import IsAdminUser
 # MuckRock
 from muckrock.task.models import (
     FlaggedTask,
-    GenericTask,
     NewAgencyTask,
-    NewExemptionTask,
     OrphanTask,
     ResponseTask,
     SnailMailTask,
@@ -20,9 +18,7 @@ from muckrock.task.models import (
 )
 from muckrock.task.serializers import (
     FlaggedTaskSerializer,
-    GenericTaskSerializer,
     NewAgencyTaskSerializer,
-    NewExemptionTaskSerializer,
     OrphanTaskSerializer,
     ResponseTaskSerializer,
     SnailMailTaskSerializer,
@@ -120,16 +116,4 @@ ResponseTaskViewSet = create_task_viewset(
     ResponseTask,
     ResponseTaskSerializer,
     ('communication',),
-)
-
-NewExemptionTaskViewSet = create_task_viewset(
-    NewExemptionTask,
-    NewExemptionTaskSerializer,
-    ('user', 'foia', 'language'),
-)
-
-GenericTaskViewSet = create_task_viewset(
-    GenericTask,
-    GenericTaskSerializer,
-    ('subject', 'body'),
 )

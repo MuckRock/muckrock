@@ -424,7 +424,6 @@ class StaffDigest(Digest):
             FlaggedTask,
             PortalTask,
             SnailMailTask,
-            NewExemptionTask,
         )
         stale_tasks = OrderedDict()
         stale_tasks['Processing Requests'] = (
@@ -440,7 +439,6 @@ class StaffDigest(Digest):
             (FlaggedTask, 5),
             (PortalTask, 5),
             (SnailMailTask, 5),
-            (NewExemptionTask, 5),
         ]
         for task_type, days_old in task_types:
             stale_tasks[task_type.type] = (

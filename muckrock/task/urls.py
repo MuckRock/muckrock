@@ -113,16 +113,6 @@ urlpatterns = [
         views.ProjectReviewTaskList.as_view(),
         name='projectreview-task'
     ),
-    url(
-        r'^new-exemption/$',
-        views.NewExemptionTaskList.as_view(),
-        name='newexemption-task-list'
-    ),
-    url(
-        r'^new-exemption/(?P<pk>\d+)/$',
-        views.NewExemptionTaskList.as_view(),
-        name='newexemption-task'
-    ),
     # tasks for a specific request
     url(
         r'^request/(?P<pk>\d+)/$',

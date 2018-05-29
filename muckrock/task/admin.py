@@ -13,7 +13,6 @@ from muckrock.task.models import (
     BlacklistDomain,
     CrowdfundTask,
     FlaggedTask,
-    GenericTask,
     MultiRequestTask,
     NewAgencyTask,
     OrphanTask,
@@ -60,10 +59,6 @@ class ResponseTaskAdmin(VersionAdmin):
     readonly_fields = ['communication']
 
 
-class GenericTaskAdmin(VersionAdmin):
-    """Generic Task Admin"""
-
-
 class CrowdfundTaskAdmin(VersionAdmin):
     """Crowdfund Task Admin"""
     readonly_fields = ['crowdfund']
@@ -86,7 +81,6 @@ admin.site.register(FlaggedTask, FlaggedTaskAdmin)
 admin.site.register(ProjectReviewTask, ProjectReviewTaskAdmin)
 admin.site.register(NewAgencyTask, NewAgencyTaskAdmin)
 admin.site.register(ResponseTask, ResponseTaskAdmin)
-admin.site.register(GenericTask, GenericTaskAdmin)
 admin.site.register(CrowdfundTask, CrowdfundTaskAdmin)
 admin.site.register(MultiRequestTask, MultiRequestTaskAdmin)
 admin.site.register(PortalTask, PortalTaskAdmin)
