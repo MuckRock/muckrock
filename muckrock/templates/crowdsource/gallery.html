@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block body %}
+  {% if values %}
+    <ul>
+    {% for value in values %}
+      <li>{{ value }}</li>
+    {% endfor %}
+  {% else %}
+    <p>Nothing in the gallery!</p>
+  {% endif %}
+{% endblock %}
+

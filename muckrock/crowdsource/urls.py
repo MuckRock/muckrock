@@ -31,6 +31,11 @@ urlpatterns = [
         name='crowdsource-embed',
     ),
     url(
+        r'^(?P<slug>[-\w]+)-(?P<idx>\d+)/gallery/$',
+        views.CrowdsourceEmbededGallery.as_view(),
+        name='crowdsource-gallery',
+    ),
+    url(
         r'^confirm/$',
         views.CrowdsourceEmbededConfirmView.as_view(),
         name='crowdsource-embed-confirm',

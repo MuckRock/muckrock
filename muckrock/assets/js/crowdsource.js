@@ -30,6 +30,20 @@ $(document).ready(function(){
         'toggle',
         'value'
       ],
+      typeUserAttrs: {
+        text: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        },
+        textarea: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        }
+      },
       disabledActionButtons: ['data', 'save', 'clear'],
       fields: [{label: 'Check Box', attrs: {type: 'checkbox2'}, icon: ''}],
       templates: {checkbox2: function(data) {
@@ -38,7 +52,12 @@ $(document).ready(function(){
         };
       }},
     defaultFields: JSON.parse($("#id_crowdsource-form_json").length ? $("#id_crowdsource-form_json").val() : "[]")
+  }).promise.then(function() {
+    $("#build-wrap .fld-gallery").each(function() {
+      $(this).prop("checked", $(this).val() === "true");
+    });
   });
+
 
   $("form.create-crowdsource").submit(function() {
     $("#id_crowdsource-form_json").val(formBuilder.actions.getData('json'));
@@ -74,7 +93,7 @@ $(document).ready(function(){
     search = "";
 
   function handleUpdateResponses(data) {
-    var response, values, dataValues, dataUrlP, checked;
+    var response, values, dataValues, dataUrlP, flagged, galleried, tags;
     var responses = $("section.assignment-responses");
     responses.html("");
 
@@ -88,11 +107,9 @@ $(document).ready(function(){
       } else {
         dataUrlP = "";
       }
-      if (data.results[i].flag) {
-        checked = "checked";
-      } else {
-        checked = "";
-      }
+      flagged = data.results[i].flag ? "checked" : "";
+      galleried = data.results[i].gallery ? "checked" : "";
+      tags = data.results[i].tags.join(', ');
       response.append(`
         <header class="textbox__header">
           <p class="from">From: ${data.results[i].user}</p>
@@ -104,7 +121,15 @@ $(document).ready(function(){
         <section class="textbox__section actionables">
           <label>
             Flagged:
-            <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${checked}>
+            <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${flagged}>
+          </label>
+          <label>
+            Gallery:
+            <input type="checkbox" class="gallery-checkbox" data-crowdsource="${data.results[i].id}" ${galleried}>
+          </label>
+          <label>
+            Tags:
+            <input type="text" class="tag-box" data-crowdsource="${data.results[i].id}" value="${tags}">
           </label>
         </section>
       `);
@@ -129,6 +154,31 @@ $(document).ready(function(){
         }
       });
     });
+    $('.gallery-checkbox').click(function(){
+      $.ajax({
+        url: "/api_v1/assignment-responses/" + $(this).data("crowdsource") + "/",
+        type: "PATCH",
+        data: {
+          'gallery': $(this).prop("checked")
+        }
+      });
+    });
+
+    var tagTimeoutIds = {};
+    function tagHandler() {
+      var crowdsource = $(this).data("crowdsource");
+      var tags = $(this).val();
+      clearTimeout(tagTimeoutIds[crowdsource]);
+      tagTimeoutIds[crowdsource] = setTimeout(function() {
+        // Runs 1 second (1000 ms) after the last change
+        $.ajax({
+          url: "/api_v1/assignment-responses/" + crowdsource + "/",
+          type: "PATCH",
+          data: {'tags': tags}
+        });
+      }, 1000);
+    }
+    $(".tag-box").on("input propertychange change", tagHandler);
 
     // update the pagination bar
     $("#assignment-responses .pagination__control__item .first").text(
