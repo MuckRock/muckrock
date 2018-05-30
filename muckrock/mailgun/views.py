@@ -358,6 +358,11 @@ def _catch_all(request, address):
     from_email, to_emails, cc_emails = _parse_email_headers(post)
     subject = post.get('Subject') or post.get('subject', '')
 
+    if any(to_email.email.startswith('bounce+') for to_email in to_emails):
+        foia = _find_likely_bounce(subject)
+    else:
+        foia = None
+
     if from_email.allowed():
         comm = _make_orphan_comm(
             from_email,
@@ -366,13 +371,30 @@ def _catch_all(request, address):
             subject,
             post,
             request.FILES,
-            None,
+            foia,
         )
         OrphanTask.objects.create(
             reason='ia', communication=comm, address=address
         )
 
     return HttpResponse('OK')
+
+
+def _find_likely_bounce(subject):
+    """Find likely foia for out of office bounces"""
+    if 'RE:' in subject:
+        reply = 'RE:'
+    elif 'Re:' in subject:
+        reply = 'Re:'
+    else:
+        return None
+    # remove RE: and trailing space
+    subject = subject[subject.find(reply) + 4:]
+    comm = FOIACommunication.objects.filter(subject__contains=subject).last()
+    if comm:
+        return comm.foia
+    else:
+        return None
 
 
 @mailgun_verify
