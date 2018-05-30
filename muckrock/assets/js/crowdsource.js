@@ -30,6 +30,20 @@ $(document).ready(function(){
         'toggle',
         'value'
       ],
+      typeUserAttrs: {
+        text: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        },
+        textarea: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        }
+      },
       disabledActionButtons: ['data', 'save', 'clear'],
       fields: [{label: 'Check Box', attrs: {type: 'checkbox2'}, icon: ''}],
       templates: {checkbox2: function(data) {
@@ -38,7 +52,12 @@ $(document).ready(function(){
         };
       }},
     defaultFields: JSON.parse($("#id_crowdsource-form_json").length ? $("#id_crowdsource-form_json").val() : "[]")
+  }).promise.then(function() {
+    $("#build-wrap .fld-gallery").each(function() {
+      $(this).prop("checked", $(this).val() === "true");
+    });
   });
+
 
   $("form.create-crowdsource").submit(function() {
     $("#id_crowdsource-form_json").val(formBuilder.actions.getData('json'));
@@ -74,7 +93,7 @@ $(document).ready(function(){
     search = "";
 
   function handleUpdateResponses(data) {
-    var response, values, dataValues, dataUrlP, checked, tags;
+    var response, values, dataValues, dataUrlP, flagged, galleried, tags;
     var responses = $("section.assignment-responses");
     responses.html("");
 
@@ -88,11 +107,8 @@ $(document).ready(function(){
       } else {
         dataUrlP = "";
       }
-      if (data.results[i].flag) {
-        checked = "checked";
-      } else {
-        checked = "";
-      }
+      flagged = data.results[i].flag ? "checked" : "";
+      galleried = data.results[i].gallery ? "checked" : "";
       tags = data.results[i].tags.join(', ');
       response.append(`
         <header class="textbox__header">
@@ -105,7 +121,11 @@ $(document).ready(function(){
         <section class="textbox__section actionables">
           <label>
             Flagged:
-            <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${checked}>
+            <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${flagged}>
+          </label>
+          <label>
+            Gallery:
+            <input type="checkbox" class="gallery-checkbox" data-crowdsource="${data.results[i].id}" ${galleried}>
           </label>
           <label>
             Tags:
@@ -131,6 +151,15 @@ $(document).ready(function(){
         type: "PATCH",
         data: {
           'flag': $(this).prop("checked")
+        }
+      });
+    });
+    $('.gallery-checkbox').click(function(){
+      $.ajax({
+        url: "/api_v1/assignment-responses/" + $(this).data("crowdsource") + "/",
+        type: "PATCH",
+        data: {
+          'gallery': $(this).prop("checked")
         }
       });
     });

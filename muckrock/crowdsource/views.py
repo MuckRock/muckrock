@@ -38,7 +38,11 @@ from muckrock.crowdsource.forms import (
     CrowdsourceDataFormset,
     CrowdsourceForm,
 )
-from muckrock.crowdsource.models import Crowdsource, CrowdsourceResponse
+from muckrock.crowdsource.models import (
+    Crowdsource,
+    CrowdsourceResponse,
+    CrowdsourceValue,
+)
 
 
 class CrowdsourceDetailView(DetailView):
@@ -334,6 +338,29 @@ class CrowdsourceEmbededFormView(CrowdsourceFormView):
 class CrowdsourceEmbededConfirmView(TemplateView):
     """Embedded confirm page"""
     template_name = 'crowdsource/embed_confirm.html'
+
+
+@method_decorator(frame_deny_exempt, name='dispatch')
+class CrowdsourceEmbededGallery(DetailView):
+    """Embedded gallery page"""
+    template_name = 'crowdsource/gallery.html'
+    pk_url_kwarg = 'idx'
+    query_pk_and_slug = True
+    queryset = Crowdsource.objects.exclude(status='draft')
+
+    def get_context_data(self, **kwargs):
+        """Get gallery fields"""
+        context = (
+            super(CrowdsourceEmbededGallery, self).get_context_data(**kwargs)
+        )
+        gallery_responses = self.object.responses.filter(gallery=True)
+        context['values'] = CrowdsourceValue.objects.filter(
+            response__in=gallery_responses,
+            field__gallery=True,
+        ).values_list(
+            'value', flat=True
+        )
+        return context
 
 
 class CrowdsourceListView(MRFilterListView):

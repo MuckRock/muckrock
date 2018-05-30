@@ -85,6 +85,10 @@
       <dd>
       <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-embed" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
       </dd>
+      <dt>Gallery Code</dt>
+      <dd>
+      <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-gallery" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
+      </dd>
     </dl>
   </section>
 

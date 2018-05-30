@@ -153,6 +153,7 @@ class Crowdsource(models.Model):
                 min=field_data.get('min'),
                 max=field_data.get('max'),
                 required=field_data.get('required', False),
+                gallery=field_data.get('gallery', False),
                 order=order,
             )
             if 'values' in field_data and field.field.accepts_choices:
@@ -270,6 +271,7 @@ class CrowdsourceField(models.Model):
     min = models.PositiveSmallIntegerField(blank=True, null=True)
     max = models.PositiveSmallIntegerField(blank=True, null=True)
     required = models.BooleanField(default=True)
+    gallery = models.BooleanField(default=False)
     order = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
@@ -286,6 +288,7 @@ class CrowdsourceField(models.Model):
             'label': self.label,
             'description': self.help_text,
             'required': self.required,
+            'gallery': self.gallery,
         }
         if self.field.accepts_choices:
             data['values'] = [{
@@ -349,6 +352,7 @@ class CrowdsourceResponse(models.Model):
     # per data item
     number = models.PositiveSmallIntegerField(default=1)
     flag = models.BooleanField(default=False)
+    gallery = models.BooleanField(default=False)
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
@@ -413,15 +417,6 @@ class CrowdsourceResponse(models.Model):
             text,
             'info@muckrock.com',
             [email],
-        )
-
-    # XXX
-    def get_response_values(self):
-        """replace me"""
-        metadata = self.crowdsource.get_metadata_keys()
-        return zip(
-            self.crowdsource.get_header_values(metadata),
-            self.get_values(metadata),
         )
 
     class Meta:
