@@ -52,7 +52,9 @@ $(document).ready(function(){
         };
       }},
     defaultFields: JSON.parse($("#id_crowdsource-form_json").length ? $("#id_crowdsource-form_json").val() : "[]")
-  }).promise.then(function() {
+  });
+
+  formBuilder.promise.then(function() {
     $("#build-wrap .fld-gallery").each(function() {
       $(this).prop("checked", $(this).val() === "true");
     });
