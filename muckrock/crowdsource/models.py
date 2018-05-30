@@ -181,7 +181,7 @@ class Crowdsource(models.Model):
 
     def get_header_values(self, metadata_keys):
         """Get header values for CSV export"""
-        values = ['user', 'datetime', 'skip']
+        values = ['user', 'datetime', 'skip', 'flag', 'gallery', 'tags']
         if self.multiple_per_page:
             values.append('number')
         if self.data.exists():
@@ -368,6 +368,9 @@ class CrowdsourceResponse(models.Model):
             self.user.username,
             self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
             self.skip,
+            self.flag,
+            self.gallery,
+            ', '.join(self.tags.values_list('name', flat=True)),
         ]
         if self.crowdsource.multiple_per_page:
             values.append(self.number)
