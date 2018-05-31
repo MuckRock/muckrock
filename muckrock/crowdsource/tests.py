@@ -148,22 +148,47 @@ class TestCrowdsource(TestCase):
         )
         eq_(
             crowdsource.get_header_values(['meta']),
-            ['user', 'datetime', 'skip', 'Text Field', 'Select Field'],
+            [
+                'user',
+                'datetime',
+                'skip',
+                'flag',
+                'gallery',
+                'tags',
+                'Text Field',
+                'Select Field',
+            ],
         )
         crowdsource.multiple_per_page = True
         eq_(
             crowdsource.get_header_values(['meta']),
             [
-                'user', 'datetime', 'skip', 'number', 'Text Field',
-                'Select Field'
+                'user',
+                'datetime',
+                'skip',
+                'flag',
+                'gallery',
+                'tags',
+                'number',
+                'Text Field',
+                'Select Field',
             ],
         )
         CrowdsourceDataFactory(crowdsource=crowdsource)
         eq_(
             crowdsource.get_header_values(['meta']),
             [
-                'user', 'datetime', 'skip', 'number', 'datum', 'meta',
-                'Text Field', 'Select Field'
+                'user',
+                'datetime',
+                'skip',
+                'flag',
+                'gallery',
+                'tags',
+                'number',
+                'datum',
+                'meta',
+                'Text Field',
+                'Select Field',
             ],
         )
 
@@ -303,5 +328,13 @@ class TestCrowdsourceResponse(TestCase):
 
         eq_(
             response.get_values([]),
-            ['Username', '2017-01-02 00:00:00', False, 'Value'],
+            [
+                'Username',
+                '2017-01-02 00:00:00',
+                False,
+                False,
+                False,
+                '',
+                'Value',
+            ],
         )

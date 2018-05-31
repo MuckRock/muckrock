@@ -260,7 +260,7 @@
                   {% endif %}
                 {% endif %}
                 {% if can_appeal %}
-                  <a href="#appeal" class="red button">Appeal</a>
+                  <a href="#appeal" id="appeal-button" class="red button">Appeal</a>
                 {% endif %}
               </div>
               {% if not request.user.profile.acct_type == "agency" %}

@@ -20,6 +20,9 @@ const mapDispatchToProps = (dispatch) => ({
         dispatch(updateVisibilityFilter('SHOW_DETAIL'));
     },
     showExemptionForm: () => {
+        /* eslint-disable no-undef */
+        mixpanel.track('Get Appeal Help');
+        /* eslint-enable no-undef */
         dispatch(updateVisibilityFilter('SHOW_FORM'));
     },
 });

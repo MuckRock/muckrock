@@ -30,6 +30,10 @@ const mapDispatchToProps = (dispatch) => ({
         dispatch(submitExemptionState('DEFAULT'));
     },
     onSubmit: (data) => {
+        /* eslint-disable no-undef */
+        mixpanel.track('Request Appeal Help',
+          {foia: data.foia, language: data.language});
+        /* eslint-enable no-undef */
         dispatch(submitExemption(data));
     }
 });
