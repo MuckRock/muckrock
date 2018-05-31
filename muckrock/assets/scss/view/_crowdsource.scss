@@ -23,3 +23,20 @@
 .crowdsource.detail .actions form {
   display: inline-block;
 }
+
+.assignment-response {
+  display: flex;
+  flex-wrap: wrap;
+  .textbox__header {
+    flex: 1 1 100%;
+  }
+  .textbox__section.actionables {
+    flex: 1 1 100%;
+  }
+  .textbox__section {
+    flex: 1 1 50%;
+  }
+  .embedo {
+    flex: 1 1 50%;
+  }
+}

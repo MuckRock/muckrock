@@ -105,6 +105,11 @@
             <option value="no-flag">Unflagged</option>
           </select>
         </label>
+        {% if crowdsource.data.all %}
+          <label>
+            Show data inline: <input type="checkbox" id="data-inline">
+          </label>
+        {% endif %}
       </form>
       <nav class="pagination small">
         <div class="pagination__control">

@@ -2,6 +2,8 @@
 **
 */
 
+import Embedo from 'embedo';
+
 $(document).ready(function(){
   var formBuilder = $("#build-wrap").formBuilder({
       disableFields: [
@@ -94,8 +96,10 @@ $(document).ready(function(){
     flag = null,
     search = "";
 
+  var embedo = new Embedo();
+
   function handleUpdateResponses(data) {
-    var response, values, dataValues, dataUrlP, flagged, galleried, tags;
+    var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried, tags;
     var responses = $("section.assignment-responses");
     responses.html("");
 
@@ -106,8 +110,10 @@ $(document).ready(function(){
         dataUrlP = `<p>Data:
           <a href="${data.results[i].data}">${data.results[i].data}</a>
           </p>`;
+        oEmbed = `<div class="embedo" data-url="${data.results[i].data}"></div>`;
       } else {
         dataUrlP = "";
+        oEmbed = "";
       }
       flagged = data.results[i].flag ? "checked" : "";
       galleried = data.results[i].gallery ? "checked" : "";
@@ -142,6 +148,7 @@ $(document).ready(function(){
         values.append("<dd>" + dataValues[j].value + "</dd>");
       }
       response.append($("<section>").addClass("textbox__section").html(values));
+      response.append(oEmbed);
       responses.append(response);
     }
     $('.collapsable header').click(function(){
@@ -165,6 +172,11 @@ $(document).ready(function(){
         }
       });
     });
+    if ($("#data-inline").prop("checked")) {
+      $(".embedo").each(function(){
+        embedo.load(this, $(this).data('url'));
+      });
+    }
 
     var tagTimeoutIds = {};
     function tagHandler() {
@@ -218,6 +230,14 @@ $(document).ready(function(){
     }
 
   }
+
+  $("#data-inline").change(function() {
+    if ($(this).prop("checked")) {
+      $(".embedo").each(function(){
+        embedo.load(this, $(this).data('url'));
+      });
+    }
+  });
 
   function updateResponses() {
     $.ajax({
