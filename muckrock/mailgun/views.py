@@ -80,7 +80,7 @@ def _make_orphan_comm(
     return comm
 
 
-def _get_mail_body(post):
+def _get_mail_body(post, foia=None):
     """Try to get the stripped-text unless it looks like that parsing failed,
     then get the full plain body"""
     stripped_text = post.get('stripped-text', '')
@@ -94,6 +94,9 @@ def _get_mail_body(post):
         '--- Please respond above this line ---\n',
     ]
     if stripped_text in bad_text:
+        return post.get('body-plain')
+    elif foia and foia.portal and foia.portal.type == 'nextrequest':
+        # mailgun seems to improperly strip nextrequest messages
         return post.get('body-plain')
     else:
         return '%s\n%s' % (
@@ -277,7 +280,7 @@ def _handle_request(request, mail_id):
             subject=subject[:255],
             response=True,
             datetime=timezone.now(),
-            communication=_get_mail_body(post),
+            communication=_get_mail_body(post, foia),
             hidden=hidden,
         )
         email_comm = EmailCommunication.objects.create(
