@@ -466,4 +466,10 @@ $('document').ready(function(){
     );
   });
 
+  $("#appeal-button").click(function() {
+    /* eslint-disable no-undef */
+    mixpanel.track('Appeal');
+    /* eslint-enable no-undef */
+  });
+
 });

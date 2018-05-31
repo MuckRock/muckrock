@@ -29,6 +29,9 @@ const mapDispatchToProps = (dispatch) => ({
         if (q === undefined || q == '') {
             dispatch(resetExemptionState());
         } else {
+            /* eslint-disable no-undef */
+            mixpanel.track('Appeal Search', {'query': q});
+            /* eslint-enable no-undef */
             dispatch(searchExemptions(data));
         }
     },
