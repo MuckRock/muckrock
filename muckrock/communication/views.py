@@ -23,7 +23,7 @@ class EmailDetailView(DetailView):
     """Show message open and error detail for an email address"""
     _prefetch_queryset = (
         EmailCommunication.objects.select_related(
-            'communication__foia__jurisdiction',
+            'communication__foia__agency__jurisdiction',
             'from_email',
         ).prefetch_related(
             Prefetch(
@@ -65,7 +65,7 @@ class PhoneDetailView(DetailView):
     """Show message error detail for a fax number"""
     _prefetch_queryset = (
         FaxCommunication.objects.select_related(
-            'communication__foia__jurisdiction',
+            'communication__foia__agency__jurisdiction',
             'to_number',
         ).prefetch_related(
             Prefetch(
