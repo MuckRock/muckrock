@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, Count, Max, Prefetch, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
@@ -781,14 +781,19 @@ class MultiRequestTask(Task):
     def submit(self, agency_list):
         """Submit the composer"""
         # pylint: disable=not-callable
+        from muckrock.foia.tasks import submit_composer
         return_requests = 0
-        for agency in self.composer.agencies.all():
-            if str(agency.pk) not in agency_list:
-                self.composer.agencies.remove(agency)
-                self.composer.foias.filter(agency=agency).delete()
-                return_requests += 1
-        self.composer.return_requests(return_requests)
-        self.composer.approved()
+        with transaction.atomic():
+            for agency in self.composer.agencies.all():
+                if str(agency.pk) not in agency_list:
+                    self.composer.agencies.remove(agency)
+                    self.composer.foias.filter(agency=agency).delete()
+                    return_requests += 1
+            self.composer.return_requests(return_requests)
+            transaction.on_commit(
+                lambda: submit_composer.
+                apply_async(args=(self.composer.pk, True, None))
+            )
 
     def reject(self):
         """Reject the composer and return the user their requests"""
