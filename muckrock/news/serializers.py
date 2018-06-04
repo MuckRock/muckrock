@@ -2,6 +2,9 @@
 Serilizers for the news application API
 """
 
+# Django
+from django.contrib.auth.models import User
+
 # Third Party
 from rest_framework import serializers
 
@@ -13,8 +16,16 @@ from muckrock.news.models import Article
 class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model"""
 
-    authors = serializers.StringRelatedField(many=True)
-    editors = serializers.StringRelatedField(many=True)
+    authors = serializers.SlugRelatedField(
+        many=True,
+        slug_field='username',
+        queryset=User.objects.all(),
+    )
+    editors = serializers.SlugRelatedField(
+        many=True,
+        slug_field='username',
+        queryset=User.objects.all(),
+    )
     foias = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=FOIARequest.objects.all(),
