@@ -118,12 +118,16 @@ class Article(models.Model):
     def get_authors_names(self):
         """Get all authors names for a byline"""
         authors = list(self.authors.all())
+        if not authors:
+            return ''
         names = ', '.join(a.get_full_name() for a in authors[:-1])
         if names:
             names = ' & '.join([names, authors[-1].get_full_name()])
         else:
             names = authors[-1].get_full_name()
         return names
+
+    get_authors_names.short_description = 'Authors'
 
     class Meta:
         ordering = ['-pub_date']
