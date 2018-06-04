@@ -55,4 +55,9 @@ urlpatterns = [
         views.CrowdsourceCreateView.as_view(),
         name='crowdsource-create',
     ),
+    url(
+        r'^oembed/$',
+        views.oembed,
+        name='crowdsource-oembed',
+    ),
 ]
