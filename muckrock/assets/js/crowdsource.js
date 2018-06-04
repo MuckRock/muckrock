@@ -2,7 +2,6 @@
 **
 */
 
-import Embedo from 'embedo';
 
 $(document).ready(function(){
   var formBuilder = $("#build-wrap").formBuilder({
@@ -96,8 +95,6 @@ $(document).ready(function(){
     flag = null,
     search = "";
 
-  var embedo = new Embedo();
-
   function handleUpdateResponses(data) {
     var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried, tags;
     var responses = $("section.assignment-responses");
@@ -110,7 +107,7 @@ $(document).ready(function(){
         dataUrlP = `<p>Data:
           <a href="${data.results[i].data}">${data.results[i].data}</a>
           </p>`;
-        oEmbed = `<div class="embedo" data-url="${data.results[i].data}"></div>`;
+        oEmbed = `<div class="embed" data-url="${data.results[i].data}"></div>`;
       } else {
         dataUrlP = "";
         oEmbed = "";
@@ -173,8 +170,16 @@ $(document).ready(function(){
       });
     });
     if ($("#data-inline").prop("checked")) {
-      $(".embedo").each(function(){
-        embedo.load(this, $(this).data('url'));
+      $(".embed").each(function(){
+        var embed = $(this);
+        $.ajax({
+          url: "/assignment/oembed/",
+          type: "GET",
+          data: {"url": $(this).data('url')},
+          success: function(data) {
+            embed.html(data);
+          }
+        });
       });
     }
 
@@ -233,8 +238,16 @@ $(document).ready(function(){
 
   $("#data-inline").change(function() {
     if ($(this).prop("checked")) {
-      $(".embedo").each(function(){
-        embedo.load(this, $(this).data('url'));
+      $(".embed").each(function(){
+        var embed = $(this);
+        $.ajax({
+          url: "/assignment/oembed/",
+          type: "GET",
+          data: {"url": $(this).data('url')},
+          success: function(data) {
+            embed.html(data);
+          }
+        });
       });
     }
   });

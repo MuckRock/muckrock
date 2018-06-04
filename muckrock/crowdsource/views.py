@@ -6,7 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.urlresolvers import reverse
-from django.http import Http404, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    StreamingHttpResponse,
+)
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
@@ -40,6 +45,7 @@ from muckrock.crowdsource.forms import (
 )
 from muckrock.crowdsource.models import (
     Crowdsource,
+    CrowdsourceData,
     CrowdsourceResponse,
     CrowdsourceValue,
 )
@@ -510,3 +516,12 @@ class CrowdsourceUpdateView(UpdateView):
             )
         messages.success(self.request, msg)
         return redirect(crowdsource)
+
+
+def oembed(request):
+    """AJAX view to get oembed data"""
+    if 'url' in request.GET:
+        data = CrowdsourceData(url=request.GET['url'])
+        return HttpResponse(data.embed())
+    else:
+        return HttpResponseBadRequest()
