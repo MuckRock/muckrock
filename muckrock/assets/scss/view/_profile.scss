@@ -73,3 +73,14 @@
         }
     }
 }
+
+.api-token {
+  input {
+    font-family: monospace;
+    width: 100%;
+    display: none;
+  }
+  a {
+    font-style: italic;
+  }
+}

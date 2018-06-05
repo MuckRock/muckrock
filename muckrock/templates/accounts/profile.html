@@ -73,6 +73,9 @@
   {% if org and show_org_link %}
     <p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
   {% endif %}
+  {% if user == user_obj and user.is_staff %}
+    <p class="api-token">API Token:&nbsp;<a href="#">show...</a><input type="text" value={{ api_token }} readonly></p>
+  {% endif %}
 {% endblock metadata %}
 
 {% block activity %}
