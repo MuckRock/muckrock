@@ -29,6 +29,7 @@ from datetime import date
 # Third Party
 import stripe
 from rest_framework import viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import (
     DjangoModelPermissionsOrAnonReadOnly,
     IsAdminUser,
@@ -561,6 +562,8 @@ class ProfileView(BuyRequestsMixin, FormView):
                 settings.STRIPE_PUB_KEY,
             'sidebar_admin_url':
                 reverse('admin:auth_user_change', args=(self.user.pk,)),
+            'api_token':
+                Token.objects.get_or_create(user=self.user)[0],
         })
         return context_data
 
