@@ -17,11 +17,6 @@ from django.views.generic.dates import (
     YearArchiveView,
 )
 
-# Third Party
-import django_filters
-from rest_framework import viewsets
-from rest_framework.permissions import DjangoModelPermissions
-
 # MuckRock
 from muckrock.core.utils import cache_get_or_set
 from muckrock.core.views import MRSearchFilterListView, PaginationMixin
@@ -30,7 +25,6 @@ from muckrock.news.filters import (
     ArticleDateRangeFilterSet,
 )
 from muckrock.news.models import Article
-from muckrock.news.serializers import ArticleSerializer
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
@@ -208,42 +202,3 @@ class AuthorArchiveView(NewsListView):
         context = super(AuthorArchiveView, self).get_context_data(**kwargs)
         context.update({'author': self.get_author()})
         return context
-
-
-class ArticleViewSet(viewsets.ModelViewSet):
-    """API views for Article"""
-    # pylint: disable=too-many-public-methods
-    model = Article
-    serializer_class = ArticleSerializer
-    permission_classes = (DjangoModelPermissions,)
-
-    class Filter(django_filters.FilterSet):
-        """API Filter for Articles"""
-        authors = django_filters.CharFilter(name='authors__username')
-        editors = django_filters.CharFilter(name='editors__username')
-        foias = django_filters.NumberFilter(name='foias__id')
-        tags = django_filters.CharFilter(name='tags__name')
-        min_date = django_filters.DateFilter(name='pub_date', lookup_expr='gte')
-        max_date = django_filters.DateFilter(name='pub_date', lookup_expr='lte')
-
-        class Meta:
-            model = Article
-            fields = (
-                'title',
-                'pub_date',
-                'min_date',
-                'max_date',
-                'authors',
-                'editors',
-                'foias',
-                'publish',
-            )
-
-    filter_class = Filter
-
-    def get_queryset(self):
-        if 'no_editor' in self.request.query_params:
-            queryset = self.model.objects.filter(editors=None)
-        else:
-            queryset = self.model.objects.all()
-        return queryset.prefetch_related('authors', 'editors', 'foias')

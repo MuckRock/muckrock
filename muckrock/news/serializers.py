@@ -10,7 +10,7 @@ from rest_framework import serializers
 
 # MuckRock
 from muckrock.foia.models import FOIARequest
-from muckrock.news.models import Article
+from muckrock.news.models import Article, Photo
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -36,3 +36,10 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    """Serializer for Photo model"""
+
+    class Meta:
+        model = Photo
