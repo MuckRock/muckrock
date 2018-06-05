@@ -24,7 +24,7 @@ import muckrock.crowdsource.viewsets
 import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
-import muckrock.news.views
+import muckrock.news.viewsets
 import muckrock.qanda.views
 import muckrock.task.viewsets
 from muckrock.agency.sitemap import AgencySitemap
@@ -70,7 +70,8 @@ router.register(
     'api-communication'
 )
 router.register(r'user', muckrock.accounts.views.UserViewSet, 'api-user')
-router.register(r'news', muckrock.news.views.ArticleViewSet, 'api-news')
+router.register(r'news', muckrock.news.viewsets.ArticleViewSet, 'api-news')
+router.register(r'photos', muckrock.news.viewsets.PhotoViewSet, 'api-photos')
 router.register(r'task', muckrock.task.viewsets.TaskViewSet, 'api-task')
 router.register(
     r'orphantask', muckrock.task.viewsets.OrphanTaskViewSet, 'api-orphantask'

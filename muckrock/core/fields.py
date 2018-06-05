@@ -29,6 +29,10 @@ email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 def filefield_maxlength_validator(value):
     """"Check if absolute file path can fit in database table"""
 
+    if not hasattr(value, 'field'):
+        # images sent in via API do not have a field
+        return value
+
     filename = value.field.generate_filename(value.instance, value.name)
     bytes_filename = len(filename.encode('utf-8'))  # filename length in bytes
 
