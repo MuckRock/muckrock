@@ -126,7 +126,7 @@ class BuyRequestsMixin(object):
         )
         if recipient == self.request.user:
             msg = (
-                'Purchase successful.  {} requests have been added to your'
+                'Purchase successful.  {} requests have been added to your '
                 'account.'.format(num_requests)
             )
         else:
