@@ -61,12 +61,12 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
         get,
         queryset=SnailMailTask.objects.filter(resolved=False)
         .order_by('communication__foia__agency').preload_pdf(),
-    ).qs
+    ).qs[:100]
 
     blank_pdf = FPDF()
     blank_pdf.add_page()
     blank = StringIO(blank_pdf.output(dest='S'))
-    for snail in snails:
+    for snail in snails.iterator():
         # generate the pdf and merge all pdf attachments
         pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
         pdf.generate()
