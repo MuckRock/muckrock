@@ -45,7 +45,11 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
         foia.submit(switch=True)
 
 
-@task(ignore_result=True, name='muckrock.task.tasks.snail_mail_bulk_pdf_task')
+@task(
+    ignore_result=True,
+    time_limit=900,
+    name='muckrock.task.tasks.snail_mail_bulk_pdf_task',
+)
 def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     """Save a PDF file for all open snail mail tasks"""
     # pylint: disable=too-many-locals
