@@ -57,6 +57,7 @@ from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, parse_tags
+from muckrock.task.models import ReviewAgencyTask
 
 
 class RequestExploreView(TemplateView):
@@ -285,11 +286,14 @@ class RequestList(MRSearchFilterListView):
 
     def get_actions(self):
         """Get available actions for this view"""
-        return {
+        actions = {
             'follow': self._follow,
             'unfollow': self._unfollow,
             'crowdsource': self._crowdsource,
         }
+        if self.request.user.is_staff:
+            actions['review_agency'] = self._review_agency
+        return actions
 
     def _delete(self, request):
         """Delete a saved search"""
@@ -352,6 +356,16 @@ class RequestList(MRSearchFilterListView):
                                 format(file_.doc_id)
                             )
         return 'Files added to assignment'
+
+    def _review_agency(self, foias, user, _post):
+        """Open review agency tasks for the selected foia's agencies"""
+        foias = foias.get_viewable(user)
+        for foia in foias:
+            ReviewAgencyTask.objects.ensure_one_created(
+                agency=foia.agency,
+                resolved=False,
+            )
+        return 'Review agency tasks created'
 
     def get(self, request, *args, **kwargs):
         """Check for loading saved searches"""
