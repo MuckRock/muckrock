@@ -96,10 +96,13 @@ $('document').ready(function(){
   });
 
   // Loupe
+  /*
+   * Temprarily disabled for now, see issue #1427
   $('.news__article__main img').loupe({
     height: 200,
     width: 200
   });
+  */
 
   // Quicksearch
   $('#comms-filter').quicksearch('#comms .communications-list .communication');
