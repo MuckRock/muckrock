@@ -140,9 +140,14 @@ class CoverPDF(PDF):
                         )
                     )
                 else:
+                    if snail.communication.foia.address:
+                        warning = ''
+                    else:
+                        warning = 'Warning - No Address: '
                     lines.append(
-                        u'\n{}□ MR #{} - "{}" by {} - {} pages'.format(
+                        u'\n{}□ {}MR #{} - "{}" by {} - {} pages'.format(
                             tab,
+                            warning,
                             snail.communication.foia.pk,
                             snail.communication.foia.title,
                             snail.communication.from_user,
@@ -155,10 +160,14 @@ class CoverPDF(PDF):
                             2 * tab, snail.amount
                         )
                     )
-                for file_, status in files:
+                for file_, status, pages in files:
                     if status == 'attached':
                         lines.append(
-                            u'{}▣ Attached: {}'.format(2 * tab, file_.name())
+                            u'{}▣ Attached: {} - {} pages'.format(
+                                2 * tab,
+                                file_.name(),
+                                pages,
+                            )
                         )
                     elif status == 'skipped':
                         lines.append(
