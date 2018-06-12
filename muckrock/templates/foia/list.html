@@ -58,6 +58,9 @@
           {% if can_crowdsource %}
             <option value="crowdsource" data-help="Add these requests' files to your assignment">Add files to assignment</option>
           {% endif %}
+          {% if user.is_staff %}
+            <option value="review_agency" data-help="Create a review agency task for the selected requests' agencies">Review agencies</option>
+          {% endif %}
         </select>
         <button class="blue button" disabled>Go</button>
         <p class="help"></p>
