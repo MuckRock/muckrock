@@ -89,8 +89,7 @@
           if available or CD-ROM if not.</p>
           <p>Thank you in advance for your anticipated cooperation in this matter.
           I look forward to receiving your response to this request within
-          { number of days } { business or calendar } days,
-          as the statute requires.</p>
+          { days }.</p>
           <p>Sincerely,</p>
           <p>{{ user.get_full_name|default:"{ name }" }}</p>
         </div>
@@ -101,10 +100,8 @@
             <dd>Inserts the full name of the relevant transparency law, i.e. Freedom of Information Act.</dd>
             <dt>{ short name }</dt>
             <dd>Inserts the abbreviation of the relevant transparency law, i.e., FOIA.</dd>
-            <dt>{ number of days }</dt>
-            <dd>Inserts the number of days the law permits before a response is required.</dd>
-            <dt>{ business or calendar }</dt>
-            <dd>Inserts whether the law counts weekends and other holidays in the above deadline.</dd>
+            <dt>{ days }</dt>
+            <dd>Inserts the number of days the law permits before a response is required, or a default of 10 days if no requirement.</dd>
             <dt>{ name }</dt>
             <dd>Inserts your name. <a href="{% url "acct-settings" %}">Change that here.</a></dd>
             <dt>{ agency name }</dt>
