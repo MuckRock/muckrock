@@ -9,6 +9,12 @@
           it is sent to the agency.
         </p>
         <footer class="button-group">
+          {% if user.is_staff %}
+            <form method="post" action="{% url "foia-composer-detail" idx=foia.composer.pk slug=foia.composer.slug %}">
+              {% csrf_token %}
+              <button class="button" name="action" value="send-now">Send Now</button>
+            </form>
+          {% endif %}
           <a class="primary button" href="{% url "foia-draft" idx=foia.composer.pk %}">
             Edit
           </a>

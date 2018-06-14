@@ -212,6 +212,16 @@ class Jurisdiction(models.Model, RequestHelper):
             requests = FOIARequest.objects.filter(agency__jurisdiction=self)
         return requests
 
+    def get_days(self):
+        """Get days phrase for request language"""
+        if self.days:
+            return '{} {} days, as the statute requires'.format(
+                self.days,
+                self.get_day_type(),
+            )
+        else:
+            return '10 business days'
+
     class Meta:
         ordering = ['name']
         unique_together = ('slug', 'parent')

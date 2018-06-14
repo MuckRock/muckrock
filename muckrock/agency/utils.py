@@ -26,21 +26,14 @@ def initial_communication_template(
             'get_law_name':
                 '<abbr class="tooltip" title="This will be replaced by the '
                 'relevant transparency law">{ law name }</abbr>',
-            'days':
-                '<abbr class="tooltip" title="This will be replaced by the '
-                'number of days the law permits before a response is '
-                'required">{ number of days }</abbr>',
-            'get_day_type':
-                '<abbr class="tooltip" title="This will be replaced by '
-                'business or calendar, depending on whether the law counts '
-                'weekends and other holidays in its deadline">'
-                '{ business or calendar }</abbr>',
+            'get_days':
+                '<abbr class="tooltip" title="Number of days statute requires, '
+                'or default of 10 days if no requirement">{ days }</abbr>',
         }
     else:
         jurisdiction = {
             'get_law_name': '{ law name }',
-            'days': '{ number of days }',
-            'get_day_type': '{ business or calendar }',
+            'get_days': '{ days }',
         }
     requested_docs = requested_docs.replace('{ name }', user_name)
 
@@ -48,6 +41,8 @@ def initial_communication_template(
         tags = [
             ('{ law name }', jurisdiction.get_law_name()),
             ('{ short name }', jurisdiction.get_law_name(abbrev=True)),
+            ('{ days }', jurisdiction.get_days()),
+            # old tags
             ('{ number of days }', jurisdiction.days or 10),
             ('{ business or calendar }', jurisdiction.get_day_type()),
         ]

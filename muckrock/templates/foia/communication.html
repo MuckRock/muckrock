@@ -11,11 +11,11 @@
           {% else %}
             <a href="{{communication.foia.get_absolute_url}}#{{communication.anchor}}" class="permalink">
             {% endif %}
-            {% if communication.mails.all %}
-              <time datetime="{{ communication.mails.all.0.sent_datetime|date:'c' }}" class="date">{{ communication.mails.all.0.sent_datetime|date:"m/d/Y" }}</time>
-            {% else %}
-              <time datetime="{{ communication.datetime|date:'c' }}" class="date">{{ communication.datetime | date:"m/d/Y" }}</time>
-            {% endif %}
+            {% with datetime=communication.get_subcomm.sent_datetime|default:communication.datetime %}
+              <time datetime="{{ datetime|date:'c' }}" class="date">
+                {{ datetime|date:"m/d/Y" }}
+              </time>
+            {% endwith %}
             </a>
             {% if not hide_options %}
               {% if request.user.is_staff %}
