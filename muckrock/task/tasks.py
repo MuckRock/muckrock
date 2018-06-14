@@ -76,12 +76,13 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
         for file_ in snail.communication.files.all():
             if file_.get_extension() == 'pdf':
                 try:
+                    pages = PdfFileReader(file_.ffile).getNumPages()
                     single_merger.append(file_.ffile)
-                    files.append((file_, 'attached'))
+                    files.append((file_, 'attached', pages))
                 except (PdfReadError, ValueError):
-                    files.append((file_, 'error'))
+                    files.append((file_, 'error', 0))
             else:
-                files.append((file_, 'skipped'))
+                files.append((file_, 'skipped', 0))
         single_pdf = StringIO()
         try:
             single_merger.write(single_pdf)

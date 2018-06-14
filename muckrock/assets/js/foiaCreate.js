@@ -288,8 +288,7 @@ $(document).ready(function(){
         "if available or CD-ROM if not.\n\nThank you in advance for your " +
         "anticipated cooperation in this matter.\n\n" +
         "I look forward to receiving your response to this request within " +
-        "{ number of days } { business or calendar } days, " +
-        "as the statute requires.\n\n" +
+        "{ days }.\n\n" +
         "Sincerely,\n\n" +
         "{ name }";
       $("#id_requested_docs").val(newText);

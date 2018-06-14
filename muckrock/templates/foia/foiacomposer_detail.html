@@ -9,11 +9,17 @@
     <h1>{{composer.title}}</h1>
 
     {% if can_edit %}
-      <p>
+      <div>
         <a href="{% url "foia-draft" idx=composer.pk %}" class="primary button">
           Edit Request
         </a>
-      </p>
+        {% if user.is_staff %}
+          <form method="post">
+            {% csrf_token %}
+            <button class="button" name="action" value="send-now">Send Now</button>
+          </form>
+        {% endif %}
+      </div>
       <p>
         Thank you for submitting this request.  Please review it now.
         You will have until {{ edit_deadline|time:"g:i a" }}

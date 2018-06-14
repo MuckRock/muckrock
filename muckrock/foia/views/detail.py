@@ -3,6 +3,7 @@ Detail view for a FOIA request
 """
 
 # Django
+from celery import current_app
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -55,6 +56,7 @@ from muckrock.foia.models import (
     FOIAMultiRequest,
     FOIARequest,
 )
+from muckrock.foia.tasks import submit_composer
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
@@ -827,7 +829,7 @@ class MultiDetail(DetailView):
     query_pk_and_slug = True
 
     def dispatch(self, request, *args, **kwargs):
-        """If request is a draft, then redirect to drafting interface"""
+        """Redirect to corresponding composer"""
         multi = self.get_object()
         return redirect(multi.composer)
 
@@ -840,7 +842,7 @@ class ComposerDetail(DetailView):
     pk_url_kwarg = 'idx'
     template_name = 'foia/foiacomposer_detail.html'
 
-    def dispatch(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """If composer is a draft, then redirect to drafting interface"""
         # pylint: disable=attribute-defined-outside-init
         composer = self.get_object()
@@ -857,7 +859,7 @@ class ComposerDetail(DetailView):
             raise Http404
         if len(self.foias) == 1:
             return redirect(self.foias[0])
-        return super(ComposerDetail, self).dispatch(request, *args, **kwargs)
+        return super(ComposerDetail, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
@@ -881,3 +883,27 @@ class ComposerDetail(DetailView):
                 and composer.delayed_id
             )
         return context
+
+    def post(self, request, *args, **kwargs):
+        """Handle send it now action
+
+        This uses celery's inspection tools to pull out the arguments for the
+        submit_composer task, revoke it, and then call it immediately with the
+        correct args
+        """
+        # pylint: disable=eval-used
+        # pylint: disable=unused-argument
+        composer = self.get_object()
+        if (
+            request.POST.get('action') == 'send-now' and request.user.is_staff
+            and composer.revokable()
+        ):
+            inspect = current_app.control.inspect()
+            for tasks in inspect.scheduled().itervalues():
+                for task in tasks:
+                    if task['request']['id'] == composer.delayed_id:
+                        current_app.control.revoke(composer.delayed_id)
+                        submit_composer(*eval(task['request']['args']))
+                        return redirect(composer)
+
+        return redirect(composer)

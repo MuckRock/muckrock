@@ -790,6 +790,20 @@ class FOIARequest(models.Model):
                 (self.last_request().sent_to() == self.fax))
         )
 
+        # if no address, try to find one on the agency
+        if not self.address:
+            if kwargs.get('appeal') and self.agency.appeal_agency:
+                agency = self.agency.appeal_agency
+                request_type = 'appeal'
+            elif kwargs.get('appeal'):
+                agency = self.agency
+                request_type = 'appeal'
+            else:
+                agency = self.agency
+                request_type = 'primary'
+            self.address = agency.get_addresses(request_type).first()
+            self.save()
+
         task.models.SnailMailTask.objects.create(
             category=category,
             communication=comm,
