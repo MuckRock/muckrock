@@ -185,7 +185,7 @@ class TestAgencyViews(TestCase):
         eq_(response.status_code, 200)
         data = json.loads(response.content)
         assert_in('{ law name }', data['intro'])
-        assert_in('{ number of days }', data['outro'])
+        assert_in('{ days }', data['outro'])
         assert_in('John Doe', data['outro'])
 
     def test_contact_info(self):
