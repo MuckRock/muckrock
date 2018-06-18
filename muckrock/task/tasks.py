@@ -54,6 +54,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     """Save a PDF file for all open snail mail tasks"""
     # pylint: disable=too-many-locals
     # pylint: disable=unused-argument
+    # pylint: disable=too-many-statements
     cover_info = []
     bulk_merger = PdfFileMerger(strict=False)
 
