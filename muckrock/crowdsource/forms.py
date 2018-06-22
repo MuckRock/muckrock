@@ -37,7 +37,7 @@ class CrowdsourceAssignmentForm(forms.Form):
         super(CrowdsourceAssignmentForm, self).__init__(*args, **kwargs)
 
         for field in crowdsource.fields.all():
-            self.fields[field.label] = field.get_form_field()
+            self.fields[str(field.pk)] = field.get_form_field()
         if user.is_anonymous:
             self.fields['full_name'] = forms.CharField(
                 label='Full Name or Handle (Public)'
