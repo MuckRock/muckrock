@@ -182,4 +182,4 @@ class CoverPDF(PDF):
                             )
                         )
         text = u'\n'.join(lines)
-        self.multi_cell(0, 13, text)
+        self.multi_cell(0, 13, text, 0, 'L')

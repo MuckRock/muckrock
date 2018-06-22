@@ -443,7 +443,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                 'Getting request page to view list of documents',
             )
             documents = [
-                d.strip('- \r') for d in documents.split('\n') if d.strip()
+                d.strip('-* \r') for d in documents.split('\n') if d.strip()
             ]
             soup = BeautifulSoup(reply.content, 'lxml')
             for document in documents:

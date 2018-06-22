@@ -390,11 +390,11 @@ class CrowdsourceResponse(models.Model):
         # values created for them
         for key in ['data_id', 'full_name', 'email', 'newsletter']:
             data.pop(key, None)
-        for label, value in data.iteritems():
+        for pk, value in data.iteritems():
             try:
                 field = CrowdsourceField.objects.get(
                     crowdsource=self.crowdsource,
-                    label=label,
+                    pk=pk,
                 )
                 self.values.create(
                     field=field,
