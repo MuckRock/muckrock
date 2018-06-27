@@ -232,6 +232,7 @@ INSTALLED_APPS = (
     'constance',
     'constance.backends.database',
     'django_extensions',
+    'social_django',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -306,6 +307,7 @@ CELERY_ROUTES = {
 
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
+    'muckrock.accounts.backends.SquareletBackend',
     'muckrock.accounts.backends.CaseInsensitiveModelBackend',
     'lot.auth_backend.LOTBackend',
 )
@@ -675,3 +677,23 @@ ZOHO_DEPT_IDS = {
     'documentcloud': os.environ.get('ZOHO_DEPT_ID_DC', '280313000000190114'),
     'foiamachine': os.environ.get('ZOHO_DEPT_ID_FM', '280313000000194669'),
 }
+
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_SQUARELET_KEY = os.environ.get('SQUARELET_KEY')
+SOCIAL_AUTH_SQUARELET_SECRET = os.environ.get('SQUARELET_SECRET')
+SOCIAL_AUTH_TRAILING_SLASH = False
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'muckrock.accounts.backends.save_profile',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+SQUARELET_URL = os.environ.get('SQUARELET_URL')
