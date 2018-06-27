@@ -110,6 +110,9 @@ class OrganizationCreateView(CreateView):
         if not user.is_staff:
             organization.owner = user
         organization.save()
+        if not user.profile.organization:
+            user.profile.organization = organization
+            user.profile.save()
         self.object = organization
         # redirect to the success url with a nice message
         logging.info('%s created %s', user, organization)

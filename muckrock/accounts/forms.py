@@ -234,9 +234,13 @@ class RegisterOrganizationForm(RegisterForm):
 
     def create_organization(self, owner):
         """Creates and returns an organization from the form data"""
-        return Organization.objects.create(
-            name=self.cleaned_data['organization_name'], owner=owner
+        organization = Organization.objects.create(
+            name=self.cleaned_data['organization_name'],
+            owner=owner,
         )
+        owner.profile.organization = organization
+        owner.profile.save()
+        return organization
 
 
 class StripeForm(forms.Form):
