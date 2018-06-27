@@ -4,7 +4,7 @@ URL mappings for the accounts application
 
 # Django
 import django.contrib.auth.views as auth_views
-from django.conf.urls import url
+from django.conf.urls import include, url
 from django.contrib.auth.decorators import login_required
 
 # MuckRock
@@ -115,4 +115,5 @@ urlpatterns = [
         views.agency_redirect_login,
         name='acct-agency-redirect-login'
     ),
+    url(r'^', include('social_django.urls', namespace='social')),
 ]
