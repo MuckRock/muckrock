@@ -147,6 +147,9 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     notes = FOIANoteSerializer(many=True)
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
     tracking_id = serializers.ReadOnlyField(source='current_tracking_id')
+    datetime_submitted = serializers.ReadOnlyField(
+        source='composer.datetime_submitted'
+    )
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=super-on-old-class
@@ -204,6 +207,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             'username',
             'agency',
             # request dates
+            'datetime_submitted',
             'date_due',
             'days_until_due',
             'date_followup',

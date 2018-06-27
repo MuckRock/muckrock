@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for the crowdsource app"""
+"""Tests for crowdsource models"""
 
 # Django
 from django.contrib.auth.models import AnonymousUser

@@ -52,7 +52,7 @@ from muckrock.crowdsource.models import (
 
 
 class CrowdsourceDetailView(DetailView):
-    """A view for the crowdsource owner to view the particular crowdsource"""
+    """A view for those with permission to view the particular crowdsource"""
     template_name = 'crowdsource/detail.html'
     pk_url_kwarg = 'idx'
     query_pk_and_slug = True
@@ -64,10 +64,11 @@ class CrowdsourceDetailView(DetailView):
     )
 
     def dispatch(self, *args, **kwargs):
-        """Redirect to assignment page for non owner, non staff"""
+        """Redirect to assignment page for those without permission"""
         crowdsource = self.get_object()
-        is_owner = self.request.user == crowdsource.user
-        if not is_owner and not self.request.user.is_staff:
+        if not self.request.user.has_perm(
+            'crowdsource.view_crowdsource', crowdsource
+        ):
             return redirect(
                 'crowdsource-assignment',
                 slug=crowdsource.slug,
@@ -154,18 +155,15 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
         """Check permissions"""
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
-        project_only = self.object.project_only and self.object.project
-        owner_or_staff = (
-            request.user.is_staff or request.user == self.object.user
+        edit_perm = request.user.has_perm(
+            'crowdsource.change_crowdsource', self.object
         )
-        is_contributor = (
-            self.object.project
-            and self.object.project.has_contributor(request.user)
+        form_perm = request.user.has_perm(
+            'crowdsource.form_crowdsource', self.object
         )
-        user_allowed = owner_or_staff or is_contributor
-        if self.object.status == 'draft' and not owner_or_staff:
+        if self.object.status == 'draft' and not edit_perm:
             raise Http404
-        if project_only and not user_allowed:
+        if not form_perm:
             messages.error(request, 'That crowdsource is private')
             return redirect('crowdsource-list')
         return super(CrowdsourceFormView,
@@ -388,7 +386,7 @@ class CrowdsourceListView(MRFilterListView):
         ).prefetch_related(
             'data',
             'responses',
-        )
+        ).distinct()
         return queryset.get_viewable(self.request.user)
 
     def get_context_data(self, **kwargs):
@@ -460,7 +458,9 @@ class CrowdsourceUpdateView(UpdateView):
         # pylint: disable=attribute-defined-outside-init
         crowdsource = self.get_object()
         editable = crowdsource.status == 'draft'
-        user_allowed = request.user == crowdsource.user or request.user.is_staff
+        user_allowed = request.user.has_perm(
+            'crowdsource.change_crowdsource', crowdsource
+        )
         if not editable or not user_allowed:
             messages.error(request, 'You may not edit this crowdsource')
             return redirect(crowdsource)

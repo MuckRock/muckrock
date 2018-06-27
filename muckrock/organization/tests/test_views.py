@@ -27,7 +27,8 @@ class TestCreateView(TestCase):
     def setUp(self):
         self.url = reverse('org-create')
         self.request_factory = RequestFactory()
-        self.create_view = muckrock.organization.views.OrganizationCreateView.as_view(
+        self.create_view = (
+            muckrock.organization.views.OrganizationCreateView.as_view()
         )
 
     def test_get_ok(self):

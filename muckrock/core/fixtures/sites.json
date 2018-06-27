@@ -1,0 +1,26 @@
+[
+{
+    "model": "sites.site",
+    "pk": 1,
+    "fields": {
+        "domain": "www.muckrock.com",
+        "name": "MuckRock.com"
+    }
+},
+{
+    "model": "sites.site",
+    "pk": 2,
+    "fields": {
+        "domain": "www.foiamachine.org",
+        "name": "FOIA Machine"
+    }
+},
+{
+    "model": "sites.site",
+    "pk": 3,
+    "fields": {
+        "domain": "localhost:8000",
+        "name": "MuckRock"
+    }
+}
+]
