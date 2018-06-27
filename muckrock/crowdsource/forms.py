@@ -99,6 +99,7 @@ class CrowdsourceForm(forms.ModelForm):
             'data_csv',
             'multiple_per_page',
             'project_only',
+            'project_admin',
             'submission_emails',
         )
 

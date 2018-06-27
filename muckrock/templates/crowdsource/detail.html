@@ -62,6 +62,8 @@
         <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
         <dt>Project Only</dt>
         <dd>{{crowdsource.project_only}}</dd>
+        <dt>Project Admin</dt>
+        <dd>{{crowdsource.project_admin}}</dd>
       {% endif %}
       {% if crowdsource.data.all %}
         <dt>Data Count</dt>

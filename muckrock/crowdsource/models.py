@@ -90,6 +90,12 @@ class Crowdsource(models.Model):
         help_text='Only members of the project will be able to complete '
         'assignments for this crowdsource',
     )
+    project_admin = models.BooleanField(
+        default=False,
+        help_text=
+        'Members of this project will be able to manage this crowdsource '
+        'as if they were the owner',
+    )
     data_limit = models.PositiveSmallIntegerField(
         default=3,
         help_text='Number of times each data assignment will be completed '
@@ -206,6 +212,10 @@ class Crowdsource(models.Model):
 
     class Meta:
         verbose_name = 'assignment'
+        permissions = ((
+            'form_crowdsource',
+            'Can view and fill out the assignments for this crowdsource'
+        ),)
 
 
 class CrowdsourceDataQuerySet(models.QuerySet):
