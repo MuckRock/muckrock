@@ -10,7 +10,7 @@ from __future__ import absolute_import
 from rules import add_perm, is_staff, predicate
 
 # MuckRock
-from muckrock.foia.rules import is_advanced, user_authenticated
+from muckrock.foia.rules import is_advanced, skip_if_not_obj, user_authenticated
 
 
 @predicate
@@ -20,23 +20,27 @@ def is_experimental(user):
 
 
 @predicate
+@skip_if_not_obj
 @user_authenticated
 def is_owner(user, crowdsource):
     return crowdsource.user == user
 
 
 @predicate
+@skip_if_not_obj
 def is_project_only(user, crowdsource):
     return crowdsource.project_only and crowdsource.project
 
 
 @predicate
+@skip_if_not_obj
 @user_authenticated
 def is_contributor(user, crowdsource):
     return crowdsource.project.has_contributor(user)
 
 
 @predicate
+@skip_if_not_obj
 @user_authenticated
 def is_project_admin(user, crowdsource):
     return (

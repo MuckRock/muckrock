@@ -18,16 +18,16 @@ from rules import add_perm, is_authenticated, is_staff, predicate
 from muckrock.foia.models.request import END_STATUS
 
 
-def skip_if_not_foia(func):
+def skip_if_not_obj(func):
     """Decorator for predicates
-    Skip the predicate if foia is None"""
+    Skip the predicate if obj is None"""
 
     @wraps(func)
-    def inner(user, foia):
-        if foia is None:
+    def inner(user, obj):
+        if obj is None:
             return None
         else:
-            return func(user, foia)
+            return func(user, obj)
 
     return inner
 
@@ -52,7 +52,7 @@ def user_authenticated(func):
 
 def has_status(*statuses):
     @predicate('has_status:%s' % ','.join(statuses))
-    @skip_if_not_foia
+    @skip_if_not_obj
     def inner(user, foia):
         return foia.status in statuses
 
@@ -60,7 +60,7 @@ def has_status(*statuses):
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def is_owner(user, foia):
     return foia.user == user
 
@@ -71,7 +71,7 @@ def no_foia(user, foia):
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def is_editor(user, foia):
     return (
         user.is_authenticated()
@@ -80,7 +80,7 @@ def is_editor(user, foia):
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def is_read_collaborator(user, foia):
     return (
         user.is_authenticated()
@@ -89,7 +89,7 @@ def is_read_collaborator(user, foia):
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 @user_authenticated
 def is_org_shared(user, foia):
     return (
@@ -103,7 +103,7 @@ is_viewer = is_read_collaborator | is_org_shared
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def is_embargoed(user, foia):
     return foia.embargo
 
@@ -112,7 +112,7 @@ is_private = is_embargoed
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def has_thanks(user, foia):
     return foia.communications.filter(thanks=True).exists()
 
@@ -121,13 +121,13 @@ is_thankable = ~has_thanks & has_status(*END_STATUS)
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def has_appealable_jurisdiction(user, foia):
     return foia.agency and foia.agency.jurisdiction.has_appeal
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def is_overdue(user, foia):
     return foia.date_due is not None and foia.date_due < date.today()
 
@@ -139,13 +139,13 @@ is_appealable = has_appealable_jurisdiction & (
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def has_crowdfund(user, foia):
     return bool(foia.crowdfund)
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 def has_open_crowdfund(user, foia):
     return bool(foia.crowdfund) and not foia.crowdfund.expired()
 
@@ -154,7 +154,7 @@ is_payable = has_status('payment') & ~has_open_crowdfund
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 @user_authenticated
 def match_agency(user, foia):
     return bool(user.profile.agency and user.profile.agency == foia.agency)
@@ -201,7 +201,7 @@ can_view = can_edit | is_viewer | is_from_agency | ~is_private
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 @user_authenticated
 def can_view_composer_child(user, composer):
     for foia in composer.foias.all():
@@ -211,7 +211,7 @@ def can_view_composer_child(user, composer):
 
 
 @predicate
-@skip_if_not_foia
+@skip_if_not_obj
 @user_authenticated
 def is_owner_composer(user, composer):
     if composer.user_id == user.pk:
