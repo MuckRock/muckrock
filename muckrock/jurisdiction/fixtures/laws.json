@@ -1,0 +1,13 @@
+[
+	{
+        "pk": 1,
+        "model": "jurisdiction.law",
+        "fields": {
+            "jurisdiction": 1,
+            "name": "Law 1",
+            "shortname": "l1",
+            "citation": "c1",
+            "url": "exmaple.com"
+        }
+    }
+]
