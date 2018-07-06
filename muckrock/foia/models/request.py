@@ -69,8 +69,12 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    agency = models.ForeignKey('agency.Agency')
-    composer = models.ForeignKey('foia.FOIAComposer', related_name='foias')
+    agency = models.ForeignKey('agency.Agency', on_delete=models.PROTECT)
+    composer = models.ForeignKey(
+        'foia.FOIAComposer',
+        on_delete=models.PROTECT,
+        related_name='foias',
+    )
     datetime_updated = models.DateTimeField(
         blank=True,
         null=True,
@@ -102,6 +106,7 @@ class FOIARequest(models.Model):
 
     portal = models.ForeignKey(
         'portal.Portal',
+        on_delete=models.SET_NULL,
         related_name='foias',
         blank=True,
         null=True,
@@ -112,6 +117,7 @@ class FOIARequest(models.Model):
     )
     email = models.ForeignKey(
         'communication.EmailAddress',
+        on_delete=models.SET_NULL,
         related_name='foias',
         blank=True,
         null=True,
@@ -122,12 +128,14 @@ class FOIARequest(models.Model):
     )
     fax = models.ForeignKey(
         'communication.PhoneNumber',
+        on_delete=models.SET_NULL,
         related_name='foias',
         blank=True,
         null=True,
     )
     address = models.ForeignKey(
         'communication.Address',
+        on_delete=models.SET_NULL,
         related_name='foias',
         blank=True,
         null=True,
