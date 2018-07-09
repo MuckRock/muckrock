@@ -227,7 +227,7 @@ class muckrock {
 	} ->
 	exec { "load data":
 		user => 'vagrant',
-		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py loaddata test_users test_profiles test_statistics jurisdictions agency_types test_agencies holidays test_news tagged_item_base taggit tags sites flatpages'",
+		command => "/bin/bash -c 'source ~/.bashrc; /home/vagrant/ve/muckrock/bin/python /home/vagrant/muckrock/manage.py loaddata test_users test_profiles test_statistics jurisdictions agency_types test_agencies holidays test_news tagged_item_base taggit tags sites flatpages laws'",
 	} ->
 	exec { "install watson":
 		user => 'vagrant',
