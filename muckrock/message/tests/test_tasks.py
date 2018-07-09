@@ -11,6 +11,7 @@ from django.test import TestCase
 # Third Party
 import mock
 import nose.tools
+import requests_mock
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
@@ -138,6 +139,7 @@ class TestNotificationTasks(TestCase):
         tasks.email_verify(self.user)
         mock_send.assert_called_with(fail_silently=False)
 
+    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
     def test_support(self, mock_send):
         """Notifies the user with a support response."""
         task = FlaggedTaskFactory()

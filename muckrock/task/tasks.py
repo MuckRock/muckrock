@@ -23,7 +23,7 @@ from PyPDF2.utils import PdfReadError
 from muckrock.communication.models import MailCommunication
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.filters import SnailMailTaskFilterSet
-from muckrock.task.models import SnailMailTask
+from muckrock.task.models import FlaggedTask, SnailMailTask
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
 
 
@@ -134,3 +134,18 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     key.key = pdf_name
     key.set_contents_from_file(bulk_pdf)
     key.set_canned_acl('public-read')
+
+
+@task(ignore_result=True, name='muckrock.task.tasks.create_zoho_ticket')
+def create_zoho_ticket(flag_pk, **kwargs):
+    """Create a zoho ticket from a flag"""
+    flag = FlaggedTask.objects.get(pk=flag_pk)
+    zoho_id = flag.create_zoho_ticket()
+    if zoho_id is None:
+        raise create_zoho_ticket.retry(
+            countdown=300,
+            args=[flag_pk],
+            kwargs=kwargs,
+        )
+    else:
+        flag.resolve(form_data={'zoho_id': zoho_id})

@@ -1,12 +1,12 @@
 """
 Test the API viewsets for the Jurisdiction application.
 """
-
 # Django
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 # Third Party
+import mock
 from nose.tools import eq_, ok_
 from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -87,6 +87,7 @@ class TestExemptionList(TestCase):
         )
 
 
+@mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
 class TestExemptionCreation(TestCase):
     """
     The exemption creation view allows new exemptions to be submitted for staff

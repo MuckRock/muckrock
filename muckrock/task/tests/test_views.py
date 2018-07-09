@@ -335,6 +335,7 @@ class SnailMailTaskViewTests(TestCase):
 class FlaggedTaskViewTests(TestCase):
     """Tests FlaggedTask POST handlers"""
 
+    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
     def setUp(self):
         self.user = UserFactory(is_staff=True)
         self.url = reverse('flagged-task-list')
