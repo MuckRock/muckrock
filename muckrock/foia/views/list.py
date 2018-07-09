@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.postgres.aggregates.general import StringAgg
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Count, DurationField, F, Prefetch
 from django.db.models.functions import Cast, Now
@@ -199,7 +200,7 @@ class RequestList(MRSearchFilterListView):
                 context['paginator'].object_list.select_related(None)
                 .select_related(
                     'composer__user',
-                    'agency__jurisdiction',
+                    'agency__jurisdiction__parent',
                 ).prefetch_related(
                     'tracking_ids',
                 ).only(
@@ -210,6 +211,8 @@ class RequestList(MRSearchFilterListView):
                     'agency__jurisdiction__name',
                     'agency__jurisdiction__slug',
                     'agency__jurisdiction__id',
+                    'agency__jurisdiction__parent__name',
+                    'agency__jurisdiction__parent__id',
                     'agency__name',
                     'agency__id',
                     'date_followup',
@@ -232,6 +235,7 @@ class RequestList(MRSearchFilterListView):
                     tag_names=StringAgg('tags__name', ',', distinct=True),
                 )
             )
+            paginator = Paginator(foias, 1000)
             writer = csv.writer(psuedo_buffer)
             response = StreamingHttpResponse(
                 chain(
@@ -239,7 +243,8 @@ class RequestList(MRSearchFilterListView):
                     (
                         writer.writerow(f[0](foia)
                                         for f in fields)
-                        for foia in foias
+                        for p in paginator.page_range
+                        for foia in paginator.page(p).object_list
                     ),
                 ),
                 content_type='text/csv',
