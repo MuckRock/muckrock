@@ -36,6 +36,7 @@ from muckrock.core.views import (
     class_view_decorator,
 )
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
+from muckrock.foia.constants import FOIA_CSV_CHUNK_SIZE
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
     FOIARequestFilterSet,
@@ -235,7 +236,7 @@ class RequestList(MRSearchFilterListView):
                     tag_names=StringAgg('tags__name', ',', distinct=True),
                 )
             )
-            paginator = Paginator(foias, 1000)
+            paginator = Paginator(foias, FOIA_CSV_CHUNK_SIZE)
             writer = csv.writer(psuedo_buffer)
             response = StreamingHttpResponse(
                 chain(
