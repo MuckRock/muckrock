@@ -11,7 +11,7 @@ from muckrock.news.models import Article
 
 class ArticleAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete for picking articles"""
-    choices = Article.objects.get_published()
+    choices = Article.objects.get_published().prefetch_related('authors')
     choice_template = 'autocomplete/article.html'
     search_fields = ['title']
     attrs = {
