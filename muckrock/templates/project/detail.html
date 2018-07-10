@@ -7,216 +7,218 @@
 {% load rules %}
 
 {% block title %}
-{{ project.title }}
+  {{ project.title }}
 {% endblock %}
 
 {% block description %}
-<meta name="description" content="{{ project.description }}" />
+  <meta name="description" content="{{ project.description }}" />
 {% endblock %}
 
 {% block open_graph %}
-<meta property="og:type" content="article" />
-<meta property="og:title" content="{{ project.title }}" />
-<meta property="og:description" content="{{ project.summary }}" />
-<meta property="og:url" content="{{ project.get_absolute_url }}" />
-<meta property="og:site_name" content="MuckRock" />
-{% if project.image %}
-<meta property="og:image" content="{{ project.image.url }}" />
-{% endif %}
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="{{ project.title }}" />
+  <meta property="og:description" content="{{ project.summary }}" />
+  <meta property="og:url" content="{{ project.get_absolute_url }}" />
+  <meta property="og:site_name" content="MuckRock" />
+  {% if project.image %}
+    <meta property="og:image" content="{{ project.image.url }}" />
+  {% endif %}
 {% endblock open_graph %}
 
 {% block twitter_card %}
-<meta name="twitter:site" content="@muckrock" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="{{ project.title }}" />
-<meta name="twitter:description" content="{{ project.summary }}" />
-{% if project.image %}
-<meta name="twitter:image:src" content="{{ project.image.url }}" />
-{% endif %}
-{% for contributor in contributors %}
-{% if contributor.profile.twitter %}
-<meta name="twitter:creator" content="{{ contributor.profile.twitter }}" />
-{% endif %}
-{% endfor %}
+  <meta name="twitter:site" content="@muckrock" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ project.title }}" />
+  <meta name="twitter:description" content="{{ project.summary }}" />
+  {% if project.image %}
+    <meta name="twitter:image:src" content="{{ project.image.url }}" />
+  {% endif %}
+  {% for contributor in contributors %}
+    {% if contributor.profile.twitter %}
+      <meta name="twitter:creator" content="{{ contributor.profile.twitter }}" />
+    {% endif %}
+  {% endfor %}
 {% endblock twitter_card %}
 
 {% block content %}
-<div class="project detail">
+  <div class="project detail">
     {% if project.image %}
-    <div class="project__image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
+      <div class="project__image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');"></div>
     {% endif %}
     {% if user_can_edit and project.private and not project.approved %}
-    <section class="launch prompt">
+      <section class="launch prompt">
         <h3>Launch your project</h3>
         <ol>
-            {% if project.image %}
+          {% if project.image %}
             <li class="strikethrough">Pick a cover image</li>
-            {% else %}
+          {% else %}
             <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#basics">Pick a cover image</a></li>
-            {% endif %}
-            {% if project.description %}
+          {% endif %}
+          {% if project.description %}
             <li class="strikethrough">Write a description</li>
-            {% else %}
+          {% else %}
             <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#description">Write a description</a></li>
-            {% endif %}
-            {% if project.contributors.count > 1 %}
+          {% endif %}
+          {% if project.contributors.count > 1 %}
             <li class="strikethrough">Add contributors</li>
-            {% else %}
+          {% else %}
             <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors">Add contributors</a></li>
-            {% endif %}
-            {% if project.requests.count > 1 %}
+          {% endif %}
+          {% if project.requests.count > 1 %}
             <li class="strikethrough">Attach requests</li>
-            {% else %}
+          {% else %}
             <li><a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#requests">Attach requests</a></li>
-            {% endif %}
-            <li><a href="{% url 'project-publish' slug=project.slug pk=project.pk %}">Publish!</a></li>
+          {% endif %}
+          <li><a href="{% url 'project-publish' slug=project.slug pk=project.pk %}">Publish!</a></li>
         </ol>
-    </section>
+      </section>
     {% endif %}
     <section class="overview">
-        <main class="overview__main">
-            <h1 class="title">{{ project.title }}</h1>
-            <summary>
-                {{ project.summary }}
-            </summary>
-            {% if project.newsletter %}
-            {% newsletter list_id=project.newsletter label=newsletter_label cta=newsletter_cta %}
-            {% endif %}
-			{% with project.crowdfunds.all as crowdfunds %}
-            {% if crowdfunds %}
-            <section class="project-crowdfunds">
-				{% for crowdfund in crowdfunds %}
-					{% crowdfund crowdfund=crowdfund %}
-				{% endfor %}
-            </section>
-            {% endif %}
-			{% endwith %}
-            {% if project.description %}
-            <section class="project-description">
-                {{ project.description|markdown }}
-            </section>
-            {% endif %}
-        </main>
-        <aside class="overview__aside">
-            {% if project.approved and not project.private %}
-            {% social title=project.title url=project.get_absolute_url %}
-            {% endif %}
-            {% if user_can_edit %}
-            <div class="project-controls">
-                <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
-                    Edit
-                </a>
-                {% if project.approved and not project.private %}
-                <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="green button">
-                    Crowdfund
-                </a>
-                {% endif %}
-                {% if not project.approved and project.private %}
-                <a href="{% url 'project-publish' slug=project.slug pk=project.pk %}" class="blue button">
-                    Publish
-                </a>
-                {% endif %}
-            </div>
-            {% endif %}
-            <div class="badges">
-            {% if project.featured %}
-                <span class="small blue badge">&#9733; Featured</span>
-            {% endif %}
-            {% if project.private %}
-                <span class="small red badge">&empty; Private</span>
-            {% elif not project.private and not project.approved %}
-                <span class="small grey badge">Awaiting Review</span>
-            {% endif %}
-            </div>
-            {% if visible_requests or articles %}
-            <ul class="nostyle inline stats">
-                {% if visible_requests %}
-                    <li class="stat"><a href="{{project.get_absolute_url}}#requests"><span class="value">{{visible_requests|length}}</span> request{{visible_requests|length|pluralize}}</a></li>
-                {% endif %}
-                {% if articles %}
-                    <li class="stat"><a href="{{project.get_absolute_url}}#articles"><span class="value">{{articles|length}}</span> article{{articles|length|pluralize}}</a></li>
-                {% endif %}
-            </ul>
-            {% endif %}
-            {% if contributors %}
-            <div class="contributors">
-                <header class="space-between mb0">
-                    <dfn>Contributors</dfn>
-                    <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="small action">Edit</a>
-                </header>
-                {% for contributor in contributors %}
-                <div class="contributor align-center">
-                    <a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
-                        {% if contributor.profile.avatar %}
-                        <img class="avatar" src="{% thumbnail contributor.profile.avatar 50x50 %}">
-                        {% else %}
-                        <img class="avatar" src="{% static 'img/defaultavatar.png' %}" height="50" width="50">
-                        {% endif %}
-                    </a>
-                    <div class="info">
-                        <p class="name bold mb0"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
-                            {{ contributor.get_full_name }}
-                        </a></p>
-                        <p class="small links space-between">
-                            {% if contributor.profile.organization %}
-                            <a href="{{ contributor.profile.organization.get_absolute_url }}">
-                                {{ contributor.profile.organization }}
-                            </a>
-                            {% endif %}
-                            {% if contributor.profile.twitter %}
-                            <a href="https://www.twitter.com/{{contributor.profile.twitter}}">
-                                {% include 'lib/component/icon/twitter.svg' %}
-                            </a>
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% tag_manager project %}
-        </aside>
-    </section>
-	{% cache cache_timeout project_detail_objects project.pk %}
-    <section class="objects">
-        {% if articles %}
-        <section class="articles" id="articles">
-            <h2>{{ articles|length }} Article{{ articles|length|pluralize }}</h2>
-            {% for article in articles %}
-            {% include 'lib/pattern/article.html' with small=True hide_project=True %}
+      <main class="overview__main">
+      <h1 class="title">{{ project.title }}</h1>
+      <summary>
+        {{ project.summary }}
+      </summary>
+      {% if project.newsletter %}
+        {% newsletter list_id=project.newsletter label=newsletter_label cta=newsletter_cta %}
+      {% endif %}
+      {% with project.crowdfunds.all as crowdfunds %}
+        {% if crowdfunds %}
+          <section class="project-crowdfunds">
+            {% for crowdfund in crowdfunds %}
+              {% crowdfund crowdfund=crowdfund %}
             {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+      {% if project.description %}
+        <section class="project-description">
+          {{ project.description|markdown }}
         </section>
+      {% endif %}
+      </main>
+      <aside class="overview__aside">
+        {% if project.approved and not project.private %}
+          {% social title=project.title url=project.get_absolute_url %}
+        {% endif %}
+        {% if user_can_edit %}
+          <div class="project-controls">
+            <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}" class="blue button">
+              Edit
+            </a>
+            {% if project.approved and not project.private %}
+              <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="green button">
+                Crowdfund
+              </a>
+            {% endif %}
+            {% if not project.approved and project.private %}
+              <a href="{% url 'project-publish' slug=project.slug pk=project.pk %}" class="blue button">
+                Publish
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+        <div class="badges">
+          {% if project.featured %}
+            <span class="small blue badge">&#9733; Featured</span>
+          {% endif %}
+          {% if project.private %}
+            <span class="small red badge">&empty; Private</span>
+          {% elif not project.private and not project.approved %}
+            <span class="small grey badge">Awaiting Review</span>
+          {% endif %}
+        </div>
+        {% if visible_requests or articles %}
+          <ul class="nostyle inline stats">
+            {% if visible_requests %}
+              <li class="stat"><a href="{{project.get_absolute_url}}#requests"><span class="value">{{visible_requests_count}}</span> request{{visible_requests_count|pluralize}}</a></li>
+            {% endif %}
+            {% if articles %}
+              <li class="stat"><a href="{{project.get_absolute_url}}#articles"><span class="value">{{articles_count}}</span> article{{articles_count|pluralize}}</a></li>
+            {% endif %}
+          </ul>
+        {% endif %}
+        {% if contributors %}
+          <div class="contributors">
+            <header class="space-between mb0">
+              <dfn>Contributors</dfn>
+              <a href="{% url 'project-edit' slug=project.slug pk=project.pk %}#contributors" class="small action">Edit</a>
+            </header>
+            {% for contributor in contributors %}
+              <div class="contributor align-center">
+                <a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
+                  {% if contributor.profile.avatar %}
+                    <img class="avatar" src="{% thumbnail contributor.profile.avatar 50x50 %}">
+                  {% else %}
+                    <img class="avatar" src="{% static 'img/defaultavatar.png' %}" height="50" width="50">
+                  {% endif %}
+                </a>
+                <div class="info">
+                  <p class="name bold mb0"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
+                    {{ contributor.get_full_name }}
+                  </a></p>
+                  <p class="small links space-between">
+                  {% if contributor.profile.organization %}
+                    <a href="{{ contributor.profile.organization.get_absolute_url }}">
+                      {{ contributor.profile.organization }}
+                    </a>
+                  {% endif %}
+                  {% if contributor.profile.twitter %}
+                    <a href="https://www.twitter.com/{{contributor.profile.twitter}}">
+                      {% include 'lib/component/icon/twitter.svg' %}
+                    </a>
+                  {% endif %}
+                  </p>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% tag_manager project %}
+      </aside>
+    </section>
+    {% cache cache_timeout project_detail_objects project.pk %}
+      <section class="objects">
+        {% if articles %}
+          <section class="articles" id="articles">
+            <h2>{{ articles_count }} Article{{ articles_count|pluralize }}</h2>
+            {% for article in articles %}
+              {% include 'lib/pattern/article.html' with small=True hide_project=True %}
+            {% endfor %}
+            <a href="{% url "news-archive" %}?projects={{ project.pk }}">View all...</a>
+          </section>
         {% endif %}
         {% if visible_requests %}
-        {% has_perm 'foia.export_csv' request.user as can_export %}
-        <section class="requests" id="requests">
-            <h2>{{visible_requests|length}} Request{{ visible_requests|length|pluralize }}</h2>
+          {% has_perm 'foia.export_csv' request.user as can_export %}
+          <section class="requests" id="requests">
+            <h2>{{visible_requests_count}} Request{{ visible_requests_count|pluralize }}</h2>
             {% if can_export %}
-                <p><a href="{% url "foia-list" %}?projects={{ project.pk }}&content_type=csv" class="blue button">
-                    <span>Export Requests as CSV</span>
-                </a></p>
+              <p><a href="{% url "foia-list" %}?projects={{ project.pk }}&content_type=csv" class="blue button">
+                <span>Export Requests as CSV</span>
+              </a></p>
             {% endif %}
             {% for foia in visible_requests %}
-            {% include 'lib/foia.html' with hide_actions=True %}
+              {% include 'lib/foia.html' with hide_actions=True %}
             {% endfor %}
-        </section>
+            <a href="{% url "foia-list" %}?projects={{ project.pk }}">View all...</a>
+          </section>
         {% endif %}
-    </section>
-	{% endcache %}
+      </section>
+    {% endcache %}
 
     {% if project.maps.exists and user_is_experimental %}
-    <section role="tabpanel" class="tab-panel maps" id="requests">
+      <section role="tabpanel" class="tab-panel maps" id="requests">
         <h2>Maps</h2>
         <ul>
-            {% for map in project.maps.all %}
+          {% for map in project.maps.all %}
             <li class="map"><a href="{{ map.get_absolute_url }}">{{ map.title }}</a></li>
-            {% endfor %}
+          {% endfor %}
         </ul>
-    </section>
+      </section>
     {% endif %}
-</div>
+  </div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+  <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 {% endblock scripts %}

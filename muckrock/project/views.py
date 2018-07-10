@@ -152,20 +152,26 @@ class ProjectDetailView(DetailView):
         context['sidebar_admin_url'] = reverse(
             'admin:project_project_change', args=(project.pk,)
         )
-        context['visible_requests'] = (
+        visible_requests = (
             project.requests.get_viewable(user).select_related(
                 'agency__jurisdiction__parent__parent',
                 'composer__user__profile',
-            ).get_public_file_count()
+            )
         )
-        context['followers'] = followers(project)
-        context['articles'] = (
+        context['visible_requests'] = visible_requests.get_public_file_count(
+            limit=6
+        )
+        context['visible_requests_count'] = visible_requests.count()
+        articles = (
             project.articles.get_published().prefetch_related(
                 Prefetch(
                     'authors', queryset=User.objects.select_related('profile')
                 )
             )
         )
+        context['articles'] = articles[:3]
+        context['articles_count'] = articles.count()
+        context['followers'] = followers(project)
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'
                 ] = user.is_authenticated() and user.profile.experimental
