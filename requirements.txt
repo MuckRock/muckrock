@@ -55,7 +55,7 @@ django-reversion==1.10.2
 django-robots==2.0
 django-secure==1.0.1
 django-sslify==0.2.7
-django-storages==1.5.1
+django-storages==1.6.6
 django-taggit==0.20.1
 django-watson==1.4.1
 django-webpack-loader==0.3.0
