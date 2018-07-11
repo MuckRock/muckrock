@@ -24,7 +24,7 @@ contextlib2==0.5.4        # via raven
 cssselect==0.9.2          # via premailer
 cssutils==1.0.1           # via premailer
 dill==0.2.5
-django-activity-stream==0.6.4
+django-activity-stream==0.6.5
 django-adaptors==0.2.5
 django-appconf==1.0.2     # via django-celery-email, django-compressor
 django-celery-email==1.1.5
