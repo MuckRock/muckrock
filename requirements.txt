@@ -28,7 +28,7 @@ django-activity-stream==0.6.4
 django-adaptors==0.2.5
 django-appconf==1.0.2     # via django-celery-email, django-compressor
 django-celery-email==1.1.5
-django-celery==3.2.1
+django-celery==3.2.2
 django-compat==1.0.14     # via django-hijack
 django-compressor==2.1
 django-constance[database]==2.0.0
