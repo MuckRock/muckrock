@@ -9,7 +9,7 @@ backports.functools-lru-cache==1.2.1  # via pylint
 backports.shutil-get-terminal-size==1.0.0  # via ipython
 certifi==2017.4.17        # via requests
 chardet==3.0.3            # via requests
-click==6.6                # via pip-tools
+click==6.7                # via pip-tools
 configparser==3.5.0       # via pylint
 coverage==4.2
 decorator==4.0.10         # via ipython, traitlets
