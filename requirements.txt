@@ -117,7 +117,7 @@ six==1.10.0               # via bleach, django-compat, django-extensions, django
 smart-open==1.4.0
 smartypants==1.8.6
 sqlparse==0.2.4           # via django-debug-toolbar
-stripe==1.75.0
+stripe==2.0.1
 typing==3.6.4             # via django-extensions
 unicodecsv==0.14.1
 unidecode==0.4.19
