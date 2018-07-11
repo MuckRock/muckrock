@@ -85,7 +85,7 @@ packaging==16.8
 pascha==0.5
 pdfrw==0.4
 phonenumberslite==8.8.2
-pillow==4.2.1
+pillow==5.2.0
 premailer==3.0.0          # via django-premailer
 psycopg2==2.7.4
 pyasn1-modules==0.2.1     # via oauth2client
