@@ -3,40 +3,31 @@ Views to display lists of FOIA requests
 """
 
 # Django
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.postgres.aggregates.general import StringAgg
-from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
-from django.db.models import Count, DurationField, F, Prefetch
-from django.db.models.functions import Cast, Now
-from django.http import Http404, StreamingHttpResponse
+from django.db.models import Count, Prefetch
+from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 # Standard Library
 from datetime import date, timedelta
-from itertools import chain
 
 # Third Party
 import actstream
-import unicodecsv as csv
 from actstream.models import following
 from furl import furl
 
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.core.forms import TagManagerForm
-from muckrock.core.models import ExtractDay
-from muckrock.core.utils import Echo
 from muckrock.core.views import (
     MRListView,
     MRSearchFilterListView,
     class_view_decorator,
 )
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
-from muckrock.foia.constants import FOIA_CSV_CHUNK_SIZE
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
     FOIARequestFilterSet,
@@ -55,6 +46,7 @@ from muckrock.foia.models import (
     FOIASavedSearch,
 )
 from muckrock.foia.rules import can_embargo, can_embargo_permananently
+from muckrock.foia.tasks import export_csv
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
@@ -168,94 +160,17 @@ class RequestList(MRSearchFilterListView):
         wants_csv = self.request.GET.get('content_type') == 'csv'
         has_perm = self.request.user.has_perm('foia.export_csv')
         if wants_csv and has_perm:
-            psuedo_buffer = Echo()
-            fields = (
-                (lambda f: f.user.username, 'User'),
-                (lambda f: f.title, 'Title'),
-                (lambda f: f.get_status_display(), 'Status'),
-                (lambda f: settings.MUCKROCK_URL + f.get_absolute_url(), 'URL'),
-                (lambda f: f.jurisdiction.name, 'Jurisdiction'),
-                (lambda f: f.jurisdiction.pk, 'Jurisdiction ID'),
-                (
-                    lambda f: f.jurisdiction.get_level_display(),
-                    'Jurisdiction Level',
-                ),
-                (
-                    lambda f: f.jurisdiction.parent.name
-                    if f.jurisdiction.level == 'l' else f.jurisdiction.name,
-                    'Jurisdiction State',
-                ),
-                (lambda f: f.agency.name if f.agency else '', 'Agency'),
-                (lambda f: f.agency.pk if f.agency else '', 'Agency ID'),
-                (lambda f: f.date_followup, 'Followup Date'),
-                (lambda f: f.date_estimate, 'Estimated Completion Date'),
-                (lambda f: f.composer.requested_docs, 'Requested Documents'),
-                (lambda f: f.current_tracking_id(), 'Tracking Number'),
-                (lambda f: f.embargo, 'Embargo'),
-                (lambda f: f.days_since_submitted, 'Days since submitted'),
-                (lambda f: f.days_since_updated, 'Days since updated'),
-                (lambda f: f.project_names, 'Projects'),
-                (lambda f: f.tag_names, 'Tags'),
+            export_csv.delay(
+                context['paginator'].object_list.values_list('pk', flat=True),
+                self.request.user.pk,
             )
-            foias = (
-                context['paginator'].object_list.select_related(None)
-                .select_related(
-                    'composer__user',
-                    'agency__jurisdiction__parent',
-                ).prefetch_related(
-                    'tracking_ids',
-                ).only(
-                    'composer__user__username',
-                    'title',
-                    'status',
-                    'slug',
-                    'agency__jurisdiction__name',
-                    'agency__jurisdiction__slug',
-                    'agency__jurisdiction__id',
-                    'agency__jurisdiction__parent__name',
-                    'agency__jurisdiction__parent__id',
-                    'agency__name',
-                    'agency__id',
-                    'date_followup',
-                    'date_estimate',
-                    'embargo',
-                    'composer__requested_docs',
-                ).annotate(
-                    days_since_submitted=ExtractDay(
-                        Cast(
-                            Now() - F('composer__datetime_submitted'),
-                            DurationField()
-                        )
-                    ),
-                    days_since_updated=ExtractDay(
-                        Cast(Now() - F('datetime_updated'), DurationField())
-                    ),
-                    project_names=StringAgg(
-                        'projects__title', ',', distinct=True
-                    ),
-                    tag_names=StringAgg('tags__name', ',', distinct=True),
-                )
+            messages.info(
+                self.request,
+                'Your CSV is being processed.  It will be emailed to you when '
+                'it is ready.'
             )
-            paginator = Paginator(foias, FOIA_CSV_CHUNK_SIZE)
-            writer = csv.writer(psuedo_buffer)
-            response = StreamingHttpResponse(
-                chain(
-                    [writer.writerow(f[1] for f in fields)],
-                    (
-                        writer.writerow(f[0](foia)
-                                        for f in fields)
-                        for p in paginator.page_range
-                        for foia in paginator.page(p).object_list
-                    ),
-                ),
-                content_type='text/csv',
-            )
-            response['Content-Disposition'
-                     ] = 'attachment; filename="requests.csv"'
-            return response
-        else:
-            return super(RequestList,
-                         self).render_to_response(context, **kwargs)
+
+        return super(RequestList, self).render_to_response(context, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Allow saving a search/filter"""
