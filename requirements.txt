@@ -12,7 +12,7 @@ amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 babel==2.5.1              # via django-phonenumber-field
 beautifulsoup4==4.6.0
-billiard==3.3.0.23        # via celery
+billiard==3.5.0.4        # via celery
 bleach==2.1.2
 boto==2.42.0
 bz2file==0.98             # via smart-open
