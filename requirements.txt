@@ -51,7 +51,7 @@ django-picklefield==1.0.0  # via django-constance
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
-django-reversion==1.10.2
+django-reversion==2.0.13
 django-robots==2.0
 django-secure==1.0.1
 django-sslify==0.2.7
