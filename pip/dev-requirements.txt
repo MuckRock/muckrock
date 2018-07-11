@@ -37,7 +37,7 @@ lazy-object-proxy==1.2.2  # via astroid
 mccabe==0.5.2             # via pylint
 mock==2.0.0
 nose==1.3.7               # via django-nose
-paramiko==1.17.2          # via fabric
+paramiko==2.4.1          # via fabric
 pathlib2==2.1.0           # via ipython, pickleshare
 pbr==1.10.0               # via mock
 pexpect==4.2.1            # via ipython
