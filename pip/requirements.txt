@@ -73,7 +73,7 @@ httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
 image-diet2==1.0
 jsonfield==1.0.3
-kombu==3.0.35             # via celery
+kombu==4.2.1             # via celery
 lxml==3.6.4               # via premailer
 markdown==2.6.7
 newrelic==2.70.0.51
