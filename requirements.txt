@@ -72,7 +72,7 @@ html5lib==1.0.1           # via bleach
 httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
 image-diet2==1.0
-jsonfield==1.0.3
+jsonfield==2.0.2
 kombu==3.0.35             # via celery
 lxml==3.6.4               # via premailer
 markdown==2.6.7
