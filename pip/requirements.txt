@@ -10,7 +10,7 @@
 -e git+git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
-babel==2.5.1              # via django-phonenumber-field
+babel==2.6.0              # via django-phonenumber-field
 beautifulsoup4==4.6.0
 billiard==3.3.0.23        # via celery
 bleach==2.1.2
