@@ -111,7 +111,7 @@ rjsmin==1.0.12            # via django-compressor
 rsa==3.4.2                # via oauth2client
 rules==1.1.1
 scikit-learn==0.16.1
-scipy==0.14.0
+scipy==1.1.0
 simplejson==3.8.2         # via django-lot
 six==1.10.0               # via bleach, django-compat, django-extensions, django-geojson, furl, google-api-python-client, html5lib, oauth2client, orderedmultidict, packaging, python-dateutil
 smart-open==1.4.0
