@@ -122,6 +122,6 @@ typing==3.6.4             # via django-extensions
 unicodecsv==0.14.1
 unidecode==0.4.19
 uritemplate==3.0.0        # via google-api-python-client
-urllib3==1.21.1           # via requests
+urllib3==1.22           # via requests
 webencodings==0.5.1       # via html5lib
 xlrd==1.1.0
