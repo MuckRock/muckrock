@@ -104,7 +104,7 @@ pytz==2017.2              # via babel, celery, django
 pyyaml==3.12              # via pyimagediet
 raven==5.27.1
 rcssmin==1.0.6            # via django-compressor
-redis==2.10.5
+redis==2.10.6
 reportlab==3.4.0
 requests==2.18.1
 rjsmin==1.0.12            # via django-compressor
