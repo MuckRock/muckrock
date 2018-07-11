@@ -105,7 +105,7 @@ pyyaml==3.12              # via pyimagediet
 raven==5.27.1
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
-reportlab==3.4.0
+reportlab==3.5.0
 requests==2.18.1
 rjsmin==1.0.12            # via django-compressor
 rsa==3.4.2                # via oauth2client
