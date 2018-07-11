@@ -2,6 +2,9 @@
 Constants for the FOIA app
 """
 
+# Standard Library
+import os
+
 # submit a composer with a 35 minute delay
 COMPOSER_SUBMIT_DELAY = 35 * 60
 

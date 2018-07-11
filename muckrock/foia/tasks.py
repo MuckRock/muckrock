@@ -6,9 +6,12 @@ from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
+from django.db.models import DurationField, F
+from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.utils import timezone
 
@@ -21,15 +24,18 @@ import os.path
 import re
 import sys
 import urllib2
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+from hashlib import md5
 from random import randint
+from time import time as timestamp
 from urllib import quote_plus
 
 # Third Party
 import dill as pickle
 import numpy as np
 import requests
+import unicodecsv as csv
 from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError
@@ -38,6 +44,7 @@ from phaxio.exceptions import PhaxioError
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
+from smart_open import smart_open
 
 # MuckRock
 from muckrock.communication.models import (
@@ -45,6 +52,7 @@ from muckrock.communication.models import (
     FaxError,
     MailCommunication,
 )
+from muckrock.core.models import ExtractDay
 from muckrock.core.utils import generate_status_action
 from muckrock.foia.codes import CODES
 from muckrock.foia.exceptions import SizeError
@@ -54,6 +62,7 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIARequest,
 )
+from muckrock.message.email import TemplateEmail
 from muckrock.task.models import ResponseTask, ReviewAgencyTask
 from muckrock.vendor import MultipartPostHandler
 
@@ -765,3 +774,129 @@ def autoimport():
             'info@muckrock.com', ['info@muckrock.com'],
             fail_silently=False
         )
+
+
+@task(
+    ignore_result=True,
+    time_limit=600,
+    name='muckrock.foia.tasks.export_csv',
+)
+def export_csv(foia_pks, user_pk):
+    """Export a csv of the selected FOIA requests"""
+    fields = (
+        (lambda f: f.user.username, 'User'),
+        (lambda f: f.title, 'Title'),
+        (lambda f: f.get_status_display(), 'Status'),
+        (lambda f: settings.MUCKROCK_URL + f.get_absolute_url(), 'URL'),
+        (lambda f: f.jurisdiction.name, 'Jurisdiction'),
+        (lambda f: f.jurisdiction.pk, 'Jurisdiction ID'),
+        (
+            lambda f: f.jurisdiction.get_level_display(),
+            'Jurisdiction Level',
+        ),
+        (
+            lambda f: f.jurisdiction.parent.name
+            if f.jurisdiction.level == 'l' else f.jurisdiction.name,
+            'Jurisdiction State',
+        ),
+        (lambda f: f.agency.name if f.agency else '', 'Agency'),
+        (lambda f: f.agency.pk if f.agency else '', 'Agency ID'),
+        (lambda f: f.date_followup, 'Followup Date'),
+        (lambda f: f.date_estimate, 'Estimated Completion Date'),
+        (lambda f: f.composer.requested_docs, 'Requested Documents'),
+        (lambda f: f.current_tracking_id(), 'Tracking Number'),
+        (lambda f: f.embargo, 'Embargo'),
+        (lambda f: f.days_since_submitted, 'Days since submitted'),
+        (lambda f: f.days_since_updated, 'Days since updated'),
+        (lambda f: f.project_names, 'Projects'),
+        (lambda f: f.tag_names, 'Tags'),
+    )
+    foias = (
+        FOIARequest.objects.filter(pk__in=foia_pks).select_related(
+            'composer__user',
+            'agency__jurisdiction__parent',
+        ).only(
+            'composer__user__username',
+            'title',
+            'status',
+            'slug',
+            'agency__jurisdiction__name',
+            'agency__jurisdiction__slug',
+            'agency__jurisdiction__id',
+            'agency__jurisdiction__parent__name',
+            'agency__jurisdiction__parent__id',
+            'agency__name',
+            'agency__id',
+            'date_followup',
+            'date_estimate',
+            'embargo',
+            'composer__requested_docs',
+        ).annotate(
+            days_since_submitted=ExtractDay(
+                Cast(
+                    Now() - F('composer__datetime_submitted'), DurationField()
+                )
+            ),
+            days_since_updated=ExtractDay(
+                Cast(Now() - F('datetime_updated'), DurationField())
+            ),
+            project_names=StringAgg('projects__title', ',', distinct=True),
+            tag_names=StringAgg('tags__name', ',', distinct=True),
+        )
+    )
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    today = date.today()
+    file_key = 'exported_csv/{y:4d}/{m:02d}/{d:02d}/{md5}/requests.csv'.format(
+        y=today.year,
+        m=today.month,
+        d=today.day,
+        md5=md5(
+            '{}{}'.format(
+                int(timestamp()),
+                ''.join(str(pk) for pk in foia_pks[:100]),
+            )
+        ).hexdigest(),
+    )
+    key = bucket.new_key(file_key)
+    with smart_open(key, 'wb') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(f[1] for f in fields)
+        for foia in foias.iterator():
+            writer.writerow(f[0](foia) for f in fields)
+    key.set_acl('public-read')
+
+    notification = TemplateEmail(
+        user=User.objects.get(pk=user_pk),
+        extra_context={'file': file_key},
+        text_template='message/notification/csv_export.txt',
+        html_template='message/notification/csv_export.html',
+        subject='Your CSV Export',
+    )
+    notification.send(fail_silently=False)
+
+
+@periodic_task(
+    run_every=crontab(hour=1, minute=0),
+    name='muckrock.foia.tasks.clean_export_csv',
+)
+def clean_export_csv():
+    """Clean up exported CSVs that are more than 5 days old"""
+
+    p_csv = re.compile(r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests.csv')
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    older_than = date.today() - timedelta(5)
+    for key in bucket.list(prefix='exported_csv/'):
+        file_name = key.name[len('exported_csv/'):]
+        m_csv = p_csv.match(file_name)
+        if m_csv:
+            file_date = date(*(int(i) for i in m_csv.groups()))
+            if file_date < older_than:
+                key.delete()
