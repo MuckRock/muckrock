@@ -24,7 +24,7 @@ import os.path
 import re
 import sys
 import urllib2
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from hashlib import md5
 from random import randint
@@ -877,3 +877,26 @@ def export_csv(foia_pks, user_pk):
         subject='Your CSV Export',
     )
     notification.send(fail_silently=False)
+
+
+@periodic_task(
+    run_every=crontab(hour=1, minute=0),
+    name='muckrock.foia.tasks.clean_export_csv',
+)
+def clean_export_csv():
+    """Clean up exported CSVs that are more than 5 days old"""
+
+    p_csv = re.compile(r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests.csv')
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    older_than = date.today() - timedelta(5)
+    for key in bucket.list(prefix='exported_csv/'):
+        file_name = key.name[len('exported_csv/'):]
+        m_csv = p_csv.match(file_name)
+        if m_csv:
+            file_date = date(*(int(i) for i in m_csv.groups()))
+            if file_date < older_than:
+                key.delete()
