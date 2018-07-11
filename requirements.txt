@@ -22,7 +22,7 @@ chardet==3.0.3
 click==6.6                # via pyimagediet
 contextlib2==0.5.4        # via raven
 cssselect==0.9.2          # via premailer
-cssutils==1.0.1           # via premailer
+cssutils==1.0.2           # via premailer
 dill==0.2.5
 django-activity-stream==0.6.4
 django-adaptors==0.2.5
