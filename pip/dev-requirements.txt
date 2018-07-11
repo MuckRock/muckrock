@@ -17,7 +17,7 @@ dj-inmemorystorage==1.4.0
 django-debug-toolbar-request-history==0.0.5
 django-debug-toolbar==1.8  # via django-debug-toolbar-request-history
 django-nose==1.4.4
-django==1.11.4
+django==2.0.6
 ecdsa==0.13               # via paramiko
 enum34==1.1.6             # via traitlets
 fabric==1.12.0
