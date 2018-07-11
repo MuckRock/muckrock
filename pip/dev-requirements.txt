@@ -15,7 +15,7 @@ coverage==4.2
 decorator==4.0.10         # via ipython, traitlets
 dj-inmemorystorage==1.4.0
 django-debug-toolbar-request-history==0.0.5
-django-debug-toolbar==1.8  # via django-debug-toolbar-request-history
+django-debug-toolbar==1.9.1  # via django-debug-toolbar-request-history
 django-nose==1.4.4
 django==1.11.4
 ecdsa==0.13               # via paramiko
