@@ -61,6 +61,6 @@ traitlets==4.3.0          # via ipython
 urllib3==1.21.1           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
 whoosh==2.7.4
-wrapt==1.10.8             # via astroid
+wrapt==1.10.11             # via astroid
 yapf==0.20.1
 yet-another-django-profiler==1.0.3
