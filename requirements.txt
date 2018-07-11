@@ -67,7 +67,7 @@ fpdf==1.7.2
 furl==1.0.1
 fuzzywuzzy==0.14.0
 google-api-python-client==1.6.5
-gunicorn==19.6.0
+gunicorn==19.8.1
 html5lib==1.0.1           # via bleach
 httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
