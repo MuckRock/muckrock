@@ -97,7 +97,7 @@ pymdown-extensions==1.2
 pyparsing==2.2.0          # via packaging
 pypdf2==1.26.0
 pyphaxio==0.11
-python-dateutil==2.5.3
+python-dateutil==2.7.3
 python-levenshtein==0.12.0
 python-magic==0.4.12      # via pyimagediet
 pytz==2017.2              # via babel, celery, django
