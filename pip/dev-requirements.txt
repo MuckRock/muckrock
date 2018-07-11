@@ -28,7 +28,7 @@ freezegun==0.3.8
 funcsigs==1.0.2           # via mock
 futures==3.2.0
 idna==2.5                 # via requests
-ipaddress==1.0.17         # via fake-factory
+ipaddress==1.0.21         # via fake-factory
 ipdb==0.10.1
 ipython-genutils==0.1.0   # via traitlets
 ipython==5.1.0            # via ipdb
