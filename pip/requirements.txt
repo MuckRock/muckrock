@@ -17,7 +17,7 @@ bleach==2.1.2
 boto==2.42.0
 bz2file==0.98             # via smart-open
 celery==3.1.23
-certifi==2017.4.17        # via requests
+certifi==2018.4.16        # via requests
 chardet==3.0.3
 click==6.6                # via pyimagediet
 contextlib2==0.5.4        # via raven
