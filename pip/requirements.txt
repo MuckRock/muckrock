@@ -8,7 +8,7 @@
 -e git+git://github.com/BradWhittington/django-mailgun.git@4f2edb9466f6245c3bbf501aab2681f0b3c71e0c#egg=django_mailgun
 -e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@be138fc8481ae999b052efe215d52ef5733506f4#egg=django_news_sitemaps
 -e git+git://github.com/jazzband/django-queued-storage@d30d70d6db4eb742ccde9d4a7da6ca7624e53219#egg=django_queued_storage
-amqp==1.4.9               # via kombu
+amqp==2.3.2               # via kombu
 anyjson==0.3.3            # via kombu
 babel==2.5.1              # via django-phonenumber-field
 beautifulsoup4==4.6.0
