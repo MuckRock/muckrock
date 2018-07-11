@@ -102,7 +102,7 @@ python-levenshtein==0.12.0
 python-magic==0.4.12      # via pyimagediet
 pytz==2017.2              # via babel, celery, django
 pyyaml==3.12              # via pyimagediet
-raven==5.27.1
+raven==6.9.0
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.5
 reportlab==3.4.0
