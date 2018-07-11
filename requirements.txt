@@ -37,7 +37,7 @@ django-dashing==0.3.3
 django-debug-toolbar==1.8
 django-email-bandit==1.2.0
 django-extensions==2.0.7
-django-filter==1.0.4
+django-filter==1.1.0
 django-geojson==2.9.1
 django-hijack==2.1.4
 django-hosts==2.0
