@@ -69,7 +69,7 @@ fuzzywuzzy==0.14.0
 google-api-python-client==1.6.5
 gunicorn==19.6.0
 html5lib==1.0.1           # via bleach
-httplib2==0.10.3          # via google-api-python-client, oauth2client
+httplib2==0.11.3          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
 image-diet2==1.0
 jsonfield==1.0.3
