@@ -22,7 +22,7 @@ ecdsa==0.13               # via paramiko
 enum34==1.1.6             # via traitlets
 fabric==1.12.0
 factory-boy==2.7.0
-fake-factory==0.7.2       # via factory-boy
+fake-factory==9999.9.9       # via factory-boy
 first==2.0.1              # via pip-tools
 freezegun==0.3.8
 funcsigs==1.0.2           # via mock
