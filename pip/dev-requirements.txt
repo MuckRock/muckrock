@@ -63,4 +63,4 @@ wcwidth==0.1.7            # via prompt-toolkit
 whoosh==2.7.4
 wrapt==1.10.8             # via astroid
 yapf==0.20.1
-yet-another-django-profiler==1.0.3
+yet-another-django-profiler==1.1.0
