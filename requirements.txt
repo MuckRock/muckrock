@@ -46,7 +46,7 @@ django-localflavor==1.3
 django-lot==0.0.6
 django-mathfilters==0.4.0
 django-opensearch==0.4.0
-django-phonenumber-field==1.3.0
+django-phonenumber-field==2.0.0
 django-picklefield==1.0.0  # via django-constance
 django-premailer==0.2.0
 django-pylibmc==0.6.1
