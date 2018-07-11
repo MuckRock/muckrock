@@ -115,7 +115,7 @@ scipy==0.14.0
 simplejson==3.8.2         # via django-lot
 six==1.10.0               # via bleach, django-compat, django-extensions, django-geojson, furl, google-api-python-client, html5lib, oauth2client, orderedmultidict, packaging, python-dateutil
 smart-open==1.4.0
-smartypants==1.8.6
+smartypants==2.0.1
 sqlparse==0.2.4           # via django-debug-toolbar
 stripe==1.75.0
 typing==3.6.4             # via django-extensions
