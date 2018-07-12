@@ -7,6 +7,9 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
 
+# Standard Library
+import re
+
 # Third Party
 from mock import patch
 from nose.tools import eq_, ok_
@@ -86,18 +89,10 @@ class TestUniqueUsername(TestCase):
         name = 'Highlander'  # there can only be one!
         username = unique_username(name)
         user = UserFactory(username=username)
-        eq_(
-            user.username, 'Highlander',
-            'If no previous user, the name should be valid.'
-        )
-        eq_(
-            unique_username(name), 'Highlander1',
-            'If previous user, the name should have a number appended.'
-        )
-        eq_(
-            unique_username('highlander'), 'highlander1',
-            'Capitals should be ignored when determining uniqueness.'
-        )
+        eq_(user.username, 'Highlander')
+        ok_(re.match(name + r'_[a-zA-Z]{8}', unique_username(name)))
+        lower_name = name.lower()
+        ok_(re.match(lower_name + r'_[a-zA-Z]{8}', unique_username(lower_name)))
 
 
 class TestSplitName(TestCase):
