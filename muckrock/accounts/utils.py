@@ -12,7 +12,9 @@ from django.utils.safestring import mark_safe
 # Standard Library
 import json
 import logging
+import random
 import re
+import string
 
 # Third Party
 import requests
@@ -26,15 +28,15 @@ logger = logging.getLogger(__name__)
 
 def unique_username(name):
     """Create a globally unique username from a name and return it."""
-    # username can be at most 30 characters
+    # username can be at most 150 characters
     # strips illegal characters from username
-    base_username = re.sub(r'[^\w\-.@]', '', name)[:30]
+    base_username = re.sub(r'[^\w\-.@]', '', name)[:141]
     username = base_username
-    num = 1
     while User.objects.filter(username__iexact=username).exists():
-        postfix = str(num)
-        username = '%s%s' % (base_username[:30 - len(postfix)], postfix)
-        num += 1
+        username = '{}_{}'.format(
+            base_username,
+            ''.join(random.sample(string.ascii_letters, 8)),
+        )
     return username
 
 
