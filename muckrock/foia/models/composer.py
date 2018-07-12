@@ -27,7 +27,6 @@ from taggit.managers import TaggableManager
 # MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
-from muckrock.foia.models import FOIARequest
 from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.organization.models import Organization
 from muckrock.tags.models import TaggedItemBase
@@ -112,7 +111,7 @@ class FOIAComposer(models.Model):
 
     def submit(self, contact_info=None):
         """Submit a composer to create the requests"""
-        from muckrock.foia.tasks import submit_composer
+        from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
         num_requests = self.agencies.count()
         request_count = self.user.profile.make_requests(num_requests)
@@ -121,18 +120,18 @@ class FOIAComposer(models.Model):
         self.num_org_requests = request_count['org']
         self.status = 'submitted'
         self.datetime_submitted = timezone.now()
-        for agency in self.agencies.select_related(
-            'jurisdiction__law',
-            'jurisdiction__parent__law',
-        ).iterator():
-            FOIARequest.objects.create_new(
-                composer=self,
-                agency=agency,
-            )
+
+        if num_requests == 1:
+            # if only one request, create it immediately so we can redirect there
+            composer_create_foias(self.pk, contact_info)
+        else:
+            # otherwise do it delayed so the page doesn't risk timing out
+            composer_create_foias.delay(self.pk, contact_info)
+
         # if num_requests is less than the multi-review amount, we will approve
         # the request right away, other wise we create a multirequest task
         approve = num_requests < settings.MULTI_REVIEW_AMOUNT
-        result = submit_composer.apply_async(
+        result = composer_delayed_submit.apply_async(
             args=(self.pk, approve, contact_info),
             countdown=COMPOSER_SUBMIT_DELAY,
         )

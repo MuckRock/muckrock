@@ -207,19 +207,49 @@ def set_document_cloud_pages(doc_pk, **kwargs):
 @task(
     ignore_result=True,
     max_retries=10,
-    name='muckrock.foia.tasks.submit_composer'
+    name='muckrock.foia.tasks.composer_create_foias'
 )
-def submit_composer(composer_pk, approve, contact_info, **kwargs):
-    """Submit a composer to all agencies"""
+def composer_create_foias(composer_pk, contact_info, **kwargs):
+    """Create all the foias for a composer"""
     # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
+    for agency in composer.agencies.select_related(
+        'jurisdiction__law',
+        'jurisdiction__parent__law',
+    ).iterator():
+        FOIARequest.objects.create_new(
+            composer=composer,
+            agency=agency,
+        )
+
+
+@task(
+    ignore_result=True,
+    max_retries=10,
+    name='muckrock.foia.tasks.composer_delayed_submit'
+)
+def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
+    """Submit a composer to all agencies"""
+    # pylint: disable=unused-argument
+    logger.info(
+        u'Starting composer_delayed_submit: (%s, %s, %s, %s)',
+        composer_pk,
+        approve,
+        contact_info,
+        kwargs,
+    )
+    composer = FOIAComposer.objects.get(pk=composer_pk)
+    logger.info('Fetched the composer')
     # the delayed submit is processing,
     # clear the delayed id, it is too late to cancel
     composer.delayed_id = ''
     composer.save()
+    logger.info('Saved the composer')
     if approve:
+        logger.info('Approving')
         composer.approved(contact_info)
     else:
+        logger.info('Creating Multirequest Task')
         composer.multirequesttask_set.create()
 
 

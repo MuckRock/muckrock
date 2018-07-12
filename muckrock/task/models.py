@@ -781,7 +781,7 @@ class MultiRequestTask(Task):
     def submit(self, agency_list):
         """Submit the composer"""
         # pylint: disable=not-callable
-        from muckrock.foia.tasks import submit_composer
+        from muckrock.foia.tasks import composer_delayed_submit
         return_requests = 0
         with transaction.atomic():
             for agency in self.composer.agencies.all():
@@ -791,7 +791,7 @@ class MultiRequestTask(Task):
                     return_requests += 1
             self.composer.return_requests(return_requests)
             transaction.on_commit(
-                lambda: submit_composer.
+                lambda: composer_delayed_submit.
                 apply_async(args=(self.composer.pk, True, None))
             )
 

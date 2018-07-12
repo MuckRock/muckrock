@@ -56,7 +56,7 @@ from muckrock.foia.models import (
     FOIAMultiRequest,
     FOIARequest,
 )
-from muckrock.foia.tasks import submit_composer
+from muckrock.foia.tasks import composer_delayed_submit
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
@@ -870,6 +870,10 @@ class ComposerDetail(DetailView):
             'admin:foia_foiacomposer_change',
             args=(composer.pk,),
         )
+        context['processing'] = (
+            composer.status == 'submitted'
+            and (composer.foias.count() != composer.agencies.count())
+        )
         if (
             composer.status == 'submitted'
             and composer.datetime_submitted is not None
@@ -888,7 +892,7 @@ class ComposerDetail(DetailView):
         """Handle send it now action
 
         This uses celery's inspection tools to pull out the arguments for the
-        submit_composer task, revoke it, and then call it immediately with the
+        composer_delayed_submit task, revoke it, and then call it immediately with the
         correct args
         """
         # pylint: disable=eval-used
@@ -903,7 +907,7 @@ class ComposerDetail(DetailView):
                 for task in tasks:
                     if task['request']['id'] == composer.delayed_id:
                         current_app.control.revoke(composer.delayed_id)
-                        submit_composer(*eval(task['request']['args']))
+                        composer_delayed_submit(*eval(task['request']['args']))
                         return redirect(composer)
 
         return redirect(composer)
