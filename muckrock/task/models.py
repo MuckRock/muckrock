@@ -510,30 +510,28 @@ class FlaggedTask(Task):
 
     def create_zoho_ticket(self):
         """Create a Zoho ticket"""
+
+        def make_url(obj):
+            """Make a URL"""
+            if obj is None:
+                return ''
+            else:
+                return u'<p><a href="https://{}{}">{}</a></p>'.format(
+                    settings.MUCKROCK_URL,
+                    obj.get_absolute_url(),
+                    obj,
+                )
+
         contact_id = self.get_contact_id(self.user)
         if contact_id is None:
             return None
         description = bleach.clean(self.text)
         subject = description[:50] or u'-No Subject-'
-        if self.foia:
-            description += u'<p><a href="https://{}{}">#{} - {}</a></p>'.format(
-                settings.MUCKROCK_URL,
-                self.foia.get_absolute_url(),
-                self.foia.pk,
-                self.foia.title,
-            )
-        if self.agency:
-            description += u'<p><a href="https://{}{}">{}</a></p>'.format(
-                settings.MUCKROCK_URL,
-                self.agency.get_absolute_url(),
-                self.agency.name,
-            )
-        if self.jurisdiction:
-            description += u'<p><a href="https://{}{}">{}</a></p>'.format(
-                settings.MUCKROCK_URL,
-                self.jurisdiction.get_absolute_url(),
-                self.jurisdiction,
-            )
+
+        description += make_url(self.foia)
+        description += make_url(self.agency)
+        description += make_url(self.jurisdiction)
+
         response = requests.post(
             settings.ZOHO_URL + 'tickets',
             headers={
