@@ -11,8 +11,6 @@ from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Case, Count, Max, Prefetch, When
 from django.db.models.functions import Cast, Now
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone
 
