@@ -24,7 +24,9 @@ class AgencyAddress(models.Model):
     """Through model for agency to address M2M"""
 
     agency = models.ForeignKey('Agency')
-    address = models.ForeignKey('communication.Address')
+    address = models.ForeignKey(
+        'communication.Address', on_delete=models.PROTECT
+    )
     request_type = models.CharField(
         max_length=7,
         choices=REQUEST_TYPES,
