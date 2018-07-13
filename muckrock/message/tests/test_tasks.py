@@ -11,7 +11,6 @@ from django.test import TestCase
 # Third Party
 import mock
 import nose.tools
-import requests_mock
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
