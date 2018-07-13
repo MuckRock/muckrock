@@ -15,10 +15,12 @@ from muckrock.agency.models import Agency
 from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
-from muckrock.task.models import (
+from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
     SNAIL_MAIL_CATEGORIES,
+)
+from muckrock.task.models import (
     FlaggedTask,
     NewAgencyTask,
     PortalTask,

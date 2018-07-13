@@ -11,6 +11,8 @@ from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Case, Count, Max, Prefetch, When
 from django.db.models.functions import Cast, Now
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone
 
@@ -18,6 +20,9 @@ from django.utils import timezone
 import logging
 from datetime import date
 from itertools import groupby
+
+# Third Party
+import requests
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
@@ -28,10 +33,15 @@ from muckrock.communication.models import (
     PhoneNumber,
 )
 from muckrock.core.models import ExtractDay
-from muckrock.foia.models import STATUS, FOIANote, FOIARequest
+from muckrock.foia.models import STATUS, FOIANote
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
+from muckrock.task.constants import (
+    FLAG_CATEGORIES,
+    PORTAL_CATEGORIES,
+    SNAIL_MAIL_CATEGORIES,
+)
 from muckrock.task.querysets import (
     CrowdfundTaskQuerySet,
     FlaggedTaskQuerySet,
@@ -47,70 +57,9 @@ from muckrock.task.querysets import (
     TaskQuerySet,
 )
 
-# pylint: disable=missing-docstring
+logger = logging.getLogger(__name__)
 
-SNAIL_MAIL_CATEGORIES = [
-    ('a', 'Appeal'),
-    ('n', 'New'),
-    ('u', 'Update'),
-    ('f', 'Followup'),
-    ('p', 'Payment'),
-]
-PORTAL_CATEGORIES = [('i', 'Incoming')] + SNAIL_MAIL_CATEGORIES
-PUBLIC_FLAG_CATEGORIES = [
-    (
-        'move communication',
-        'A communication ended up on this request inappropriately.',
-    ),
-    (
-        'no response',
-        'This agency hasn\'t responded after multiple submissions.',
-    ),
-    (
-        'wrong agency',
-        'The agency has indicated that this request should be directed to '
-        'another agency.',
-    ),
-    (
-        'missing documents',
-        'I should have received documents for this request.',
-    ),
-    (
-        'form',
-        'The agency has asked that you use a form.',
-    ),
-    (
-        'follow-up complaints',
-        'Agency is complaining about follow-up messages.',
-    ),
-    (
-        'appeal',
-        'Should I appeal this response?',
-    ),
-    (
-        'proxy',
-        'The agency denied the request due to an in-state citzenship law.',
-    ),
-]
-PRIVATE_FLAG_CATEGORIES = [
-    (
-        'contact info changed',
-        'User supplied contact info.',
-    ),
-    (
-        'no proxy',
-        'No proxy was available.',
-    ),
-    (
-        'agency update',
-        'An agency logged in to the site and updated a request.',
-    ),
-    (
-        'agency new email',
-        'An agency with no primary email set replied via email.',
-    ),
-]
-FLAG_CATEGORIES = PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES
+# pylint: disable=missing-docstring
 
 
 class Task(models.Model):
@@ -561,6 +510,71 @@ class FlaggedTask(Task):
         """Send an email reply to the user that raised the flag."""
         support.delay(self.user, text, self)
 
+    def create_zoho_ticket(self):
+        """Create a Zoho ticket"""
+        contact_id = self.get_contact_id(self.user)
+        if contact_id is None:
+            return None
+        response = requests.post(
+            settings.ZOHO_URL + 'tickets',
+            headers={
+                'Authorization': settings.ZOHO_TOKEN,
+                'orgId': settings.ZOHO_ORG_ID,
+            },
+            json={
+                'subject': self.text[:50] or '-No Subject-',
+                'departmentId': settings.ZOHO_DEPT_IDS['muckrock'],
+                'contactId': contact_id,
+                'email': self.user.email,
+                'description': self.text,
+                'category': 'Flag',
+                'subCategory': self.get_category_display(),
+            },
+        )
+        if response.status_code == 200:
+            return response.json()['id']
+        else:
+            logger.error('Zoho API Error: %s %s', self.pk, response.content)
+            return None
+
+    def get_contact_id(self, user):
+        """Get a zoho contact id for the contact with the given email address"""
+        response = requests.get(
+            settings.ZOHO_URL + 'contacts/search',
+            headers={
+                'Authorization': settings.ZOHO_TOKEN,
+                'orgId': settings.ZOHO_ORG_ID,
+            },
+            params={
+                'limit': 1,
+                'email': user.email,
+            },
+        )
+        if response.status_code == 200:
+            contacts = response.json()
+            if contacts['count'] > 0:
+                return contacts['data'][0]['id']
+
+        # if we could not find an existing contact, we will create one
+        response = requests.post(
+            settings.ZOHO_URL + 'contacts',
+            headers={
+                'Authorization': settings.ZOHO_TOKEN,
+                'orgId': settings.ZOHO_ORG_ID,
+            },
+            json={
+                'firstName': user.first_name,
+                'lastName':
+                    user.last_name or 'Anonymous',  # lastName is required
+                'email': user.email,
+                'customFields': {
+                    'username': user.username
+                },
+            },
+        )
+        if response.status_code == 200:
+            return response.json()['id']
+
 
 class ProjectReviewTask(Task):
     """Created when a project is published and needs approval."""
@@ -781,7 +795,7 @@ class MultiRequestTask(Task):
     def submit(self, agency_list):
         """Submit the composer"""
         # pylint: disable=not-callable
-        from muckrock.foia.tasks import submit_composer
+        from muckrock.foia.tasks import composer_delayed_submit
         return_requests = 0
         with transaction.atomic():
             for agency in self.composer.agencies.all():
@@ -791,7 +805,7 @@ class MultiRequestTask(Task):
                     return_requests += 1
             self.composer.return_requests(return_requests)
             transaction.on_commit(
-                lambda: submit_composer.
+                lambda: composer_delayed_submit.
                 apply_async(args=(self.composer.pk, True, None))
             )
 
@@ -884,7 +898,9 @@ class RejectedEmailTask(Task):
 
 
 class StaleAgencyTask(Task):
-    """An agency has gone stale"""
+    """Deprecated: Replaced by review agency task
+
+    An agency has gone stale"""
     type = 'StaleAgencyTask'
     agency = models.ForeignKey('agency.Agency')
 
@@ -894,51 +910,12 @@ class StaleAgencyTask(Task):
     def get_absolute_url(self):
         return reverse('stale-agency-task', kwargs={'pk': self.pk})
 
-    def resolve(self, user=None, form_data=None):
-        """Unmark the agency as stale when resolving"""
-        self.agency.unmark_stale()
-        super(StaleAgencyTask, self).resolve(user, form_data)
-
-    def stale_requests(self):
-        """Returns a list of stale requests associated with the task's agency"""
-        if hasattr(self.agency, 'stale_requests_cache'):
-            return self.agency.stale_requests_cache
-        return FOIARequest.objects.get_stale(agency=self.agency)
-
-    def latest_response(self):
-        """Returns the latest response from the agency"""
-        foias = self.agency.foiarequest_set.all()
-        comms = [c for f in foias for c in f.communications.all() if c.response]
-        if len(comms) > 0:
-            return max(comms, key=lambda x: x.datetime)
-        else:
-            return None
-
-    def update_email(self, new_email, foia_list):
-        """Updates the email on the agency and the provided requests."""
-        from muckrock.agency.models import AgencyEmail
-        agency_emails = (
-            self.agency.agencyemail_set.filter(
-                request_type='primary', email_type='to'
-            )
-        )
-        for agency_email in agency_emails:
-            agency_email.request_type = 'none'
-            agency_email.email_type = 'none'
-            agency_email.save()
-        AgencyEmail.objects.create(
-            email=new_email,
-            agency=self.agency,
-            request_type='primary',
-            email_type='to',
-        )
-        for foia in foia_list:
-            foia.email = new_email
-            foia.followup(switch=True)
-
 
 class NewExemptionTask(Task):
-    """Created when a new exemption is submitted for our review."""
+    """
+    Depracted: folded into flag tasks
+
+    Created when a new exemption is submitted for our review."""
     type = 'NewExemptionTask'
     foia = models.ForeignKey('foia.FOIARequest')
     language = models.TextField()

@@ -682,3 +682,12 @@ MULTI_REVIEW_AMOUNT = 2
 MIXPANEL_TOKEN = os.environ.get(
     'MIXPANEL_TOKEN', 'f0342a5341ddad56dfa73505aa604c74'
 )
+
+ZOHO_TOKEN = os.environ.get('ZOHO_TOKEN')
+ZOHO_URL = os.environ.get('ZOHO_URL', 'https://desk.zoho.com/api/v1/')
+ZOHO_ORG_ID = os.environ.get('ZOHO_ORG_ID', '669309916')
+ZOHO_DEPT_IDS = {
+    'muckrock': os.environ.get('ZOHO_DEPT_ID_MR', '280313000000006907'),
+    'documentcloud': os.environ.get('ZOHO_DEPT_ID_DC', '280313000000190114'),
+    'foiamachine': os.environ.get('ZOHO_DEPT_ID_FM', '280313000000194669'),
+}

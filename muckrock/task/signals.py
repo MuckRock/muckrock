@@ -14,6 +14,7 @@ from muckrock.task.models import (
     OrphanTask,
     ProjectReviewTask,
 )
+from muckrock.task.tasks import create_zoho_ticket
 
 logger = logging.getLogger(__name__)
 
@@ -153,18 +154,30 @@ def notify_project(sender, instance, created, **kwargs):
     slack.delay(payload)
 
 
+def zoho_flagged(sender, instance, created, **kwargs):
+    """Create a zoho ticket after creation"""
+    # pylint: disable=unused-argument
+    if created:
+        create_zoho_ticket.delay(instance.pk)
+
+
 post_save.connect(
     domain_blacklist,
     sender=OrphanTask,
-    dispatch_uid='muckrock.task.signals.domain_blacklist'
+    dispatch_uid='muckrock.task.signals.domain_blacklist',
 )
 post_save.connect(
     notify_flagged,
     sender=FlaggedTask,
-    dispatch_uid='muckrock.task.signals.notify_flagged'
+    dispatch_uid='muckrock.task.signals.notify_flagged',
 )
 post_save.connect(
     notify_project,
     sender=ProjectReviewTask,
-    dispatch_uid='muckrock.task.signals.notify_project'
+    dispatch_uid='muckrock.task.signals.notify_project',
+)
+post_save.connect(
+    zoho_flagged,
+    sender=FlaggedTask,
+    dispatch_uid='muckrock.task.signals.zoho_flagged',
 )

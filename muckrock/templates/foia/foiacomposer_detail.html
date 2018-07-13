@@ -5,6 +5,18 @@
 {% endblock %}
 
 {% block content %}
+
+  {% if processing %}
+    <div class="message info">
+      <span class="symbol">{% include "lib/component/icon/info.svg" %}</span>
+      <span class="text">
+        <p>
+          This multirequest is still processing, please refresh the page in a few minutes to view a list of all of the requests.
+        </p>
+      </span>
+    </div>
+  {% endif %}
+
   <div class="foia detail">
     <h1>{{composer.title}}</h1>
 
