@@ -1,7 +1,6 @@
 """
 Models for the Task application
 """
-
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -20,6 +19,7 @@ from datetime import date
 from itertools import groupby
 
 # Third Party
+import bleach
 import requests
 
 # MuckRock
@@ -513,6 +513,27 @@ class FlaggedTask(Task):
         contact_id = self.get_contact_id(self.user)
         if contact_id is None:
             return None
+        description = bleach.clean(self.text)
+        subject = description[:50] or u'-No Subject-'
+        if self.foia:
+            description += u'<p><a href="https://{}{}">#{} - {}</a></p>'.format(
+                settings.MUCKROCK_URL,
+                self.foia.get_absolute_url(),
+                self.foia.pk,
+                self.foia.title,
+            )
+        if self.agency:
+            description += u'<p><a href="https://{}{}">{}</a></p>'.format(
+                settings.MUCKROCK_URL,
+                self.agency.get_absolute_url(),
+                self.agency.name,
+            )
+        if self.jurisdiction:
+            description += u'<p><a href="https://{}{}">{}</a></p>'.format(
+                settings.MUCKROCK_URL,
+                self.jurisdiction.get_absolute_url(),
+                self.jurisdiction,
+            )
         response = requests.post(
             settings.ZOHO_URL + 'tickets',
             headers={
@@ -520,11 +541,11 @@ class FlaggedTask(Task):
                 'orgId': settings.ZOHO_ORG_ID,
             },
             json={
-                'subject': self.text[:50] or '-No Subject-',
+                'subject': subject,
                 'departmentId': settings.ZOHO_DEPT_IDS['muckrock'],
                 'contactId': contact_id,
                 'email': self.user.email,
-                'description': self.text,
+                'description': description,
                 'category': 'Flag',
                 'subCategory': self.get_category_display(),
             },
