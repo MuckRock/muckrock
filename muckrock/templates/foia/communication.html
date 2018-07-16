@@ -116,12 +116,16 @@
         <form method="post" class="resend-communication communication-action" id="resend-{{communication.pk}}-form">
           {% csrf_token %}
           <label>Resend Communication</label>
-          {% with form=resend_forms|get_item:communication.pk %}
+          {% with form=resend_form %}
             {% for field in form %}
               {% if field.errors %}
                 <span class="error field">{{field.errors}}</span>
               {% endif %}
-              {{ field }}
+              {% if field.name == "communication" %}
+                <input type="hidden" id="id_communication" name="communication" value="{{ communication.pk }}">
+              {% else %}
+                {{ field }}
+              {% endif %}
             {% endfor %}
           {% endwith %}
           <p class="help-text">This will become the new default for future outgoing communications.</p>
