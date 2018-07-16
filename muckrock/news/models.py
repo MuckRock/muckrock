@@ -95,10 +95,11 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
+        pub_date = timezone.localtime(self.pub_date)
         kwargs = {
-            'year': self.pub_date.strftime('%Y'),
-            'month': self.pub_date.strftime('%b').lower(),
-            'day': self.pub_date.strftime('%d'),
+            'year': pub_date.strftime('%Y'),
+            'month': pub_date.strftime('%b').lower(),
+            'day': pub_date.strftime('%d'),
             'slug': self.slug,
         }
         return reverse('news-detail', kwargs=kwargs)
