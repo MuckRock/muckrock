@@ -544,6 +544,7 @@ class FlaggedTask(Task):
                 'contactId': contact_id,
                 'email': self.user.email,
                 'description': description,
+                'channel': 'Web',
                 'category': 'Flag',
                 'subCategory': self.get_category_display(),
             },
