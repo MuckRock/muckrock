@@ -93,7 +93,7 @@ class Detail(DetailView):
         self._obj = None
         self.agency_reply_form = FOIAAgencyReplyForm()
         self.admin_fix_form = None
-        self.resend_forms = None
+        self.resend_form = None
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -108,10 +108,7 @@ class Detail(DetailView):
                 'other_emails': foia.get_other_emails(),
             }
         )
-        self.resend_forms = {
-            c.pk: ResendForm(communication=c)
-            for c in foia.communications.all()
-        }
+        self.resend_form = ResendForm()
         if request.POST:
             try:
                 return self.post(request)
@@ -133,13 +130,22 @@ class Detail(DetailView):
         foia = get_object_or_404(
             FOIARequest.objects.select_related(
                 'agency__jurisdiction__parent__parent',
+                'agency__jurisdiction__law',
+                'agency__jurisdiction__parent__law',
                 'crowdfund',
                 'composer__user__profile',
+                'portal',
+                'email',
+                'fax',
+                'address',
             ).prefetch_related(
+                'tracking_ids',
+                'cc_emails',
                 Prefetch(
                     'communications',
-                    FOIACommunication.objects.
-                    select_related('from_user__profile').prefetch_related(
+                    FOIACommunication.objects.select_related(
+                        'from_user__profile__agency'
+                    ).prefetch_related(
                         'files',
                         'emails',
                         'faxes',
@@ -258,7 +264,7 @@ class Detail(DetailView):
         context['agency_status_choices'] = AGENCY_STATUS
         context['agency_reply_form'] = self.agency_reply_form
         context['admin_fix_form'] = self.admin_fix_form
-        context['resend_forms'] = self.resend_forms
+        context['resend_form'] = self.resend_form
         context['cc_emails'] = json.dumps([
             unicode(e) for e in foia.cc_emails.all()
         ])
@@ -757,7 +763,7 @@ class Detail(DetailView):
             else:
                 comm = form.cleaned_data['communication']
                 if comm:
-                    self.resend_forms[comm.pk] = form
+                    self.resend_form = form
                 raise FoiaFormError
         return redirect(foia.get_absolute_url() + '#')
 
