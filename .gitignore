@@ -27,3 +27,4 @@ webpack-stats.json
 npm-debug.log
 .secret_key.sh
 tags
+.lvimrc

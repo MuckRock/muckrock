@@ -273,6 +273,16 @@ class Address(models.Model):
 
     class Meta:
         verbose_name_plural = 'addresses'
+        unique_together = (
+            'street',
+            'suite',
+            'city',
+            'state',
+            'zip_code',
+            'agency_override',
+            'attn_override',
+            'address',
+        )
 
 
 # Communication models
@@ -356,12 +366,14 @@ class MailCommunication(models.Model):
     sent_datetime = models.DateTimeField()
     from_address = models.ForeignKey(
         Address,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
         related_name='from_mails',
     )
     to_address = models.ForeignKey(
         Address,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
         related_name='to_mails',

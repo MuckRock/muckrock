@@ -121,6 +121,9 @@ class AgencyForm(forms.ModelForm):
                 city=self.cleaned_data['address_city'],
                 state=self.cleaned_data['address_state'],
                 zip_code=self.cleaned_data['address_zip'],
+                agency_override='',
+                attn_override='',
+                address='',
             )
             # clear out any previously set primary addresses
             AgencyAddress.objects.filter(
