@@ -149,7 +149,7 @@ class UserDoneFeed(Feed):
                 composer__user=obj,
                 embargo=False,
             ).order_by(
-                '-datetime_submitted',
+                '-composer__datetime_submitted',
             ).select_related('agency__jurisdiction')
             .prefetch_related('communications')[:25]
         )
@@ -184,7 +184,7 @@ class UserUpdateFeed(Feed):
         communications = (
             FOIACommunication.objects.filter(foia__composer__user=obj)
             .exclude(foia__embargo=True)
-            .select_related('foia__agency__jurisdiction').order_by('-date')
+            .select_related('foia__agency__jurisdiction').order_by('-datetime')
         )
         return communications[:25]
 
