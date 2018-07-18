@@ -158,8 +158,36 @@ class TestFOIAViews(TestCase):
     def test_feeds(self):
         """Test the RSS feed views"""
 
+        user = UserFactory()
+        foias = FOIARequestFactory.create_batch(4, composer__user=user)
+
         get_allowed(self.client, reverse('foia-submitted-feed'))
         get_allowed(self.client, reverse('foia-done-feed'))
+        get_allowed(
+            self.client, reverse('foia-feed', kwargs={
+                'idx': foias[0].pk
+            })
+        )
+        get_allowed(
+            self.client,
+            reverse(
+                'foia-user-submitted-feed', kwargs={
+                    'username': user.username
+                }
+            )
+        )
+        get_allowed(
+            self.client,
+            reverse('foia-user-done-feed', kwargs={
+                'username': user.username
+            })
+        )
+        get_allowed(
+            self.client,
+            reverse('foia-user-feed', kwargs={
+                'username': user.username
+            })
+        )
 
     def test_404_views(self):
         """Test views that should give a 404 error"""
