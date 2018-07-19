@@ -542,7 +542,7 @@ class FlaggedTask(Task):
                 'subject': subject,
                 'departmentId': settings.ZOHO_DEPT_IDS['muckrock'],
                 'contactId': contact_id,
-                'email': self.user.email,
+                'email': self.user.email if self.user else 'info@muckrock.com',
                 'description': description,
                 'channel': 'Web',
                 'category': 'Flag',
@@ -557,6 +557,8 @@ class FlaggedTask(Task):
 
     def get_contact_id(self, user):
         """Get a zoho contact id for the contact with the given email address"""
+        if user is None:
+            user = User.objects.get(username='MuckrockStaff')
         response = requests.get(
             settings.ZOHO_URL + 'contacts/search',
             headers={

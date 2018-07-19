@@ -265,7 +265,7 @@ def _handle_request(request, mail_id):
             FlaggedTask.objects.create(
                 agency=foia.agency,
                 category='agency new email',
-                text='We received an email from {} for a request to this'
+                text='We received an email from {} for a request to this '
                 'agency, but this agency does not currently have a primary '
                 'email address set'.format(from_email),
             )
