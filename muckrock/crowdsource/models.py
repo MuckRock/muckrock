@@ -2,6 +2,7 @@
 """Models for the Crowdsource application"""
 
 # Django
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -421,6 +422,10 @@ class CrowdsourceResponse(models.Model):
                 self.crowdsource.get_header_values(metadata),
                 self.get_values(metadata),
             )
+        )
+        text += '\nhttps://{}{}#assignment-responses'.format(
+            settings.MUCKROCK_URL,
+            self.crowdsource.get_absolute_url(),
         )
         send_mail(
             '[Assignment Response] {} by {}'.format(
