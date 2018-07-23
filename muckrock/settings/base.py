@@ -109,6 +109,7 @@ if AWS_DEBUG:
     USE_QUEUED_STORAGE = True
     DIET_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     DIET_CONFIG = os.path.join(SITE_ROOT, '../config/image_diet.yaml')
+    AWS_S3_CUSTOM_DOMAIN = ''
 else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
