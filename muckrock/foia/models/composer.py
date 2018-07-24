@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
+from django.db.models.signals import post_delete
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -26,7 +27,9 @@ from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.core.utils import TempDisconnectSignal
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
+from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.organization.models import Organization
 from muckrock.tags.models import TaggedItemBase
@@ -238,10 +241,19 @@ class FOIAComposer(models.Model):
 
     def revoke(self):
         """Revoke a submitted composer"""
+        from muckrock.foia.signals import foia_file_delete_s3
         current_app.control.revoke(self.delayed_id)
         self.status = 'started'
         self.delayed_id = ''
         self.datetime_submitted = None
-        self.foias.all().delete()
+        disconnect_kwargs = {
+            'signal': post_delete,
+            'receiver': foia_file_delete_s3,
+            'sender': FOIAFile,
+            'dispatch_uid': 'muckrock.foia.signals.file_delete_s3',
+        }
+        with TempDisconnectSignal(**disconnect_kwargs):
+            self.foias.all().delete()
+        self.pending_attachments.update(sent=False)
         self.return_requests()
         self.save()
