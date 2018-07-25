@@ -696,4 +696,4 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-SQUARELET_URL = os.environ.get('SQUARELET_URL')
+SQUARELET_URL = os.environ.get('SQUARELET_URL', '')
