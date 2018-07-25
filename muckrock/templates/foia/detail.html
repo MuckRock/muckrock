@@ -11,6 +11,11 @@
 {% block title %}{{ foia.title }} &bull; MuckRock{% endblock %}
 {% block type %}request{% endblock %}
 
+{% block rss %}
+{{ block.super }}
+<link rel="alternate" type="application/rss+xml" title="{{foia.title}} Feed" href="{% url 'foia-feed' foia.id %}" />
+{% endblock rss %}
+
 {% block open_graph %}
   {% cache cache_timeout foia_detail_open_graph foia.pk request.user.pk %}
     <meta property="og:title" content="{{ foia.title }}" />
