@@ -44,7 +44,7 @@ class QuestionList(MRSearchFilterListView):
     default_order = 'desc'
     sort_map = {
         'title': 'title',
-        'user': 'user__first_name',
+        'user': 'user__profile__full_name',
         'date': 'date',
     }
 

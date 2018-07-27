@@ -1,7 +1,7 @@
 {% extends 'message/base.html' %}
 {% load tags %}
 {% block body %}
-<p>Welcome to MuckRock, {{user.first_name}}!</p>
+<p>Welcome to MuckRock, {{user.profile.full_name}}!</p>
 <p>We need you to finish creating your account. <a href="{{completion_url|safe}}">Click here to set your username and password, and to verify your email address.</a></p>
 <h2>Have a technical support or customer service issue? <a href="mailto:info@muckrock.com">Email us</a></h2>
 <h2>Looking for FOIA advice?</h2>

@@ -105,8 +105,8 @@ class Signup(FormView):
     def form_valid(self, form):
         """Create the user and sign them in."""
         user = create_new_user(self.request, form)
-        welcome_message = 'Welcome to FOIA Machine, %(first_name)s!' % {
-            'first_name': user.first_name,
+        welcome_message = 'Welcome to FOIA Machine, %(full_name)s!' % {
+            'full_name': user.profile.full_name,
         }
         messages.success(self.request, welcome_message)
         return super(Signup, self).form_valid(form)

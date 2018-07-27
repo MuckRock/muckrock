@@ -66,7 +66,6 @@ from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import (
-    email_verify,
     failed_payment,
     send_charge_receipt,
     send_invoice_receipt,
@@ -403,20 +402,13 @@ class ProfileSettings(TemplateView):
         """Returns context for the template"""
         context = super(ProfileSettings, self).get_context_data(**kwargs)
         user_profile = self.request.user.profile
-        profile_initial = {
-            'first_name': self.request.user.first_name,
-            'last_name': self.request.user.last_name,
-        }
         email_initial = {'email': self.request.user.email}
         receipt_initial = {
             'emails':
                 '\n'
                 .join(r.email for r in self.request.user.receipt_emails.all())
         }
-        profile_form = ProfileSettingsForm(
-            initial=profile_initial,
-            instance=user_profile,
-        )
+        profile_form = ProfileSettingsForm(instance=user_profile)
         email_form = EmailSettingsForm(
             initial=email_initial,
             instance=user_profile,
@@ -444,35 +436,6 @@ class ProfileSettings(TemplateView):
             'crowdfunds': crowdfunds,
         })
         return context
-
-
-@login_required
-def verify_email(request):
-    """Verifies a user's email address"""
-    user = request.user
-    _profile = user.profile
-    key = request.GET.get('key')
-    if not _profile.email_confirmed:
-        if key:
-            if key == _profile.confirmation_key:
-                _profile.email_confirmed = True
-                _profile.save()
-                messages.success(
-                    request, 'Your email address has been confirmed.'
-                )
-            else:
-                messages.error(request, 'Your confirmation key is invalid.')
-        else:
-            email_verify.delay(user)
-            messages.info(
-                request,
-                'We just sent you an email containing your verification link.'
-            )
-    else:
-        messages.warning(
-            request, 'Your email is already confirmed, no need to verify again!'
-        )
-    return redirect(_profile)
 
 
 class ProfileView(BuyRequestsMixin, FormView):
@@ -644,8 +607,7 @@ def stripe_webhook(request):
 
 @method_decorator(login_required, name='dispatch')
 class RegistrationCompletionView(FormView):
-    """Provides a form for a new user to change their username and password.
-    Will verify their email if a key is provided."""
+    """Provides a form for a new user to change their username and password."""
     template_name = 'forms/base_form.html'
     form_class = RegistrationCompletionForm
 
@@ -658,17 +620,6 @@ class RegistrationCompletionView(FormView):
         kwargs = super(RegistrationCompletionView, self).get_form_kwargs()
         kwargs.update({'user': self.request.user})
         return kwargs
-
-    def get(self, request, *args, **kwargs):
-        _profile = request.user.profile
-        if 'key' in request.GET:
-            key = request.GET['key']
-            if key == _profile.confirmation_key:
-                _profile.email_confirmed = True
-                _profile.save()
-                messages.success(request, 'Your email is validated.')
-        return super(RegistrationCompletionView,
-                     self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
         """Saves the form and redirects to the success url."""
@@ -693,7 +644,7 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
-    filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')
+    filter_fields = ('username', 'profile__full_name', 'email', 'is_staff')
 
 
 class StatisticsViewSet(viewsets.ModelViewSet):
@@ -775,7 +726,7 @@ class ProxyList(MRFilterListView):
     template_name = 'lists/proxy_list.html'
     default_sort = 'profile__state'
     sort_map = {
-        'name': 'last_name',
+        'name': 'profile__full_name',
         'state': 'profile__state',
     }
 

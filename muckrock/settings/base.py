@@ -159,6 +159,9 @@ TEMPLATES = [{
             'muckrock.core.context_processors.domain',
             'muckrock.core.context_processors.cache_timeout',
         ],
+        'libraries': {
+            'thumbnail': 'easy_thumbnails.templatetags.thumbnail',
+        },
     }
 }]
 
@@ -206,6 +209,7 @@ INSTALLED_APPS = (
     'djcelery',
     'djcelery_email',
     'easy_thumbnails',
+    'sorl.thumbnail',
     'gunicorn',
     'localflavor',
     'mathfilters',
@@ -544,7 +548,7 @@ ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
-MUCKROCK_URL = 'localhost:8000'
+MUCKROCK_URL = 'dev.muckrock.com:8000'
 FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
 
 # Limit CORS support to just API endpoints
@@ -689,6 +693,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
+    # XXX associate by uuid
     'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
     'muckrock.accounts.backends.save_profile',
@@ -697,4 +702,4 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-SQUARELET_URL = os.environ.get('SQUARELET_URL', '')
+SQUARELET_URL = os.environ.get('SQUARELET_URL', 'http://dev.squarelet.com:8001')

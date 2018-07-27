@@ -102,11 +102,6 @@ urlpatterns = [
         name='acct-notifications-unread'
     ),
     url(r'^settings/$', views.ProfileSettings.as_view(), name='acct-settings'),
-    url(
-        r'^settings/verify_email/$',
-        views.verify_email,
-        name='acct-verify-email'
-    ),
     url(r'^proxies/$', views.ProxyList.as_view(), name='accounts-proxies'),
     url(r'^stripe_webhook_v2/$', views.stripe_webhook, name='acct-webhook-v2'),
     url(

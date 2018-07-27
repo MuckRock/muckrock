@@ -1,7 +1,7 @@
 {% extends 'message/base.txt' %}
 
 {% block body %}
-Hi {{ user.first_name }},
+Hi {{ user.profile.full_name }},
 
 Congratulations on launching your crowdfund campaign! We’re excited to help.
 

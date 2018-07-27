@@ -1,5 +1,5 @@
 {% autoescape off %}
-Hi {% for user in users %}{{user.first_name}}, {% endfor %}
+Hi {% for user in users %}{{user.profile.full_name}}, {% endfor %}
 
 {% block message %}{% endblock %}
 

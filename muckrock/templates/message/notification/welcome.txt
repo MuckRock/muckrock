@@ -1,7 +1,7 @@
 {% extends 'message/base.txt' %}
 {% load tags %}
 {% block body %}
-Hi {{user.first_name}},
+Hi {{user.profile.full_name}},
 
 Welcome to MuckRock!
 

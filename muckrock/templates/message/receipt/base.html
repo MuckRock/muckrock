@@ -26,7 +26,7 @@
 </div>
     {% endblock %}
 <div>
-    <p>{% if user %}Hi {{ user.first_name }},{% elif charge.name %}Hi {{charge.name}},{% else %}Hi,{% endif %}</p>
+    <p>{% if user %}Hi {{ user.profile.full_name }},{% elif charge.name %}Hi {{charge.name}},{% else %}Hi,{% endif %}</p>
     {% block description %}
     <p>This email confirms your payment to MuckRock.</p>
     {% endblock %}

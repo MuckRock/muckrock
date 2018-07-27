@@ -108,8 +108,7 @@ class TestSignup(TestCase):
         data = {
             'username': 'TestUser',
             'email': 'test@email.com',
-            'first_name': 'Test',
-            'last_name': 'User',
+            'full_name': 'Test User',
             'password1': 'test',
             'password2': 'test',
         }

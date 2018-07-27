@@ -3,7 +3,7 @@
 {% load humanize %}
 
 {% block body %}
-    <p>Hi {{user.first_name}},</p>
+    <p>Hi {{user.profile.full_name}},</p>
     {% if type == 'pro' %}
         {% if attempt == "final" %}
             <p class="red">Your Pro subscription has been cancelled.</p>

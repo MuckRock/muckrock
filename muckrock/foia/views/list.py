@@ -121,7 +121,7 @@ class RequestList(MRSearchFilterListView):
     default_order = 'desc'
     sort_map = {
         'title': 'title',
-        'user': 'composer__user__first_name',
+        'user': 'composer__user__profile__full_name',
         'agency': 'agency__name',
         'date_updated': 'datetime_updated',
         'date_submitted': 'composer__datetime_submitted',

@@ -22,14 +22,11 @@ from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.accounts.models import Profile
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.message.tasks import email_change
 from muckrock.organization.models import Organization
 
 
 class ProfileSettingsForm(forms.ModelForm):
     """A form for updating user information"""
-    first_name = forms.CharField(max_length=30)
-    last_name = forms.CharField(max_length=30)
     location = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
@@ -38,64 +35,20 @@ class ProfileSettingsForm(forms.ModelForm):
 
     class Meta():
         model = Profile
-        fields = ['first_name', 'last_name', 'avatar', 'twitter', 'location']
+        fields = ['twitter', 'location']
 
     def clean_twitter(self):
         """Stripe @ from beginning of Twitter name, if it exists."""
         twitter = self.cleaned_data['twitter']
         return twitter.split('@')[-1]
 
-    def save(self, commit=True):
-        """Modifies associated User model."""
-        profile = super(ProfileSettingsForm, self).save(commit)
-        profile.user.first_name = self.cleaned_data['first_name']
-        profile.user.last_name = self.cleaned_data['last_name']
-        profile.user.save()
-        return profile
-
 
 class EmailSettingsForm(forms.ModelForm):
     """A form for updating user email preferences."""
-    email = forms.EmailField()
 
     class Meta():
         model = Profile
-        fields = ['email', 'email_pref', 'use_autologin']
-
-    def clean_email(self):
-        """Validates that a user does not exist with the given e-mail address"""
-        email = self.cleaned_data['email']
-        users = User.objects.filter(email__iexact=email)
-        if users.count() == 1 and users.first() != self.instance.user:
-            raise forms.ValidationError(
-                'A user with that e-mail address already exists.'
-            )
-        if users.count() > 1:  # pragma: no cover
-            # this should never happen
-            raise forms.ValidationError(
-                'A user with that e-mail address already exists.'
-            )
-        return email
-
-    def save(self, commit=True):
-        """Modifies associated User and Stripe.Customer models"""
-        profile = super(EmailSettingsForm, self).save(commit)
-        user = profile.user
-        old_email = user.email
-        new_email = self.cleaned_data['email']
-        if old_email != new_email:
-            customer = profile.customer()
-            user.email = new_email
-            customer.email = new_email
-            profile.email_failed = False
-            profile.email_confirmed = False
-            profile.generate_confirmation_key()
-            user.save()
-            customer.save()
-            profile.save()
-            # notify the user
-            email_change.delay(user, old_email)
-        return profile
+        fields = ['email_pref', 'use_autologin']
 
 
 class BillingPreferencesForm(forms.ModelForm):
@@ -156,14 +109,16 @@ class RegisterForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         fields = [
-            'username', 'email', 'first_name', 'last_name', 'password1',
-            'password2'
+            'username',
+            'email',
+            'full_name',
+            'password1',
+            'password2',
         ]
 
     username = forms.CharField()
     email = forms.EmailField()
-    first_name = forms.CharField()
-    last_name = forms.CharField()
+    full_name = forms.CharField(max_length=255)
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput())
     password2 = forms.CharField(
         label='Password Confirmation', widget=forms.PasswordInput()

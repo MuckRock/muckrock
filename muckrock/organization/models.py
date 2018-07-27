@@ -93,7 +93,7 @@ class Organization(models.Model):
         msg = render_to_string(
             template, {
                 'member_name':
-                    user.first_name,
+                    user.profile.full_name,
                 'organization_name':
                     self.name,
                 'organization_owner':
@@ -153,12 +153,12 @@ class Organization(models.Model):
             which_org = 'this' if user.profile.organization == self else 'a different'
             raise AttributeError(
                 '%s is already a member of %s organization.' %
-                (user.first_name, which_org)
+                (user.profile.full_name, which_org)
             )
         is_an_owner = Organization.objects.filter(owner=user).exists()
         owns_this_org = self.is_owned_by(user)
         if is_an_owner and not owns_this_org:
-            user_name = user.first_name
+            user_name = user.profile.full_name
             raise AttributeError(
                 '%s is already an owner of a different organization.' %
                 user_name

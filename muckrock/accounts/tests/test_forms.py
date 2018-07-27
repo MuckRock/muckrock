@@ -7,8 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
 # Third Party
-from mock import patch
-from nose.tools import assert_false, assert_true, eq_, ok_
+from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
 from muckrock.accounts.forms import (
@@ -32,29 +31,6 @@ class TestEmailSettingsForm(TestCase):
         }
         self.form = EmailSettingsForm
 
-    @patch('stripe.Customer.retrieve')
-    @patch('muckrock.message.tasks.email_change.delay')
-    def test_email_normal(self, mock_notify, mock_stripe):
-        """Changing email normally should succeed"""
-        # pylint: disable=unused-argument
-        old_email = self.profile.user.email
-        new_email = 'new@example.com'
-        self.data['email'] = new_email
-        form = self.form(self.data, instance=self.profile)
-        assert_true(form.is_valid())
-        eq_(form.clean_email(), new_email)
-        form.save()
-        mock_notify.assert_called_once_with(self.profile.user, old_email)
-
-    @patch('muckrock.message.tasks.email_change.delay')
-    def test_email_same(self, mock_notify):
-        """Keeping email the same should succeed"""
-        form = self.form(self.data, instance=self.profile)
-        assert_true(form.is_valid())
-        eq_(form.clean_email(), self.profile.user.email)
-        form.save()
-        mock_notify.assert_not_called()
-
     def test_email_conflict(self):
         """Trying to use an already taken email should fail"""
         other_user = UserFactory()
@@ -76,8 +52,7 @@ class TestRegistrationForm(TestCase):
         data = {
             'username': existing_username,
             'email': 'different@example.com',
-            'first_name': 'Adam',
-            'last_name': 'Smith',
+            'full_name': 'Adam Smith',
             'password1': 'password',
             'password2': 'password'
         }
@@ -90,8 +65,7 @@ class TestRegistrationForm(TestCase):
         data = {
             'username': 'different',
             'email': existing_email,
-            'first_name': 'Adam',
-            'last_name': 'Smith',
+            'full_name': 'Adam Smith',
             'password1': 'password',
             'password2': 'password'
         }

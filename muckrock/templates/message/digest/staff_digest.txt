@@ -1,6 +1,6 @@
 {% extends 'message/base.txt' %}
 {% block body %}
-{{ salutation }}, {{ user.first_name }}.
+{{ salutation }}, {{ user.profile.full_name }}.
 
 {% if stats %}
 -------------------------
