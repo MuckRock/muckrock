@@ -840,6 +840,10 @@ def export_csv(foia_pks, user_pk):
         (lambda f: f.days_since_updated, 'Days since updated'),
         (lambda f: f.project_names, 'Projects'),
         (lambda f: f.tag_names, 'Tags'),
+        (lambda f: f.price, 'Price'),
+        (lambda f: f.composer.datetime_submitted, 'Date Submitted'),
+        (lambda f: f.date_due, 'Date Due'),
+        (lambda f: f.datetime_done, 'Date Done'),
     )
     foias = (
         FOIARequest.objects.filter(pk__in=foia_pks).select_related(
