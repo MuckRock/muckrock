@@ -255,20 +255,6 @@ def _handle_request(request, mail_id):
                 agency=foia.agency,
                 email=from_email,
             )
-        # if agency isn't currently using an outgoing email or a portal, flag it
-        if (
-            not foia.agency.get_emails().exists() and not foia.agency.portal
-            and not FlaggedTask.objects.filter(
-                agency=foia.agency, category='agency new email'
-            ).exists()
-        ):
-            FlaggedTask.objects.create(
-                agency=foia.agency,
-                category='agency new email',
-                text='We received an email from {} for a request to this '
-                'agency, but this agency does not currently have a primary '
-                'email address set'.format(from_email),
-            )
 
         # if this request is using a portal, hide the incoming messages
         hidden = foia.portal is not None
@@ -296,6 +282,27 @@ def _handle_request(request, mail_id):
             (post.get('message-headers', ''), post.get('body-plain', ''))
         )
         comm.process_attachments(request.FILES)
+
+        # if agency isn't currently using an outgoing email or a portal, flag it
+        if (
+            not foia.agency.get_emails().exists() and not foia.agency.portal
+            and not FlaggedTask.objects.filter(
+                agency=foia.agency, category='agency new email'
+            ).exists()
+        ):
+            FlaggedTask.objects.create(
+                agency=foia.agency,
+                category='agency new email',
+                text='We received an email from {} for a request to this '
+                'agency, but this agency does not currently have a primary '
+                'email address set\n'
+                '<p><a href="https://{}{}" target="_blank">Communication</a></p>'
+                .format(
+                    from_email,
+                    settings.MUCKROCK_URL,
+                    comm.get_absolute_url(),
+                ),
+            )
 
         comm.extract_tracking_id()
 
