@@ -1,7 +1,7 @@
 {% extends 'message/base.txt' %}
 {% load tags %}
 {% block body %}
-Welcome to MuckRock, {{user.first_name}}!
+Welcome to MuckRock, {{user.profile.full_name}}!
 
 We'll need you to finish creating your account. Follow this link to set up your username and password, and to verify your email address: {{base_url}}{{completion_url|safe}}
 

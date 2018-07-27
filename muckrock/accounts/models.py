@@ -15,6 +15,7 @@ import logging
 from datetime import date
 from itertools import izip_longest
 from urllib import urlencode
+from uuid import uuid4
 
 # Third Party
 import stripe
@@ -24,11 +25,7 @@ from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
 
 # MuckRock
-from muckrock.core.utils import (
-    generate_key,
-    get_image_storage,
-    stripe_retry_on_error,
-)
+from muckrock.core.utils import get_image_storage, stripe_retry_on_error
 from muckrock.foia.exceptions import InsufficientRequestsError
 
 logger = logging.getLogger(__name__)
@@ -62,6 +59,8 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(User)
+    full_name = models.CharField(max_length=255, blank=True)
+    uuid = models.UUIDField(unique=True, editable=False, default=uuid4)
     source = models.CharField(
         max_length=20,
         blank=True,
@@ -108,6 +107,7 @@ class Profile(models.Model):
     linkedin = models.URLField(
         max_length=255, blank=True, help_text='Begin with http://'
     )
+    # XXX remove after migrating
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True,
@@ -116,12 +116,12 @@ class Profile(models.Model):
                        'crop': 'smart'},
         storage=get_image_storage(),
     )
+    avatar_url = models.URLField(max_length=255, blank=True)
 
     # provide user access to experimental features
     experimental = models.BooleanField(default=False)
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=24, blank=True)
     # email preferences
     email_pref = models.CharField(
         max_length=10,
@@ -395,13 +395,6 @@ class Profile(models.Model):
             metadata=metadata,
             idempotency_key=True,
         )
-
-    def generate_confirmation_key(self):
-        """Generate random key used for validating the email address"""
-        key = generate_key(24)
-        self.confirmation_key = key
-        self.save()
-        return key
 
     def autologin(self):
         """Generate an autologin key and value for this user if they set this preference."""

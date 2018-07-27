@@ -649,9 +649,8 @@ class FlaggedTask(Task):
                 'orgId': settings.ZOHO_ORG_ID,
             },
             json={
-                'firstName': user.first_name,
-                'lastName':
-                    user.last_name or 'Anonymous',  # lastName is required
+                'lastName': user.profile.full_name or
+                            'Anonymous',  # lastName is required
                 'email': user.email,
                 'customFields': {
                     'username': user.username

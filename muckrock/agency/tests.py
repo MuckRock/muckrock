@@ -181,7 +181,7 @@ class TestAgencyViews(TestCase):
             },
         )
         request = mock_middleware(request)
-        request.user = UserFactory(first_name='John', last_name='Doe')
+        request.user = UserFactory(profile__full_name='John Doe')
         response = boilerplate(request)
         eq_(response.status_code, 200)
         data = json.loads(response.content)

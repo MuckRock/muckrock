@@ -2,7 +2,7 @@
 {% load tags %}
 
 {% block body %}
-Hi {{user.first_name}},
+Hi {{user.profile.full_name}},
 
 {{added_by.get_full_name}} ({{base_url}}{{added_by.get_absolute_url}}) has added you as a contributor to their project {{ project.title }} ({{base_url}}{{ project.get_absolute_url }}?{% autologin user %}). This means that you have full access to this project, including the ability to edit and crowdfund, alongside your other contributors.
 

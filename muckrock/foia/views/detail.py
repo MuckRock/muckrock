@@ -248,7 +248,7 @@ class Detail(DetailView):
             context['open_tasks'] = open_tasks
             context['asignees'] = User.objects.filter(
                 is_staff=True,
-            ).order_by('last_name')
+            ).order_by('profile__full_name')
 
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse(
@@ -713,7 +713,7 @@ class Detail(DetailView):
             )
         else:
             success_msg = '%s can now %s this request.' % (
-                users[0].first_name, access
+                users[0].profile.full_name, access
             )
         messages.success(request, success_msg)
         return redirect(foia.get_absolute_url() + '#')
@@ -729,8 +729,8 @@ class Detail(DetailView):
             elif foia.has_viewer(user):
                 foia.remove_viewer(user)
             messages.success(
-                request,
-                '%s no longer has access to this request.' % user.first_name
+                request, '%s no longer has access to this request.' %
+                user.profile.full_name
             )
         return redirect(foia.get_absolute_url() + '#')
 
@@ -742,7 +742,8 @@ class Detail(DetailView):
         if has_perm and user:
             foia.demote_editor(user)
             messages.success(
-                request, '%s can now only view this request.' % user.first_name
+                request,
+                '%s can now only view this request.' % user.profile.full_name
             )
         return redirect(foia.get_absolute_url() + '#')
 
@@ -754,7 +755,8 @@ class Detail(DetailView):
         if has_perm and user:
             foia.promote_viewer(user)
             messages.success(
-                request, '%s can now edit this request.' % user.first_name
+                request,
+                '%s can now edit this request.' % user.profile.full_name
             )
         return redirect(foia.get_absolute_url() + '#')
 

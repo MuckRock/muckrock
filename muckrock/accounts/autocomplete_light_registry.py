@@ -19,7 +19,7 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking users"""
     choices = User.objects.all()
     choice_template = 'autocomplete/user.html'
-    search_fields = ['^username', '^first_name', '^last_name', '^email']
+    search_fields = ['^username', 'profile__full_name', '^email']
     attrs = {
         'placeholder': 'Search users',
         'data-autocomplete-minimum-characters': 2

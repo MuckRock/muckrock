@@ -29,20 +29,6 @@ from muckrock.message.tasks import gift, welcome_miniregister
 logger = logging.getLogger(__name__)
 
 
-def split_name(name):
-    """Splits a full name into a first and last name."""
-    # infer first and last names from the full name
-    # limit first and last names to 30 characters each
-    if ' ' in name:
-        first_name, last_name = name.rsplit(' ', 1)
-        first_name = first_name[:30]
-        last_name = last_name[:30]
-    else:
-        first_name = name[:30]
-        last_name = ''
-    return first_name, last_name
-
-
 class MiniregMixin(object):
     """A mixin to expose miniregister functionality to a view"""
     minireg_source = 'Default'
@@ -52,21 +38,19 @@ class MiniregMixin(object):
         password = generate_key(12)
         full_name = full_name.strip()
         username = unique_username(full_name)
-        first_name, last_name = split_name(full_name)
         # create a new User
         user = User.objects.create_user(
             username,
             email,
             password,
-            first_name=first_name,
-            last_name=last_name
         )
         # create a new Profile
         Profile.objects.create(
             user=user,
             acct_type='basic',
             monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
-            date_update=date.today()
+            date_update=date.today(),
+            full_name=full_name,
         )
         # send the new user a welcome email
         welcome_miniregister.delay(user)
@@ -132,7 +116,7 @@ class BuyRequestsMixin(object):
         else:
             msg = (
                 'Purchase successful.  {} requests have been gifted to'
-                '{}.'.format(num_requests, recipient.first_name)
+                '{}.'.format(num_requests, recipient.profile.full_name)
             )
             gift.delay(
                 recipient,

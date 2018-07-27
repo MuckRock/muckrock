@@ -6,7 +6,7 @@
         {% if user_is_contributor %}
         <h1>Your Projects</h1>
         {% else %}
-        <h1>{{contributor.first_name}}&rsquo;s Projects</h1>
+        <h1>{{contributor.profile.full_name}}&rsquo;s Projects</h1>
         {% endif %}
     </header>
     <div class="projects">

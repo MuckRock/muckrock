@@ -1,7 +1,7 @@
 {% extends 'message/base.html' %}
 
 {% block body %}
-<p>{{ salutation }}, {{ user.first_name }}.</p>
+<p>{{ salutation }}, {{ user.profile.full_name }}.</p>
 {% if stale_tasks_show %}
   <h1>Stale Tasks</h1>
   {% for task_type, tasks in stale_tasks.iteritems %}

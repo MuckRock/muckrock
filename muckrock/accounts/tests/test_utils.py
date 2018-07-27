@@ -15,7 +15,7 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.accounts.mixins import MiniregMixin, split_name
+from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import unique_username
 from muckrock.core.factories import UserFactory
 from muckrock.core.test_utils import mock_middleware
@@ -43,14 +43,7 @@ class TestMiniregister(TestCase):
         ok_(user.profile, 'A profile should be created for the user.')
         ok_(user.is_authenticated(), 'The user should be logged in.')
         mock_welcome.assert_called_once()  # The user should get a welcome email
-        eq_(
-            user.first_name, 'Lou',
-            'The first name should be extracted from the full name.'
-        )
-        eq_(
-            user.last_name, 'Reed',
-            'The last name should be extracted from the full name.'
-        )
+        eq_(user.profile.full_name, 'Lou Reed')
         eq_(
             user.username, 'LouReed',
             'The username should remove the spaces from the full name.'
@@ -93,31 +86,3 @@ class TestUniqueUsername(TestCase):
         ok_(re.match(name + r'_[a-zA-Z]{8}', unique_username(name)))
         lower_name = name.lower()
         ok_(re.match(lower_name + r'_[a-zA-Z]{8}', unique_username(lower_name)))
-
-
-class TestSplitName(TestCase):
-    """The split_name method should split a full name into a first and last name."""
-
-    def test_single_space_name(self):
-        """If the full name has two names in it, the method should return a first and last name."""
-        name = 'Johnny Appleseed'
-        first_name, last_name = split_name(name)
-        eq_(first_name, 'Johnny')
-        eq_(last_name, 'Appleseed')
-
-    def test_multi_space_name(self):
-        """
-        If the full name has more than two separate names in it,
-        the first name should include everything except the final name.
-        """
-        long_name = 'John Jacob Jingleheimer Schmidt'  # his name is my name too
-        first_name, last_name = split_name(long_name)
-        eq_(first_name, 'John Jacob Jingleheimer')
-        eq_(last_name, 'Schmidt')
-
-    def test_single_name(self):
-        """If a single name is provided as the full name, then there should be no last name."""
-        short_name = 'Zeus'
-        first_name, last_name = split_name(short_name)
-        eq_(first_name, 'Zeus')
-        ok_(not last_name)

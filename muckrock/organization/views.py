@@ -513,7 +513,7 @@ class OrganizationDetailView(DetailView):
                 if removing_self:
                     msg = 'You are no longer a member.'
                 else:
-                    msg = 'You removed membership from %s.' % user.first_name
+                    msg = 'You removed membership from %s.' % user.profile.full_name
                 messages.success(request, msg)
         else:
             messages.error(

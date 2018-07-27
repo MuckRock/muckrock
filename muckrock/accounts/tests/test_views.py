@@ -51,8 +51,7 @@ class TestBasicSignupView(TestCase):
         self.data = {
             'username': 'test-user',
             'email': 'test@muckrock.com',
-            'first_name': 'Test',
-            'last_name': 'User',
+            'full_name': 'Test User',
             'password1': 'password',
             'password2': 'password'
         }
@@ -100,8 +99,7 @@ class TestProfessionalSignupView(TestCase):
         self.data = {
             'username': 'test-user',
             'email': 'test@muckrock.com',
-            'first_name': 'Test',
-            'last_name': 'User',
+            'full_name': 'Test User',
             'password1': 'password',
             'password2': 'password',
             'token': 'test'
@@ -148,8 +146,7 @@ class TestOrganizationSignupView(TestCase):
         self.data = {
             'username': 'test-user',
             'email': 'test@muckrock.com',
-            'first_name': 'Test',
-            'last_name': 'User',
+            'full_name': 'Test User',
             'password1': 'password',
             'password2': 'password',
             'organization_name': 'Test Org'
@@ -326,8 +323,8 @@ class TestProfileViewBuyRequests(TestCase):
 
 
 class TestRegistrationCompletionView(TestCase):
-    """The RegistrationCompletionView allows a user to verify their email,
-    change their password, and update their email after creating an
+    """The RegistrationCompletionView allows a user to
+    change their password and update their email after creating an
     account through the miniregistration process."""
 
     def setUp(self):
@@ -343,21 +340,6 @@ class TestRegistrationCompletionView(TestCase):
         ok_(
             reverse('acct-login') in response.url,
             'Logged out users should be redirected to the login view.'
-        )
-
-    def test_get_and_verify(self):
-        """Getting the view with a verification key should verify the user's email."""
-        key = self.user.profile.generate_confirmation_key()
-        response = http_get_response(
-            reverse('accounts-complete-registration') + '?key=' + key,
-            views.RegistrationCompletionView.as_view(),
-            user=self.user
-        )
-        self.user.profile.refresh_from_db()
-        eq_(response.status_code, 200, 'The view should respond 200 OK')
-        ok_(
-            self.user.profile.email_confirmed,
-            'The user\'s email address should be confirmed.'
         )
 
     def test_update_username_password(self):
@@ -463,12 +445,7 @@ class TestAccountFunctional(TestCase):
         """Test the account settings view"""
         # pylint: disable=unused-argument
         profile = self.user.profile
-        profile_data = {
-            'action': 'profile',
-            'first_name': 'Allan',
-            'last_name': 'Lasser',
-            'twitter': 'allanlasser'
-        }
+        profile_data = {'action': 'profile', 'twitter': 'allanlasser'}
         email_data = {
             'action': 'email',
             'email': 'allan@muckrock.com',
@@ -489,7 +466,7 @@ class TestAccountFunctional(TestCase):
         all_data.update(email_data)
         all_data.pop('action')
         for key, val in all_data.iteritems():
-            if key in ['first_name', 'last_name', 'email']:
+            if key == 'email':
                 eq_(val, getattr(self.user, key))
             else:
                 eq_(val, getattr(profile, key))

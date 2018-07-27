@@ -328,7 +328,7 @@ class Homepage(object):
             FOIARequest.objects.get_public().get_done().
             order_by('-datetime_done', 'pk').select_related(
                 'agency__jurisdiction__parent__parent',
-                'composer__user',
+                'composer__user__profile',
             ).only(
                 'status',
                 'slug',
@@ -343,8 +343,7 @@ class Homepage(object):
                 'agency__jurisdiction__parent__slug',
                 'agency__jurisdiction__parent__parent__slug',
                 'composer__user__username',
-                'composer__user__first_name',
-                'composer__user__last_name',
+                'composer__user____profile__full_name',
             ).get_public_file_count(limit=6)
         )
 

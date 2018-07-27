@@ -329,6 +329,7 @@ def failed_payment(invoice_id):
 @task(name='muckrock.message.tasks.welcome')
 def welcome(user):
     """Send a welcome notification to a new user. Hello!"""
+    # XXX
     verification_url = reverse('acct-verify-email')
     key = user.profile.generate_confirmation_key()
     context = {
@@ -348,6 +349,7 @@ def welcome(user):
 def welcome_miniregister(user):
     """Send a welcome notification to a new users who signed up with miniregister.
     Provide them a link to verify their email and update their username/password."""
+    # XXX
     completion_url = reverse('accounts-complete-registration')
     key = user.profile.generate_confirmation_key()
     context = {'completion_url': user.profile.wrap_url(completion_url, key=key)}
@@ -371,39 +373,6 @@ def gift(to_user, from_user, gift_description):
         text_template='message/notification/gift.txt',
         html_template='message/notification/gift.html',
         subject=u'You got a gift!'
-    )
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.email_change')
-def email_change(user, old_email):
-    """Notify the user when their email is changed."""
-    context = {'old_email': old_email, 'new_email': user.email}
-    notification = TemplateEmail(
-        user=user,
-        extra_context=context,
-        text_template='message/notification/email_change.txt',
-        html_template='message/notification/email_change.html',
-        subject=u'Changed email address'
-    )
-    notification.to.append(
-        old_email
-    )  # Send to both the new and old email addresses
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.email_verify')
-def email_verify(user):
-    """Verify the user's email by sending them a message."""
-    url = reverse('acct-verify-email')
-    key = user.profile.generate_confirmation_key()
-    context = {'verification_link': user.profile.wrap_url(url, key=key)}
-    notification = TemplateEmail(
-        user=user,
-        extra_context=context,
-        text_template='message/notification/email_verify.txt',
-        html_template='message/notification/email_verify.html',
-        subject=u'Verify your email'
     )
     notification.send(fail_silently=False)
 

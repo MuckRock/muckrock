@@ -25,6 +25,7 @@ from urllib import urlencode
 # Third Party
 import bleach
 import markdown
+from sorl.thumbnail.templatetags.thumbnail import thumbnail
 
 # MuckRock
 from muckrock.core.forms import NewsletterSignupForm, TagManagerForm
@@ -426,3 +427,9 @@ def do_cache(parser, token):
 def do_compress_cache(parser, token):
     """Cache tag that can compress its contents"""
     return CacheNode(*parse_cache(parser, token), compress=True)
+
+
+@register.tag
+def sorl_thumbnail(parser, token):
+    """Wrapper for sorl thumbnail tag to resolve name clash with easy thumbnails"""
+    return thumbnail(parser, token)

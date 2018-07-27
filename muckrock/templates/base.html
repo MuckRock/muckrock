@@ -235,8 +235,7 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
         });
         mixpanel.people.set({
           "$email": "{{ request.user.email }}",
-          "$first_name": "{{ request.user.first_name }}",
-          "$last_name": "{{ request.user.last_name }}",
+          "$name": "{{ request.user.profile.full_name }}",
           "Account Type": "{{ request.user.profile.acct_type }}",
           "Date Joined": "{{ request.user.date_joined|date:"c" }}",
           {% if request.user.profile.organization %}

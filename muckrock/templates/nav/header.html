@@ -1,7 +1,9 @@
 {% load cache %}
 {% load static from staticfiles %}
+{% load sorl_thumbnail %}
 {% load thumbnail %}
 {% load hijack_tags %}
+{% load tags %}
 
 <header class="global-header {% if request|is_hijacked %}global-header-hijacked{% endif %}">
   <nav class="global-navigation space-between mb0" id="nav">
@@ -165,7 +167,11 @@
           {% if user.is_authenticated %}
             <li class="dropdown dropdown--right">
               <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
-                <img class="round avatar mb0" src="{% if user.profile.avatar %}{% thumbnail user.profile.avatar 62x62 crop %}{% else %}{% static 'img/defaultavatar.png' %}{% endif %}" height="31" width="31">
+                {% sorl_thumbnail profile.avatar_url "62x62" as avatar %}
+                  <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
+                {% empty %}
+                  <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
+                {% endthumbnail %}
                 <span class="label">{{ user.get_full_name }}</span>
               </a>
               <ul id="profile-dropdown">

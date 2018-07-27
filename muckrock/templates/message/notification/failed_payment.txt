@@ -2,7 +2,7 @@
 {% load tags %}
 {% load humanize %}
 {% block body %}
-Hi {{user.first_name}},
+Hi {{user.profile.full_name}},
 {% if type == 'pro' %}{% if attempt == "final" %}
 Your Pro subscription has been cancelled.
 
