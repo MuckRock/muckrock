@@ -106,8 +106,9 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         return
 
     if doc.doc_id and not change:
-        # not change means we are uploading a new one - it should not have an id yet
-        return
+        # not change means we are re-uploading - remove old doc_id
+        doc.doc_id = ''
+        doc.save()
 
     if not doc.doc_id and change:
         # if we are changing it must have an id - this should never happen but it is!
@@ -523,15 +524,13 @@ def embargo_expire():
     name='muckrock.foia.tasks.set_all_document_cloud_pages'
 )
 def set_all_document_cloud_pages():
-    """Try and set all document cloud documents that have no page count set"""
+    """Re-upload all document cloud documents that have no page count set"""
     docs = [
         doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()
     ]
-    logger.info(
-        'Setting document cloud pages, %d documents with 0 pages', len(docs)
-    )
-    for doc in docs:
-        set_document_cloud_pages.apply_async(args=[doc.pk])
+    logger.info('Re-upload documents, %d documents with 0 pages', len(docs))
+    for doc in docs[:250]:
+        upload_document_cloud.apply_async(args=[doc.pk, False])
 
 
 @periodic_task(
