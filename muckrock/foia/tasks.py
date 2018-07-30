@@ -808,7 +808,7 @@ def autoimport():
 
 @task(
     ignore_result=True,
-    time_limit=600,
+    time_limit=1800,
     name='muckrock.foia.tasks.export_csv',
 )
 def export_csv(foia_pks, user_pk):

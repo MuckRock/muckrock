@@ -516,10 +516,13 @@ class FlaggedTask(Task):
             if obj is None:
                 return ''
             else:
-                return u'<p><a href="https://{}{}">{}</a></p>'.format(
-                    settings.MUCKROCK_URL,
-                    obj.get_absolute_url(),
-                    obj,
+                return (
+                    u'<p><a href="https://{}{}" target="_blank">{}</a></p>'
+                    .format(
+                        settings.MUCKROCK_URL,
+                        obj.get_absolute_url(),
+                        obj,
+                    )
                 )
 
         contact_id = self.get_contact_id(self.user)
