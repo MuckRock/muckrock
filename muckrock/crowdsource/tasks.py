@@ -33,8 +33,9 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
         )
     )
     try:
+        resp.raise_for_status()
         resp_json = resp.json()
-    except ValueError as exc:
+    except (ValueError, requests.exceptions.HTTPError) as exc:
         datum_per_page.retry(
             args=[crowdsource_pk, doc_id, metadata],
             countdown=300,
