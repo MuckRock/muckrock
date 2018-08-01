@@ -60,4 +60,14 @@ urlpatterns = [
         views.oembed,
         name='crowdsource-oembed',
     ),
+    url(
+        r'^(?P<idx>\d+)/edit/$',
+        views.CrowdsourceEditResponseView.as_view(),
+        name='crowdsource-edit-response',
+    ),
+    url(
+        r'^(?P<idx>\d+)/revert/$',
+        views.CrowdsourceRevertResponseView.as_view(),
+        name='crowdsource-revert-response',
+    ),
 ]

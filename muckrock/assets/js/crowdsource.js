@@ -96,9 +96,11 @@ $(document).ready(function(){
     search = "";
 
   function handleUpdateResponses(data) {
-    var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried, tags;
+    var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried,
+      tags, dataSection;
     var responses = $("section.assignment-responses");
     responses.html("");
+    var pencil = $("#pencil-svg").html();
 
     // generate the responses
     for(var i = 0; i < data.results.length; i++) {
@@ -117,7 +119,12 @@ $(document).ready(function(){
       tags = data.results[i].tags.join(', ');
       response.append(`
         <header class="textbox__header">
-          <p class="from">From: ${data.results[i].user}</p>
+          <p class="from nocollapse">
+            <a href="/assignment/${data.results[i].id}/edit/" class="edit-link">
+              ${pencil}
+            </a>
+            From: ${data.results[i].user}
+          </p>
           ${dataUrlP}
           <time class="date">
             ${data.results[i].datetime}
@@ -144,12 +151,27 @@ $(document).ready(function(){
         values.append("<dt>" + dataValues[j].field + "</dt>");
         values.append("<dd>" + dataValues[j].value + "</dd>");
       }
-      response.append($("<section>").addClass("textbox__section").html(values));
+      dataSection = $("<section>").addClass("textbox__section").html(values);
+      response.append(dataSection);
+      if (data.results[i].edit_user) {
+        dataSection.append($("<p>").html(
+          `<em>This submission was edited by ${data.results[i].edit_user} at
+          ${data.results[i].edit_datetime}.
+          <a href="/assignment/${data.results[i].id}/revert">
+            View the original submission and, if necessary, revert.
+          </a></em>`
+        ));
+      }
       response.append(oEmbed);
       responses.append(response);
     }
+    // Need to re-run these so they apply to dynamically created content
     $('.collapsable header').click(function(){
       $(this).parent().toggleClass('collapsed');
+    });
+    $('.collapsable header').find('.nocollapse').click(function(event){
+      // Prevent click from propagating up to the collapsable header.
+      event.stopPropagation();
     });
     $('.flag-checkbox').click(function(){
       $.ajax({

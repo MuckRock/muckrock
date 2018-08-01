@@ -13,6 +13,7 @@ from django.http import (
     StreamingHttpResponse,
 )
 from django.shortcuts import redirect
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.views.generic import (
@@ -325,6 +326,85 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             slug=crowdsource.slug,
             idx=crowdsource.pk,
         )
+
+
+class CrowdsourceEditResponseView(BaseDetailView, FormView):
+    """A view for an admin to edit a submitted response"""
+    template_name = 'crowdsource/form.html'
+    form_class = CrowdsourceAssignmentForm
+    pk_url_kwarg = 'idx'
+    context_object_name = 'response'
+    model = CrowdsourceResponse
+
+    def dispatch(self, request, *args, **kwargs):
+        """Check permissions"""
+        # pylint: disable=attribute-defined-outside-init
+        self.object = self.get_object()
+        edit_perm = request.user.has_perm(
+            'crowdsource.change_crowdsource', self.object.crowdsource
+        )
+        if not edit_perm:
+            raise Http404
+        return (
+            super(CrowdsourceEditResponseView, self)
+            .dispatch(request, *args, **kwargs)
+        )
+
+    def get_form_kwargs(self):
+        """Add the user and crowdsource object to the form"""
+        kwargs = super(CrowdsourceEditResponseView, self).get_form_kwargs()
+        kwargs.update({
+            'crowdsource': self.get_object().crowdsource,
+            'user': self.request.user,
+        })
+        return kwargs
+
+    def get_initial(self):
+        """Fetch the crowdsource data item to show with this form,
+        if there is one, and the latest values"""
+        initial = {'data_id': self.object.data_id}
+        for value in self.object.values.all():
+            initial[str(value.field.pk)] = value.value
+        return initial
+
+    def get_context_data(self, **kwargs):
+        """Set the crowdsource and data in the context"""
+        return super(CrowdsourceEditResponseView, self).get_context_data(
+            crowdsource=self.object.crowdsource,
+            data=self.object.data,
+            edit=True,
+        )
+
+    def form_valid(self, form):
+        """Save the form results"""
+        response = self.object
+        response.edit_user = self.request.user
+        response.edit_datetime = timezone.now()
+        response.save()
+
+        form.cleaned_data.pop('data_id', None)
+        for field_id, new_value in form.cleaned_data.iteritems():
+            value = response.values.get(field_id=field_id)
+            value.value = new_value
+            value.save()
+
+        return redirect(
+            'crowdsource-detail',
+            slug=response.crowdsource.slug,
+            idx=response.crowdsource.pk,
+        )
+
+
+class CrowdsourceRevertResponseView(CrowdsourceEditResponseView):
+    """A view for an admin to revert a submitted response to its original values"""
+
+    def get_initial(self):
+        """Fetch the crowdsource data item to show with this form,
+        if there is one, and the original values"""
+        initial = {'data_id': self.object.data_id}
+        for value in self.object.values.all():
+            initial[str(value.field.pk)] = value.original_value
+        return initial
 
 
 @method_decorator(frame_deny_exempt, name='dispatch')

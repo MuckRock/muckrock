@@ -25,11 +25,11 @@
       </form>
     {% endif %}
     <div class="buttons">
-      <input form="submitInput" type="submit" name="submit" value="Submit" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
+      <input form="submitInput" type="submit" name="submit" value="{% if edit %}Update{% else %}Submit{% endif %}" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
       {% if crowdsource.multiple_per_page %}
         <input form="submitInput" type="submit" name="submit" value="Submit and Add Another" class="blue button" {% if crowdsource.status != "open" %}disabled{% endif %}>
       {% endif %}
-      {% if data %}
+      {% if data and not edit %}
         <input form="skipInput" type="submit" name="submit" value="Skip" class="button" {% if crowdsource.status != "open" %}disabled{% endif %}>
       {% endif %}
     </div>

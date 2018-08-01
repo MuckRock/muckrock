@@ -40,3 +40,17 @@
     flex: 1 1 50%;
   }
 }
+
+#pencil-svg {
+  display: none;
+}
+
+#assignment-responses .edit-link {
+  margin-right: 1em;
+  &:hover {
+    text-decoration: none;
+    g {
+      stroke: $color-grey-5;
+    }
+  }
+}
