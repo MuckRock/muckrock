@@ -414,7 +414,7 @@ class Profile(models.Model):
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
         extra.update(self.autologin())
-        return link + '?' + urlencode(extra)
+        return u'{}?{}'.format(link, urlencode(extra))
 
     def limit_attachments(self):
         """Does this user need to have their attachments limited?"""
