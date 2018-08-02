@@ -33,7 +33,19 @@ http {
     <% end %>
 	include block_nobis.conf;
 
-	limit_req_zone $binary_remote_addr zone=one:10m rate=1r/s;
+    geo $limit {
+        default 1;
+        <% ENV.fetch('NO_LIMIT_IPS', '').split(',').each do |ip| %>
+            <%= ip %> 0;
+        <% end %>
+    }
+
+    map $limit $limit_key {
+        0 "";
+        1 $binary_remote_addr;
+    }
+
+	limit_req_zone $limit_key zone=one:10m rate=1r/s;
 
 	log_format l2met 'measure#nginx.service=$request_time request_id=$http_x_request_id';
 	log_format compression '$remote_addr - $remote_user [$time_local] '
