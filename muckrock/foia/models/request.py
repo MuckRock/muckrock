@@ -443,9 +443,9 @@ class FOIARequest(models.Model):
             self.date_processing = date.today()
             self.save()
         else:
+            self._send_msg(appeal=appeal, **kwargs)
             self.update_dates()
             self.save()
-            self._send_msg(appeal=appeal, **kwargs)
 
     def update_address_from_info(self, agency, appeal, contact_info):
         """Update the contact information manually"""
