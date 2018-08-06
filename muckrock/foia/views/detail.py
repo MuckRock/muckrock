@@ -252,9 +252,7 @@ class Detail(DetailView):
         context['sidebar_admin_url'] = reverse(
             'admin:foia_foiarequest_change', args=(foia.pk,)
         )
-        context['is_thankable'] = self.request.user.has_perm(
-            'foia.thank_foiarequest', foia
-        )
+        context['is_thankable'] = foia.has_perm(self.request.user, 'thank')
         context['files'] = foia.get_files()[:50]
         if self.request.user.is_authenticated():
             context['foia_cache_timeout'] = 0
@@ -276,7 +274,7 @@ class Detail(DetailView):
                 foia.composer.datetime_submitted +
                 timedelta(seconds=COMPOSER_EDIT_DELAY)
             )
-            context['can_revoke'] = foia.composer.revokable()
+            context['can_revoke'] = user_can_edit and foia.composer.revokable()
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
         return context
@@ -852,16 +850,15 @@ class ComposerDetail(DetailView):
         """If composer is a draft, then redirect to drafting interface"""
         # pylint: disable=attribute-defined-outside-init
         composer = self.get_object()
-        is_owner = composer.user == self.request.user
-        is_owner_or_staff = is_owner or self.request.user.is_staff
-        if composer.status == 'started' and is_owner_or_staff:
+        can_edit = composer.has_perm(self.request.user, 'change')
+        if composer.status == 'started' and can_edit:
             return redirect('foia-draft', idx=composer.pk)
-        if composer.status == 'started' and not is_owner_or_staff:
+        if composer.status == 'started' and not can_edit:
             raise Http404
         self.foias = (
             composer.foias.get_viewable(self.request.user).select_related_view()
         )
-        if not is_owner_or_staff and not self.foias:
+        if not can_edit and not self.foias:
             raise Http404
         if len(self.foias) == 1:
             return redirect(self.foias[0])
@@ -891,6 +888,7 @@ class ComposerDetail(DetailView):
             context['can_edit'] = (
                 timezone.now() < context['edit_deadline']
                 and composer.delayed_id
+                and composer.has_perm(self.request.user, 'change')
             )
         return context
 

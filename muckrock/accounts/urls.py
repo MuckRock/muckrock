@@ -88,7 +88,7 @@ urlpatterns = [
     ),
     url(
         r'^profile/(?P<username>[\w\-.@ ]+)/$',
-        login_required(views.ProfileView.as_view()),
+        views.ProfileView.as_view(),
         name='acct-profile'
     ),
     url(

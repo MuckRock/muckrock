@@ -93,6 +93,8 @@ def authenticate_documentcloud(request):
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
+    logger.info('Upload Doc Cloud: %s', doc_pk)
+
     try:
         doc = FOIAFile.objects.get(pk=doc_pk)
     except FOIAFile.DoesNotExist as exc:
@@ -528,6 +530,7 @@ def set_all_document_cloud_pages():
     ]
     logger.info('Re-upload documents, %d documents with 0 pages', len(docs))
     for doc in docs[:250]:
+        logger.info('0 page re-upload: %s', doc.pk)
         upload_document_cloud.apply_async(args=[doc.pk, False])
 
 
