@@ -24,8 +24,9 @@ class DateTimeField(serializers.DateTimeField):
 
     def to_representation(self, value):
         """Display dates how we used to, as naive times in the local timezone"""
-        return unicode(
+        return (
             value.astimezone(get_default_timezone()).replace(tzinfo=None)
+            .isoformat()
         )
 
 
@@ -164,6 +165,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     datetime_submitted = DateTimeField(
         read_only=True, source='composer.datetime_submitted'
     )
+    datetime_done = DateTimeField()
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=super-on-old-class
