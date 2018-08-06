@@ -483,10 +483,7 @@ class ProfileView(BuyRequestsMixin, FormView):
         # pylint: disable=attribute-defined-outside-init
         username = kwargs.get('username')
         if username is None:
-            if request.user.is_anonymous():
-                return redirect('acct-login')
-            else:
-                return redirect('acct-profile', username=request.user.username)
+            return redirect('acct-profile', username=request.user.username)
         self.user = get_object_or_404(User, username=username, is_active=True)
         return super(ProfileView, self).dispatch(request, *args, **kwargs)
 
