@@ -4,6 +4,7 @@ Serilizers for the FOIA application API
 
 # Django
 from django.contrib.auth.models import User
+from django.utils.timezone import get_default_timezone
 
 # Third Party
 from rest_framework import permissions, serializers
@@ -16,6 +17,16 @@ from muckrock.foia.models import (
     FOIANote,
     FOIARequest,
 )
+
+
+class DateTimeField(serializers.DateTimeField):
+    """Custom formatting for date time fields"""
+
+    def to_representation(self, value):
+        """Display dates how we used to, as naive times in the local timezone"""
+        return unicode(
+            value.astimezone(get_default_timezone()).replace(tzinfo=None)
+        )
 
 
 class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
@@ -57,6 +68,7 @@ class IsOwner(permissions.BasePermission):
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
     ffile = serializers.CharField(source='ffile.url', read_only=True)
+    datetime = DateTimeField()
 
     class Meta:
         model = FOIAFile
@@ -80,6 +92,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     )
     delivered = serializers.SerializerMethodField()
     resolved_by = serializers.SerializerMethodField()
+    datetime = DateTimeField()
 
     def __init__(self, *args, **kwargs):
         super(FOIACommunicationSerializer, self).__init__(*args, **kwargs)
@@ -124,6 +137,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
 
 class FOIANoteSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Note model"""
+    datetime = DateTimeField(read_only=True)
 
     class Meta:
         model = FOIANote
@@ -147,8 +161,8 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     notes = FOIANoteSerializer(many=True)
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
     tracking_id = serializers.ReadOnlyField(source='current_tracking_id')
-    datetime_submitted = serializers.ReadOnlyField(
-        source='composer.datetime_submitted'
+    datetime_submitted = DateTimeField(
+        read_only=True, source='composer.datetime_submitted'
     )
 
     def __init__(self, *args, **kwargs):
