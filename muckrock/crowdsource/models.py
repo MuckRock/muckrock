@@ -22,6 +22,7 @@ from random import choice
 from bleach.sanitizer import Cleaner
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
+from pyembed.core.discovery import AutoDiscoverer
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -249,7 +250,11 @@ class CrowdsourceData(models.Model):
         """Get the html to embed into the crowdsource"""
         try:
             # first try to get embed code from oEmbed
-            return mark_safe(PyEmbed().embed(self.url, max_height=400))
+            return mark_safe(
+                PyEmbed(discoverer=AutoDiscoverer()).embed(
+                    self.url, max_height=400
+                )
+            )
         except PyEmbedConsumerError:
             # if this is a private document cloud document, it will not have
             # an oEmbed, create the embed manually
@@ -365,6 +370,16 @@ class CrowdsourceResponse(models.Model):
     flag = models.BooleanField(default=False)
     gallery = models.BooleanField(default=False)
 
+    # edits
+    edit_user = models.ForeignKey(
+        'auth.User',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='edited_crowdsource_responses',
+    )
+    edit_datetime = models.DateTimeField(null=True, blank=True)
+
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
@@ -402,6 +417,7 @@ class CrowdsourceResponse(models.Model):
         for key in ['data_id', 'full_name', 'email', 'newsletter']:
             data.pop(key, None)
         for pk, value in data.iteritems():
+            value = value if value is not None else ''
             try:
                 field = CrowdsourceField.objects.get(
                     crowdsource=self.crowdsource,
@@ -409,7 +425,8 @@ class CrowdsourceResponse(models.Model):
                 )
                 self.values.create(
                     field=field,
-                    value=value if value is not None else '',
+                    value=value,
+                    original_value=value,
                 )
             except CrowdsourceField.DoesNotExist:
                 pass
@@ -446,7 +463,8 @@ class CrowdsourceValue(models.Model):
 
     response = models.ForeignKey(CrowdsourceResponse, related_name='values')
     field = models.ForeignKey(CrowdsourceField, related_name='values')
-    value = models.CharField(max_length=2000)
+    value = models.CharField(max_length=2000, blank=True)
+    original_value = models.CharField(max_length=2000, blank=True)
 
     def __unicode__(self):
         return self.value
