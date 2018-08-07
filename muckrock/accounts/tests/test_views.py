@@ -3,6 +3,7 @@ Tests accounts views
 """
 
 # Django
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
@@ -414,7 +415,9 @@ class TestAccountFunctional(TestCase):
         """Private URLs should redirect logged-out users to the log in page"""
         # my profile
         get, post = http_get_post(
-            reverse('acct-my-profile'), views.ProfileView.as_view(), {}
+            reverse('acct-my-profile'),
+            login_required(views.ProfileView.as_view()),
+            {},
         )
         eq_(
             get.status_code, 302,
