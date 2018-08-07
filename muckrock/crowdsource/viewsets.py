@@ -3,7 +3,7 @@ Viewsets for the Crowdsource application API
 """
 
 # Django
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 
 # Third Party
 from django_filters import rest_framework as django_filters
@@ -21,9 +21,9 @@ class CrowdsourceResponsePermissions(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """Is owner or staff?"""
-        if request.user.is_staff:
-            return True
-        return request.user == obj.crowdsource.user
+        return request.user.has_perm(
+            'crowdsource.view_crowdsource', obj.crowdsource
+        )
 
 
 class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
@@ -43,6 +43,20 @@ class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
     )
     serializer_class = CrowdsourceResponseSerializer
     permission_classes = (CrowdsourceResponsePermissions,)
+
+    def get_queryset(self):
+        """Filter the queryset"""
+        if self.request.user.is_staff:
+            return self.queryset
+        elif self.request.user.is_authenticated:
+            return self.queryset.filter(
+                Q(crowdsource__user=self.request.user) | Q(
+                    crowdsource__project_admin=True,
+                    crowdsource__project__contributors=self.request.user,
+                )
+            )
+        else:
+            return self.queryset.none()
 
     class Filter(django_filters.FilterSet):
         """API Filter for Crowdsource Responses"""
