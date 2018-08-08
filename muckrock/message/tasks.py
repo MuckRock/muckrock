@@ -7,7 +7,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 # Standard Library

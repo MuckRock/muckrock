@@ -10,12 +10,8 @@ from django.test import TestCase
 from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
-from muckrock.accounts.forms import (
-    BuyRequestForm,
-    EmailSettingsForm,
-    RegisterForm,
-)
-from muckrock.core.factories import ProfileFactory, UserFactory
+from muckrock.accounts.forms import BuyRequestForm, RegisterForm
+from muckrock.core.factories import UserFactory
 
 
 class TestRegistrationForm(TestCase):

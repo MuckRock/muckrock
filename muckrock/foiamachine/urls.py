@@ -7,7 +7,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 from django.views.defaults import page_not_found, server_error
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 
 # Third Party
 import debug_toolbar
@@ -34,7 +34,11 @@ def handler500(request):
 
 urlpatterns = [
     url(r'^$', views.Homepage.as_view(), name='index'),
-    url(r'^accounts/signup/$', views.Signup.as_view(), name='signup'),
+    url(
+        r'^accounts/signup/$',
+        RedirectView(url=settings.SQUARELET_URL + '/accounts/signup/'),
+        name='signup'
+    ),
     url(
         r'^accounts/login/$',
         auth_views.login,

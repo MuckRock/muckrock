@@ -252,7 +252,7 @@
             </li>
           {% else %}
             <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
-            <li><a href="{% url "social:begin" backend="squarelet" %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
+            <li><a href="{% url "acct-login" %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
           {% endif %}
         {% else %} {# for agency users #}
           <li class="dropdown dropdown--right">

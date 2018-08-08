@@ -76,56 +76,8 @@
     }
 }
 
-.account.signup.form {
-    margin-bottom: 0;
-    .visible-fields {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        .field {
-            @include flex(1 0 100%);
-        }
-        .errorlist {
-            list-style: none;
-            margin-bottom: 0;
-            padding-left: 0;
-        }
-        @include media($medium-bp) {
-            .field {
-                @include flex(1 0 50%);
-                &:nth-child(odd) {
-                    padding-right: $vr;
-                }
-                &:last-child {
-                    padding-right: 0;
-                }
-            }
-        }
-        input {
-            width: 100%;
-        }
-    }
-    footer {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(center);
-        @include flex-direction(column-reverse);
-        @include media($medium-bp) {
-            @include flex-direction(row);
-        }
-    }
-    .cancel {
-        cursor: pointer;
-        color: $color-blue;
-        border-bottom: 1px dotted;
-        &:hover {
-            text-decoration: none;
-            color: $color-blue-dark;
-            border-bottom-style: solid;
-        }
-    }
-}
 
-.login.form, .signup.form {
+.login.form {
     max-width: 40em;
     margin: 0 auto;
 }

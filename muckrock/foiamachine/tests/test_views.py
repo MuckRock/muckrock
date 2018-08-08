@@ -89,37 +89,6 @@ class TestPasswordReset(TestCase):
         eq_(response.status_code, 302)
 
 
-class TestSignup(TestCase):
-    """Users should be able to sign up."""
-
-    def setUp(self):
-        self.view = views.Signup.as_view()
-        self.url = reverse('signup', host='foiamachine')
-
-    def test_ok(self):
-        """Signup should return 200."""
-        response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
-
-    def test_signup(self):
-        """Posting the required information to sign up should create an account,
-        log the user into the account, create a profile for their account,
-        and return a redirect to the profile page."""
-        data = {
-            'username': 'TestUser',
-            'email': 'test@email.com',
-            'full_name': 'Test User',
-            'password1': 'test',
-            'password2': 'test',
-        }
-        response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 302, 'The response should redirect.')
-        eq_(response.url, reverse('profile', host='foiamachine'))
-        user = auth.models.User.objects.get(username=data['username'])
-        ok_(user, 'The user should be created.')
-        ok_(user.profile, 'The user should be given a profile.')
-
-
 class TestProfile(TestCase):
     """Users should be able to view their profile once they're logged in."""
 
