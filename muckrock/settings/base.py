@@ -550,6 +550,8 @@ ORG_REQUESTS_PER_SEAT = 10
 # development urls
 MUCKROCK_URL = 'dev.muckrock.com:8000'
 FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
+# XXX urls
+SQUARELET_URL = os.environ.get('SQUARELET_URL', 'http://dev.squarelet.com:8001')
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
@@ -685,6 +687,7 @@ ZOHO_DEPT_IDS = {
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_SQUARELET_KEY = os.environ.get('SQUARELET_KEY')
 SOCIAL_AUTH_SQUARELET_SECRET = os.environ.get('SQUARELET_SECRET')
+SOCIAL_AUTH_SQUARELET_SCOPE = ['uuid']
 SOCIAL_AUTH_TRAILING_SLASH = False
 
 SOCIAL_AUTH_PIPELINE = (
@@ -694,12 +697,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
     # XXX associate by uuid
-    'social_core.pipeline.social_auth.associate_by_email',
+    #'social_core.pipeline.social_auth.associate_by_email',
+    'muckrock.accounts.pipeline.associate_by_uuid',
     'social_core.pipeline.user.create_user',
-    'muckrock.accounts.backends.save_profile',
+    'muckrock.accounts.pipeline.save_profile',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
-
-SQUARELET_URL = os.environ.get('SQUARELET_URL', 'http://dev.squarelet.com:8001')
