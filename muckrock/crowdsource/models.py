@@ -20,9 +20,14 @@ from random import choice
 
 # Third Party
 from bleach.sanitizer import Cleaner
+from pkg_resources import resource_filename
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
-from pyembed.core.discovery import AutoDiscoverer
+from pyembed.core.discovery import (
+    AutoDiscoverer,
+    ChainingDiscoverer,
+    FileDiscoverer,
+)
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -251,9 +256,18 @@ class CrowdsourceData(models.Model):
         try:
             # first try to get embed code from oEmbed
             return mark_safe(
-                PyEmbed(discoverer=AutoDiscoverer()).embed(
-                    self.url, max_height=400
-                )
+                PyEmbed(
+                    # we don't use the default discoverer because it contains a bug
+                    # that makes it always match spotify
+                    discoverer=ChainingDiscoverer([
+                        FileDiscoverer(
+                            resource_filename(
+                                __name__, 'oembed_providers.json'
+                            )
+                        ),
+                        AutoDiscoverer(),
+                    ])
+                ).embed(self.url, max_height=400)
             )
         except PyEmbedConsumerError:
             # if this is a private document cloud document, it will not have
