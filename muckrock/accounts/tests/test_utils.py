@@ -11,7 +11,6 @@ from django.test import RequestFactory, TestCase
 import re
 
 # Third Party
-from mock import patch
 from nose.tools import eq_, ok_
 
 # MuckRock

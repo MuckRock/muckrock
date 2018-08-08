@@ -10,7 +10,6 @@ from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
-    FormView,
     TemplateView,
     UpdateView,
     View,
@@ -21,8 +20,6 @@ from django.views.generic.detail import SingleObjectMixin
 from django_hosts.resolvers import reverse, reverse_host
 
 # MuckRock
-from muckrock.accounts.forms import RegisterForm
-from muckrock.accounts.views import create_new_user
 from muckrock.foiamachine.filters import FoiaMachineRequestFilter
 from muckrock.foiamachine.forms import (
     FoiaMachineBulkRequestForm,
@@ -92,24 +89,6 @@ class Homepage(TemplateView):
         if self.request.user.is_authenticated():
             return redirect(reverse('profile', host='foiamachine'))
         return super(Homepage, self).dispatch(*args, **kwargs)
-
-
-class Signup(FormView):
-    """Signs up new users"""
-    template_name = 'foiamachine/views/registration/signup.html'
-    form_class = RegisterForm
-
-    def get_success_url(self):
-        return reverse('profile', host='foiamachine')
-
-    def form_valid(self, form):
-        """Create the user and sign them in."""
-        user = create_new_user(self.request, form)
-        welcome_message = 'Welcome to FOIA Machine, %(full_name)s!' % {
-            'full_name': user.profile.full_name,
-        }
-        messages.success(self.request, welcome_message)
-        return super(Signup, self).form_valid(form)
 
 
 class Profile(LoginRequiredMixin, TemplateView):

@@ -5,7 +5,7 @@ Views for the accounts application
 # Django
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -13,7 +13,6 @@ from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseNotAllowed,
-    HttpResponseRedirect,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
@@ -24,7 +23,6 @@ from django.views.generic import FormView, ListView, TemplateView
 import json
 import logging
 import sys
-from datetime import date
 
 # Third Party
 import stripe
@@ -44,15 +42,11 @@ from muckrock.accounts.forms import (
     OrgPreferencesForm,
     ProfileSettingsForm,
     ReceiptForm,
-    RegisterForm,
-    RegisterOrganizationForm,
-    RegistrationCompletionForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import (
     ACCT_TYPES,
     Notification,
-    Profile,
     ReceiptEmail,
     RecurringDonation,
     Statistics,
@@ -78,143 +72,11 @@ logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def create_new_user(request, valid_form):
-    """Create a user from the valid form, give them a profile, and log them in."""
-    new_user = valid_form.save()
-    Profile.objects.create(
-        user=new_user,
-        acct_type='basic',
-        monthly_requests=0,
-        date_update=date.today()
-    )
-    new_user = authenticate(
-        username=valid_form.cleaned_data['username'],
-        password=valid_form.cleaned_data['password1']
-    )
-    login(request, new_user)
-    mixpanel_event(
-        request,
-        'Sign Up',
-        {'Source': 'Sign Up Page'},
-        signup=True,
-    )
-    return new_user
-
-
 def account_logout(request):
     """Logs a user out of their account and redirects to index page"""
     logout(request)
     messages.success(request, 'You have successfully logged out.')
     return redirect('index')
-
-
-class SignupView(FormView):
-    """Generic ancestor for all account signup views."""
-
-    def dispatch(self, *args, **kwargs):
-        """Prevent logged-in users from accessing this view."""
-        if self.request.user.is_authenticated():
-            return HttpResponseRedirect(self.get_success_url())
-        return super(SignupView, self).dispatch(*args, **kwargs)
-
-    def get_success_url(self):
-        """Allows the success URL to be overridden by a query parameter."""
-        url_redirect = self.request.GET.get('next', None)
-        return url_redirect if url_redirect else reverse('acct-my-profile')
-
-
-class BasicSignupView(SignupView):
-    """Allows a logged-out user to register for a basic account."""
-    template_name = 'accounts/signup/basic.html'
-    form_class = RegisterForm
-
-    def form_valid(self, form):
-        """When form is valid, create the user."""
-        new_user = create_new_user(self.request, form)
-        success_msg = 'Your account was successfully created. Welcome to MuckRock!'
-        messages.success(self.request, success_msg)
-        return super(BasicSignupView, self).form_valid(form)
-
-
-class ProfessionalSignupView(SignupView):
-    """Allows a logged-out user to register for a professional account."""
-    template_name = 'accounts/signup/professional.html'
-    form_class = RegisterForm
-
-    def get_context_data(self, **kwargs):
-        """Adds Stripe PK to template context data."""
-        context = super(ProfessionalSignupView, self).get_context_data(**kwargs)
-        context['stripe_pk'] = settings.STRIPE_PUB_KEY
-        return context
-
-    def form_valid(self, form):
-        """When form is valid, create the user and begin their professional subscription."""
-        new_user = create_new_user(self.request, form)
-        try:
-            new_user.profile.start_pro_subscription(
-                self.request.POST['stripe_token']
-            )
-            success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
-            messages.success(self.request, success_msg)
-            mixpanel_event(
-                self.request,
-                'Pro Subscription Started',
-            )
-        except (KeyError, AttributeError):
-            # no payment information provided
-            logger.warn('No payment information provided.')
-            error_msg = (
-                'Your account was successfully created, '
-                'but you did not provide payment information. '
-                'You can subscribe from the account management page.'
-            )
-            messages.error(self.request, error_msg)
-        except stripe.error.CardError:
-            # card declined
-            logger.warn('Card was declined.')
-            error_msg = (
-                'Your account was successfully created, but your card was declined. '
-                'You can subscribe from the account management page.'
-            )
-            messages.error(self.request, error_msg)
-        except (stripe.error.InvalidRequestError, stripe.error.APIError):
-            # invalid request made to stripe
-            logger.warn('No payment information provided.')
-            error_msg = (
-                'Your account was successfully created, '
-                'but we could not contact our payment provider. '
-                'You can subscribe from the account management page.'
-            )
-            messages.error(self.request, error_msg)
-        return super(ProfessionalSignupView, self).form_valid(form)
-
-
-class OrganizationSignupView(SignupView):
-    """Allows a logged-out user to register for an account and an organization."""
-    template_name = 'accounts/signup/organization.html'
-    form_class = RegisterOrganizationForm
-
-    def form_valid(self, form):
-        """
-        When form is valid, create the user and the organization.
-        Then redirect to the organization activation page.
-        """
-        new_user = create_new_user(self.request, form)
-        new_org = form.create_organization(new_user)
-        mixpanel_event(
-            self.request,
-            'Organization Created',
-            new_org.mixpanel_event(),
-        )
-        messages.success(
-            self.request,
-            'Your account and organization were successfully created.'
-        )
-        return HttpResponseRedirect(
-            reverse('org-activate', kwargs={
-                'slug': new_org.slug
-            })
-        )
 
 
 class AccountsView(TemplateView):
@@ -223,6 +85,7 @@ class AccountsView(TemplateView):
     If user is logged out, it lets them register for any plan.
     If user is logged in, it lets them up- or downgrade their account to any plan.
     """
+    # XXX if logged out, just redirect to squarelet?
     template_name = 'accounts/plans.html'
 
     def get_context_data(self, **kwargs):
@@ -599,37 +462,6 @@ def stripe_webhook(request):
     elif event_type == 'invoice.payment_failed':
         failed_payment.delay(event_object_id)
     return HttpResponse()
-
-
-@method_decorator(login_required, name='dispatch')
-class RegistrationCompletionView(FormView):
-    """Provides a form for a new user to change their username and password."""
-    template_name = 'forms/base_form.html'
-    form_class = RegistrationCompletionForm
-
-    def get_initial(self):
-        """Adds the username as an initial value."""
-        return {'username': self.request.user.username}
-
-    def get_form_kwargs(self):
-        """Adds the user to the form kwargs."""
-        kwargs = super(RegistrationCompletionView, self).get_form_kwargs()
-        kwargs.update({'user': self.request.user})
-        return kwargs
-
-    def form_valid(self, form):
-        """Saves the form and redirects to the success url."""
-        form.save(commit=True)
-        messages.success(self.request, 'Your account is now complete.')
-        return redirect(self.get_success_url())
-
-    def get_success_url(self):
-        """Return the user's profile."""
-        return reverse(
-            'acct-profile', kwargs={
-                'username': self.request.user.username
-            }
-        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
