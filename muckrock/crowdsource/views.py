@@ -384,9 +384,10 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
 
         form.cleaned_data.pop('data_id', None)
         for field_id, new_value in form.cleaned_data.iteritems():
-            value = response.values.get(field_id=field_id)
-            value.value = new_value
-            value.save()
+            response.values.update_or_create(
+                field_id=field_id,
+                defaults={'value': new_value},
+            )
 
         return redirect(
             'crowdsource-detail',
