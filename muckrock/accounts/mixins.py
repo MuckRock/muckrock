@@ -5,7 +5,7 @@ View mixins
 # Django
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 
 # Standard Library
@@ -14,16 +14,17 @@ import sys
 from datetime import date
 
 # Third Party
+import requests
 import stripe
+from simplejson.scanner import JSONDecodeError
 
 # MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import (
+    get_squarelet_access_token,
     mailchimp_subscribe,
     mixpanel_event,
-    unique_username,
 )
-from muckrock.core.utils import generate_key
 from muckrock.message.tasks import gift
 
 logger = logging.getLogger(__name__)
@@ -32,32 +33,68 @@ logger = logging.getLogger(__name__)
 class MiniregMixin(object):
     """A mixin to expose miniregister functionality to a view"""
     minireg_source = 'Default'
+    field_map = {}
 
-    def miniregister(self, full_name, email, newsletter=False):
-        """Create a new user from their full name and email and login"""
-        # XXX make a new user on squarelet
-        password = generate_key(12)
-        full_name = full_name.strip()
-        username = unique_username(full_name)
-        # create a new User
-        user = User.objects.create_user(
-            username,
-            email,
-            password,
+    def _create_squarelet_user(self, form, data):
+        """Create a corresponding user on squarelet"""
+
+        api_url = '{}/api/users/'.format(settings.SQUARELET_URL)
+        access_token = get_squarelet_access_token()
+        headers = {'Authorization': 'Bearer {}'.format(access_token)}
+        generic_error = (
+            'Sorry, something went wrong with the user service.  '
+            'Please try again later'
         )
-        # create a new Profile
+
+        try:
+            resp = requests.post(api_url, data=data, headers=headers)
+        except requests.exceptions.RequestException:
+            form.add_error(None, generic_error)
+            raise
+        if resp.status_code / 100 != 2:
+            try:
+                error_json = resp.json()
+            except JSONDecodeError:
+                form.add_error(None, generic_error)
+            else:
+                for field, errors in error_json.iteritems():
+                    for error in errors:
+                        form.add_error(self.field_map.get(field, field), error)
+            finally:
+                resp.raise_for_status()
+        return resp.json()
+
+    def miniregister(self, form, full_name, email, newsletter=False):
+        """Create a new user from their full name and email"""
+        full_name = full_name.strip()
+
+        user_json = self._create_squarelet_user(
+            form,
+            {
+                'name': full_name,
+                'username': full_name,
+                'email': email,
+            },
+        )
+
+        user = User.objects.create_user(
+            user_json['username'],
+            email,
+        )
         Profile.objects.create(
             user=user,
             acct_type='basic',
             monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
             date_update=date.today(),
             full_name=full_name,
+            uuid=user_json['id'],
         )
-        user = authenticate(
-            username=user.username,
-            password=password,
+        login(
+            self.request,
+            user,
+            backend='muckrock.accounts.backends.SquareletBackend',
         )
-        login(self.request, user)
+
         if newsletter:
             mailchimp_subscribe(
                 self.request,

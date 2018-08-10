@@ -42,38 +42,36 @@ if 'MEMCACHIER_SERVERS' in os.environ:
     os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
     os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
 
-    CACHES = {
-        'default': {
-            # Use pylibmc
-            'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
+    CACHES['default'] = {
+        # Use pylibmc
+        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
 
-            # Use binary memcache protocol (needed for authentication)
-            'BINARY': True,
+        # Use binary memcache protocol (needed for authentication)
+        'BINARY': True,
 
-            # TIMEOUT is not the connection timeout! It's the default expiration
-            # timeout that should be applied to keys! Setting it to `None`
-            # disables expiration.
-            'TIMEOUT': None,
-            'OPTIONS': {
-                # Enable faster IO
-                'no_block': True,
-                'tcp_nodelay': True,
+        # TIMEOUT is not the connection timeout! It's the default expiration
+        # timeout that should be applied to keys! Setting it to `None`
+        # disables expiration.
+        'TIMEOUT': None,
+        'OPTIONS': {
+            # Enable faster IO
+            'no_block': True,
+            'tcp_nodelay': True,
 
-                # Keep connection alive
-                'tcp_keepalive': True,
+            # Keep connection alive
+            'tcp_keepalive': True,
 
-                # Timeout for set/get requests
-                '_poll_timeout': 2000,
+            # Timeout for set/get requests
+            '_poll_timeout': 2000,
 
-                # Use consistent hashing for failover
-                'ketama': True,
+            # Use consistent hashing for failover
+            'ketama': True,
 
-                # Configure failover timings
-                'connect_timeout': 2000,
-                'remove_failed': 4,
-                'retry_timeout': 2,
-                'dead_timeout': 10
-            }
+            # Configure failover timings
+            'connect_timeout': 2000,
+            'remove_failed': 4,
+            'retry_timeout': 2,
+            'dead_timeout': 10
         }
     }
 

@@ -239,6 +239,7 @@ class Agency(models.Model, RequestHelper):
         try:
             return self.profile.user
         except Profile.DoesNotExist:
+            # XXX what to do here
             user = User.objects.create_user(unique_username(self.name))
             Profile.objects.create(
                 user=user,

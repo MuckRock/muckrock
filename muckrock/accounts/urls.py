@@ -31,6 +31,13 @@ urlpatterns = [
     ),
     url(r'^logout/$', views.account_logout, name='acct-logout'),
     url(
+        r'^reset_pw/$',
+        RedirectView.as_view(
+            url=settings.SQUARELET_URL + '/accounts/password/reset/'
+        ),
+        name='acct-reset-pw'
+    ),
+    url(
         r'^profile/$',
         login_required(views.ProfileView.as_view()),
         name='acct-my-profile'

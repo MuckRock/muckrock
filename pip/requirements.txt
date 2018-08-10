@@ -54,6 +54,7 @@ django-picklefield==1.0.0  # via django-constance
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
+django-redis==4.9.0       # via python-redis-lock
 django-reversion==1.10.2
 django-robots==2.0
 django-secure==1.0.1
@@ -120,6 +121,7 @@ python-dateutil==2.5.3
 python-levenshtein==0.12.0
 python-magic==0.4.12      # via pyimagediet
 python-openid==2.2.5      # via social-auth-core
+python-redis-lock[django]==3.2.0
 pytz==2017.2              # via babel, celery, django
 pyyaml==3.12              # via pyimagediet
 raven==5.27.1
@@ -142,6 +144,7 @@ smart-open==1.6.0
 smartypants==1.8.6
 social-auth-app-django==2.1.0
 social-auth-core==1.7.0   # via social-auth-app-django
+sorl-thumbnail==12.4.1
 sqlparse==0.2.4           # via django-debug-toolbar
 stripe==1.75.0
 traitlets==4.3.2          # via ipython

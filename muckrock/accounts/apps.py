@@ -19,3 +19,6 @@ class AccountsConfig(AppConfig):
         registry.register(self.get_model('Profile'))
         from muckrock.accounts.widgets import TopWidget
         router.register(TopWidget, 'top_widget')
+        # clear all locks in case of crash
+        from django.core.cache import caches
+        caches['lock'].reset_all()

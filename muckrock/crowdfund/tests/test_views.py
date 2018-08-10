@@ -13,6 +13,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 # Third Party
+import requests_mock
 from mock import Mock, patch
 from nose.tools import eq_, ok_
 
@@ -22,7 +23,7 @@ from muckrock.core.factories import (
     ProjectFactory,
     UserFactory,
 )
-from muckrock.core.test_utils import mock_middleware
+from muckrock.core.test_utils import mock_middleware, mock_squarelet
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import CrowdfundPayment
 from muckrock.crowdfund.views import CrowdfundDetailView
@@ -95,22 +96,25 @@ class TestCrowdfundView(TestCase):
         ok_(response, 'There should be a response.')
         if ajax:
             eq_(
-                response.status_code, 200,
-                'If the request was AJAX then the response should return 200 OK.'
+                response.status_code,
+                200,
+                response.content,
             )
             eq_(
-                response['Content-Type'], 'application/json',
-                'If the request was AJAX then the response should be JSON encoded.'
+                response['Content-Type'],
+                'application/json',
+                response.content,
             )
         else:
             eq_(
-                response.status_code, 302,
-                'The response should be a redirection.'
+                response.status_code,
+                302,
+                response.content,
             )
             eq_(
                 response.url,
                 self.crowdfund.get_crowdfund_object().get_absolute_url(),
-                'The response should redirect to the crowdfund object.'
+                response.content,
             )
         return response
 
@@ -153,7 +157,7 @@ class TestCrowdfundView(TestCase):
             'The crowdfund should have the payment added to it.'
         )
 
-    def test_onymous_authenticated(self):
+    def test_authenticated(self):
         """An attributed contribution is opted-in by the user"""
         user = UserFactory()
         self.data['show'] = True
@@ -198,12 +202,14 @@ class TestCrowdfundView(TestCase):
         eq_(data['authenticated'], True)
         eq_(data['registered'], False)
 
-    def test_registered_ajax(self):
+    @requests_mock.Mocker()
+    def test_registered_ajax(self, mock_requests):
         """
         A contribution made via AJAX while logged out, but registering, should report that:
         - the user is authenticated
         - the user was registered
         """
+        mock_squarelet(mock_requests)
         # when registering, the full name should be present
         self.data['full_name'] = 'John Doe'
         self.data['show'] = True

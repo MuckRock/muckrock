@@ -26,6 +26,7 @@ from django.views.generic import (
 from django.views.generic.detail import BaseDetailView
 
 # Third Party
+import requests
 from djangosecure.decorators import frame_deny_exempt
 from ipware import get_client_ip
 
@@ -146,6 +147,10 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     context_object_name = 'crowdsource'
     queryset = Crowdsource.objects.filter(status__in=['draft', 'open'])
     minireg_source = 'Crowdsource'
+    field_map = {
+        'email': 'email',
+        'name': 'full_name',
+    }
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
@@ -259,11 +264,15 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             user = self.request.user
             ip_address = None
         elif form.cleaned_data.get('email'):
-            user = self.miniregister(
-                form.cleaned_data['full_name'],
-                form.cleaned_data['email'],
-                form.cleaned_data.get('newsletter'),
-            )
+            try:
+                user = self.miniregister(
+                    form,
+                    form.cleaned_data['full_name'],
+                    form.cleaned_data['email'],
+                    form.cleaned_data.get('newsletter'),
+                )
+            except requests.exceptions.RequestException:
+                return self.form_invalid(form)
             ip_address = None
         else:
             user = None
