@@ -5,14 +5,8 @@ Forms for accounts application
 # Django
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
-from django.contrib.auth.models import User
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.validators import validate_email
-from django.utils.text import slugify
-
-# Standard Library
-import re
 
 # Third Party
 import stripe
@@ -22,7 +16,6 @@ from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.accounts.models import Profile
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.organization.models import Organization
 
 
 class ProfileSettingsForm(forms.ModelForm):

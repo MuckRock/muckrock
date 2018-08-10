@@ -16,6 +16,7 @@ from operator import attrgetter
 
 # Third Party
 import nose.tools
+import requests_mock
 from actstream.actions import follow, is_following, unfollow
 from nose.tools import (
     assert_false,
@@ -35,7 +36,11 @@ from muckrock.core.factories import (
     ProjectFactory,
     UserFactory,
 )
-from muckrock.core.test_utils import http_post_response, mock_middleware
+from muckrock.core.test_utils import (
+    http_post_response,
+    mock_middleware,
+    mock_squarelet,
+)
 from muckrock.core.tests import get_404, get_allowed
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.factories import (
@@ -1153,8 +1158,10 @@ class TestFOIAComposerViews(TestCase):
         response = CreateComposer.as_view()(request)
         eq_(response.status_code, 200)
 
-    def test_post_create_composer_anonymous(self):
+    @requests_mock.Mocker()
+    def test_post_create_composer_anonymous(self, mock_requests):
         """Create a new composer as an anonymous user"""
+        mock_squarelet(mock_requests)
         agency = AgencyFactory()
         data = {
             'title': 'Title',

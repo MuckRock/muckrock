@@ -4,7 +4,7 @@ Tests accounts views
 
 # Django
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
 from django.http import Http404
@@ -16,7 +16,6 @@ from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.accounts import views
-from muckrock.accounts.forms import RegistrationCompletionForm
 from muckrock.core.factories import (
     AgencyFactory,
     NotificationFactory,
@@ -31,7 +30,6 @@ from muckrock.core.test_utils import (
 from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.views import Detail as FOIARequestDetail
-from muckrock.organization.models import Organization
 from muckrock.qanda.views import Detail as QuestionDetail
 
 
@@ -177,52 +175,6 @@ class TestProfileViewBuyRequests(TestCase):
         self.view(post_request, username=self.user.username)
         self.user.profile.refresh_from_db()
         eq_(self.user.profile.num_requests, existing_request_count)
-
-
-class TestRegistrationCompletionView(TestCase):
-    """The RegistrationCompletionView allows a user to
-    change their password and update their email after creating an
-    account through the miniregistration process."""
-
-    def setUp(self):
-        self.user = UserFactory()
-
-    def test_login_required(self):
-        """Only registered users may see the registration completion page."""
-        response = http_get_response(
-            reverse('accounts-complete-registration'),
-            views.RegistrationCompletionView.as_view()
-        )
-        eq_(response.status_code, 302, 'Logged out users should be redirected.')
-        ok_(
-            reverse('acct-login') in response.url,
-            'Logged out users should be redirected to the login view.'
-        )
-
-    def test_update_username_password(self):
-        """The user should be able to update their username and password after logging in."""
-        username = 'TomWaits'
-        password = 'swordfishtrombones'
-        form = RegistrationCompletionForm(
-            self.user, {
-                'username': username,
-                'new_password1': password,
-                'new_password2': password
-            }
-        )
-        ok_(form.is_valid(), 'The forms should validate.')
-        http_post_response(
-            reverse('accounts-complete-registration'),
-            views.RegistrationCompletionView.as_view(),
-            data=form.data,
-            user=self.user,
-        )
-        self.user.refresh_from_db()
-        eq_(self.user.username, username, 'The username should be updated.')
-        ok_(
-            self.user.check_password(password),
-            'The password should be updated.'
-        )
 
 
 class TestAccountFunctional(TestCase):

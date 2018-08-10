@@ -19,6 +19,7 @@ from django.views.generic import CreateView, UpdateView
 import re
 
 # Third Party
+import requests
 from stripe.error import StripeError
 
 # MuckRock
@@ -170,6 +171,10 @@ class GenericComposer(BuyRequestsMixin):
 class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     """Create a new composer"""
     minireg_source = 'Composer'
+    field_map = {
+        'email': 'register_email',
+        'name': 'register_full_name',
+    }
 
     # pylint: disable=attribute-defined-outside-init
 
@@ -234,6 +239,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         # form validation guarentees we have either registration or login info
         if form.cleaned_data.get('register_full_name'):
             user = self.miniregister(
+                form,
                 form.cleaned_data['register_full_name'],
                 form.cleaned_data['register_email'],
                 form.cleaned_data.get('register_newsletter'),
@@ -262,7 +268,10 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if self.request.user.is_authenticated:
             user = self.request.user
         else:
-            user = self._handle_anonymous_submitter(form)
+            try:
+                user = self._handle_anonymous_submitter(form)
+            except requests.exceptions.RequestException:
+                return self.form_invalid(form)
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user

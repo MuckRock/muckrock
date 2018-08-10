@@ -66,6 +66,7 @@ pypdf2 # Used to manipulate PDFs
 pyphaxio # For sending faxes through Phaxio
 python-Levenshtein # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
+python-redis-lock[django] # use a redis cache with a locking mechanism
 raven # Sentry integration
 redis # Redis integration - for use with celery
 reportlab # Used for adding text to PDFs for form filling in
@@ -76,6 +77,7 @@ scipy==0.14.0 # Used for machine learning
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
 social-auth-app-django # for oauth client
+sorl-thumbnail # used for squarlet avatars
 stripe # Stripe payment processor integration
 unicodecsv # Unicode compatible replacement for CSV module
 unidecode # Used for unicode decoding

@@ -281,9 +281,10 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-BROKER_URL = os.environ.get(
+REDIS_URL = os.environ.get(
     'REDISTOGO_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 )
+BROKER_URL = REDIS_URL
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 25 * 60 * 60}
 
 djcelery.setup_loader()
@@ -312,7 +313,7 @@ CELERY_ROUTES = {
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
     'muckrock.accounts.backends.SquareletBackend',
-    'muckrock.accounts.backends.CaseInsensitiveModelBackend',
+    'django.contrib.auth.backends.ModelBackend',  # XXX remove this
     'lot.auth_backend.LOTBackend',
 )
 ABSOLUTE_URL_OVERRIDES = {
@@ -486,7 +487,14 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
+    },
+    'lock': {
+        'BACKEND': 'redis_lock.django_cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+        },
+    },
 }
 DEFAULT_CACHE_TIMEOUT = 15 * 60
 
@@ -696,8 +704,6 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
-    # XXX associate by uuid
-    #'social_core.pipeline.social_auth.associate_by_email',
     'muckrock.accounts.pipeline.associate_by_uuid',
     'social_core.pipeline.user.create_user',
     'muckrock.accounts.pipeline.save_profile',

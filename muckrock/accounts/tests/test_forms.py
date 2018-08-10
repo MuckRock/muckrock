@@ -10,42 +10,8 @@ from django.test import TestCase
 from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
-from muckrock.accounts.forms import BuyRequestForm, RegisterForm
+from muckrock.accounts.forms import BuyRequestForm
 from muckrock.core.factories import UserFactory
-
-
-class TestRegistrationForm(TestCase):
-    """New users should be created using a registration form."""
-
-    def setUp(self):
-        self.user = UserFactory()
-        self.form = RegisterForm
-
-    def test_unique_username(self):
-        """Username should be unique (case insensitive)"""
-        existing_username = self.user.username
-        data = {
-            'username': existing_username,
-            'email': 'different@example.com',
-            'full_name': 'Adam Smith',
-            'password1': 'password',
-            'password2': 'password'
-        }
-        form = self.form(data)
-        assert_false(form.is_valid())
-
-    def test_unique_email(self):
-        """Email should be unique (case insensitive)"""
-        existing_email = self.user.email
-        data = {
-            'username': 'different',
-            'email': existing_email,
-            'full_name': 'Adam Smith',
-            'password1': 'password',
-            'password2': 'password'
-        }
-        form = self.form(data)
-        assert_false(form.is_valid())
 
 
 class TestBuyRequestForm(TestCase):

@@ -5,7 +5,6 @@ Nodes and tags for rendering crowdfunds into templates
 # Django
 from django import template
 from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -117,8 +116,6 @@ def generate_crowdfund_context(
     obj_url = the_crowdfund.get_crowdfund_object().get_absolute_url()
     # Remove the autofocus attribute from the login form in order to not scroll down
     # to the crowdfund widget on page load
-    login_form = AuthenticationForm()
-    login_form.fields['username'].widget.attrs.pop('autofocus', None)
     return {
         'crowdfund': the_crowdfund,
         'named_contributors': named,
@@ -126,7 +123,6 @@ def generate_crowdfund_context(
         'anon_contributors_count': anon_count,
         'contributor_summary': contrib_sum,
         'endpoint': endpoint,
-        'login_form': login_form,
         'logged_in': logged_in,
         'user_email': user_email,
         'payment_form': payment_form,

@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^$', views.Homepage.as_view(), name='index'),
     url(
         r'^accounts/signup/$',
-        RedirectView(url=settings.SQUARELET_URL + '/accounts/signup/'),
+        RedirectView.as_view(url=settings.SQUARELET_URL + '/accounts/signup/'),
         name='signup'
     ),
     url(

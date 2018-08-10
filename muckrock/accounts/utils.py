@@ -5,6 +5,7 @@ Utility method for the accounts application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.cache import caches
 from django.core.validators import validate_email
 from django.forms import ValidationError
 from django.utils.safestring import mark_safe
@@ -146,3 +147,31 @@ def mixpanel_event(request, event, props=None, **kwargs):
         request.session['mp_alias'] = True
     if kwargs.get('charge'):
         request.session['mp_charge'] = kwargs['charge']
+
+
+def get_squarelet_access_token():
+    """Get an access token for squarelet"""
+
+    cache = caches['lock']
+
+    # if not in cache, lock, acquire token, put in cache
+    access_token = cache.get('squarelet_access_token')
+    if access_token is None:
+        with cache.lock('squarelt_access_token'):
+            access_token = cache.get('squarelet_access_token')
+            if access_token is None:
+                token_url = '{}/openid/token'.format(settings.SQUARELET_URL)
+                auth = (
+                    settings.SOCIAL_AUTH_SQUARELET_KEY,
+                    settings.SOCIAL_AUTH_SQUARELET_SECRET,
+                )
+                data = {'grant_type': 'client_credentials'}
+                resp = requests.post(token_url, data=data, auth=auth)
+                resp.raise_for_status()
+                resp_json = resp.json()
+                access_token = resp_json['access_token']
+                # expire a few seconds early to ensure its not expired
+                # when we try to use it
+                expires_in = int(resp_json['expires_in']) - 10
+                cache.set('squarelet_access_token', access_token, expires_in)
+    return access_token

@@ -18,6 +18,7 @@ import logging
 from datetime import date
 
 # Third Party
+import requests
 import stripe
 from djangosecure.decorators import frame_deny_exempt
 
@@ -71,6 +72,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
     model = Crowdfund
     template_name = 'crowdfund/detail.html'
     minireg_source = 'Crowdfund'
+    field_map = {'full_name': 'name'}
 
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
@@ -126,7 +128,10 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
             full_name = payment_form.cleaned_data['full_name']
             email_exists = User.objects.filter(email__iexact=email).exists()
             if user is None and show and full_name and not email_exists:
-                user = self.miniregister(full_name, email)
+                try:
+                    user = self.miniregister(payment_form, full_name, email)
+                except requests.exceptions.RequestException:
+                    return self.return_error(request)
                 registered = True
             crowdfund = payment_form.cleaned_data['crowdfund']
             try:

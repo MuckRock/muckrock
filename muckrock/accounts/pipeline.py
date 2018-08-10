@@ -8,13 +8,13 @@ from datetime import date
 from muckrock.accounts.models import Profile
 
 
-def associate_by_uuid(backend, details, user=None, *args, **kwargs):
+def associate_by_uuid(backend, response, user=None, *args, **kwargs):
     """Associate current auth with a user with the same uuid in the DB."""
     # pylint: disable=unused-argument
     if user:
         return None
 
-    uuid = details.get('uuid')
+    uuid = response.get('uuid')
     if uuid:
         try:
             profile = Profile.objects.get(uuid=uuid)

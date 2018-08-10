@@ -61,6 +61,7 @@ class ProfileInline(admin.StackedInline):
     form = ProfileAdminForm
     extra = 0
     max_num = 1
+    readonly_fields = ('uuid',)
 
 
 class ReceiptEmailInline(admin.StackedInline):
