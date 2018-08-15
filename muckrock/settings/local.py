@@ -97,4 +97,10 @@ if CACHE_DEBUG:
         }
     }
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'dev.muckrock.com']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'dev.muckrock.com',
+    'dev.foiamachine.org',
+]

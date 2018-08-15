@@ -9,12 +9,11 @@ from django.http import Http404
 from django.test import TestCase
 
 # Third Party
-from django_hosts.resolvers import reverse, reverse_lazy
+from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.core.factories import UserFactory
-from muckrock.core.forms import PasswordResetForm
 from muckrock.core.test_utils import http_get_response, http_post_response
 from muckrock.foiamachine import factories, forms, models, views
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
@@ -61,31 +60,6 @@ class TestLogin(TestCase):
             'password': self.password,
         }
         response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 302)
-
-
-class TestPasswordReset(TestCase):
-    """Submitting an email to password reset for a user should send an email."""
-
-    def setUp(self):
-        self.view = auth.views.password_reset
-        self.url = reverse('password-reset', host='foiamachine')
-        self.user = UserFactory()
-
-    def test_post(self):
-        """A user who posts their email should be sent an email."""
-        data = {'email': self.user.email}
-        kwargs = {
-            'template_name':
-                'foiamachine/views/registration/password_reset.html',
-            'email_template_name':
-                'foiamachine/emails/password_reset_email.html',
-            'post_reset_redirect':
-                reverse_lazy('password-reset-done', host='foiamachine'),
-            'password_reset_form':
-                PasswordResetForm
-        }
-        response = http_post_response(self.url, self.view, data, **kwargs)
         eq_(response.status_code, 302)
 
 
