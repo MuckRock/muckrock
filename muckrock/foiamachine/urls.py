@@ -8,6 +8,7 @@ from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import RedirectView, TemplateView
+from django.views.static import serve
 
 # Third Party
 import debug_toolbar
@@ -15,7 +16,6 @@ from django_hosts.resolvers import reverse_lazy
 
 # MuckRock
 from muckrock.agency.urls import agency_url
-from muckrock.core.forms import PasswordResetForm
 from muckrock.foiamachine import views
 from muckrock.jurisdiction.urls import jur_url
 
@@ -41,8 +41,14 @@ urlpatterns = [
     ),
     url(
         r'^accounts/login/$',
-        auth_views.login,
-        {'template_name': 'foiamachine/views/registration/login.html'},
+        RedirectView.as_view(
+            url=reverse_lazy(
+                'social:begin',
+                host='foiamachine',
+                kwargs={'backend': 'squarelet'},
+            ),
+            query_string=True
+        ),
         name='login'
     ),
     url(
@@ -51,64 +57,6 @@ urlpatterns = [
         name='logout'
     ),
     url(r'^accounts/profile/$', views.Profile.as_view(), name='profile'),
-    url(
-        r'^accounts/password_change/$',
-        auth_views.password_change, {
-            'template_name':
-                'foiamachine/views/registration/password_change.html',
-            'post_change_redirect':
-                reverse_lazy('password-change-done', host='foiamachine')
-        },
-        name='password-change'
-    ),
-    url(
-        r'^accounts/password_change/done/$',
-        auth_views.password_change_done, {
-            'template_name':
-                'foiamachine/views/registration/password_change_done.html'
-        },
-        name='password-change-done'
-    ),
-    url(
-        r'^accounts/password_reset/$',
-        auth_views.password_reset, {
-            'template_name':
-                'foiamachine/views/registration/password_reset.html',
-            'email_template_name':
-                'foiamachine/emails/password_reset_email.html',
-            'post_reset_redirect':
-                reverse_lazy('password-reset-done', host='foiamachine'),
-            'password_reset_form':
-                PasswordResetForm
-        },
-        name='password-reset'
-    ),
-    url(
-        r'^accounts/password_reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        auth_views.password_reset_confirm, {
-            'template_name':
-                'foiamachine/views/registration/password_reset_confirm.html',
-            'post_reset_redirect':
-                reverse_lazy('password-reset-complete', host='foiamachine'),
-        },
-        name='password-reset-confirm'
-    ),
-    url(
-        r'^accounts/password_reset/done/$',
-        auth_views.password_reset_done, {
-            'template_name':
-                'foiamachine/views/registration/password_reset_done.html'
-        },
-        name='password-reset-done'
-    ),
-    url(
-        r'^accounts/password_reset/complete/$',
-        auth_views.password_reset_complete, {
-            'template_name':
-                'foiamachine/views/registration/password_reset_complete.html'
-        },
-        name='password-reset-complete'
-    ),
     url(
         r'^foi/create/$',
         views.FoiaMachineRequestCreateView.as_view(),
@@ -159,12 +107,13 @@ urlpatterns = [
     ),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
+    url(r'^accounts/', include('social_django.urls', namespace='social')),
 ]
 
 if settings.DEBUG:
     urlpatterns += [
         url(
-            r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+            r'^media/(?P<path>.*)$', serve, {
                 'document_root': settings.MEDIA_ROOT
             }
         ),
