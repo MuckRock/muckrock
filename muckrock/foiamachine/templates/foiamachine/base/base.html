@@ -44,7 +44,7 @@
                 {% if request.user.is_authenticated %}
                 <ul class="nostyle inline">
                     <li class="bold"><a href="{% host_url 'profile' host 'foiamachine' %}">{{user}}</a></li>
-                    <li class="small"><a href="{% host_url 'logout' host 'foiamachine' %}">Log out</a></li>
+                    <li class="small"><a href="{% host_url 'acct-logout' host 'foiamachine' %}">Log out</a></li>
                 </ul>
                 {% else %}
                 <ul class="nostyle inline">
@@ -85,6 +85,9 @@
                 <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
             {% endblock %}
         {% endcompress %}
+        {% if request.session.session_state %}
+          <iframe src="{% url "acct-rp-iframe" %}" frameborder="0" width="0" height="0"></iframe>
+      {% endif %}
     </body>
     {% endblock body %}
 </html>

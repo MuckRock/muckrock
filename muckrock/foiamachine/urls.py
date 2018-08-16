@@ -5,7 +5,6 @@ FOIA Machine urls
 # Django
 from django.conf import settings
 from django.conf.urls import include, url
-from django.contrib.auth import views as auth_views
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import RedirectView, TemplateView
 from django.views.static import serve
@@ -15,6 +14,7 @@ import debug_toolbar
 from django_hosts.resolvers import reverse_lazy
 
 # MuckRock
+from muckrock.accounts import views as account_views
 from muckrock.agency.urls import agency_url
 from muckrock.foiamachine import views
 from muckrock.jurisdiction.urls import jur_url
@@ -51,11 +51,7 @@ urlpatterns = [
         ),
         name='login'
     ),
-    url(
-        r'^accounts/logout/$',
-        auth_views.logout, {'next_page': 'index'},
-        name='logout'
-    ),
+    url(r'^accounts/logout/$', views.account_logout, name='acct-logout'),
     url(r'^accounts/profile/$', views.Profile.as_view(), name='profile'),
     url(
         r'^foi/create/$',
@@ -108,6 +104,7 @@ urlpatterns = [
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^__debug__/', include(debug_toolbar.urls)),
     url(r'^accounts/', include('social_django.urls', namespace='social')),
+    url(r'^rp_iframe/$', account_views.rp_iframe, name='acct-rp-iframe'),
 ]
 
 if settings.DEBUG:

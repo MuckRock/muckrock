@@ -74,14 +74,12 @@ logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def account_logout(request):
-    """Logs a user out of their account and redirects to squarelet's logout page"""
+def account_logout_helper(request, url):
+    """Logout helper to specify the URL"""
     if 'id_token' in request.session:
         params = {
-            'id_token_hint':
-                request.session['id_token'],
-            'post_logout_redirect_uri':
-                'http://{}/'.format(settings.MUCKROCK_URL),
+            'id_token_hint': request.session['id_token'],
+            'post_logout_redirect_uri': url,
         }
         redirect_url = '{}/openid/end-session?{}'.format(
             settings.SQUARELET_URL, urlencode(params)
@@ -91,6 +89,13 @@ def account_logout(request):
     logout(request)
     messages.success(request, 'You have successfully logged out.')
     return redirect(redirect_url)
+
+
+def account_logout(request):
+    """Logs a user out of their account and redirects to squarelet's logout page"""
+    return account_logout_helper(
+        request, 'http://{}/'.format(settings.MUCKROCK_URL)
+    )
 
 
 class AccountsView(TemplateView):
