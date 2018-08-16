@@ -23,9 +23,11 @@ from django.views.generic import FormView, ListView, TemplateView
 import json
 import logging
 import sys
+from urllib import urlencode
 
 # Third Party
 import stripe
+from djangosecure.decorators import frame_deny_exempt
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import (
@@ -73,10 +75,22 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def account_logout(request):
-    """Logs a user out of their account and redirects to index page"""
+    """Logs a user out of their account and redirects to squarelet's logout page"""
+    if 'id_token' in request.session:
+        params = {
+            'id_token_hint':
+                request.session['id_token'],
+            'post_logout_redirect_uri':
+                'http://{}/'.format(settings.MUCKROCK_URL),
+        }
+        redirect_url = '{}/openid/end-session?{}'.format(
+            settings.SQUARELET_URL, urlencode(params)
+        )
+    else:
+        redirect_url = 'index'
     logout(request)
     messages.success(request, 'You have successfully logged out.')
-    return redirect('index')
+    return redirect(redirect_url)
 
 
 class AccountsView(TemplateView):
@@ -638,3 +652,13 @@ def agency_redirect_login(
             {'email': email,
              'valid': valid},
         )
+
+
+@frame_deny_exempt
+def rp_iframe(request):
+    """RP iframe for OIDC sesison management"""
+    return render(
+        request,
+        'accounts/check_session_iframe.html',
+        {'settings': settings},
+    )

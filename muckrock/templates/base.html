@@ -258,5 +258,9 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
     {% block scripts %}
     {% endblock scripts %}
     <!-- END SCRIPTS -->
+    {# iframe for OpenID Connect session management #}
+    {% if request.session.session_state %}
+      <iframe src="{% url "acct-rp-iframe" %}" frameborder="0" width="0" height="0"></iframe>
+    {% endif %}
   </body>
 </html>

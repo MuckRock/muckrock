@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>RP Iframe</title>
+  </head>
+  <body onload="javascript:startChecking()">
+    <iframe id="op-iframe" src="{{ settings.SQUARELET_URL }}/openid/check-session-iframe" frameborder="0" width="0" height="0"></iframe>
+  </body>
+  <script>
+
+var targetOP = "{{ settings.SQUARELET_URL }}";
+
+window.addEventListener("message", receiveMessage, false);
+
+function startChecking() {
+  checkStatus();
+  setInterval(checkStatus, 5 * 1000);
+}
+
+function checkStatus() {
+  var clientId = "{{ settings.SOCIAL_AUTH_SQUARELET_KEY }}";
+  var sessionState = "{{ request.session.session_state }}";
+  var data = clientId + ' ' + sessionState;
+  document.getElementById('op-iframe').contentWindow.postMessage(data, targetOP);
+}
+
+function receiveMessage(event) {
+  if (event.origin !== targetOP) {
+    // Origin did not come from the OP.
+    return;
+  }
+  if (event.data === 'changed') {
+    // state has changed, log out
+    console.log('OIDC session management: changed');
+    window.top.location.href = "{% url "acct-logout" %}";
+  } else {
+    // Error.
+    console.log('OIDC session management: error');
+  }
+}
+  </script>
+</html>
