@@ -66,5 +66,6 @@ urlpatterns = [
         views.agency_redirect_login,
         name='acct-agency-redirect-login'
     ),
+    url(r'^rp_iframe/$', views.rp_iframe, name='acct-rp-iframe'),
     url(r'^', include('social_django.urls', namespace='social')),
 ]

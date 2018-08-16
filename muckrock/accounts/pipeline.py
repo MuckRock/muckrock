@@ -52,3 +52,15 @@ def save_profile(backend, user, response, *args, **kwargs):
 
     user.profile.save()
     user.save()
+
+
+def save_session_data(strategy, request, response, *args, **kwargs):
+    """Save some data in the session"""
+    # pylint: disable=unused-argument
+    session_state = strategy.request_data().get('session_state')
+    if session_state:
+        request.session['session_state'] = session_state
+
+    id_token = response.get('id_token')
+    if id_token:
+        request.session['id_token'] = id_token
