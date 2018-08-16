@@ -3,6 +3,7 @@ FOIAMachine views
 """
 
 # Django
+from django.conf import settings
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
@@ -20,6 +21,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django_hosts.resolvers import reverse, reverse_host
 
 # MuckRock
+from muckrock.accounts.views import account_logout_helper
 from muckrock.foiamachine.filters import FoiaMachineRequestFilter
 from muckrock.foiamachine.forms import (
     FoiaMachineBulkRequestForm,
@@ -380,4 +382,11 @@ def jurisdiction_detail(request, **kwargs):
             host='default',
             kwargs=kwargs,
         )
+    )
+
+
+def account_logout(request):
+    """Logs a user out of their account and redirects to squarelet's logout page"""
+    return account_logout_helper(
+        request, 'http://{}/'.format(settings.FOIAMACHINE_URL)
     )
