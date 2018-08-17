@@ -13,6 +13,7 @@ import json
 # Third Party
 import requests_mock
 from nose.tools import assert_false, assert_true, eq_, ok_
+from rest_framework.authtoken.models import Token
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
@@ -33,23 +34,17 @@ class TestFOIAViewsetCreate(TestCase):
         if 'document_request' not in data:
             data['document_request'] = 'Document Request'
 
-        password = 'abc'
         user_kwargs_defaults = {
-            'password': password,
             'profile__num_requests': 5,
         }
         if user_kwargs is not None:
             user_kwargs_defaults.update(user_kwargs)
         user = UserFactory.create(**user_kwargs_defaults)
+        Token.objects.create(user=user)
 
-        response = self.client.post(
-            reverse('api-token-auth'),
-            {'username': user.username,
-             'password': password},
-        )
         headers = {
             'content-type': 'application/json',
-            'HTTP_AUTHORIZATION': 'Token %s' % response.json()['token'],
+            'HTTP_AUTHORIZATION': 'Token %s' % user.auth_token,
         }
         response = self.client.post(
             reverse('api-foia-list'),
@@ -71,11 +66,8 @@ class TestFOIAViewsetCreate(TestCase):
             text='Attachment content here',
         )
         agency = AgencyFactory()
-        password = 'abc'
-        user = UserFactory.create(
-            password=password,
-            profile__num_requests=5,
-        )
+        user = UserFactory.create(profile__num_requests=5)
+        Token.objects.create(user=user)
         data = {
             'jurisdiction': agency.jurisdiction.pk,
             'agency': agency.pk,
@@ -83,14 +75,9 @@ class TestFOIAViewsetCreate(TestCase):
             'title': 'Title',
             'attachments': [attachment_url],
         }
-        response = self.client.post(
-            reverse('api-token-auth'),
-            {'username': user.username,
-             'password': password},
-        )
         headers = {
             'content-type': 'application/json',
-            'HTTP_AUTHORIZATION': 'Token %s' % response.json()['token'],
+            'HTTP_AUTHORIZATION': 'Token %s' % user.auth_token,
         }
         response = self.client.post(
             reverse('api-foia-list'),

@@ -3,7 +3,6 @@ Tests for FOIA Machine views.
 """
 
 # Django
-from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.test import TestCase
@@ -37,30 +36,6 @@ class TestHomepage(TestCase):
         response = http_get_response(self.url, self.view, user)
         eq_(response.status_code, 302)
         eq_(response.url, reverse('profile', host='foiamachine'))
-
-
-class TestLogin(TestCase):
-    """Users should be able to log in."""
-
-    def setUp(self):
-        self.view = auth.views.login
-        self.url = reverse('login', host='foiamachine')
-        self.password = 'Free the docs.'
-        self.user = UserFactory(password=self.password)
-
-    def test_get_ok(self):
-        """Login should return 200."""
-        response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
-
-    def test_post_ok(self):
-        """Logging in should redirect to the profile page."""
-        data = {
-            'username': self.user.username,
-            'password': self.password,
-        }
-        response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 302)
 
 
 class TestProfile(TestCase):

@@ -13,7 +13,6 @@ from django.views.generic.base import RedirectView, TemplateView
 # Third Party
 import debug_toolbar
 from dashing.utils import router as dashing_router
-from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
@@ -125,7 +124,6 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^api_v1/', include(router.urls)),
-    url(r'^api_v1/token-auth/', obtain_auth_token, name='api-token-auth'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(
