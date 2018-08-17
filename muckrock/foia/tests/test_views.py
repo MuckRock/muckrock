@@ -225,8 +225,8 @@ class TestFOIAViews(TestCase):
     def test_action_views(self):
         """Test action views"""
 
-        UserFactory(username='adam', password='abc')
-        self.client.login(username='adam', password='abc')
+        user = UserFactory(username='adam')
+        self.client.force_login(user)
 
         foia = FOIARequestFactory(status='payment')
         get_allowed(

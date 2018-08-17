@@ -313,7 +313,6 @@ CELERY_ROUTES = {
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
     'muckrock.accounts.backends.SquareletBackend',
-    'django.contrib.auth.backends.ModelBackend',  # XXX remove this
     'lot.auth_backend.LOTBackend',
 )
 ABSOLUTE_URL_OVERRIDES = {
