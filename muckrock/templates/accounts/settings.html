@@ -8,6 +8,9 @@
     <header>
       <h1>Settings</h1>
       <dl>
+        <dt>Account Preferences</dt>
+        <dd><a href="{{ squarelet_url }}/users/~update/">Profile</a></dd>
+        <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
         <dt>Preferences</dt>
         <dd><a href="#profile">Profile</a></dd>
         <dd><a href="#email">Email</a></dd>
@@ -16,9 +19,6 @@
         <dd><a href="#organization">Organization</a></dd>
         <dd><a href="#donations">Donations</a></dd>
         <dd><a href="#crowdfunds">Crowdfund Payments</a></dd>
-        <dt>Password</dt>
-        <dd><a href="{% url 'acct-change-pw' %}">Change Password</a></dd>
-        <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
       </dl>
     </header>
     <main>

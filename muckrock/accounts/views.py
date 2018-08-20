@@ -304,6 +304,7 @@ class ProfileSettings(TemplateView):
         )
         context.update({
             'stripe_pk': settings.STRIPE_PUB_KEY,
+            'squarelet_url': settings.SQUARELET_URL,
             'profile_form': profile_form,
             'email_form': email_form,
             'receipt_form': receipt_form,
