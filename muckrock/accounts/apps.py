@@ -22,3 +22,7 @@ class AccountsConfig(AppConfig):
         # clear all locks in case of crash
         from django.core.cache import caches
         caches['lock'].reset_all()
+        # require squarelet login for admin
+        from django.contrib.auth.decorators import login_required
+        from django.contrib import admin
+        admin.site.login = login_required(admin.site.login)
