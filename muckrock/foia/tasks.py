@@ -30,6 +30,7 @@ from hashlib import md5
 from random import randint
 from time import time as timestamp
 from urllib import quote_plus
+from zipfile import ZIP_DEFLATED, ZipFile
 
 # Third Party
 import dill as pickle
@@ -913,24 +914,70 @@ def export_csv(foia_pks, user_pk):
     notification.send(fail_silently=False)
 
 
+@task(
+    ignore_result=True,
+    time_limit=1800,
+    name='muckrock.foia.tasks.zip_request',
+)
+def zip_request(foia_pk, user_pk):
+    """Send a user a zip download of their request"""
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    today = date.today()
+    file_key = 'zip_request/{y:4d}/{m:02d}/{d:02d}/{md5}/request.zip'.format(
+        y=today.year,
+        m=today.month,
+        d=today.day,
+        md5=md5('{}{}{}'.format(
+            int(timestamp()),
+            foia_pk,
+            user_pk,
+        )).hexdigest(),
+    )
+    key = bucket.new_key(file_key)
+    foia = FOIARequest.objects.get(pk=foia_pk)
+    with smart_open(key, 'wb') as out_file:
+        with ZipFile(out_file, 'w', ZIP_DEFLATED) as zip_file:
+            for i, comm in enumerate(foia.communications.all()):
+                file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
+                zip_file.writestr(file_name, comm.communication.encode('utf8'))
+                for ffile in comm.files.all():
+                    zip_file.writestr(ffile.name(), ffile.ffile.read())
+    key.set_acl('public-read')
+
+    notification = TemplateEmail(
+        user=User.objects.get(pk=user_pk),
+        extra_context={'file': file_key,
+                       'foia': foia.title},
+        text_template='message/notification/zip_request.txt',
+        html_template='message/notification/zip_request.html',
+        subject='Your zip archive of your request',
+    )
+    notification.send(fail_silently=False)
+
+
 @periodic_task(
     run_every=crontab(hour=1, minute=0),
     name='muckrock.foia.tasks.clean_export_csv',
 )
 def clean_export_csv():
-    """Clean up exported CSVs that are more than 5 days old"""
+    """Clean up exported CSVs and request zips that are more than 5 days old"""
 
-    p_csv = re.compile(r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests.csv')
+    p_csv = re.compile(r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests?.(csv|zip)')
     conn = S3Connection(
         settings.AWS_ACCESS_KEY_ID,
         settings.AWS_SECRET_ACCESS_KEY,
     )
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     older_than = date.today() - timedelta(5)
-    for key in bucket.list(prefix='exported_csv/'):
-        file_name = key.name[len('exported_csv/'):]
-        m_csv = p_csv.match(file_name)
-        if m_csv:
-            file_date = date(*(int(i) for i in m_csv.groups()))
-            if file_date < older_than:
-                key.delete()
+    for prefix in ['exported_csv/', 'zip_request/']:
+        for key in bucket.list(prefix=prefix):
+            file_name = key.name[len(prefix):]
+            m_csv = p_csv.match(file_name)
+            if m_csv:
+                file_date = date(*(int(i) for i in m_csv.groups()))
+                if file_date < older_than:
+                    key.delete()

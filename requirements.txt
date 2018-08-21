@@ -14,7 +14,9 @@ babel==2.5.1              # via django-phonenumber-field
 beautifulsoup4==4.6.0
 billiard==3.3.0.23        # via celery
 bleach==2.1.2
+boto3==1.7.82             # via smart-open
 boto==2.42.0
+botocore==1.10.82         # via boto3, s3transfer
 bz2file==0.98             # via smart-open
 celery==3.1.23
 certifi==2017.4.17        # via requests
@@ -61,10 +63,12 @@ django-watson==1.4.1
 django-webpack-loader==0.3.0
 django==1.11.4
 djangorestframework==3.4.7
+docutils==0.14            # via botocore
 dogslow==0.9.7
 easy-thumbnails==2.4.1
 fpdf==1.7.2
 furl==1.0.1
+futures==3.2.0            # via s3transfer
 fuzzywuzzy==0.14.0
 google-api-python-client==1.6.5
 gunicorn==19.6.0
@@ -72,6 +76,7 @@ html5lib==1.0.1           # via bleach
 httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
 image-diet2==1.0
+jmespath==0.9.3           # via boto3, botocore
 jsonfield==1.0.3
 kombu==3.0.35             # via celery
 lxml==3.6.4               # via premailer
@@ -110,11 +115,12 @@ requests==2.18.1
 rjsmin==1.0.12            # via django-compressor
 rsa==3.4.2                # via oauth2client
 rules==1.1.1
+s3transfer==0.1.13        # via boto3
 scikit-learn==0.16.1
 scipy==0.14.0
 simplejson==3.8.2         # via django-lot
 six==1.10.0               # via bleach, django-compat, django-extensions, django-geojson, furl, google-api-python-client, html5lib, oauth2client, orderedmultidict, packaging, python-dateutil
-smart-open==1.4.0
+smart-open==1.6.0
 smartypants==1.8.6
 sqlparse==0.2.4           # via django-debug-toolbar
 stripe==1.75.0
