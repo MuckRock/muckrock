@@ -44,6 +44,15 @@ class UserSerializer(serializers.ModelSerializer):
             'profile',
         )
 
+    def update(self, instance, validated_data):
+        """Make profile fields writable"""
+        profile = validated_data.pop('profile', {})
+        super(UserSerializer, self).update(instance, validated_data)
+        for key, value in profile.iteritems():
+            setattr(instance.profile, key, value)
+        instance.profile.save()
+        return instance
+
 
 class StatisticsSerializer(serializers.ModelSerializer):
     """Serializer for Statistics model"""

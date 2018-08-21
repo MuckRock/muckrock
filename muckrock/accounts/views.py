@@ -493,6 +493,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
     filter_fields = ('username', 'profile__full_name', 'email', 'is_staff')
+    lookup_field = 'profile__uuid'
 
 
 class StatisticsViewSet(viewsets.ModelViewSet):
