@@ -19,9 +19,7 @@ from django.views.generic import DetailView
 # Standard Library
 import json
 import logging
-from cStringIO import StringIO
 from datetime import timedelta
-from zipfile import ZIP_DEFLATED, ZipFile
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -56,7 +54,7 @@ from muckrock.foia.models import (
     FOIAMultiRequest,
     FOIARequest,
 )
-from muckrock.foia.tasks import composer_delayed_submit
+from muckrock.foia.tasks import composer_delayed_submit, zip_request
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
@@ -811,19 +809,12 @@ class Detail(DetailView):
         """Get a zip file of the entire request"""
         foia = self.get_object()
         if foia.has_perm(self.request.user, 'zip_download'):
-            buff = StringIO()
-            with ZipFile(buff, 'w', ZIP_DEFLATED) as zip_file:
-                for i, comm in enumerate(foia.communications.all()):
-                    file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
-                    zip_file.writestr(
-                        file_name, comm.communication.encode('utf8')
-                    )
-                    for ffile in comm.files.all():
-                        zip_file.writestr(ffile.name(), ffile.ffile.read())
-            resp = HttpResponse(buff.getvalue(), 'application/x-zip-compressed')
-            resp['Content-Disposition'
-                 ] = u'attachment; filename="{}.zip"'.format(foia.title)
-            return resp
+            zip_request.delay(foia.pk, self.request.user.pk)
+            messages.info(
+                self.request,
+                'Your zip archive is being processed.  It will be emailed to you when '
+                'it is ready.'
+            )
         return redirect(foia.get_absolute_url() + '#')
 
 
