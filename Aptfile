@@ -1,0 +1,8 @@
+:repo:deb http://ppa.launchpad.net/ne3/trusty/ubuntu trusty main
+:repo:deb http://ppa.launchpad.net/systemed/backportsvivid/ubuntu trusty main
+libgeos-3.4.2
+proj-bin
+proj-data
+libproj0
+libgdal1h
+gdal-bin

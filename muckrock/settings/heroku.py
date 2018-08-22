@@ -78,3 +78,6 @@ if 'MEMCACHIER_SERVERS' in os.environ:
     }
 
 CONSTANCE_DATABASE_CACHE_BACKEND = 'default'
+
+GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH', None)
+GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH', None)
