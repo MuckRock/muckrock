@@ -25,7 +25,6 @@ class AgencySerializer(serializers.ModelSerializer):
         queryset=Jurisdiction.objects.all(),
         style={'base_template': 'input.html'},
     )
-    location = serializers.JSONField()
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
     average_response_time = serializers.ReadOnlyField()
     fee_rate = serializers.ReadOnlyField()
@@ -55,9 +54,7 @@ class AgencySerializer(serializers.ModelSerializer):
             'exempt',
             'types',
             'requires_proxy',
-            # location
             'jurisdiction',
-            'location',
             # contact info
             'website',
             'twitter',
