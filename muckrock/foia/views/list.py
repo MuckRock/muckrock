@@ -161,7 +161,11 @@ class RequestList(MRSearchFilterListView):
         has_perm = self.request.user.has_perm('foia.export_csv')
         if wants_csv and has_perm:
             export_csv.delay(
-                context['paginator'].object_list.values_list('pk', flat=True),
+                list(
+                    context['paginator'].object_list.values_list(
+                        'pk', flat=True
+                    )
+                ),
                 self.request.user.pk,
             )
             messages.info(
