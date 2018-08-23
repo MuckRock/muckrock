@@ -13,7 +13,6 @@ from django.forms import ValidationError
 from email.utils import getaddresses, parseaddr
 
 # Third Party
-from djgeojson.fields import PointField
 from localflavor.us.models import USStateField, USZipCodeField
 from localflavor.us.us_states import STATE_CHOICES
 from phonenumber_field.modelfields import PhoneNumberField
@@ -186,7 +185,6 @@ class Address(models.Model):
     city = models.CharField(blank=True, max_length=255)
     state = USStateField(blank=True)
     zip_code = USZipCodeField(blank=True)
-    point = PointField(blank=True)
 
     # These are override fields for parts of the address
     agency_override = models.CharField(

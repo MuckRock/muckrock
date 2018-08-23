@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+# Django
 from django.db import migrations, models
-import djgeojson.fields
 
 
 class Migration(migrations.Migration):
@@ -15,6 +15,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='foiarequest',
             name='location',
-            field=djgeojson.fields.PointField(blank=True),
+            #field=djgeojson.fields.PointField(blank=True),
+            # changing so I can uninstall djgeojson, this field is later removed
+            field=models.CharField(max_length=1),
         ),
     ]
