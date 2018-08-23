@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
             name='point',
             #field=djgeojson.fields.PointField(blank=True),
             # changing so I can uninstall djgeojson, this field is later removed
-            field=models.CharField(),
+            field=models.CharField(max_length=1),
         ),
     ]
