@@ -195,10 +195,8 @@ INSTALLED_APPS = (
     'djangosecure',
     'djcelery',
     'djcelery_email',
-    'djgeojson',
     'easy_thumbnails',
     'gunicorn',
-    'leaflet',
     'localflavor',
     'mathfilters',
     'news_sitemaps',
@@ -236,7 +234,6 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
-    'muckrock.map',
     'muckrock.message',
     'muckrock.organization',
     'muckrock.project',
@@ -533,32 +530,6 @@ DEFAULT_HOST = 'default'
 ORG_MIN_SEATS = 3
 ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
-
-# Leaflet Settings
-LEAFLET_CONFIG = {
-    'DEFAULT_CENTER': (37.8, -96.9),
-    'DEFAULT_ZOOM': 4,
-    'MIN_ZOOM': 4,
-    'MAX_ZOOM': 18,
-    'PLUGINS': {
-        'search': {
-            'css': ['vendor/leaflet-geocoder-control/Control.Geocoder.css',],
-            'js': [
-                'vendor/leaflet-geocoder-control/Control.Geocoder.js',
-                'js/leaflet-form.js'
-            ],
-            'auto-include':
-                True,
-        },
-        'draw': {
-            'css': [
-                'leaflet/draw/leaflet.draw.css',
-                'leaflet/draw/leaflet.draw.ie.css'
-            ],
-            'js': ['leaflet/draw/leaflet.draw.js']
-        }
-    }
-}
 
 # development urls
 MUCKROCK_URL = 'localhost:8000'

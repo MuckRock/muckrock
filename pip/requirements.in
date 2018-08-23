@@ -20,10 +20,8 @@ django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
 django-extensions # Nicer shell
 django-filter # Used for filtering in viewsets
-django-geojson # Used for storing geographic data
 django-hijack # Allows admins to log in to other user accounts
 django-hosts # Used for multi-domain routing
-django-leaflet # Used for plotting geographic data
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
 django-mathfilters # Mathematical template filters
@@ -50,7 +48,6 @@ fuzzywuzzy # fuzzy string matching for FM agency import
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
-jsonfield # Used for storing JSON data, required by django-geojson
 markdown # Used for rendering Markdown, obviously!
 newrelic # Interface to newrelic service
 numpy==1.9.1 # Used by machine learning

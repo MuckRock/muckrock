@@ -45,12 +45,6 @@ class muckrock {
         },
     }
 
-    apt::ppa { 'ppa:ubuntugis/ppa': }
-
-	package { 'gdal-bin':
-		ensure => installed,
-	}
-
 	package { 'ruby-dev':
 		ensure => installed,
 	} ->

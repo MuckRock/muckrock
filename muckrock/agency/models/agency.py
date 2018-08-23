@@ -15,7 +15,6 @@ import logging
 from datetime import date
 
 # Third Party
-from djgeojson.fields import PointField
 from easy_thumbnails.fields import ThumbnailerImageField
 
 # MuckRock
@@ -131,7 +130,6 @@ class Agency(models.Model, RequestHelper):
         blank=True, max_length=255, help_text='May use html'
     )
     public_notes = models.TextField(blank=True, help_text='May use html')
-    location = PointField(blank=True)
 
     addresses = models.ManyToManyField(
         'communication.Address',
