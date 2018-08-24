@@ -966,7 +966,9 @@ def zip_request(foia_pk, user_pk):
 def clean_export_csv():
     """Clean up exported CSVs and request zips that are more than 5 days old"""
 
-    p_csv = re.compile(r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests?.(csv|zip)')
+    p_csv = re.compile(
+        r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests?.(?:csv|zip)'
+    )
     conn = S3Connection(
         settings.AWS_ACCESS_KEY_ID,
         settings.AWS_SECRET_ACCESS_KEY,
