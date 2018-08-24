@@ -10,6 +10,7 @@ from datetime import timedelta
 
 # Third Party
 import factory
+import faker.providers.phone_number.en_US as faker_phone
 
 # MuckRock
 from muckrock.communication.models import (
@@ -19,6 +20,11 @@ from muckrock.communication.models import (
     FaxCommunication,
     PhoneNumber,
 )
+
+# Monkey patch the faker phone number provider to not produce international numbers
+faker_phone.Provider.formats = [
+    f for f in faker_phone.Provider.formats if not f.startswith('+')
+]
 
 
 class EmailAddressFactory(factory.django.DjangoModelFactory):
