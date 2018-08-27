@@ -48,6 +48,7 @@ fuzzywuzzy # fuzzy string matching for FM agency import
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
+ipython # better python shell
 markdown # Used for rendering Markdown, obviously!
 newrelic # Interface to newrelic service
 numpy==1.9.1 # Used by machine learning
