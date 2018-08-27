@@ -12,6 +12,7 @@ from django.db.models import Case, Count, Max, Prefetch, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.html import linebreaks, urlize
 
 # Standard Library
 import logging
@@ -530,6 +531,7 @@ class FlaggedTask(Task):
             return None
         description = bleach.clean(self.text)
         subject = description[:50] or u'-No Subject-'
+        description = linebreaks(urlize(description))
 
         description += make_url(self.foia)
         description += make_url(self.agency)
