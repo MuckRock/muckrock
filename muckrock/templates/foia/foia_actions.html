@@ -50,6 +50,9 @@
               <h2>{{ action.desc }}</h2>
               {% for field in action.form %}
                 {{ field }}
+                {% if field.help_text %}
+                  <p class="help-text">{{ field.help_text }}</p>
+                {% endif %}
               {% endfor %}
               <button type="submit" name="action" value="{{ action.action }}" class="primary button">{{ action.title }}</button>
               <span class="close-modal button">Close</span>

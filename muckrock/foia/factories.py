@@ -80,6 +80,7 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
         'muckrock.communication.factories.EmailCommunicationFactory',
         'communication',
     )
+    communication = factory.Faker('paragraph')
 
 
 class RawEmailFactory(factory.django.DjangoModelFactory):

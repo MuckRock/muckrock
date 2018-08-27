@@ -21,6 +21,7 @@ from freezegun import freeze_time
 from nose.tools import eq_, ok_
 
 # MuckRock
+from muckrock.communication.factories import EmailCommunicationFactory
 from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
@@ -31,9 +32,10 @@ from muckrock.core.utils import new_action
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
+    FOIAFileFactory,
     FOIARequestFactory,
 )
-from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.task.models import SnailMailTask
 
 # allow methods that could be functions and too many public methods in tests
@@ -218,6 +220,36 @@ class TestFOIARequestUnit(TestCase):
                         'payment',
                     ]
                 )
+
+    def test_soft_delete(self):
+        """Test the soft delete method"""
+        foia = FOIARequestFactory(status='processed')
+        FOIAFileFactory.create_batch(size=3, comm__foia=foia)
+        user = UserFactory(is_superuser=True)
+
+        nose.tools.eq_(foia.get_files().count(), 3)
+        nose.tools.eq_(
+            RawEmail.objects.filter(email__communication__foia=foia).count(), 3
+        )
+
+        foia.soft_delete(user, 'final message', 'note')
+        foia.refresh_from_db()
+
+        # final communication we send out is not cleared
+        for comm in list(foia.communications.all())[:-1]:
+            nose.tools.eq_(comm.communication, '')
+        nose.tools.eq_(foia.get_files().count(), 0)
+        # one raw email left on the final outgoing message
+        nose.tools.eq_(
+            RawEmail.objects.filter(email__communication__foia=foia).count(), 1
+        )
+        nose.tools.eq_(foia.last_request().communication, 'final message')
+        nose.tools.eq_(foia.notes.first().note, 'note')
+
+        nose.tools.ok_(foia.deleted)
+        nose.tools.ok_(foia.embargo)
+        nose.tools.ok_(foia.permanent_embargo)
+        nose.tools.eq_(foia.status, 'abandoned')
 
 
 class TestFOIAIntegration(TestCase):
