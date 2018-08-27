@@ -530,7 +530,7 @@ def set_all_document_cloud_pages():
         doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()
     ]
     logger.info('Re-upload documents, %d documents with 0 pages', len(docs))
-    for doc in docs[:250]:
+    for doc in docs:
         logger.info('0 page re-upload: %s', doc.pk)
         upload_document_cloud.apply_async(args=[doc.pk, False])
 
