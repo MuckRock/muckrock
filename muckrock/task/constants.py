@@ -60,5 +60,9 @@ PRIVATE_FLAG_CATEGORIES = [
         'agency new email',
         'An agency with no primary email set replied via email.',
     ),
+    (
+        'manual form',
+        'A request needs a PDF form to be manually filled out to be submitted'
+    ),
 ]
 FLAG_CATEGORIES = PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES

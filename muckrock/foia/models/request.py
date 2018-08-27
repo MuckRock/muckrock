@@ -424,6 +424,11 @@ class FOIARequest(models.Model):
             needs_review = False
             self.update_address_from_agency(agency, appeal, kwargs.get('clear'))
 
+        # check for a pdf form that needs to be filled out on the initial submission
+        if agency.form and self.communications.count() == 1:
+            # this needs review if it cannot fill out the form automatically
+            needs_review |= agency.form.fill(self.communications.first())
+
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
         approved_agency = agency.status == 'approved'
@@ -431,14 +436,9 @@ class FOIARequest(models.Model):
         if self.missing_proxy:
             self._flag_proxy_resubmit()
             self.save()
-        elif not approved_agency:
-            # not an approved agency, all we do is mark as submitted
-            self.status = 'submitted'
-            self.date_processing = date.today()
-            self.save()
-        elif needs_review:
-            # if the user submitted new contact information, leave processing
-            # and create a flag
+        elif not approved_agency or needs_review:
+            # the request needs attention from staff before going out
+            # the request is processing until the correpsonding task is completed
             self.status = 'submitted'
             self.date_processing = date.today()
             self.save()
@@ -678,10 +678,6 @@ class FOIARequest(models.Model):
         subject = comm.subject or self.default_subject()
         subject = subject[:255]
         comm.subject = subject
-
-        # attach the pdf form if one exists and this is the initial request
-        if self.agency.form and self.communications.count() == 1:
-            self.agency.form.fill(comm)
 
         # preferred order of communication methods
         if self.portal and self.portal.status == 'good' and not kwargs.get(

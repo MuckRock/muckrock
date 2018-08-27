@@ -17,6 +17,9 @@ from datetime import date
 from pdfrw import PageMerge, PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 
+# MuckRock
+from muckrock.task.models import FlaggedTask
+
 
 class AgencyRequestForm(models.Model):
     """A form an agency requires you to fill out in order to file a request"""
@@ -29,12 +32,24 @@ class AgencyRequestForm(models.Model):
         return self.name
 
     def fill(self, comm):
-        """Fill out the form"""
-        data = self._get_data(comm)
-        overlay = self._create_overlay(data)
-        form = self._merge_overlay(overlay)
-        name = u'{}.pdf'.format(self.name)
-        comm.attach_file(content=form.read(), name=name, source='MuckRock')
+        """Fill out the form - returns a bool indicating if manual review is needed"""
+        if self.mappers.exists():
+            data = self._get_data(comm)
+            overlay = self._create_overlay(data)
+            form = self._merge_overlay(overlay)
+            name = u'{}.pdf'.format(self.name)
+            comm.attach_file(content=form.read(), name=name, source='MuckRock')
+            return False
+        else:
+            FlaggedTask.objects.create(
+                foia=comm.foia,
+                category='manual form',
+                text=
+                'This request requires a form to be manually filled out before being '
+                'sent.  Please fill it out, attach to the initial communication, and '
+                'send it.\n\n{}'.format(self.form.url),
+            )
+            return True
 
     def _get_data(self, comm):
         """Get the data for filling in the form"""
