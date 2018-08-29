@@ -20,6 +20,7 @@ import string
 # Third Party
 import requests
 import stripe
+from social_django.utils import load_backend, load_strategy
 
 # MuckRock
 from muckrock.core.utils import retry_on_error, stripe_retry_on_error
@@ -175,3 +176,14 @@ def get_squarelet_access_token():
                 expires_in = int(resp_json['expires_in']) - 10
                 cache.set('squarelet_access_token', access_token, expires_in)
     return access_token
+
+
+def mini_login(request, username, password):
+    """Provide authentication via squarelet via the password grant type"""
+    strategy = load_strategy(request)
+    backend = load_backend(strategy, 'squarelet', redirect_uri=None)
+    backend.password_grant_auth = (username, password)
+    backend.STATE_PARAMETER = False
+    backend.REDIRECT_STATE = False
+    user = backend.complete(request=request)
+    return user

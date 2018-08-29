@@ -4,15 +4,16 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
+from requests.exceptions import HTTPError
 
 # MuckRock
 from muckrock.accounts.forms import BuyRequestForm
+from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
 from muckrock.core.forms import TaggitWidget
 from muckrock.foia.fields import ComposerAgencyField
@@ -201,14 +202,16 @@ class BaseComposerForm(forms.ModelForm):
                     'login information'
                 )
             if login:
-                form = AuthenticationForm(
-                    data={
-                        'username': cleaned_data.get('login_username'),
-                        'password': cleaned_data.get('login_password'),
-                    }
-                )
-                form.full_clean()
-                self.user = form.get_user()
+                try:
+                    self.user = mini_login(
+                        self.request,
+                        cleaned_data.get('login_username'),
+                        cleaned_data.get('login_password'),
+                    )
+                except HTTPError:
+                    raise forms.ValidationError(
+                        'Please enter a correct username and password'
+                    )
         return cleaned_data
 
 
