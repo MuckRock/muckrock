@@ -4,7 +4,9 @@ Tests for mailgun
 
 # Django
 from django.conf import settings
+from django.core import mail
 from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 
 # Standard Library
@@ -81,6 +83,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
     def setUp(self):
         """Set up tests"""
         self.factory = RequestFactory()
+        mail.outbox = []
 
     def test_normal(self):
         """Test a normal succesful response"""
@@ -208,6 +211,29 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         to_ = foia.get_request_email()
         response = self.mailgun_route(to_=to_, sign=False)
         nose.tools.eq_(response.status_code, 403)
+
+    def test_deleted(self):
+        """Test a message to a deleted request"""
+
+        foia = FOIARequestFactory(status='abandoned', deleted=True)
+        from_name = 'Smith, Bob'
+        from_email = 'test@agency.gov'
+        from_ = '"%s" <%s>' % (from_name, from_email)
+        to_ = foia.get_request_email()
+        subject = 'Test subject'
+        text = 'Test normal.'
+        signature = '-Charlie Jones'
+
+        self.mailgun_route(from_, to_, subject, text, signature)
+        foia.refresh_from_db()
+
+        # no communication should be created, and an autoreply sould be mailed out
+        nose.tools.eq_(foia.communications.count(), 0)
+        nose.tools.eq_(
+            mail.outbox[0].body,
+            render_to_string('text/foia/deleted_autoreply.txt'),
+        )
+        nose.tools.eq_(mail.outbox[0].to, [from_])
 
 
 class TestMailgunViewCatchAll(TestMailgunViews):

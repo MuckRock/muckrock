@@ -38,6 +38,19 @@
   {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
   {% has_perm 'foia.agency_reply_foiarequest' request.user foia as can_agency_reply %}
 
+  {% if foia.deleted %}
+    <div class="message error">
+      <span class="symbol">
+        {% include 'lib/component/icon/error.svg' %}
+      </span>
+      <span class="text">
+        <p>
+        This request has been deleted
+        </p>
+      </span>
+    </div>
+  {% endif %}
+
   <article class="request detail grid__row" id="foia-{{ foia.id }}">
     {% cond_cache foia_cache_timeout foia_detail_top foia.pk request.user.pk %}
     <section class="request properties grid__column one-quarter">

@@ -173,6 +173,12 @@ class FOIARequest(models.Model):
     )
     access_key = models.CharField(blank=True, max_length=255)
 
+    deleted = models.BooleanField(
+        default=False,
+        help_text=
+        'This request has been "deleted" and should reject new communications'
+    )
+
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
@@ -975,7 +981,11 @@ class FOIARequest(models.Model):
 
     def user_actions(self, user):
         """Provides action interfaces for users"""
-        from muckrock.foia.forms import FOIAFlagForm, FOIAContactUserForm
+        from muckrock.foia.forms import (
+            FOIAFlagForm,
+            FOIAContactUserForm,
+            FOIASoftDeleteForm,
+        )
         is_owner = self.created_by(user)
         is_agency_user = (
             user.is_authenticated() and user.profile.acct_type == 'agency'
@@ -1035,6 +1045,17 @@ class FOIARequest(models.Model):
                 'class_name': 'failure',
                 'modal': True,
                 'form': FOIAFlagForm(),
+            },
+            {
+                'test': self.has_perm(user, 'delete'),
+                'title': 'Delete Request',
+                'action': 'delete',
+                'desc':
+                    u'Wipe all data from this request.  WARNING: This cannot be '
+                    u'undone.',
+                'class_name': 'failure',
+                'modal': True,
+                'form': FOIASoftDeleteForm(foia=self),
             },
             {
                 'test': is_admin,
@@ -1209,6 +1230,26 @@ class FOIARequest(models.Model):
                 via, addr
             )
         )
+
+    def soft_delete(self, user, final_message, note):
+        """If a user requests that this request be deleted, use this to wipe the
+        sensitive data without destroying the history that a request existed with
+        this MR number"""
+        from muckrock.foia.models.communication import RawEmail
+
+        self.get_files().delete()
+        RawEmail.objects.filter(email__communication__foia=self).delete()
+        self.communications.all().update(communication='')
+
+        if self.status not in END_STATUS and final_message:
+            self.create_out_communication(user, final_message, user)
+        self.notes.create(author=user, note=note)
+
+        self.deleted = True
+        self.embargo = True
+        self.permanent_embargo = True
+        self.status = 'abandoned'
+        self.save()
 
     class Meta:
         ordering = ['title']

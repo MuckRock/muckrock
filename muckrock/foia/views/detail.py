@@ -43,6 +43,7 @@ from muckrock.foia.forms import (
     FOIAEstimatedCompletionDateForm,
     FOIAFlagForm,
     FOIANoteForm,
+    FOIASoftDeleteForm,
     ResendForm,
     TrackingNumberForm,
 )
@@ -304,6 +305,7 @@ class Detail(DetailView):
             'question': self._question,
             'add_note': self._add_note,
             'flag': self._flag,
+            'delete': self._delete,
             'contact_user': self._contact_user,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
@@ -413,6 +415,20 @@ class Detail(DetailView):
             )
             messages.success(request, 'Problem succesfully reported')
             new_action(request.user, 'flagged', target=foia)
+        return redirect(foia.get_absolute_url() + '#')
+
+    def _delete(self, request, foia):
+        """Allow staff to soft delete requests"""
+        form = FOIASoftDeleteForm(request.POST, foia=foia)
+        has_perm = foia.has_perm(request.user, 'delete')
+        if has_perm and form.is_valid():
+            foia.soft_delete(
+                request.user,
+                # final message is not used when foia is in an end state
+                form.cleaned_data.get('final_message', ''),
+                form.cleaned_data['note'],
+            )
+            messages.success(request, 'Request succesfully deleted')
         return redirect(foia.get_absolute_url() + '#')
 
     def _contact_user(self, request, foia):

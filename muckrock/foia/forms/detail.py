@@ -13,7 +13,12 @@ from datetime import date, timedelta
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
-from muckrock.foia.models import FOIANote, FOIARequest, TrackingNumber
+from muckrock.foia.models import (
+    END_STATUS,
+    FOIANote,
+    FOIARequest,
+    TrackingNumber,
+)
 from muckrock.task.constants import PUBLIC_FLAG_CATEGORIES
 
 
@@ -127,3 +132,24 @@ class FOIAContactUserForm(forms.Form):
     prefix = 'contact'
 
     text = forms.CharField(widget=forms.Textarea)
+
+
+class FOIASoftDeleteForm(forms.Form):
+    """Form to soft delete a request"""
+
+    final_message = forms.CharField(
+        widget=forms.Textarea,
+        help_text=
+        'A final communication to the agency, explaining that the request is '
+        'being withdrawn',
+    )
+    note = forms.CharField(
+        widget=forms.Textarea,
+        help_text='An internal note explaining why the request is being deleted',
+    )
+
+    def __init__(self, *args, **kwargs):
+        foia = kwargs.pop('foia')
+        super(FOIASoftDeleteForm, self).__init__(*args, **kwargs)
+        if foia.status in END_STATUS:
+            self.fields.pop('final_message')

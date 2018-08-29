@@ -6,9 +6,10 @@ Views for mailgun
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseForbidden
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
@@ -224,6 +225,16 @@ def _handle_request(request, mail_id):
         # extra logging for next request portals for now
         if foia.portal and foia.portal.type == 'nextrequest':
             _log_mail(request)
+
+        if foia.deleted:
+            if from_email is not None:
+                send_mail(
+                    'Request Withdrawn: {}'.format(subject),
+                    render_to_string('text/foia/deleted_autoreply.txt'),
+                    'info@muckrock.com',
+                    [unicode(from_email)],
+                )
+            return HttpResponse('WARNING')
 
         if from_email is not None:
             email_allowed = from_email.allowed(foia)
