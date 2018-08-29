@@ -21,7 +21,6 @@ from freezegun import freeze_time
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.communication.factories import EmailCommunicationFactory
 from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
