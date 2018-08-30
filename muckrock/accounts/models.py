@@ -107,7 +107,7 @@ class Profile(models.Model):
     linkedin = models.URLField(
         max_length=255, blank=True, help_text='Begin with http://'
     )
-    # XXX remove after migrating
+    # remove after migrating
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True,
