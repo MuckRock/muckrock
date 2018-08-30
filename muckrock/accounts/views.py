@@ -104,7 +104,6 @@ class AccountsView(TemplateView):
     If user is logged out, it lets them register for any plan.
     If user is logged in, it lets them up- or downgrade their account to any plan.
     """
-    # XXX if logged out, just redirect to squarelet?
     template_name = 'accounts/plans.html'
 
     def get_context_data(self, **kwargs):
