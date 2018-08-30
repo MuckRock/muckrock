@@ -594,7 +594,10 @@ class FOIARequest(models.Model):
             )
             file_.ffile.name = attachment.ffile.name
             file_.save()
-        attachments.update(sent=True)
+        if not composer:
+            # we need to not mark composer attachments as sent until all requests
+            # have been sent
+            attachments.update(sent=True)
 
     def followup(self, switch=False):
         """Send an automatic follow up email for this request"""

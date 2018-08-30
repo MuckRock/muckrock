@@ -223,6 +223,10 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
             composer=composer,
             agency=agency,
         )
+    # mark all attachments as sent here, after all requests have been sent
+    composer.pending_attachments.filter(
+        user=composer.user, sent=False
+    ).update(sent=True)
 
 
 @task(
