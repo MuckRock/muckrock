@@ -6,73 +6,57 @@
 {% block type %}exemption{% endblock %}
 
 {% block header %}
-<h1>{{exemption.name}}</h1>
-{% if exemption.aliases %}<p>Also known as {{exemption.aliases}}.</p>{% endif %}
-<p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
-{% endblock %}
-
-{% block aside %}
-<!--<a href="#flag-form" class="modal-trigger button">Suggest Change</a>-->
+  <h1>{{exemption.name}}</h1>
+  {% if exemption.aliases %}<p>Also known as {{exemption.aliases}}.</p>{% endif %}
+  <p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
 {% endblock %}
 
 {% block main %}
-{% comment %}
-<div class="modal" id="flag-form">
-    <form method="post">
-        {% csrf_token %}
-        {% include 'lib/pattern/form.html' with form=flag_form %}
-        <footer>
-            <button type="submit" name="action" value="flag" class="primary button">Submit</button>
-            <span class="close-modal button">Cancel</span>
-        </footer>
-    </form>
-</div>
-{% endcomment %}
-<div class="grid__row">
+  <div class="grid__row">
     <div class="grid__column two-thirds">
-        {{exemption.basis|markdown}}
-        {% if exemption.example_appeals.exists %}
+      {{exemption.basis|markdown}}
+      {% if exemption.example_appeals.exists %}
         <h2>Example Appeals</h2>
         {% for appeal in exemption.example_appeals.all %}
-        <div class="example-appeal">
+          <div class="example-appeal">
             {{appeal.context|markdown}}
             <blockquote class="force-select">{{appeal.language|linebreaks}}</blockquote>
-        </div>
+          </div>
         {% endfor %}
-        {% endif %}
-        {{exemption.appeal_language|markdown}}
-        {% if exemption.invokations.exists %}
+      {% endif %}
+      {{exemption.appeal_language|markdown}}
+      {% if exemption.invokations.exists %}
         <h2>Invocations</h2>
         <ul>
-        {% for invokation in exemption.invokations.all %}
+          {% for invokation in exemption.invokations.all %}
             <li>
-                <div class="invoked-exmption">
-                    <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>.</p>
-                </div>
+              <div class="invoked-exmption">
+                <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>.</p>
+              </div>
             </li>
-        {% endfor %}
+          {% endfor %}
         </ul>
-        {% endif %}
+      {% endif %}
     </div>
     <div class="grid__column third">
-        {% if exemption.proper_use %}
+      {% if exemption.proper_use %}
         <div>
-            <h2>Proper Use</h2>
-            {{exemption.proper_use|markdown}}
+          <h2>Proper Use</h2>
+          {{exemption.proper_use|markdown}}
         </div>
-        {% endif %}
-        {% if exemption.improper_use %}
+      {% endif %}
+      {% if exemption.improper_use %}
         <div>
-            <h2>Improper Use</h2>
-            {{exemption.improper_use|markdown}}
+          <h2>Improper Use</h2>
+          {{exemption.improper_use|markdown}}
         </div>
-        {% endif %}
-        {% if exemption.key_citations %}
+      {% endif %}
+      {% if exemption.key_citations %}
         <div class="small">
-            <h2>Key Citations</h2>
-            {{exemption.key_citations|markdown}}
+          <h2>Key Citations</h2>
+          {{exemption.key_citations|markdown}}
         </div>
-        {% endif %}
+      {% endif %}
     </div>
-</div>
+  </div>
 {% endblock %}
