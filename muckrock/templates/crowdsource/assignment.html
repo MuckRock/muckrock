@@ -14,8 +14,10 @@
     <form {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} method="post" id="submitInput">
       {% csrf_token %}
       {% include 'lib/pattern/form.html' %}
-      {% if user.is_anonymous %}
+      {% if user.is_anonymous and crowdsource.registration == "required" %}
         <p>Thanks for helping out with this Assignment!  We need to create an account for you to save your data.  Already have an account?  <a href="{% url "acct-login" %}">Log in</a> instead.</p>
+      {% elif user.is_anonymous and crowdsource.registration == "optional" %}
+        <p>Thanks for helping out with this Assignment!  You may optionally create an account when you save your data.  Already have an account?  <a href="{% url "acct-login" %}">Log in</a> instead.  Prefer to stay anonymous?  Leave the username and email fields blank.</p>
       {% endif %}
     </form>
     {% if data %}

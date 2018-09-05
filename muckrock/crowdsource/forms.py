@@ -38,11 +38,13 @@ class CrowdsourceAssignmentForm(forms.Form):
 
         for field in crowdsource.fields.all():
             self.fields[str(field.pk)] = field.get_form_field()
-        if user.is_anonymous:
+        if user.is_anonymous and crowdsource.registration != 'off':
+            required = crowdsource.registration == 'required'
             self.fields['full_name'] = forms.CharField(
-                label='Full Name or Handle (Public)'
+                label='Full Name or Handle (Public)',
+                required=required,
             )
-            self.fields['email'] = forms.EmailField()
+            self.fields['email'] = forms.EmailField(required=required)
             self.fields['newsletter'] = forms.BooleanField(
                 initial=True,
                 required=False,
@@ -53,7 +55,7 @@ class CrowdsourceAssignmentForm(forms.Form):
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['email']
-        if User.objects.filter(email__iexact=email).exists():
+        if email and User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(
                 'User with this email already exists. Please login first.'
             )
@@ -95,6 +97,7 @@ class CrowdsourceForm(forms.ModelForm):
             'description',
             'data_limit',
             'user_limit',
+            'registration',
             'form_json',
             'data_csv',
             'multiple_per_page',
@@ -102,6 +105,13 @@ class CrowdsourceForm(forms.ModelForm):
             'project_admin',
             'submission_emails',
         )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(CrowdsourceForm, self).__init__(*args, **kwargs)
+
+        if not user.profile.is_advanced:
+            del self.fields['registration']
 
     def clean_data_csv(self):
         """If there is a data CSV, ensure it has a URL column"""

@@ -22,6 +22,7 @@ django-extensions # Nicer shell
 django-filter # Used for filtering in viewsets
 django-hijack # Allows admins to log in to other user accounts
 django-hosts # Used for multi-domain routing
+django-ipware # Used to get user's IP address
 django-localflavor # Used for phone numbers and state list
 django-lot # Used for Log On Tokens
 django-mathfilters # Mathematical template filters

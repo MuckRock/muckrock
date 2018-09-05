@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Case, Q, Sum, Value, When
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -120,6 +120,16 @@ class Crowdsource(models.Model):
         help_text='Is the user limited to completing this form only once? '
         '(else, it is unlimited) - only used if not using data for this crowdsource',
     )
+    registration = models.CharField(
+        max_length=8,
+        choices=(
+            ('required', 'Required'),
+            ('off', 'Off'),
+            ('optional', 'Optional'),
+        ),
+        default='required',
+        help_text='Is registration required to complete this assignment?',
+    )
     submission_emails = models.ManyToManyField('communication.EmailAddress')
 
     objects = CrowdsourceQuerySet.as_manager()
@@ -137,9 +147,9 @@ class Crowdsource(models.Model):
             },
         )
 
-    def get_data_to_show(self, user):
+    def get_data_to_show(self, user, ip_address):
         """Get the crowdsource data to show"""
-        options = self.data.get_choices(self.data_limit, user)
+        options = self.data.get_choices(self.data_limit, user, ip_address)
         if options:
             return choice(options)
         else:
@@ -228,14 +238,23 @@ class Crowdsource(models.Model):
 class CrowdsourceDataQuerySet(models.QuerySet):
     """Object manager for crowdsource data"""
 
-    def get_choices(self, data_limit, user):
+    def get_choices(self, data_limit, user, ip_address):
         """Get choices for data to show"""
         choices = (
-            self.annotate(count=models.Count('responses__user', distinct=True))
-            .filter(count__lt=data_limit)
+            self.annotate(
+                count=Sum(
+                    Case(
+                        When(responses__number=1, then=Value(1)),
+                        default=0,
+                        output_field=models.IntegerField(),
+                    )
+                )
+            ).filter(count__lt=data_limit)
         )
         if user is not None:
             choices = choices.exclude(responses__user=user)
+        elif ip_address is not None:
+            choices = choices.exclude(responses__ip_address=ip_address)
         return choices
 
 
@@ -368,7 +387,13 @@ class CrowdsourceChoice(models.Model):
 class CrowdsourceResponse(models.Model):
     """A response to a crowdsource question"""
     crowdsource = models.ForeignKey(Crowdsource, related_name='responses')
-    user = models.ForeignKey('auth.User', related_name='crowdsource_responses')
+    user = models.ForeignKey(
+        'auth.User',
+        related_name='crowdsource_responses',
+        blank=True,
+        null=True,
+    )
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime = models.DateTimeField(default=timezone.now)
     data = models.ForeignKey(
         CrowdsourceData,
@@ -397,15 +422,21 @@ class CrowdsourceResponse(models.Model):
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
+        if self.user:
+            from_ = unicode(self.user)
+        elif self.ip_address:
+            from_ = self.ip_address
+        else:
+            from_ = 'Anonymous'
         return u'Response by {} on {}'.format(
-            self.user,
+            from_,
             self.datetime,
         )
 
     def get_values(self, metadata_keys):
         """Get the values for this response for CSV export"""
         values = [
-            self.user.username,
+            self.user.username if self.user else 'Anonymous',
             self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
             self.skip,
             self.flag,
@@ -461,7 +492,7 @@ class CrowdsourceResponse(models.Model):
         send_mail(
             '[Assignment Response] {} by {}'.format(
                 self.crowdsource.title,
-                self.user.username,
+                self.user.username if self.user else 'Anonymous',
             ),
             text,
             'info@muckrock.com',

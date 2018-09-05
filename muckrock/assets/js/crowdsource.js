@@ -123,7 +123,7 @@ $(document).ready(function(){
             <a href="/assignment/${data.results[i].id}/edit/" class="edit-link">
               ${pencil}
             </a>
-            From: ${data.results[i].user}
+            From: ${data.results[i].user || data.results[i].ip_address || 'Anonymous'}
           </p>
           ${dataUrlP}
           <time class="date">
