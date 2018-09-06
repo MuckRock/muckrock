@@ -6,73 +6,83 @@
 {% block type %}exemption{% endblock %}
 
 {% block header %}
-<h1>{{exemption.name}}</h1>
-{% if exemption.aliases %}<p>Also known as {{exemption.aliases}}.</p>{% endif %}
-<p><a href="{{exemption.jurisdiction.get_absolute_url}}">{{exemption.jurisdiction}}</a></p>
-{% endblock %}
+  <div class="place explore">
+    <header class="explore__header__wrapper">
+      <div class="explore__header grid__row">
+        <div class="grid__column two-thirds">
+          <h3>Welcome to MuckRock's <a href="{{ exemption.jurisdiction.get_absolute_url }}">{{ exemption.jurisdiction.get_law_name }} appeal guide</a>!</h3>
+          <p>Each entry provides background and context about an exemption to the public records laws in <a href="{% url "jurisdiction-explore" %}">all fifty states</a>, as well as <a href="{{ federal_url }}">federal FOIA</a>. Read more about <a href="{{ exemption.jurisdiction.get_absolute_url }}">{{ exemption.jurisdiction.name }}'s public records law</a> or explore <a href="{% url "jurisdiction-explore" %}">all our expert FOIA guides</a>. Have a public records appeal or information on an exemption we should include? Consider sharing your knowledge with everyone by <a href="{{ assignment_url }}">donating your FOIA appeal language</a>.</p>
+        </div>
+      </div>
+    </header>
+  </div>
 
-{% block aside %}
-<!--<a href="#flag-form" class="modal-trigger button">Suggest Change</a>-->
+  <h1>{{ exemption.name }}</h1>
+  {% if exemption.aliases %}<p>Also known as {{ exemption.aliases }}.</p>{% endif %}
+
+  <p><em>
+    {% if contributors %}
+      Thank you to
+      {% with contributors|length as contributors_len %}
+        {% for contributor in contributors %}
+          {% if forloop.last and contributors_len > 1 %}and {% endif %}
+          <a href="{{ contributor.profile.get_absolute_url }}">
+            {{ contributor.get_full_name }}</a>{% if not forloop.last and contributors_len > 2 %},{% endif %}
+        {% endfor %}
+      {% endwith %}
+      for contributing to this entry.
+    {% endif %}
+    This guide is for informational purposes only, is general in nature, and is not legal opinion nor legal advice regarding any specific issue or factual circumstance.
+  </em></p>
+
 {% endblock %}
 
 {% block main %}
-{% comment %}
-<div class="modal" id="flag-form">
-    <form method="post">
-        {% csrf_token %}
-        {% include 'lib/pattern/form.html' with form=flag_form %}
-        <footer>
-            <button type="submit" name="action" value="flag" class="primary button">Submit</button>
-            <span class="close-modal button">Cancel</span>
-        </footer>
-    </form>
-</div>
-{% endcomment %}
-<div class="grid__row">
+  <div class="grid__row">
     <div class="grid__column two-thirds">
-        {{exemption.basis|markdown}}
-        {% if exemption.example_appeals.exists %}
+      {{exemption.basis|markdown}}
+      {% if exemption.example_appeals.exists %}
         <h2>Example Appeals</h2>
         {% for appeal in exemption.example_appeals.all %}
-        <div class="example-appeal">
+          <div class="example-appeal">
             {{appeal.context|markdown}}
             <blockquote class="force-select">{{appeal.language|linebreaks}}</blockquote>
-        </div>
+          </div>
         {% endfor %}
-        {% endif %}
-        {{exemption.appeal_language|markdown}}
-        {% if exemption.invokations.exists %}
+      {% endif %}
+      {{exemption.appeal_language|markdown}}
+      {% if exemption.invokations.exists %}
         <h2>Invocations</h2>
         <ul>
-        {% for invokation in exemption.invokations.all %}
+          {% for invokation in exemption.invokations.all %}
             <li>
-                <div class="invoked-exmption">
-                    <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>.</p>
-                </div>
+              <div class="invoked-exmption">
+                <p><a href="{{invokation.request.agency.get_absolute_url}}">{{invokation.request.agency}}</a> invoked the exemption on <a href="{{invokation.request.get_absolute_url}}">{{invokation.request}}</a>.</p>
+              </div>
             </li>
-        {% endfor %}
+          {% endfor %}
         </ul>
-        {% endif %}
+      {% endif %}
     </div>
     <div class="grid__column third">
-        {% if exemption.proper_use %}
+      {% if exemption.proper_use %}
         <div>
-            <h2>Proper Use</h2>
-            {{exemption.proper_use|markdown}}
+          <h2>Proper Use</h2>
+          {{exemption.proper_use|markdown}}
         </div>
-        {% endif %}
-        {% if exemption.improper_use %}
+      {% endif %}
+      {% if exemption.improper_use %}
         <div>
-            <h2>Improper Use</h2>
-            {{exemption.improper_use|markdown}}
+          <h2>Improper Use</h2>
+          {{exemption.improper_use|markdown}}
         </div>
-        {% endif %}
-        {% if exemption.key_citations %}
+      {% endif %}
+      {% if exemption.key_citations %}
         <div class="small">
-            <h2>Key Citations</h2>
-            {{exemption.key_citations|markdown}}
+          <h2>Key Citations</h2>
+          {{exemption.key_citations|markdown}}
         </div>
-        {% endif %}
+      {% endif %}
     </div>
-</div>
+  </div>
 {% endblock %}

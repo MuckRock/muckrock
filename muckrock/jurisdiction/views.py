@@ -18,6 +18,7 @@ from rest_framework import viewsets
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.core.views import MRFilterListView, MRSearchFilterListView
+from muckrock.crowdsource.models import Crowdsource
 from muckrock.jurisdiction.filters import (
     ExemptionFilterSet,
     JurisdictionFilterSet,
@@ -280,12 +281,26 @@ class ExemptionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """Adds a flag form to the context."""
+        # crowdsource to link to on exemption pages
+        crowdsource_pk = 20
         context = super(ExemptionDetailView, self).get_context_data(**kwargs)
         admin_url = reverse(
             'admin:jurisdiction_exemption_change', args=(self.object.pk,)
         )
         context['flag_form'] = FlagForm()
         context['sidebar_admin_url'] = admin_url
+        context['federal_url'] = Jurisdiction.objects.get(level='f'
+                                                          ).get_absolute_url()
+        assignment = Crowdsource.objects.filter(pk=crowdsource_pk).first()
+        context['assignment_url'] = reverse(
+            'crowdsource-assignment',
+            kwargs={
+                'slug': assignment.slug,
+                'idx': assignment.pk
+            }
+        ) if assignment else '#'
+        context['contributors'
+                ] = self.object.contributors.select_related('profile')
         return context
 
 
