@@ -202,9 +202,11 @@ class Crowdsource(models.Model):
         """Get the form JSON for editing the form"""
         return json.dumps([f.get_json() for f in self.fields.all()])
 
-    def get_header_values(self, metadata_keys):
+    def get_header_values(self, metadata_keys, include_emails=False):
         """Get header values for CSV export"""
         values = ['user', 'datetime', 'skip', 'flag', 'gallery', 'tags']
+        if include_emails:
+            values.insert(1, 'email')
         if self.multiple_per_page:
             values.append('number')
         if self.data.exists():
@@ -433,7 +435,7 @@ class CrowdsourceResponse(models.Model):
             self.datetime,
         )
 
-    def get_values(self, metadata_keys):
+    def get_values(self, metadata_keys, include_emails=False):
         """Get the values for this response for CSV export"""
         values = [
             self.user.username if self.user else 'Anonymous',
@@ -443,6 +445,8 @@ class CrowdsourceResponse(models.Model):
             self.gallery,
             ', '.join(self.tags.values_list('name', flat=True)),
         ]
+        if include_emails:
+            values.insert(1, self.user.email)
         if self.crowdsource.multiple_per_page:
             values.append(self.number)
         if self.data:

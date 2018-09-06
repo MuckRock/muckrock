@@ -104,12 +104,20 @@ class CrowdsourceDetailView(DetailView):
         metadata_keys = crowdsource.get_metadata_keys()
         psuedo_buffer = Echo()
         writer = csv.writer(psuedo_buffer)
+        include_emails = self.request.user.is_staff
         response = StreamingHttpResponse(
             chain(
-                [writer.writerow(crowdsource.get_header_values(metadata_keys))],
+                [
+                    writer.writerow(
+                        crowdsource.get_header_values(
+                            metadata_keys, include_emails
+                        )
+                    )
+                ],
                 (
-                    writer.writerow(csr.get_values(metadata_keys))
-                    for csr in crowdsource.responses.all()
+                    writer.writerow(
+                        csr.get_values(metadata_keys, include_emails)
+                    ) for csr in crowdsource.responses.all()
                 ),
             ),
             content_type='text/csv',
