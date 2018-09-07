@@ -41,16 +41,39 @@
   }
 }
 
-#pencil-svg {
+#pencil-svg, #email-svg {
   display: none;
 }
 
 #assignment-responses .edit-link {
-  margin-right: 1em;
+  margin-right: 0.5em;
   &:hover {
     text-decoration: none;
     g {
       stroke: $color-grey-5;
+    }
+  }
+}
+
+#assignment-responses .message-link {
+  margin-right: 1em;
+  svg {
+    stroke: $color-white;
+  }
+  &:hover {
+    text-decoration: none;
+    svg {
+      stroke: $color-grey-5;
+    }
+  }
+  &.success {
+    svg {
+      stroke: $color-green;
+    }
+  }
+  &.failure {
+    svg {
+      stroke: $color-red;
     }
   }
 }

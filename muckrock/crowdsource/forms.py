@@ -16,7 +16,11 @@ from autocomplete_light import shortcuts as autocomplete_light
 from muckrock.communication.models import EmailAddress
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE, PROJECT_URL_RE
 from muckrock.crowdsource.fields import FIELD_DICT
-from muckrock.crowdsource.models import Crowdsource, CrowdsourceData
+from muckrock.crowdsource.models import (
+    Crowdsource,
+    CrowdsourceData,
+    CrowdsourceResponse,
+)
 from muckrock.crowdsource.tasks import datum_per_page, import_doccloud_proj
 
 
@@ -278,3 +282,13 @@ class CrowdsourceChoiceForm(forms.Form):
         self.fields['crowdsource'].queryset = (
             Crowdsource.objects.filter(status='draft', user=user)
         )
+
+
+class CrowdsourceMessageResponseForm(forms.Form):
+    """Form to message the author of a response"""
+    response = forms.ModelChoiceField(
+        queryset=CrowdsourceResponse.objects.all(),
+        widget=forms.HiddenInput(),
+    )
+    subject = forms.CharField()
+    body = forms.CharField(widget=forms.Textarea())

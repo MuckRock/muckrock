@@ -10,6 +10,7 @@ from django.http import (
     Http404,
     HttpResponse,
     HttpResponseBadRequest,
+    JsonResponse,
     StreamingHttpResponse,
 )
 from django.shortcuts import redirect
@@ -44,6 +45,7 @@ from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
     CrowdsourceDataFormset,
     CrowdsourceForm,
+    CrowdsourceMessageResponseForm,
 )
 from muckrock.crowdsource.models import (
     Crowdsource,
@@ -51,6 +53,7 @@ from muckrock.crowdsource.models import (
     CrowdsourceResponse,
     CrowdsourceValue,
 )
+from muckrock.message.email import TemplateEmail
 
 
 class CrowdsourceDetailView(DetailView):
@@ -148,6 +151,7 @@ class CrowdsourceDetailView(DetailView):
             'admin:crowdsource_crowdsource_change',
             args=(self.object.pk,),
         )
+        context['message_form'] = CrowdsourceMessageResponseForm()
         return context
 
 
@@ -655,3 +659,33 @@ def oembed(request):
         return HttpResponse(data.embed())
     else:
         return HttpResponseBadRequest()
+
+
+def message_response(request):
+    """AJAX view to send an email to the user of a response"""
+    form = CrowdsourceMessageResponseForm(request.POST)
+    if form.is_valid():
+        response = form.cleaned_data['response']
+        if not request.user.has_perm(
+            'crowdsource.edit_crowdsource', response.crowdsource
+        ):
+            return JsonResponse({'error': 'permission denied'}, status=403)
+        if not response.user or not response.user.email:
+            return JsonResponse({'error': 'no email'}, status=400)
+        msg = TemplateEmail(
+            subject=form.cleaned_data['subject'],
+            from_email='info@muckrock.com',
+            user=response.user,
+            text_template='crowdsource/email/message_user.txt',
+            html_template='crowdsource/email/message_user.html',
+            extra_context={
+                'body': form.cleaned_data['body'],
+                'assignment': response.crowdsource,
+                'from_user': request.user,
+            },
+            headers={'Reply-To': request.user.email},
+        )
+        msg.send()
+        return JsonResponse({'status': 'ok'})
+    else:
+        return JsonResponse({'error': 'form invalid'}, status=400)
