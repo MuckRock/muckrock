@@ -647,7 +647,7 @@ def message_response(request):
                 'assignment': response.crowdsource,
                 'from_user': request.user,
             },
-            headers={'Reply-To': request.user.email},
+            headers={'h:Reply-To': request.user.email},
         )
         msg.send()
         return JsonResponse({'status': 'ok'})
