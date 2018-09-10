@@ -427,9 +427,9 @@ class CrowdsourceResponse(models.Model):
         if self.user:
             from_ = unicode(self.user)
         elif self.ip_address:
-            from_ = self.ip_address
+            from_ = unicode(self.ip_address)
         else:
-            from_ = 'Anonymous'
+            from_ = u'Anonymous'
         return u'Response by {} on {}'.format(
             from_,
             self.datetime,
