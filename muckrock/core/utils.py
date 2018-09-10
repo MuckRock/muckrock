@@ -165,14 +165,6 @@ def stripe_retry_on_error(func, *args, **kwargs):
     )
 
 
-class Echo(object):
-    """File like object that just returns written values"""
-
-    def write(self, value):
-        """Return the value"""
-        return value
-
-
 class TempDisconnectSignal(object):
     """Context manager to remporarily disable a signal"""
 

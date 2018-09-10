@@ -11,7 +11,6 @@ from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
     JsonResponse,
-    StreamingHttpResponse,
 )
 from django.shortcuts import redirect
 from django.utils import timezone
@@ -26,19 +25,13 @@ from django.views.generic import (
 )
 from django.views.generic.detail import BaseDetailView
 
-# Standard Library
-from datetime import date
-from itertools import chain
-
 # Third Party
-import unicodecsv as csv
 from djangosecure.decorators import frame_deny_exempt
 from ipware import get_client_ip
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
-from muckrock.core.utils import Echo
 from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.crowdsource.filters import CrowdsourceFilterSet
 from muckrock.crowdsource.forms import (
