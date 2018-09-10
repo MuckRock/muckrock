@@ -34,11 +34,18 @@ class CrowdsourceResponseSerializer(serializers.ModelSerializer):
 
     values = CrowdsourceValueSerializer(many=True, read_only=True)
     user = serializers.StringRelatedField(source='user.get_full_name')
+    ip_address = serializers.CharField()
     edit_user = serializers.StringRelatedField(source='edit_user.get_full_name')
     data = serializers.StringRelatedField(source='data.url')
     datetime = serializers.DateTimeField(format='%m/%d/%Y %I:%M %p')
     edit_datetime = serializers.DateTimeField(format='%m/%d/%Y %I:%M %p')
     tags = TagField()
+
+    def __init__(self, *args, **kwargs):
+        super(CrowdsourceResponseSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request', None)
+        if request is None or not request.user.is_staff:
+            self.fields.pop('ip_address')
 
     def create(self, validated_data):
         """Handle tags"""

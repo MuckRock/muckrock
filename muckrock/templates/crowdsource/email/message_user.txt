@@ -1,0 +1,9 @@
+{% extends 'message/base.txt' %}
+
+{% block body %}
+Hi {{ user.get_full_name }},
+
+{{ from_user.get_full_name }} has sent you a message in response to your submission to the assignment {{ assignment.title }}:
+
+{{ body }}
+{% endblock %}

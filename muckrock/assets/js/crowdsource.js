@@ -2,6 +2,7 @@
 **
 */
 
+import modal from './modal';
 
 $(document).ready(function(){
   var formBuilder = $("#build-wrap").formBuilder({
@@ -71,6 +72,24 @@ $(document).ready(function(){
     cloneMore("div.crowdsource-data:last");
   });
 
+  $("#message-modal form").submit(function(e) {
+    e.preventDefault();
+    var mailLink = $("a.message-link[data-response='" + $("#id_response").val() + "']");
+    $.ajax({
+      url: '/assignment/message/',
+      type: 'post',
+      data: $(this).serialize(),
+      success: function() {
+        mailLink.removeClass('failure');
+        mailLink.addClass('success');
+      },
+      error: function(jqxhr, textStatus, errorThrown) {
+        mailLink.removeClass('success');
+        mailLink.addClass('failure');
+      }
+    })
+  });
+
   function cloneMore(selector) {
     var newElement = $(selector).clone(true);
     var total = $('#id_data-TOTAL_FORMS').val();
@@ -97,10 +116,11 @@ $(document).ready(function(){
 
   function handleUpdateResponses(data) {
     var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried,
-      tags, dataSection;
+      tags, dataSection, mailLink;
     var responses = $("section.assignment-responses");
     responses.html("");
     var pencil = $("#pencil-svg").html();
+    var mail = $("#email-svg").html();
 
     // generate the responses
     for(var i = 0; i < data.results.length; i++) {
@@ -117,13 +137,19 @@ $(document).ready(function(){
       flagged = data.results[i].flag ? "checked" : "";
       galleried = data.results[i].gallery ? "checked" : "";
       tags = data.results[i].tags.join(', ');
+      if (data.results[i].user) {
+        mailLink = `<a href="#" class="message-link" data-response="${data.results[i].id}" data-name="${data.results[i].user}">${mail}</a>`;
+      } else {
+        mailLink = "";
+      }
       response.append(`
         <header class="textbox__header">
           <p class="from nocollapse">
             <a href="/assignment/${data.results[i].id}/edit/" class="edit-link">
               ${pencil}
             </a>
-            From: ${data.results[i].user}
+            ${mailLink}
+            From: ${data.results[i].user || data.results[i].ip_address || 'Anonymous'}
           </p>
           ${dataUrlP}
           <time class="date">
@@ -190,6 +216,13 @@ $(document).ready(function(){
           'gallery': $(this).prop("checked")
         }
       });
+    });
+    $('.message-link').click(function(e){
+      e.preventDefault();
+      $('#id_response').val($(this).data('response'));
+      $('#message-modal .name').text($(this).data('name'));
+      modal($('#message-modal'));
+      return false;
     });
     if ($("#data-inline").prop("checked")) {
       $(".embed").each(function(){

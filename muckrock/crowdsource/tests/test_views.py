@@ -5,12 +5,15 @@ from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
 
 # Third Party
-from nose.tools import eq_
+from nose.tools import assert_false, assert_true, eq_
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory, UserFactory
 from muckrock.core.test_utils import mock_middleware
-from muckrock.crowdsource.factories import CrowdsourceFactory
+from muckrock.crowdsource.factories import (
+    CrowdsourceFactory,
+    CrowdsourceResponseFactory,
+)
 from muckrock.crowdsource.views import (
     CrowdsourceDetailView,
     CrowdsourceFormView,
@@ -215,3 +218,71 @@ class TestCrowdsourceFormView(TestCase):
         request.user = crowdsource.user
         response = self.view(request, slug=crowdsource.slug, idx=crowdsource.pk)
         eq_(response.status_code, 200)
+
+    def test_has_assignment_limit(self):
+        """Test the has assignment method with a user limit"""
+        # pylint: disable=protected-access
+        view = CrowdsourceFormView()
+        crowdsource = CrowdsourceFactory(user_limit=True)
+        user = UserFactory()
+        ip_address = '127.0.0.1'
+
+        # the user hasn't replied yet, should have an assignment
+        assert_true(view._has_assignment(crowdsource, user, None))
+
+        # the user replied, they may not reply again
+        CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            user=user,
+        )
+        assert_false(view._has_assignment(crowdsource, user, None))
+
+        # the ip address hasn't replied yet, should have an assignment
+        assert_true(
+            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
+        )
+
+        # the ip address replied, they may not reply again
+        CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            user=None,
+            ip_address=ip_address,
+        )
+        assert_false(
+            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
+        )
+
+    def test_has_assignment_no_limit(self):
+        """Test the has assignment method without a user limit"""
+        # pylint: disable=protected-access
+        view = CrowdsourceFormView()
+        crowdsource = CrowdsourceFactory(user_limit=False)
+        user = UserFactory()
+        ip_address = '127.0.0.1'
+
+        # should always return true
+
+        # the user hasn't replied yet, should have an assignment
+        assert_true(view._has_assignment(crowdsource, user, None))
+
+        # the user replied, they may reply again
+        CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            user=user,
+        )
+        assert_true(view._has_assignment(crowdsource, user, None))
+
+        # the ip address hasn't replied yet, should have an assignment
+        assert_true(
+            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
+        )
+
+        # the ip address replied, they may reply again
+        CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            user=None,
+            ip_address=ip_address,
+        )
+        assert_true(
+            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
+        )

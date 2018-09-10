@@ -39,9 +39,12 @@ class TestCrowdsource(TestCase):
     def test_get_data_to_show(self):
         """Get data to show should pick the correct data"""
         crowdsource = CrowdsourceFactory()
-        assert_is_none(crowdsource.get_data_to_show(crowdsource.user))
+        ip_address = None
+        assert_is_none(
+            crowdsource.get_data_to_show(crowdsource.user, ip_address)
+        )
         data = CrowdsourceDataFactory(crowdsource=crowdsource)
-        eq_(data, crowdsource.get_data_to_show(crowdsource.user))
+        eq_(data, crowdsource.get_data_to_show(crowdsource.user, ip_address))
 
     def test_create_form(self):
         """Create form should create fields from the JSON"""
@@ -257,15 +260,16 @@ class TestCrowdsourceData(TestCase):
         """Test the get choices queryset method"""
         crowdsource = CrowdsourceFactory()
         data = CrowdsourceDataFactory.create_batch(
-            3,
+            4,
             crowdsource=crowdsource,
         )
         user = crowdsource.user
+        ip_address = '127.0.0.1'
         limit = 2
 
         # all data should be valid choices
         eq_(
-            set(crowdsource.data.get_choices(limit, user)),
+            set(crowdsource.data.get_choices(limit, user, None)),
             set(data),
         )
         # if I respond to one, it is no longer a choice for me
@@ -275,7 +279,7 @@ class TestCrowdsourceData(TestCase):
             data=data[0],
         )
         eq_(
-            set(crowdsource.data.get_choices(limit, user)),
+            set(crowdsource.data.get_choices(limit, user, None)),
             set(data[1:]),
         )
         # if one has at least `limit` responses, it is no longer a valid choice
@@ -285,20 +289,36 @@ class TestCrowdsourceData(TestCase):
             data=data[1],
         )
         eq_(
-            set(crowdsource.data.get_choices(limit, user)),
+            set(crowdsource.data.get_choices(limit, user, None)),
             set(data[2:]),
         )
         # multiple responses from the same user only count once
         new_user = UserFactory()
-        CrowdsourceResponseFactory.create_batch(
-            2,
+        CrowdsourceResponseFactory(
             crowdsource=crowdsource,
-            data=data[2],
             user=new_user,
+            data=data[2],
+            number=1,
+        )
+        CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            user=new_user,
+            data=data[2],
+            number=2,
         )
         eq_(
-            set(crowdsource.data.get_choices(limit, user)),
+            set(crowdsource.data.get_choices(limit, user, None)),
             set(data[2:]),
+        )
+        # if I anonymously to one, it is no longer a choice for me
+        CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            ip_address=ip_address,
+            data=data[3],
+        )
+        eq_(
+            set(crowdsource.data.get_choices(limit, None, ip_address)),
+            set([data[0], data[2]]),
         )
 
 

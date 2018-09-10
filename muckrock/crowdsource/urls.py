@@ -61,6 +61,11 @@ urlpatterns = [
         name='crowdsource-oembed',
     ),
     url(
+        r'^message/$',
+        views.message_response,
+        name='crowdsource-message-response',
+    ),
+    url(
         r'^(?P<idx>\d+)/edit/$',
         views.CrowdsourceEditResponseView.as_view(),
         name='crowdsource-edit-response',

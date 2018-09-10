@@ -10,6 +10,7 @@ from django.http import (
     Http404,
     HttpResponse,
     HttpResponseBadRequest,
+    JsonResponse,
     StreamingHttpResponse,
 )
 from django.shortcuts import redirect
@@ -32,6 +33,7 @@ from itertools import chain
 # Third Party
 import unicodecsv as csv
 from djangosecure.decorators import frame_deny_exempt
+from ipware import get_client_ip
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
@@ -43,6 +45,7 @@ from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
     CrowdsourceDataFormset,
     CrowdsourceForm,
+    CrowdsourceMessageResponseForm,
 )
 from muckrock.crowdsource.models import (
     Crowdsource,
@@ -50,6 +53,7 @@ from muckrock.crowdsource.models import (
     CrowdsourceResponse,
     CrowdsourceValue,
 )
+from muckrock.message.email import TemplateEmail
 
 
 class CrowdsourceDetailView(DetailView):
@@ -103,12 +107,20 @@ class CrowdsourceDetailView(DetailView):
         metadata_keys = crowdsource.get_metadata_keys()
         psuedo_buffer = Echo()
         writer = csv.writer(psuedo_buffer)
+        include_emails = self.request.user.is_staff
         response = StreamingHttpResponse(
             chain(
-                [writer.writerow(crowdsource.get_header_values(metadata_keys))],
+                [
+                    writer.writerow(
+                        crowdsource.get_header_values(
+                            metadata_keys, include_emails
+                        )
+                    )
+                ],
                 (
-                    writer.writerow(csr.get_values(metadata_keys))
-                    for csr in crowdsource.responses.all()
+                    writer.writerow(
+                        csr.get_values(metadata_keys, include_emails)
+                    ) for csr in crowdsource.responses.all()
                 ),
             ),
             content_type='text/csv',
@@ -139,6 +151,7 @@ class CrowdsourceDetailView(DetailView):
             'admin:crowdsource_crowdsource_change',
             args=(self.object.pk,),
         )
+        context['message_form'] = CrowdsourceMessageResponseForm()
         return context
 
 
@@ -189,9 +202,11 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
 
     def get(self, request, *args, **kwargs):
         """Check if there is a valid assignment"""
+        ip_address, _ = get_client_ip(self.request)
         has_assignment = self._has_assignment(
             self.get_object(),
             self.request.user,
+            ip_address,
         )
         if has_assignment:
             return super(CrowdsourceFormView, self).get(request, args, kwargs)
@@ -203,18 +218,21 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             )
             return redirect('crowdsource-list')
 
-    def _has_assignment(self, crowdsource, user):
+    def _has_assignment(self, crowdsource, user, ip_address):
         """Check if the user has a valid assignment to complete"""
         # pylint: disable=attribute-defined-outside-init
         if user.is_anonymous:
             user = None
-        self.data = crowdsource.get_data_to_show(user)
+        else:
+            ip_address = None
+        self.data = crowdsource.get_data_to_show(user, ip_address)
         if crowdsource.data.exists():
             return self.data is not None
         else:
             return not (
-                crowdsource.user_limit
-                and crowdsource.responses.filter(user=user).exists()
+                crowdsource.user_limit and crowdsource.responses.filter(
+                    user=user, ip_address=ip_address
+                ).exists()
             )
 
     def get_form_kwargs(self):
@@ -257,19 +275,32 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
         has_data = crowdsource.data.exists()
         if self.request.user.is_authenticated:
             user = self.request.user
-        else:
+            ip_address = None
+        elif form.cleaned_data.get('email'):
             user = self.miniregister(
                 form.cleaned_data['full_name'],
                 form.cleaned_data['email'],
                 form.cleaned_data.get('newsletter'),
             )
-        number = (
-            self.object.responses.filter(user=user, data=self.data).count() + 1
-        )
+            ip_address = None
+        else:
+            user = None
+            ip_address, _ = get_client_ip(self.request)
+        if user or ip_address:
+            number = (
+                self.object.responses.filter(
+                    user=user,
+                    ip_address=ip_address,
+                    data=self.data,
+                ).count() + 1
+            )
+        else:
+            number = 1
         if not has_data or self.data is not None:
             response = CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
                 user=user,
+                ip_address=ip_address,
                 data=self.data,
                 number=number,
             )
@@ -313,10 +344,20 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     def skip(self):
         """The user wants to skip this data"""
         crowdsource = self.get_object()
+        ip_address, _ = get_client_ip(self.request)
+        can_submit_anonymous = crowdsource.registration != 'required' and ip_address
         if self.data is not None and self.request.user.is_authenticated:
             CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
                 user=self.request.user,
+                data=self.data,
+                skip=True,
+            )
+            messages.info(self.request, 'Skipped!')
+        elif self.data is not None and can_submit_anonymous:
+            CrowdsourceResponse.objects.create(
+                crowdsource=crowdsource,
+                ip_address=ip_address,
                 data=self.data,
                 skip=True,
             )
@@ -524,6 +565,12 @@ class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
         messages.success(self.request, msg)
         return redirect(crowdsource)
 
+    def get_form_kwargs(self):
+        """Add user to form kwargs"""
+        kwargs = super(CrowdsourceCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 
 @class_view_decorator(login_required)
 class CrowdsourceUpdateView(UpdateView):
@@ -598,6 +645,12 @@ class CrowdsourceUpdateView(UpdateView):
         messages.success(self.request, msg)
         return redirect(crowdsource)
 
+    def get_form_kwargs(self):
+        """Add user to form kwargs"""
+        kwargs = super(CrowdsourceUpdateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 
 def oembed(request):
     """AJAX view to get oembed data"""
@@ -606,3 +659,33 @@ def oembed(request):
         return HttpResponse(data.embed())
     else:
         return HttpResponseBadRequest()
+
+
+def message_response(request):
+    """AJAX view to send an email to the user of a response"""
+    form = CrowdsourceMessageResponseForm(request.POST)
+    if form.is_valid():
+        response = form.cleaned_data['response']
+        if not request.user.has_perm(
+            'crowdsource.edit_crowdsource', response.crowdsource
+        ):
+            return JsonResponse({'error': 'permission denied'}, status=403)
+        if not response.user or not response.user.email:
+            return JsonResponse({'error': 'no email'}, status=400)
+        msg = TemplateEmail(
+            subject=form.cleaned_data['subject'],
+            from_email='info@muckrock.com',
+            user=response.user,
+            text_template='crowdsource/email/message_user.txt',
+            html_template='crowdsource/email/message_user.html',
+            extra_context={
+                'body': form.cleaned_data['body'],
+                'assignment': response.crowdsource,
+                'from_user': request.user,
+            },
+            headers={'Reply-To': request.user.email},
+        )
+        msg.send()
+        return JsonResponse({'status': 'ok'})
+    else:
+        return JsonResponse({'error': 'form invalid'}, status=400)

@@ -153,4 +153,19 @@
   <p id="pencil-svg">
     {% include "lib/component/icon/pencil.svg" %}
   </p>
+  <p id="email-svg">
+    {% include "lib/component/icon/email.svg" %}
+  </p>
+  <div class="modal" id="message-modal">
+    <h1>Contact User</h1>
+    <h2>Send an email to <span class="name"></span></h2>
+    <form method="post" action="/assignment/message/">
+      {% with message_form as form %}
+        {% include "lib/pattern/form.html" %}
+      {% endwith %}
+      <button type="submit" name="action" value="message" class="primary button close-modal">Message</button>
+      <span class="close-modal button">Close</span>
+    </form>
+  </div>
+
 {% endblock main %}
