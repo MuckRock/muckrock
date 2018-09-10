@@ -894,9 +894,10 @@ def export_csv(foia_pks, user_pk):
         m=today.month,
         d=today.day,
         md5=md5(
-            '{}{}'.format(
+            '{}{}{}'.format(
                 int(timestamp()),
                 ''.join(str(pk) for pk in foia_pks[:100]),
+                settings.SECRET_KEY,
             )
         ).hexdigest(),
     )
@@ -971,7 +972,7 @@ def clean_export_csv():
     """Clean up exported CSVs and request zips that are more than 5 days old"""
 
     p_csv = re.compile(
-        r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/requests?.(?:csv|zip)'
+        r'(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results)\.(?:csv|zip)'
     )
     conn = S3Connection(
         settings.AWS_ACCESS_KEY_ID,

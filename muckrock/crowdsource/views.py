@@ -53,6 +53,7 @@ from muckrock.crowdsource.models import (
     CrowdsourceResponse,
     CrowdsourceValue,
 )
+from muckrock.crowdsource.tasks import export_csv
 from muckrock.message.email import TemplateEmail
 
 
@@ -84,10 +85,13 @@ class CrowdsourceDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         """Handle CSV downloads"""
         if self.request.GET.get('csv'):
-            return self.results_csv()
-        else:
-            return super(CrowdsourceDetailView,
-                         self).get(request, *args, **kwargs)
+            export_csv.delay(self.get_object().pk, self.request.user.pk)
+            messages.info(
+                self.request,
+                'Your CSV is being processed.  It will be emailed to you when '
+                'it is ready.'
+            )
+        return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Handle closing the crowdsource"""
@@ -100,39 +104,6 @@ class CrowdsourceDetailView(DetailView):
             return self.create_dataset()
 
         return redirect(crowdsource)
-
-    def results_csv(self):
-        """Return the results in CSV format"""
-        crowdsource = self.get_object()
-        metadata_keys = crowdsource.get_metadata_keys()
-        psuedo_buffer = Echo()
-        writer = csv.writer(psuedo_buffer)
-        include_emails = self.request.user.is_staff
-        response = StreamingHttpResponse(
-            chain(
-                [
-                    writer.writerow(
-                        crowdsource.get_header_values(
-                            metadata_keys, include_emails
-                        )
-                    )
-                ],
-                (
-                    writer.writerow(
-                        csr.get_values(metadata_keys, include_emails)
-                    ) for csr in crowdsource.responses.all()
-                ),
-            ),
-            content_type='text/csv',
-        )
-        response['Content-Disposition'] = (
-            'attachment; '
-            'filename="results-{}-{}.csv"'.format(
-                self.get_object().slug,
-                date.today().isoformat(),
-            )
-        )
-        return response
 
     def create_dataset(self):
         """Create a dataset from a crowdsource's responses"""
