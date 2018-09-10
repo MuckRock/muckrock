@@ -83,11 +83,11 @@ $(document).ready(function(){
         mailLink.removeClass('failure');
         mailLink.addClass('success');
       },
-      error: function(jqxhr, textStatus, errorThrown) {
+      error: function() {
         mailLink.removeClass('success');
         mailLink.addClass('failure');
       }
-    })
+    });
   });
 
   function cloneMore(selector) {
