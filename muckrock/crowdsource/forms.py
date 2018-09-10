@@ -66,56 +66,15 @@ class CrowdsourceAssignmentForm(forms.Form):
         return email
 
 
-class CrowdsourceForm(forms.ModelForm):
-    """Form for creating a crowdsource"""
-    prefix = 'crowdsource'
-
-    project = autocomplete_light.ModelChoiceField(
-        'ProjectManagerAutocomplete',
-        required=False,
-    )
-    form_json = forms.CharField(
-        widget=forms.HiddenInput(),
-        initial='[]',
-    )
-    data_csv = forms.FileField(
-        label='Data CSV File',
-        required=False,
-    )
+class CrowdsourceDataCsvForm(forms.Form):
+    """Form for adding data to a crowdsource"""
+    data_csv = forms.FileField(label='Data CSV File',)
     doccloud_each_page = forms.BooleanField(
         label='Split Documents by Page',
         help_text='Each DocumentCloud URL will be split '
         'up into one assignment per page',
         required=False,
     )
-    submission_emails = forms.CharField(
-        help_text='Comma seperated list of emails to send to on submission',
-        required=False,
-    )
-
-    class Meta:
-        model = Crowdsource
-        fields = (
-            'title',
-            'project',
-            'description',
-            'data_limit',
-            'user_limit',
-            'registration',
-            'form_json',
-            'data_csv',
-            'multiple_per_page',
-            'project_only',
-            'project_admin',
-            'submission_emails',
-        )
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
-        super(CrowdsourceForm, self).__init__(*args, **kwargs)
-
-        if not user.profile.is_advanced:
-            del self.fields['registration']
 
     def clean_data_csv(self):
         """If there is a data CSV, ensure it has a URL column"""
@@ -167,6 +126,49 @@ class CrowdsourceForm(forms.ModelForm):
                             url=url,
                             metadata=data,
                         )
+
+
+class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
+    """Form for creating a crowdsource"""
+    prefix = 'crowdsource'
+
+    project = autocomplete_light.ModelChoiceField(
+        'ProjectManagerAutocomplete',
+        required=False,
+    )
+    form_json = forms.CharField(
+        widget=forms.HiddenInput(),
+        initial='[]',
+    )
+    submission_emails = forms.CharField(
+        help_text='Comma seperated list of emails to send to on submission',
+        required=False,
+    )
+
+    class Meta:
+        model = Crowdsource
+        fields = (
+            'title',
+            'project',
+            'description',
+            'data_limit',
+            'user_limit',
+            'registration',
+            'form_json',
+            'data_csv',
+            'multiple_per_page',
+            'project_only',
+            'project_admin',
+            'submission_emails',
+        )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(CrowdsourceForm, self).__init__(*args, **kwargs)
+
+        self.fields['data_csv'].required = False
+        if not user.profile.is_advanced:
+            del self.fields['registration']
 
     def clean_form_json(self):
         """Ensure the form JSON is in the correct format"""

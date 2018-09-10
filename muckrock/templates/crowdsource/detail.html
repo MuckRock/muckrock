@@ -36,6 +36,11 @@
         </a>
       </li>
       <li>
+        <a role="tab" class="tab" aria-controls="info" href="#data">
+          <span class="label">Add Data</span>
+        </a>
+      </li>
+      <li>
         <a role="tab" class="tab" aria-controls="responses" href="#assignment-responses">
           {% with crowdsource.responses.count as count %}
             <span class="counter">{{ count }}</span>
@@ -92,6 +97,17 @@
       <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-gallery" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
       </dd>
     </dl>
+  </section>
+
+  <section role="tabpanel" class="tab-panel communications" id="data">
+    <h2 class="tab-panel-heading">Add Data</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% with data_form as form %}
+        {% include "lib/pattern/form.html" %}
+      {% endwith %}
+      <input type="submit" name="action" value="Add Data" class="button primary" id="add-data-button">
+    </form>
   </section>
 
   <section role="tabpanel" class="tab-panel" id="assignment-responses">

@@ -36,6 +36,7 @@ from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.crowdsource.filters import CrowdsourceFilterSet
 from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
+    CrowdsourceDataCsvForm,
     CrowdsourceDataFormset,
     CrowdsourceForm,
     CrowdsourceMessageResponseForm,
@@ -87,15 +88,31 @@ class CrowdsourceDetailView(DetailView):
         return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        """Handle closing the crowdsource"""
+        """Handle actions on the crowdsource"""
         crowdsource = self.get_object()
         if request.POST.get('action') == 'Close':
             crowdsource.status = 'close'
             crowdsource.save()
-            messages.success(request, 'The crowdsource has been closed')
+            messages.success(request, 'The assignment has been closed')
         elif request.POST.get('action') == 'Create Data Set':
             return self.create_dataset()
-
+        elif request.POST.get('action') == 'Add Data':
+            form = CrowdsourceDataCsvForm(request.POST, request.FILES)
+            has_perm = self.request.user.has_perm(
+                'crowdsource.edit_crowdsource', crowdsource
+            )
+            if not has_perm:
+                messages.error(
+                    request,
+                    'You do not have permission to edit this assignment'
+                )
+            if form.is_valid():
+                form.process_data_csv(crowdsource)
+                messages.success(
+                    request, 'The data is being added to the assignment'
+                )
+            else:
+                messages.error(request, form.errors)
         return redirect(crowdsource)
 
     def create_dataset(self):
@@ -116,6 +133,7 @@ class CrowdsourceDetailView(DetailView):
             args=(self.object.pk,),
         )
         context['message_form'] = CrowdsourceMessageResponseForm()
+        context['data_form'] = CrowdsourceDataCsvForm()
         return context
 
 
