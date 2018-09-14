@@ -144,3 +144,4 @@ urllib3==1.21.1           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via html5lib
 xlrd==1.1.0
+zipstream==1.1.4

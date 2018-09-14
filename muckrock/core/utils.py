@@ -187,3 +187,13 @@ class TempDisconnectSignal(object):
             sender=self.sender,
             dispatch_uid=self.dispatch_uid,
         )
+
+
+def read_in_chunks(file_, size=128):
+    """Read a file in chunks"""
+    # from https://www.smallsurething.com/how-to-read-a-file-properly-in-python/
+    while True:
+        chunk = file_.read(size)
+        if not chunk:
+            break
+        yield chunk

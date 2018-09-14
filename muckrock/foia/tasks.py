@@ -30,7 +30,6 @@ from hashlib import md5
 from random import randint
 from time import time as timestamp
 from urllib import quote_plus
-from zipfile import ZIP_DEFLATED, ZipFile
 
 # Third Party
 import dill as pickle
@@ -46,6 +45,7 @@ from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
 from smart_open import smart_open
+from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
 from muckrock.communication.models import (
@@ -54,7 +54,7 @@ from muckrock.communication.models import (
     MailCommunication,
 )
 from muckrock.core.models import ExtractDay
-from muckrock.core.utils import generate_status_action
+from muckrock.core.utils import generate_status_action, read_in_chunks
 from muckrock.foia.codes import CODES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
@@ -944,13 +944,20 @@ def zip_request(foia_pk, user_pk):
     )
     key = bucket.new_key(file_key)
     foia = FOIARequest.objects.get(pk=foia_pk)
-    with smart_open(key, 'wb') as out_file:
-        with ZipFile(out_file, 'w', ZIP_DEFLATED) as zip_file:
-            for i, comm in enumerate(foia.communications.all()):
-                file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
-                zip_file.writestr(file_name, comm.communication.encode('utf8'))
-                for ffile in comm.files.all():
-                    zip_file.writestr(ffile.name(), ffile.ffile.read())
+    with smart_open(key, 'wb') as out_file, ZipFile(
+        mode='w', compression=ZIP_DEFLATED, allowZip64=True
+    ) as zip_file:
+        for i, comm in enumerate(foia.communications.all()):
+            file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
+            zip_file.writestr(file_name, comm.communication.encode('utf8'))
+            for ffile in comm.files.all():
+                zip_file.write_iter(
+                    ffile.name(),
+                    # read in 2MB chunks at a time
+                    read_in_chunks(ffile.ffile, size=2 * 1024 ** 2)
+                )
+        for data in zip_file:
+            out_file.write(data)
     key.set_acl('public-read')
 
     notification = TemplateEmail(
