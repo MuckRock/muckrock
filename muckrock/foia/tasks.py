@@ -26,9 +26,7 @@ import sys
 import urllib2
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from hashlib import md5
 from random import randint
-from time import time as timestamp
 from urllib import quote_plus
 
 # Third Party
@@ -44,7 +42,6 @@ from phaxio.exceptions import PhaxioError
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
-from smart_open import smart_open
 from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
@@ -54,6 +51,7 @@ from muckrock.communication.models import (
     MailCommunication,
 )
 from muckrock.core.models import ExtractDay
+from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import generate_status_action, read_in_chunks
 from muckrock.foia.codes import CODES
 from muckrock.foia.exceptions import SizeError
@@ -63,7 +61,6 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIARequest,
 )
-from muckrock.message.email import TemplateEmail
 from muckrock.task.models import ResponseTask, ReviewAgencyTask
 from muckrock.vendor import MultipartPostHandler
 
@@ -811,13 +808,13 @@ def autoimport():
         )
 
 
-@task(
-    ignore_result=True,
-    time_limit=1800,
-    name='muckrock.foia.tasks.export_csv',
-)
-def export_csv(foia_pks, user_pk):
-    """Export a csv of the selected FOIA requests"""
+class ExportCsv(AsyncFileDownloadTask):
+    """Export the list of foia requests for the user"""
+    dir_name = 'exported_csv'
+    file_name = 'requests.csv'
+    text_template = 'message/notification/csv_export.txt'
+    html_template = 'message/notification/csv_export.html'
+    subject = 'Your CSV Export'
     fields = (
         (lambda f: f.user.username, 'User'),
         (lambda f: f.title, 'Title'),
@@ -850,73 +847,98 @@ def export_csv(foia_pks, user_pk):
         (lambda f: f.date_due, 'Date Due'),
         (lambda f: f.datetime_done, 'Date Done'),
     )
-    foias = (
-        FOIARequest.objects.filter(pk__in=foia_pks).select_related(
-            'composer__user',
-            'agency__jurisdiction__parent',
-        ).only(
-            'composer__user__username',
-            'title',
-            'status',
-            'slug',
-            'agency__jurisdiction__name',
-            'agency__jurisdiction__slug',
-            'agency__jurisdiction__id',
-            'agency__jurisdiction__parent__name',
-            'agency__jurisdiction__parent__id',
-            'agency__name',
-            'agency__id',
-            'date_followup',
-            'date_estimate',
-            'embargo',
-            'composer__requested_docs',
-        ).annotate(
-            days_since_submitted=ExtractDay(
-                Cast(
-                    Now() - F('composer__datetime_submitted'), DurationField()
-                )
-            ),
-            days_since_updated=ExtractDay(
-                Cast(Now() - F('datetime_updated'), DurationField())
-            ),
-            project_names=StringAgg('projects__title', ',', distinct=True),
-            tag_names=StringAgg('tags__name', ',', distinct=True),
-        )
-    )
-    conn = S3Connection(
-        settings.AWS_ACCESS_KEY_ID,
-        settings.AWS_SECRET_ACCESS_KEY,
-    )
-    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-    today = date.today()
-    file_key = 'exported_csv/{y:4d}/{m:02d}/{d:02d}/{md5}/requests.csv'.format(
-        y=today.year,
-        m=today.month,
-        d=today.day,
-        md5=md5(
-            '{}{}{}'.format(
-                int(timestamp()),
-                ''.join(str(pk) for pk in foia_pks[:100]),
-                settings.SECRET_KEY,
-            )
-        ).hexdigest(),
-    )
-    key = bucket.new_key(file_key)
-    with smart_open(key, 'wb') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(f[1] for f in fields)
-        for foia in foias.iterator():
-            writer.writerow(f[0](foia) for f in fields)
-    key.set_acl('public-read')
 
-    notification = TemplateEmail(
-        user=User.objects.get(pk=user_pk),
-        extra_context={'file': file_key},
-        text_template='message/notification/csv_export.txt',
-        html_template='message/notification/csv_export.html',
-        subject='Your CSV Export',
-    )
-    notification.send(fail_silently=False)
+    def __init__(self, user_pk, foia_pks):
+        super(ExportCsv, self).__init__(
+            user_pk, ''.join(str(pk) for pk in foia_pks[:100])
+        )
+        self.foias = (
+            FOIARequest.objects.filter(pk__in=foia_pks).select_related(
+                'composer__user',
+                'agency__jurisdiction__parent',
+            ).only(
+                'composer__user__username',
+                'title',
+                'status',
+                'slug',
+                'agency__jurisdiction__name',
+                'agency__jurisdiction__slug',
+                'agency__jurisdiction__id',
+                'agency__jurisdiction__parent__name',
+                'agency__jurisdiction__parent__id',
+                'agency__name',
+                'agency__id',
+                'date_followup',
+                'date_estimate',
+                'embargo',
+                'composer__requested_docs',
+            ).annotate(
+                days_since_submitted=ExtractDay(
+                    Cast(
+                        Now() - F('composer__datetime_submitted'),
+                        DurationField()
+                    )
+                ),
+                days_since_updated=ExtractDay(
+                    Cast(Now() - F('datetime_updated'), DurationField())
+                ),
+                project_names=StringAgg('projects__title', ',', distinct=True),
+                tag_names=StringAgg('tags__name', ',', distinct=True),
+            )
+        )
+
+    def generate_file(self, out_file):
+        """Export selected foia requests as a CSV file"""
+        writer = csv.writer(out_file)
+        writer.writerow(f[1] for f in self.fields)
+        for foia in self.foias.iterator():
+            writer.writerow(f[0](foia) for f in self.fields)
+
+
+@task(
+    ignore_result=True,
+    time_limit=1800,
+    name='muckrock.foia.tasks.export_csv',
+)
+def export_csv(foia_pks, user_pk):
+    """Export a csv of the selected FOIA requests"""
+    ExportCsv(user_pk, foia_pks).run()
+
+
+class ZipRequest(AsyncFileDownloadTask):
+    """Export all communications and files from a foia request"""
+    dir_name = 'zip_request'
+    file_name = 'request.zip'
+    text_template = 'message/notification/zip_request.txt'
+    html_template = 'message/notification/zip_request.html'
+    subject = 'Your zip archive of your request'
+
+    def __init__(self, user_pk, foia_pk):
+        super(ZipRequest, self).__init__(user_pk, foia_pk)
+        self.foia = FOIARequest.objects.get(pk=foia_pk)
+
+    def get_context(self):
+        """Add the foia title to the context"""
+        context = super(ZipRequest, self).get_context()
+        context.update({'foia': self.foia.title})
+        return context
+
+    def generate_file(self, out_file):
+        """Zip all of the communications and files"""
+        with ZipFile(
+            mode='w', compression=ZIP_DEFLATED, allowZip64=True
+        ) as zip_file:
+            for i, comm in enumerate(self.foia.communications.all()):
+                file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
+                zip_file.writestr(file_name, comm.communication.encode('utf8'))
+                for ffile in comm.files.all():
+                    zip_file.write_iter(
+                        ffile.name(),
+                        # read in 2MB chunks at a time
+                        read_in_chunks(ffile.ffile, size=2 * 1024 * 1024)
+                    )
+            for data in zip_file:
+                out_file.write(data)
 
 
 @task(
@@ -926,49 +948,7 @@ def export_csv(foia_pks, user_pk):
 )
 def zip_request(foia_pk, user_pk):
     """Send a user a zip download of their request"""
-    conn = S3Connection(
-        settings.AWS_ACCESS_KEY_ID,
-        settings.AWS_SECRET_ACCESS_KEY,
-    )
-    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-    today = date.today()
-    file_key = 'zip_request/{y:4d}/{m:02d}/{d:02d}/{md5}/request.zip'.format(
-        y=today.year,
-        m=today.month,
-        d=today.day,
-        md5=md5('{}{}{}'.format(
-            int(timestamp()),
-            foia_pk,
-            user_pk,
-        )).hexdigest(),
-    )
-    key = bucket.new_key(file_key)
-    foia = FOIARequest.objects.get(pk=foia_pk)
-    with smart_open(key, 'wb') as out_file, ZipFile(
-        mode='w', compression=ZIP_DEFLATED, allowZip64=True
-    ) as zip_file:
-        for i, comm in enumerate(foia.communications.all()):
-            file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
-            zip_file.writestr(file_name, comm.communication.encode('utf8'))
-            for ffile in comm.files.all():
-                zip_file.write_iter(
-                    ffile.name(),
-                    # read in 2MB chunks at a time
-                    read_in_chunks(ffile.ffile, size=2 * 1024 ** 2)
-                )
-        for data in zip_file:
-            out_file.write(data)
-    key.set_acl('public-read')
-
-    notification = TemplateEmail(
-        user=User.objects.get(pk=user_pk),
-        extra_context={'file': file_key,
-                       'foia': foia.title},
-        text_template='message/notification/zip_request.txt',
-        html_template='message/notification/zip_request.html',
-        subject='Your zip archive of your request',
-    )
-    notification.send(fail_silently=False)
+    ZipRequest(user_pk, foia_pk).run()
 
 
 @periodic_task(
