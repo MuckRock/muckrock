@@ -5,24 +5,18 @@ Celery tasks for the crowdsource application
 # Django
 from celery.task import task
 from django.conf import settings
-from django.contrib.auth.models import User
 
 # Standard Library
 import logging
-from datetime import date
-from hashlib import md5
-from time import time
 from urllib import quote_plus
 
 # Third Party
 import requests
 import unicodecsv as csv
-from boto.s3.connection import S3Connection
-from smart_open.smart_open_lib import smart_open
 
 # MuckRock
+from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.crowdsource.models import Crowdsource
-from muckrock.message.email import TemplateEmail
 
 logger = logging.getLogger(__name__)
 
@@ -105,47 +99,32 @@ def import_doccloud_proj(
                 )
 
 
+class ExportCsv(AsyncFileDownloadTask):
+    """Export the results of the crowdsource for the user"""
+    dir_name = 'exported_csv'
+    file_name = 'results.csv'
+    text_template = 'message/notification/csv_export.txt'
+    html_template = 'message/notification/csv_export.html'
+    subject = 'Your CSV Export'
+
+    def __init__(self, user_pk, crowdsource_pk):
+        super(ExportCsv, self).__init__(user_pk, crowdsource_pk)
+        self.crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
+
+    def generate_file(self, out_file):
+        """Export all responses as a CSV file"""
+        metadata_keys = self.crowdsource.get_metadata_keys()
+        include_emails = self.user.is_staff
+
+        writer = csv.writer(out_file)
+        writer.writerow(
+            self.crowdsource.get_header_values(metadata_keys, include_emails)
+        )
+        for csr in self.crowdsource.responses.all().iterator():
+            writer.writerow(csr.get_values(metadata_keys, include_emails))
+
+
 @task(time_limit=1800, name='muckrock.crowdsource.tasks.export_csv')
 def export_csv(crowdsource_pk, user_pk):
     """Export the results of the crowdsource for the user"""
-    crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
-    metadata_keys = crowdsource.get_metadata_keys()
-    user = User.objects.get(pk=user_pk)
-    include_emails = user.is_staff
-
-    conn = S3Connection(
-        settings.AWS_ACCESS_KEY_ID,
-        settings.AWS_SECRET_ACCESS_KEY,
-    )
-    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-    today = date.today()
-    file_key = 'exported_csv/{y:4d}/{m:02d}/{d:02d}/{md5}/results.csv'.format(
-        y=today.year,
-        m=today.month,
-        d=today.day,
-        md5=md5(
-            '{}{}{}'.format(
-                int(time()),
-                crowdsource_pk,
-                settings.SECRET_KEY,
-            )
-        ).hexdigest(),
-    )
-    key = bucket.new_key(file_key)
-    with smart_open(key, 'wb') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(
-            crowdsource.get_header_values(metadata_keys, include_emails)
-        )
-        for csr in crowdsource.responses.all().iterator():
-            writer.writerow(csr.get_values(metadata_keys, include_emails))
-    key.set_acl('public-read')
-
-    notification = TemplateEmail(
-        user=user,
-        extra_context={'file': file_key},
-        text_template='message/notification/csv_export.txt',
-        html_template='message/notification/csv_export.html',
-        subject='Your CSV Export',
-    )
-    notification.send(fail_silently=False)
+    ExportCsv(user_pk, crowdsource_pk).run()
