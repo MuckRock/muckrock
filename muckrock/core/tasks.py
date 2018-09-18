@@ -35,7 +35,7 @@ class AsyncFileDownloadTask(object):
             settings.AWS_ACCESS_KEY_ID,
             settings.AWS_SECRET_ACCESS_KEY,
         )
-        bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         today = date.today()
         self.file_key = '{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}'.format(
             dir_name=self.dir_name,
@@ -52,7 +52,7 @@ class AsyncFileDownloadTask(object):
                 )
             ).hexdigest(),
         )
-        self.key = bucket.new_key(self.file_key)
+        self.key = self.bucket.new_key(self.file_key)
 
     def get_context(self):
         """Get context for the notification email"""
