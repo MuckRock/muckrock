@@ -42,6 +42,7 @@ from phaxio.exceptions import PhaxioError
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
+from smart_open.smart_open_lib import smart_open
 from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
@@ -932,10 +933,12 @@ class ZipRequest(AsyncFileDownloadTask):
                 file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
                 zip_file.writestr(file_name, comm.communication.encode('utf8'))
                 for ffile in comm.files.all():
+                    read_key = self.bucket.get_key(ffile.ffile.name)
+                    read_file = smart_open(read_key, 'rb')
                     zip_file.write_iter(
                         ffile.name(),
-                        # read in 2MB chunks at a time
-                        read_in_chunks(ffile.ffile, size=2 * 1024 * 1024)
+                        # read in 5MB chunks at a time
+                        read_in_chunks(read_file, size=5 * 1024 * 1024)
                     )
             for data in zip_file:
                 out_file.write(data)

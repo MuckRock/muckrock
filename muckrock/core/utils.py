@@ -195,5 +195,6 @@ def read_in_chunks(file_, size=128):
     while True:
         chunk = file_.read(size)
         if not chunk:
+            file_.close()
             break
         yield chunk
