@@ -933,12 +933,10 @@ class ZipRequest(AsyncFileDownloadTask):
                 file_name = '{:03d}_{}_comm.txt'.format(i, comm.datetime)
                 zip_file.writestr(file_name, comm.communication.encode('utf8'))
                 for ffile in comm.files.all():
-                    read_key = self.bucket.get_key(ffile.ffile.name)
-                    read_file = smart_open(read_key, 'rb')
                     zip_file.write_iter(
                         ffile.name(),
                         # read in 5MB chunks at a time
-                        read_in_chunks(read_file, size=5 * 1024 * 1024)
+                        read_in_chunks(ffile.ffile, size=5 * 1024 * 1024)
                     )
             for data in zip_file:
                 out_file.write(data)
