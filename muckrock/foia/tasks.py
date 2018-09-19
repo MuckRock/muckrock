@@ -42,7 +42,6 @@ from phaxio.exceptions import PhaxioError
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 from scipy.sparse import hstack
-from smart_open.smart_open_lib import smart_open
 from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
