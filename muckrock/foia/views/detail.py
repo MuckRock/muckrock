@@ -227,7 +227,9 @@ class Detail(DetailView):
         )
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
-        context['status_choices'] = STATUS
+        context['status_choices'] = [(k, v)
+                                     for (k, v) in STATUS
+                                     if k != 'submitted']
         context['show_estimated_date'] = foia.status not in [
             'submitted', 'ack', 'done', 'rejected'
         ]
@@ -345,13 +347,12 @@ class Detail(DetailView):
 
     def _status(self, request, foia):
         """Handle updating status"""
+        allowed_statuses = [s for s, _ in STATUS if s != 'submitted']
         status = request.POST.get('status')
         old_status = foia.get_status_display()
         has_perm = foia.has_perm(request.user, 'change')
-        user_editable = has_perm and status in [s for s, _ in STATUS]
-        staff_editable = request.user.is_staff and status in [
-            s for s, _ in STATUS
-        ]
+        user_editable = has_perm and status in allowed_statuses
+        staff_editable = request.user.is_staff and status in allowed_statuses
         if foia.status != 'submitted' and (user_editable or staff_editable):
             foia.status = status
             foia.save(comment='status updated')
