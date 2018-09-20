@@ -67,7 +67,7 @@ class NewsDetail(DateDetailView):
         context = super(NewsDetail, self).get_context_data(**kwargs)
         context['projects'] = context['object'].projects.all()
         context['foias'] = (
-            context['object'].foias.select_related_view()
+            context['object'].foias.get_public().select_related_view()
             .get_public_file_count()
         )
         context['related_articles'] = self.get_related_articles(
