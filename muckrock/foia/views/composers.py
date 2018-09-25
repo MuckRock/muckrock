@@ -178,7 +178,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if clone_pk is not None:
             data.update(self._get_clone_data(clone_pk))
         agency_pks = self.request.GET.getlist('agency')
-        agency_pks = [pk for pk in agency_pks if re.match('[0-9]+', pk)]
+        agency_pks = [pk for pk in agency_pks if re.match('^[0-9]+$', pk)]
         if agency_pks:
             agencies = Agency.objects.filter(
                 pk__in=agency_pks,

@@ -68,7 +68,7 @@ http {
 
 	server {
 		listen <%= ENV["PORT"] %>;
-		server_name _;
+		server_name www.muckrock.com "";
 		keepalive_timeout 5;
 		limit_req zone=one burst=20 nodelay;
 		if ($http_host ~ "\.$" ){
