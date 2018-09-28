@@ -11,6 +11,7 @@ from django.utils import timezone
 
 # Standard Library
 from cStringIO import StringIO
+from random import randint
 
 # Third Party
 from boto.s3.connection import S3Connection
@@ -18,6 +19,7 @@ from boto.s3.key import Key
 from fpdf import FPDF
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from PyPDF2.utils import PdfReadError
+from requests.exceptions import RequestException
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
@@ -136,16 +138,23 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     key.set_canned_acl('public-read')
 
 
-@task(ignore_result=True, name='muckrock.task.tasks.create_zoho_ticket')
+@task(
+    ignore_result=True,
+    max_retries=5,
+    name='muckrock.task.tasks.create_zoho_ticket'
+)
 def create_zoho_ticket(flag_pk, **kwargs):
     """Create a zoho ticket from a flag"""
     flag = FlaggedTask.objects.get(pk=flag_pk)
-    zoho_id = flag.create_zoho_ticket()
-    if zoho_id is None:
+    try:
+        zoho_id = flag.create_zoho_ticket()
+    except RequestException as exc:
         raise create_zoho_ticket.retry(
-            countdown=300,
+            countdown=(2 ** create_zoho_ticket.request.retries) * 300 +
+            randint(0, 300),
             args=[flag_pk],
             kwargs=kwargs,
+            exc=exc,
         )
     else:
         flag.resolve(form_data={'zoho_id': zoho_id})
