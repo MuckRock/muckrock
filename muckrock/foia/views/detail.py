@@ -914,12 +914,21 @@ class ComposerDetail(DetailView):
             request.POST.get('action') == 'send-now' and request.user.is_staff
             and composer.revokable()
         ):
-            inspect = current_app.control.inspect()
-            for tasks in inspect.scheduled().itervalues():
+            scheduled = current_app.control.inspect().scheduled()
+            if scheduled is None:
+                # if no tasks are scheduled, something has gone wrong
+                messages.error(request, 'This request could not be sent')
+                return redirect(composer)
+            for tasks in scheduled.itervalues():
                 for task in tasks:
                     if task['request']['id'] == composer.delayed_id:
                         current_app.control.revoke(composer.delayed_id)
-                        composer_delayed_submit(*eval(task['request']['args']))
+                        composer_delayed_submit.delay(
+                            *eval(task['request']['args'])
+                        )
                         return redirect(composer)
+            # if we don't return from the for loop, we could not find the task
+            # something has gone wrong
+            messages.error(request, 'This request could not be sent')
 
         return redirect(composer)
