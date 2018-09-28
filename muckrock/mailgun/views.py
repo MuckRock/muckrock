@@ -475,13 +475,13 @@ def bounces(request, email_comm, timestamp):
     foia_email_is_error = foia.email.status == 'error'
     recipient_is_cc = email_comm.cc_emails.filter(email=recipient)
     if not recipient_is_foia_email:
-        logger.error(
+        logger.warn(
             'Bounce: recipient does not match foia email: %s - %s',
             recipient,
             foia.email,
         )
     elif not foia_email_is_error:
-        logger.error(
+        logger.warn(
             'Bounce: foia email is not marked as error: %s',
             foia.email,
         )
