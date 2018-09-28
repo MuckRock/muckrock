@@ -8,7 +8,7 @@ Models for the FOIA application
 # Django
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.urlresolvers import reverse
 from django.db import connection, models
 from django.db.models import Sum
@@ -713,6 +713,17 @@ class FOIARequest(models.Model):
         self.portal.send_msg(comm, **kwargs)
 
     def _send_email(self, comm, **kwargs):
+        """Send the message as an email - asynchrnously"""
+        from muckrock.foia.tasks import foia_send_email
+        # set status here to avoid altering the request in the celery task
+        # that would create a race condition
+        self.status = self._sent_status(
+            kwargs.get('appeal'),
+            kwargs.get('thanks'),
+        )
+        foia_send_email.delay(self.pk, comm.pk, kwargs)
+
+    def send_delayed_email(self, comm, **kwargs):
         """Send the message as an email"""
 
         from_email, _ = EmailAddress.objects.get_or_create(
@@ -726,11 +737,6 @@ class FOIARequest(models.Model):
             appeal=kwargs.get('appeal')
         )
 
-        self.status = self._sent_status(
-            kwargs.get('appeal'),
-            kwargs.get('thanks'),
-        )
-
         email_comm = EmailCommunication.objects.create(
             communication=comm,
             sent_datetime=timezone.now(),
@@ -738,24 +744,32 @@ class FOIARequest(models.Model):
         )
         email_comm.to_emails.add(self.email)
         email_comm.cc_emails.set(self.cc_emails.all())
-        msg = EmailMultiAlternatives(
-            subject=comm.subject,
-            body=body,
-            from_email=str(from_email),
-            to=[str(self.email)],
-            cc=[str(e) for e in self.cc_emails.all() if e.status == 'good'],
-            bcc=['diagnostics@muckrock.com'],
-            headers={
-                'X-Mailgun-Variables': {
-                    'email_id': email_comm.pk
-                },
-            }
-        )
-        msg.attach_alternative(linebreaks(escape(body)), 'text/html')
-        # atach all files from the latest communication
-        comm.attach_files_to_email(msg)
 
-        msg.send(fail_silently=False)
+        # if we are using celery email, we want to not use it here, and use the
+        # celery email backend directly.  Otherwise just use the default email backend
+        backend = getattr(
+            settings, 'CELERY_EMAIL_BACKEND', settings.EMAIL_BACKEND
+        )
+        with get_connection(backend) as email_connection:
+            msg = EmailMultiAlternatives(
+                subject=comm.subject,
+                body=body,
+                from_email=str(from_email),
+                to=[str(self.email)],
+                cc=[str(e) for e in self.cc_emails.all() if e.status == 'good'],
+                bcc=['diagnostics@muckrock.com'],
+                headers={
+                    'X-Mailgun-Variables': {
+                        'email_id': email_comm.pk
+                    },
+                },
+                connection=email_connection,
+            )
+            msg.attach_alternative(linebreaks(escape(body)), 'text/html')
+            # atach all files from the latest communication
+            comm.attach_files_to_email(msg)
+
+            msg.send(fail_silently=False)
 
         email_comm.set_raw_email(msg.message())
 

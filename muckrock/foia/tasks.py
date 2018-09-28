@@ -975,3 +975,14 @@ def clean_export_csv():
                 file_date = date(*(int(i) for i in m_csv.groups()))
                 if file_date < older_than:
                     key.delete()
+
+
+@task(ignore_result=True, name='muckrock.foia.tasks.foia_send_email')
+def foia_send_email(foia_pk, comm_pk, kwargs):
+    """Send outgoing request emails asynchrnously"""
+    # We do not want to do this using djcelery-email, as that
+    # requires the entire email body be serialized through redis,
+    # which could be quite large
+    foia = FOIARequest.objects.get(pk=foia_pk)
+    comm = FOIACommunication.objects.get(pk=comm_pk)
+    foia.send_delayed_email(comm, **kwargs)

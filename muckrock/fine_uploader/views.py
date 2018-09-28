@@ -204,7 +204,7 @@ def _is_valid_policy(user, policy_document):
     bucket = None
     parsed_max_size = None
 
-    if user.profile.acct_type in ('admin', 'agency'):
+    if not user.profile.limit_attachments():
         max_size = None
     else:
         max_size = settings.MAX_ATTACHMENT_SIZE
