@@ -554,11 +554,9 @@ class FlaggedTask(Task):
                 'subCategory': self.get_category_display(),
             },
         )
+        response.raise_for_status()
         if response.status_code == 200:
             return response.json()['id']
-        else:
-            logger.error('Zoho API Error: %s %s', self.pk, response.content)
-            return None
 
     def get_contact_id(self, user):
         """Get a zoho contact id for the contact with the given email address"""
@@ -575,6 +573,7 @@ class FlaggedTask(Task):
                 'email': user.email,
             },
         )
+        response.raise_for_status()
         if response.status_code == 200:
             contacts = response.json()
             if contacts['count'] > 0:
@@ -597,6 +596,7 @@ class FlaggedTask(Task):
                 },
             },
         )
+        response.raise_for_status()
         if response.status_code == 200:
             return response.json()['id']
 

@@ -406,13 +406,15 @@ class StaffDigest(Digest):
         else:
             previous_pro = set([])
         pro_gained = [
-            User.objects.get(username=username)
-            for username in list(current_pro - previous_pro)
+            User.objects.filter(username=username).first()
+            for username in current_pro - previous_pro
         ]
+        pro_gained = [u for u in pro_gained if u is not None]
         pro_lost = [
-            User.objects.get(username=username)
-            for username in list(previous_pro - current_pro)
+            User.objects.filter(username=username).first()
+            for username in previous_pro - current_pro
         ]
+        pro_lost = [u for u in pro_lost if u is not None]
         data = {'gained': pro_gained, 'lost': pro_lost}
         return data
 

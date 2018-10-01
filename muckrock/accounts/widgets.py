@@ -18,6 +18,7 @@ from boto.s3.connection import S3Connection
 from constance import config
 from dashing.widgets import GraphWidget, ListWidget, NumberWidget, Widget
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
 from smart_open import smart_open
 
@@ -460,30 +461,33 @@ class PageViewsWidget(NumberWidget):
                     json.loads(key_file.read()),
                     ['https://www.googleapis.com/auth/analytics.readonly'],
                 )
-            analytics = build(
-                'analyticsreporting',
-                'v4',
-                credentials=credentials,
-                cache_discovery=False,
-            )
-            response = analytics.reports().batchGet(
-                body={
-                    'reportRequests': [{
-                        'viewId':
-                            settings.VIEW_ID,
-                        'dateRanges': [{
-                            'startDate': month_start.isoformat(),
-                            'endDate': today.isoformat(),
-                        }],
-                        'metrics': [{
-                            'expression': 'ga:pageviews'
-                        }],
-                    }]
-                }
-            ).execute()
-            # google really buries the useful data in the response
-            # remove format if we want to go back to a comparison
             try:
+                analytics = build(
+                    'analyticsreporting',
+                    'v4',
+                    credentials=credentials,
+                    cache_discovery=False,
+                )
+                response = analytics.reports().batchGet(
+                    body={
+                        'reportRequests': [{
+                            'viewId':
+                                settings.VIEW_ID,
+                            'dateRanges': [{
+                                'startDate': month_start.isoformat(),
+                                'endDate': today.isoformat(),
+                            }],
+                            'metrics': [{
+                                'expression': 'ga:pageviews'
+                            }],
+                        }]
+                    }
+                ).execute()
+            except HttpError:
+                return 'Error'
+            try:
+                # google really buries the useful data in the response
+                # remove format if we want to go back to a comparison
                 return '{:,}'.format(
                     int(
                         response['reports'][0]['data']['rows'][0]['metrics'][0]

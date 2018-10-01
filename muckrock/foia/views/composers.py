@@ -83,6 +83,11 @@ class GenericComposer(BuyRequestsMixin):
     def _submit_composer(self, composer, form):
         """Submit a composer"""
         # pylint: disable=not-an-iterable
+        if composer.attachments_over_size_limit(self.request.user):
+            messages.error(
+                self.request, 'Total attachment size must be less than 20MB'
+            )
+            return
         if form.cleaned_data.get('num_requests', 0) > 0:
             self.buy_requests(form)
         if (
@@ -378,9 +383,12 @@ def autosave(request, idx):
         composer = form.save()
         new_agencies = set(composer.agencies.all())
         removed_agencies = old_agencies - new_agencies
-        # delete pending agencies which have been removed from all composers
+        # delete pending agencies which have been removed from composers and requests
         for agency in removed_agencies:
-            if agency.status == 'pending' and agency.composers.count() == 0:
+            if (
+                agency.status == 'pending' and agency.composers.count() == 0
+                and agency.foiarequest_set.count() == 0
+            ):
                 agency.delete()
         return HttpResponse('OK')
     else:

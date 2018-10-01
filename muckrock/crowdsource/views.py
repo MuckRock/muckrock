@@ -407,6 +407,7 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
 
         form.cleaned_data.pop('data_id', None)
         for field_id, new_value in form.cleaned_data.iteritems():
+            new_value = new_value if new_value is not None else ''
             response.values.update_or_create(
                 field_id=field_id,
                 defaults={'value': new_value},

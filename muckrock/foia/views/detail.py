@@ -460,6 +460,11 @@ class Detail(DetailView):
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
+        if foia.attachments_over_size_limit(request.user):
+            messages.error(
+                request, 'Total attachment size must be less than 20MB'
+            )
+            return redirect(foia.get_absolute_url() + '#')
         if request.user.is_staff:
             return self._admin_follow_up(request, foia)
         else:
@@ -561,6 +566,11 @@ class Detail(DetailView):
             return redirect(foia.get_absolute_url() + '#')
         if not form.is_valid():
             messages.error(request, 'You did not submit an appeal.')
+            return redirect(foia.get_absolute_url() + '#')
+        if foia.attachments_over_size_limit(request.user):
+            messages.error(
+                request, 'Total attachment size must be less than 20MB'
+            )
             return redirect(foia.get_absolute_url() + '#')
         communication = foia.appeal(form.cleaned_data['text'], request.user)
         base_language = form.cleaned_data['base_language']
@@ -914,12 +924,21 @@ class ComposerDetail(DetailView):
             request.POST.get('action') == 'send-now' and request.user.is_staff
             and composer.revokable()
         ):
-            inspect = current_app.control.inspect()
-            for tasks in inspect.scheduled().itervalues():
+            scheduled = current_app.control.inspect().scheduled()
+            if scheduled is None:
+                # if no tasks are scheduled, something has gone wrong
+                messages.error(request, 'This request could not be sent')
+                return redirect(composer)
+            for tasks in scheduled.itervalues():
                 for task in tasks:
                     if task['request']['id'] == composer.delayed_id:
                         current_app.control.revoke(composer.delayed_id)
-                        composer_delayed_submit(*eval(task['request']['args']))
+                        composer_delayed_submit.delay(
+                            *eval(task['request']['args'])
+                        )
                         return redirect(composer)
+            # if we don't return from the for loop, we could not find the task
+            # something has gone wrong
+            messages.error(request, 'This request could not be sent')
 
         return redirect(composer)

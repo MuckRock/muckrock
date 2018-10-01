@@ -515,7 +515,7 @@ class CommunicationError(models.Model):
 
     def __unicode__(self):
         return u'CommunicationError: %s - %s' % (
-            self.communication.pk, self.datetime
+            self.communication.pk, self.date
         )
 
     class Meta:
@@ -547,7 +547,7 @@ class CommunicationOpen(models.Model):
 
     def __unicode__(self):
         return u'CommunicationOpen: %s - %s' % (
-            self.communication.pk, self.datetime
+            self.communication.pk, self.date
         )
 
     class Meta:

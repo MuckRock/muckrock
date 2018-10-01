@@ -556,6 +556,8 @@ FILTERS_HELP_TEXT_FILTER = False
 # fine uploader
 MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024
 MAX_ATTACHMENT_NUM = 3
+# maximum for outgoing messages, including staff
+MAX_ATTACHMENT_TOTAL_SIZE = 20 * 1024 * 1024
 ALLOWED_FILE_MIMES = [
     'application/pdf',
     'image/jpeg',

@@ -8,6 +8,7 @@ from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 # Standard Library
 import logging
@@ -35,6 +36,10 @@ logger = logging.getLogger(__name__)
 )
 def send_activity_digest(user, subject, interval):
     """Individual task to create and send an activity digest to a user."""
+    logger.info(
+        'Starting activity digest at: %s User: %s Subject: %s Interval: %s',
+        timezone.now(), user, subject, interval
+    )
     try:
         email = digests.ActivityDigest(
             user=user,
