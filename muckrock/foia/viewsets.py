@@ -183,6 +183,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 'attachments should be a list of publicly available URLs'
             )
 
+        total_size = 0
         for attm_path in attachments[:3]:
             try:
                 res = requests.get(attm_path)
@@ -203,6 +204,16 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     'Error downloading attachment: {}, code: {}'.format(
                         attm_path, res.status_code
                     )
+                )
+            len_res = len(res.content)
+            if len_res > settings.MAX_ATTACHMENT_SIZE:
+                raise forms.ValidationError(
+                    'Attachment too large (5MB): {}'.format(attm_path)
+                )
+            total_size += len_res
+            if total_size > settings.MAX_ATTACHMENT_TOTAL_SIZE:
+                raise forms.ValidationError(
+                    'Total attachment size must be less than 20MB'
                 )
             title = attm_path.rsplit('/', 1)[1]
             clean_attachments.append((title, res.content))
