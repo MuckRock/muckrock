@@ -12,10 +12,12 @@ from django.utils import timezone
 
 # Standard Library
 import logging
+from random import randint
 
 # Third Party
 import stripe
 from dateutil.relativedelta import relativedelta
+from requests.exceptions import RequestException
 
 # MuckRock
 from muckrock.accounts.models import Profile, RecurringDonation
@@ -437,5 +439,12 @@ def notify_project_contributor(user, project, added_by):
 @task(name='muckrock.message.tasks.slack')
 def slack(payload):
     """Send a Slack notification using the provided payload."""
-    notification = SlackNotification(payload)
-    notification.send()
+    try:
+        notification = SlackNotification(payload)
+        notification.send(fail_silently=False)
+    except RequestException as exc:
+        slack.retry(
+            countdown=2 ** slack.request.retries * 30 + randint(0, 30),
+            args=[payload],
+            exc=exc,
+        )
