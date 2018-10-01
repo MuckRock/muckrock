@@ -599,6 +599,16 @@ class FOIARequest(models.Model):
             # have been sent
             attachments.update(sent=True)
 
+    def attachments_over_size_limit(self, user):
+        """Are the pending attachments for this composer over the size limit?"""
+        total_size = sum(
+            a.ffile.size for a in self.pending_attachments.filter(
+                user=user,
+                sent=False,
+            )
+        )
+        return total_size > settings.MAX_ATTACHMENT_TOTAL_SIZE
+
     def followup(self, switch=False):
         """Send an automatic follow up email for this request"""
         if self.date_estimate and date.today() < self.date_estimate:

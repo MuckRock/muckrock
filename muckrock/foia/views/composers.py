@@ -83,6 +83,11 @@ class GenericComposer(BuyRequestsMixin):
     def _submit_composer(self, composer, form):
         """Submit a composer"""
         # pylint: disable=not-an-iterable
+        if composer.attachments_over_size_limit(self.request.user):
+            messages.error(
+                self.request, 'Total attachment size must be less than 20MB'
+            )
+            return
         if form.cleaned_data.get('num_requests', 0) > 0:
             self.buy_requests(form)
         if (

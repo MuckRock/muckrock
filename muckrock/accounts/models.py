@@ -418,7 +418,7 @@ class Profile(models.Model):
 
     def limit_attachments(self):
         """Does this user need to have their attachments limited?"""
-        return True
+        return self.acct_type not in ('admin', 'agency')
 
 
 class ReceiptEmail(models.Model):
