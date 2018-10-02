@@ -6,6 +6,7 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.test import TestCase
 from django.utils import timezone
 
@@ -14,6 +15,7 @@ import re
 from datetime import date, datetime, timedelta
 
 # Third Party
+import mock
 import nose.tools
 import pytz
 from actstream.actions import follow
@@ -53,6 +55,20 @@ class TestFOIARequestUnit(TestCase):
 
         self.foia = FOIARequestFactory(status='submitted', title='Test 1')
         UserFactory(username='MuckrockStaff')
+
+    def run_commit_hooks(self):
+        """
+        Fake transaction commit to run delayed on_commit functions
+        https://medium.com/gitux/speed-up-django-transaction-hooks-tests-6de4a558ef96
+        """
+        for db_name in reversed(self._databases_names()):
+            with mock.patch(
+                'django.db.backends.base.base.BaseDatabaseWrapper.'
+                'validate_no_atomic_block', lambda a: False
+            ):
+                transaction.get_connection(
+                    using=db_name,
+                ).run_and_clear_commit_hooks()
 
     # models
     def test_foia_model_unicode(self):
@@ -174,6 +190,7 @@ class TestFOIARequestUnit(TestCase):
             response=True,
         )
         foia.followup()
+        self.run_commit_hooks()
         nose.tools.assert_in('I can expect', mail.outbox[-1].body)
         nose.tools.eq_(
             foia.date_followup,
@@ -185,11 +202,13 @@ class TestFOIARequestUnit(TestCase):
         num_days = 365
         foia.date_estimate = date.today() + timedelta(num_days)
         foia.followup()
+        self.run_commit_hooks()
         nose.tools.assert_in('I am still', mail.outbox[-1].body)
         nose.tools.eq_(foia._followup_days(), num_days)
 
         foia.date_estimate = date.today()
         foia.followup()
+        self.run_commit_hooks()
         nose.tools.assert_in('check on the status', mail.outbox[-1].body)
         nose.tools.eq_(foia._followup_days(), 15)
 
@@ -233,6 +252,7 @@ class TestFOIARequestUnit(TestCase):
 
         foia.soft_delete(user, 'final message', 'note')
         foia.refresh_from_db()
+        self.run_commit_hooks()
 
         # final communication we send out is not cleared
         for comm in list(foia.communications.all())[:-1]:
@@ -425,6 +445,20 @@ class TestFOIARequestAppeal(TestCase):
         )
         self.foia = FOIARequestFactory(agency=self.agency, status='rejected')
 
+    def run_commit_hooks(self):
+        """
+        Fake transaction commit to run delayed on_commit functions
+        https://medium.com/gitux/speed-up-django-transaction-hooks-tests-6de4a558ef96
+        """
+        for db_name in reversed(self._databases_names()):
+            with mock.patch(
+                'django.db.backends.base.base.BaseDatabaseWrapper.'
+                'validate_no_atomic_block', lambda a: False
+            ):
+                transaction.get_connection(
+                    using=db_name,
+                ).run_and_clear_commit_hooks()
+
     def test_appeal(self):
         """Sending an appeal to the agency should require the message for the appeal,
         which is then turned into a communication to the correct agency. In this case,
@@ -447,6 +481,7 @@ class TestFOIARequestAppeal(TestCase):
         # Check that everything happened like we expected
         self.foia.refresh_from_db()
         appeal_comm.refresh_from_db()
+        self.run_commit_hooks()
         eq_(self.foia.email, self.appeal_agency.get_emails('appeal').first())
         eq_(self.foia.status, 'appealing')
         eq_(appeal_comm.communication, appeal_message)
