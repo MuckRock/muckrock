@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.urlresolvers import reverse
-from django.db import connection, models
+from django.db import connection, models, transaction
 from django.db.models import Sum
 from django.http.request import QueryDict
 from django.template.defaultfilters import escape, linebreaks, slugify
@@ -725,13 +725,19 @@ class FOIARequest(models.Model):
     def _send_email(self, comm, **kwargs):
         """Send the message as an email - asynchrnously"""
         from muckrock.foia.tasks import foia_send_email
-        # set status here to avoid altering the request in the celery task
-        # that would create a race condition
-        self.status = self._sent_status(
-            kwargs.get('appeal'),
-            kwargs.get('thanks'),
-        )
-        foia_send_email.delay(self.pk, comm.pk, kwargs)
+        # set status and mail id here to avoid altering the request in the
+        # celery task and creating a race condition
+        with transaction.atomic():
+            self.status = self._sent_status(
+                kwargs.get('appeal'),
+                kwargs.get('thanks'),
+            )
+            self.set_mail_id()
+            self.save()
+            comm.save()
+            transaction.on_commit(
+                lambda: foia_send_email.delay(self.pk, comm.pk, kwargs)
+            )
 
     def send_delayed_email(self, comm, **kwargs):
         """Send the message as an email"""
