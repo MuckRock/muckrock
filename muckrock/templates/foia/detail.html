@@ -160,11 +160,11 @@
               <button class="cancel button">Cancel</button>
             </footer>
           </form>
-        {% endif %}
-        {% include 'foia/component/status.html' %}
         {% include 'foia/component/embargo.html' %}
         {% project_manager foia %}
         {% tag_manager foia %}
+        {% endif %}
+        {% include 'foia/component/status.html' %}
       </section>
     </section>
   {% endcache %}
