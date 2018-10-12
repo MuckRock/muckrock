@@ -67,7 +67,7 @@
       {% social title=foia.title url=foia.get_absolute_url %}
       <section class="basic-information">
         <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {{foia.agency.link_display}} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
-        {% if foia.composer.parent %}
+        {% if foia.composer.parent and request.user.profile.acct_type != "agency" %}
           <p>It is a clone of <a href="{{ foia.composer.parent.get_absolute_url }}">this request</a>.</p>
         {% endif %}
       </section>
@@ -167,9 +167,11 @@
           </form>
         {% endif %}
         {% include 'foia/component/status.html' %}
-        {% include 'foia/component/embargo.html' %}
-        {% project_manager foia %}
-        {% tag_manager foia %}
+        {% if request.user.profile.acct_type != "agency" %}
+          {% include 'foia/component/embargo.html' %}
+          {% project_manager foia %}
+          {% tag_manager foia %}
+        {% endif %}
       </section>
     </section>
   {% endcache %}
