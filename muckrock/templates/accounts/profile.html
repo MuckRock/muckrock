@@ -8,6 +8,11 @@
 {% endblock title %}
 {% block type %}account{% endblock type %}
 
+{% block rss %}
+{{ block.super }}
+<link rel="alternate" type="application/rss+xml" title="{{user_obj.get_full_name}}'s FOIA Feed" href="{% url 'foia-user-feed' user_obj.username %}" />
+{% endblock rss %}
+
 {% block open_graph %}
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="{{user_obj.get_absolute_url}}" />
