@@ -3,6 +3,7 @@ Django settings for muckrock project
 """
 
 # Django
+from celery.concurrency import asynpool
 from django.core.urlresolvers import reverse
 
 # Standard Library
@@ -22,6 +23,9 @@ def boolcheck(setting):
     else:
         return bool(setting)
 
+
+# monkey patch celery to prevent Timed out waiting for UP message errors
+asynpool.PROC_ALIVE_TIMEOUT = 60.0
 
 DEBUG = False
 EMAIL_DEBUG = DEBUG
