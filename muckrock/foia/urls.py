@@ -119,17 +119,17 @@ urlpatterns = [
     url(r'^feeds/completed/$', LatestDoneRequests(), name='foia-done-feed'),
     url(r'^feeds/(?P<idx>\d+)/$', FOIAFeed(), name='foia-feed'),
     url(
-        r'^feeds/submitted/(?P<username>[\w\d_.@ ]+)/$',
+        r'^feeds/submitted/(?P<username>[\w\-.@ ]+)/$',
         UserSubmittedFeed(),
         name='foia-user-submitted-feed'
     ),
     url(
-        r'^feeds/completed/(?P<username>[\w\d_.@ ]+)/$',
+        r'^feeds/completed/(?P<username>[\w\-.@ ]+)/$',
         UserDoneFeed(),
         name='foia-user-done-feed',
     ),
     url(
-        r'^feeds/(?P<username>[\w\d_.@ ]+)/$',
+        r'^feeds/(?P<username>[\w\-.@ ]+)/$',
         UserUpdateFeed(),
         name='foia-user-feed',
     ),
