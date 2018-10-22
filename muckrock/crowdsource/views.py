@@ -303,7 +303,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             for email in crowdsource.submission_emails.all():
                 response.send_email(email.email)
 
-        if self.request.POST['submit'] == 'Submit and Add Another':
+        if self.request.POST.get('submit') == 'Submit and Add Another':
             return self.render_to_response(
                 self.get_context_data(data=self.data),
             )
