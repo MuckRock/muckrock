@@ -155,6 +155,18 @@
               <td>{{foia.portal_password}}</td>
             </tr>
           </table>
+        {% elif user.is_staff %}
+          <div id="show-portal-info" class="action">Show Request Info</div>
+          <table class="portal-info">
+            <tr>
+              <td>Request Email</td>
+              <td>{{foia.get_request_email}}</td>
+            </tr>
+            <tr>
+              <td>Password (if needed)</td>
+              <td>{{foia.portal_password}}</td>
+            </tr>
+          </table>
         {% endif %}
         {% if user_can_edit %}
           <form class="change-date hidden-form" method="post">
