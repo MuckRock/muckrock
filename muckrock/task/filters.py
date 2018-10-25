@@ -196,6 +196,12 @@ class PortalTaskFilterSet(TaskFilterSet):
     """Allows portal tasks to be filtered by category"""
     # pylint: disable=invalid-name
     category = django_filters.ChoiceFilter(choices=PORTAL_CATEGORIES)
+    agency = django_filters.ModelMultipleChoiceFilter(
+        name='communication__foia__agency',
+        label='Agency',
+        queryset=Agency.objects.all(),
+        widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
+    )
     communication__foia__portal__type = django_filters.ChoiceFilter(
         choices=PORTAL_TYPES,
         label='Portal Type',
@@ -212,6 +218,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         model = PortalTask
         fields = [
             'category',
+            'agency',
             'communication__foia__portal__type',
             'resolved',
             'resolved_by',
