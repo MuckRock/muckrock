@@ -75,6 +75,12 @@ def delete_individual_orgs(apps, schema_editor):
     Organization.objects.filter(individual=True).delete()
 
 
+def inactive_orgs(apps, schema_editor):
+    """Put inactive organizations onto the free plan"""
+    Organization = apps.get_model('organization', 'Organization')
+    Organization.objects.filter(active=False).update(org_type=0)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -84,6 +90,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(
+            inactive_orgs,
+            reverse_code=migrations.RunPython.noop,
+        ),
         migrations.RunPython(
             create_memberships,
             reverse_code=delete_memberships,
