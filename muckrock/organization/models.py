@@ -38,6 +38,7 @@ class Organization(models.Model):
     )
     private = models.BooleanField(default=False)
     individual = models.BooleanField()
+    # XXX add choices here
     org_type = models.IntegerField()
 
     # deprecate #
