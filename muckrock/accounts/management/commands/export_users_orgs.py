@@ -2,12 +2,15 @@
 Management command to export users and organizations for squarelet
 """
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 # Third Party
 import unicodecsv as csv
+from boto.s3.connection import S3Connection
+from smart_open.smart_open_lib import smart_open
 
 # MuckRock
 from muckrock.organization.models import Membership, Organization
@@ -25,6 +28,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # pylint: disable=unused-argument
+        # pylint: disable=attribute-defined-outside-init
+        conn = S3Connection(
+            settings.AWS_ACCESS_KEY_ID,
+            settings.AWS_SECRET_ACCESS_KEY,
+        )
+        self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         with transaction.atomic():
             self.export_users()
             self.export_orgs()
@@ -32,7 +41,8 @@ class Command(BaseCommand):
 
     def export_users(self):
         """Export users"""
-        with open('users.csv', 'wb') as out_file:
+        key = self.bucket.new_key('squarelet_export/users.csv')
+        with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
             writer.writerow([
                 'uuid',
@@ -63,7 +73,8 @@ class Command(BaseCommand):
     def export_orgs(self):
         """Export organizations"""
         # pylint: disable=protected-access
-        with open('orgs.csv', 'wb') as out_file:
+        key = self.bucket.new_key('squarelet_export/orgs.csv')
+        with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
             writer.writerow([
                 'uuid',
@@ -101,7 +112,8 @@ class Command(BaseCommand):
 
     def export_members(self):
         """Export memberships"""
-        with open('members.csv', 'wb') as out_file:
+        key = self.bucket.new_key('squarelet_export/members.csv')
+        with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
             writer.writerow([
                 'user_uuid',
