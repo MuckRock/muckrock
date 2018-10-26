@@ -74,8 +74,7 @@ def mock_squarelet(mock_requests, requests_json=None):
                 'monthly': 0,
             }
         else:
-            # XXX do i return anything if they are returning requests?
-            return {}
+            return "OK"
 
     mock_requests.post(
         settings.SQUARELET_URL + '/api/users/',
