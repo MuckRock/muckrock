@@ -18,6 +18,7 @@ from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import mock_squarelet
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
@@ -551,6 +552,11 @@ class MultiRequestTaskTests(TestCase):
             user__profile__monthly_requests=10,
         )
         self.task = MultiRequestTask.objects.create(composer=self.composer)
+
+        self.mocker = requests_mock.Mocker()
+        mock_squarelet(self.mocker)
+        self.mocker.start()
+        self.addCleanup(self.mocker.stop)
 
     def test_get_absolute_url(self):
         eq_(
