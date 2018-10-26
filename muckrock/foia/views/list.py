@@ -28,6 +28,7 @@ from muckrock.core.views import (
     class_view_decorator,
 )
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
+from muckrock.crowdsource.tasks import datum_per_page
 from muckrock.foia.filters import (
     AgencyFOIARequestFilterSet,
     FOIARequestFilterSet,
@@ -215,6 +216,7 @@ class RequestList(MRSearchFilterListView):
             'follow': self._follow,
             'unfollow': self._unfollow,
             'crowdsource': self._crowdsource,
+            'crowdsource_page': self._crowdsource_page,
         }
         if self.request.user.is_staff:
             actions['review_agency'] = self._review_agency
@@ -263,7 +265,15 @@ class RequestList(MRSearchFilterListView):
         return 'Unfollowed requests'
 
     def _crowdsource(self, foias, user, post):
-        """Extend the embargo on the selected requests"""
+        """Add the files to the crowdsource"""
+        self._crowdsource_base(foias, user, post, split=False)
+
+    def _crowdsource_page(self, foias, user, post):
+        """Add the files to the crowdsource, split per page"""
+        self._crowdsource_base(foias, user, post, split=True)
+
+    def _crowdsource_base(self, foias, user, post, split):
+        """Helper function for both crowdsource actions"""
         foias = foias.prefetch_related('communications__files')
         foias = [f for f in foias if f.has_perm(user, 'view')]
         form = CrowdsourceChoiceForm(post, user=user)
@@ -274,7 +284,13 @@ class RequestList(MRSearchFilterListView):
             for foia in foias:
                 for comm in foia.communications.all():
                     for file_ in comm.files.all():
-                        if file_.doc_id:
+                        if file_.doc_id and split:
+                            datum_per_page.delay(
+                                crowdsource.pk,
+                                file_.doc_id,
+                                {},
+                            )
+                        elif file_.doc_id and not split:
                             crowdsource.data.create(
                                 url=
                                 'https://www.documentcloud.org/documents/{}.html'.
