@@ -57,6 +57,7 @@
           <option value="unfollow" data-help="Stop receiving update notifications on the selected requests.">Unfollow</option>
           {% if can_crowdsource %}
             <option value="crowdsource" data-help="Add these requests' files to your assignment">Add files to assignment</option>
+            <option value="crowdsource_page" data-help="Add these requests' files to your assignment, split per page">Add files' pages to assignment</option>
           {% endif %}
           {% if user.is_staff %}
             <option value="review_agency" data-help="Create a review agency task for the selected requests' agencies">Review agencies</option>

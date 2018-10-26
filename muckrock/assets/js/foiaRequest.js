@@ -274,6 +274,7 @@ $('document').ready(function(){
         $("#request-actions .share-form").show();
         break;
       case "crowdsource":
+      case "crowdsource_page":
         $("#request-actions .crowdsource-form").show();
         break;
     }
