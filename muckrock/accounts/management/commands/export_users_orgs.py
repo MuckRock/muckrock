@@ -98,7 +98,7 @@ class Command(BaseCommand):
                 writer.writerow([
                     org.uuid,
                     org.name,
-                    org.org_type,
+                    org.plan,
                     org.individual,
                     org.private,
                     org.owner.profile.customer_id,

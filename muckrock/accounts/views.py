@@ -20,12 +20,7 @@ from urllib import urlencode
 # Third Party
 import stripe
 from djangosecure.decorators import frame_deny_exempt
-from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import (
-    DjangoModelPermissionsOrAnonReadOnly,
-    IsAdminUser,
-)
 
 # MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
@@ -35,13 +30,7 @@ from muckrock.accounts.forms import (
     ProfileSettingsForm,
     ReceiptForm,
 )
-from muckrock.accounts.models import (
-    ACCT_TYPES,
-    Notification,
-    RecurringDonation,
-    Statistics,
-)
-from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
+from muckrock.accounts.models import ACCT_TYPES, Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
@@ -257,27 +246,6 @@ class ProfileView(TemplateView):
                 Token.objects.get_or_create(user=self.user)[0],
         })
         return context_data
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """API views for User"""
-    # pylint: disable=too-many-public-methods
-    queryset = (
-        User.objects.order_by('id').prefetch_related('profile', 'groups')
-    )
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
-    filter_fields = ('username', 'profile__full_name', 'email', 'is_staff')
-    lookup_field = 'profile__uuid'
-
-
-class StatisticsViewSet(viewsets.ModelViewSet):
-    """API views for Statistics"""
-    # pylint: disable=too-many-public-methods
-    queryset = Statistics.objects.all()
-    serializer_class = StatisticsSerializer
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
-    filter_fields = ('date',)
 
 
 @method_decorator(login_required, name='dispatch')
