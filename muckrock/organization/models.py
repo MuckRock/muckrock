@@ -21,6 +21,7 @@ import stripe
 from muckrock.core.exceptions import SquareletError
 from muckrock.core.utils import squarelet_get, squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
+from muckrock.organization.choices import Plan
 
 logger = logging.getLogger(__name__)
 stripe.api_version = '2015-10-16'
@@ -38,8 +39,7 @@ class Organization(models.Model):
     )
     private = models.BooleanField(default=False)
     individual = models.BooleanField()
-    # XXX add choices here
-    org_type = models.IntegerField()
+    plan = models.IntegerField(choices=Plan.choices, default=Plan.free)
 
     # deprecate #
     slug = models.SlugField(max_length=255, blank=True)

@@ -8,6 +8,7 @@ from django.utils.text import slugify
 import factory
 
 # MuckRock
+from muckrock.organization.choices import Plan
 from muckrock.organization.models import Membership, Organization
 
 
@@ -20,7 +21,7 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Organization %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     individual = False
-    org_type = 1
+    plan = Plan.free
 
 
 class MembershipFactory(factory.django.DjangoModelFactory):

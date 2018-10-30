@@ -16,7 +16,7 @@ from dashing.utils import router as dashing_router
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
-import muckrock.accounts.views
+import muckrock.accounts.viewsets
 import muckrock.agency.views
 import muckrock.core.views as views
 import muckrock.crowdsource.viewsets
@@ -62,13 +62,14 @@ router.register(
     r'question', muckrock.qanda.views.QuestionViewSet, 'api-question'
 )
 router.register(
-    r'statistics', muckrock.accounts.views.StatisticsViewSet, 'api-statistics'
+    r'statistics', muckrock.accounts.viewsets.StatisticsViewSet,
+    'api-statistics'
 )
 router.register(
     r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet,
     'api-communication'
 )
-router.register(r'user', muckrock.accounts.views.UserViewSet, 'api-user')
+router.register(r'user', muckrock.accounts.viewsets.UserViewSet, 'api-user')
 router.register(r'news', muckrock.news.viewsets.ArticleViewSet, 'api-news')
 router.register(r'photos', muckrock.news.viewsets.PhotoViewSet, 'api-photos')
 router.register(r'task', muckrock.task.viewsets.TaskViewSet, 'api-task')

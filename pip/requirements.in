@@ -12,6 +12,7 @@ django-activity-stream # Used for notifications
 django-adaptors # Used for model import
 django-celery # Integrate celery with django
 django-celery-email<2.0 # Send emails asynchronously using Celery
+django-choices # Define choices for a field
 django-compressor # Compress all JS and CSS assets into a single file
 django-constance[database] # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
