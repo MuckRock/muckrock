@@ -388,7 +388,7 @@ LOGGING = {
         'django': {
             'handlers': ['null'],
             'propagate': True,
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.request': {
             'handlers': ['console', 'sentry'],
@@ -501,7 +501,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'muckrock.core.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
         'rest_framework.filters.SearchFilter',
     ),
