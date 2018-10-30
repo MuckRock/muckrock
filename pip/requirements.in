@@ -43,6 +43,7 @@ django-webpack-loader==0.3.0 # Used for loading Webpack bundles
 django<2.0 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
+drf-nested-routers # Nested resources for DRF
 easy-thumbnails # Used for thumbnailing images
 fpdf # Used to generate PDFs
 furl # Used to manipulate urls

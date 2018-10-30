@@ -13,7 +13,7 @@ from django.views.generic.base import RedirectView, TemplateView
 # Third Party
 import debug_toolbar
 from dashing.utils import router as dashing_router
-from rest_framework.routers import DefaultRouter
+from rest_framework_nested import routers
 
 # MuckRock
 import muckrock.accounts.viewsets
@@ -24,6 +24,7 @@ import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
+import muckrock.organization.viewsets
 import muckrock.qanda.views
 import muckrock.task.viewsets
 from muckrock.agency.sitemap import AgencySitemap
@@ -47,7 +48,7 @@ sitemaps = {
     'Flatpages': FlatPageSitemap,
 }
 
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(
     r'jurisdiction', muckrock.jurisdiction.viewsets.JurisdictionViewSet,
     'api-jurisdiction'
@@ -71,6 +72,19 @@ router.register(
 )
 router.register(r'user', muckrock.accounts.viewsets.UserViewSet, 'api-user')
 router.register(r'news', muckrock.news.viewsets.ArticleViewSet, 'api-news')
+router.register(
+    r'organization', muckrock.organization.viewsets.OrganizationViewSet,
+    'api-organization'
+)
+organization_router = routers.NestedSimpleRouter(
+    router, "organization", lookup="organization"
+)
+organization_router.register(
+    "membership",
+    muckrock.organization.viewsets.MembershipViewSet,
+    base_name="api-organization-membership"
+)
+
 router.register(r'photos', muckrock.news.viewsets.PhotoViewSet, 'api-photos')
 router.register(r'task', muckrock.task.viewsets.TaskViewSet, 'api-task')
 router.register(
@@ -125,6 +139,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^api_v1/', include(router.urls)),
+    url(r'^api_v1/', include(organization_router.urls)),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(

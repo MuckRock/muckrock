@@ -1,9 +1,14 @@
 """
 Custom pipeline steps for oAuth authentication
 """
+# Standard Library
+import logging
+
 # MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.organization.models import Membership, Organization
+
+logger = logging.getLogger(__name__)
 
 
 def associate_by_uuid(backend, response, user=None, *args, **kwargs):
@@ -23,7 +28,7 @@ def associate_by_uuid(backend, response, user=None, *args, **kwargs):
 
 
 def save_profile(backend, user, response, *args, **kwargs):
-    """Save a profile for new users registered through squarelet"""
+    """Update the user's profile based on information from squarelet"""
     # pylint: disable=unused-argument
     if not hasattr(user, 'profile'):
         user.profile = Profile(
@@ -55,9 +60,16 @@ def link_organizations(backend, user, response, *args, **kwargs):
     """Link the users organizations"""
     # pylint: disable=unused-argument
     # XXX test
-    new_organizations = set(
-        Organization.objects.filter(uuid__in=response['organizations'])
-    )
+    new_organizations = set()
+    for uuid, defaults in response['organizations'].iteritems():
+        # the organization response has up to date information on all included orgs
+        # XXX enforce name uniqueness?
+        organization, _ = Organization.objects.update_or_create(
+            uuid=uuid,
+            defaults=defaults,
+        )
+        new_organizations.add(organization)
+
     current_organizations = set(user.organizations.all())
     add_organizations = new_organizations - current_organizations
     remove_organizations = current_organizations - new_organizations
@@ -72,7 +84,10 @@ def link_organizations(backend, user, response, *args, **kwargs):
         organization__individual=True
     )
     if individual_organization in remove_organizations:
-        #logger.error('Trying to remove a user\'s individual organization')
+        # XXX
+        logger.error(
+            'Trying to remove a user\'s individual organization: %s', user
+        )
         remove_organizations.remove(individual_organization)
 
     user.memberships.bulk_create([
