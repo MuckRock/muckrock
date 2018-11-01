@@ -65,7 +65,7 @@ django-taggit==0.20.1
 django-watson==1.4.1
 django-webpack-loader==0.3.0
 django==1.11.4
-djangorestframework==3.9.0
+djangorestframework==3.6.0
 docutils==0.14            # via botocore
 dogslow==0.9.7
 drf-nested-routers==0.91
