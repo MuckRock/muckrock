@@ -426,6 +426,8 @@ class ProfileSettings(TemplateView):
             kwargs.get('receipt_form') or ReceiptForm(initial=receipt_initial)
         )
         current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
+        if user_profile.organization:
+            current_plan = 'Organization'
         donations = RecurringDonation.objects.filter(user=self.request.user)
         crowdfunds = RecurringCrowdfundPayment.objects.filter(
             user=self.request.user
