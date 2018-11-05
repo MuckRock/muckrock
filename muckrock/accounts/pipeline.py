@@ -43,6 +43,7 @@ def save_profile(backend, user, response, *args, **kwargs):
         user.profile.email_confirmed = response['email_verified']
         if old_email != user.email:
             # if email has changed, update stripe customer and reset email failed flag
+            # XXX put this in save / signal?
             customer = user.profile.customer()
             customer.email = user.email
             customer.save()

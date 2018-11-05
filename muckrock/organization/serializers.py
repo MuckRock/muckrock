@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 # Third Party
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 # MuckRock
 from muckrock.accounts.models import Profile
@@ -43,10 +44,17 @@ class MembershipReadSerializer(serializers.ModelSerializer):
             'organization',
             'active',
         )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Membership.objects.all(),
+                fields=('user', 'organization'),
+            )
+        ]
 
 
 class MembershipWriteSerializer(serializers.Serializer):
     """Serializer for writing Membership model"""
+    # pylint: disable=abstract-method
 
     user = serializers.UUIDField()
     organization = serializers.UUIDField()

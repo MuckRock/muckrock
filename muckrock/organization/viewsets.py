@@ -38,17 +38,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         # remove any uuid set in the data - we do not want to override existing uuid
         # it is not set to read only so we can set it on creation
         request.data.pop('uuid', None)
-        try:
-            response = (
-                super(OrganizationViewSet,
-                      self).update(request, *args, **kwargs)
-            )
-        except Http404:
-            # allow "updating" a non existing organization in order to create one
-            # with the given uuid
-            request.data['uuid'] = self.kwargs['uuid']
-            response = self.create(request, *args, **kwargs)
-        return response
+        return super(OrganizationViewSet, self).update(request, *args, **kwargs)
 
 
 class MembershipViewSet(viewsets.ModelViewSet):

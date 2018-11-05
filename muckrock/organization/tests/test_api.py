@@ -63,10 +63,8 @@ class TestOrganizationViewSet(TestCase):
             'uuid': unicode(uuid4()),
         }
         self.api_call(
-            reverse('api-organization-detail', kwargs={
-                'uuid': data['uuid']
-            }),
-            'patch',
+            reverse('api-organization-list'),
+            'post',
             data,
             code=HTTP_201_CREATED,
         )

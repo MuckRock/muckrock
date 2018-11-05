@@ -15,11 +15,12 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for Profile model"""
+    # re-declare to make read/write
+    uuid = serializers.UUIDField(required=False)
     location = serializers.PrimaryKeyRelatedField(
         queryset=Jurisdiction.objects.all(),
-        style={
-            'base_template': 'input.html'
-        }
+        style={'base_template': 'input.html'},
+        required=False,
     )
 
     class Meta:
@@ -51,6 +52,13 @@ class UserSerializer(serializers.ModelSerializer):
         for key, value in profile.iteritems():
             setattr(instance.profile, key, value)
         instance.profile.save()
+        return instance
+
+    def create(self, validated_data):
+        """Make profile fields writable"""
+        profile = validated_data.pop('profile', {})
+        instance = super(UserSerializer, self).create(validated_data)
+        Profile.objects.create(user=instance, **profile)
         return instance
 
 
