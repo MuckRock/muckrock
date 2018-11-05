@@ -79,27 +79,3 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
     class Meta:
         model = Article
         fields = ['projects', 'authors', 'pub_date']
-
-
-class ArticleAuthorFilterSet(django_filters.FilterSet):
-    """Allows a list of articles by an author to be filtered by a date range or many tags."""
-    pub_date = django_filters.DateFromToRangeFilter(
-        label='Date Range',
-        lookup_expr='contains',
-        widget=RangeWidget(
-            attrs={
-                'class': 'datepicker',
-                'placeholder': 'MM/DD/YYYY',
-            }
-        ),
-    )
-    tags = django_filters.ModelMultipleChoiceFilter(
-        name='tags__name',
-        queryset=Tag.objects.all(),
-        label='Tags',
-        widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
-    )
-
-    class Meta:
-        model = Article
-        fields = ['pub_date']

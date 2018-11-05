@@ -8,7 +8,7 @@ from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
 # Standard Library
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Third Party
 import pytz

@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch, Q
 from django.http import Http404, HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.views.generic.dates import (
     DateDetailView,
@@ -20,10 +20,7 @@ from django.views.generic.dates import (
 # MuckRock
 from muckrock.core.utils import cache_get_or_set
 from muckrock.core.views import MRSearchFilterListView, PaginationMixin
-from muckrock.news.filters import (
-    ArticleAuthorFilterSet,
-    ArticleDateRangeFilterSet,
-)
+from muckrock.news.filters import ArticleDateRangeFilterSet
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
