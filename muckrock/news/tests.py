@@ -163,26 +163,6 @@ class TestNewsFunctional(TestCase):
             )
         )
 
-    def test_news_archive_author(self):
-        """Should return all articles for the given author"""
-        author = UserFactory()
-        ArticleFactory.create_batch(
-            3,
-            publish=True,
-            authors=[author],
-            pub_date=timezone.now() - timedelta(1),
-        )
-        response = get_allowed(
-            self.client,
-            reverse('news-author', kwargs={
-                'username': author.username
-            })
-        )
-        eq_(
-            len(response.context['object_list']),
-            Article.objects.filter(authors=author).count()
-        )
-
     def test_news_detail(self):
         """News detail should display the given article"""
         article = ArticleFactory(

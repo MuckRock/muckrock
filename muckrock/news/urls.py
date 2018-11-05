@@ -40,10 +40,5 @@ urlpatterns = [
         views.NewsYear.as_view(),
         name='news-archive-year'
     ),
-    url(
-        r'^author/(?P<username>[\w\-.@ ]+)/$',
-        views.AuthorArchiveView.as_view(),
-        name='news-author'
-    ),
     url(r'^feeds/$', LatestEntries(), name='news-feed'),
 ]

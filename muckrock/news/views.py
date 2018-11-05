@@ -183,22 +183,3 @@ class NewsListView(MRSearchFilterListView):
         years.reverse()
         context['years'] = years
         return context
-
-
-class AuthorArchiveView(NewsListView):
-    """List of news articles by author"""
-    filter_class = ArticleAuthorFilterSet
-    template_name = 'news/author.html'
-
-    def get_author(self):
-        """Return the author this view is referencing."""
-        return get_object_or_404(User, username=self.kwargs.get('username'))
-
-    def get_queryset(self):
-        """Returns just articles for the specific author."""
-        return self.queryset.filter(authors=self.get_author())
-
-    def get_context_data(self, **kwargs):
-        context = super(AuthorArchiveView, self).get_context_data(**kwargs)
-        context.update({'author': self.get_author()})
-        return context
