@@ -84,7 +84,9 @@ class Profile(models.Model):
     phone = PhoneNumberField(blank=True)
 
     # XXX deprecate ##
-    acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
+    acct_type = models.CharField(
+        max_length=10, choices=ACCT_TYPES, default='basic'
+    )
     _organization = models.ForeignKey(
         'organization.Organization',
         blank=True,
