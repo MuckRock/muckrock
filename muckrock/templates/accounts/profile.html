@@ -150,7 +150,7 @@
     <section class="articles">
       <h3>
         {% if request.user == user_obj %}Your Latest Articles{% else %}Latest Articles{% endif %}
-        <small><a href="{% url 'news-author' username=user_obj.username %}">See all</a></small>
+        <small><a href="{% url 'news-archive' %}?authors={{ user_obj.pk }}">See all</a></small>
       </h3>
       {% for article in articles %}
         {% include 'lib/pattern/article.html' %}
