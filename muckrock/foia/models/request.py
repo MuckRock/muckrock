@@ -707,7 +707,7 @@ class FOIARequest(models.Model):
         elif self.email and self.email.status == 'good' and not kwargs.get(
             'snail'
         ):
-            self._send_email(comm, **kwargs)
+            self.send_email(comm, **kwargs)
         elif self.fax and self.fax.status == 'good' and not kwargs.get('snail'):
             self._send_fax(comm, **kwargs)
         else:
@@ -723,7 +723,7 @@ class FOIARequest(models.Model):
         """Send the message via portal"""
         self.portal.send_msg(comm, **kwargs)
 
-    def _send_email(self, comm, **kwargs):
+    def send_email(self, comm, **kwargs):
         """Send the message as an email - asynchrnously"""
         from muckrock.foia.tasks import foia_send_email
         # set status and mail id here to avoid altering the request in the

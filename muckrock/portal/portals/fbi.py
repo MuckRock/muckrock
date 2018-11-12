@@ -7,6 +7,7 @@ Logic for interacting with FBI portals automatically
 from django.utils import timezone
 
 # Standard Library
+import os
 import re
 
 # Third Party
@@ -18,6 +19,8 @@ from muckrock.foia.models import FOIACommunication
 from muckrock.portal.portals.automated import PortalAutoReceiveMixin
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
+
+FBI_PORTAL_EMAIL = os.environ.get('FBI_PORTAL_EMAIL', '')
 
 
 class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
@@ -80,3 +83,21 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
             comm,
             'There are eFOIA files available for you to download.',
         )
+
+    def send_msg(self, comm, **kwargs):
+        """Send a message via email if it is not a new submission"""
+        # need to update communications to ensure we have the correct count
+        # for figuring out if this is a new or update message
+        comm.foia.communications.update()
+        category, _ = comm.foia.process_manual_send(**kwargs)
+
+        if category in ('f', 'u'):
+            # send to default email address if we do not have one on file or
+            # if the last reply was from the portal email address
+            if comm.foia.email is None or comm.foia.email.email == FBI_PORTAL_EMAIL:
+                comm.foia.email = comm.foia.agency.get_emails('primary',
+                                                              'to').first()
+                comm.foia.save()
+            comm.foia.send_email(comm, **kwargs)
+        else:
+            super(FBIPortal, self).send_msg(comm, **kwargs)
