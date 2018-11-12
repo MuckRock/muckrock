@@ -77,4 +77,9 @@ class MembershipWriteSerializer(serializers.Serializer):
         organization = Organization.objects.get(
             uuid=self.initial_data['organization']
         )
-        return Membership.objects.create(user=user, organization=organization)
+        # set this membership to be the active membership if the user
+        # currently has no active membership
+        active = not user.memberships.filter(active=True).exists()
+        return Membership.objects.create(
+            user=user, organization=organization, active=active
+        )

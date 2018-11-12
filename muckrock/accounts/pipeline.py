@@ -49,7 +49,7 @@ def save_profile(backend, user, response, *args, **kwargs):
             customer.save()
             user.profile.email_failed = False
 
-    user.profile.full_name = response['name']
+    user.profile.full_name = response.get('name', '')
     if 'picture' in response:
         user.profile.avatar_url = response['picture']
 
@@ -113,3 +113,5 @@ def save_session_data(strategy, request, response, *args, **kwargs):
     id_token = response.get('id_token')
     if id_token:
         request.session['id_token'] = id_token
+    import ipdb
+    ipdb.set_trace()

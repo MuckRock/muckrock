@@ -4,7 +4,6 @@ API ViewSets for the organization app
 
 # Django
 from django.db import transaction
-from django.http.response import Http404
 
 # Third Party
 from rest_framework import viewsets
