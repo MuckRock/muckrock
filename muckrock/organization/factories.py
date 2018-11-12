@@ -1,5 +1,5 @@
 """
-Factories for th eorganization app
+Factories for the organization app
 """
 # Django
 from django.utils.text import slugify
@@ -8,8 +8,7 @@ from django.utils.text import slugify
 import factory
 
 # MuckRock
-from muckrock.organization.choices import Plan
-from muckrock.organization.models import Membership, Organization
+from muckrock.organization.models import Membership, Organization, Plan
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
@@ -21,7 +20,7 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Organization %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     individual = False
-    plan = Plan.free
+    plan = factory.SubFactory('muckrock.organization.factories.FreePlanFactory')
 
 
 class MembershipFactory(factory.django.DjangoModelFactory):
@@ -35,3 +34,36 @@ class MembershipFactory(factory.django.DjangoModelFactory):
         'muckrock.organization.factories.OrganizationFactory'
     )
     active = True
+
+
+class PlanFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Plan test objects"""
+
+    class Meta:
+        model = Plan
+        django_get_or_create = ('name',)
+
+    name = factory.Sequence(lambda n: "Plan %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+
+
+class FreePlanFactory(PlanFactory):
+    """A free plan factory"""
+    name = 'Free'
+
+
+class ProfessionalPlanFactory(PlanFactory):
+    """A professional plan factory"""
+    name = 'Professional'
+    minimum_users = 1
+    base_requests = 20
+    feature_level = 1
+
+
+class OrganizationPlanFactory(PlanFactory):
+    """An organization plan factory"""
+    name = 'Organization'
+    minimum_users = 5
+    base_requests = 50
+    requests_per_user = 5
+    feature_level = 2

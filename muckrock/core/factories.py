@@ -60,6 +60,20 @@ class UserFactory(factory.django.DjangoModelFactory):
             self.save()
 
 
+class ProfessionalUserFactory(UserFactory):
+    """A professional user"""
+    membership__organization__plan = factory.SubFactory(
+        'muckrock.organization.factories.ProfessionalPlanFactory'
+    )
+
+
+class OrganizationUserFactory(UserFactory):
+    """An organization user"""
+    membership__organization__plan = factory.SubFactory(
+        'muckrock.organization.factories.OrganizationPlanFactory'
+    )
+
+
 class NotificationFactory(factory.django.DjangoModelFactory):
     """A factory for creating Notification test objects."""
 

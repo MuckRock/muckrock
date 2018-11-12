@@ -18,7 +18,6 @@ from muckrock.core.factories import (
 )
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import FOIARequestFactory
-from muckrock.organization.factories import OrganizationFactory
 
 # Creates Mock items for testing methods that involve Stripe
 #

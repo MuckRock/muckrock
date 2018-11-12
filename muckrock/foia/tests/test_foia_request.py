@@ -285,7 +285,7 @@ class TestFOIAIntegration(TestCase):
 
         mock_squarelet(mock_request)
         mail.outbox = []
-        user = UserFactory(profile__num_requests=1)
+        user = UserFactory(membership__organization__number_requests=1)
         agency = AgencyFactory(email=None, fax=None)
         cal = agency.jurisdiction.get_calendar()
 
@@ -295,6 +295,7 @@ class TestFOIAIntegration(TestCase):
             ## create and submit request
             composer = FOIAComposerFactory(
                 user=user,
+                organization=user.profile.organization,
                 title='Test with no email',
                 agencies=[agency],
             )

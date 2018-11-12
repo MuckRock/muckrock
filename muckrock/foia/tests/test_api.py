@@ -17,7 +17,12 @@ from nose.tools import assert_false, assert_true, eq_, ok_
 from rest_framework.authtoken.models import Token
 
 # MuckRock
-from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyFactory,
+    OrganizationUserFactory,
+    ProfessionalUserFactory,
+    UserFactory,
+)
 from muckrock.core.test_utils import mock_squarelet
 from muckrock.foia.models import FOIAComposer
 
@@ -33,7 +38,14 @@ class TestFOIAViewsetCreate(TestCase):
         self.mocker.start()
         self.addCleanup(self.mocker.stop)
 
-    def api_call(self, data=None, user_kwargs=None, code=201, status=None):
+    def api_call(
+        self,
+        data=None,
+        user_type=None,
+        number_requests=5,
+        code=201,
+        status=None
+    ):
         """Helper for API calls"""
         if data is None:
             data = {}
@@ -44,9 +56,14 @@ class TestFOIAViewsetCreate(TestCase):
         if 'document_request' not in data:
             data['document_request'] = 'Document Request'
 
-        if user_kwargs is None:
-            user_kwargs = {}
-        user = UserFactory.create(**user_kwargs)
+        user_factory = {
+            None: UserFactory,
+            'pro': ProfessionalUserFactory,
+            'org': OrganizationUserFactory,
+        }[user_type]
+        user = user_factory.create(
+            membership__organization__number_requests=number_requests
+        )
         Token.objects.create(user=user)
 
         headers = {
@@ -75,7 +92,7 @@ class TestFOIAViewsetCreate(TestCase):
             text='Attachment content here',
         )
         agency = AgencyFactory()
-        user = UserFactory.create(profile__num_requests=5)
+        user = UserFactory.create(membership__organization__number_requests=5)
         Token.objects.create(user=user)
         data = {
             'jurisdiction': agency.jurisdiction.pk,
@@ -141,9 +158,7 @@ class TestFOIAViewsetCreate(TestCase):
             {
                 'embargo': True,
             },
-            user_kwargs={
-                'profile__acct_type': 'pro',
-            },
+            user_type='pro',
         )
         composer = FOIAComposer.objects.get()
         assert_true(composer.embargo)
@@ -155,9 +170,6 @@ class TestFOIAViewsetCreate(TestCase):
             {
                 'embargo': True,
             },
-            user_kwargs={
-                'profile__acct_type': 'basic',
-            },
             code=400,
             status='You do not have permission to embargo requests',
         )
@@ -168,9 +180,7 @@ class TestFOIAViewsetCreate(TestCase):
             {
                 'permanent_embargo': True,
             },
-            user_kwargs={
-                'profile__acct_type': 'admin',
-            },
+            user_type='org',
         )
         composer = FOIAComposer.objects.get()
         ok_(composer.embargo)
@@ -182,9 +192,7 @@ class TestFOIAViewsetCreate(TestCase):
             {
                 'permanent_embargo': True,
             },
-            user_kwargs={
-                'profile__acct_type': 'pro',
-            },
+            user_type='pro',
             code=400,
             status='You do not have permission to permanently embargo requests',
         )
@@ -299,6 +307,7 @@ class TestFOIAViewsetCreate(TestCase):
             status_code=402,
         )
         self.api_call(
+            number_requests=0,
             code=402,
             status='Out of requests.  FOI Request has been saved.',
         )

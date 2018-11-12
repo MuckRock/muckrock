@@ -24,6 +24,7 @@ from lot.models import LOT
 from memoize import mproperty
 
 # MuckRock
+from muckrock.accounts.querysets import ProfileQuerySet
 from muckrock.core.utils import get_image_storage, stripe_retry_on_error
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,8 @@ class Profile(models.Model):
     """User profile information for muckrock"""
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
+
+    objects = ProfileQuerySet.as_manager()
 
     email_prefs = (
         ('never', 'Never'),
@@ -84,6 +87,7 @@ class Profile(models.Model):
     phone = PhoneNumberField(blank=True)
 
     # XXX deprecate ##
+    # XXX this is everywhere!!! XXX
     acct_type = models.CharField(
         max_length=10, choices=ACCT_TYPES, default='basic'
     )

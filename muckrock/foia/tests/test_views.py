@@ -33,6 +33,8 @@ from nose.tools import (
 from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
+    OrganizationUserFactory,
+    ProfessionalUserFactory,
     ProjectFactory,
     UserFactory,
 )
@@ -491,7 +493,7 @@ class TestBulkActions(TestCase):
         """Test bulk embargo extending"""
         tomorrow = date.today() + timedelta(1)
         next_month = date.today() + timedelta(30)
-        user = UserFactory(profile__acct_type='pro')
+        user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
             composer__user=user,
@@ -539,7 +541,7 @@ class TestBulkActions(TestCase):
     def test_remove_embargo(self):
         """Test bulk embargo removing"""
         tomorrow = date.today() + timedelta(1)
-        user = UserFactory(profile__acct_type='pro')
+        user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
             composer__user=user,
@@ -584,7 +586,7 @@ class TestBulkActions(TestCase):
     def test_perm_embargo(self):
         """Test bulk permanent embargo"""
         tomorrow = date.today() + timedelta(1)
-        user = UserFactory(profile__acct_type='admin')
+        user = OrganizationUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
             composer__user=user,
@@ -735,7 +737,7 @@ class TestRawEmail(TestCase):
     def setUp(self):
         """Set up for tests"""
         self.comm = FOIACommunicationFactory(
-            foia__composer__user__profile__acct_type='pro'
+            foia__composer__user=ProfessionalUserFactory()
         )
         self.request_factory = RequestFactory()
         self.url = reverse('foia-raw', kwargs={'idx': self.comm.id})
@@ -743,12 +745,12 @@ class TestRawEmail(TestCase):
 
     def test_raw_email_view(self):
         """Advanced users should be able to view raw emails"""
-        basic_user = UserFactory(profile__acct_type='basic')
+        free_user = UserFactory()
         pro_user = self.comm.foia.user
         request = self.request_factory.get(self.url)
-        request.user = basic_user
+        request.user = free_user
         response = self.view(request, self.comm.id)
-        eq_(response.status_code, 302, 'Basic users should be denied access.')
+        eq_(response.status_code, 302, 'Free users should be denied access.')
         request.user = pro_user
         response = self.view(request, self.comm.id)
         eq_(

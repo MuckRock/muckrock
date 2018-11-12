@@ -3,10 +3,11 @@ Models for the organization application
 """
 
 # Django
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
+from django.db.models.expressions import F
+from django.db.models.functions import Greatest
 from django.utils.text import slugify
 
 # Standard Library
@@ -14,14 +15,11 @@ import logging
 from uuid import uuid4
 
 # Third Party
-import requests
 import stripe
 
 # MuckRock
-from muckrock.core.exceptions import SquareletError
-from muckrock.core.utils import squarelet_get, squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
-from muckrock.organization.choices import Plan
+from muckrock.organization.querysets import OrganizationQuerySet
 
 logger = logging.getLogger(__name__)
 stripe.api_version = '2015-10-16'
@@ -31,29 +29,29 @@ class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
     # pylint: disable=too-many-instance-attributes
 
-    name = models.CharField(max_length=255, unique=True)
+    objects = OrganizationQuerySet.as_manager()
+
     uuid = models.UUIDField(unique=True, editable=False, default=uuid4)
 
     users = models.ManyToManyField(
         User, through="organization.Membership", related_name='organizations'
     )
+
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, blank=True)  # XXX no blank
     private = models.BooleanField(default=False)
-    individual = models.BooleanField()
-    plan = models.IntegerField(choices=Plan.choices, default=Plan.free)
+    individual = models.BooleanField(default=True)
+    plan = models.ForeignKey('organization.Plan', null=True)
+
+    requests_per_month = models.IntegerField(default=0)
+    monthly_requests = models.IntegerField(default=0)
+    number_requests = models.IntegerField(default=0)
+    date_update = models.DateField(null=True)
 
     # deprecate #
-    slug = models.SlugField(max_length=255, blank=True)
-
     owner = models.ForeignKey(User, blank=True, null=True)
-
-    date_update = models.DateField(auto_now_add=True, null=True)
-    num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
-    _monthly_requests = models.IntegerField(
-        default=settings.MONTHLY_REQUESTS.get('org', 0),
-        db_column='monthly_requests',
-    )
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
 
@@ -74,49 +72,75 @@ class Organization(models.Model):
         # XXX test
         return self.users.filter(pk=user.pk).exists()
 
-    @property
-    def squarelet(self):
-        """Get info on this organization from squarelet"""
-        # XXX make sure we are checking for squarelet errors in callers
-        resp = squarelet_get('/api/organizations/{}/'.format(self.uuid))
-        if resp.status_code == requests.codes.ok:
-            return resp.json()
+    def update_data(self, data):
+        """Set updated data from squarelet"""
+        # XXX test this
+        # XXX comment this better
+
+        self.plan, created = Plan.objects.get_or_create(
+            slug=data['plan'],
+            defaults={'name': data['plan'].replace('-', ' ').title()},
+        )
+        if created:
+            logger.warning('Unknown plan: %s', data['plan'])
+
+        # calc reqs/month in case it has changed
+        self.requests_per_month = self.plan.requests_per_month(
+            data['max_users']
+        )
+
+        # if date update has changed, then this is a monthly restore of the
+        # subscription, and we should restore monthly requests.  If not, requests
+        # per month may have changed if they changed their plan or their user count,
+        # in which case we should add the difference to their monthly requests
+        # if requests per month increased
+        if self.date_update == data['date_update']:
+            # add additional monthly requests immediately
+            self.monthly_requests = F('monthly_requests') + Greatest(
+                self.requests_per_month - F('requests_per_month'), 0
+            )
         else:
-            raise SquareletError()
+            # reset monthly requests when date_update is updated
+            self.monthly_requests = self.requests_per_month
 
-    @property
-    def number_requests(self):
-        """Get the number of ala carte requests left from squarelet"""
-        return self.squarelet['number_requests']
+        # update the remaining fields
+        fields = [
+            'name',
+            'slug',
+            'individual',
+            'private',
+            'date_update',
+        ]
+        for field in fields:
+            setattr(self, field, data[field])
+        self.save()
 
-    @property
-    def monthly_requests(self):
-        """Get the number of monthly reccuring requests left from squarelet"""
-        return self.squarelet['monthly_requests']
-
+    @transaction.atomic
     def make_requests(self, amount):
         """Try to deduct requests from the organization's balance"""
-        resp = squarelet_post(
-            '/api/organizations/{}/requests/'.format(self.uuid), {
-                'amount': amount
-            }
-        )
-        if resp.status_code == requests.codes.payment:
-            raise InsufficientRequestsError(resp.json()['extra'])
-        elif resp.status_code != requests.codes.ok:
-            raise SquareletError()
-        else:
-            return resp.json()
+        request_count = {"monthly": 0, "regular": 0}
+        organization = Organization.objects.select_for_update().get(pk=self.pk)
+
+        request_count["monthly"] = min(amount, organization.monthly_requests)
+        amount -= request_count["monthly"]
+
+        request_count["regular"] = min(amount, organization.number_requests)
+        amount -= request_count["regular"]
+
+        if amount > 0:
+            # XXX catching this?
+            raise InsufficientRequestsError(amount)
+
+        organization.monthly_requests -= request_count["monthly"]
+        organization.number_requests -= request_count["regular"]
+        organization.save()
+        return request_count
 
     def return_requests(self, amounts):
         """Return requests to the organization's balance"""
-        # XXX async this? error check?
-        squarelet_post(
-            '/api/organizations/{}/requests/'.format(self.uuid), {
-                'return_regular': amounts['regular'],
-                'return_monthly': amounts['monthly'],
-            }
-        )
+        self.monthly_requests = F("monthly_requests") + amounts["monthly"]
+        self.number_requests = F("number_requests") + amounts["regular"]
+        self.save()
 
 
 class Membership(models.Model):
@@ -129,9 +153,34 @@ class Membership(models.Model):
         Organization, on_delete=models.CASCADE, related_name='memberships'
     )
     active = models.BooleanField(default=False)
+    admin = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("user", "organization")
 
     def __unicode__(self):
         return u"{} in {}".format(self.user, self.organization)
+
+
+class Plan(models.Model):
+    """Plans that organizations can subscribe to"""
+
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
+
+    minimum_users = models.PositiveSmallIntegerField(default=1)
+    base_requests = models.PositiveSmallIntegerField(default=0)
+    requests_per_user = models.PositiveSmallIntegerField(default=0)
+    # XXX
+    feature_level = models.PositiveSmallIntegerField(default=0)
+
+    def __unicode__(self):
+        return self.name
+
+    def requests_per_month(self, users):
+        """Calculate how many requests an organization gets per month on this plan
+        for a given number of users"""
+        return (
+            self.base_requests +
+            (users - self.minimum_users) * self.requests_per_user
+        )

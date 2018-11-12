@@ -27,13 +27,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
     filter_fields = ('username', 'profile__full_name', 'email', 'is_staff')
-    lookup_field = 'profile__uuid'
-
-    def update(self, request, *args, **kwargs):
-        # uuid in profile is only writable for creates
-        if 'profile' in request.data:
-            request.data['profile'].pop('uuid', None)
-        return super(UserViewSet, self).update(request, *args, **kwargs)
 
 
 class StatisticsViewSet(viewsets.ModelViewSet):

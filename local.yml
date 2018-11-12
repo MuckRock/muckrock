@@ -1,0 +1,78 @@
+version: '2'
+
+volumes:
+  postgres_data_local: {}
+  postgres_backup_local: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: muckrock_local_django
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - .:/app
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: /start
+    networks:
+      default:
+        aliases:
+          - dev.muckrock.com
+          - dev.foiamachine.org
+      squarelet_default:
+        aliases:
+          - dev.muckrock.com
+          - dev.foiamachine.org
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: muckrock_production_postgres
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+      - postgres_backup_local:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+
+  redis:
+    image: redis:3.2
+
+  celeryworker:
+    <<: *django
+    image: muckrock_local_celeryworker
+    depends_on:
+      - redis
+      - postgres
+    ports: []
+    command: /start-celeryworker
+    environment:
+      - C_FORCE_ROOT=true
+    networks:
+      default:
+        aliases: []
+      squarelet_default:
+        aliases: []
+
+  celerybeat:
+    <<: *django
+    image: muckrock_local_celerybeat
+    depends_on:
+      - redis
+      - postgres
+    ports: []
+    command: /start-celerybeat
+    networks:
+      default:
+        aliases: []
+      squarelet_default:
+        aliases: []
+
+networks:
+  squarelet_default:
+    external: true

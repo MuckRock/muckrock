@@ -18,8 +18,7 @@ from simplejson.scanner import JSONDecodeError
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import mailchimp_subscribe, mixpanel_event
 from muckrock.core.utils import squarelet_post
-from muckrock.organization.choices import Plan
-from muckrock.organization.models import Membership, Organization
+from muckrock.organization.models import Membership, Organization, Plan
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +83,7 @@ class MiniregMixin(object):
             uuid=user_json['org_uuid'],
             private=True,
             individual=True,
-            plan=Plan.free,
+            plan=Plan.objects.get(slug='free'),
         )
         Membership.objects.create(user=user, organization=org, active=True)
 

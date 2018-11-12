@@ -3,7 +3,7 @@ Miscellaneous Views for the FOIA application
 """
 
 # Django
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import permission_required
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -48,7 +48,7 @@ def acronyms(request):
     )
 
 
-@user_passes_test(lambda u: u.is_authenticated() and u.profile.is_advanced())
+@permission_required('foia.view_rawemail')
 def raw(request, idx):
     """Get the raw email for a communication"""
     # pylint: disable=unused-argument
