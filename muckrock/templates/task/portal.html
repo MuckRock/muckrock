@@ -56,7 +56,18 @@
                 <dd>{{ task.reason|linebreaks }}</dd>
             {% endif %}
             <dt>Communication</dt>
-            <dd>{{task.communication.communication|linebreaks}}</dd>
+            <dd>
+              {{task.communication.communication|linebreaks}}
+              {% if task.communication.files.all %}
+                <p>Attachments:</p>
+                <ul>
+                  {% for file in task.communication.files.all %}
+                    <li>{{ file.ffile.url }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <p>Upload documents directly: {{ reply_link }}</p>
+            </dd>
         {% endwith %}
     </dl>
     {% if task.category == "i" %}

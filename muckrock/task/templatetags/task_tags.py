@@ -4,6 +4,7 @@ Nodes and tags for rendering tasks into templates
 
 # Django
 from django import template
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
@@ -274,6 +275,10 @@ class PortalTaskNode(TaskNode):
             extra_context['status'] = foia.models.STATUS
             if foia_.portal and not foia_.portal_password:
                 extra_context['password'] = foia_.portal.get_new_password()
+            extra_context['reply_link'] = 'https://{}{}#agency-reply'.format(
+                settings.MUCKROCK_URL,
+                foia_.get_agency_reply_link(email=foia_.email),
+            )
 
         return extra_context
 
