@@ -46,6 +46,17 @@ $('.tracking-id.edit').click(function(){
   });
 });
 
+$('.new-portal.edit').click(function(){
+  var button = $(this);
+  button.hide();
+  $('.add-portal').addClass('visible');
+  $('.add-portal .cancel').click(function(e){
+    e.preventDefault();
+    $('.add-portal').removeClass('visible');
+    button.show();
+  });
+});
+
 $('#show-portal-info').click(function(){
     $(this).hide();
     $('.portal-info').addClass('visible');

@@ -114,7 +114,7 @@ class FOIARequest(models.Model):
     portal_password = models.CharField(
         max_length=20,
         blank=True,
-        default=lambda: utils.generate_key(12),
+        default=utils.generate_key,
     )
     email = models.ForeignKey(
         'communication.EmailAddress',

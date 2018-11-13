@@ -36,6 +36,7 @@ from muckrock.foia.models import STATUS, FOIANote
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
+from muckrock.portal.models import PORTAL_TYPES
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -46,6 +47,7 @@ from muckrock.task.querysets import (
     FlaggedTaskQuerySet,
     MultiRequestTaskQuerySet,
     NewAgencyTaskQuerySet,
+    NewPortalTaskQuerySet,
     OrphanTaskQuerySet,
     PortalTaskQuerySet,
     ProjectReviewTaskQuerySet,
@@ -871,6 +873,29 @@ class PortalTask(Task):
         comm.foia.status = status
         comm.foia.save(comment='portal task')
         comm.foia.update()
+
+
+class NewPortalTask(Task):
+    """A portal has been detected where we do not have one in the system"""
+
+    type = 'NewPortalTask'
+    communication = models.ForeignKey('foia.FOIACommunication')
+    portal_type = models.CharField(
+        choices=PORTAL_TYPES,
+        max_length=11,
+    )
+
+    objects = NewPortalTaskQuerySet.as_manager()
+
+    def __unicode__(self):
+        return u'New Portal Task'
+
+    def display(self):
+        """Display something useful and identifing"""
+        return self.communication.foia.title
+
+    def get_absolute_url(self):
+        return reverse('new-portal-task', kwargs={'pk': self.pk})
 
 
 # Retired Tasks

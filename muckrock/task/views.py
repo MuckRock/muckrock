@@ -38,6 +38,7 @@ from muckrock.agency.models import Agency
 from muckrock.communication.models import MailCommunication, PortalCommunication
 from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.models import STATUS, FOIARequest
+from muckrock.portal.forms import PortalForm
 from muckrock.task.filters import (
     FlaggedTaskFilterSet,
     NewAgencyTaskFilterSet,
@@ -61,6 +62,7 @@ from muckrock.task.models import (
     FlaggedTask,
     MultiRequestTask,
     NewAgencyTask,
+    NewPortalTask,
     OrphanTask,
     PortalTask,
     ProjectReviewTask,
@@ -90,6 +92,7 @@ def count_tasks():
             crowdfund=Count('crowdfundtask'),
             multirequest=Count('multirequesttask'),
             portal=Count('portaltask'),
+            new_portal=Count('newportaltask'),
         )
     )
     return count
@@ -600,6 +603,32 @@ class PortalTaskList(TaskList):
             'tracking_number': tracking_number,
         }
         task.resolve(request.user, form_data)
+
+
+class NewPortalTaskList(TaskList):
+    """List view for New Portal Tasks"""
+    title = 'New Portal'
+    queryset = NewPortalTask.objects.preload_list()
+
+    def task_post_helper(self, request, task, form_data=None):
+        """Special post helper exclusive to New Portal Tasks"""
+        if request.POST.get('approve'):
+            foia = task.communication.foia
+            form = PortalForm(request.POST, foia=foia)
+            if not form.is_valid():
+                return
+            form.save()
+            # save the portal to the agency as well
+            foia.agency.portal = foia.portal
+            foia.agency.save()
+            form_data = form.cleaned_data
+            if form_data.get('portal'):
+                form_data['portal'] = form_data['portal'].pk
+            task.resolve(request.user, form_data)
+        elif request.POST.get('reject'):
+            task.resolve(request.user, {'reject': 'true'})
+            messages.error(request, 'New portal rejected')
+        return super(NewPortalTaskList, self).task_post_helper(request, task)
 
 
 class RequestTaskList(TemplateView):

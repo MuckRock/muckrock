@@ -43,6 +43,12 @@
             Portal
         </a>
     </li>
+    <li class="{% active request '^/task/new-portal/$' %}">
+        <a href="{% url 'new-portal-task-list' %}">
+            <span class="blue counter">{{ counters.new_portal }}</span>
+            New Portal
+        </a>
+    </li>
     <li class="{% active request '^/task/flagged/$' %}">
         <a href="{% url 'flagged-task-list' %}">
             <span class="blue counter">{{ counters.flagged }}</span>

@@ -155,7 +155,7 @@
               <td>{{foia.portal_password}}</td>
             </tr>
           </table>
-        {% elif user.is_staff %}
+        {% elif request.user.is_staff %}
           <div id="show-portal-info" class="action">Show Request Info</div>
           <table class="portal-info">
             <tr>
@@ -167,6 +167,17 @@
               <td>{{foia.portal_password}}</td>
             </tr>
           </table>
+        {% endif %}
+        {% if request.user.is_staff and not foia.portal %}
+          <p class="edit action new-portal">Add Portal</p>
+          <form class="add-portal hidden-form" method="post">
+            {% csrf_token %}
+            {% include 'lib/pattern/form.html' with form=portal_form %}
+            <footer>
+              <button class="primary button" type="submit" name="action" value="portal">Add</button>
+              <button class="cancel button">Cancel</button>
+            </footer>
+          </form>
         {% endif %}
         {% if user_can_edit %}
           <form class="change-date hidden-form" method="post">

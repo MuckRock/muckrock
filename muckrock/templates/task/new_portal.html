@@ -1,0 +1,57 @@
+{% extends 'task/default.html' %}
+
+{% block task-content %}
+  <dl class="task__data">
+    <dt>Portal Type Detected</dt>
+    <dd>{{ task.portal_type }}</dd>
+    {% with task.communication.foia as foia %}
+      <dt>Submitter</dt>
+      <dd>
+        <a href="{% url 'admin:auth_user_change' foia.user.pk %}">
+          {{foia.user}}
+        </a>
+      </dd>
+      <dt>Request</dt>
+      <dd>
+        <a href="{{foia.get_absolute_url}}">{{foia}}</a>
+        (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>) -
+        MR #{{foia.pk}}
+      </dd>
+      {% with agency=foia.agency %}
+          <dt>Agency</dt>
+          <dd>
+            <a href="{% url 'admin:agency_agency_change' agency.pk %}">
+              {{agency}}
+            </a>
+          </dd>
+          {% if agency.notes %}
+              <dt>Agency Notes</dt>
+              <dd>{{agency.notes}}</dd>
+          {% endif %}
+      {% endwith %}
+    {% endwith %}
+  </dl>
+  <div class="collapsable full-communication">
+    <header>This communication</header>
+    <main>
+      {% include 'foia/communication.html' with communication=task.communication hide_options=True %}
+    </main>
+  </div>
+{% endblock %}
+
+{% block task-actions %}
+    <div class="response-input">
+      <p>Please choose an existing portal from the agency's jurisdiction <em>or</em> supply information to create a new portal.</p>
+        {{ form }}
+    </div>
+    <span class="task-defer">
+      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+    </span>
+    <button type="submit" class="red button" name="reject" value="true">
+      Reject
+    </button>
+    <button type="submit" class="primary button" name="approve" value="true">
+      Submit
+    </button>
+{% endblock %}

@@ -38,7 +38,12 @@ from muckrock.communication.models import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
-from muckrock.task.models import FlaggedTask, OrphanTask, ReviewAgencyTask
+from muckrock.task.models import (
+    FlaggedTask,
+    NewPortalTask,
+    OrphanTask,
+    ReviewAgencyTask,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -293,6 +298,9 @@ def _handle_request(request, mail_id):
             (post.get('message-headers', ''), post.get('body-plain', ''))
         )
         comm.process_attachments(request.FILES)
+
+        # attempt to autodetect a known portal
+        _detect_portal(comm, from_email.email, post)
 
         # if agency isn't currently using an outgoing email or a portal, flag it
         if (
@@ -684,3 +692,41 @@ def _log_mail(request):
         ['mitch@muckrock.com'],
     )
     email.send(fail_silently=False)
+
+
+def _detect_portal(comm, email, post):
+    """Try to auto-detect a known portal type"""
+
+    portal_emails = [
+        ('nextrequest', 'support@nextrequest.com'),
+        ('foiaonline', 'admin@foiaonline.gov'),
+        ('foiaonline', 'foia@regulations.gov'),
+        ('fbi', 'efoia@subscriptions.fbi.gov'),
+        ('govqa', '@mycusthelp.net'),
+    ]
+    portal_detectors = [(
+        'nextrequest',
+        lambda p: 'POWERED BY NEXTREQUEST' in p.get('body-html', '')
+    )]
+
+    if comm.foia.portal:
+        # if this request already has a portal, no need to auto-detect
+        return
+
+    for type_, portal_email in portal_emails:
+        if portal_email[0] == '@':
+            match = email.endswith(portal_email)
+        else:
+            match = email == portal_email
+        if match:
+            return NewPortalTask.objects.create(
+                communication=comm,
+                portal_type=type_,
+            )
+
+        for type_, detector in portal_detectors:
+            if detector(post):
+                return NewPortalTask.objects.create(
+                    communication=comm,
+                    portal_type=type_,
+                )

@@ -9,6 +9,7 @@ from django.utils import timezone
 
 # MuckRock
 from muckrock import agency, foia, task
+from muckrock.portal.forms import PortalForm
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
 
@@ -277,6 +278,25 @@ class PortalTaskNode(TaskNode):
         return extra_context
 
 
+class NewPortalTaskNode(TaskNode):
+    """Renders a new portal task."""
+    model = task.models.NewPortalTask
+    task_template = 'task/new_portal.html'
+    endpoint_name = 'new-portal-task-list'
+    class_name = 'new-portal'
+
+    def get_extra_context(self):
+        """Get extra context"""
+        extra_context = super(NewPortalTaskNode, self).get_extra_context()
+
+        extra_context['form'] = PortalForm(
+            foia=self.task.communication.foia,
+            initial={'type': self.task.portal_type},
+        )
+
+        return extra_context
+
+
 class ReviewAgencyTaskNode(TaskNode):
     """Renders a review agency task."""
     model = task.models.ReviewAgencyTask
@@ -395,6 +415,12 @@ def snail_mail_task(parser, token):
 def portal_task(parser, token):
     """Returns a PortalTaskNode"""
     return PortalTaskNode(get_id(token))
+
+
+@register.tag
+def new_portal_task(parser, token):
+    """Returns a NewPortalTaskNode"""
+    return NewPortalTaskNode(get_id(token))
 
 
 @register.tag

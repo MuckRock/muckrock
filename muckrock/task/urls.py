@@ -44,6 +44,16 @@ urlpatterns = [
         name='portal-task'
     ),
     url(
+        r'^new-portal/$',
+        views.NewPortalTaskList.as_view(),
+        name='new-portal-task-list'
+    ),
+    url(
+        r'^new-portal/(?P<pk>\d+)/$',
+        views.NewPortalTaskList.as_view(),
+        name='new-portal-task'
+    ),
+    url(
         r'^flagged/$',
         views.FlaggedTaskList.as_view(),
         name='flagged-task-list'

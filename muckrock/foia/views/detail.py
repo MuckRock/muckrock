@@ -59,6 +59,7 @@ from muckrock.foia.tasks import composer_delayed_submit, zip_request
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
+from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.qanda.forms import QuestionForm
 from muckrock.qanda.models import Question
@@ -237,6 +238,7 @@ class Detail(DetailView):
             instance=foia
         )
         context['tracking_id_form'] = TrackingNumberForm()
+        context['portal_form'] = PortalForm(foia=foia)
         context['contact_info_form'] = ContactInfoForm(foia=foia)
 
         if user_can_edit or user.is_staff:
@@ -324,6 +326,7 @@ class Detail(DetailView):
             'agency_reply': self._agency_reply,
             'staff_pay': self._staff_pay,
             'tracking_id': self._tracking_id,
+            'portal': self._portal,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -611,6 +614,22 @@ class Detail(DetailView):
                 messages.error(
                     request,
                     'Please fill out the tracking number and reason',
+                )
+        else:
+            messages.error(request, 'You do not have permission to do that')
+        return redirect(foia.get_absolute_url() + '#')
+
+    def _portal(self, request, foia):
+        """Add a new or existing portal"""
+        form = PortalForm(request.POST, foia=foia)
+        if request.user.is_staff:
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully added a portal')
+            else:
+                messages.error(
+                    request,
+                    'Choose a portal or supply information for a new one',
                 )
         else:
             messages.error(request, 'You do not have permission to do that')
