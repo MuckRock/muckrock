@@ -49,7 +49,7 @@
   </dl>
 
   {% for data in review_data %}
-    <div class="collapsable review-requests{% if not data.error %} collapsed{% endif %}">
+    <div class="collapsable review-requests{% if not data.error and not data.unacknowledged %} collapsed{% endif %}">
       <header {% if data.error %}class="error"{% endif %}>
         <p>{{data.address}} (<a href="{{ data.address.get_absolute_url }}" class="nocollapse">Details</a>)</p>
       </header>
@@ -127,7 +127,7 @@
         <tbody>
           {% for foia in data.foias %}
             <tr class="review-request">
-              <td><input type="checkbox" form="{{task.pk}}-form" name="{{data.checkbox_name}}" value="{{foia.pk}}" {% if data.error %}checked{% endif %}></td>
+              <td><input type="checkbox" form="{{task.pk}}-form" name="{{data.checkbox_name}}" value="{{foia.pk}}" {% if data.error or foia.status == "ack" %}checked{% endif %}></td>
               <td><a href="{{foia.get_absolute_url}}">{{foia}}</a></td>
               <td>{{foia.composer.datetime_submitted|date:"m/d/y"}}</td>
               <td>{{foia.latest_response|default_if_none:"Never"}}</td>

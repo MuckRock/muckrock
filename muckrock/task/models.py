@@ -340,6 +340,8 @@ class ReviewAgencyTask(Task):
                         addr.errors.all()[:5],
                     'foias':
                         foias,
+                    'unacknowledged':
+                        any(f.status == 'ack' for f in foias),
                     'total_errors':
                         addr.error_count,
                     'last_error':
@@ -388,6 +390,7 @@ class ReviewAgencyTask(Task):
                 'address': 'Snail Mail',
                 'foias': foias,
                 'checkbox_name': '%d-snail' % self.pk,
+                'unacknowledged': any(f.status == 'ack' for f in foias),
             })
 
         return review_data
