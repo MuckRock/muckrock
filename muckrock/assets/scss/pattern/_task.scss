@@ -325,6 +325,25 @@ $task-padding: $vr/4 $vr/2;
 	}
 }
 
+/* New Portal Task */
+
+.new-portal.task {
+    .response-input {
+        margin-bottom: 0;
+        text-align: left;
+        //@include columns(2 12em);
+        label {
+            font-size: $size-2;
+        }
+    }
+    .task__data {
+        margin-bottom: 0;
+    }
+	.proxy {
+		float: left;
+	}
+}
+
 /* Snail Mail Task */
 
 .task .task-post-actions input[type="checkbox"] {

@@ -114,7 +114,7 @@ class FOIARequest(models.Model):
     portal_password = models.CharField(
         max_length=20,
         blank=True,
-        default=lambda: utils.generate_key(12),
+        default=utils.generate_key,
     )
     email = models.ForeignKey(
         'communication.EmailAddress',
@@ -707,7 +707,7 @@ class FOIARequest(models.Model):
         elif self.email and self.email.status == 'good' and not kwargs.get(
             'snail'
         ):
-            self._send_email(comm, **kwargs)
+            self.send_email(comm, **kwargs)
         elif self.fax and self.fax.status == 'good' and not kwargs.get('snail'):
             self._send_fax(comm, **kwargs)
         else:
@@ -723,7 +723,7 @@ class FOIARequest(models.Model):
         """Send the message via portal"""
         self.portal.send_msg(comm, **kwargs)
 
-    def _send_email(self, comm, **kwargs):
+    def send_email(self, comm, **kwargs):
         """Send the message as an email - asynchrnously"""
         from muckrock.foia.tasks import foia_send_email
         # set status and mail id here to avoid altering the request in the
@@ -991,10 +991,14 @@ class FOIARequest(models.Model):
         else:
             return 15
 
-    def get_agency_reply_link(self, email):
+    def get_agency_reply_link(self, email=None):
         """Get the link for the agency user to log in"""
         agency = self.agency
         agency_user_profile = agency.get_user().profile
+        if email is None:
+            email_args = {}
+        else:
+            email_args = {'email': email}
         return agency_user_profile.wrap_url(
             reverse(
                 'acct-agency-redirect-login',
@@ -1004,8 +1008,7 @@ class FOIARequest(models.Model):
                     'foia_slug': self.slug,
                     'foia_idx': self.pk,
                 },
-            ),
-            email=email,
+            ), **email_args
         )
 
     def update_tags(self, tags):

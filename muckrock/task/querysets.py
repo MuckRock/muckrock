@@ -461,3 +461,17 @@ class PortalTaskQuerySet(TaskQuerySet):
                 'communication__foia__tracking_ids',
             )
         )
+
+
+class NewPortalTaskQuerySet(TaskQuerySet):
+    """Object manager for new portal tasks"""
+
+    def preload_list(self):
+        """Preload relations for list display"""
+        return (
+            self.select_related(
+                'communication__foia__agency__jurisdiction',
+                'communication__foia__composer__user',
+                'resolved_by',
+            )
+        )

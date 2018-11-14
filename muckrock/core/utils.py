@@ -98,7 +98,7 @@ def notify(users, action):
     return notifications
 
 
-def generate_key(size=6, chars=string.ascii_uppercase + string.digits):
+def generate_key(size=12, chars=string.ascii_uppercase + string.digits):
     """Generates a random alphanumeric key"""
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 

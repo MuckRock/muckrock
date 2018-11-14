@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import EmailMessage, send_mail
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -38,7 +39,13 @@ from muckrock.communication.models import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
-from muckrock.task.models import FlaggedTask, OrphanTask, ReviewAgencyTask
+from muckrock.mailgun.tasks import download_links
+from muckrock.task.models import (
+    FlaggedTask,
+    NewPortalTask,
+    OrphanTask,
+    ReviewAgencyTask,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -270,29 +277,34 @@ def _handle_request(request, mail_id):
         # if this request is using a portal, hide the incoming messages
         hidden = foia.portal is not None
 
-        comm = FOIACommunication.objects.create(
-            foia=foia,
-            from_user=foia.agency.get_user(),
-            to_user=foia.user,
-            subject=subject[:255],
-            response=True,
-            datetime=timezone.now(),
-            communication=_get_mail_body(post, foia),
-            hidden=hidden,
-        )
-        email_comm = EmailCommunication.objects.create(
-            communication=comm,
-            sent_datetime=timezone.now(),
-            from_email=from_email,
-        )
-        email_comm.to_emails.set(to_emails)
-        email_comm.cc_emails.set(cc_emails)
-        RawEmail.objects.create(
-            email=email_comm,
-            raw_email='%s\n%s' %
-            (post.get('message-headers', ''), post.get('body-plain', ''))
-        )
-        comm.process_attachments(request.FILES)
+        with transaction.atomic():
+            comm = FOIACommunication.objects.create(
+                foia=foia,
+                from_user=foia.agency.get_user(),
+                to_user=foia.user,
+                subject=subject[:255],
+                response=True,
+                datetime=timezone.now(),
+                communication=_get_mail_body(post, foia),
+                hidden=hidden,
+            )
+            email_comm = EmailCommunication.objects.create(
+                communication=comm,
+                sent_datetime=timezone.now(),
+                from_email=from_email,
+            )
+            email_comm.to_emails.set(to_emails)
+            email_comm.cc_emails.set(cc_emails)
+            RawEmail.objects.create(
+                email=email_comm,
+                raw_email='%s\n%s' %
+                (post.get('message-headers', ''), post.get('body-plain', ''))
+            )
+            comm.process_attachments(request.FILES)
+            transaction.on_commit(lambda: download_links(comm.pk))
+
+        # attempt to autodetect a known portal
+        _detect_portal(comm, from_email.email, post)
 
         # if agency isn't currently using an outgoing email or a portal, flag it
         if (
@@ -684,3 +696,41 @@ def _log_mail(request):
         ['mitch@muckrock.com'],
     )
     email.send(fail_silently=False)
+
+
+def _detect_portal(comm, email, post):
+    """Try to auto-detect a known portal type"""
+
+    portal_emails = [
+        ('nextrequest', 'support@nextrequest.com'),
+        ('foiaonline', 'admin@foiaonline.gov'),
+        ('foiaonline', 'foia@regulations.gov'),
+        ('fbi', 'efoia@subscriptions.fbi.gov'),
+        ('govqa', '@mycusthelp.net'),
+    ]
+    portal_detectors = [(
+        'nextrequest',
+        lambda p: 'POWERED BY NEXTREQUEST' in p.get('body-html', '')
+    )]
+
+    if comm.foia.portal:
+        # if this request already has a portal, no need to auto-detect
+        return
+
+    for type_, portal_email in portal_emails:
+        if portal_email[0] == '@':
+            match = email.endswith(portal_email)
+        else:
+            match = email == portal_email
+        if match:
+            return NewPortalTask.objects.create(
+                communication=comm,
+                portal_type=type_,
+            )
+
+        for type_, detector in portal_detectors:
+            if detector(post):
+                return NewPortalTask.objects.create(
+                    communication=comm,
+                    portal_type=type_,
+                )
