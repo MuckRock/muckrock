@@ -10,10 +10,21 @@ from muckrock.core.utils import generate_key
 from muckrock.portal.models import PORTAL_TYPES, Portal
 
 
+class PortalChoiceField(forms.ModelChoiceField):
+    """Choice field to display more information about the portal"""
+
+    def label_from_instance(self, obj):
+        return '{} ({}) <{}>'.format(
+            obj.name,
+            obj.get_type_display(),
+            obj.url,
+        )
+
+
 class PortalForm(forms.Form):
     """Add an existing or new portal to a request"""
 
-    portal = forms.ModelChoiceField(
+    portal = PortalChoiceField(
         queryset=Portal.objects.none(),
         required=False,
     )
