@@ -713,8 +713,11 @@ def _detect_portal(comm, email, post):
         lambda p: 'POWERED BY NEXTREQUEST' in p.get('body-html', '')
     )]
 
-    if comm.foia.portal:
-        # if this request already has a portal, no need to auto-detect
+    if comm.foia.portal or NewPortalTask.objects.filter(
+        resolved=False, communication__foia=comm.foia
+    ):
+        # if this request already has a portal or an open new portal task,
+        # no need to auto-detect
         return
 
     for type_, portal_email in portal_emails:

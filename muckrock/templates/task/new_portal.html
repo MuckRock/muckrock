@@ -3,7 +3,7 @@
 {% block task-content %}
   <dl class="task__data">
     <dt>Portal Type Detected</dt>
-    <dd>{{ task.portal_type }}</dd>
+    <dd>{{ task.get_portal_type_display }}</dd>
     {% with task.communication.foia as foia %}
       <dt>Submitter</dt>
       <dd>
