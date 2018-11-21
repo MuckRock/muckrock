@@ -446,7 +446,7 @@ class CrowdsourceResponse(models.Model):
             ', '.join(self.tags.values_list('name', flat=True)),
         ]
         if include_emails:
-            values.insert(1, self.user.email)
+            values.insert(1, self.user.email if self.user else '')
         if self.crowdsource.multiple_per_page:
             values.append(self.number)
         if self.data:
