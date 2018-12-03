@@ -98,6 +98,7 @@ class OrphanTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrphanTask
+        fields = '__all__'
 
 
 class SnailMailTaskSerializer(serializers.ModelSerializer):
@@ -126,6 +127,7 @@ class SnailMailTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SnailMailTask
+        fields = '__all__'
 
 
 class FlaggedTaskSerializer(serializers.ModelSerializer):
@@ -165,6 +167,7 @@ class FlaggedTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FlaggedTask
+        fields = '__all__'
 
 
 class NewAgencyTaskSerializer(serializers.ModelSerializer):
@@ -192,6 +195,7 @@ class NewAgencyTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NewAgencyTask
+        fields = '__all__'
 
 
 class ResponseTaskSerializer(serializers.ModelSerializer):
@@ -215,3 +219,4 @@ class ResponseTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ResponseTask
+        fields = '__all__'

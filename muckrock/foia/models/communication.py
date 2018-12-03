@@ -7,6 +7,7 @@ Models for the FOIA application
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models, transaction
+from django.db.models import Count
 from django.utils import timezone
 
 # Standard Library
@@ -21,6 +22,7 @@ import chardet
 # MuckRock
 from muckrock.core.utils import new_action
 from muckrock.foia.models.request import STATUS, FOIARequest
+from muckrock.foia.querysets import FOIACommunicationQuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -32,24 +34,8 @@ DELIVERED = (
 )
 
 
-class FOIACommunicationQuerySet(models.QuerySet):
-    """Object manager for FOIA Communications"""
-
-    def visible(self):
-        """Hide hidden communications"""
-        return self.filter(hidden=False)
-
-    def preload_list(self):
-        """Preload the relations required for displaying a list of communications"""
-        return self.prefetch_related(*FOIACommunication.prefetch_fields)
-
-
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
-
-    prefetch_fields = (
-        'files', 'emails', 'faxes', 'mails', 'web_comms', 'portals'
-    )
 
     foia = models.ForeignKey(
         FOIARequest, related_name='communications', blank=True, null=True

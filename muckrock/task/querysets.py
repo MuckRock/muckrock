@@ -4,7 +4,7 @@ Custom QuerySets for the Task application
 
 # Django
 from django.db import models
-from django.db.models import F, Prefetch, Q, Sum
+from django.db.models import Count, F, Prefetch, Q, Sum
 from django.db.models.functions import Cast, Now
 
 # Standard Library
@@ -15,6 +15,10 @@ from muckrock import task
 from muckrock.communication.models import EmailCommunication
 from muckrock.core.models import ExtractDay
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
+from muckrock.foia.querysets import (
+    FOIACommunicationQuerySet,
+    PreloadFileQuerysetMixin,
+)
 
 
 class TaskQuerySet(models.QuerySet):
@@ -81,21 +85,36 @@ class TaskQuerySet(models.QuerySet):
         return self.filter(date_deferred__gt=date.today())
 
 
-class CommunicationTaskMixin(object):
+class CommunicationTaskMixin(PreloadFileQuerysetMixin):
     """Mixin for preloading tasks with a communication"""
+
+    files_path = 'communication__files'
+    comm_id = 'communication_id'
 
     def preload_communication(self):
         """Preload models on the communication"""
-        return self.prefetch_related(
+        return self.select_related('communication').prefetch_related(
             *[
                 'communication__{}'.format(f)
-                for f in FOIACommunication.prefetch_fields
+                for f in FOIACommunicationQuerySet.prefetch_fields
             ]
+        ).preload_files()
+
+    def preload_files(self, limit=11):
+        """Add communication select related"""
+        queryset = super(CommunicationTaskMixin,
+                         self).preload_files(limit=limit)
+        return queryset.select_related('communication')
+
+    def _process_preloaded_files(self, task_, files):
+        """What to do with the preloaded files for each record"""
+        task_.communication.display_files = files.get(
+            task_.communication.pk, []
         )
 
     def preload_communication_siblings(self):
         """Preload all communications on the communication's FOIA request"""
-        return self.prefetch_related(
+        return self.select_related('communication__foia').prefetch_related(
             Prefetch(
                 'communication__foia__communications',
                 queryset=FOIACommunication.objects.preload_list(),

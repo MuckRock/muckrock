@@ -12,11 +12,16 @@ from django.db import models
 import logging
 import os
 
+# MuckRock
+from muckrock.foia.querysets import FOIAFileQuerySet
+
 logger = logging.getLogger(__name__)
 
 
 class FOIAFile(models.Model):
     """An arbitrary file attached to a FOIA request"""
+
+    objects = FOIAFileQuerySet.as_manager()
 
     access = (('public', 'Public'), ('private', 'Private'),
               ('organization', 'Organization'))

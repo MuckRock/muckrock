@@ -11,9 +11,57 @@ from django.utils.text import slugify
 
 # Standard Library
 from datetime import date, datetime, time
+from itertools import groupby
 
 # MuckRock
 from muckrock.agency.constants import STALE_REPLIES
+
+
+class PreloadFileQuerysetMixin(object):
+    """Mixin for preloading related files"""
+
+    files_path = 'files'
+    comm_id = 'id'
+
+    def __init__(self, *args, **kwargs):
+        super(PreloadFileQuerysetMixin, self).__init__(*args, **kwargs)
+        self._preload_files_amt = 0
+        self._preload_files_done = False
+
+    def _clone(self):
+        """Add _preload_files_amt to vlaues to copy over in a clone"""
+        # pylint: disable=protected-access
+        clone = super(PreloadFileQuerysetMixin, self)._clone()
+        clone._preload_files_amt = self._preload_files_amt
+        return clone
+
+    def preload_files(self, limit=11):
+        """Preload up to limit files for the communications
+        Mark as needing to be preloaded - actually preloading will be done lazily
+        """
+        # pylint: disable=protected-access
+        self._preload_files_amt = limit
+        return self
+
+    def _do_preload_files(self):
+        """Do the preloading of the files lazily"""
+        from muckrock.foia.models.file import FOIAFile
+        comm_ids = [getattr(i, self.comm_id) for i in self._result_cache]
+        if comm_ids:
+            files = FOIAFile.objects.preload(comm_ids, self._preload_files_amt)
+            for obj in self._result_cache:
+                self._process_preloaded_files(obj, files)
+        self._preload_files_done = True
+
+    def _process_preloaded_files(self, obj, files):
+        """What to do with the preloaded files for each record"""
+        obj.display_files = files.get(obj.pk, [])
+
+    def _fetch_all(self):
+        """Override fetch all to lazily preload files if needed"""
+        super(PreloadFileQuerysetMixin, self)._fetch_all()
+        if self._preload_files_amt > 0 and not self._preload_files_done:
+            self._do_preload_files()
 
 
 class FOIARequestQuerySet(models.QuerySet):
@@ -269,3 +317,39 @@ class FOIAComposerQuerySet(models.QuerySet):
             return draft
         else:
             return self.create(user=user)
+
+
+class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
+    """Object manager for FOIA Communications"""
+
+    prefetch_fields = ('emails', 'faxes', 'mails', 'web_comms', 'portals')
+
+    def visible(self):
+        """Hide hidden communications"""
+        return self.filter(hidden=False)
+
+    def preload_list(self):
+        """Preload the relations required for displaying a list of communications"""
+        return self.prefetch_related(*self.prefetch_fields).preload_files()
+
+
+class FOIAFileQuerySet(models.QuerySet):
+    """Custom Queryset for FOIA Files"""
+
+    def preload(self, comm_ids, limit=11):
+        """Preload the top limit files for the communications in comm_ids"""
+        file_qs = self.raw(
+            """
+            SELECT rank_filter.* FROM (
+                SELECT foia_foiafile.*, ROW_NUMBER() OVER (
+                    PARTITION BY comm_id ORDER BY foia_foiafile.datetime DESC
+                ) FROM foia_foiafile
+                WHERE comm_id IN %s
+            ) rank_filter WHERE ROW_NUMBER <= %s
+            """,
+            [tuple(comm_ids), limit]
+        )
+        return {
+            comm_id: list(files)
+            for comm_id, files in groupby(file_qs, lambda f: f.comm_id)
+        }
