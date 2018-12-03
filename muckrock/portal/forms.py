@@ -45,6 +45,13 @@ class PortalForm(forms.Form):
             agencies__jurisdiction=self.foia.agency.jurisdiction
         ).distinct()
 
+    def clean_url(self):
+        """Ensure unique URL"""
+        url = self.cleaned_data['url']
+        if url and Portal.objects.filter(url__iexact=url).exists():
+            raise forms.ValidationError('Portal with that URL exists')
+        return url
+
     def clean(self):
         """If no portal selected, must supply data for a new one"""
         data = super(PortalForm, self).clean()
