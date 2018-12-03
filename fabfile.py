@@ -49,7 +49,7 @@ def test(test_path='', reuse='0', capture=False):
         '--settings=muckrock.settings.test' % {
             'reuse': reuse,
             'test_path': test_path,
-            'capture': '--nologcapture' if not capture else ''
+            'capture': '--nologcapture' if not capture else '',
         }
     )
     with env.cd(env.base_path):

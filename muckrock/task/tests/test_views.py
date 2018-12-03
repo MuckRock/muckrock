@@ -2,15 +2,17 @@
 Tests for Tasks views
 """
 # Django
+from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test import Client, RequestFactory, TestCase
+from django.db import connection, reset_queries
+from django.test import Client, RequestFactory, TestCase, tag
 
 # Standard Library
 import logging
 
 # Third Party
 import mock
-import nose
+from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
@@ -26,6 +28,7 @@ from muckrock.foia.models import FOIANote
 from muckrock.task.factories import (
     FlaggedTaskFactory,
     NewAgencyTaskFactory,
+    NewPortalTaskFactory,
     OrphanTaskFactory,
     ProjectReviewTaskFactory,
     ResponseTaskFactory,
@@ -40,17 +43,39 @@ from muckrock.task.models import (
 )
 from muckrock.task.views import (
     FlaggedTaskList,
+    NewPortalTaskList,
     ProjectReviewTaskList,
     ResponseTaskList,
     TaskList,
 )
 
-eq_ = nose.tools.eq_
-ok_ = nose.tools.ok_
-raises = nose.tools.raises
 mock_send = mock.Mock()
 
 # pylint: disable=missing-docstring
+
+
+def n_plus_one_query(client, url, factory):
+    """Should make the same number of SQL queries regardless of amount of data"""
+
+    def make_request():
+        num_queries = 0
+        try:
+            settings.DEBUG = True
+            response = client.get(url)
+            eq_(response.status_code, 200)
+            num_queries = len(connection.queries)
+        finally:
+            settings.DEBUG = False
+            reset_queries()
+        return num_queries
+
+    reset_queries()
+    single_num_queries = make_request()
+
+    factory.create_batch(3)
+    multiple_num_queries = make_request()
+
+    eq_(single_num_queries, multiple_num_queries)
 
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
@@ -274,6 +299,11 @@ class OrphanTaskViewTests(TestCase):
         )
         ok_(BlacklistDomain.objects.filter(domain='example.com'))
 
+    @tag('slow')
+    def _test_n_plus_one_query(self):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        n_plus_one_query(self.client, self.url, OrphanTaskFactory)
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class SnailMailTaskViewTests(TestCase):
@@ -330,6 +360,11 @@ class SnailMailTaskViewTests(TestCase):
                                        ).first()
         ok_(note, 'A note should be generated.')
 
+    @tag('slow')
+    def _test_n_plus_one_query(self):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        n_plus_one_query(self.client, self.url, SnailMailTaskFactory)
+
 
 @mock.patch('muckrock.task.models.FlaggedTask.reply')
 class FlaggedTaskViewTests(TestCase):
@@ -337,11 +372,13 @@ class FlaggedTaskViewTests(TestCase):
 
     @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
     def setUp(self):
-        self.user = UserFactory(is_staff=True)
+        password = 'abc'
+        self.user = UserFactory(is_staff=True, password=password)
         self.url = reverse('flagged-task-list')
         self.view = FlaggedTaskList.as_view()
         self.task = FlaggedTaskFactory()
         self.request_factory = RequestFactory()
+        self.client.login(username=self.user.username, password=password)
 
     def test_get_single(self, mock_reply):
         """Should be able to view a single task"""
@@ -395,17 +432,25 @@ class FlaggedTaskViewTests(TestCase):
         ok_(self.task.resolved, 'The task should resolve.')
         mock_reply.assert_called_with(test_text)
 
+    @tag('slow')
+    def _test_n_plus_one_query(self, mock_reply):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        # pylint: disable=unused-argument
+        n_plus_one_query(self.client, self.url, FlaggedTaskFactory)
+
 
 @mock.patch('muckrock.task.models.ProjectReviewTask.reply')
 class ProjectReviewTaskViewTests(TestCase):
     """Tests FlaggedTask POST handlers"""
 
     def setUp(self):
-        self.user = UserFactory(is_staff=True)
+        password = 'abc'
+        self.user = UserFactory(is_staff=True, password=password)
         self.url = reverse('projectreview-task-list')
         self.view = ProjectReviewTaskList.as_view()
         self.task = ProjectReviewTaskFactory()
         self.request_factory = RequestFactory()
+        self.client.login(username=self.user.username, password=password)
 
     def test_get_single(self, mock_reply):
         """Should be able to view a single task"""
@@ -468,6 +513,12 @@ class ProjectReviewTaskViewTests(TestCase):
         ok_(self.task.resolved, 'The task should be resolved.')
         mock_reply.assert_called_with(test_text, 'rejected')
 
+    @tag('slow')
+    def _test_n_plus_one_query(self, mock_reply):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        # pylint: disable=unused-argument
+        n_plus_one_query(self.client, self.url, ProjectReviewTaskFactory)
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class NewAgencyTaskViewTests(TestCase):
@@ -522,21 +573,33 @@ class NewAgencyTaskViewTests(TestCase):
         eq_(updated_task.agency.status, 'rejected')
         eq_(updated_task.resolved, True)
 
+    @tag('slow')
+    def _test_n_plus_one_query(self):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        n_plus_one_query(self.client, self.url, NewAgencyTaskFactory)
+
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
 class ResponseTaskListViewTests(TestCase):
     """Tests ResponseTask-specific POST handlers"""
 
     def setUp(self):
-        self.user = UserFactory(is_staff=True)
+        password = 'abc'
+        self.user = UserFactory(is_staff=True, password=password)
         self.url = reverse('response-task-list')
         self.view = ResponseTaskList.as_view()
         self.task = ResponseTaskFactory()
+        self.client.login(username=self.user.username, password=password)
 
     def test_get_list(self):
         """Staff users should be able to view a list of tasks."""
         response = http_get_response(self.url, self.view, self.user)
         eq_(response.status_code, 200)
+
+    @tag('slow')
+    def _test_n_plus_one_query(self):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        n_plus_one_query(self.client, self.url, ResponseTaskFactory)
 
     def test_get_single(self):
         """Staff users should be able to view a single task"""
@@ -728,3 +791,25 @@ class ResponseTaskListViewTests(TestCase):
             foia.communications.count(), num_comms,
             'The number of communications should not have changed from before.'
         )
+
+
+class NewPortalTaskListViewTests(TestCase):
+    """Tests NewPortalTask-specific view tests"""
+
+    def setUp(self):
+        password = 'abc'
+        self.user = UserFactory(is_staff=True, password=password)
+        self.url = reverse('new-portal-task-list')
+        self.view = NewPortalTaskList.as_view()
+        self.task = NewPortalTaskFactory()
+        self.client.login(username=self.user.username, password=password)
+
+    def test_get_list(self):
+        """Staff users should be able to view a list of tasks."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200)
+
+    @tag('slow')
+    def _test_n_plus_one_query(self):
+        """Should make the same number of SQL queries regardless of amount of data"""
+        n_plus_one_query(self.client, self.url, NewPortalTaskFactory)

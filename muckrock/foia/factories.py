@@ -6,6 +6,10 @@ Factories generate objects during testing for the FOIA app
 from django.utils import timezone
 from django.utils.text import slugify
 
+# Standard Library
+import random
+from string import digits
+
 # Third Party
 import factory
 
@@ -55,6 +59,10 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     composer = factory.SubFactory(FOIAComposerFactory)
     email = factory.SubFactory(
         'muckrock.communication.factories.EmailAddressFactory',
+    )
+    mail_id = factory.Sequence(
+        lambda n: '{}-{}'.
+        format(n, ''.join(random.choice(digits) for _ in xrange(8)))
     )
 
     @factory.post_generation

@@ -39,9 +39,17 @@ class FOIACommunicationQuerySet(models.QuerySet):
         """Hide hidden communications"""
         return self.filter(hidden=False)
 
+    def preload_list(self):
+        """Preload the relations required for displaying a list of communications"""
+        return self.prefetch_related(*FOIACommunication.prefetch_fields)
+
 
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
+
+    prefetch_fields = (
+        'files', 'emails', 'faxes', 'mails', 'web_comms', 'portals'
+    )
 
     foia = models.ForeignKey(
         FOIARequest, related_name='communications', blank=True, null=True

@@ -81,6 +81,28 @@ class TaskQuerySet(models.QuerySet):
         return self.filter(date_deferred__gt=date.today())
 
 
+class CommunicationTaskMixin(object):
+    """Mixin for preloading tasks with a communication"""
+
+    def preload_communication(self):
+        """Preload models on the communication"""
+        return self.prefetch_related(
+            *[
+                'communication__{}'.format(f)
+                for f in FOIACommunication.prefetch_fields
+            ]
+        )
+
+    def preload_communication_siblings(self):
+        """Preload all communications on the communication's FOIA request"""
+        return self.prefetch_related(
+            Prefetch(
+                'communication__foia__communications',
+                queryset=FOIACommunication.objects.preload_list(),
+            )
+        )
+
+
 class OrphanTaskQuerySet(TaskQuerySet):
     """Object manager for orphan tasks"""
 
@@ -112,7 +134,7 @@ class OrphanTaskQuerySet(TaskQuerySet):
         )
 
 
-class SnailMailTaskQuerySet(TaskQuerySet):
+class SnailMailTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
     """Object manager for snail mail tasks"""
 
     def preload_list(self):
@@ -132,18 +154,6 @@ class SnailMailTaskQuerySet(TaskQuerySet):
                 'communication__foia__address',
                 'resolved_by',
             ).prefetch_related(
-                'communication__files',
-                'communication__foia__communications',
-                'communication__emails',
-                'communication__faxes',
-                'communication__mails',
-                'communication__web_comms',
-                'communication__portals',
-                'communication__foia__communications__emails',
-                'communication__foia__communications__faxes',
-                'communication__foia__communications__mails',
-                'communication__foia__communications__web_comms',
-                'communication__foia__communications__portals',
                 'communication__foia__tracking_ids',
                 Prefetch(
                     'communication__foia__communications',
@@ -174,7 +184,7 @@ class SnailMailTaskQuerySet(TaskQuerySet):
                     'communication__foia__agency__appeal_agency__agencyaddress_set',
                     queryset=AgencyAddress.objects.select_related('address')
                 ),
-            )
+            ).preload_communication().preload_communication_siblings()
         )
 
     def preload_pdf(self):
@@ -185,20 +195,7 @@ class SnailMailTaskQuerySet(TaskQuerySet):
                 'communication__foia__agency',
                 'communication__foia__composer__user',
                 'communication__from_user',
-            ).prefetch_related(
-                'communication__files',
-                'communication__foia__communications',
-                'communication__emails',
-                'communication__faxes',
-                'communication__mails',
-                'communication__web_comms',
-                'communication__portals',
-                'communication__foia__communications__emails',
-                'communication__foia__communications__faxes',
-                'communication__foia__communications__mails',
-                'communication__foia__communications__web_comms',
-                'communication__foia__communications__portals',
-            )
+            ).preload_communication().preload_communication_siblings()
         )
 
 
@@ -339,7 +336,7 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             self.ensure_one_created(**kwargs)
 
 
-class ResponseTaskQuerySet(TaskQuerySet):
+class ResponseTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
     """Object manager for response tasks"""
 
     def preload_list(self):
@@ -359,14 +356,7 @@ class ResponseTaskQuerySet(TaskQuerySet):
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related('from_user__profile__agency')
-                    .prefetch_related(
-                        'files',
-                        'emails',
-                        'faxes',
-                        'mails',
-                        'web_comms',
-                        'portals',
-                    ),
+                    .preload_list(),
                     to_attr='reverse_communications'
                 ),
                 Prefetch(
@@ -374,12 +364,8 @@ class ResponseTaskQuerySet(TaskQuerySet):
                     queryset=EmailCommunication.objects.
                     select_related('from_email')
                 ),
-                'communication__faxes',
-                'communication__mails',
-                'communication__web_comms',
-                'communication__portals',
                 'communication__foia__tracking_ids',
-            )
+            ).preload_communication()
         )
 
 
@@ -419,7 +405,7 @@ class MultiRequestTaskQuerySet(TaskQuerySet):
         )
 
 
-class PortalTaskQuerySet(TaskQuerySet):
+class PortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
     """Object manager for portal tasks"""
 
     def preload_list(self):
@@ -442,28 +428,15 @@ class PortalTaskQuerySet(TaskQuerySet):
                     queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related(
                         'from_user__profile',
-                    ).prefetch_related(
-                        'files',
-                        'emails',
-                        'faxes',
-                        'mails',
-                        'web_comms',
-                        'portals',
-                    ),
+                    ).preload_list(),
                     to_attr='reverse_communications'
                 ),
-                'communication__files',
-                'communication__emails',
-                'communication__faxes',
-                'communication__mails',
-                'communication__web_comms',
-                'communication__portals',
                 'communication__foia__tracking_ids',
-            )
+            ).preload_communication()
         )
 
 
-class NewPortalTaskQuerySet(TaskQuerySet):
+class NewPortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
     """Object manager for new portal tasks"""
 
     def preload_list(self):
@@ -473,5 +446,5 @@ class NewPortalTaskQuerySet(TaskQuerySet):
                 'communication__foia__agency__jurisdiction',
                 'communication__foia__composer__user',
                 'resolved_by',
-            )
+            ).preload_communication()
         )

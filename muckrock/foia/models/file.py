@@ -130,7 +130,7 @@ class FOIAFile(models.Model):
             )
             logger.error(error_msg, original_id)
             return
-        new_ffile.name = self.ffile.name
+        new_ffile.name = self.name()
         self.ffile = new_ffile
         self.save()
         upload_document_cloud.apply_async(args=[self.pk, False], countdown=3)
