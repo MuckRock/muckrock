@@ -12,11 +12,16 @@ from django.db import models
 import logging
 import os
 
+# MuckRock
+from muckrock.foia.querysets import FOIAFileQuerySet
+
 logger = logging.getLogger(__name__)
 
 
 class FOIAFile(models.Model):
     """An arbitrary file attached to a FOIA request"""
+
+    objects = FOIAFileQuerySet.as_manager()
 
     access = (('public', 'Public'), ('private', 'Private'),
               ('organization', 'Organization'))
@@ -130,7 +135,7 @@ class FOIAFile(models.Model):
             )
             logger.error(error_msg, original_id)
             return
-        new_ffile.name = self.ffile.name
+        new_ffile.name = self.name()
         self.ffile = new_ffile
         self.save()
         upload_document_cloud.apply_async(args=[self.pk, False], countdown=3)

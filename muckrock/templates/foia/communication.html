@@ -71,17 +71,17 @@
         {% endif %}
       </section>
     {% endif %}
-    {% if communication.files.all %}
+    {% if communication.display_files %}
       <ul class="files">
         {% with foia_url=communication.foia.get_absolute_url %}
-          {% with files=communication.files.all|slice:":10" %}
+          {% with files=communication.display_files|slice:":10" %}
             {% for file in files %}
               <li>{% include 'lib/file.html' with hide_id=True %}</li>
             {% endfor %}
           {% endwith %}
         {% endwith %}
       </ul>
-      {% if communication.files.all|length > 10 %}
+      {% if communication.display_files|length > 10 %}
         <span class="notification warning">
           <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
           <span class="text">

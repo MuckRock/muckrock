@@ -84,3 +84,15 @@ class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory('muckrock.core.factories.UserFactory')
     agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
+
+
+class NewPortalTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating new portal tasks"""
+
+    class Meta:
+        model = task.models.NewPortalTask
+
+    communication = factory.SubFactory(
+        'muckrock.foia.factories.FOIACommunicationFactory'
+    )
+    portal_type = 'other'

@@ -7,6 +7,7 @@ Models for the FOIA application
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models, transaction
+from django.db.models import Count
 from django.utils import timezone
 
 # Standard Library
@@ -21,6 +22,7 @@ import chardet
 # MuckRock
 from muckrock.core.utils import new_action
 from muckrock.foia.models.request import STATUS, FOIARequest
+from muckrock.foia.querysets import FOIACommunicationQuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +32,6 @@ DELIVERED = (
     ('mail', 'Mail'),
     ('web', 'Web'),
 )
-
-
-class FOIACommunicationQuerySet(models.QuerySet):
-    """Object manager for FOIA Communications"""
-
-    def visible(self):
-        """Hide hidden communications"""
-        return self.filter(hidden=False)
 
 
 class FOIACommunication(models.Model):

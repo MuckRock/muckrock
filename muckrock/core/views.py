@@ -271,7 +271,7 @@ class NewsletterSignupView(View):
         default_list = settings.MAILCHIMP_LIST_DEFAULT if default else None
         # First try subscribing the user to the list they are signing up for.
         path = request.GET.get('next', request.path)
-        url = 'https://{}{}'.format(settings.MUCKROCK_URL, path)
+        url = u'https://{}{}'.format(settings.MUCKROCK_URL, path)
         primary_error = mailchimp_subscribe(
             request,
             email,

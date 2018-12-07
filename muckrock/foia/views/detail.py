@@ -143,16 +143,8 @@ class Detail(DetailView):
                 'cc_emails',
                 Prefetch(
                     'communications',
-                    FOIACommunication.objects.select_related(
-                        'from_user__profile__agency'
-                    ).prefetch_related(
-                        'files',
-                        'emails',
-                        'faxes',
-                        'mails',
-                        'web_comms',
-                        'portals',
-                    )
+                    FOIACommunication.objects.
+                    select_related('from_user__profile__agency').preload_list()
                 ),
                 Prefetch(
                     'communications__faxes',

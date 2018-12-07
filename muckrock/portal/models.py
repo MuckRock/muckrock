@@ -10,6 +10,8 @@ PORTAL_TYPES = [
     ('nextrequest', 'NextRequest'),
     ('foiaxpress', 'FOIAXpress'),
     ('fbi', 'FBI eFOIPA Portal'),
+    ('justfoia', 'JustFOIA'),
+    ('foiadirect', 'FOIA Direct'),
     ('webform', 'Web Form'),
     ('other', 'Other'),
 ]

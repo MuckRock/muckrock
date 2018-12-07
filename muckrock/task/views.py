@@ -616,7 +616,7 @@ class NewPortalTaskList(TaskList):
             foia = task.communication.foia
             form = PortalForm(request.POST, foia=foia)
             if not form.is_valid():
-                return
+                raise ValueError(form.errors)
             form.save()
             # save the portal to the agency as well
             foia.agency.portal = foia.portal

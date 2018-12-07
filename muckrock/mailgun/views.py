@@ -315,15 +315,12 @@ def _handle_request(request, mail_id):
         ):
             FlaggedTask.objects.create(
                 agency=foia.agency,
+                foia=foia,
                 category='agency new email',
                 text='We received an email from {} for a request to this '
                 'agency, but this agency does not currently have a primary '
-                'email address set\n'
-                '<p><a href="https://{}{}" target="_blank">Communication</a></p>'
-                .format(
+                'email address set'.format(
                     from_email,
-                    settings.MUCKROCK_URL,
-                    comm.get_absolute_url(),
                 ),
             )
 
