@@ -4,7 +4,7 @@ Custom QuerySets for the Task application
 
 # Django
 from django.db import models
-from django.db.models import Count, F, Prefetch, Q, Sum
+from django.db.models import F, Prefetch, Q, Sum
 from django.db.models.functions import Cast, Now
 
 # Standard Library
