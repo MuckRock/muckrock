@@ -517,6 +517,8 @@ class PortalTaskList(TaskList):
                 self._incoming_handler(request, task)
             else:
                 self._outgoing_handler(request, task)
+        elif request.POST.get('reject'):
+            task.resolve(request.user, {'reject': 'true'})
         return super(PortalTaskList, self).task_post_helper(request, task)
 
     def _incoming_handler(self, request, task):
