@@ -580,8 +580,7 @@ class FlaggedTask(Task):
                 return ''
             else:
                 return (
-                    u'<p><a href="https://{}{}" target="_blank">{}</a></p>'
-                    .format(
+                    u'<p><a href="{}{}" target="_blank">{}</a></p>'.format(
                         settings.MUCKROCK_URL,
                         obj.get_absolute_url(),
                         obj,

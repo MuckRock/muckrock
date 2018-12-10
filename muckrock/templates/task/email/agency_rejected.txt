@@ -11,7 +11,7 @@ Since we weren’t sure where to send the request, we’ve credited it back your
 There’s a copy of your request draft here if you want to clarify the agency’s name:
 
 {% for foia in foias %}
-    * {{ foia.composer.title }} - https://{{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}
+    * {{ foia.composer.title }} - {{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}
 {% endfor %}
 
 If you’re filing a request to a local agency, type it in like "Library, Smallville, IL" (Agency Name, City, State Abbreviation); if it’s a state agency just type in "State Police, IL". For federal requests, you can just type the name.

@@ -555,10 +555,9 @@ ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
-MUCKROCK_URL = 'dev.muckrock.com:8000'
-FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
-# XXX urls
-SQUARELET_URL = os.environ.get('SQUARELET_URL', 'http://dev.squarelet.com:8001')
+MUCKROCK_URL = 'http://dev.muckrock.com:8000'
+FOIAMACHINE_URL = 'http://dev.foiamachine.org:8000'
+SQUARELET_URL = 'http://dev.squarelet.com:8001'
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
