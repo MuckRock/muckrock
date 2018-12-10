@@ -66,7 +66,7 @@ class Question(models.Model):
             User.objects.filter(
                 answer__question=self,
                 is_active=True,
-            ).distinct()
+            ).distinct().select_related('profile')
         )
 
     class Meta:

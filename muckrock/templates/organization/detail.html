@@ -58,7 +58,7 @@
       {% elif is_member %}
         <div class="owner">
           <dfn>Owner</dfn>
-          <p>{{ org.owner.get_full_name }}</p>
+          <p>{{ org.owner.profile.full_name }}</p>
           <p>{{ org.owner.email }}</p>
         </div>
       {% endif %}
@@ -99,7 +99,7 @@
             <tbody>
               {% for member in members %}
                 <tr class="member">
-                  <td class="name"><a href="{{member.get_absolute_url}}">{{member.user.get_full_name}}</a></td>
+                  <td class="name"><a href="{{member.get_absolute_url}}">{{member.user.profile.full_name}}</a></td>
                   {% if is_owner or is_staff or request.user == member.user %}
                     <td class="remove">
                       <form class="remove-member" method="post">

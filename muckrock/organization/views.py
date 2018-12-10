@@ -375,7 +375,8 @@ class OrganizationDetailView(DetailView):
             'completed': requests.get_done().order_by('-datetime_done')[:10]
         }
 
-        context['members'] = organization.members.select_related('user')
+        context['members'
+                ] = organization.members.select_related('user__profile')
         num_requests = organization.get_requests()
         context['available'] = {
             'requests': num_requests,

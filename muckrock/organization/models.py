@@ -97,7 +97,7 @@ class Organization(models.Model):
                 'organization_name':
                     self.name,
                 'organization_owner':
-                    self.owner.get_full_name(),
+                    self.owner.profile.full_name,
                 'organization_link':
                     user.profile.wrap_url(self.get_absolute_url()),
                 'settings_link':

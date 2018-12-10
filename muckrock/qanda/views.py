@@ -162,7 +162,7 @@ class Detail(DetailView):
         )
         context['answers'] = (
             context['object'].answers.filter(user__is_active=True)
-            .select_related('user')
+            .select_related('user__profile')
         )
         context['answer_form'] = AnswerForm()
         foia = self.object.foia

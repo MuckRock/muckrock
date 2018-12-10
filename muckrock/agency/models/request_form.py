@@ -152,7 +152,7 @@ class AgencyRequestForm(models.Model):
 
     def _requester_name(self, comm):
         """User's full name"""
-        return comm.from_user.get_full_name()
+        return comm.from_user.profile.full_name
 
     _requester_name.value_choice = True
 

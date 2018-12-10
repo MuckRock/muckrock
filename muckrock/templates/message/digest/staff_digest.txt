@@ -50,7 +50,7 @@ Pro Users (last 5 days)
 {{ pro_users.gained|length }} Gained
 - - - - - - - - - - - - -
 {% for user in pro_users.gained %}
-* {{user.get_full_name}} ({{base_url}}{{user.get_absolute_url}})
+* {{user.profile.full_name}} ({{base_url}}{{user.get_absolute_url}})
 {% endfor %}
 {% endif %}
 {% if pro_users.lost|length > 0 %}
@@ -58,7 +58,7 @@ Pro Users (last 5 days)
 {{ pro_users.lost|length }} Lost
 - - - - - - - - - - - - -
 {% for user in pro_users.lost %}
-* {{user.get_full_name}} ({{base_url}}{{user.get_absolute_url}})
+* {{user.profile.full_name}} ({{base_url}}{{user.get_absolute_url}})
 {% endfor %}
 {% endif %}
 {% endif %}

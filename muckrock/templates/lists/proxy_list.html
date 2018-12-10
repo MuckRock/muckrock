@@ -9,7 +9,7 @@
 
 {% block list-table-row %}
 {% with object as user %}
-<td><a href="{{ user.get_absolute_url }}">{{ user.get_full_name }}</a></td>
+<td><a href="{{ user.get_absolute_url }}">{{ user.profile.full_name }}</a></td>
 <td>{{ user.profile.get_state_display }}</td>
 {% endwith %}
 {% endblock list-table-row %}

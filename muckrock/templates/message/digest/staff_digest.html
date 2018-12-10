@@ -234,7 +234,7 @@
 <h2>{{pro_users.gained|length}} Gained</h2>
 <ul>
 {% for user in pro_users.gained %}
-    <li><a href="{{user.get_absolute_url}}">{{user.get_full_name}}</a></li>
+    <li><a href="{{user.get_absolute_url}}">{{user.profile.full_name}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
@@ -242,7 +242,7 @@
 <h2>{{pro_users.lost|length}} Lost</h2>
 <ul>
 {% for user in pro_users.lost %}
-    <li><a href="{{user.get_absolute_url}}">{{user.get_full_name}}</a></li>
+    <li><a href="{{user.get_absolute_url}}">{{user.profile.full_name}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}

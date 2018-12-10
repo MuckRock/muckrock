@@ -219,7 +219,7 @@ class SnailMailTask(Task):
             'number': number,
             'payable_to': payable_to,
             'amount': self.amount,
-            'signed_by': user.get_full_name(),
+            'signed_by': user.profile.full_name,
             'foia_pk': foia.pk,
             'comm_pk': self.communication.pk,
             'type': type_,
@@ -789,7 +789,7 @@ class NewAgencyTask(Task):
                 comm = foia.communications.first()
                 comm.communication = initial_communication_template(
                     [foia.agency],
-                    comm.from_user.get_full_name(),
+                    comm.from_user.profile.full_name,
                     foia.composer.requested_docs,
                     edited_boilerplate=foia.composer.edited_boilerplate,
                     proxy=proxy_info['proxy'],

@@ -91,7 +91,7 @@
           I look forward to receiving your response to this request within
           { days }.</p>
           <p>Sincerely,</p>
-          <p>{{ user.get_full_name|default:"{ name }" }}</p>
+          <p>{{ user.profile.full_name|default:"{ name }" }}</p>
         </div>
         <div class="tags-explanation">
           <p>Words in { brackets } are automatically replaced based on the agency and jurisdiction. You can use the following variables:</p>

@@ -1,9 +1,9 @@
 {% extends 'message/base.html' %}
 
 {% block body %}
-<p>Hi {{ user.get_full_name }},</p>
+<p>Hi {{ user.profile.full_name }},</p>
 
-<p>{{ from_user.get_full_name }} has sent you a message in response to your submission to the assignment {{ assignment.title }}:</p>
+<p>{{ from_user.profile.full_name }} has sent you a message in response to your submission to the assignment {{ assignment.title }}:</p>
 
 {{ body|urlize|linebreaks }}
 {% endblock %}

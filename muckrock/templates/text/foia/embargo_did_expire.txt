@@ -1,5 +1,5 @@
 {% autoescape off %}
-Dear {{request.user.get_full_name}},
+Dear {{request.user.profile.full_name}},
 
 The embargo on your FOI request "{{request.title}}" has expired and it is now visible to the public. If you need to reset the embargo for any reason, you may do that from the request page.
 

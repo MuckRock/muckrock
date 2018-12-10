@@ -21,7 +21,7 @@
     <meta property="og:title" content="{{ foia.title }}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-    <meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+    <meta property="og:description" content="{{ foia.user.profile.full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
     <meta property="og:site_name" content="MuckRock" />
   {% endcache %}
 {% endblock open_graph %}
@@ -34,7 +34,7 @@
       <meta name="twitter:creator" content="{{ foia.user.profile.twitter }}" />
     {% endif %}
     <meta name="twitter:title" content="{{ foia.title }}" />
-    <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+    <meta name="twitter:description" content="{{ foia.user.profile.full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
   {% endcache %}
 {% endblock twitter_card %}
 
@@ -66,7 +66,7 @@
       </header>
       {% social title=foia.title url=foia.get_absolute_url %}
       <section class="basic-information">
-        <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {{foia.agency.link_display}} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
+        <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.profile.full_name }}</a> filed this request{% if foia.agency %} with the {{foia.agency.link_display}} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
         {% if foia.composer.parent and request.user.profile.acct_type != "agency" %}
           <p>It is a clone of <a href="{{ foia.composer.parent.get_absolute_url }}">this request</a>.</p>
         {% endif %}
@@ -361,7 +361,7 @@ Hi,
 Thanks so much for your help with this request! I really appreciate it.
 
 Sincerely,
-{{foia.user.get_full_name}}
+{{foia.user.profile.full_name}}
                     </textarea>
                     <div class="buttons">
                       <button class="primary button" type="submit" name="thanks" value="1">Send</button>
@@ -529,7 +529,6 @@ Sincerely,
       <!-- NOTES -->
       <section role="tabpanel" class="tab-panel notes" id="notes">
         <h2 class="tab-panel-heading">Notes</h2>
-        {% with foia.notes.all as notes %}
           {% if notes %}
             <header class="notes-controls">
               <div class="notes filter">
@@ -540,7 +539,6 @@ Sincerely,
           {% for note in notes %}
             {% include 'foia/note.html' with note=note %}
           {% endfor %}
-        {% endwith %}
         <form class="add-note" method="post">
           {% csrf_token %}
           <header>
@@ -608,13 +606,13 @@ Sincerely,
           <h3>People with access</h3>
           <tbody>
             <tr class="person with-access">
-              <td class="name"><p>{{ foia.user.get_full_name }} <span class="small badge">Creator</span></p></td>
+              <td class="name"><p>{{ foia.user.profile.full_name }} <span class="small badge">Creator</span></p></td>
               <td class="modify nostretch"></td>
             </tr>
             {% for user in foia.edit_collaborators.all %}
               <tr class="person with-access">
                 <td class="name">
-                  <p>{{ user.get_full_name }} <span class="small badge">Editor</span></p>
+                  <p>{{ user.profile.full_name }} <span class="small badge">Editor</span></p>
                 </td>
                 <td class="modify nostretch">
                   <form class="modify-access" method="post">
@@ -629,7 +627,7 @@ Sincerely,
             {% for user in foia.read_collaborators.all %}
               <tr class="person with-access">
                 <td class="name">
-                  <p>{{ user.get_full_name }} <span class="small badge">Viewer</span></p>
+                  <p>{{ user.profile.full_name }} <span class="small badge">Viewer</span></p>
                 </td>
                 <td class="modify nostretch">
                   <form class="modify-access" method="post">

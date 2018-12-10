@@ -12,9 +12,9 @@
 <div class="question detail grid__row">
     <div class="grid__column quarter">
         <h1>{{question.title}}</h1>
-        <p>Asked by <a href="{{question.user.get_absolute_url}}">{{object.user.get_full_name}}</a> on <a href="{{question.get_absolute_url}}">{{question.date|date:"F j, Y"}}</a>.</p>
+        <p>Asked by <a href="{{question.user.get_absolute_url}}">{{object.user.profile.full_name}}</a> on <a href="{{question.get_absolute_url}}">{{question.date|date:"F j, Y"}}</a>.</p>
         {% if answers %}
-        <p>{{answers|length}} answer{{answers|length|pluralize}} from {% for user in question.answer_authors %}{% if not forloop.first and forloop.revcounter > 1 %},{% endif %} {% if forloop.last and forloop.counter0 > 0 %}and {% endif %}<a href="{% url "acct-profile" user.username %}">{{user.get_full_name}}</a>{% endfor %}.</p>
+        <p>{{answers|length}} answer{{answers|length|pluralize}} from {% for user in question.answer_authors %}{% if not forloop.first and forloop.revcounter > 1 %},{% endif %} {% if forloop.last and forloop.counter0 > 0 %}and {% endif %}<a href="{% url "acct-profile" user.username %}">{{user.profile.full_name}}</a>{% endfor %}.</p>
         {% endif %}
         {% social title=question.title url=question.get_absolute_url %}
         {% tag_manager question %}

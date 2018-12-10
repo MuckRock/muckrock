@@ -6,7 +6,7 @@
     <div class="info">
       <div class="title truncate">{{ choice.title }}</div>
       <div class="meta">
-        <span class="author">by {{ choice.authors.all.0.get_full_name }}</span>
+        <span class="author">by {{ choice.authors.all.0.profile.full_name }}</span>
         &bull;
         <span class="date">{{ choice.pub_date|date:"m/d/y" }}</span>
       </div>

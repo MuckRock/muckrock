@@ -69,7 +69,6 @@ from muckrock.message.tasks import (
     failed_payment,
     send_charge_receipt,
     send_invoice_receipt,
-    welcome,
 )
 from muckrock.news.models import Article
 from muckrock.organization.models import Organization
@@ -132,7 +131,6 @@ class BasicSignupView(SignupView):
     def form_valid(self, form):
         """When form is valid, create the user."""
         new_user = create_new_user(self.request, form)
-        welcome.delay(new_user)
         success_msg = 'Your account was successfully created. Welcome to MuckRock!'
         messages.success(self.request, success_msg)
         return super(BasicSignupView, self).form_valid(form)
@@ -152,7 +150,6 @@ class ProfessionalSignupView(SignupView):
     def form_valid(self, form):
         """When form is valid, create the user and begin their professional subscription."""
         new_user = create_new_user(self.request, form)
-        welcome.delay(new_user)
         try:
             new_user.profile.start_pro_subscription(
                 self.request.POST['stripe_token']
@@ -209,7 +206,6 @@ class OrganizationSignupView(SignupView):
             'Organization Created',
             new_org.mixpanel_event(),
         )
-        welcome.delay(new_user)
         messages.success(
             self.request,
             'Your account and organization were successfully created.'

@@ -121,7 +121,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                 'requester[email]':
                     email,
                 'requester[name]':
-                    user.get_full_name(),
+                    user.profile.full_name,
                 'requester[phone_number]':
                     '(617) 299-1832',
                 'requester[address]':

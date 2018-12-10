@@ -71,7 +71,7 @@ class TestFoiaMachineRequest(TestCase):
         context = {
             'jurisdiction': self.foi.jurisdiction,
             'document_request': self.foi.request_language,
-            'user_name': self.foi.user.get_full_name()
+            'user_name': self.foi.user.profile.full_name,
         }
         expected_letter = render_to_string(template, context=context).strip()
         actual_letter = self.foi.generate_letter()
