@@ -23,15 +23,16 @@ import requests
 from stripe.error import StripeError
 
 # MuckRock
-from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
+from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
+from muckrock.core.exceptions import SquareletError
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIARequest
 
 
-class GenericComposer(BuyRequestsMixin):
+class GenericComposer(object):
     """Shared functionality between create and update composer views"""
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
@@ -60,13 +61,12 @@ class GenericComposer(BuyRequestsMixin):
             foias_filed = (
                 self.request.user.composers.exclude(status='started').count()
             )
+            organization = self.request.user.profile.organization
+            context['organization'] = organization
             requests_left = {
-                'regular': self.request.user.profile.num_requests,
-                'monthly': self.request.user.profile.get_monthly_requests(),
+                'regular': organization.number_requests,
+                'monthly': organization.monthly_requests,
             }
-            org = self.request.user.profile.get_org()
-            if org is not None:
-                requests_left['org'] = org.get_requests()
             context['sidebar_admin_url'] = reverse(
                 'admin:foia_foiacomposer_change',
                 args=(self.object.pk,),
@@ -106,6 +106,10 @@ class GenericComposer(BuyRequestsMixin):
             composer.submit(contact_info)
         except InsufficientRequestsError:
             messages.warning(self.request, 'You need to purchase more requests')
+        except SquareletError:
+            messages.warning(
+                self.request, 'There was an error, please try again later'
+            )
         else:
             messages.success(self.request, 'Request submitted')
             self.request.session['ga'] = 'request_submitted'
@@ -224,7 +228,8 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if self.request.user.is_authenticated:
             self.object = (
                 FOIAComposer.objects.get_or_create_draft(
-                    user=self.request.user
+                    user=self.request.user,
+                    organization=self.request.user.profile.organization,
                 )
             )
         context = super(CreateComposer, self).get_context_data(**kwargs)
@@ -246,6 +251,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             )
             if form.cleaned_data.get('register_pro'):
                 try:
+                    # XXX use squarelet
                     user.profile.start_pro_subscription(
                         form.cleaned_data.get('stripe_token'),
                     )
@@ -275,6 +281,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user
+            composer.organization = user.profile.organization
             composer.save()
             form.save_m2m()
             # if a new agency is added while the user is anonymous,

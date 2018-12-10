@@ -18,6 +18,7 @@ from datetime import date, datetime, timedelta
 import mock
 import nose.tools
 import pytz
+import requests_mock
 from actstream.actions import follow
 from freezegun import freeze_time
 from nose.tools import eq_, ok_
@@ -26,9 +27,9 @@ from nose.tools import eq_, ok_
 from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
-    OrganizationFactory,
     UserFactory,
 )
+from muckrock.core.test_utils import mock_squarelet
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
@@ -152,18 +153,17 @@ class TestFOIARequestUnit(TestCase):
 
     def test_foia_viewable_org_share(self):
         """Test all the viewable and embargo functions"""
-        org = OrganizationFactory()
-        org.owner.profile.organization = org
+        user = UserFactory()
         foia = FOIARequestFactory(
             embargo=True,
-            composer__user__profile__organization=org,
+            composer__organization=user.profile.organization,
         )
-        foias = FOIARequest.objects.get_viewable(org.owner)
+        foias = FOIARequest.objects.get_viewable(user)
         nose.tools.assert_not_in(foia, foias)
 
         foia.user.profile.org_share = True
         foia.user.profile.save()
-        foias = FOIARequest.objects.get_viewable(org.owner)
+        foias = FOIARequest.objects.get_viewable(user)
         nose.tools.assert_in(foia, foias)
 
     def test_foia_set_mail_id(self):
@@ -275,13 +275,15 @@ class TestFOIARequestUnit(TestCase):
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
 
-    def test_request_lifecycle_no_email(self):
+    @requests_mock.Mocker()
+    def test_request_lifecycle_no_email(self, mock_request):
         """Test a request going through the full cycle as if we had to
         physically mail it
         """
         # pylint: disable=too-many-statements
         # pylint: disable=protected-access
 
+        mock_squarelet(mock_request)
         mail.outbox = []
         user = UserFactory(profile__num_requests=1)
         agency = AgencyFactory(email=None, fax=None)

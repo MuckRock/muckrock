@@ -9,13 +9,12 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.validators import validate_email
 
 # Third Party
-import stripe
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.core.utils import stripe_retry_on_error
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.organization.models import Organization
 
 
 class ProfileSettingsForm(forms.ModelForm):
@@ -44,28 +43,23 @@ class EmailSettingsForm(forms.ModelForm):
         fields = ['email_pref', 'use_autologin']
 
 
-class BillingPreferencesForm(forms.ModelForm):
-    """A form for updating billing preferences."""
-    stripe_token = forms.CharField()
-
-    class Meta():
-        model = Profile
-        fields = ['stripe_token']
-
-    def save(self, commit=True):
-        """Modifies associated Profile and Stripe.Customer model"""
-        profile = super(BillingPreferencesForm, self).save(commit)
-        profile.payment_failed = False
-        profile.save()
-        token = self.cleaned_data['stripe_token']
-        customer = profile.customer()
-        customer.source = token
-        customer.save()
-        return profile
-
-
 class OrgPreferencesForm(forms.ModelForm):
     """A form for updating user organization preferences"""
+
+    active_org = forms.ModelChoiceField(
+        queryset=Organization.objects.none(), empty_label=None
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(OrgPreferencesForm, self).__init__(*args, **kwargs)
+        self.fields['active_org'
+                    ].queryset = self.instance.user.organizations.all()
+        self.fields['active_org'].initial = self.instance.organization
+
+    def save(self, *args, **kwargs):
+        """Set the active organization in addition to saving the other preferences"""
+        super(OrgPreferencesForm, self).save(*args, **kwargs)
+        self.instance.organization = self.cleaned_data['active_org']
 
     class Meta():
         model = Profile
@@ -129,57 +123,3 @@ class StripeForm(forms.Form):
         widget=forms.HiddenInput(),
         required=False,
     )
-
-
-class BuyRequestForm(StripeForm):
-    """Form for buying more requests"""
-
-    num_requests = forms.IntegerField(
-        label='Number of requests to buy',
-        min_value=1,
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
-        super(BuyRequestForm, self).__init__(*args, **kwargs)
-        if self.user.is_authenticated:
-            self.fields['stripe_email'].initial = self.user.email
-        if self.user.is_authenticated and self.user.profile.is_advanced():
-            limit_val = 1
-        else:
-            limit_val = 4
-        self.fields['num_requests'].validators[0].limit_value = limit_val
-        self.fields['num_requests'].widget.attrs['min'] = limit_val
-        self.fields['num_requests'].initial = limit_val
-
-    def buy_requests(self, recipient):
-        """Buy the requests"""
-        num_requests = self.cleaned_data['num_requests']
-        stripe_retry_on_error(
-            stripe.Charge.create,
-            amount=self.get_price(num_requests),
-            currency='usd',
-            source=self.cleaned_data['stripe_token'],
-            metadata={
-                'email': self.cleaned_data['stripe_email'],
-                'action': 'request-purchase',
-                'amount': num_requests,
-            },
-            idempotency_key=True,
-        )
-        recipient.profile.add_requests(num_requests)
-
-    def get_price(self, num_requests):
-        """Get the price for the requests"""
-        is_advanced = (
-            self.user.is_authenticated and self.user.profile.is_advanced()
-        )
-        if num_requests >= 20 and is_advanced:
-            # advanced users pay $3 for bulk purchases
-            return 300 * num_requests
-        elif num_requests >= 20:
-            # other users pay $4 for bulk purchases
-            return 400 * num_requests
-        else:
-            # all users pay $5 for non-bulk purchases
-            return 500 * num_requests

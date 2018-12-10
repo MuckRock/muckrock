@@ -7,12 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.test import RequestFactory, TestCase
 
 # Third Party
-from mock import Mock, patch
-from nose.tools import eq_, ok_, raises
+from mock import patch
+from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.accounts import views
@@ -40,143 +39,6 @@ def http_get_post(url, view, data):
     return (get_response, post_response)
 
 
-class TestAccountsView(TestCase):
-    """The AccountsView allows users to choose an account plan that is right for them."""
-
-    def setUp(self):
-        self.user = UserFactory()
-        self.view = views.AccountsView.as_view()
-        self.url = reverse('accounts')
-
-    def test_get(self):
-        """Getting the view should show the available plans."""
-        response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200, 'Should be visible to anyone')
-
-    @patch('muckrock.accounts.models.Profile.start_pro_subscription')
-    def test_upgrade(self, mock_subscribe):
-        """Logged in users should be able to upgrade to Pro accounts."""
-        data = {'action': 'upgrade', 'stripe_token': 'test'}
-        response = http_post_response(self.url, self.view, data, self.user)
-        eq_(response.status_code, 200)
-        mock_subscribe.assert_called_once_with(data['stripe_token'])
-
-    @patch('muckrock.accounts.models.Profile.start_pro_subscription')
-    def test_upgrade_logged_out(self, mock_subscribe):
-        """Logged out users should not be able to upgrade."""
-        data = {'action': 'upgrade', 'stripe_token': 'test'}
-        response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 200)
-        ok_(not mock_subscribe.called)
-
-    @patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
-    def test_downgrade(self, mock_unsubscribe):
-        """Logged in pro users should be able to downgrade to a Basic account."""
-        data = {'action': 'downgrade'}
-        pro_user = UserFactory(profile__acct_type='pro')
-        response = http_post_response(self.url, self.view, data, pro_user)
-        eq_(response.status_code, 200)
-        ok_(mock_unsubscribe.called)
-
-    @patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
-    def test_downgrade_not_pro(self, mock_unsubscribe):
-        """A user who is not a pro cannot downgrade."""
-        data = {'action': 'downgrade'}
-        response = http_post_response(self.url, self.view, data, self.user)
-        eq_(response.status_code, 200)
-        ok_(not mock_unsubscribe.called)
-
-    @patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
-    def test_downgrade_logged_out(self, mock_unsubscribe):
-        """Logged out users cannot downgrade."""
-        data = {'action': 'downgrade'}
-        response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 200)
-        ok_(not mock_unsubscribe.called)
-
-
-@patch('stripe.Charge', Mock())
-class TestProfileViewBuyRequests(TestCase):
-    """Test buying requests through the profile view"""
-
-    def setUp(self):
-        self.user = UserFactory()
-        self.factory = RequestFactory()
-        self.kwargs = {'username': self.user.username}
-        self.url = reverse('acct-profile', kwargs=self.kwargs)
-        self.view = views.ProfileView.as_view()
-        self.data = {
-            'stripe_token': 'test',
-            'stripe_email': self.user.email,
-            'num_requests': 4,
-        }
-
-    def test_buy_requests(self):
-        """A user should be able to buy themselves requests."""
-        existing_request_count = self.user.profile.num_requests
-        post_request = self.factory.post(self.url, self.data)
-        post_request = mock_middleware(post_request)
-        post_request.user = self.user
-        self.view(post_request, username=self.user.username)
-        self.user.profile.refresh_from_db()
-        eq_(
-            self.user.profile.num_requests,
-            existing_request_count + self.data['num_requests'],
-        )
-
-    @patch('muckrock.message.tasks.gift.delay')
-    def test_buy_requests_for_another(self, mock_notify):
-        """A user should be able to buy someone else requests."""
-        other_user = UserFactory()
-        existing_request_count = other_user.profile.num_requests
-        post_request = self.factory.post(self.url, self.data)
-        post_request = mock_middleware(post_request)
-        post_request.user = self.user
-        self.view(post_request, username=other_user.username)
-        other_user.profile.refresh_from_db()
-        eq_(
-            other_user.profile.num_requests,
-            existing_request_count + self.data['num_requests'],
-        )
-        ok_(
-            mock_notify.called,
-            'The recipient should be notified of their gift by email.'
-        )
-
-    def test_gift_requests_anonymously(self):
-        """Logged out users should also be able to buy someone else requests."""
-        other_user = UserFactory()
-        existing_request_count = other_user.profile.num_requests
-        post_request = self.factory.post(self.url, self.data)
-        post_request = mock_middleware(post_request)
-        post_request.user = AnonymousUser()
-        self.view(post_request, username=other_user.username)
-        other_user.profile.refresh_from_db()
-        eq_(
-            other_user.profile.num_requests,
-            existing_request_count + self.data['num_requests'],
-        )
-
-    @raises(Http404)
-    def test_nonexistant_user(self):
-        """Buying requests for nonexistant user should return a 404."""
-        post_request = self.factory.post(self.url, self.data)
-        post_request = mock_middleware(post_request)
-        post_request.user = self.user
-        self.view(post_request, username='nonexistant_user')
-
-    def test_bad_post_data(self):
-        """Bad post data should cancel the transaction."""
-        existing_request_count = self.user.profile.num_requests
-        bad_data = {'tok': 'bad'}
-        post_request = self.factory.post(self.url, bad_data)
-        post_request = mock_middleware(post_request)
-        post_request.user = self.user
-        self.view(post_request, username=self.user.username)
-        self.user.profile.refresh_from_db()
-        eq_(self.user.profile.num_requests, existing_request_count)
-
-
 class TestAccountFunctional(TestCase):
     """Functional tests for account"""
 
@@ -191,7 +53,7 @@ class TestAccountFunctional(TestCase):
         response = http_get_response(
             reverse('accounts'), views.AccountsView.as_view()
         )
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 302)
         # profile page
         request_factory = RequestFactory()
         request = request_factory.get(self.user.profile.get_absolute_url())

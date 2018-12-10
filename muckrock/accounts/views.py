@@ -9,20 +9,12 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import (
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseNotAllowed,
-)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import FormView, ListView, TemplateView
+from django.views.generic import ListView, RedirectView, TemplateView
 
 # Standard Library
-import json
 import logging
-import sys
 from urllib import urlencode
 
 # Third Party
@@ -38,18 +30,14 @@ from rest_framework.permissions import (
 # MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
-    BillingPreferencesForm,
-    BuyRequestForm,
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
     ReceiptForm,
 )
-from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import (
     ACCT_TYPES,
     Notification,
-    ReceiptEmail,
     RecurringDonation,
     Statistics,
 )
@@ -61,17 +49,16 @@ from muckrock.core.views import MRFilterListView
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
-from muckrock.message.tasks import (
-    failed_payment,
-    send_charge_receipt,
-    send_invoice_receipt,
-)
 from muckrock.news.models import Article
-from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+class AccountsView(RedirectView):
+    """Accounts view redirects to squarelet"""
+    url = '{}/plans/'.format(settings.SQUARELET_URL)
 
 
 def account_logout_helper(request, url):
@@ -96,86 +83,6 @@ def account_logout(request):
     return account_logout_helper(request, settings.MUCKROCK_URL + '/')
 
 
-class AccountsView(TemplateView):
-    """
-    Displays the list of payment plans.
-    If user is logged out, it lets them register for any plan.
-    If user is logged in, it lets them up- or downgrade their account to any plan.
-    """
-    template_name = 'accounts/plans.html'
-
-    def get_context_data(self, **kwargs):
-        """Returns a context based on whether the user is logged in or logged out."""
-        context = super(AccountsView, self).get_context_data(**kwargs)
-        logged_in = self.request.user.is_authenticated()
-        if logged_in:
-            context['acct_type'] = self.request.user.profile.acct_type
-            context['email'] = self.request.user.email
-            context['org'] = (
-                Organization.objects.filter(owner=self.request.user).first()
-            )
-        context['stripe_pk'] = settings.STRIPE_PUB_KEY
-        context['logged_in'] = logged_in
-        return context
-
-    def post(self, request, **kwargs):
-        """Handle upgrades and downgrades of accounts"""
-        try:
-            action = request.POST['action']
-            account_actions = {'downgrade': downgrade, 'upgrade': upgrade}
-            account_actions[action](request)
-        except KeyError as exception:
-            logger.error(exception)
-            messages.error(request, 'No available action was specified.')
-        except AttributeError as exception:
-            logger.error(exception)
-            error_msg = 'You cannot be logged out and modify your account.'
-            messages.error(request, error_msg)
-        except ValueError as exception:
-            logger.error(exception)
-            messages.error(request, exception)
-        except stripe.error.CardError:
-            # card declined
-            logger.warn('Card was declined.')
-            messages.error(request, 'Your card was declined')
-        return self.render_to_response(self.get_context_data())
-
-
-def upgrade(request):
-    """Upgrades the user from a Basic to a Professional account."""
-    if not request.user.is_authenticated():
-        raise AttributeError('Cannot upgrade an anonymous user.')
-    is_pro_user = request.user.profile.acct_type in ['pro', 'proxy']
-    is_org_owner = Organization.objects.filter(owner=request.user).exists()
-    if is_pro_user:
-        raise ValueError(
-            'Cannot upgrade this account, it is already Professional.'
-        )
-    if is_org_owner:
-        raise ValueError(
-            'Cannot upgrade this account, it owns an organization.'
-        )
-    token = request.POST.get('stripe_token')
-    if not token:
-        raise ValueError(
-            'Cannot upgrade this account, no Stripe token provided.'
-        )
-    request.user.profile.start_pro_subscription(token)
-    mixpanel_event(request, 'Pro Subscription Started')
-
-
-def downgrade(request):
-    """Downgrades the user from a Professional to a Basic account."""
-    if not request.user.is_authenticated():
-        raise AttributeError('Cannot downgrade an anonymous user.')
-    if request.user.profile.acct_type != 'pro':
-        raise ValueError(
-            'Cannot downgrade this account, it is not Professional.'
-        )
-    request.user.profile.cancel_pro_subscription()
-    mixpanel_event(request, 'Pro Subscription Cancelled')
-
-
 @method_decorator(login_required, name='dispatch')
 class ProfileSettings(TemplateView):
     """Update a users information"""
@@ -187,17 +94,11 @@ class ProfileSettings(TemplateView):
         settings_forms = {
             'profile': ProfileSettingsForm,
             'email': EmailSettingsForm,
-            'billing': BillingPreferencesForm,
             'org': OrgPreferencesForm,
         }
         action = request.POST.get('action')
         receipt_form = None
-        if action == 'receipt':
-            receipt_form = ReceiptForm(request.POST)
-            success = self._handle_receipt_form(receipt_form)
-            if success:
-                return redirect('acct-settings')
-        elif action == 'cancel-donations':
+        if action == 'cancel-donations':
             self._handle_cancel_payments('donations', 'cancel-donations')
             return redirect('acct-settings')
         elif action == 'cancel-crowdfunds':
@@ -221,28 +122,6 @@ class ProfileSettings(TemplateView):
         # form was invalid
         context = self.get_context_data(receipt_form=receipt_form)
         return self.render_to_response(context)
-
-    def _handle_receipt_form(self, receipt_form):
-        """Process the receipt form"""
-        if receipt_form.is_valid():
-            new_emails = receipt_form.cleaned_data['emails'].split('\n')
-            new_emails = {e.strip() for e in new_emails}
-            old_emails = {
-                r.email
-                for r in self.request.user.receipt_emails.all()
-            }
-            ReceiptEmail.objects.filter(
-                user=self.request.user,
-                email__in=(old_emails - new_emails),
-            ).delete()
-            ReceiptEmail.objects.bulk_create([
-                ReceiptEmail(user=self.request.user, email=e)
-                for e in new_emails - old_emails
-            ])
-            messages.success(self.request, 'Your settings have been updated.')
-            return True
-        else:
-            return False
 
     def _handle_cancel_payments(self, attr, arg):
         """Handle cancelling recurring donations or crowdfunds"""
@@ -275,6 +154,7 @@ class ProfileSettings(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Returns context for the template"""
+        # XXX this contains a lot of stuff moving to squarelet
         context = super(ProfileSettings, self).get_context_data(**kwargs)
         user_profile = self.request.user.profile
         email_initial = {'email': self.request.user.email}
@@ -307,17 +187,15 @@ class ProfileSettings(TemplateView):
             'receipt_form': receipt_form,
             'org_form': org_form,
             'current_plan': current_plan,
-            'credit_card': user_profile.card(),
             'donations': donations,
             'crowdfunds': crowdfunds,
         })
         return context
 
 
-class ProfileView(BuyRequestsMixin, FormView):
+class ProfileView(TemplateView):
     """View a user's profile"""
     template_name = 'accounts/profile.html'
-    form_class = BuyRequestForm
 
     def dispatch(self, request, *args, **kwargs):
         """Get the user and redirect if neccessary"""
@@ -328,31 +206,6 @@ class ProfileView(BuyRequestsMixin, FormView):
         self.user = get_object_or_404(User, username=username, is_active=True)
         return super(ProfileView, self).dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        """Check for cancel pro before checking form"""
-        if (
-            request.user.is_staff and request.POST.get('action') == 'cancel-pro'
-        ):
-            self.user.profile.cancel_pro_subscription()
-            mixpanel_event(request, 'Pro Subscription Cancelled')
-            messages.success(request, 'Pro account has been cancelled')
-            return redirect('acct-profile', username=self.user.username)
-        else:
-            return super(ProfileView, self).post(request, *args, **kwargs)
-
-    def get_initial(self):
-        """Set the form label"""
-        if self.user == self.request.user:
-            return {'stripe_label': 'Buy'}
-        else:
-            return {'stripe_label': 'Gift'}
-
-    def get_form_kwargs(self):
-        """Give the form the current user"""
-        kwargs = super(ProfileView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
     def get_context_data(self, **kwargs):
         """Get data for the profile page"""
         context_data = super(ProfileView, self).get_context_data(**kwargs)
@@ -361,7 +214,7 @@ class ProfileView(BuyRequestsMixin, FormView):
             org and (
                 not org.private or self.request.user.is_staff or (
                     self.request.user.is_authenticated()
-                    and self.request.user.profile.is_member_of(org)
+                    and org.has_member(self.request.user)
                 )
             )
         )
@@ -404,81 +257,6 @@ class ProfileView(BuyRequestsMixin, FormView):
                 Token.objects.get_or_create(user=self.user)[0],
         })
         return context_data
-
-    def form_valid(self, form):
-        """Buy requests"""
-        self.buy_requests(form, recipient=self.user)
-        return redirect('acct-profile', username=self.user.username)
-
-
-@csrf_exempt
-def stripe_webhook(request):
-    """Handle webhooks from stripe"""
-    if request.method != "POST":
-        return HttpResponseNotAllowed(['POST'])
-
-    payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    try:
-        if settings.STRIPE_WEBHOOK_SECRET:
-            event = stripe.Webhook.construct_event(
-                payload,
-                sig_header,
-                settings.STRIPE_WEBHOOK_SECRET,
-            )
-        else:
-            event = json.loads(request.body)
-
-        event_id = event['id']
-        event_type = event['type']
-        if event_type.startswith(('charge', 'invoice')):
-            event_object_id = event['data']['object'].get('id', '')
-        else:
-            event_object_id = ''
-    except (TypeError, ValueError, SyntaxError) as exception:
-        logging.error(
-            'Stripe Webhook: Error parsing JSON: %s',
-            exception,
-            exc_info=sys.exc_info(),
-        )
-        return HttpResponseBadRequest()
-    except KeyError as exception:
-        logging.error(
-            'Stripe Webhook: Unexpected structure: %s in %s',
-            exception,
-            event,
-            exc_info=sys.exc_info(),
-        )
-        return HttpResponseBadRequest()
-    except stripe.error.SignatureVerificationError as exception:
-        logging.error(
-            'Stripe Webhook: Signature Verification Error: %s',
-            sig_header,
-            exc_info=sys.exc_info(),
-        )
-        return HttpResponseBadRequest()
-    # If we've made it this far, then the webhook message was successfully sent!
-    # Now it's up to us to act on it.
-    success_msg = (
-        'Received Stripe webhook\n'
-        '\tfrom:\t%(address)s\n'
-        '\tid:\t%(id)s\n'
-        '\ttype:\t%(type)s\n'
-        '\tdata:\t%(data)s\n'
-    ) % {
-        'address': request.META['REMOTE_ADDR'],
-        'id': event_id,
-        'type': event_type,
-        'data': event
-    }
-    logger.info(success_msg)
-    if event_type == 'charge.succeeded':
-        send_charge_receipt.delay(event_object_id)
-    elif event_type == 'invoice.payment_succeeded':
-        send_invoice_receipt.delay(event_object_id)
-    elif event_type == 'invoice.payment_failed':
-        failed_payment.delay(event_object_id)
-    return HttpResponse()
 
 
 class UserViewSet(viewsets.ModelViewSet):

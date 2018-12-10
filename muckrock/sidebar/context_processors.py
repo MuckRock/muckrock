@@ -47,7 +47,7 @@ def get_organization(user):
     """Gets organization, if it exists"""
 
     return cache_get_or_set(
-        'sb:%s:user_org' % user.username, user.profile.get_org,
+        'sb:%s:user_org' % user.username, lambda: user.profile.organization,
         settings.DEFAULT_CACHE_TIMEOUT
     )
 

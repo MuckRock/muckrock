@@ -79,6 +79,8 @@ def store_statistics():
     yesterday = date.today() - timedelta(1)
     yesterday_midnight = today_midnight - timedelta(1)
 
+    # XXX a lot of these need to be redone
+
     stats = Statistics.objects.create(
         **{
             'date':
@@ -224,8 +226,7 @@ def store_statistics():
                 .exclude_org_users().count(),
             'daily_requests_org':
                 FOIARequest.objects.filter(
-                    composer__user__profile__organization__active=True,
-                    composer__user__profile__organization__monthly_cost__gt=0,
+                    composer__organization__individual=False,
                 ).get_submitted_range(yesterday_midnight, today_midnight)
                 .count(),
             'daily_articles':
@@ -342,15 +343,10 @@ def store_statistics():
                 SnailMailTask.objects.filter(resolved=False, category='a')
                 .get_undeferred().count(),
             'total_active_org_members':
-                Profile.objects.filter(
-                    organization__active=True,
-                    organization__monthly_cost__gt=0,
-                ).count(),
+                Profile.objects.filter(user__organizations__individual=False,)
+                .count(),
             'total_active_orgs':
-                Organization.objects.filter(
-                    active=True,
-                    monthly_cost__gt=0,
-                ).count(),
+                Organization.objects.filter(individual=False).count(),
             'total_crowdfunds':
                 Crowdfund.objects.count(),
             'total_crowdfunds_pro':

@@ -268,6 +268,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
         composer = FOIAComposer.objects.create(
             user=request.user,
+            organization=request.user.profile.organization,
             title=data['title'],
             slug=slugify(data['title']) or 'untitled',
             requested_docs=data['requested_docs'],

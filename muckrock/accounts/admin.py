@@ -4,13 +4,11 @@ Admin registration for accounts models
 
 # Django
 from django import forms
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 
 # Third Party
-import stripe
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
@@ -70,6 +68,9 @@ class ReceiptEmailInline(admin.StackedInline):
     extra = 1
 
 
+# XXX be careful with admin editing and squarelet
+
+
 class MRUserAdmin(UserAdmin):
     """User admin options"""
     list_display = (
@@ -82,44 +83,6 @@ class MRUserAdmin(UserAdmin):
     )
     list_filter = ('profile__acct_type',) + UserAdmin.list_filter
     inlines = [ProfileInline, ReceiptEmailInline]
-
-    def save_related(self, request, form, formsets, change):
-        """Creates/cancels a pro subscription if changing to/from pro acct_type"""
-        obj = form.instance
-        try:
-            profile = obj.profile
-            before_acct_type = profile.acct_type
-        except ObjectDoesNotExist:
-            profile = None
-            before_acct_type = None
-        try:
-            after_acct_type = formsets[0].cleaned_data[0].get('acct_type')
-        except IndexError:
-            after_acct_type = None
-        if change and profile:
-            # we want to subscribe users when acct_type changes to 'pro'
-            # and unsubscribe users when acct_type changes from 'pro'
-            if before_acct_type != after_acct_type:
-                try:
-                    if after_acct_type == 'pro':
-                        profile.start_pro_subscription()
-                    elif before_acct_type == 'pro':
-                        profile.cancel_pro_subscription()
-                except (
-                    stripe.InvalidRequestError, stripe.CardError, ValueError
-                ) as exception:
-                    messages.error(request, exception)
-        else:
-            # if creating a new pro from scratch, try starting their subscription
-            try:
-                if after_acct_type == 'pro':
-                    profile.start_pro_subscription()
-            except (
-                stripe.InvalidRequestError, stripe.CardError, ValueError
-            ) as exception:
-                messages.error(request, exception)
-        obj.save()
-        super(MRUserAdmin, self).save_related(request, form, formsets, change)
 
     def full_name(self, obj):
         """Show full name from profile"""
@@ -138,6 +101,9 @@ class RecurringDonationAdminForm(forms.ModelForm):
     class Meta:
         model = RecurringDonation
         fields = '__all__'
+
+
+# XXX what to do with recurring donations
 
 
 class RecurringDonationAdmin(VersionAdmin):

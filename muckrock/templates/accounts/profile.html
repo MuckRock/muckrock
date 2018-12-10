@@ -60,18 +60,22 @@
     <dl class="stats">
       {% if user.profile.acct_type != 'basic' %}
         <dt>Monthly Requests</dt>
-        {% if user_obj.profile.get_monthly_requests %}
-          <dd>{{ user_obj.profile.get_monthly_requests }}</dd>
+        {% with monthly_requests=user_obj.profile.organization.monthly_requests %}
+          {% if monthly_requests %}
+            <dd>{{ monthly_requests }}</dd>
+          {% else %}
+            <dd>0</dd>
+          {% endif %}
+        {% endwith %}
+      {% endif %}
+      <dt>Requests Remaining</dt>
+      {% with number_requests=user_obj.profile.organization.number_requests %}
+        {% if number_requests %}
+          <dd>{{ number_requests }}</dd>
         {% else %}
           <dd>0</dd>
         {% endif %}
-      {% endif %}
-      <dt>Requests Remaining</dt>
-      {% if user_obj.profile.num_requests %}
-        <dd>{{ user_obj.profile.num_requests }}</dd>
-      {% else %}
-        <dd>0</dd>
-      {% endif %}
+      {% endwith %}
     </dl>
   {% endif %}
   {% if org and show_org_link %}
@@ -92,43 +96,13 @@
         </form>
       {% endif %}
       {% if request.user == user_obj %}
-        {% if user.profile.acct_type == 'basic' and not user.profile.organization %}
-          <a href="{% url 'accounts' %}" class="blue button">Go Pro!</a>
-        {% endif %}
         <div class="button-group">
           <a href="{% url 'foia-create' %}" class="blue button" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
             {% include 'lib/component/icon/create-request.svg' %}
             <span>File a Request</span>
           </a>
-          <button class="blue button" form="buy-requests" type="submit">Buy Requests</button>
         </div>
         <a href="{% url 'acct-settings' %}" class="button">Settings</a>
-      {% else %}
-        <button class="primary button" form="buy-requests" type="submit">&hearts; Gift Requests</button>
-      {% endif %}
-
-      <form method="POST" class="stripe-checkout" id="buy-requests">
-        {% csrf_token %}
-        <div class="hidden-fields">
-          {% for field in form.hidden_fields %}
-            {{ field }}
-          {% endfor %}
-        </div>
-        {% include "lib/pattern/buy_requests.html" with user=user form=form only %}
-      </form>
-
-      {% if request.user.is_staff and user_obj.profile.acct_type == "pro" %}
-        <div class="modal" id="cancel-pro">
-          <form method="post">
-            {% csrf_token %}
-            <p>Are you sure you want to cancel {{user_obj.username}}'s pro account?</p>
-            <footer>
-              <button type="submit" name="action" value="cancel-pro" class="primary button">Confirm</button>
-              <span class="close-modal button">Cancel</span>
-            </footer>
-          </form>
-        </div>
-        <a href="#cancel-pro" class="modal-trigger button">Cancel Subscription</a>
       {% endif %}
     </div>
   </section>

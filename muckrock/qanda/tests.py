@@ -64,7 +64,6 @@ class TestQandA(TestCase):
         nose.tools.ok_(question.user.is_active)
         block_user(request, 'question', question.pk)
         question.user.refresh_from_db()
-        print 'question user', question.user.pk, question.user.username
         nose.tools.assert_false(question.user.is_active)
         nose.tools.eq_(len(mail.outbox), 1)
 

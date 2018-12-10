@@ -693,7 +693,7 @@ ZOHO_DEPT_IDS = {
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_SQUARELET_KEY = os.environ.get('SQUARELET_KEY')
 SOCIAL_AUTH_SQUARELET_SECRET = os.environ.get('SQUARELET_SECRET')
-SOCIAL_AUTH_SQUARELET_SCOPE = ['uuid']
+SOCIAL_AUTH_SQUARELET_SCOPE = ['uuid', 'organizations']
 SOCIAL_AUTH_TRAILING_SLASH = False
 
 SOCIAL_AUTH_PIPELINE = (
@@ -705,6 +705,7 @@ SOCIAL_AUTH_PIPELINE = (
     'muckrock.accounts.pipeline.associate_by_uuid',
     'social_core.pipeline.user.create_user',
     'muckrock.accounts.pipeline.save_profile',
+    'muckrock.accounts.pipeline.link_organizations',
     'muckrock.accounts.pipeline.save_session_data',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
