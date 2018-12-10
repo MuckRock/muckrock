@@ -24,7 +24,7 @@
                     {% if contributors_count > 0 %}
                         <ul class="contributor dropdown">
                             {% for contributor in named_contributors %}
-                                <li>{{ contributor.get_full_name }}</li>
+                                <li>{{ contributor.profile.full_name }}</li>
                             {% endfor %}
                             {% if anon_contributors_count %}
                                 <li>{{ anon_contributors_count }} anonymous backer{{ anon_contributors_count|pluralize }}</li>
@@ -60,7 +60,7 @@
                     <label for="id_show">{{ payment_form.show }} <strong>List me as a backer</strong></label>
                     {% if logged_in %}
                         <div class="anonymity__account anonymity__account--authenticated">
-                            <p class="small">You are logged in as <a class="action" href="{{request.user.get_absolute_url}}" target="_blank">{{ request.user.get_full_name }}</a>.</p>
+                            <p class="small">You are logged in as <a class="action" href="{{request.user.get_absolute_url}}" target="_blank">{{ request.user.profile.full_name }}</a>.</p>
                         </div>
                     {% else %}
                         <div class="anonymity__account anonymity__account--unauthenticated">

@@ -197,7 +197,7 @@ def boilerplate(request):
         pk__in=[i.split('$')[3] for i in new_agency_pks]
     )
     if request.user.is_authenticated:
-        user_name = request.user.get_full_name()
+        user_name = request.user.profile.full_name
     else:
         user_name = (
             '<abbr class="tooltip" title="This will be replaced by your full '

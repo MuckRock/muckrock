@@ -181,7 +181,7 @@ class TestNewsletterSignupView(TestCase):
             form.data['email'],
             form.data['list'],
             source='Newsletter Sign Up Form',
-            url='https://localhost:8000/newsletter-post/',
+            url='https://{}/newsletter-post/'.format(settings.MUCKROCK_URL),
         )
         eq_(
             response.status_code, 302,
@@ -204,7 +204,7 @@ class TestNewsletterSignupView(TestCase):
             form.data['email'],
             form.data['list'],
             source='Newsletter Sign Up Form',
-            url='https://localhost:8000/newsletter-post/',
+            url='https://{}/newsletter-post/'.format(settings.MUCKROCK_URL),
         )
         mock_subscribe.assert_any_call(
             ANY,
@@ -212,7 +212,7 @@ class TestNewsletterSignupView(TestCase):
             settings.MAILCHIMP_LIST_DEFAULT,
             suppress_msg=True,
             source='Newsletter Sign Up Form',
-            url='https://localhost:8000/newsletter-post/',
+            url='https://{}/newsletter-post/'.format(settings.MUCKROCK_URL),
         )
         eq_(
             response.status_code, 302,

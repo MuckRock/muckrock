@@ -61,13 +61,6 @@
         <div class="news-request__foias grid__column three-quarters">
             {% for foia in article.foias.all %}
             {% include 'lib/foia.html' with hide_actions=True %}
-            {% comment %}
-            <div class="news-request__foia">
-                <p class="mb0"><span class="small badge {{ foia.status|classify_status }}">{{ foia.get_status_display }}</span></p>
-                <p class="h2 mb0"><a class="black" href="{{foia.get_absolute_url}}">{{foia.title}}</a></p>
-                <p><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
-            </div>
-            {% endcomment %}
             {% endfor %}
         </div>
     </div>

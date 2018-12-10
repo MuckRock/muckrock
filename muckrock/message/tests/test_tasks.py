@@ -116,21 +116,11 @@ class TestNotificationTasks(TestCase):
     def setUp(self):
         self.user = UserFactory()
 
-    def test_welcome(self, mock_send):
-        """Welcomes a new user to the site."""
-        tasks.welcome(self.user)
-        mock_send.assert_called_with(fail_silently=False)
-
     def test_gift(self, mock_send):
         """Tells the user when they have been given a gift."""
         sender = UserFactory()
         gift = '4 requests'
         tasks.gift(self.user, sender, gift)
-        mock_send.assert_called_with(fail_silently=False)
-
-    def test_email_verify(self, mock_send):
-        """Ask the user to verify their account email."""
-        tasks.email_verify(self.user)
         mock_send.assert_called_with(fail_silently=False)
 
     @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())

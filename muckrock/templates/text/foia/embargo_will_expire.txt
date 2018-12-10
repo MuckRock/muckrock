@@ -1,5 +1,5 @@
 {% autoescape off %}
-Dear {{request.user.get_full_name}},
+Dear {{request.user.profile.full_name}},
 
 The embargo on your FOI request "{{request.title}}" will expire tomorrow. If you need to renew it, please login now and update it. If you do not need to keep it secret at this time, please consider allowing the embargo to expire so that the community may benefit by having more public requests.
 

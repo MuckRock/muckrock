@@ -12,7 +12,7 @@
     {% endif %}
     {% if task.user %}
       <dt>User</dt>
-      <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user.get_full_name}}</a></dd>
+      <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user.profile.full_name}}</a></dd>
     {% endif %}
     {% if task.foia %}
       <dt>Request</dt>

@@ -1,6 +1,6 @@
 {% autoescape off %}
 
-{{question.user.get_full_name}} asked a question on MuckRock:
+{{question.user.profile.full_name}} asked a question on MuckRock:
 
 {{question.question}}
 

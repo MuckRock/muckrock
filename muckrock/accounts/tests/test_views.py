@@ -446,11 +446,7 @@ class TestAccountFunctional(TestCase):
         # pylint: disable=unused-argument
         profile = self.user.profile
         profile_data = {'action': 'profile', 'twitter': 'allanlasser'}
-        email_data = {
-            'action': 'email',
-            'email': 'allan@muckrock.com',
-            'email_pref': 'hourly'
-        }
+        email_data = {'action': 'email', 'email_pref': 'hourly'}
         settings_url = reverse('acct-settings')
         http_post_response(
             settings_url, views.ProfileSettings.as_view(), profile_data,
@@ -466,10 +462,7 @@ class TestAccountFunctional(TestCase):
         all_data.update(email_data)
         all_data.pop('action')
         for key, val in all_data.iteritems():
-            if key == 'email':
-                eq_(val, getattr(self.user, key))
-            else:
-                eq_(val, getattr(profile, key))
+            eq_(val, getattr(profile, key))
 
 
 class TestNotificationList(TestCase):

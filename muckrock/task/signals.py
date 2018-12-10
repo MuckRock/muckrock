@@ -41,7 +41,7 @@ def format_user(user):
     base_url = 'https://www.muckrock.com'
     return '<%(url)s|%(name)s>' % {
         'url': base_url + user.get_absolute_url(),
-        'name': user.get_full_name(),
+        'name': user.profile.full_name,
     }
 
 

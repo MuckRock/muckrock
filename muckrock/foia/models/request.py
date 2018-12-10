@@ -610,7 +610,7 @@ class FOIARequest(models.Model):
             file_ = comm.files.create(
                 title=os.path.basename(attachment.ffile.name),
                 datetime=comm.datetime,
-                source=user.get_full_name(),
+                source=user.profile.full_name,
                 access=access,
             )
             file_.ffile.name = attachment.ffile.name
@@ -1236,7 +1236,7 @@ class FOIARequest(models.Model):
         """Create the initial request communication"""
         text = initial_communication_template(
             [self.agency],
-            from_user.get_full_name(),
+            from_user.profile.full_name,
             self.composer.requested_docs,
             edited_boilerplate=self.composer.edited_boilerplate,
             proxy=proxy,

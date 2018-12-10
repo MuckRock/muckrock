@@ -24,9 +24,9 @@ class AuthorListFilter(admin.SimpleListFilter):
         """All authors"""
         authors = (
             User.objects.exclude(authored_articles=None)
-            .order_by('profile__full_name')
+            .select_related('profile').order_by('profile__full_name')
         )
-        return tuple((a.pk, a.get_full_name()) for a in authors)
+        return tuple((a.pk, a.profile.full_name) for a in authors)
 
     def queryset(self, request, queryset):
         """Articles by the selected author"""

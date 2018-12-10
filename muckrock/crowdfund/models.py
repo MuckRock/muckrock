@@ -101,7 +101,7 @@ class Crowdfund(models.Model):
         # returns the list of a set of a list to remove duplicates
         return User.objects.filter(
             crowdfundpayment__crowdfund=self, crowdfundpayment__show=True
-        ).distinct()
+        ).select_related('profile').distinct()
 
     def get_crowdfund_object(self):
         """Is this for a request or a project?"""

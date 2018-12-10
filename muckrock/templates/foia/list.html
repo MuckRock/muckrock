@@ -110,7 +110,7 @@
         <span class="small green badge">Active Crowdfund</span>
       {% endif %}
     </td>
-    <td>{{ foia.user.get_full_name }}</td>
+    <td>{{ foia.user.profile.full_name }}</td>
     <td>{{ foia.agency }}</td>
     <td>{{ foia.jurisdiction }}</td>
     <td>{{ foia.datetime_updated|date:"m/d/Y" }}</td>

@@ -172,7 +172,7 @@
                 {% empty %}
                   <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
                 {% endthumbnail %}
-                <span class="label">{{ user.get_full_name }}</span>
+                <span class="label">{{ user.profile.full_name }}</span>
               </a>
               <ul id="profile-dropdown">
                 {% if payment_failed %}

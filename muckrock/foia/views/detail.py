@@ -268,6 +268,7 @@ class Detail(DetailView):
         context['cc_emails'] = json.dumps([
             unicode(e) for e in foia.cc_emails.all()
         ])
+        context['notes'] = foia.notes.select_related('author').all()
         if (
             foia.composer.status == 'submitted'
             and foia.composer.datetime_submitted is not None

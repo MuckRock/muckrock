@@ -24,7 +24,7 @@ from muckrock.accounts.utils import (
     unique_username,
 )
 from muckrock.core.utils import generate_key
-from muckrock.message.tasks import gift, welcome_miniregister
+from muckrock.message.tasks import gift
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ class MiniregMixin(object):
 
     def miniregister(self, full_name, email, newsletter=False):
         """Create a new user from their full name and email and login"""
+        # XXX make a new user on squarelet
         password = generate_key(12)
         full_name = full_name.strip()
         username = unique_username(full_name)
@@ -52,8 +53,6 @@ class MiniregMixin(object):
             date_update=date.today(),
             full_name=full_name,
         )
-        # send the new user a welcome email
-        welcome_miniregister.delay(user)
         user = authenticate(
             username=user.username,
             password=password,

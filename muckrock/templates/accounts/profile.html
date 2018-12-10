@@ -3,7 +3,7 @@
 {% load static from staticfiles %}
 
 {% block title %}
-  {{user_obj.get_full_name}} ({{ user_obj.username }}) &bull; MuckRock
+  {{user_obj.profile.full_name}} ({{ user_obj.username }}) &bull; MuckRock
 {% endblock title %}
 {% block type %}account{% endblock type %}
 
@@ -15,7 +15,7 @@
 {% block open_graph %}
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="{{user_obj.get_absolute_url}}" />
-  <meta property="og:title" content="{{user_obj.get_full_name}} ({{user_obj.username}})" />
+  <meta property="og:title" content="{{user_obj.profile.full_name}} ({{user_obj.username}})" />
   <meta property="og:description" content="{{user_obj.profile.full_name}} has filed {{requests.all.count}} public records requests on MuckRock." />
   <meta property="og:site_name" content="MuckRock" />
   {% if profile.avatar_url %}
@@ -26,7 +26,7 @@
 {% block twitter_card %}
   <meta name="twitter:site" content="@muckrock" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="{{user_obj.get_full_name}} ({{user_obj.username}})" />
+  <meta name="twitter:title" content="{{user_obj.profile.full_name}} ({{user_obj.username}})" />
   <meta name="twitter:description" content="{{user_obj.profile.full_name}} has filed {{requests.all.count}} public records requests on MuckRock." />
   {% if profile.avatar_url %}<meta name="twitter:image:src" content="{{ profile.avatar_url }}" />{% endif %}
   {% if profile.twitter %}<meta name="twitter:creator" content="{{ profile.twitter }}" />{% endif %}
@@ -39,7 +39,7 @@
     {% empty %}
       <img src="{% static 'img/defaultavatar.png' %}" class="avatar">
     {% endthumbnail %}
-    <h1 class="fullname">{{user_obj.get_full_name}}</h1>
+    <h1 class="fullname">{{user_obj.profile.full_name}}</h1>
     <p class="username">{{user_obj.username}}</p>
   </section>
   <ul class="links nostyle">

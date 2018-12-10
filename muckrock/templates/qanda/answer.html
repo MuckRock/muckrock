@@ -4,7 +4,7 @@
 {% has_perm 'qanda.block' request.user as can_block %}
 <div class="collapsable textbox {% if answer.user == answer.question.user %}blue{% endif %} answer" id="answer-{{answer.id}}">
     <header class="textbox__header answer-header">
-        <span class="from">{{answer.user.get_full_name}}</span>
+        <span class="from">{{answer.user.profile.full_name}}</span>
         <span>
             <a href="{{answer.question.get_absolute_url}}#answer-{{answer.id}}" class="nocollapse permalink"><time class="date" datetime="{{answer.date|date:'c'}}">{{answer.date|date:'m/d/Y'}}</time></a>
             {% if request.user.is_authenticated %}

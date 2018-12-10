@@ -6,7 +6,7 @@
 <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
 <dl>
     <dt>User</dt>
-    <dd><a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a></dd>
+    <dd><a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.profile.full_name }}</a></dd>
     <dt>Agency</dt>
     <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a></dd>
     <dt>Status</dt>

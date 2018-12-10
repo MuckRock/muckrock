@@ -28,11 +28,10 @@ class TestMiniregister(TestCase):
         self.full_name = 'Lou Reed'
         self.email = 'lou@hero.in'
 
-    @patch('muckrock.message.tasks.welcome_miniregister.delay')
-    def test_expected_case(self, mock_welcome):
+    def test_expected_case(self):
         """
         Giving the miniregister method a full name, email, and password should
-        create a user, create a profile, send them a welcome email, and log them in.
+        create a user, create a profile, and log them in.
         The method should return the authenticated user.
         """
         request = RequestFactory()
@@ -42,7 +41,6 @@ class TestMiniregister(TestCase):
         ok_(isinstance(user, User), 'A user should be created and returned.')
         ok_(user.profile, 'A profile should be created for the user.')
         ok_(user.is_authenticated(), 'The user should be logged in.')
-        mock_welcome.assert_called_once()  # The user should get a welcome email
         eq_(user.profile.full_name, 'Lou Reed')
         eq_(
             user.username, 'LouReed',

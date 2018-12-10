@@ -27,7 +27,7 @@
         {% for contributor in contributors %}
           {% if forloop.last and contributors_len > 1 %}and {% endif %}
           <a href="{{ contributor.profile.get_absolute_url }}">
-            {{ contributor.get_full_name }}</a>{% if not forloop.last and contributors_len > 2 %},{% endif %}
+            {{ contributor.profile.full_name }}</a>{% if not forloop.last and contributors_len > 2 %},{% endif %}
         {% endfor %}
       {% endwith %}
       for contributing to this entry.

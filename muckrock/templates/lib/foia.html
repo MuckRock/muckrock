@@ -9,7 +9,7 @@
     </header>
     <main class="foia__single__main">
         <p class="title"><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></p>
-        <p class="small summary"><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.get_full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
+        <p class="small summary"><a href="{% url 'acct-profile' username=foia.user.username %}">{{ foia.user.profile.full_name }}</a> sent this request to the <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a> of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}</p>
     </main>
     {% if not hide_actions %}
     <footer class="foia__single__footer">
