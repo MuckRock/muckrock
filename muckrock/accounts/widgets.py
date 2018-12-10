@@ -367,6 +367,8 @@ class OrgUserCountWidget(CompareNumberWidget):
     direction = 1
     more_info = 'vs one month ago'
 
+    # XXX
+
     def get_value(self):
         """Get value"""
         return (

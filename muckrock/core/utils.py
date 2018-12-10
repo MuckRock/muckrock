@@ -5,7 +5,7 @@ Miscellanous utilities
 # Django
 from django.conf import settings
 from django.contrib.auth.models import Group, User
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
 from django.utils.module_loading import import_string
@@ -20,6 +20,7 @@ import uuid
 
 # Third Party
 import actstream
+import requests
 import stripe
 
 # MuckRock
@@ -198,3 +199,54 @@ def read_in_chunks(file_, size=128):
             file_.close()
             break
         yield chunk
+
+
+def get_squarelet_access_token():
+    """Get an access token for squarelet"""
+
+    lock_cache = caches['lock']
+
+    # if not in cache, lock, acquire token, put in cache
+    access_token = lock_cache.get('squarelet_access_token')
+    if access_token is None:
+        with lock_cache.lock('squarelt_access_token'):
+            access_token = lock_cache.get('squarelet_access_token')
+            if access_token is None:
+                token_url = '{}/openid/token'.format(settings.SQUARELET_URL)
+                auth = (
+                    settings.SOCIAL_AUTH_SQUARELET_KEY,
+                    settings.SOCIAL_AUTH_SQUARELET_SECRET,
+                )
+                data = {'grant_type': 'client_credentials'}
+                resp = requests.post(token_url, data=data, auth=auth)
+                resp.raise_for_status()
+                resp_json = resp.json()
+                access_token = resp_json['access_token']
+                # expire a few seconds early to ensure its not expired
+                # when we try to use it
+                expires_in = int(resp_json['expires_in']) - 10
+                lock_cache.set(
+                    'squarelet_access_token', access_token, expires_in
+                )
+    return access_token
+
+
+# XXX catch network errors?
+def _squarelet(method, path, **kwargs):
+    """Helper function for squarelet requests"""
+    api_url = '{}{}'.format(settings.SQUARELET_URL, path)
+    access_token = get_squarelet_access_token()
+    headers = {'Authorization': 'Bearer {}'.format(access_token)}
+    return method(api_url, headers=headers, **kwargs)
+
+
+def squarelet_post(path, data):
+    """Make a post request to squarlet"""
+    return _squarelet(requests.post, path, data=data)
+
+
+def squarelet_get(path, params=None):
+    """Make a get request to squarlet"""
+    if params is None:
+        params = {}
+    return _squarelet(requests.get, path, params=params)

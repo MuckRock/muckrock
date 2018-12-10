@@ -20,7 +20,6 @@ from muckrock.communication.models import EmailAddress
 from muckrock.core.utils import new_action
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.news.models import Article
-from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Answer, Question
 
@@ -35,8 +34,6 @@ class ProfileFactory(factory.django.DjangoModelFactory):
         'muckrock.core.factories.UserFactory', profile=None
     )
     acct_type = 'basic'
-    date_update = timezone.now()
-    customer_id = "cus_RTW3KxBMCknuhB"
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -48,6 +45,11 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+    membership = factory.RelatedFactory(
+        'muckrock.organization.factories.MembershipFactory',
+        'user',
+        organization__individual=True,
+    )
 
     @factory.post_generation
     def password(self, create, extracted, **kwargs):
@@ -66,17 +68,6 @@ class NotificationFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     action = factory.LazyAttribute(lambda obj: new_action(obj.user, 'acted'))
-
-
-class OrganizationFactory(factory.django.DjangoModelFactory):
-    """A factory for creating Organization test objects."""
-
-    class Meta:
-        model = Organization
-
-    name = factory.Sequence(lambda n: "Organization %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    owner = factory.SubFactory(UserFactory)
 
 
 class AgencyFactory(factory.django.DjangoModelFactory):

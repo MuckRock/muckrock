@@ -18,6 +18,8 @@ from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
+# XXX move receipts to squarelet
+
 
 class LineItem(object):
     """A line item for a receipt"""

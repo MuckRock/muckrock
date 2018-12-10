@@ -1126,6 +1126,10 @@ class TestFOIAComposerViews(TestCase):
 
     def setUp(self):
         self.request_factory = RequestFactory()
+        self.mocker = requests_mock.Mocker()
+        mock_squarelet(self.mocker)
+        self.mocker.start()
+        self.addCleanup(self.mocker.stop)
 
     def test_get_create_composer(self):
         """Get the create composer form"""
@@ -1158,10 +1162,8 @@ class TestFOIAComposerViews(TestCase):
         response = CreateComposer.as_view()(request)
         eq_(response.status_code, 200)
 
-    @requests_mock.Mocker()
-    def test_post_create_composer_anonymous(self, mock_requests):
+    def test_post_create_composer_anonymous(self):
         """Create a new composer as an anonymous user"""
-        mock_squarelet(mock_requests)
         agency = AgencyFactory()
         data = {
             'title': 'Title',

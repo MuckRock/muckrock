@@ -32,6 +32,9 @@ class FOIAComposerFactory(factory.django.DjangoModelFactory):
         model = FOIAComposer
 
     user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    organization = factory.SubFactory(
+        'muckrock.organization.factories.OrganizationFactory'
+    )
     title = factory.Sequence('FOIA Composer #{}'.format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
 

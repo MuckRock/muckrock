@@ -1,11 +1,9 @@
 """
 Custom pipeline steps for oAuth authentication
 """
-# Standard Library
-from datetime import date
-
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.organization.models import Membership, Organization
 
 
 def associate_by_uuid(backend, response, user=None, *args, **kwargs):
@@ -31,7 +29,6 @@ def save_profile(backend, user, response, *args, **kwargs):
         user.profile = Profile(
             user=user,
             acct_type='basic',
-            date_update=date.today(),
             uuid=response['uuid'],
         )
 
@@ -54,9 +51,45 @@ def save_profile(backend, user, response, *args, **kwargs):
     user.save()
 
 
+def link_organizations(backend, user, response, *args, **kwargs):
+    """Link the users organizations"""
+    # pylint: disable=unused-argument
+    # XXX test
+    new_organizations = set(
+        Organization.objects.filter(uuid__in=response['organizations'])
+    )
+    current_organizations = set(user.organizations.all())
+    add_organizations = new_organizations - current_organizations
+    remove_organizations = current_organizations - new_organizations
+
+    # user must have an active organization, if the current
+    # active one is removed, we will activate another one
+    active_organization = user.profile.organization
+    active_removed = active_organization in remove_organizations
+
+    # never remove the user's individual organization
+    individual_organization = user.memberships.get(
+        organization__individual=True
+    )
+    if individual_organization in remove_organizations:
+        #logger.error('Trying to remove a user\'s individual organization')
+        remove_organizations.remove(individual_organization)
+
+    user.memberships.bulk_create([
+        Membership(user=user, organization=org, active=False)
+        for org in add_organizations
+    ])
+    user.memberships.filter(organization__in=remove_organizations).delete()
+
+    if active_removed:
+        user.memberships.filter(organization__individual=True
+                                ).update(active=True)
+
+
 def save_session_data(strategy, request, response, *args, **kwargs):
     """Save some data in the session"""
     # pylint: disable=unused-argument
+    # session_state and id_token are used for universal logout functionality
     session_state = strategy.request_data().get('session_state')
     if session_state:
         request.session['session_state'] = session_state

@@ -92,10 +92,10 @@ def is_read_collaborator(user, foia):
 @skip_if_not_obj
 @user_authenticated
 def is_org_shared(user, foia):
+    # XXX only active org?
     return (
         foia.user.is_authenticated() and foia.user.profile.org_share
-        and foia.user.profile.organization is not None
-        and foia.user.profile.organization == user.profile.organization
+        and foia.composer.organization.has_member(user)
     )
 
 
@@ -184,6 +184,7 @@ def is_agency_user(user):
 @predicate
 @user_authenticated
 def is_org_member(user):
+    # XXX bring in org types / plan types
     return user.profile.organization and user.profile.organization.active
 
 

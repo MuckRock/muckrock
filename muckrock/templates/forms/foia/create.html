@@ -163,23 +163,19 @@
                  data-month="{{ requests_left.monthly }}"
                  data-reg="{{ requests_left.regular }}"
                  >
-               {% with org=user.profile.get_org %}
-                 <p>
-                   You have
-                    {% if org %}
-                      <strong>{{ requests_left.org }}</strong> organizational
-                      (<a href="{{ org.get_absolute_url }}">{{ org.name }} </a>)
-                      requests left,
-                    {% endif %}
-                    {% if user.profile.is_advanced %}
-                      <strong>{{ requests_left.monthly }}</strong>
-                      monthly requests left and
-                    {% endif %}
-                    <strong>{{ requests_left.regular }}</strong> purchased requests
-                    left.
-                 </p>
-                 <p class="using-requests"></p>
-               {% endwith %}
+              {% if not organization.individual %}
+                <p>You are currently working on behalf of the organization {{ organization.name }}.</p>
+              {% endif %}
+              <p>
+                You have
+                {% if user.profile.is_advanced %}
+                  <strong>{{ requests_left.monthly }}</strong>
+                  monthly requests left and
+                {% endif %}
+                <strong>{{ requests_left.regular }}</strong> purchased requests
+                left.
+              </p>
+              <p class="using-requests"></p>
             </div>
 
             <div class="buy-section{% if not use.profile.is_advanced %} hide-form{% endif %}">

@@ -93,12 +93,10 @@ class FOIARequestQuerySet(models.QuerySet):
             if user.profile.acct_type == 'agency':
                 query = query | Q(agency=user.profile.agency)
             # organizational users may also view requests from their org that are shared
-            if user.profile.organization is not None:
-                query = query | Q(
-                    composer__user__profile__org_share=True,
-                    composer__user__profile__organization=user.profile.
-                    organization,
-                )
+            query = query | Q(
+                composer__user__profile__org_share=True,
+                composer__organization__users=user,
+            )
             return self.filter(query)
         else:
             # anonymous user, filter out embargoes
@@ -198,10 +196,7 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def exclude_org_users(self):
         """Exclude requests made by org users"""
-        return self.exclude(
-            composer__user__profile__organization__active=True,
-            composer__user__profile__organization__monthly_cost__gt=0,
-        )
+        return self.filter(composer__organization__individual=True)
 
     def create_new(self, composer, agency):
         """Create a new request and submit it"""
@@ -282,20 +277,20 @@ class FOIAComposerQuerySet(models.QuerySet):
             )
             # organizational users may also view requests from their org
             # that are shared
-            if user.profile.organization is not None:
-                query = query | Q(
-                    user__profile__org_share=True,
-                    user__profile__organization=user.profile.organization,
-                )
+            query = query | Q(
+                user__profile__org_share=True,
+                organization__users=user,
+            )
             return self.filter(query)
         else:
             # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started').filter(foias__embargo=False)
 
-    def get_or_create_draft(self, user):
+    def get_or_create_draft(self, user, organization):
         """Return an existing blank draft or create one"""
         draft = self.filter(
             user=user,
+            organization=organization,
             title='Untitled',
             slug='untitled',
             status='started',
@@ -316,7 +311,7 @@ class FOIAComposerQuerySet(models.QuerySet):
             draft.save()
             return draft
         else:
-            return self.create(user=user)
+            return self.create(user=user, organization=organization)
 
 
 class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):

@@ -44,7 +44,7 @@ def http_post_response(url, view, data, user=AnonymousUser(), **kwargs):
     return response
 
 
-def mock_squarelet(mock_requests):
+def mock_squarelet(mock_requests, requests_json=None):
     """Set up proper mock for squarelet"""
     mock_requests.post(
         settings.SQUARELET_URL + '/openid/token',
@@ -52,17 +52,51 @@ def mock_squarelet(mock_requests):
               'expires_in': '60'},
     )
 
-    def json_cb(request, context):
-        """Call back to generate json response for mock request"""
+    def users_cb(request, context):
+        """Call back to generate json response for user creation"""
         data = parse_qs(request.body)
+        username = re.sub(r'[^\w\-.]', '', data['username'][0])
         return {
             'id': unicode(uuid.uuid4()),
-            'username': re.sub(r'[^\w\-.]', '', data['username'][0]),
+            'username': username,
             'name': data['name'][0],
             'email': data['email'][0],
+            'org_name': username,
+            'org_uuid': unicode(uuid.uuid4()),
         }
+
+    def requests_cb(request, context):
+        """Call back to generate json response for make requests"""
+        data = parse_qs(request.body)
+        if 'amount' in data:
+            return {
+                'regular': data['amount'][0],
+                'monthly': 0,
+            }
+        else:
+            # XXX do i return anything if they are returning requests?
+            return {}
 
     mock_requests.post(
         settings.SQUARELET_URL + '/api/users/',
-        json=json_cb,
+        json=users_cb,
+    )
+
+    if requests_json is None:
+        requests_json = requests_cb
+    mock_requests.post(
+        re.compile(
+            r'{}/api/organizations/[a-f0-9-]+/requests/'.format(
+                settings.SQUARELET_URL
+            )
+        ),
+        json=requests_json,
+    )
+
+    mock_requests.get(
+        re.compile(
+            r'{}/api/organizations/[a-f0-9-]+/'.format(settings.SQUARELET_URL)
+        ),
+        json={'number_requests': 5,
+              'monthly_requests': 0},
     )

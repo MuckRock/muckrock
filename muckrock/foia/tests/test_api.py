@@ -9,6 +9,7 @@ from django.test import TestCase
 
 # Standard Library
 import json
+import re
 
 # Third Party
 import requests_mock
@@ -17,11 +18,20 @@ from rest_framework.authtoken.models import Token
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import mock_squarelet
 from muckrock.foia.models import FOIAComposer
 
 
 class TestFOIAViewsetCreate(TestCase):
     """Unit Tests for FOIA API Viewset create method"""
+
+    # XXX redo these tests without num_requests
+
+    def setUp(self):
+        self.mocker = requests_mock.Mocker()
+        mock_squarelet(self.mocker)
+        self.mocker.start()
+        self.addCleanup(self.mocker.stop)
 
     def api_call(self, data=None, user_kwargs=None, code=201, status=None):
         """Helper for API calls"""
@@ -34,12 +44,9 @@ class TestFOIAViewsetCreate(TestCase):
         if 'document_request' not in data:
             data['document_request'] = 'Document Request'
 
-        user_kwargs_defaults = {
-            'profile__num_requests': 5,
-        }
-        if user_kwargs is not None:
-            user_kwargs_defaults.update(user_kwargs)
-        user = UserFactory.create(**user_kwargs_defaults)
+        if user_kwargs is None:
+            user_kwargs = {}
+        user = UserFactory.create(**user_kwargs)
         Token.objects.create(user=user)
 
         headers = {
@@ -52,15 +59,17 @@ class TestFOIAViewsetCreate(TestCase):
             content_type='application/json',
             **headers
         )
-        eq_(response.status_code, code, response)
+        eq_(
+            response.status_code, code,
+            'Code: {}\nResponse: {}'.format(response.status_code, response)
+        )
         if status:
             eq_(response.json()['status'], status)
 
-    @requests_mock.Mocker()
-    def test_foia_create(self, mock):
+    def test_foia_create(self):
         """Test creating a FOIA through the API"""
         attachment_url = 'http://www.example.com/attachment.txt'
-        mock.get(
+        self.mocker.get(
             attachment_url,
             headers={'Content-Type': 'text/plain'},
             text='Attachment content here',
@@ -200,15 +209,14 @@ class TestFOIAViewsetCreate(TestCase):
             status='document_request or full_text required',
         )
 
-    @requests_mock.Mocker()
-    def test_attachments(self, mock):
+    def test_attachments(self):
         """Test attachments"""
-        mock.get(
+        self.mocker.get(
             'http://www.example.com/attachment.txt',
             headers={'Content-Type': 'text/plain'},
             text='Attachment content here',
         )
-        mock.get(
+        self.mocker.get(
             'http://www.example.com/attachment.pdf',
             headers={'Content-Type': 'application/pdf'},
             text='Attachment content here',
@@ -232,11 +240,10 @@ class TestFOIAViewsetCreate(TestCase):
             status='attachments should be a list of publicly available URLs',
         )
 
-    @requests_mock.Mocker()
-    def test_attachments_bad_mime(self, mock):
+    def test_attachments_bad_mime(self):
         """Test attachments with a bad mime type"""
         url = 'http://www.example.com/attachment.exe'
-        mock.get(
+        self.mocker.get(
             url,
             headers={'Content-Type': 'application/octet-stream'},
             text='Attachment content here',
@@ -262,11 +269,10 @@ class TestFOIAViewsetCreate(TestCase):
             status='Error downloading attachment: {}'.format(url),
         )
 
-    @requests_mock.Mocker()
-    def test_attachments_error_url(self, mock):
+    def test_attachments_error_url(self):
         """Test attachments with an error URL"""
         url = 'http://www.example.com/attachment.html'
-        mock.get(
+        self.mocker.get(
             url,
             headers={'Content-Type': 'text/html'},
             status_code=404,
@@ -283,10 +289,16 @@ class TestFOIAViewsetCreate(TestCase):
 
     def test_no_requests(self):
         """Test submitting when out of requests"""
+        self.mocker.post(
+            re.compile(
+                r'{}/api/organizations/[a-f0-9-]+/requests/'.format(
+                    settings.SQUARELET_URL
+                )
+            ),
+            json={'extra': 1},
+            status_code=402,
+        )
         self.api_call(
-            user_kwargs={
-                'profile__num_requests': 0,
-            },
             code=402,
             status='Out of requests.  FOI Request has been saved.',
         )

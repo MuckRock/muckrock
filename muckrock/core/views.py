@@ -400,6 +400,9 @@ class StripeFormMixin(object):
         return initial
 
 
+# XXX move donations to squarelet
+
+
 class DonationFormView(StripeFormMixin, FormView):
     """Accepts donations from all users."""
     form_class = StripeForm

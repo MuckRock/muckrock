@@ -20,12 +20,6 @@ def has_confirmed_email(user):
 
 @predicate
 @user_authenticated
-def has_requests(user):
-    return user.profile.num_requests > 0
-
-
-@predicate
-@user_authenticated
 def made_request(user):
     return user.composers.exclude(status='started').exists()
 

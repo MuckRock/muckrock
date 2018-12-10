@@ -71,8 +71,8 @@ easy-thumbnails==2.4.1
 enum34==1.1.6             # via traitlets
 fpdf==1.7.2
 furl==1.0.1
-futures==3.2.0            # via s3transfer
 future==0.16.0            # via pyjwkest
+futures==3.2.0            # via s3transfer
 fuzzywuzzy==0.14.0
 google-api-python-client==1.6.5
 gunicorn==19.6.0
@@ -83,9 +83,11 @@ image-diet2==1.0
 ipython-genutils==0.2.0   # via traitlets
 ipython==5.8.0
 jmespath==0.9.3           # via boto3, botocore
+jsonfield==2.0.2
 kombu==3.0.35             # via celery
 lxml==3.6.4               # via premailer
 markdown==2.6.7
+memoize==1.0.0
 newrelic==2.70.0.51
 numpy==1.9.1
 oauth2client==4.1.2       # via google-api-python-client
@@ -139,7 +141,7 @@ scikit-learn==0.16.1
 scipy==0.14.0
 simplegeneric==0.8.1      # via ipython
 simplejson==3.8.2         # via django-lot
-six==1.10.0               # via bleach, django-compat, django-extensions, furl, google-api-python-client, html5lib, oauth2client, orderedmultidict, packaging, pathlib2, prompt-toolkit, python-dateutil, traitlets
+six==1.10.0               # via bleach, django-compat, django-extensions, furl, google-api-python-client, html5lib, oauth2client, orderedmultidict, packaging, pathlib2, prompt-toolkit, pyjwkest, python-dateutil, social-auth-app-django, social-auth-core, traitlets
 smart-open==1.6.0
 smartypants==1.8.6
 social-auth-app-django==2.1.0

@@ -4,28 +4,21 @@ View mixins
 
 # Django
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 
 # Standard Library
 import logging
-import sys
-from datetime import date
 
 # Third Party
 import requests
-import stripe
 from simplejson.scanner import JSONDecodeError
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.accounts.utils import (
-    get_squarelet_access_token,
-    mailchimp_subscribe,
-    mixpanel_event,
-)
-from muckrock.message.tasks import gift
+from muckrock.accounts.utils import mailchimp_subscribe, mixpanel_event
+from muckrock.core.utils import squarelet_post
+from muckrock.organization.models import Membership, Organization
 
 logger = logging.getLogger(__name__)
 
@@ -38,16 +31,13 @@ class MiniregMixin(object):
     def _create_squarelet_user(self, form, data):
         """Create a corresponding user on squarelet"""
 
-        api_url = '{}/api/users/'.format(settings.SQUARELET_URL)
-        access_token = get_squarelet_access_token()
-        headers = {'Authorization': 'Bearer {}'.format(access_token)}
         generic_error = (
             'Sorry, something went wrong with the user service.  '
             'Please try again later'
         )
 
         try:
-            resp = requests.post(api_url, data=data, headers=headers)
+            resp = squarelet_post('/api/users/', data=data)
         except requests.exceptions.RequestException:
             form.add_error(None, generic_error)
             raise
@@ -84,11 +74,19 @@ class MiniregMixin(object):
         Profile.objects.create(
             user=user,
             acct_type='basic',
-            monthly_requests=settings.MONTHLY_REQUESTS.get('basic', 0),
-            date_update=date.today(),
             full_name=full_name,
             uuid=user_json['id'],
         )
+        # XXX how to do this
+        org = Organization.objects.create(
+            name=user_json['org_name'],
+            uuid=user_json['org_uuid'],
+            private=True,
+            individual=True,
+            org_type=1,
+        )
+        Membership.objects.create(user=user, organization=org, active=True)
+
         login(
             self.request,
             user,
@@ -113,48 +111,3 @@ class MiniregMixin(object):
             signup=True,
         )
         return user
-
-
-class BuyRequestsMixin(object):
-    """Buy requests functionality"""
-
-    def buy_requests(self, form, recipient=None):
-        """Buy requests"""
-        if recipient is None:
-            recipient = self.request.user
-        try:
-            form.buy_requests(recipient)
-        except stripe.StripeError as exc:
-            messages.error(self.request, 'Payment Error')
-            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
-            return
-
-        num_requests = form.cleaned_data['num_requests']
-        price = form.get_price(num_requests)
-        self.request.session['ga'] = 'request_purchase'
-        mixpanel_event(
-            self.request,
-            'Requests Purchased',
-            {
-                'Number': num_requests,
-                'Recipient': recipient.username,
-                'Price': price / 100,
-            },
-            charge=price / 100,
-        )
-        if recipient == self.request.user:
-            msg = (
-                'Purchase successful.  {} requests have been added to your '
-                'account.'.format(num_requests)
-            )
-        else:
-            msg = (
-                'Purchase successful.  {} requests have been gifted to'
-                '{}.'.format(num_requests, recipient.profile.full_name)
-            )
-            gift.delay(
-                recipient,
-                self.request.user,
-                '{} requests'.format(num_requests),
-            )
-        messages.success(self.request, msg)
