@@ -387,6 +387,4 @@ def jurisdiction_detail(request, **kwargs):
 
 def account_logout(request):
     """Logs a user out of their account and redirects to squarelet's logout page"""
-    return account_logout_helper(
-        request, 'http://{}/'.format(settings.FOIAMACHINE_URL)
-    )
+    return account_logout_helper(request, settings.FOIAMACHINE_URL + '/')

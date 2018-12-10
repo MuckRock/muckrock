@@ -93,9 +93,7 @@ def account_logout_helper(request, url):
 
 def account_logout(request):
     """Logs a user out of their account and redirects to squarelet's logout page"""
-    return account_logout_helper(
-        request, 'http://{}/'.format(settings.MUCKROCK_URL)
-    )
+    return account_logout_helper(request, settings.MUCKROCK_URL + '/')
 
 
 class AccountsView(TemplateView):

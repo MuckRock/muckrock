@@ -100,9 +100,7 @@ class MiniregMixin(object):
                 self.request,
                 user.email,
                 source='Mini-Register: {}'.format(self.minireg_source),
-                url='https://{}{}'.format(
-                    settings.MUCKROCK_URL, self.request.path
-                ),
+                url='{}{}'.format(settings.MUCKROCK_URL, self.request.path),
             )
 
         mixpanel_event(

@@ -489,7 +489,7 @@ class CrowdsourceResponse(models.Model):
                 self.get_values(metadata),
             )
         )
-        text += '\nhttps://{}{}#assignment-responses'.format(
+        text += '\n{}{}#assignment-responses'.format(
             settings.MUCKROCK_URL,
             self.crowdsource.get_absolute_url(),
         )

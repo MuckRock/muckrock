@@ -535,7 +535,7 @@ def delivered(_request, email_comm, timestamp):
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
     # pylint: disable=too-many-branches
-    url = 'https://%s%s' % (
+    url = '{}{}'.format(
         settings.MUCKROCK_URL,
         reverse('phaxio-callback'),
     )
