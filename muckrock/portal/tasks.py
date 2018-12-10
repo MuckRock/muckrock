@@ -42,6 +42,7 @@ def foiaonline_autologin():
     """
     bad_msg = 'Either the email address or password is invalid. Please try again.'
     good_msg = 'Your session has been extended for 30 more minutes.'
+    lock_msg = 'Your account has been locked, please contact the FOIAonline Help Desk.'
     foias = FOIARequest.objects.filter(
         status__in=[
             'ack', 'processed', 'appealing', 'fix', 'payment', 'lawsuit'
@@ -69,9 +70,19 @@ def foiaonline_autologin():
                         'FOIAOnline autologin: request %s login failed: bad password',
                         foia.pk
                     )
-                if good_msg not in response.content:
+                elif lock_msg in response.content:
+                    logger.warn(
+                        'FOIAOnline autologin: request %s login failed: account locked',
+                        foia.pk
+                    )
+                elif good_msg not in response.content:
                     logger.warn(
                         'FOIAOnline autologin: request %s login failed: unknown',
+                        foia.pk
+                    )
+                else:
+                    logger.info(
+                        'FOIAOnline autologin: request %s login succeeded',
                         foia.pk
                     )
 
