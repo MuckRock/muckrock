@@ -117,9 +117,9 @@ def celery():
 
 @task(alias='m')
 def manage(cmd):
-    """Run a python manage.py command"""
+    """Run python manage command"""
     with env.cd(env.base_path):
-        env.run('./manage.py %s' % cmd)
+        env.run(DJANGO_RUN_USER.format(cmd='python manage.py {}'.format(cmd)))
 
 
 @task
