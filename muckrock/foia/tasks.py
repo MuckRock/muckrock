@@ -551,13 +551,13 @@ def retry_stuck_documents():
         upload_document_cloud.apply_async(args=[doc.pk, False])
 
 
-# Increase the time limit for autoimport to 1 hour, and a soft time limit to
+# Increase the time limit for autoimport to 10 hours, and a soft time limit to
 # 5 minutes before that
 @periodic_task(
     run_every=crontab(hour=2, minute=0),
     name='muckrock.foia.tasks.autoimport',
-    time_limit=3600,
-    soft_time_limit=3300
+    time_limit=36000,
+    soft_time_limit=35700,
 )
 def autoimport():
     """Auto import documents from S3"""
