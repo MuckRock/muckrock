@@ -305,12 +305,12 @@ class ReviewAgencyTask(Task):
                 (k, list(v)) for k, v in
                 groupby(open_requests, lambda f: getattr(f, email_or_fax))
             ]
-            # do a seperate query for per email addr/fax number stats
+            # do seperate queries for per email addr/fax number stats
+            # do annotations separately for performance reasons (limit joins)
             addresses = (
                 address_model.objects.annotate(
                     error_count=Count('errors', distinct=True),
                     last_error=Max('errors__datetime'),
-                    last_confirm=Max('%s__confirmed_datetime' % confirm_rel),
                 ).prefetch_related(
                     Prefetch(
                         'errors',
@@ -321,11 +321,20 @@ class ReviewAgencyTask(Task):
                     )
                 )
             )
+            addresses = addresses.in_bulk(g[0].pk for g in grouped_requests)
+            addresses_confirm = address_model.objects.annotate(
+                last_confirm=Max('%s__confirmed_datetime' % confirm_rel),
+            )
+            addresses_confirm = addresses_confirm.in_bulk(
+                g[0].pk for g in grouped_requests
+            )
             if email_or_fax == 'email':
-                addresses = addresses.annotate(
+                addresses_open = address_model.objects.annotate(
                     last_open=Max('opens__datetime'),
                 )
-            addresses = addresses.in_bulk(g[0].pk for g in grouped_requests)
+                addresses_open = addresses_open.in_bulk(
+                    g[0].pk for g in grouped_requests
+                )
 
             review_data = []
             for addr, foias in grouped_requests:
@@ -337,7 +346,7 @@ class ReviewAgencyTask(Task):
                     'error':
                         addr.status == 'error',
                     'errors':
-                        addr.errors.all()[:5],
+                        list(addr.errors.all())[:5],
                     'foias':
                         foias,
                     'unacknowledged':
@@ -347,9 +356,10 @@ class ReviewAgencyTask(Task):
                     'last_error':
                         addr.last_error,
                     'last_confirm':
-                        addr.last_confirm,
+                        addresses_confirm[addr.pk].last_confirm,
                     'last_open':
-                        addr.last_open if email_or_fax == 'email' else None,
+                        addresses_open[addr.pk].last_open
+                        if email_or_fax == 'email' else None,
                     'checkbox_name':
                         'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
                     'email_or_fax':
@@ -460,11 +470,15 @@ class ReviewAgencyTask(Task):
 
     def latest_response(self):
         """Returns the latest response from the agency"""
-        return (
-            self.agency.foiarequest_set.aggregate(
-                max_date=Max('communications__datetime')
-            )['max_date']
+        from muckrock.foia.models import FOIACommunication
+        latest_communication = (
+            FOIACommunication.objects.filter(foia__agency=self.agency
+                                             ).order_by('-datetime').first()
         )
+        if latest_communication:
+            return latest_communication.datetime
+        else:
+            return None
 
 
 class FlaggedTask(Task):
