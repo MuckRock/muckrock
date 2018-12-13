@@ -255,7 +255,7 @@ class FOIACommunicationInline(admin.StackedInline):
     def file_names(self, instance):
         """All file's names for this communication"""
         return ', '.join(
-            os.path.basename(f.ffile.name) for f in instance.files.all()
+            os.path.basename(f.ffile.name) for f in instance.files.all()[:20]
         )
 
     def confirmed_datetime(self, instance):
