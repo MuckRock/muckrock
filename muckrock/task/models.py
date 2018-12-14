@@ -61,6 +61,7 @@ from muckrock.task.querysets import (
 logger = logging.getLogger(__name__)
 
 # pylint: disable=missing-docstring
+# pylint: disable=too-many-lines
 
 
 class Task(models.Model):
