@@ -65,6 +65,19 @@ class CrowdsourceAssignmentForm(forms.Form):
             )
         return email
 
+    def clean(self):
+        """Must supply both name and email, or neither"""
+        data = super(CrowdsourceAssignmentForm, self).clean()
+
+        if data.get('email') and not data.get('full_name'):
+            self.add_error(
+                'full_name', 'Name is required if registering with an email'
+            )
+        if data.get('full_name') and not data.get('email'):
+            self.add_error(
+                'email', 'Email is required if registering with a name'
+            )
+
 
 class CrowdsourceDataCsvForm(forms.Form):
     """Form for adding data to a crowdsource"""
