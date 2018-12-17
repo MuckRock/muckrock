@@ -122,6 +122,7 @@ urlpatterns = [
     url(r'^dataset/', include('muckrock.dataset.urls')),
     url(r'^fine-uploader/', include('muckrock.fine_uploader.urls')),
     url(r'^communication/', include('muckrock.communication.urls')),
+    url(r'^squarelet/', include('muckrock.squarelet.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^api_v1/', include(router.urls)),

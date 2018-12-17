@@ -26,15 +26,15 @@ class ProfileQuerySet(models.QuerySet):
             raise ValueError('Missing required fields: {}'.format(missing))
         old_user = User.objects.filter(profile__uuid=uuid).first()
 
-        user = self._squarelet_update_or_create_user(uuid, data)
+        user, created = self._squarelet_update_or_create_user(uuid, data)
         # if they have changed their email address, reset email failed flag
         reset_email_failed = old_user and (old_user.email != user.email)
 
         profile = self._squarelet_update_or_create_profile(
-            uuid, data, reset_email_failed
+            uuid, data, user, reset_email_failed
         )
 
-        self._update_organizations(user, profile, data)
+        self._update_organizations(user, profile, data, created)
 
     def _squarelet_update_or_create_user(self, uuid, data):
         """Format user data and update or create the user"""
@@ -48,15 +48,14 @@ class ProfileQuerySet(models.QuerySet):
         }
         user_data = {
             user_map[k]: data.get(k, user_defaults[k])
-            for k in data.iterkeys()
+            for k in user_map.iterkeys()
         }
-        user, _ = User.objects.update_or_create(
+        return User.objects.update_or_create(
             profile__uuid=uuid, defaults=user_data
         )
-        return user
 
     def _squarelet_update_or_create_profile(
-        self, uuid, data, reset_email_failed
+        self, uuid, data, user, reset_email_failed
     ):
         """Format user data and update or create the user"""
         profile_map = {
@@ -67,20 +66,19 @@ class ProfileQuerySet(models.QuerySet):
         profile_defaults = {
             'name': '',
             'picture': '',
-            'emailed_verified': False,
+            'email_verified': False,
         }
         if reset_email_failed:
             profile_defaults['email_failed'] = False
         profile_data = {
             profile_map[k]: data.get(k, profile_defaults[k])
-            for k in data.iterkeys()
+            for k in profile_map.iterkeys()
         }
-        profile, _ = self.objects.update_or_create(
-            uuid=uuid, defaults=profile_data
-        )
+        profile_data['user'] = user
+        profile, _ = self.update_or_create(uuid=uuid, defaults=profile_data)
         return profile
 
-    def _update_organizations(self, user, profile, data):
+    def _update_organizations(self, user, profile, data, created):
         """Update the user's organizations"""
         current_organizations = set(user.organizations.all())
         new_memberships = []
@@ -97,11 +95,13 @@ class ProfileQuerySet(models.QuerySet):
                 current_organizations.remove(organization)
             else:
                 # if not currently a member, create the new membership
+                # if this is a newly created acount, make their individual
+                # organization active
                 new_memberships.append(
                     Membership(
                         user=user,
                         organization=organization,
-                        active=False,
+                        active=created and org_data['individual'],
                         admin=org_data['admin'],
                     )
                 )

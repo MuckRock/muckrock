@@ -218,6 +218,7 @@ def get_squarelet_access_token():
                     settings.SOCIAL_AUTH_SQUARELET_SECRET,
                 )
                 data = {'grant_type': 'client_credentials'}
+                logger.info(token_url)
                 resp = requests.post(token_url, data=data, auth=auth)
                 resp.raise_for_status()
                 resp_json = resp.json()

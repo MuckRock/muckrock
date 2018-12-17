@@ -11,15 +11,18 @@ from django.views.decorators.csrf import csrf_exempt
 # Standard Library
 import hashlib
 import hmac
+import logging
 import time
 
 # MuckRock
 from muckrock.squarelet.tasks import pull_data
 
+logger = logging.getLogger(__name__)
+
 
 @csrf_exempt
-def cache_invalidate(request):
-    """Receive a cache invalidation from squarelet"""
+def webhook(request):
+    """Receive a cache invalidation webhook from squarelet"""
 
     type_ = request.POST.get('type', '')
     uuid = request.POST.get('uuid', '')
@@ -28,7 +31,7 @@ def cache_invalidate(request):
 
     # verify signature
     hmac_digest = hmac.new(
-        key=settings.SQUARELET_SECRET_KEY,
+        key=settings.SQUARELET_SECRET,
         msg='{}{}{}'.format(timestamp, type_, uuid),
         digestmod=hashlib.sha256,
     ).hexdigest()
@@ -36,7 +39,10 @@ def cache_invalidate(request):
         unicode(signature),
         unicode(hmac_digest),
     )
-    timestamp_current = int(timestamp) + 300 > time.time()
+    try:
+        timestamp_current = int(timestamp) + 300 > time.time()
+    except ValueError:
+        return HttpResponseForbidden()
     if not match or not timestamp_current:
         return HttpResponseForbidden()
 

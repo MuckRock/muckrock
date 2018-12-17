@@ -294,13 +294,14 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
 CELERY_IMPORTS = (
-    'muckrock.foia.tasks',
     'muckrock.accounts.tasks',
     'muckrock.agency.tasks',
-    'muckrock.task.tasks',
-    'muckrock.portal.tasks',
-    'muckrock.dataset.tasks',
     'muckrock.crowdsource.tasks',
+    'muckrock.dataset.tasks',
+    'muckrock.foia.tasks',
+    'muckrock.portal.tasks',
+    'muckrock.squarelet.tasks',
+    'muckrock.task.tasks',
 )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
@@ -692,7 +693,9 @@ ZOHO_DEPT_IDS = {
 
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_SQUARELET_KEY = os.environ.get('SQUARELET_KEY')
-SOCIAL_AUTH_SQUARELET_SECRET = os.environ.get('SQUARELET_SECRET')
+SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get(
+    'SQUARELET_SECRET'
+)
 SOCIAL_AUTH_SQUARELET_SCOPE = ['uuid', 'organizations']
 SOCIAL_AUTH_TRAILING_SLASH = False
 
