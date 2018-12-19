@@ -28,4 +28,5 @@ class OrganizationQuerySet(models.QuerySet):
             k: data.get(k, defaults[k])
             for k in defaults.iterkeys()
         }
+        # XXX instantiate resources if this is a non free plan!
         return self.update_or_create(uuid=uuid, defaults=formatted_data)
