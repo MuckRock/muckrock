@@ -16,6 +16,7 @@ import requests
 # MuckRock
 from muckrock.foia.models import FOIARequest
 from muckrock.portal.models import Portal
+from muckrock.task.models import FlaggedTask
 
 logger = logging.getLogger(__name__)
 
@@ -70,15 +71,30 @@ def foiaonline_autologin():
                         'FOIAOnline autologin: request %s login failed: bad password',
                         foia.pk
                     )
+                    FlaggedTask.objects.create(
+                        text='FOIAOnline autologin failed: bad password',
+                        foia=foia,
+                        category='foiaonline',
+                    )
                 elif lock_msg in response.content:
                     logger.warn(
                         'FOIAOnline autologin: request %s login failed: account locked',
                         foia.pk
                     )
+                    FlaggedTask.objects.create(
+                        text='FOIAOnline autologin failed: account locked',
+                        foia=foia,
+                        category='foiaonline',
+                    )
                 elif good_msg not in response.content:
                     logger.warn(
                         'FOIAOnline autologin: request %s login failed: unknown',
                         foia.pk
+                    )
+                    FlaggedTask.objects.create(
+                        text='FOIAOnline autologin failed: account locked',
+                        foia=foia,
+                        category='foiaonline',
                     )
                 else:
                     logger.info(
@@ -90,4 +106,9 @@ def foiaonline_autologin():
                 logger.warn(
                     'FOIAOnline autologin: request %s has no portal password set',
                     foia.pk
+                )
+                FlaggedTask.objects.create(
+                    text='FOIAOnline autologin failed: no portal password set',
+                    foia=foia,
+                    category='foiaonline',
                 )
