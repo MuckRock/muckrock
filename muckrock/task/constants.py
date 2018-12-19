@@ -64,5 +64,6 @@ PRIVATE_FLAG_CATEGORIES = [
         'manual form',
         'A request needs a PDF form to be manually filled out to be submitted'
     ),
+    ('foiaonline', 'The FOIAOnline autologin failed'),
 ]
 FLAG_CATEGORIES = PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES
