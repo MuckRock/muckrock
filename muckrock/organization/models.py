@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models.expressions import F
+from django.db.models.functions import Greatest
 from django.utils.text import slugify
 
 # Standard Library
@@ -21,6 +22,11 @@ from muckrock.core.exceptions import SquareletError
 from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.choices import Plan
+from muckrock.organization.constants import (
+    BASE_REQUESTS,
+    EXTRA_REQUESTS_PER_USER,
+    MIN_USERS,
+)
 from muckrock.organization.querysets import OrganizationQuerySet
 
 logger = logging.getLogger(__name__)
@@ -77,13 +83,25 @@ class Organization(models.Model):
     @transaction.atomic
     def update_data(self, data):
         """Set updated data from squarelet"""
-        # XXX calc reqs/month to see if max users changed
-        if self.plan != data['plan']:
-            # do the things to change the plan
-            pass
+        # XXX test this
+        # calc reqs/month to see if it has changed
+        extra_users = data['max_users'] - MIN_USERS[data['plan']]
+        requests_per_month = (
+            BASE_REQUESTS[data['plan']] +
+            extra_users * EXTRA_REQUESTS_PER_USER[data['plan']]
+        )
+        plan_differs = self.plan != data['plan']
+        # requests/month differing only matter if this is not a free plan
+        reqs_differ = (
+            self.plan != Plan.free
+            and self.requests_per_month != requests_per_month
+        )
+        if plan_differs or reqs_differ:
+            # update the plan
+            self._set_subscription(data['plan'], requests_per_month)
         if self.date_update != data['date_update']:
-            # do the re-up
-            pass
+            # update monthly fields
+            self.monthly_requests = requests_per_month
         fields = [
             'name', 'slug', 'individual', 'private', 'plan', 'date_update'
         ]
@@ -91,46 +109,18 @@ class Organization(models.Model):
             setattr(self, field, data[field])
         self.save()
 
-    def _set_subscription(self, plan, max_users):
+    def _set_subscription(self, plan, requests_per_month):
         """Update data for when the subscription has changed"""
-        if self.plan == Plan.free and plan != Plan.free:
-            # create a subscription going from free to non-free
-            self._create_subscription(plan, max_users)
-        elif self.plan != Plan.free and plan == Plan.free:
+
+        if plan == Plan.free:
             # cancel a subscription going from non-free to free
-            self._cancel_subscription()
-        elif self.plan != Plan.free and plan != Plan.free:
-            # modify a subscription going from non-free to non-free
-            self._modify_subscription(plan, max_users)
-
-    def _create_subscription(self, plan, max_users):
-        """Set values for new subscription"""
-        extra_users = max_users - MIN_USERS[plan]
-        requests_per_month = (
-            BASE_REQUESTS[plan] + extra_users * EXTRA_REQUESTS_PER_USER[plan]
-        )
-        self.requests_per_month = requests_per_month
-        self.monthly_requests = requests_per_month
-
-    def _cancel_subscription(self):
-        """Reset values for a cancelled subscription"""
-        self.requests_per_month = 0
-        self.date_update = None
-
-    def _modify_subscription(self, plan, max_users):
-        """Set values for a modified subscription"""
-
-        extra_users = max_users - MIN_USERS[plan]
-        requests_per_month = (
-            BASE_REQUESTS[plan] + extra_users * EXTRA_REQUESTS_PER_USER[plan]
-        )
-
-        # if new limit is higher than the old limit, add them immediately
-        # use f expressions to avoid race conditions
-        self.monthly_requests = F("monthly_requests") + Greatest(
-            requests_per_month - F("requests_per_month"), 0
-        )
-        self.requests_per_month = requests_per_month
+            self.requests_per_month = 0
+        else:
+            # set updated values for paid requests
+            self.monthly_requests = F("monthly_requests") + Greatest(
+                requests_per_month - F("requests_per_month"), 0
+            )
+            self.requests_per_month = requests_per_month
 
     @transaction.atomic
     def make_requests(self, amount):
