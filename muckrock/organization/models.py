@@ -84,43 +84,34 @@ class Organization(models.Model):
     def update_data(self, data):
         """Set updated data from squarelet"""
         # XXX test this
-        # calc reqs/month to see if it has changed
+        # XXX comment this better
+
+        # calc reqs/month in case it has changed
         extra_users = data['max_users'] - MIN_USERS[data['plan']]
         requests_per_month = (
             BASE_REQUESTS[data['plan']] +
             extra_users * EXTRA_REQUESTS_PER_USER[data['plan']]
         )
-        plan_differs = self.plan != data['plan']
-        # requests/month differing only matter if this is not a free plan
-        reqs_differ = (
-            self.plan != Plan.free
-            and self.requests_per_month != requests_per_month
-        )
-        if plan_differs or reqs_differ:
-            # update the plan
-            self._set_subscription(data['plan'], requests_per_month)
-        if self.date_update != data['date_update']:
-            # update monthly fields
+
+        if self.date_update == data['date_update']:
+            # add additional monthly requests immediately
+            self.monthly_requests = F("monthly_requests") + Greatest(
+                requests_per_month - F("requests_per_month"), 0
+            )
+        else:
+            # reset monthly requests when date_update is updated
             self.monthly_requests = requests_per_month
         fields = [
-            'name', 'slug', 'individual', 'private', 'plan', 'date_update'
+            'name',
+            'slug',
+            'individual',
+            'private',
+            'plan',
+            'date_update',
         ]
         for field in fields:
             setattr(self, field, data[field])
         self.save()
-
-    def _set_subscription(self, plan, requests_per_month):
-        """Update data for when the subscription has changed"""
-
-        if plan == Plan.free:
-            # cancel a subscription going from non-free to free
-            self.requests_per_month = 0
-        else:
-            # set updated values for paid requests
-            self.monthly_requests = F("monthly_requests") + Greatest(
-                requests_per_month - F("requests_per_month"), 0
-            )
-            self.requests_per_month = requests_per_month
 
     @transaction.atomic
     def make_requests(self, amount):

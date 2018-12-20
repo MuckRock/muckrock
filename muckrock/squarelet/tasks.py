@@ -29,7 +29,7 @@ def pull_data(type_, uuid, **kwargs):
         'organization': Organization,
     }
     if type_ not in types_url:
-        logger.warn('Received invalid type: %s', type_)
+        logger.warn('Pull data received invalid type: %s', type_)
         return
     resp = squarelet_get('/api/{}/{}/'.format(types_url[type_], uuid))
     try:
@@ -45,6 +45,7 @@ def pull_data(type_, uuid, **kwargs):
             countdown=2 ** pull_data.request.retries,
         )
     else:
+        logger.info('Pull data for: %s %s', type_, uuid)
         model = types_model[type_]
         data = resp.json()
         model.objects.squarelet_update_or_create(uuid, data)

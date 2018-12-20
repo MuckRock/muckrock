@@ -1,7 +1,7 @@
 """Custom querysets for organization app"""
 
 # Django
-from django.db import models
+from django.db import models, transaction
 
 # MuckRock
 from muckrock.organization.choices import Plan
@@ -10,6 +10,7 @@ from muckrock.organization.choices import Plan
 class OrganizationQuerySet(models.QuerySet):
     """Object manager for profiles"""
 
+    @transaction.atomic
     def squarelet_update_or_create(self, uuid, data):
         """Update or create records based on data from squarelet"""
         required_fields = {'name', 'slug'}
@@ -29,4 +30,7 @@ class OrganizationQuerySet(models.QuerySet):
             for k in defaults.iterkeys()
         }
         # XXX instantiate resources if this is a non free plan!
-        return self.update_or_create(uuid=uuid, defaults=formatted_data)
+        old_organization = self.model.objects.filter(uuid=uuid).first()
+        organization, created = self.update_or_create(
+            uuid=uuid, defaults=formatted_data
+        )

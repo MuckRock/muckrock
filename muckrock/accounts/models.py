@@ -252,18 +252,6 @@ class Profile(models.Model):
         # XXX move this to rules
         return self.acct_type not in ('admin', 'agency')
 
-    def update_data(self, data):
-        """Set updated data from squarelet"""
-        if data['email'] != self.user.email:
-            self.email_failed = False
-        self.full_name = data['name']
-        self.user.username = data['preferred_username']
-        self.avatar_url = data['picture']
-        self.user.email = data['email']
-        self.email_confirmed = data['email_verified']
-
-        #for organization in data['organizations']:
-
 
 # XXX deprecate ##
 class ReceiptEmail(models.Model):
