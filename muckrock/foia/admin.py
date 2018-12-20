@@ -254,8 +254,8 @@ class FOIACommunicationInline(admin.StackedInline):
 
     def file_names(self, instance):
         """All file's names for this communication"""
-        return ', '.join(
-            os.path.basename(f.ffile.name) for f in instance.files.all()[:20]
+        return '\n'.join(
+            os.path.basename(f.ffile.name) for f in instance.display_files
         )
 
     def confirmed_datetime(self, instance):
@@ -282,8 +282,7 @@ class FOIACommunicationInline(admin.StackedInline):
     def get_queryset(self, request):
         return (
             super(FOIACommunicationInline, self).get_queryset(request)
-            .prefetch_related(
-                'files',
+            .preload_files(limit=20).prefetch_related(
                 'emails',
                 'faxes',
                 'mails',
