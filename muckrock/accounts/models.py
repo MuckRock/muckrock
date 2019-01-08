@@ -87,6 +87,7 @@ class Profile(models.Model):
     phone = PhoneNumberField(blank=True)
 
     # XXX deprecate ##
+    # XXX this is everywhere!!! XXX
     acct_type = models.CharField(
         max_length=10, choices=ACCT_TYPES, default='basic'
     )

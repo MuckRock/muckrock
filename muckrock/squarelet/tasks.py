@@ -45,7 +45,7 @@ def pull_data(type_, uuid, **kwargs):
             countdown=2 ** pull_data.request.retries,
         )
     else:
-        logger.info('Pull data for: %s %s', type_, uuid)
         model = types_model[type_]
         data = resp.json()
+        logger.info('Pull data for: %s %s %s', type_, uuid, data)
         model.objects.squarelet_update_or_create(uuid, data)

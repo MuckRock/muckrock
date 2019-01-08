@@ -9,7 +9,7 @@ from __future__ import absolute_import
 from rules import add_perm, predicate
 
 # MuckRock
-from muckrock.foia.rules import is_advanced, is_staff, user_authenticated
+from muckrock.foia.rules import has_feature_level, is_staff, user_authenticated
 
 
 @predicate
@@ -24,5 +24,5 @@ def made_request(user):
     return user.composers.exclude(status='started').exists()
 
 
-add_perm('qanda.post', made_request | is_advanced)
+add_perm('qanda.post', made_request | has_feature_level(1))
 add_perm('qanda.block', is_staff)

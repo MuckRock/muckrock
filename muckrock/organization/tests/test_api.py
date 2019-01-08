@@ -23,14 +23,15 @@ from rest_framework.status import (
 
 # MuckRock
 from muckrock.core.factories import UserFactory
-from muckrock.organization.choices import Plan
 from muckrock.organization.factories import OrganizationFactory
-from muckrock.organization.models import Membership, Organization
+from muckrock.organization.models import Membership, Organization, Plan
 
 # pylint: disable=invalid-name
 
+# XXX remove me
 
-class TestOrganizationViewSet(TestCase):
+
+class _TestOrganizationViewSet(TestCase):
     """Tests for the organization and membership viewsets"""
 
     def api_call(self, url, method="post", data=None, code=HTTP_200_OK):

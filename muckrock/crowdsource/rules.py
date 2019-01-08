@@ -10,7 +10,11 @@ from __future__ import absolute_import
 from rules import add_perm, is_staff, predicate
 
 # MuckRock
-from muckrock.foia.rules import is_advanced, skip_if_not_obj, user_authenticated
+from muckrock.foia.rules import (
+    has_feature_level,
+    skip_if_not_obj,
+    user_authenticated,
+)
 
 
 @predicate
@@ -51,7 +55,7 @@ def is_project_admin(user, crowdsource):
 
 is_crowdsource_admin = is_owner | is_staff | is_project_admin
 
-add_perm('crowdsource.add_crowdsource', is_advanced | is_experimental)
+add_perm('crowdsource.add_crowdsource', has_feature_level(1) | is_experimental)
 add_perm('crowdsource.change_crowdsource', is_crowdsource_admin)
 add_perm('crowdsource.view_crowdsource', is_crowdsource_admin)
 add_perm(

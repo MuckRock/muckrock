@@ -30,11 +30,12 @@ def save_profile(backend, user, response, *args, **kwargs):
     """Update the user's profile based on information from squarelet"""
     # pylint: disable=unused-argument
     if not hasattr(user, 'profile'):
-        user.profile = Profile(
+        user.profile = Profile.objects.create(
             user=user,
             acct_type='basic',
             uuid=response['uuid'],
         )
+        user.save()
     Profile.objects.squarelet_update_or_create(response['uuid'], response)
 
 

@@ -3,8 +3,8 @@
 # Django
 from django.db import models, transaction
 
-# MuckRock
-from muckrock.organization.choices import Plan
+# Standard Library
+from datetime import datetime
 
 
 class OrganizationQuerySet(models.QuerySet):
@@ -13,24 +13,18 @@ class OrganizationQuerySet(models.QuerySet):
     @transaction.atomic
     def squarelet_update_or_create(self, uuid, data):
         """Update or create records based on data from squarelet"""
-        required_fields = {'name', 'slug'}
+        required_fields = {'name', 'slug', 'date_update'}
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
             raise ValueError('Missing required fields: {}'.format(missing))
-        defaults = {
-            'name': '',
-            'slug': '',
-            'private': False,
-            'individual': False,
-            'plan': Plan.free,
-        }
-        # remove extra data and set missing data to default values
-        formatted_data = {
-            k: data.get(k, defaults[k])
-            for k in defaults.iterkeys()
-        }
-        # XXX instantiate resources if this is a non free plan!
-        old_organization = self.model.objects.filter(uuid=uuid).first()
-        organization, created = self.update_or_create(
-            uuid=uuid, defaults=formatted_data
-        )
+        # convert date_update from string to date
+        # XXX error handle
+        if data['date_update'] is not None:
+            data['date_update'] = datetime.strptime(
+                data['date_update'], '%Y-%m-%d'
+            ).date()
+
+        organization, created = self.model.objects.get_or_create(uuid=uuid)
+        organization.update_data(data)
+
+        return organization, created

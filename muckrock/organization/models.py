@@ -18,15 +18,7 @@ from uuid import uuid4
 import stripe
 
 # MuckRock
-from muckrock.core.exceptions import SquareletError
-from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
-from muckrock.organization.choices import Plan
-from muckrock.organization.constants import (
-    BASE_REQUESTS,
-    EXTRA_REQUESTS_PER_USER,
-    MIN_USERS,
-)
 from muckrock.organization.querysets import OrganizationQuerySet
 
 logger = logging.getLogger(__name__)
@@ -48,8 +40,8 @@ class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, blank=True)  # XXX no blank
     private = models.BooleanField(default=False)
-    individual = models.BooleanField()
-    plan = models.IntegerField(choices=Plan.choices, default=Plan.free)
+    individual = models.BooleanField(default=True)
+    plan = models.ForeignKey('organization.Plan', null=True)
 
     requests_per_month = models.IntegerField(default=0)
     monthly_requests = models.IntegerField(default=0)
@@ -80,33 +72,43 @@ class Organization(models.Model):
         # XXX test
         return self.users.filter(pk=user.pk).exists()
 
-    @transaction.atomic
     def update_data(self, data):
         """Set updated data from squarelet"""
         # XXX test this
         # XXX comment this better
 
+        self.plan, created = Plan.objects.get_or_create(
+            slug=data['plan'],
+            defaults={'name': data['plan'].replace('-', ' ').title()},
+        )
+        if created:
+            logger.warning('Unknown plan: %s', data['plan'])
+
         # calc reqs/month in case it has changed
-        extra_users = data['max_users'] - MIN_USERS[data['plan']]
-        requests_per_month = (
-            BASE_REQUESTS[data['plan']] +
-            extra_users * EXTRA_REQUESTS_PER_USER[data['plan']]
+        self.requests_per_month = self.plan.requests_per_month(
+            data['max_users']
         )
 
+        # if date update has changed, then this is a monthly restore of the
+        # subscription, and we should restore monthly requests.  If not, requests
+        # per month may have changed if they changed their plan or their user count,
+        # in which case we should add the difference to their monthly requests
+        # if requests per month increased
         if self.date_update == data['date_update']:
             # add additional monthly requests immediately
-            self.monthly_requests = F("monthly_requests") + Greatest(
-                requests_per_month - F("requests_per_month"), 0
+            self.monthly_requests = F('monthly_requests') + Greatest(
+                self.requests_per_month - F('requests_per_month'), 0
             )
         else:
             # reset monthly requests when date_update is updated
-            self.monthly_requests = requests_per_month
+            self.monthly_requests = self.requests_per_month
+
+        # update the remaining fields
         fields = [
             'name',
             'slug',
             'individual',
             'private',
-            'plan',
             'date_update',
         ]
         for field in fields:
@@ -158,3 +160,27 @@ class Membership(models.Model):
 
     def __unicode__(self):
         return u"{} in {}".format(self.user, self.organization)
+
+
+class Plan(models.Model):
+    """Plans that organizations can subscribe to"""
+
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
+
+    minimum_users = models.PositiveSmallIntegerField(default=1)
+    base_requests = models.PositiveSmallIntegerField(default=0)
+    requests_per_user = models.PositiveSmallIntegerField(default=0)
+    # XXX
+    feature_level = models.PositiveSmallIntegerField(default=0)
+
+    def __unicode__(self):
+        return self.name
+
+    def requests_per_month(self, users):
+        """Calculate how many requests an organization gets per month on this plan
+        for a given number of users"""
+        return (
+            self.base_requests +
+            (users - self.minimum_users) * self.requests_per_user
+        )

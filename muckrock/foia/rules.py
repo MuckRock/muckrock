@@ -163,40 +163,31 @@ def match_agency(user, foia):
 # User predicates
 
 
-@predicate
-@user_authenticated
-def is_advanced_type(user):
-    return user.profile.acct_type in ['admin', 'beta', 'pro', 'proxy']
+def has_feature_level(level):
+    @predicate('has_feature_level:{}'.format(level))
+    @user_authenticated
+    def inner(user):
+        # XXX performance
+        return (
+            user.organizations.filter(plan__feature_level__gte=level).exists()
+        )
 
-
-@predicate
-@user_authenticated
-def is_admin(user):
-    return user.profile.acct_type == 'admin'
+    return inner
 
 
 @predicate
 @user_authenticated
 def is_agency_user(user):
-    return user.profile.acct_type == 'agency'
-
-
-@predicate
-@user_authenticated
-def is_org_member(user):
-    # XXX bring in org types / plan types
-    return user.profile.organization and user.profile.organization.active
+    return user.profile.agency is not None
 
 
 is_from_agency = is_agency_user & match_agency
 
 can_edit = is_owner | is_editor | is_staff
 
-is_advanced = is_advanced_type | is_org_member
+can_embargo = has_feature_level(1)
 
-can_embargo = is_advanced
-
-can_embargo_permananently = is_admin | is_org_member
+can_embargo_permananently = has_feature_level(2)
 
 can_view = can_edit | is_viewer | is_from_agency | ~is_private
 
@@ -247,8 +238,8 @@ add_perm('foia.delete_foiacomposer', can_edit_composer & has_status('started'))
 add_perm('foia.upload_attachment_foiacomposer', can_edit_composer)
 add_perm('foia.change_foiacomposer', can_edit_composer)
 
-add_perm('foia.view_rawemail', is_advanced)
-add_perm('foia.file_multirequest', is_advanced)
-add_perm('foia.export_csv', is_advanced)
+add_perm('foia.view_rawemail', has_feature_level(1))
+add_perm('foia.file_multirequest', has_feature_level(1))
+add_perm('foia.export_csv', has_feature_level(1))
 add_perm('foia.zip_download_foiarequest', can_edit)
 add_perm('foia.set_info_foiarequest', is_authenticated)
