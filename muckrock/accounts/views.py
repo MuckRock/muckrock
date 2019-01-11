@@ -9,9 +9,10 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, RedirectView, TemplateView
+from django.views.generic import FormView, ListView, RedirectView, TemplateView
 
 # Standard Library
 import logging
@@ -25,11 +26,13 @@ from rest_framework.authtoken.models import Token
 # MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
+    BuyRequestForm,
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
     ReceiptForm,
 )
+from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import ACCT_TYPES, Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
@@ -182,9 +185,10 @@ class ProfileSettings(TemplateView):
         return context
 
 
-class ProfileView(TemplateView):
+class ProfileView(BuyRequestsMixin, FormView):
     """View a user's profile"""
     template_name = 'accounts/profile.html'
+    form_class = BuyRequestForm
 
     def dispatch(self, request, *args, **kwargs):
         """Get the user and redirect if neccessary"""
@@ -198,15 +202,18 @@ class ProfileView(TemplateView):
     def get_context_data(self, **kwargs):
         """Get data for the profile page"""
         context_data = super(ProfileView, self).get_context_data(**kwargs)
-        org = self.user.profile.organization
-        show_org_link = (
-            org and (
-                not org.private or self.request.user.is_staff or (
-                    self.request.user.is_authenticated()
-                    and org.has_member(self.request.user)
-                )
-            )
-        )
+        if self.request.user.is_staff:
+            organizations = [o for o in self.user.organizations.all()]
+        elif self.request.user.is_authenticated:
+            # XXX test
+            organizations = [
+                o for o in self.user.organizations.
+                filter(Q(private=False) | Q(users=self.request.user))
+            ]
+        else:
+            organizations = [
+                o for o in self.user.organizations.filter(private=False)
+            ]
         requests = (
             FOIARequest.objects.filter(composer__user=self.user)
             .get_viewable(self.request.user)
@@ -225,10 +232,8 @@ class ProfileView(TemplateView):
                 self.user,
             'profile':
                 self.user.profile,
-            'org':
-                org,
-            'show_org_link':
-                show_org_link,
+            'organizations':
+                organizations,
             'projects':
                 projects,
             'requests': {
@@ -246,6 +251,23 @@ class ProfileView(TemplateView):
                 Token.objects.get_or_create(user=self.user)[0],
         })
         return context_data
+
+    def get_form_kwargs(self):
+        """Give the form the current user"""
+        kwargs = super(ProfileView, self).get_form_kwargs()
+        user = self.request.user
+        kwargs['user'] = user
+        if user.is_authenticated:
+            kwargs['organization'] = user.profile.individual_organization
+        return kwargs
+
+    def form_valid(self, form):
+        """Buy requests"""
+        if self.request.user == self.user:
+            self.buy_requests(
+                form, recipient=self.user.profile.individual_organization
+            )
+        return redirect('acct-profile', username=self.user.username)
 
 
 @method_decorator(login_required, name='dispatch')

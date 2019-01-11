@@ -144,6 +144,11 @@ class Organization(models.Model):
         self.number_requests = F("number_requests") + amounts["regular"]
         self.save()
 
+    def add_requests(self, amount):
+        """Add requests"""
+        self.number_requests = F("number_requests") + amount
+        self.save()
+
 
 class Membership(models.Model):
     """Through table for organization membership"""

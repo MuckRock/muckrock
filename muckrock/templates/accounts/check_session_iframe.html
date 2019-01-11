@@ -31,13 +31,16 @@ function receiveMessage(event) {
     // Origin did not come from the OP.
     return;
   }
-  if (event.data === 'changed') {
+  if (event.data === 'unchanged') {
+    return;
+  } else if (event.data === 'changed') {
     // state has changed, log out
     console.log('OIDC session management: changed');
     window.top.location.href = "{% url "acct-logout" %}";
   } else {
     // Error.
     console.log('OIDC session management: error');
+    console.log(event);
   }
 }
   </script>

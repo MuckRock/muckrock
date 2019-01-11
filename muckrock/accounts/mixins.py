@@ -4,11 +4,13 @@ View mixins
 
 # Django
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 
 # Standard Library
 import logging
+import sys
 
 # Third Party
 import requests
@@ -18,6 +20,7 @@ from simplejson.scanner import JSONDecodeError
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import mailchimp_subscribe, mixpanel_event
 from muckrock.core.utils import squarelet_post
+from muckrock.message.tasks import gift
 from muckrock.organization.models import Membership, Organization, Plan
 
 logger = logging.getLogger(__name__)
@@ -111,3 +114,46 @@ class MiniregMixin(object):
             signup=True,
         )
         return user
+
+
+class BuyRequestsMixin(object):
+    """Buy requests functionality"""
+
+    def buy_requests(self, form, recipient=None):
+        """Buy requests"""
+        if recipient is None:
+            recipient = self.request.user.profile.individual_organization
+        try:
+            form.buy_requests(recipient)
+        except requests.exceptions.RequestException as exc:
+            messages.error(
+                self.request,
+                'Payment Error: {}'.format(exc.response.json()['detail'])
+            )
+            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
+            return
+
+        num_requests = form.cleaned_data['num_requests']
+        price = form.get_price(num_requests)
+        self.request.session['ga'] = 'request_purchase'
+        mixpanel_event(
+            self.request,
+            'Requests Purchased',
+            {
+                'Number': num_requests,
+                'Recipient': recipient.name,
+                'Price': price / 100,
+            },
+            charge=price / 100,
+        )
+        if recipient == self.request.user.profile.individual_organization:
+            msg = (
+                'Purchase successful.  {} requests have been added to your '
+                'account.'.format(num_requests)
+            )
+        else:
+            msg = (
+                'Purchase successful.  {} requests have been added to'
+                '{}\'s account.'.format(num_requests, recipient.name)
+            )
+        messages.success(self.request, msg)

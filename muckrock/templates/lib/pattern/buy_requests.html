@@ -1,6 +1,5 @@
 <div class="buy-request-form" data-bulk-price="{% if user.profile.is_advanced %}3{% else %}4{% endif %}">
-  {# XXX #}
-  {# {% include "lib/pattern/field.html" with field=form.num_requests only %} #}
+  {% include "lib/pattern/field.html" with field=form.num_requests only %}
   <span>
     <p>
       $5/request<br class="nomargin">
@@ -19,4 +18,17 @@
       {% endif %}
     </p>
   </span>
+  {% if form.use_card_on_file %}
+    {% include "lib/pattern/field.html" with field=form.use_card_on_file only %}
+  {% endif %}
+  <div class="form-group" id="card-element-container">
+    <label for="card-element">
+      Credit or debit card
+    </label>
+    <div id="card-element" class="form-control"></div>
+  </div>
+  {% include "lib/pattern/field.html" with field=form.save_card only %}
+  <!-- Used to display Element errors. -->
+  <div id="card-errors" role="alert"></div>
 </div>
+<input type="hidden" id="stripe_pub_key" value="{{ stripe_pk }}">

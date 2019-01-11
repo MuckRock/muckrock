@@ -38,6 +38,7 @@ import './list';
 import modal from './modal';
 import './nav';
 import './selectAll';
+import './stripe';
 import './tabs';
 import './task';
 
@@ -53,9 +54,6 @@ $('document').ready(function(){
   if ('ontouchstart' in window) {
     $('body').addClass('touch');
   }
-
-  // Stripe Checkout
-  $('form.stripe-checkout').checkout();
 
   // Crowdfund
   $('.crowdfund__widget').crowdfund();

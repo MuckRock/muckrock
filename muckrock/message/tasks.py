@@ -157,3 +157,17 @@ def slack(payload):
             args=[payload],
             exc=exc,
         )
+
+
+@task(name='muckrock.message.tasks.gift')
+def gift(to_user, from_user, gift_description):
+    """Notify the user when they have been gifted requests."""
+    context = {'from': from_user, 'gift': gift_description}
+    notification = TemplateEmail(
+        user=to_user,
+        extra_context=context,
+        text_template='message/notification/gift.txt',
+        html_template='message/notification/gift.html',
+        subject=u'You got a gift!'
+    )
+    notification.send(fail_silently=False)

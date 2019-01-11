@@ -204,6 +204,13 @@ class Profile(models.Model):
         """Get the user's active organization"""
         return self.user.memberships.get(active=True).organization
 
+    @mproperty
+    def individual_organization(self):
+        """Get the user's individual organization
+        There should always be exactly one individual organization
+        """
+        return self.user.organizations.filter(individual=True).first()
+
     @organization.setter
     def organization(self, organization):
         """Set the user's active organization"""

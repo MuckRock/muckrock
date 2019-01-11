@@ -8,13 +8,19 @@ from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.validators import validate_email
 
+# Standard Library
+import logging
+
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.core.utils import squarelet_post
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
+
+logger = logging.getLogger(__name__)
 
 
 class ProfileSettingsForm(forms.ModelForm):
@@ -91,35 +97,123 @@ class ReceiptForm(forms.Form):
         return self.cleaned_data['emails']
 
 
+# XXX move to orgs
+
+
 class StripeForm(forms.Form):
     """Form for processing stripe payments"""
-    stripe_token = forms.CharField(widget=forms.HiddenInput())
-    stripe_pk = forms.CharField(
-        widget=forms.HiddenInput(),
-        initial=settings.STRIPE_PUB_KEY,
+    stripe_token = forms.CharField(widget=forms.HiddenInput(), required=False)
+    use_card_on_file = forms.TypedChoiceField(
+        label='Use Credit Card on File',
+        coerce=lambda x: x == 'True',
+        initial=True,
+        widget=forms.RadioSelect,
+    )
+    save_card = forms.BooleanField(
+        label="Save credit card information",
         required=False,
     )
-    stripe_image = forms.CharField(
-        widget=forms.HiddenInput(),
-        initial=static('icons/logo.png'),
-        required=False,
+
+    def __init__(self, *args, **kwargs):
+        self.organization = kwargs.pop('organization', None)
+        super(StripeForm, self).__init__(*args, **kwargs)
+        self._set_card_options()
+
+    def _set_card_options(self):
+        """Initialize card options"""
+        card = self.organization and self.organization.card
+        if card:
+            self.fields['use_card_on_file'].choices = (
+                (True, self.organization.card),
+                (False, 'New Card'),
+            )
+        else:
+            del self.fields['use_card_on_file']
+            self.fields['stripe_token'].required = True
+
+    def clean(self):
+        """Validate using card on file and supplying new card"""
+        data = super(StripeForm, self).clean()
+
+        if data.get('use_card_on_file') and data.get('stripe_token'):
+            self.add_error(
+                'use_card_on_file',
+                'You cannot use your card on file and enter a credit card number.',
+            )
+
+        if data.get('save_card') and not data.get('stripe_token'):
+            self.add_error(
+                'save_card',
+                'You must enter credit card information in order to save it',
+            )
+        if data.get('save_card') and data.get('use_card_on_file'):
+            self.add_error(
+                'save_card',
+                'You cannot save your card information if you are using your '
+                'card on file.',
+            )
+
+        if (
+            'use_card_on_file' in self.fields
+            and not data.get('use_card_on_file')
+            and not data.get('stripe_token')
+        ):
+            self.add_error(
+                'use_card_on_file',
+                'You must use your card on file or enter a credit card number.',
+            )
+        return data
+
+
+class BuyRequestForm(StripeForm):
+    """Form for buying more requests"""
+
+    num_requests = forms.IntegerField(
+        label='Number of requests to buy',
+        min_value=1,
     )
-    stripe_email = forms.EmailField(widget=forms.HiddenInput())
-    stripe_label = forms.CharField(
-        widget=forms.HiddenInput(),
-        initial='Buy',
-        required=False,
-    )
-    stripe_description = forms.CharField(
-        widget=forms.HiddenInput(),
-        required=False,
-    )
-    stripe_fee = forms.IntegerField(
-        widget=forms.HiddenInput(),
-        initial=0,
-        required=False,
-    )
-    stripe_amount = forms.IntegerField(
-        widget=forms.HiddenInput(),
-        required=False,
-    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(BuyRequestForm, self).__init__(*args, **kwargs)
+        if self.user.is_authenticated and self.user.profile.is_advanced():
+            limit_val = 1
+        else:
+            limit_val = 4
+        self.fields['num_requests'].validators[0].limit_value = limit_val
+        self.fields['num_requests'].widget.attrs['min'] = limit_val
+        self.fields['num_requests'].initial = limit_val
+
+    def buy_requests(self, organization):
+        """Buy the requests"""
+        num_requests = self.cleaned_data['num_requests']
+        resp = squarelet_post(
+            '/api/charges/',
+            data={
+                'amount': self.get_price(num_requests),
+                'organization': organization.uuid,
+                'description': 'Purchase {} requests'.format(num_requests),
+                'token': self.cleaned_data['stripe_token'],
+                'save_card': self.cleaned_data['save_card'],
+            }
+        )
+        logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
+        resp.raise_for_status()
+
+        organization.add_requests(num_requests)
+
+    def get_price(self, num_requests):
+        """Get the price for the requests"""
+        # XXX
+        is_advanced = (
+            self.user.is_authenticated and self.user.profile.is_advanced()
+        )
+        if num_requests >= 20 and is_advanced:
+            # advanced users pay $3 for bulk purchases
+            return 300 * num_requests
+        elif num_requests >= 20:
+            # other users pay $4 for bulk purchases
+            return 400 * num_requests
+        else:
+            # all users pay $5 for non-bulk purchases
+            return 500 * num_requests

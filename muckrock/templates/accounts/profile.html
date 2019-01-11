@@ -60,27 +60,28 @@
     <dl class="stats">
       {% if user.profile.acct_type != 'basic' %}
         <dt>Monthly Requests</dt>
-        {% with monthly_requests=user_obj.profile.organization.monthly_requests %}
-          {% if monthly_requests %}
-            <dd>{{ monthly_requests }}</dd>
-          {% else %}
-            <dd>0</dd>
-          {% endif %}
-        {% endwith %}
+        <dd>{{ user_obj.profile.individual_organization.monthly_requests }}</dd>
       {% endif %}
       <dt>Requests Remaining</dt>
-      {% with number_requests=user_obj.profile.organization.number_requests %}
-        {% if number_requests %}
-          <dd>{{ number_requests }}</dd>
-        {% else %}
-          <dd>0</dd>
-        {% endif %}
-      {% endwith %}
+      <dd>{{ user_obj.profile.individual_organization.number_requests }}</dd>
     </dl>
   {% endif %}
-  {% if org and show_org_link %}
-    <p class="organization">{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
-  {% endif %}
+  {% for org in organizations %}
+    <p class="organization">
+      {% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of
+      <a href="{% url 'org-detail' org.slug %}" title="{{ org }}'s organization page">
+        {{ org }}
+      </a>
+      {% if user == user_obj %}
+        <dl class="stats">
+          <dt>Monthly Requests</dt>
+          <dd>{{ org.monthly_requests }}</dd>
+          <dt>Requests Remaining</dt>
+          <dd>{{ org.number_requests }}</dd>
+        </dl>
+      {% endif %}
+    </p>
+  {% endfor %}
   {% if user == user_obj and user.is_staff %}
     <p class="api-token">API Token:&nbsp;<a href="#">show...</a><input type="text" value={{ api_token }} readonly></p>
   {% endif %}
@@ -106,6 +107,23 @@
       {% endif %}
     </div>
   </section>
+
+  {% if request.user == user_obj %}
+    <section class="buy">
+      <form method="POST" class="stripe-elements" id="buy-requests">
+        {% csrf_token %}
+        <div class="hidden-fields">
+          {% for field in form.hidden_fields %}
+            {{ field }}
+          {% endfor %}
+        </div>
+        {% include "lib/pattern/buy_requests.html" with user=user form=form stripe_pk=stripe_pk only %}
+        <button class="blue button" type="submit">Buy Requests</button>
+      </form>
+    </section>
+  {% endif %}
+
+
   {% if projects %}
     <section class="projects">
       <h3>

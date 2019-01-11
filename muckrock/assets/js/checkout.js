@@ -8,6 +8,7 @@
 ** add back to the form before resubmitting it.
 */
 
+// XXX remove this
 (function( $ ){
 
     var $form = null;
