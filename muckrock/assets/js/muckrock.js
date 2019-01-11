@@ -38,6 +38,7 @@ import './list';
 import modal from './modal';
 import './nav';
 import './selectAll';
+import './stripe';
 import './tabs';
 import './task';
 

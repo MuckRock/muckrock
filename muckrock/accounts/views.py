@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, RedirectView, TemplateView
+from django.views.generic import FormView, ListView, RedirectView, TemplateView
 
 # Standard Library
 import logging
@@ -25,11 +25,13 @@ from rest_framework.authtoken.models import Token
 # MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
+    BuyRequestForm,
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
     ReceiptForm,
 )
+from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import ACCT_TYPES, Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
@@ -182,9 +184,10 @@ class ProfileSettings(TemplateView):
         return context
 
 
-class ProfileView(TemplateView):
+class ProfileView(BuyRequestsMixin, FormView):
     """View a user's profile"""
     template_name = 'accounts/profile.html'
+    form_class = BuyRequestForm
 
     def dispatch(self, request, *args, **kwargs):
         """Get the user and redirect if neccessary"""
@@ -246,6 +249,24 @@ class ProfileView(TemplateView):
                 Token.objects.get_or_create(user=self.user)[0],
         })
         return context_data
+
+    def get_initial(self):
+        """Set the form label"""
+        if self.user == self.request.user:
+            return {'stripe_label': 'Buy'}
+        else:
+            return {'stripe_label': 'Gift'}
+
+    def get_form_kwargs(self):
+        """Give the form the current user"""
+        kwargs = super(ProfileView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        """Buy requests"""
+        self.buy_requests(form, recipient=self.user)
+        return redirect('acct-profile', username=self.user.username)
 
 
 @method_decorator(login_required, name='dispatch')

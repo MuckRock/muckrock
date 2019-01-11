@@ -106,6 +106,26 @@
       {% endif %}
     </div>
   </section>
+
+  <section class="buy">
+    <form method="POST" class="stripe-elements" id="buy-requests">
+      {% csrf_token %}
+      <div class="hidden-fields">
+        {% for field in form.hidden_fields %}
+          {{ field }}
+        {% endfor %}
+      </div>
+      {% include "lib/pattern/buy_requests.html" with user=user form=form only %}
+    </form>
+    {% if request.user == user_obj %}
+      <button class="blue button" type="submit">Buy Requests</button>
+    {% else %}
+      <button class="primary button" type="submit">&hearts; Gift Requests</button>
+    {% endif %}
+    </form>
+  </section>
+
+
   {% if projects %}
     <section class="projects">
       <h3>
