@@ -42,6 +42,7 @@ class Organization(models.Model):
     private = models.BooleanField(default=False)
     individual = models.BooleanField(default=True)
     plan = models.ForeignKey('organization.Plan', null=True)
+    card = models.CharField(max_length=255, blank=True)
 
     requests_per_month = models.IntegerField(default=0)
     monthly_requests = models.IntegerField(default=0)
@@ -110,6 +111,7 @@ class Organization(models.Model):
             'individual',
             'private',
             'date_update',
+            'card',
         ]
         for field in fields:
             setattr(self, field, data[field])
