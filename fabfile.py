@@ -247,3 +247,17 @@ def pip_sync():
     """sync requirements"""
     with env.cd(os.path.join(env.base_path, 'pip')):
         env.run('pip-sync requirements.txt dev-requirements.txt')
+
+
+@task(name='npm-build')
+def npm_build():
+    """Build assets"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='npm run build'))
+
+
+@task(name='npm-watch')
+def npm_watch():
+    """Continuously build assets"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='npm run watch'))

@@ -92,6 +92,9 @@ class ReceiptForm(forms.Form):
         return self.cleaned_data['emails']
 
 
+# XXX move to orgs
+
+
 class StripeForm(forms.Form):
     """Form for processing stripe payments"""
     stripe_token = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -100,6 +103,10 @@ class StripeForm(forms.Form):
         coerce=lambda x: x == 'True',
         initial=True,
         widget=forms.RadioSelect,
+    )
+    save_card = forms.BooleanField(
+        label="Save credit card information",
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
@@ -127,6 +134,28 @@ class StripeForm(forms.Form):
                 'use_card_on_file',
                 'You cannot use your card on file and enter a credit card number.',
             )
+
+        if data.get('save_card') and not data.get('stripe_token'):
+            self.add_error(
+                'save_card',
+                'You must enter credit card information in order to save it',
+            )
+        if data.get('save_card') and data.get('use_card_on_file'):
+            self.add_error(
+                'save_card',
+                'You cannot save your card information if you are using your '
+                'card on file.',
+            )
+
+        if (
+            'use_card_on_file' in self.fields
+            and not data.get('use_card_on_file')
+            and not data.get('stripe_token')
+        ):
+            self.add_error(
+                'use_card_on_file',
+                'You must use your card on file or enter a credit card number.',
+            )
         return data
 
 
@@ -141,8 +170,6 @@ class BuyRequestForm(StripeForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super(BuyRequestForm, self).__init__(*args, **kwargs)
-        if self.user.is_authenticated:
-            self.fields['stripe_email'].initial = self.user.email
         if self.user.is_authenticated and self.user.profile.is_advanced():
             limit_val = 1
         else:
@@ -151,19 +178,21 @@ class BuyRequestForm(StripeForm):
         self.fields['num_requests'].widget.attrs['min'] = limit_val
         self.fields['num_requests'].initial = limit_val
 
-    def buy_requests(self, recipient):
+    def buy_requests(self, organization):
         """Buy the requests"""
         num_requests = self.cleaned_data['num_requests']
-        squarelet_post(
+        resp = squarelet_post(
             '/api/charges/',
             data={
                 'amount': self.get_price(num_requests),
-                'organization': recipient.profile.organization,
+                'organization': organization.uuid,
                 'description': 'Purchase {} requests'.format(num_requests),
                 'token': self.cleaned_data['stripe_token'],
             }
         )
-        recipient.profile.add_requests(num_requests)
+        # XXX check resp for error
+
+        organization.add_requests(num_requests)
 
     def get_price(self, num_requests):
         """Get the price for the requests"""

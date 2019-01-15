@@ -13,6 +13,7 @@ function stripeTokenHandler(token, form) {
   var hiddenInput = $("#id_stripe_token");
   hiddenInput.val(token.id);
   // Submit the form
+  form.off("submit");
   form.submit();
 }
 

@@ -261,11 +261,15 @@ class ProfileView(BuyRequestsMixin, FormView):
         """Give the form the current user"""
         kwargs = super(ProfileView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+        # XXX should this be individual org or the active org
+        kwargs['instance'] = self.request.user.profile.individual_organization
         return kwargs
 
     def form_valid(self, form):
         """Buy requests"""
-        self.buy_requests(form, recipient=self.user)
+        self.buy_requests(
+            form, recipient=self.user.profile.individual_organization
+        )
         return redirect('acct-profile', username=self.user.username)
 
 

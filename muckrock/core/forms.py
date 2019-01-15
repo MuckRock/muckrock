@@ -112,6 +112,7 @@ class SearchForm(forms.Form):
 
 class StripeForm(forms.Form):
     """A form to collect a stripe token for a given amount and email."""
+    # XXX remove
     stripe_pk = forms.CharField(
         initial=settings.STRIPE_PUB_KEY,
         required=False,

@@ -55,9 +55,6 @@ $('document').ready(function(){
     $('body').addClass('touch');
   }
 
-  // Stripe Checkout
-  $('form.stripe-checkout').checkout();
-
   // Crowdfund
   $('.crowdfund__widget').crowdfund();
 

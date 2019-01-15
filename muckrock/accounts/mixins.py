@@ -122,11 +122,11 @@ class BuyRequestsMixin(object):
     def buy_requests(self, form, recipient=None):
         """Buy requests"""
         if recipient is None:
-            recipient = self.request.user
+            recipient = self.request.user.profile.individual_organization
         try:
             form.buy_requests(recipient)
         except Exception as exc:
-            # XXX different error
+            # XXX different error - squarelet error
             messages.error(self.request, 'Payment Error')
             logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
             return
@@ -144,7 +144,7 @@ class BuyRequestsMixin(object):
             },
             charge=price / 100,
         )
-        if recipient == self.request.user.profile.organization:
+        if recipient == self.request.user.profile.individual_organization:
             msg = (
                 'Purchase successful.  {} requests have been added to your '
                 'account.'.format(num_requests)
@@ -152,10 +152,10 @@ class BuyRequestsMixin(object):
         else:
             msg = (
                 'Purchase successful.  {} requests have been gifted to'
-                '{}.'.format(num_requests, recipient.first_name)
+                '{}.'.format(num_requests, recipient.name)
             )
             gift.delay(
-                recipient,
+                recipient, # XXX
                 self.request.user,
                 '{} requests'.format(num_requests),
             )
