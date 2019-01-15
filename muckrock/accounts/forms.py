@@ -8,6 +8,9 @@ from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.validators import validate_email
 
+# Standard Library
+import logging
+
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 
@@ -16,6 +19,8 @@ from muckrock.accounts.models import Profile
 from muckrock.core.utils import squarelet_post
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
+
+logger = logging.getLogger(__name__)
 
 
 class ProfileSettingsForm(forms.ModelForm):
@@ -110,7 +115,7 @@ class StripeForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.organization = kwargs.pop('instance', None)
+        self.organization = kwargs.pop('organization', None)
         super(StripeForm, self).__init__(*args, **kwargs)
         self._set_card_options()
 
@@ -129,6 +134,7 @@ class StripeForm(forms.Form):
     def clean(self):
         """Validate using card on file and supplying new card"""
         data = super(StripeForm, self).clean()
+
         if data.get('use_card_on_file') and data.get('stripe_token'):
             self.add_error(
                 'use_card_on_file',
@@ -188,9 +194,11 @@ class BuyRequestForm(StripeForm):
                 'organization': organization.uuid,
                 'description': 'Purchase {} requests'.format(num_requests),
                 'token': self.cleaned_data['stripe_token'],
+                'save_card': self.cleaned_data['save_card'],
             }
         )
         # XXX check resp for error
+        logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
 
         organization.add_requests(num_requests)
 

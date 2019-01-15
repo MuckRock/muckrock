@@ -25,6 +25,19 @@ var style = {
 };
 
 $("document").ready(function(){
+  $("#id_use_card_on_file_0").change(function() {
+    $("#card-element-container").hide();
+    $("#id_save_card").closest("div").hide();
+  });
+  $("#id_use_card_on_file_1").change(function() {
+    $("#card-element-container").show();
+    $("#id_save_card").closest("div").show();
+  });
+  if($("input[name=use_card_on_file]:checked").val() === "True") {
+    $("#id_use_card_on_file_0").change();
+  } else {
+    $("#id_use_card_on_file_1").change();
+  }
   var card = elements.create("card", {style: style});
   if ($("#card-element").length > 0) {
     card.mount("#card-element");
@@ -42,8 +55,7 @@ $("document").ready(function(){
     var form = $("#card-element").closest("form");
     form.submit(function(event) {
       var useCardOnFile = $("input[name=use_card_on_file]:checked").val() === "True";
-      var freePlan = $("#id_plan option:selected").text() === "Free";
-      if (!useCardOnFile && !freePlan) {
+      if (!useCardOnFile) {
         event.preventDefault();
 
         stripe.createToken(card).then(function(result) {

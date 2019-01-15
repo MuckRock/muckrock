@@ -9,6 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, ListView, RedirectView, TemplateView
@@ -201,15 +202,14 @@ class ProfileView(BuyRequestsMixin, FormView):
     def get_context_data(self, **kwargs):
         """Get data for the profile page"""
         context_data = super(ProfileView, self).get_context_data(**kwargs)
-        org = self.user.profile.organization
-        show_org_link = (
-            org and (
-                not org.private or self.request.user.is_staff or (
-                    self.request.user.is_authenticated()
-                    and org.has_member(self.request.user)
-                )
-            )
-        )
+        if self.request.user.is_staff:
+            organizations = [o for o in self.user.organizations.all()]
+        else:
+            # XXX test
+            organizations = [
+                o for o in self.user.organizations.
+                filter(Q(private=False) | Q(users=self.request.user))
+            ]
         requests = (
             FOIARequest.objects.filter(composer__user=self.user)
             .get_viewable(self.request.user)
@@ -228,10 +228,8 @@ class ProfileView(BuyRequestsMixin, FormView):
                 self.user,
             'profile':
                 self.user.profile,
-            'org':
-                org,
-            'show_org_link':
-                show_org_link,
+            'organizations':
+                organizations,
             'projects':
                 projects,
             'requests': {
@@ -250,26 +248,21 @@ class ProfileView(BuyRequestsMixin, FormView):
         })
         return context_data
 
-    def get_initial(self):
-        """Set the form label"""
-        if self.user == self.request.user:
-            return {'stripe_label': 'Buy'}
-        else:
-            return {'stripe_label': 'Gift'}
-
     def get_form_kwargs(self):
         """Give the form the current user"""
         kwargs = super(ProfileView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         # XXX should this be individual org or the active org
-        kwargs['instance'] = self.request.user.profile.individual_organization
+        kwargs['organization'
+               ] = self.request.user.profile.individual_organization
         return kwargs
 
     def form_valid(self, form):
         """Buy requests"""
-        self.buy_requests(
-            form, recipient=self.user.profile.individual_organization
-        )
+        if self.request.user == self.user:
+            self.buy_requests(
+                form, recipient=self.user.profile.individual_organization
+            )
         return redirect('acct-profile', username=self.user.username)
 
 

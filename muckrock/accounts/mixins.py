@@ -119,6 +119,7 @@ class MiniregMixin(object):
 class BuyRequestsMixin(object):
     """Buy requests functionality"""
 
+    # XXX remove gifting
     def buy_requests(self, form, recipient=None):
         """Buy requests"""
         if recipient is None:
@@ -151,12 +152,7 @@ class BuyRequestsMixin(object):
             )
         else:
             msg = (
-                'Purchase successful.  {} requests have been gifted to'
-                '{}.'.format(num_requests, recipient.name)
-            )
-            gift.delay(
-                recipient, # XXX
-                self.request.user,
-                '{} requests'.format(num_requests),
+                'Purchase successful.  {} requests have been added to'
+                '{}\'s account.'.format(num_requests, recipient.name)
             )
         messages.success(self.request, msg)
