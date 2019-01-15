@@ -3,7 +3,8 @@ Celery tasks for the task application
 """
 
 # Django
-from celery.task import task
+from celery.schedules import crontab
+from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
@@ -146,6 +147,8 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 def create_zoho_ticket(flag_pk, **kwargs):
     """Create a zoho ticket from a flag"""
     flag = FlaggedTask.objects.get(pk=flag_pk)
+    if flag.resolved:
+        return
     try:
         zoho_id = flag.create_zoho_ticket()
     except RequestException as exc:
@@ -158,3 +161,13 @@ def create_zoho_ticket(flag_pk, **kwargs):
         )
     else:
         flag.resolve(form_data={'zoho_id': zoho_id})
+
+
+@periodic_task(
+    run_every=crontab(hour=4, minute=0),
+    name='muckrock.task.tasks.cleanup_zoho_flags',
+)
+def cleanup_zoho_flags():
+    """Find any flags that failed to make it to zoho and try again"""
+    for flag in FlaggedTask.objects.filter(resolved=False):
+        create_zoho_ticket.delay(flag.pk)
