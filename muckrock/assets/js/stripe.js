@@ -33,12 +33,15 @@ $("document").ready(function(){
     $("#card-element-container").show();
     $("#id_save_card").closest("div").show();
   });
-  if($("input[name=use_card_on_file]:checked").val() === "True") {
-    $("#id_use_card_on_file_0").change();
-  } else {
-    $("#id_use_card_on_file_1").change();
-  }
+
   var card = elements.create("card", {style: style});
+  card.addEventListener("ready", function() {
+    if($("input[name=use_card_on_file]:checked").val() === "True") {
+      $("#id_use_card_on_file_0").change();
+    } else {
+      $("#id_use_card_on_file_1").change();
+    }
+  });
   if ($("#card-element").length > 0) {
     card.mount("#card-element");
     card.addEventListener("change", function(event) {

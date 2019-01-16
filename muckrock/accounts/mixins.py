@@ -119,16 +119,17 @@ class MiniregMixin(object):
 class BuyRequestsMixin(object):
     """Buy requests functionality"""
 
-    # XXX remove gifting
     def buy_requests(self, form, recipient=None):
         """Buy requests"""
         if recipient is None:
             recipient = self.request.user.profile.individual_organization
         try:
             form.buy_requests(recipient)
-        except Exception as exc:
-            # XXX different error - squarelet error
-            messages.error(self.request, 'Payment Error')
+        except requests.exceptions.RequestException as exc:
+            messages.error(
+                self.request,
+                'Payment Error: {}'.format(exc.response.json()['detail'])
+            )
             logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
             return
 

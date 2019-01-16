@@ -36,6 +36,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'organization',
             'date_update': date(2019, 2, 21),
             'max_users': 5,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 50)
@@ -59,6 +60,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'free',
             'date_update': None,
             'max_users': 5,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 0)
@@ -86,6 +88,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'plus',
             'date_update': date(2019, 2, 21),
             'max_users': 5,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 100)
@@ -115,6 +118,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'organization',
             'date_update': date(2019, 3, 21),
             'max_users': 5,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 50)
@@ -137,6 +141,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'organization',
             'date_update': date(2019, 2, 21),
             'max_users': 9,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 70)
@@ -159,6 +164,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'organization',
             'date_update': date(2019, 2, 21),
             'max_users': 7,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 60)
@@ -181,6 +187,7 @@ class TestSquareletUpdateData(TestCase):
             'plan': 'organization',
             'date_update': date(2019, 3, 21),
             'max_users': 5,
+            'card': '',
         })
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 50)

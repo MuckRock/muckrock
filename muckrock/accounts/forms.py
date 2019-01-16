@@ -197,8 +197,8 @@ class BuyRequestForm(StripeForm):
                 'save_card': self.cleaned_data['save_card'],
             }
         )
-        # XXX check resp for error
         logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
+        resp.raise_for_status()
 
         organization.add_requests(num_requests)
 

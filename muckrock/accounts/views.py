@@ -204,11 +204,15 @@ class ProfileView(BuyRequestsMixin, FormView):
         context_data = super(ProfileView, self).get_context_data(**kwargs)
         if self.request.user.is_staff:
             organizations = [o for o in self.user.organizations.all()]
-        else:
+        elif self.request.user.is_authenticated:
             # XXX test
             organizations = [
                 o for o in self.user.organizations.
                 filter(Q(private=False) | Q(users=self.request.user))
+            ]
+        else:
+            organizations = [
+                o for o in self.user.organizations.filter(private=False)
             ]
         requests = (
             FOIARequest.objects.filter(composer__user=self.user)
@@ -251,10 +255,10 @@ class ProfileView(BuyRequestsMixin, FormView):
     def get_form_kwargs(self):
         """Give the form the current user"""
         kwargs = super(ProfileView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        # XXX should this be individual org or the active org
-        kwargs['organization'
-               ] = self.request.user.profile.individual_organization
+        user = self.request.user
+        kwargs['user'] = user
+        if user.is_authenticated:
+            kwargs['organization'] = user.profile.individual_organization
         return kwargs
 
     def form_valid(self, form):
