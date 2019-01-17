@@ -204,13 +204,6 @@ class Profile(models.Model):
         """Get the user's active organization"""
         return self.user.memberships.get(active=True).organization
 
-    @mproperty
-    def individual_organization(self):
-        """Get the user's individual organization
-        There should always be exactly one individual organization
-        """
-        return self.user.organizations.filter(individual=True).first()
-
     @organization.setter
     def organization(self, organization):
         """Set the user's active organization"""
@@ -223,6 +216,13 @@ class Profile(models.Model):
             self.user.memberships.filter(active=True).update(active=False)
             self.user.memberships.filter(organization=organization
                                          ).update(active=True)
+
+    @mproperty
+    def individual_organization(self):
+        """Get the user's individual organization
+        There should always be exactly one individual organization
+        """
+        return self.user.organizations.filter(individual=True).first()
 
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
         """

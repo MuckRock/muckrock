@@ -20,7 +20,6 @@ from simplejson.scanner import JSONDecodeError
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import mailchimp_subscribe, mixpanel_event
 from muckrock.core.utils import squarelet_post
-from muckrock.message.tasks import gift
 from muckrock.organization.models import Membership, Organization, Plan
 
 logger = logging.getLogger(__name__)
@@ -65,31 +64,14 @@ class MiniregMixin(object):
             form,
             {
                 'name': full_name,
-                'username': full_name,
+                'preferred_username': full_name,
                 'email': email,
             },
         )
 
-        user = User.objects.create_user(
-            user_json['username'],
-            email,
+        user, _ = Profile.objects.squarelet_update_or_create(
+            user_json['uuid'], user_json
         )
-        Profile.objects.create(
-            user=user,
-            acct_type='basic',
-            full_name=full_name,
-            uuid=user_json['id'],
-        )
-        # XXX how to do this
-        org = Organization.objects.create(
-            name=user_json['org_name'],
-            uuid=user_json['org_uuid'],
-            private=True,
-            individual=True,
-            plan=Plan.objects.get(slug='free'),
-        )
-        Membership.objects.create(user=user, organization=org, active=True)
-
         login(
             self.request,
             user,
@@ -119,12 +101,14 @@ class MiniregMixin(object):
 class BuyRequestsMixin(object):
     """Buy requests functionality"""
 
-    def buy_requests(self, form, recipient=None):
+    def buy_requests(self, form, organization=None, payer=None):
         """Buy requests"""
-        if recipient is None:
-            recipient = self.request.user.profile.individual_organization
+        if organization is None:
+            organization = self.request.user.profile.individual_organization
+        if payer is None:
+            payer = organization
         try:
-            form.buy_requests(recipient)
+            form.buy_requests(organization, payer)
         except requests.exceptions.RequestException as exc:
             messages.error(
                 self.request,
@@ -141,19 +125,19 @@ class BuyRequestsMixin(object):
             'Requests Purchased',
             {
                 'Number': num_requests,
-                'Recipient': recipient.name,
+                'Recipient': organization.name,
                 'Price': price / 100,
             },
             charge=price / 100,
         )
-        if recipient == self.request.user.profile.individual_organization:
+        if organization == self.request.user.profile.individual_organization:
             msg = (
                 'Purchase successful.  {} requests have been added to your '
                 'account.'.format(num_requests)
             )
         else:
             msg = (
-                'Purchase successful.  {} requests have been added to'
-                '{}\'s account.'.format(num_requests, recipient.name)
+                'Purchase successful.  {} requests have been added to '
+                '{}\'s account.'.format(num_requests, organization.name)
             )
         messages.success(self.request, msg)

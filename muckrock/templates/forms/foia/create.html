@@ -147,7 +147,6 @@
             {% include "lib/pattern/new_request_field.html" with field=form.register_full_name only %}
             {% include "lib/pattern/new_request_field.html" with field=form.register_email only %}
             {% include "lib/pattern/new_request_field.html" with field=form.register_newsletter only %}
-            {% include "lib/pattern/new_request_field.html" with field=form.register_pro only %}
           </div>
           <div class="login-form">
             {% include "lib/pattern/new_request_field.html" with field=form.login_username only %}
@@ -159,7 +158,6 @@
           <footer class="footer--submit">
             <p id="submit_help" class="error"></p>
             <div class="requests-left"
-                 data-org="{{ requests_left.org }}"
                  data-month="{{ requests_left.monthly }}"
                  data-reg="{{ requests_left.regular }}"
                  >
@@ -178,7 +176,10 @@
               <p class="using-requests"></p>
             </div>
 
-            <div class="buy-section{% if not use.profile.is_advanced %} hide-form{% endif %}">
+            <div class="buy-section{% if not user.profile.is_advanced %} hide-form{% endif %}">
+              {% if organization != payer %}
+                <p><strong>Note:</strong> Since you are not an admin of your currently active organization, {{ organization.name }}, requests will be purchased using your personal payment information.</p>
+              {% endif %}
               {% if not user.profile.is_advanced %}
                 <p class="simple-buy">
                   Click buy &amp; submit to purchase a bundle of
@@ -190,7 +191,7 @@
                   </a>
                 </p>
               {% endif %}
-              {% include "lib/pattern/buy_requests.html" with user=user form=form only %}
+              {% include "lib/pattern/buy_requests.html" with user=user form=form stripe_pk=stripe_pk only %}
             </div>
 
             <div class="contact-info">

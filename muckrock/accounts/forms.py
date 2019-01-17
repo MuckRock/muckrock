@@ -184,14 +184,14 @@ class BuyRequestForm(StripeForm):
         self.fields['num_requests'].widget.attrs['min'] = limit_val
         self.fields['num_requests'].initial = limit_val
 
-    def buy_requests(self, organization):
+    def buy_requests(self, organization, payer):
         """Buy the requests"""
         num_requests = self.cleaned_data['num_requests']
         resp = squarelet_post(
             '/api/charges/',
             data={
                 'amount': self.get_price(num_requests),
-                'organization': organization.uuid,
+                'organization': payer.uuid,
                 'description': 'Purchase {} requests'.format(num_requests),
                 'token': self.cleaned_data['stripe_token'],
                 'save_card': self.cleaned_data['save_card'],
