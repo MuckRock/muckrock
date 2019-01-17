@@ -19,9 +19,20 @@ function stripeTokenHandler(token, form) {
 
 var style = {
   base: {
-    fontSize: "1rem",
-    color: "#32325d",
-  }
+    color: '#3F3F3F',
+    fontSize: '16px',
+    fontFamily: 'system-ui, sans-serif',
+    fontSmoothing: 'antialiased',
+    '::placeholder': {
+      color: '#899194',
+    },
+  },
+  invalid: {
+    color: '#e5424d',
+    ':focus': {
+      color: '#303238',
+    },
+  },
 };
 
 $("document").ready(function(){

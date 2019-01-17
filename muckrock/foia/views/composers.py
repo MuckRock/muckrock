@@ -23,26 +23,42 @@ import requests
 from stripe.error import StripeError
 
 # MuckRock
-from muckrock.accounts.mixins import MiniregMixin
+from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
-from muckrock.core.exceptions import SquareletError
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIARequest
 
 
-class GenericComposer(object):
+class GenericComposer(BuyRequestsMixin):
     """Shared functionality between create and update composer views"""
     template_name = 'forms/foia/create.html'
     form_class = ComposerForm
     context_object_name = 'composer'
+
+    def _get_organizations(self, user):
+        """Get the active organization and which organization should pay
+        This is the active org if the user is an admin of that org,
+        else it is the user's individual org
+        """
+        if not user.is_authenticated:
+            return None, None
+        active = user.profile.organization
+        if active.has_admin(user):
+            payer = active
+        else:
+            payer = user.profile.individual_organization
+        return (active, payer)
 
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
         kwargs = super(GenericComposer, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         kwargs['request'] = self.request
+        _, payer = self._get_organizations(self.request.user)
+        kwargs['organization'] = payer
+
         if len(self.request.POST.getlist('agencies')) == 1:
             # pass the agency for contact info form
             try:
@@ -61,8 +77,9 @@ class GenericComposer(object):
             foias_filed = (
                 self.request.user.composers.exclude(status='started').count()
             )
-            organization = self.request.user.profile.organization
+            organization, payer = self._get_organizations(self.request.user)
             context['organization'] = organization
+            context['payer'] = payer
             requests_left = {
                 'regular': organization.number_requests,
                 'monthly': organization.monthly_requests,
@@ -78,6 +95,7 @@ class GenericComposer(object):
             'settings': settings,
             'foias_filed': foias_filed,
             'requests_left': requests_left,
+            'stripe_pk': settings.STRIPE_PUB_KEY,
         })
         return context
 
@@ -90,7 +108,8 @@ class GenericComposer(object):
             )
             return
         if form.cleaned_data.get('num_requests', 0) > 0:
-            self.buy_requests(form)
+            active, payer = self._get_organizations(self.request.user)
+            self.buy_requests(form, active, payer)
         if (
             form.cleaned_data.get('use_contact_information')
             and self.request.user.has_perm('foia.set_info_foiarequest')
@@ -106,10 +125,6 @@ class GenericComposer(object):
             composer.submit(contact_info)
         except InsufficientRequestsError:
             messages.warning(self.request, 'You need to purchase more requests')
-        except SquareletError:
-            messages.warning(
-                self.request, 'There was an error, please try again later'
-            )
         else:
             messages.success(self.request, 'Request submitted')
             self.request.session['ga'] = 'request_submitted'
@@ -249,21 +264,6 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                 form.cleaned_data['register_email'],
                 form.cleaned_data.get('register_newsletter'),
             )
-            if form.cleaned_data.get('register_pro'):
-                try:
-                    # XXX use squarelet
-                    user.profile.start_pro_subscription(
-                        form.cleaned_data.get('stripe_token'),
-                    )
-                except StripeError:
-                    messages.error(
-                        self.request, 'There was an error processing your '
-                        'payment.  Your account has been created, but you '
-                        'have not been subscribed to a professional account.  '
-                        'You can subscribe from the settings page.'
-                    )
-                else:
-                    mixpanel_event(self.request, 'Pro Subscription Started')
             return user
         else:
             login(self.request, form.user)

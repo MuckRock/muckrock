@@ -16,39 +16,28 @@ $(document).ready(function(){
 
   function updateRequestCount(num) {
     var requestsLeft = $(".requests-left"),
-    hasOrg = requestsLeft.data("org") || 0,
     hasMonthly = requestsLeft.data("month") || 0,
     hasRegular = requestsLeft.data("reg") || 0,
-    useOrg = 0,
     useMonthly = 0,
     useRegular = 0,
     useExtra = 0;
 
-    if (num < hasOrg) {
-      useOrg = num;
-    } else if (num < (hasOrg + hasMonthly)) {
-      useOrg = hasOrg;
-      useMonthly = num - hasOrg;
-    } else if (num < (hasOrg + hasMonthly + hasRegular)) {
-      useOrg = hasOrg;
+    if (num < hasMonthly) {
+      useMonthly = num;
+    } else if (num < (hasMonthly + hasRegular)) {
       useMonthly = hasMonthly;
-      useRegular = num - (hasOrg + hasMonthly);
+      useRegular = num - hasMonthly;
     } else {
-      useOrg = hasOrg;
       useMonthly = hasMonthly;
       useRegular = hasRegular;
-      useExtra = num - (hasOrg + hasMonthly + hasRegular);
+      useExtra = num - (hasMonthly + hasRegular);
     }
     var text = "You are making <strong>" + num + "</strong> request" +
       (num !== 1 ? "s" : "") + ".  ";
-    var useAny = (useOrg > 0 || useMonthly > 0 || useRegular > 0);
+    var useAny = (useMonthly > 0 || useRegular > 0);
     if (useAny) {
       text += "This will use ";
       var useText = [];
-      if (useOrg > 0) {
-        useText.push("<strong>" + useOrg + "</strong> organizational request" +
-          (useOrg > 1 ? "s" : ""));
-      }
       if (useMonthly > 0) {
         useText.push("<strong>" + useMonthly + "</strong> monthly request" +
           (useMonthly > 1 ? "s" : ""));
@@ -237,23 +226,11 @@ $(document).ready(function(){
     $(".submit-required").removeAttr("required");
     agencyInput.removeAttr("required");
 
-    if ($("#id_register_pro").prop("checked")) {
-      $("#id_stripe_amount").val(4000);
-      $("#id_stripe_description").val("Pro Subscription ($40.00/month)");
-      $("#id_stripe_email").val($("#id_register_email").val());
-      $(this).closest("form").checkout();
-    }
-
     $(this).closest("form").submit();
   });
 
   $("#submit_button").click(function(){
     $("input[name='action']").val("submit");
-
-    // if they need to buy requests, enable checkout on this form before submitting
-    if ($(".buy-section").is(":visible")) {
-      $(this).closest("form").checkout();
-    }
 
     $(".submit-required").attr("required", "required");
     if (agencyField.find(".deck > .choice").length === 0) {

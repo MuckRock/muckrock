@@ -12,6 +12,7 @@ from autocomplete_light.contrib.taggit_field import TaggitField
 from requests.exceptions import HTTPError
 
 # MuckRock
+from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
 from muckrock.core.forms import TaggitWidget
@@ -100,13 +101,6 @@ class BaseComposerForm(forms.ModelForm):
         required=False,
         label='Get MuckRock\'s weekly newsletter with '
         'FOIA news, tips, and more',
-    )
-    register_pro = forms.BooleanField(
-        initial=False,
-        required=False,
-        label='Go Pro',
-        help_text='Get 20 requests for $40 per month, as well as the ability to '
-        'keep your requests private',
     )
 
     login_username = forms.CharField(label='Username', required=False)
@@ -214,6 +208,25 @@ class BaseComposerForm(forms.ModelForm):
         return cleaned_data
 
 
-# XXX how to do inline purchases?
-class ComposerForm(ContactInfoForm, BaseComposerForm):
+class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     """Composer form, including optional subforms"""
+
+    def __init__(self, *args, **kwargs):
+        super(ComposerForm, self).__init__(*args, **kwargs)
+        # Make sub-form fields non-required
+        self.fields['num_requests'].required = False
+        self.fields['stripe_token'].required = False
+
+    def clean(self):
+        """Buy request fields are only required when buying requests"""
+        cleaned_data = super(ComposerForm, self).clean()
+        action = cleaned_data.get('action')
+        num_requests = cleaned_data.get('num_requests', 0)
+        if (
+            action == 'submit' and num_requests > 0
+            and not self.cleaned_data.get('stripe_token')
+        ):
+            self.add_error(
+                'stripe_token',
+                'This field is required when making a purchase',
+            )

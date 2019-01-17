@@ -36,6 +36,8 @@ class ProfileQuerySet(models.QuerySet):
 
         self._update_organizations(user, profile, data, created)
 
+        return user, created
+
     def _squarelet_update_or_create_user(self, uuid, data):
         """Format user data and update or create the user"""
         user_map = {

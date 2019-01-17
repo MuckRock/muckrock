@@ -73,6 +73,11 @@ class Organization(models.Model):
         # XXX test
         return self.users.filter(pk=user.pk).exists()
 
+    def has_admin(self, user):
+        """Is the user an admin of this organization?"""
+        # XXX test
+        return self.users.filter(pk=user.pk, memberships__admin=True).exists()
+
     def update_data(self, data):
         """Set updated data from squarelet"""
         # XXX test this
@@ -130,7 +135,6 @@ class Organization(models.Model):
         amount -= request_count["regular"]
 
         if amount > 0:
-            # XXX catching this?
             raise InsufficientRequestsError(amount)
 
         organization.monthly_requests -= request_count["monthly"]
