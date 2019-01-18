@@ -276,6 +276,8 @@ class ReceiptEmail(models.Model):
 # XXX how to do recurring donations?
 class RecurringDonation(models.Model):
     """Keep track of our recurring donations"""
+
+    # remove ##
     user = models.ForeignKey(
         User,
         blank=True,
@@ -284,13 +286,21 @@ class RecurringDonation(models.Model):
         on_delete=models.SET_NULL,
     )
     email = models.EmailField()
-    amount = models.PositiveIntegerField()
+    # replace #
+    # organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
+    ###########
+
+    # remove - this is stored on the organization now #
     customer_id = models.CharField(max_length=255)
+    payment_failed = models.BooleanField(default=False)
+    #####
+
     subscription_id = models.CharField(
         unique=True,
         max_length=255,
     )
-    payment_failed = models.BooleanField(default=False)
+
+    amount = models.PositiveIntegerField()
     active = models.BooleanField(default=True)
     created_datetime = models.DateTimeField(auto_now_add=True)
     deactivated_datetime = models.DateTimeField(blank=True, null=True)

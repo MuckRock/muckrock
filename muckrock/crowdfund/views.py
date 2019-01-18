@@ -108,20 +108,22 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
 
     def post(self, request, **kwargs):
         """
-        First we validate the payment form, so we don't charge someone's card by accident.
-        Next, we charge their card. Finally, use the validated payment form to create and
-        return a CrowdfundRequestPayment object.
+        First we validate the payment form, so we don't charge someone's card by
+        accident.
+        Next, we charge their card. Finally, use the validated payment form to create
+        and return a CrowdfundRequestPayment object.
         """
         # pylint: disable=too-many-locals
         token = request.POST.get('stripe_token')
         email = request.POST.get('stripe_email')
         email = validate_stripe_email(email)
+
         payment_form = CrowdfundPaymentForm(request.POST)
         if payment_form.is_valid() and token and email:
             amount = payment_form.cleaned_data['stripe_amount']
             # If there is no user but the show and full_name fields are filled in,
-            # and a user with that email does not already exists,
-            # create the user with our "miniregistration" functionality and then log them in
+            # and a user with that email does not already exists, create the
+            # user with our "miniregistration" functionality and then log them in
             user = request.user if request.user.is_authenticated else None
             registered = False
             show = payment_form.cleaned_data['show']

@@ -18,6 +18,7 @@ from uuid import uuid4
 import stripe
 
 # MuckRock
+from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.querysets import OrganizationQuerySet
 
@@ -152,6 +153,21 @@ class Organization(models.Model):
         """Add requests"""
         self.number_requests = F("number_requests") + amount
         self.save()
+
+    def pay(self, amount, description, token, save_card):
+        """Pay via Squarelet API"""
+        resp = squarelet_post(
+            '/api/charges/',
+            data={
+                'organization': self.uuid,
+                'amount': amount,
+                'description': description,
+                'token': token,
+                'save_card': save_card,
+            }
+        )
+        logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
+        resp.raise_for_status()
 
 
 class Membership(models.Model):

@@ -10,6 +10,7 @@ from datetime import date, timedelta
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 
 # MuckRock
+from muckrock.accounts.forms import StripeForm
 from muckrock.crowdfund.models import Crowdfund
 
 
@@ -88,7 +89,7 @@ class CrowdfundForm(forms.ModelForm):
         return deadline
 
 
-class CrowdfundPaymentForm(forms.Form):
+class CrowdfundPaymentForm(StripeForm):
     """Form to create a payment to a crowdfund"""
     stripe_amount = forms.CharField(widget=NumberInput())
     show = forms.BooleanField(required=False, widget=forms.CheckboxInput())
