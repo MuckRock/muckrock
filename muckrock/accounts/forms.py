@@ -100,14 +100,34 @@ class ReceiptForm(forms.Form):
 # XXX move to orgs
 
 
+class OrganizationChoiceField(forms.ModelChoiceField):
+    """Custom labels for organization choice field"""
+
+    def label_from_instance(self, obj):
+        """Change individual organization label to personal account"""
+        if obj.individual:
+            return 'Personal Account'
+        else:
+            return super(OrganizationChoiceField, self).label_from_instance(obj)
+
+
 class StripeForm(forms.Form):
     """Form for processing stripe payments"""
     stripe_token = forms.CharField(widget=forms.HiddenInput(), required=False)
+    organization = OrganizationChoiceField(
+        queryset=Organization.objects.none(),
+        empty_label=None,
+        label='Buy requests for:',
+    )
     use_card_on_file = forms.TypedChoiceField(
         label='Use Credit Card on File',
         coerce=lambda x: x == 'True',
         initial=True,
         widget=forms.RadioSelect,
+        choices=(
+            (True, 'Card on File'),
+            (False, 'New Card'),
+        )
     )
     save_card = forms.BooleanField(
         label="Save credit card information",
@@ -115,21 +135,42 @@ class StripeForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.organization = kwargs.pop('organization', None)
+        self._organization = kwargs.pop('organization', None)
+        self._user = kwargs.pop('user')
         super(StripeForm, self).__init__(*args, **kwargs)
-        self._set_card_options()
 
-    def _set_card_options(self):
-        """Initialize card options"""
-        card = self.organization and self.organization.card
-        if card:
+        # if auth user and org are given
+        if self._user.is_authenticated and self._organization is not None:
+            del self.fields['organization']
+            if self._organization.card:
+                self.fields['use_card_on_file'].choices = (
+                    (True, self._organization.card),
+                    (False, 'New Card'),
+                )
+            else:
+                del self.fields['use_card_on_file']
+                self.fields['stripe_token'].required = True
+
+        # if auth user no no org are given
+        elif self._user.is_authenticated and self._organization is None:
+            queryset = self._user.organizations.filter(
+                memberships__admin=True,
+            ).order_by('-individual', 'name')
+            if len(queryset) == 1:
+                self.fields['organization'].widget = forms.HiddenInput()
+            self.fields['organization'].queryset = queryset
+            self.fields['organization'
+                        ].initial = self._user.profile.individual_organization
             self.fields['use_card_on_file'].choices = (
-                (True, self.organization.card),
+                (True, self._user.profile.individual_organization.card),
                 (False, 'New Card'),
             )
-        else:
+
+        # if anonymous user is given
+        elif not self._user.is_authenticated:
+            del self.fields['organization']
             del self.fields['use_card_on_file']
-            self.fields['stripe_token'].required = True
+            del self.fields['save_card']
 
     def clean(self):
         """Validate using card on file and supplying new card"""
@@ -174,9 +215,8 @@ class BuyRequestForm(StripeForm):
     )
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
         super(BuyRequestForm, self).__init__(*args, **kwargs)
-        if self.user.is_authenticated and self.user.profile.is_advanced():
+        if self._user.is_authenticated and self._user.profile.is_advanced():
             limit_val = 1
         else:
             limit_val = 4
@@ -184,6 +224,7 @@ class BuyRequestForm(StripeForm):
         self.fields['num_requests'].widget.attrs['min'] = limit_val
         self.fields['num_requests'].initial = limit_val
 
+    # XXX move logic in to mixin
     def buy_requests(self, organization, payer):
         """Buy the requests"""
         num_requests = self.cleaned_data['num_requests']
@@ -206,7 +247,7 @@ class BuyRequestForm(StripeForm):
         """Get the price for the requests"""
         # XXX
         is_advanced = (
-            self.user.is_authenticated and self.user.profile.is_advanced()
+            self._user.is_authenticated and self._user.profile.is_advanced()
         )
         if num_requests >= 20 and is_advanced:
             # advanced users pay $3 for bulk purchases

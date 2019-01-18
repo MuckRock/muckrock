@@ -1,4 +1,13 @@
-<div class="buy-request-form" data-bulk-price="{% if user.profile.is_advanced %}3{% else %}4{% endif %}">
+<div
+  class="buy-request-form"
+  data-bulk-price="{% if user.profile.is_advanced %}3{% else %}4{% endif %}"
+  {% for org in admin_organizations %}
+    data-org-card-{{ org.pk }}="{{ org.card }}"
+  {% endfor %}
+>
+  {% if form.organization and not form.organization.is_hidden %}
+    {% include "lib/pattern/field.html" with field=form.organization only %}
+  {% endif %}
   <div class="number-row">
     {% include "lib/pattern/field.html" with field=form.num_requests only %}
     <span>

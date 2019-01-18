@@ -202,18 +202,21 @@ class ProfileView(BuyRequestsMixin, FormView):
     def get_context_data(self, **kwargs):
         """Get data for the profile page"""
         context_data = super(ProfileView, self).get_context_data(**kwargs)
+        queryset = self.user.organizations.order_by('name')
         if self.request.user.is_staff:
-            organizations = [o for o in self.user.organizations.all()]
+            organizations = [o for o in queryset]
         elif self.request.user.is_authenticated:
             # XXX test
             organizations = [
-                o for o in self.user.organizations.
-                filter(Q(private=False) | Q(users=self.request.user))
+                o for o in
+                queryset.filter(Q(private=False) | Q(users=self.request.user))
             ]
         else:
-            organizations = [
-                o for o in self.user.organizations.filter(private=False)
-            ]
+            organizations = [o for o in queryset.filter(private=False)]
+        if self.request.user == self.user:
+            context_data['admin_organizations'] = (
+                self.user.organizations.filter(memberships__admin=True)
+            )
         requests = (
             FOIARequest.objects.filter(composer__user=self.user)
             .get_viewable(self.request.user)
@@ -257,16 +260,12 @@ class ProfileView(BuyRequestsMixin, FormView):
         kwargs = super(ProfileView, self).get_form_kwargs()
         user = self.request.user
         kwargs['user'] = user
-        if user.is_authenticated:
-            kwargs['organization'] = user.profile.individual_organization
         return kwargs
 
     def form_valid(self, form):
         """Buy requests"""
         if self.request.user == self.user:
-            self.buy_requests(
-                form, recipient=self.user.profile.individual_organization
-            )
+            self.buy_requests(form)
         return redirect('acct-profile', username=self.user.username)
 
 

@@ -67,20 +67,23 @@
     </dl>
   {% endif %}
   {% for org in organizations %}
-    <p class="organization">
-      {% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of
-      <a href="{% url 'org-detail' org.slug %}" title="{{ org }}'s organization page">
-        {{ org }}
-      </a>
-      {% if user == user_obj %}
-        <dl class="stats">
-          <dt>Monthly Requests</dt>
-          <dd>{{ org.monthly_requests }}</dd>
-          <dt>Requests Remaining</dt>
-          <dd>{{ org.number_requests }}</dd>
-        </dl>
-      {% endif %}
-    </p>
+    {% if not org.individual %}
+      <p class="organization">
+        {# XXX owner -> admin #}
+        {% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of
+        <a href="{% url 'org-detail' org.slug %}" title="{{ org }}'s organization page">
+          {{ org }}
+        </a>
+        {% if user == user_obj %}
+          <dl class="stats">
+            <dt>Monthly Requests</dt>
+            <dd>{{ org.monthly_requests }}</dd>
+            <dt>Requests Remaining</dt>
+            <dd>{{ org.number_requests }}</dd>
+          </dl>
+        {% endif %}
+      </p>
+    {% endif %}
   {% endfor %}
   {% if user == user_obj and user.is_staff %}
     <p class="api-token">API Token:&nbsp;<a href="#">show...</a><input type="text" value={{ api_token }} readonly></p>
@@ -117,7 +120,7 @@
             {{ field }}
           {% endfor %}
         </div>
-        {% include "lib/pattern/buy_requests.html" with user=user form=form stripe_pk=stripe_pk only %}
+        {% include "lib/pattern/buy_requests.html" with user=user form=form stripe_pk=stripe_pk admin_organizations=admin_organizations only %}
         <button class="blue button" type="submit">Buy Requests</button>
       </form>
     </section>

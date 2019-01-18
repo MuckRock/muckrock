@@ -45,6 +45,22 @@ $("document").ready(function(){
     $("#id_save_card").closest("div").show();
   });
 
+  var $orgSelect = $(".buy-request-form #id_organization");
+  var $useCardOnFile = $("#id_use_card_on_file").closest("div.field");
+  if ($orgSelect.length > 0) {
+    $orgSelect.change(function() {
+      var card = $(".buy-request-form").data("org-card-" + $(this).val());
+      if (card) {
+        $("#id_use_card_on_file_0")[0].nextSibling.nodeValue = card;
+        $useCardOnFile.show();
+      } else {
+        $("#id_use_card_on_file_1").prop("checked", true).trigger("change");
+        $useCardOnFile.hide();
+      }
+    });
+    $orgSelect.change();
+  }
+
   var card = elements.create("card", {style: style});
   card.addEventListener("ready", function() {
     if($("input[name=use_card_on_file]:checked").val() === "True") {
