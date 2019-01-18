@@ -103,10 +103,8 @@ class BuyRequestsMixin(object):
 
     def buy_requests(self, form, organization=None, payer=None):
         """Buy requests"""
-        if organization is None:
-            organization = self.request.user.profile.individual_organization
-        if payer is None:
-            payer = organization
+        if 'organization' in form.cleaned_data:
+            organization = payer = form.cleaned_data['organization']
         try:
             form.buy_requests(organization, payer)
         except requests.exceptions.RequestException as exc:
@@ -130,7 +128,7 @@ class BuyRequestsMixin(object):
             },
             charge=price / 100,
         )
-        if organization == self.request.user.profile.individual_organization:
+        if organization.individual:
             msg = (
                 'Purchase successful.  {} requests have been added to your '
                 'account.'.format(num_requests)
