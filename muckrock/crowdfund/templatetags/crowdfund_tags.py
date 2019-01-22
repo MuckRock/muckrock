@@ -46,14 +46,20 @@ def get_initial_amount(crowdfund):
     return initial_amount
 
 
-def crowdfund_form(crowdfund, form):
+def crowdfund_form(crowdfund, user):
     """Returns a form initialized with crowdfund data"""
     initial_data = {
         'show': True,
         'crowdfund': crowdfund.pk,
         'stripe_amount': get_initial_amount(crowdfund)
     }
-    return form(initial=initial_data)
+    if user.is_authenticated:
+        organization = user.profile.individual_organization
+    else:
+        organization = None
+    return CrowdfundPaymentForm(
+        initial=initial_data, user=user, organization=organization
+    )
 
 
 def crowdfund_user(context):
@@ -95,29 +101,27 @@ def contributor_summary(named_contributors, contributors_count, anonymous):
     return summary
 
 
-def generate_crowdfund_context(
-    the_crowdfund, the_url_name, the_form, the_context
-):
-    """Generates context in a way that's agnostic towards the object being crowdfunded."""
-    endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
-    payment_form = crowdfund_form(the_crowdfund, the_form)
-    logged_in, user_email = crowdfund_user(the_context)
-    the_request = the_context.request
+def generate_crowdfund_context(crowdfund, context):
+    """Generates context that's agnostic towards the object being crowdfunded."""
+    endpoint = reverse('crowdfund', kwargs={'pk': crowdfund.pk})
+    payment_form = crowdfund_form(crowdfund, context['user'])
+    logged_in, user_email = crowdfund_user(context)
+    the_request = context.request
     named, contrib_count, anon_count = (
         cache_get_or_set(
-            'cf:%s:crowdfund_widget_data' % the_crowdfund.pk, lambda: (
-                list(the_crowdfund.named_contributors()),
-                the_crowdfund.contributors_count(),
-                the_crowdfund.anonymous_contributors_count(),
+            'cf:%s:crowdfund_widget_data' % crowdfund.pk, lambda: (
+                list(crowdfund.named_contributors()),
+                crowdfund.contributors_count(),
+                crowdfund.anonymous_contributors_count(),
             ), settings.DEFAULT_CACHE_TIMEOUT
         )
     )
     contrib_sum = contributor_summary(named, contrib_count, anon_count)
-    obj_url = the_crowdfund.get_crowdfund_object().get_absolute_url()
+    obj_url = crowdfund.get_crowdfund_object().get_absolute_url()
     # Remove the autofocus attribute from the login form in order to not scroll down
     # to the crowdfund widget on page load
     return {
-        'crowdfund': the_crowdfund,
+        'crowdfund': crowdfund,
         'named_contributors': named,
         'contributors_count': contrib_count,
         'anon_contributors_count': anon_count,
@@ -129,17 +133,17 @@ def generate_crowdfund_context(
         'request': the_request,
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'obj_url': obj_url,
-        'domain': the_context['domain'],
+        'domain': context['domain'],
     }
 
 
 @register.inclusion_tag(
-    'crowdfund/widget.html', name='crowdfund', takes_context=True
+    'crowdfund/widget.html',
+    name='crowdfund',
+    takes_context=True,
 )
 def crowdfund_tag(context, crowdfund_pk=None, crowdfund=None):
     """Template tag to insert a crowdfunding widget"""
     if crowdfund is None:
         crowdfund = get_object_or_404(Crowdfund, pk=crowdfund_pk)
-    return generate_crowdfund_context(
-        crowdfund, 'crowdfund', CrowdfundPaymentForm, context
-    )
+    return generate_crowdfund_context(crowdfund, context)

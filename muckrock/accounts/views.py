@@ -172,7 +172,6 @@ class ProfileSettings(TemplateView):
             user=self.request.user
         )
         context.update({
-            'stripe_pk': settings.STRIPE_PUB_KEY,
             'squarelet_url': settings.SQUARELET_URL,
             'profile_form': profile_form,
             'email_form': email_form,
@@ -246,8 +245,6 @@ class ProfileView(BuyRequestsMixin, FormView):
             },
             'articles':
                 articles,
-            'stripe_pk':
-                settings.STRIPE_PUB_KEY,
             'sidebar_admin_url':
                 reverse('admin:auth_user_change', args=(self.user.pk,)),
             'api_token':

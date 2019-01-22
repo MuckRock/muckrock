@@ -4,7 +4,7 @@
  */
 
 /* eslint-disable no-undef */
-var stripe = Stripe($("#stripe_pub_key").val());
+var stripe = Stripe($("#id_stripe_pk").val());
 /* eslint-enable no-undef */
 var elements = stripe.elements();
 

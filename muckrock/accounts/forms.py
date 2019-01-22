@@ -114,6 +114,9 @@ class OrganizationChoiceField(forms.ModelChoiceField):
 class StripeForm(forms.Form):
     """Form for processing stripe payments"""
     stripe_token = forms.CharField(widget=forms.HiddenInput(), required=False)
+    stripe_pk = forms.CharField(
+        widget=forms.HiddenInput(), initial=settings.STRIPE_PUB_KEY
+    )
     organization = OrganizationChoiceField(
         queryset=Organization.objects.none(),
         empty_label=None,
@@ -228,6 +231,7 @@ class BuyRequestForm(StripeForm):
     def buy_requests(self, organization, payer):
         """Buy the requests"""
         num_requests = self.cleaned_data['num_requests']
+        # XXX encapsulate this?
         resp = squarelet_post(
             '/api/charges/',
             data={
