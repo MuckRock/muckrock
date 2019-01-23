@@ -74,6 +74,7 @@ class OrgPreferencesForm(forms.ModelForm):
 
 class ReceiptForm(forms.Form):
     """Form for setting receipt emails"""
+    # XXX remove
     emails = forms.CharField(
         widget=forms.Textarea,
         required=False,
@@ -120,7 +121,7 @@ class StripeForm(forms.Form):
     organization = OrganizationChoiceField(
         queryset=Organization.objects.none(),
         empty_label=None,
-        label='Buy requests for:',
+        label='Pay from which account',
     )
     use_card_on_file = forms.TypedChoiceField(
         label='Use Credit Card on File',
@@ -227,28 +228,9 @@ class BuyRequestForm(StripeForm):
         self.fields['num_requests'].widget.attrs['min'] = limit_val
         self.fields['num_requests'].initial = limit_val
 
-    # XXX move logic in to mixin
-    def buy_requests(self, organization, payer):
-        """Buy the requests"""
-        num_requests = self.cleaned_data['num_requests']
-        # XXX encapsulate this?
-        resp = squarelet_post(
-            '/api/charges/',
-            data={
-                'amount': self.get_price(num_requests),
-                'organization': payer.uuid,
-                'description': 'Purchase {} requests'.format(num_requests),
-                'token': self.cleaned_data['stripe_token'],
-                'save_card': self.cleaned_data['save_card'],
-            }
-        )
-        logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
-        resp.raise_for_status()
-
-        organization.add_requests(num_requests)
-
     def get_price(self, num_requests):
         """Get the price for the requests"""
+        # XXX move to mixin
         # XXX
         is_advanced = (
             self._user.is_authenticated and self._user.profile.is_advanced()
@@ -262,3 +244,25 @@ class BuyRequestForm(StripeForm):
         else:
             # all users pay $5 for non-bulk purchases
             return 500 * num_requests
+
+
+# XXX foia form
+class RequestFeeForm(StripeForm):
+    """A form to pay request fees"""
+    amount = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'currency-field'
+        }),
+        min_value=0,
+        help_text=
+        'We will add a 5% fee to this amount to cover our transaction fees.',
+    )
+
+    field_order = [
+        'stripe_token',
+        'stripe_pk',
+        'amount',
+        'organization',
+        'use_card_on_file',
+        'save_card',
+    ]

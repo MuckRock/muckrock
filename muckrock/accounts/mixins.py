@@ -106,17 +106,27 @@ class BuyRequestsMixin(object):
         if 'organization' in form.cleaned_data:
             organization = payer = form.cleaned_data['organization']
         try:
-            form.buy_requests(organization, payer)
+            num_requests = form.cleaned_data['num_requests']
+            price = form.get_price(num_requests)
+            payer.pay(
+                amount=price,
+                description='Purchase {} requests'.format(num_requests),
+                token=form.cleaned_data['stripe_token'],
+                save_card=form.cleaned_data['save_card'],
+            )
+            organization.add_requests(num_requests)
         except requests.exceptions.RequestException as exc:
             messages.error(
-                self.request,
-                'Payment Error: {}'.format(exc.response.json()['detail'])
+                self.request, 'Payment Error: {}'.format(
+                    '\n'.join(
+                        '{}: {}'.format(k, v)
+                        for k, v in exc.response.json().iteritems()
+                    )
+                )
             )
             logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
             return
 
-        num_requests = form.cleaned_data['num_requests']
-        price = form.get_price(num_requests)
         self.request.session['ga'] = 'request_purchase'
         mixpanel_event(
             self.request,

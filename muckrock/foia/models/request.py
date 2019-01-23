@@ -672,10 +672,11 @@ class FOIARequest(models.Model):
     def pay(self, user, amount):
         """
         Users can make payments for request fees.
-        Upon payment, we create a snail mail task and we set the request to a processing status.
-        Payments are always snail mail, because we need to mail the check to the agency.
-        Since collaborators may make payments, we do not assume the user is the request creator.
-        Returns the communication that was generated.
+        Upon payment, we create a snail mail task and we set the request to
+        a processing status.  Payments are always snail mail, because we need to
+        mail the check to the agency.  Since collaborators may make payments, we
+        do not assume the user is the request creator.  Returns the
+        communication that was generated.
         """
         # We create the payment communication and a snail mail task for it.
         payable_to = self.agency.payable_to if self.agency else None
@@ -704,7 +705,8 @@ class FOIARequest(models.Model):
             self.title
         )
         utils.new_action(user, 'paid fees', target=self)
-        # We return the communication we generated, in case the caller wants to do anything with it
+        # We return the communication we generated, in case the caller wants to
+        # do anything with it
         return comm
 
     def _send_msg(self, **kwargs):
