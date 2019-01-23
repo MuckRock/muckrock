@@ -19,6 +19,7 @@ import django_filters
 import requests
 from rest_framework import status as http_status
 from rest_framework import decorators, viewsets
+from rest_framework.filters import DjangoFilterBackend, SearchFilter
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
@@ -52,15 +53,43 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     # pylint: disable=too-many-public-methods
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
+    # remove default ordering backend as it does not work well with fields stored
+    # on related models
+    filter_backends = (DjangoFilterBackend, SearchFilter)
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
         agency = django_filters.NumberFilter(name='agency__id')
         jurisdiction = django_filters.NumberFilter(
-            name='agency__jurisdiction__id'
+            name='agency__jurisdiction__id',
+            label='Jurisdiction ID',
         )
-        user = django_filters.CharFilter(name='composer__user__username')
-        tags = django_filters.CharFilter(name='tags__name')
+        user = django_filters.CharFilter(
+            name='composer__user__username',
+            label='User',
+        )
+        tags = django_filters.CharFilter(
+            name='tags__name',
+            label='Tags',
+        )
+        has_datetime_submitted = django_filters.BooleanFilter(
+            name='composer__datetime_submitted',
+            label='Has DateTime Submitted',
+            lookup_expr='isnull',
+            exclude=True,
+        )
+
+        order_by_field = 'ordering'
+        ordering = django_filters.OrderingFilter(
+            fields=(
+                ('composer__datetime_submitted', 'datetime_submitted'),
+                ('composer__user__username', 'user'),
+                ('agency__name', 'agency'),
+                ('datetime_done', 'datetime_done'),
+                ('title', 'title'),
+                ('status', 'status'),
+            )
+        )
 
         class Meta:
             model = FOIARequest
