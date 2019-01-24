@@ -34,7 +34,7 @@ class ProfileQuerySet(models.QuerySet):
             uuid, data, user, reset_email_failed
         )
 
-        self._update_organizations(user, profile, data, created)
+        self._update_organizations(user, profile, data)
 
         return user, created
 
@@ -80,10 +80,11 @@ class ProfileQuerySet(models.QuerySet):
         profile, _ = self.update_or_create(uuid=uuid, defaults=profile_data)
         return profile
 
-    def _update_organizations(self, user, profile, data, created):
+    def _update_organizations(self, user, profile, data):
         """Update the user's organizations"""
         current_organizations = set(user.organizations.all())
         new_memberships = []
+        no_active = not user.organizations.filter(active=True).exists()
 
         # process each organization
         for org_data in data.get('organizations', []):
@@ -97,13 +98,13 @@ class ProfileQuerySet(models.QuerySet):
                 current_organizations.remove(organization)
             else:
                 # if not currently a member, create the new membership
-                # if this is a newly created acount, make their individual
+                # if there is no active org, make their individual
                 # organization active
                 new_memberships.append(
                     Membership(
                         user=user,
                         organization=organization,
-                        active=created and org_data['individual'],
+                        active=no_active and org_data['individual'],
                         admin=org_data['admin'],
                     )
                 )

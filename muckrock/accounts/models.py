@@ -222,6 +222,7 @@ class Profile(models.Model):
         """Get the user's individual organization
         There should always be exactly one individual organization
         """
+        # XXX matching uuids
         return self.user.organizations.filter(individual=True).first()
 
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
