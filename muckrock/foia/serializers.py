@@ -68,12 +68,19 @@ class IsOwner(permissions.BasePermission):
 
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
-    ffile = serializers.CharField(source='ffile.url', read_only=True)
+    ffile = serializers.SerializerMethodField()
     datetime = DateTimeField()
 
     class Meta:
         model = FOIAFile
         exclude = ('comm',)
+
+    def get_ffile(self, obj):
+        """Get the ffile URL safely"""
+        if obj.ffile and hasattr(obj.ffile, 'url'):
+            return obj.ffile.url
+        else:
+            return ''
 
 
 class FOIACommunicationSerializer(serializers.ModelSerializer):
