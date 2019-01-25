@@ -168,6 +168,10 @@ class Organization(models.Model):
         )
         logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
         resp.raise_for_status()
+        resp_json = resp.json()
+        if 'card' in resp_json:
+            self.card = resp_json['card']
+            self.save()
 
 
 class Membership(models.Model):
