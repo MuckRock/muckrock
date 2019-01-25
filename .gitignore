@@ -30,3 +30,6 @@ tags
 .lvimrc
 .ipython
 .envs
+*.pid
+celerybeat-schedule
+.ipython
