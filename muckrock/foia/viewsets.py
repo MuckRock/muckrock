@@ -78,6 +78,12 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             lookup_expr='isnull',
             exclude=True,
         )
+        has_datetime_done = django_filters.BooleanFilter(
+            name='datetime_done',
+            label='Has DateTime Done',
+            lookup_expr='isnull',
+            exclude=True,
+        )
 
         order_by_field = 'ordering'
         ordering = django_filters.OrderingFilter(
