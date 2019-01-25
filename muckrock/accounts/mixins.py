@@ -6,7 +6,6 @@ View mixins
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.models import User
 
 # Standard Library
 import logging
@@ -20,7 +19,6 @@ from simplejson.scanner import JSONDecodeError
 from muckrock.accounts.models import Profile
 from muckrock.accounts.utils import mailchimp_subscribe, mixpanel_event
 from muckrock.core.utils import squarelet_post
-from muckrock.organization.models import Membership, Organization, Plan
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +105,7 @@ class BuyRequestsMixin(object):
             organization = payer = form.cleaned_data['organization']
         try:
             num_requests = form.cleaned_data['num_requests']
-            price = form.get_price(num_requests)
+            price = self.get_price(num_requests)
             payer.pay(
                 amount=price,
                 description='Purchase {} requests'.format(num_requests),
@@ -149,3 +147,19 @@ class BuyRequestsMixin(object):
                 '{}\'s account.'.format(num_requests, organization.name)
             )
         messages.success(self.request, msg)
+
+    def get_price(self, num_requests):
+        """Get the price for the requests"""
+        is_advanced = (
+            self.request.user.is_authenticated
+            and self.request.user.profile.is_advanced()
+        )
+        if num_requests >= 20 and is_advanced:
+            # advanced users pay $3 for bulk purchases
+            return 300 * num_requests
+        elif num_requests >= 20:
+            # other users pay $4 for bulk purchases
+            return 400 * num_requests
+        else:
+            # all users pay $5 for non-bulk purchases
+            return 500 * num_requests

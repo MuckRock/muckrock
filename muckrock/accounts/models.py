@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
+from django.db.models import Max
 from django.utils import timezone
 
 # Standard Library
@@ -195,9 +196,7 @@ class Profile(models.Model):
 
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""
-        # XXX redo
-        advanced_types = ['admin', 'beta', 'pro', 'proxy']
-        return self.acct_type in advanced_types
+        return self.feature_level > 0
 
     @mproperty
     def organization(self):
@@ -224,6 +223,13 @@ class Profile(models.Model):
         """
         # XXX matching uuids
         return self.user.organizations.filter(individual=True).first()
+
+    @mproperty
+    def feature_level(self):
+        """The user's highest feature level among all of their organizations"""
+        return self.user.organizations.aggregate(
+            max=Max('plan__feature_level')
+        )['max']
 
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
         """
@@ -255,11 +261,6 @@ class Profile(models.Model):
         """Wrap a URL for autologin"""
         extra.update(self.autologin())
         return u'{}?{}'.format(link, urlencode(extra))
-
-    def limit_attachments(self):
-        """Does this user need to have their attachments limited?"""
-        # XXX move this to rules
-        return self.acct_type not in ('admin', 'agency')
 
 
 # XXX deprecate ##

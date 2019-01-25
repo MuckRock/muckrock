@@ -14,9 +14,22 @@ from muckrock.organization.models import Organization, Plan
 
 class OrganizationAdmin(VersionAdmin):
     """Organization Admin"""
-    prepopulated_fields = {'slug': ('name',)}
-    list_display = ('name', 'private')
+    list_display = ('name', 'plan', 'private', 'individual')
+    list_filter = ('plan', 'private', 'individual')
     search_fields = ('name', 'users__username')
+    fields = (
+        'uuid',
+        'name',
+        'slug',
+        'private',
+        'individual',
+        'plan',
+        'card',
+        'requests_per_month',
+        'monthly_requests',
+        'number_requests',
+        'date_update',
+    )
     readonly_fields = (
         'uuid',
         'name',
@@ -24,9 +37,8 @@ class OrganizationAdmin(VersionAdmin):
         'private',
         'individual',
         'plan',
+        'card',
         'requests_per_month',
-        'monthly_requests',
-        'number_requests',
         'date_update',
     )
 

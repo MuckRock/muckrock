@@ -1337,6 +1337,7 @@ class FOIARequest(models.Model):
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
             ('pay_foiarequest', 'Can pay for a request'),
             ('export_csv', 'Can export a CSV of search results'),
+            ('unlimited_attachment_size', 'Can upload attachments of any size'),
             (
                 'set_info_foiarequest',
                 'Can send communications to custom addresses'

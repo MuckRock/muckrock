@@ -167,10 +167,7 @@ def has_feature_level(level):
     @predicate('has_feature_level:{}'.format(level))
     @user_authenticated
     def inner(user):
-        # XXX performance
-        return (
-            user.organizations.filter(plan__feature_level__gte=level).exists()
-        )
+        return user.profile.feature_level() >= level
 
     return inner
 
@@ -243,3 +240,4 @@ add_perm('foia.file_multirequest', has_feature_level(1))
 add_perm('foia.export_csv', has_feature_level(1))
 add_perm('foia.zip_download_foiarequest', can_edit)
 add_perm('foia.set_info_foiarequest', is_authenticated)
+add_perm('foia.unlimited_attachment_size', is_staff | is_agency_user)

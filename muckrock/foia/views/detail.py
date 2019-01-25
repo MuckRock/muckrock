@@ -26,7 +26,6 @@ from datetime import timedelta
 import requests
 
 # MuckRock
-from muckrock.accounts.forms import RequestFeeForm
 from muckrock.accounts.models import Notification
 from muckrock.agency.forms import AgencyForm
 from muckrock.communication.models import (
@@ -49,6 +48,7 @@ from muckrock.foia.forms import (
     FOIAFlagForm,
     FOIANoteForm,
     FOIASoftDeleteForm,
+    RequestFeeForm,
     ResendForm,
     TrackingNumberForm,
 )

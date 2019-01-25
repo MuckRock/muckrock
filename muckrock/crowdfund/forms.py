@@ -10,8 +10,8 @@ from datetime import date, timedelta
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 
 # MuckRock
-from muckrock.accounts.forms import StripeForm
 from muckrock.crowdfund.models import Crowdfund
+from muckrock.organization.forms import StripeForm
 
 
 class NumberInput(forms.TextInput):
