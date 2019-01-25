@@ -59,16 +59,28 @@ class ProfileInline(admin.StackedInline):
     form = ProfileAdminForm
     extra = 0
     max_num = 1
-    readonly_fields = ('uuid',)
-
-
-class ReceiptEmailInline(admin.StackedInline):
-    """Receipt emails admin inline"""
-    model = ReceiptEmail
-    extra = 1
-
-
-# XXX be careful with admin editing and squarelet
+    fields = (
+        'uuid',
+        'full_name',
+        'email_confirmed',
+        'email_pref',
+        'source',
+        'location',
+        'avatar_url',
+        'experimental',
+        'use_autologin',
+        'email_failed',
+        'new_question_notifications',
+        'org_share',
+        'preferred_proxy',
+        'agency',
+    )
+    readonly_fields = (
+        'uuid',
+        'full_name',
+        'email_confirmed',
+        'avatar_url',
+    )
 
 
 class MRUserAdmin(UserAdmin):
@@ -81,8 +93,32 @@ class MRUserAdmin(UserAdmin):
         'is_staff',
         'is_superuser',
     )
-    list_filter = ('profile__acct_type',) + UserAdmin.list_filter
-    inlines = [ProfileInline, ReceiptEmailInline]
+    list_filter = UserAdmin.list_filter
+    list_select_related = ('profile',)
+    inlines = [ProfileInline]
+    fieldsets = (
+        (None, {
+            'fields': ('username', 'password')
+        }),
+        ('Personal info', {
+            'fields': ('email',)
+        }),
+        (
+            'Permissions', {
+                'fields': (
+                    'is_active', 'is_staff', 'is_superuser', 'groups',
+                    'user_permissions'
+                )
+            }
+        ),
+        ('Important dates', {
+            'fields': ('last_login', 'date_joined')
+        }),
+    )
+    readonly_fields = (
+        'username',
+        'email',
+    )
 
     def full_name(self, obj):
         """Show full name from profile"""

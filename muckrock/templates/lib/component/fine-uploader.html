@@ -1,3 +1,5 @@
+{% load rules %}
+
 <!--
   Read the "Getting Started Guide" at http://docs.fineuploader.com/quickstart/01-getting-started.html
   if you are not yet familiar with Fine Uploader UI.
@@ -72,10 +74,11 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
     if (dataAttr) {
       pk = element.getAttribute(dataAttr);
     }
-    {% if request.user.profile.limit_attachments %}
-      var limitAttachments = true;
-    {% else %}
+    {% has_perm 'foia.unlimited_attachment_size' request.user as unlimited_attachment %}
+    {% if unlimited_attachment_size %}
       var limitAttachments = false;
+    {% else %}
+      var limitAttachments = true;
     {% endif %}
     var validation = {};
     if (spreadsheetsOnly && limitAttachments) {

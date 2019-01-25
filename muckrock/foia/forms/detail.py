@@ -19,6 +19,7 @@ from muckrock.foia.models import (
     FOIARequest,
     TrackingNumber,
 )
+from muckrock.organization.forms import StripeForm
 from muckrock.task.constants import PUBLIC_FLAG_CATEGORIES
 
 
@@ -153,3 +154,24 @@ class FOIASoftDeleteForm(forms.Form):
         super(FOIASoftDeleteForm, self).__init__(*args, **kwargs)
         if foia.status in END_STATUS:
             self.fields.pop('final_message')
+
+
+class RequestFeeForm(StripeForm):
+    """A form to pay request fees"""
+    amount = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'currency-field'
+        }),
+        min_value=0,
+        help_text=
+        'We will add a 5% fee to this amount to cover our transaction fees.',
+    )
+
+    field_order = [
+        'stripe_token',
+        'stripe_pk',
+        'amount',
+        'organization',
+        'use_card_on_file',
+        'save_card',
+    ]

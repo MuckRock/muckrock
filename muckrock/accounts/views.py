@@ -30,7 +30,6 @@ from muckrock.accounts.forms import (
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
-    ReceiptForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import ACCT_TYPES, Notification, RecurringDonation
@@ -146,27 +145,16 @@ class ProfileSettings(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Returns context for the template"""
-        # XXX this contains a lot of stuff moving to squarelet
         context = super(ProfileSettings, self).get_context_data(**kwargs)
         user_profile = self.request.user.profile
         email_initial = {'email': self.request.user.email}
-        receipt_initial = {
-            'emails':
-                '\n'
-                .join(r.email for r in self.request.user.receipt_emails.all())
-        }
         profile_form = ProfileSettingsForm(instance=user_profile)
         email_form = EmailSettingsForm(
             initial=email_initial,
             instance=user_profile,
         )
         org_form = OrgPreferencesForm(instance=user_profile)
-        receipt_form = (
-            kwargs.get('receipt_form') or ReceiptForm(initial=receipt_initial)
-        )
-        current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
-        if user_profile.organization:
-            current_plan = 'Organization'
+        # XXX this contains a lot of stuff moving to squarelet
         donations = RecurringDonation.objects.filter(user=self.request.user)
         crowdfunds = RecurringCrowdfundPayment.objects.filter(
             user=self.request.user
@@ -175,9 +163,7 @@ class ProfileSettings(TemplateView):
             'squarelet_url': settings.SQUARELET_URL,
             'profile_form': profile_form,
             'email_form': email_form,
-            'receipt_form': receipt_form,
             'org_form': org_form,
-            'current_plan': current_plan,
             'donations': donations,
             'crowdfunds': crowdfunds,
         })
@@ -255,8 +241,7 @@ class ProfileView(BuyRequestsMixin, FormView):
     def get_form_kwargs(self):
         """Give the form the current user"""
         kwargs = super(ProfileView, self).get_form_kwargs()
-        user = self.request.user
-        kwargs['user'] = user
+        kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
