@@ -109,12 +109,16 @@ class Article(models.Model):
         # epiceditor likes to stick non breaking spaces in here for some reason
         self.body = self.body.replace(u'\xa0', ' ')
         # invalidate the template cache for the page on a save
+        self.clear_cache()
+        super(Article, self).save(*args, **kwargs)
+
+    def clear_cache(self):
+        """Clear the template cache"""
         if self.pk:
             cache.delete(
                 make_template_fragment_key('article_detail_1',
                                            [self.pk])
             )
-        super(Article, self).save(*args, **kwargs)
 
     def get_authors_names(self):
         """Get all authors names for a byline"""

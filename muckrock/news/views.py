@@ -74,6 +74,15 @@ class NewsDetail(DateDetailView):
             'admin:news_article_change', args=(context['object'].pk,)
         )
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
+        # if the user is staff or the owner, do not cache the page, so they can
+        # use the project and tag forms
+        if self.request.user.is_authenticated() and (
+            self.request.user.is_staff
+            or self.request.user == context['object'].user
+        ):
+            context['news_cache_timeout'] = 0
+        else:
+            context['news_cache_timeout'] = settings.DEFAULT_CACHE_TIMEOUT
         return context
 
     def post(self, request, **kwargs):
@@ -82,6 +91,7 @@ class NewsDetail(DateDetailView):
         article = self.get_object()
         authorized = self.request.user.is_staff
         action = request.POST.get('action')
+        clear_cache = False
         if not authorized:
             return HttpResponseForbidden()
         if action == 'projects':
@@ -89,6 +99,7 @@ class NewsDetail(DateDetailView):
             if form.is_valid():
                 projects = form.cleaned_data['projects']
                 article.projects = projects
+                clear_cache = True
         tags = request.POST.get('tags')
         if tags:
             tag_set = set()
@@ -96,6 +107,9 @@ class NewsDetail(DateDetailView):
                 new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
             article.tags.set(*tag_set)
+            clear_cache = True
+        if clear_cache:
+            article.clear_cache()
         return redirect(article)
 
 
