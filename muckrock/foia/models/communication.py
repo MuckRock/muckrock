@@ -366,7 +366,7 @@ class FOIACommunication(models.Model):
 
     def from_line(self):
         """What to display for who this communication is from"""
-        if self.from_user and self.from_user.profile.acct_type == 'agency':
+        if self.from_user and self.from_user.profile.is_agency_user:
             return self.from_user.profile.agency.name
         elif self.from_user:
             return self.from_user.profile.full_name

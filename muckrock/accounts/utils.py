@@ -158,3 +158,8 @@ def mini_login(request, username, password):
     backend.REDIRECT_STATE = False
     user = backend.complete(request=request)
     return user
+
+
+def user_plan_count(plan):
+    """Count how many users have a certain plan"""
+    User.objects.filter(organizations__plan__slug=plan).distinct().count()

@@ -32,7 +32,6 @@ def save_profile(backend, user, response, *args, **kwargs):
     if not hasattr(user, 'profile'):
         user.profile = Profile.objects.create(
             user=user,
-            acct_type='basic',
             uuid=response['uuid'],
         )
         user.save()

@@ -231,6 +231,11 @@ class Profile(models.Model):
             max=Max('plan__feature_level')
         )['max']
 
+    @mproperty
+    def is_agency_user(self):
+        """Is this an agency user?"""
+        return self.agency is not None
+
     def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
         """
         Creates a Stripe charge for the user.
