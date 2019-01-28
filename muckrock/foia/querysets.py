@@ -90,7 +90,7 @@ class FOIARequestQuerySet(models.QuerySet):
                 | Q(read_collaborators=user) | ~Q(embargo=True)
             )
             # agency users may also view requests for their agency
-            if user.profile.acct_type == 'agency':
+            if user.profile.is_agency_user:
                 query = query | Q(agency=user.profile.agency)
             # organizational users may also view requests from their org that are shared
             query = query | Q(

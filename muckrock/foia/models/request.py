@@ -1051,7 +1051,7 @@ class FOIARequest(models.Model):
         )
         is_owner = self.created_by(user)
         is_agency_user = (
-            user.is_authenticated() and user.profile.acct_type == 'agency'
+            user.is_authenticated() and user.profile.is_agency_user
         )
         can_follow = (
             user.is_authenticated() and not is_owner and not is_agency_user

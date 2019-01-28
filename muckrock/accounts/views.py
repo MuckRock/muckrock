@@ -32,7 +32,7 @@ from muckrock.accounts.forms import (
     ProfileSettingsForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
-from muckrock.accounts.models import ACCT_TYPES, Notification, RecurringDonation
+from muckrock.accounts.models import Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
@@ -334,7 +334,7 @@ class ProxyList(MRFilterListView):
         """Display all proxies"""
         objects = super(ProxyList, self).get_queryset()
         return (
-            objects.filter(profile__acct_type='proxy')
+            objects.filter(organizations__plan__slug='proxy')
             .select_related('profile')
         )
 
@@ -382,7 +382,7 @@ def agency_redirect_login(
         return redirect(foia)
 
     authed = request.user.is_authenticated()
-    agency_user = authed and request.user.profile.acct_type == 'agency'
+    agency_user = authed and request.user.profile.is_agency_user
     agency_match = agency_user and request.user.profile.agency == agency
     email = request.GET.get('email', '')
     # valid if this email is associated with the agency

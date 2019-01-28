@@ -33,7 +33,6 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(
         'muckrock.core.factories.UserFactory', profile=None
     )
-    acct_type = 'basic'
 
 
 class UserFactory(factory.django.DjangoModelFactory):

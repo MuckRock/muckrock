@@ -496,9 +496,7 @@ class MyOrgRequestList(UserPassesTestMixin, RequestList):
 
 
 @class_view_decorator(
-    user_passes_test(
-        lambda u: u.is_authenticated and u.profile.acct_type == 'agency'
-    )
+    user_passes_test(lambda u: u.is_authenticated and u.profile.is_agency_user)
 )
 class AgencyRequestList(RequestList):
     """View requests owned by current agency"""
