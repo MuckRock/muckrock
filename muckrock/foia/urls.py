@@ -8,15 +8,7 @@ from django.views.generic.base import RedirectView
 
 # MuckRock
 from muckrock.core.views import jurisdiction
-from muckrock.foia import views
-from muckrock.foia.feeds import (
-    FOIAFeed,
-    LatestDoneRequests,
-    LatestSubmittedRequests,
-    UserDoneFeed,
-    UserSubmittedFeed,
-    UserUpdateFeed,
-)
+from muckrock.foia import feeds, views
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
@@ -113,24 +105,38 @@ urlpatterns = [
     # Feeds
     url(
         r'^feeds/submitted/$',
-        LatestSubmittedRequests(),
+        feeds.LatestSubmittedRequests(),
         name='foia-submitted-feed',
     ),
-    url(r'^feeds/completed/$', LatestDoneRequests(), name='foia-done-feed'),
-    url(r'^feeds/(?P<idx>\d+)/$', FOIAFeed(), name='foia-feed'),
+    url(
+        r'^feeds/completed/$',
+        feeds.LatestDoneRequests(),
+        name='foia-done-feed'
+    ),
+    url(r'^feeds/(?P<idx>\d+)/$', feeds.FOIAFeed(), name='foia-feed'),
     url(
         r'^feeds/submitted/(?P<username>[\w\-.@ ]+)/$',
-        UserSubmittedFeed(),
+        feeds.UserSubmittedFeed(),
         name='foia-user-submitted-feed'
     ),
     url(
         r'^feeds/completed/(?P<username>[\w\-.@ ]+)/$',
-        UserDoneFeed(),
+        feeds.UserDoneFeed(),
         name='foia-user-done-feed',
     ),
     url(
+        r'^feeds/agency/(?P<idx>\d+)/$',
+        feeds.AgencySubmittedFeed(),
+        name='foia-agency-feed',
+    ),
+    url(
+        r'^feeds/jurisdiction/(?P<idx>\d+)/$',
+        feeds.JurisdictionSubmittedFeed(),
+        name='foia-jurisdiction-feed',
+    ),
+    url(
         r'^feeds/(?P<username>[\w\-.@ ]+)/$',
-        UserUpdateFeed(),
+        feeds.UserUpdateFeed(),
         name='foia-user-feed',
     ),
 

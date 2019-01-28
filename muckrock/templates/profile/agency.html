@@ -5,6 +5,10 @@
 
 {% block title %}{{ agency.name }} &bull; MuckRock{% endblock title %}
 {% block type %}agency{% endblock type %}
+{% block rss %}
+  {{ block.super }}
+  <link rel="alternate" type="application/rss+xml" title="{{agency.name}}'s FOIA Feed" href="{% url 'foia-agency-feed' agency.pk %}" />
+{% endblock rss %}
 
 {% block metadata %}
   {% if agency.image %}

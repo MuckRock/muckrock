@@ -28,3 +28,4 @@ npm-debug.log
 .secret_key.sh
 tags
 .lvimrc
+.ipython
