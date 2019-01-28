@@ -3,7 +3,6 @@
 {% load static from staticfiles %}
 {% load thumbnail %}
 {% load tags %}
-{% load cache %}
 
 {% with object as article %}
 
@@ -21,7 +20,7 @@
         {% newsletter %}
     {% endif %}
 {% endwith %}
-{% cache cache_timeout article_detail_1 article.pk %}
+{% cond_cache news_cache_timeout article_detail_1 article.pk %}
 <div class="news detail" itemscope itemtype="https://schema.org/NewsArticle">
     <meta itemscope itemprop="mainEntityOfPage" itemType="https://schema.org/WebPage" itemid="https://www.muckrock.com{{ article.get_absolute_url }}">
     {% if article.image %}
@@ -62,14 +61,7 @@
             </div>
         </header>
         <main class="news__article__main" itemprop="articleBody">
-{% comment %}
-We have to keep this code un-tabbed for dumb reasons!
-The markdown filter will transform the tabbed text into a line of <code>.
-Like  I said, real dumb stuff!
-{% endcomment %}
-{% filter markdown:"safe" %}
-{% evaluate article.body %}
-{% endfilter %}
+          {% filter markdown:"safe" %}{% evaluate article.body %}{% endfilter %}
         </main>
     </article>
     <aside class="news__aside">
