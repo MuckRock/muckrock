@@ -74,12 +74,9 @@ class NewsDetail(DateDetailView):
             'admin:news_article_change', args=(context['object'].pk,)
         )
         context['stripe_pk'] = settings.STRIPE_PUB_KEY
-        # if the user is staff or the owner, do not cache the page, so they can
+        # if the user is staff, do not cache the page, so they can
         # use the project and tag forms
-        if self.request.user.is_authenticated() and (
-            self.request.user.is_staff
-            or self.request.user == context['object'].user
-        ):
+        if self.request.user.is_staff:
             context['news_cache_timeout'] = 0
         else:
             context['news_cache_timeout'] = settings.DEFAULT_CACHE_TIMEOUT
