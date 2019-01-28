@@ -4,6 +4,10 @@
 {% load humanize %}
 {% block title %}{{ title }} &bull; MuckRock{% endblock title %}
 {% block type %}{% if jurisdiction.name == 'Georgia' %}georgia {% endif %}jurisdiction{% endblock type %}
+{% block rss %}
+  {{ block.super }}
+  <link rel="alternate" type="application/rss+xml" title="{{jurisdiction.name}}'s FOIA Feed" href="{% url 'foia-jurisdiction-feed' jurisdiction.pk %}" />
+{% endblock rss %}
 
 {% block open_graph %}
   <meta property="og:site_name" content="MuckRock" />
