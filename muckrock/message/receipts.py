@@ -18,7 +18,7 @@ from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
-# XXX move receipts to squarelet
+# move receipts to squarelet once crowdfunds and donations are moved over
 
 
 class LineItem(object):
@@ -114,6 +114,7 @@ def generic_receipt(user, charge):
     )
 
 
+# XXX remove
 def request_purchase_receipt(user, charge):
     """Generates a receipt for a request purchase and then returns it."""
     subject = u'Request Bundle Receipt'
@@ -135,6 +136,7 @@ def request_purchase_receipt(user, charge):
     )
 
 
+# XXX remove
 def request_fee_receipt(user, charge):
     """Generates a receipt for a payment of request fees."""
     subject = u'Request Fee Receipt'
@@ -195,6 +197,7 @@ def crowdfund_payment_receipt(user, charge):
     )
 
 
+# XXX remove
 def pro_subscription_receipt(user, charge):
     """Generates a receipt for a payment on a pro account."""
     subject = u'Professional Account Receipt'
@@ -213,6 +216,7 @@ def pro_subscription_receipt(user, charge):
     )
 
 
+# XXX remove
 def org_subscription_receipt(user, charge):
     """Generates a receipt for a payment on an org account."""
     subject = u'Organization Account Receipt'

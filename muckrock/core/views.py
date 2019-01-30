@@ -400,9 +400,6 @@ class StripeFormMixin(object):
         return initial
 
 
-# XXX move donations to squarelet
-
-
 class DonationFormView(StripeFormMixin, FormView):
     """Accepts donations from all users."""
     form_class = StripeForm
@@ -421,7 +418,8 @@ class DonationFormView(StripeFormMixin, FormView):
         }
 
     def form_valid(self, form):
-        """If the form is valid, charge the token provided by the form, then send a receipt."""
+        """If the form is valid, charge the token provided by the form, then
+        send a receipt."""
         token = form.cleaned_data['stripe_token']
         email = form.cleaned_data['stripe_email']
         amount = form.cleaned_data['stripe_amount']
@@ -492,7 +490,6 @@ class DonationFormView(StripeFormMixin, FormView):
         subscription = None
         quantity = amount / 100
         customer = stripe_get_customer(
-            self.request.user,
             email,
             'Donation for {}'.format(email),
         )

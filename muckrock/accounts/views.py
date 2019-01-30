@@ -10,12 +10,20 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.http.response import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseNotAllowed,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView, ListView, RedirectView, TemplateView
 
 # Standard Library
+import json
 import logging
+import sys
 from urllib import urlencode
 
 # Third Party
@@ -40,6 +48,11 @@ from muckrock.core.views import MRFilterListView
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
+from muckrock.message.tasks import (
+    failed_payment,
+    send_charge_receipt,
+    send_invoice_receipt,
+)
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 
@@ -249,6 +262,76 @@ class ProfileView(BuyRequestsMixin, FormView):
         if self.request.user == self.user:
             self.buy_requests(form)
         return redirect('acct-profile', username=self.user.username)
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    """Handle webhooks from stripe"""
+    if request.method != "POST":
+        return HttpResponseNotAllowed(['POST'])
+
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    try:
+        if settings.STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(
+                payload,
+                sig_header,
+                settings.STRIPE_WEBHOOK_SECRET,
+            )
+        else:
+            event = json.loads(request.body)
+
+        event_id = event['id']
+        event_type = event['type']
+        if event_type.startswith(('charge', 'invoice')):
+            event_object_id = event['data']['object'].get('id', '')
+        else:
+            event_object_id = ''
+    except (TypeError, ValueError, SyntaxError) as exception:
+        logging.error(
+            'Stripe Webhook: Error parsing JSON: %s',
+            exception,
+            exc_info=sys.exc_info(),
+        )
+        return HttpResponseBadRequest()
+    except KeyError as exception:
+        logging.error(
+            'Stripe Webhook: Unexpected structure: %s in %s',
+            exception,
+            event,
+            exc_info=sys.exc_info(),
+        )
+        return HttpResponseBadRequest()
+    except stripe.error.SignatureVerificationError as exception:
+        logging.error(
+            'Stripe Webhook: Signature Verification Error: %s',
+            sig_header,
+            exc_info=sys.exc_info(),
+        )
+        return HttpResponseBadRequest()
+    # If we've made it this far, then the webhook message was successfully sent!
+    # Now it's up to us to act on it.
+    success_msg = (
+        'Received Stripe webhook\n'
+        '\tfrom:\t%(address)s\n'
+        '\tid:\t%(id)s\n'
+        '\ttype:\t%(type)s\n'
+        '\tdata:\t%(data)s\n'
+    ) % {
+        'address': request.META['REMOTE_ADDR'],
+        'id': event_id,
+        'type': event_type,
+        'data': event
+    }
+    logger.info(success_msg)
+    if event_type == 'charge.succeeded':
+        send_charge_receipt.delay(event_object_id)
+    elif event_type == 'invoice.payment_succeeded':
+        send_invoice_receipt.delay(event_object_id)
+    elif event_type == 'invoice.payment_failed':
+        failed_payment.delay(event_object_id)
+    return HttpResponse()
 
 
 @method_decorator(login_required, name='dispatch')

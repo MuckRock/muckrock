@@ -125,26 +125,26 @@ class BaseComposerForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        if not hasattr(self, 'user'):
-            self.user = kwargs.pop('user')
+        if not hasattr(self, '_user'):
+            self._user = kwargs.pop('user')
         self.request = kwargs.pop('request')
         super(BaseComposerForm, self).__init__(*args, **kwargs)
-        if self.user.is_authenticated:
+        if self._user.is_authenticated:
             del self.fields['register_full_name']
             del self.fields['register_email']
             del self.fields['register_newsletter']
             del self.fields['login_username']
             del self.fields['login_password']
-        if not self.user.has_perm('foia.embargo_foiarequest'):
+        if not self._user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
-        if not self.user.has_perm('foia.embargo_perm_foiarequest'):
+        if not self._user.has_perm('foia.embargo_perm_foiarequest'):
             del self.fields['permanent_embargo']
         self.fields['parent'].queryset = (
-            FOIAComposer.objects.get_viewable(self.user).distinct()
+            FOIAComposer.objects.get_viewable(self._user).distinct()
         )
-        self.fields['agencies'].user = self.user
+        self.fields['agencies'].user = self._user
         self.fields['agencies'].queryset = (
-            Agency.objects.get_approved_and_pending(self.user)
+            Agency.objects.get_approved_and_pending(self._user)
         )
 
     def clean_register_email(self):
@@ -180,7 +180,7 @@ class BaseComposerForm(forms.ModelForm):
                     )
         if cleaned_data.get('permanent_embargo'):
             cleaned_data['embargo'] = True
-        if not self.user.is_authenticated:
+        if not self._user.is_authenticated:
             register = (
                 cleaned_data.get('register_full_name')
                 and cleaned_data.get('register_email')
@@ -196,7 +196,7 @@ class BaseComposerForm(forms.ModelForm):
                 )
             if login:
                 try:
-                    self.user = mini_login(
+                    self._user = mini_login(
                         self.request,
                         cleaned_data.get('login_username'),
                         cleaned_data.get('login_password'),

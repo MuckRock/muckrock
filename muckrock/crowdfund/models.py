@@ -163,7 +163,6 @@ class Crowdfund(models.Model):
         # pylint: disable=too-many-arguments
         plan = self._get_stripe_plan()
         customer = stripe_get_customer(
-            user,
             email,
             'Crowdfund {} for {}'.format(self.pk, email),
         )
@@ -252,27 +251,12 @@ class Crowdfund(models.Model):
 
 class CrowdfundPayment(models.Model):
     """A payment toward a crowdfund campaign"""
-
-    # replace
     user = models.ForeignKey(User, blank=True, null=True)
-    #
-    # org
-    #
-
-    # remove #
     name = models.CharField(max_length=255, blank=True)
-    ###
-
-    # remove #
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
-
-    charge_id = models.CharField(max_length=255, blank=True)
-    # replace #
-    charge = models.ForeignKey
-    ###
-
     show = models.BooleanField(default=False)
+    charge_id = models.CharField(max_length=255, blank=True)
     crowdfund = models.ForeignKey(Crowdfund, related_name='payments')
     recurring = models.ForeignKey(
         'crowdfund.RecurringCrowdfundPayment',
@@ -292,8 +276,6 @@ class CrowdfundPayment(models.Model):
 
 class RecurringCrowdfundPayment(models.Model):
     """Keep track of recurring crowdfund payments"""
-
-    # replace #
     user = models.ForeignKey(
         'auth.User',
         blank=True,
@@ -301,25 +283,16 @@ class RecurringCrowdfundPayment(models.Model):
         related_name='recurring_crowdfund_payments',
         on_delete=models.SET_NULL,
     )
-    email = models.EmailField()
-    ###
-    # org
-    ###
-
-    # remove to org #
-    customer_id = models.CharField(max_length=255)
-    payment_failed = models.BooleanField(default=False)
-    ###
-
     crowdfund = models.ForeignKey(Crowdfund, related_name='recurring_payments')
+    email = models.EmailField()
+    amount = models.PositiveIntegerField()
     show = models.BooleanField(default=False)
-
+    customer_id = models.CharField(max_length=255)
     subscription_id = models.CharField(
         unique=True,
         max_length=255,
     )
-
-    amount = models.PositiveIntegerField()
+    payment_failed = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     created_datetime = models.DateTimeField(auto_now_add=True)
     deactivated_datetime = models.DateTimeField(blank=True, null=True)
