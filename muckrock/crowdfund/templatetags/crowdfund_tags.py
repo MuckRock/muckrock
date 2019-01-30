@@ -5,6 +5,7 @@ Nodes and tags for rendering crowdfunds into templates
 # Django
 from django import template
 from django.conf import settings
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -46,20 +47,14 @@ def get_initial_amount(crowdfund):
     return initial_amount
 
 
-def crowdfund_form(crowdfund, user):
+def crowdfund_form(crowdfund):
     """Returns a form initialized with crowdfund data"""
     initial_data = {
         'show': True,
         'crowdfund': crowdfund.pk,
         'stripe_amount': get_initial_amount(crowdfund)
     }
-    if user.is_authenticated:
-        organization = user.profile.individual_organization
-    else:
-        organization = None
-    return CrowdfundPaymentForm(
-        initial=initial_data, user=user, organization=organization
-    )
+    return CrowdfundPaymentForm(initial=initial_data)
 
 
 def crowdfund_user(context):
@@ -104,9 +99,9 @@ def contributor_summary(named_contributors, contributors_count, anonymous):
 def generate_crowdfund_context(crowdfund, context):
     """Generates context that's agnostic towards the object being crowdfunded."""
     endpoint = reverse('crowdfund', kwargs={'pk': crowdfund.pk})
-    payment_form = crowdfund_form(crowdfund, context['user'])
+    payment_form = crowdfund_form(crowdfund)
     logged_in, user_email = crowdfund_user(context)
-    the_request = context.request
+    request = context.request
     named, contrib_count, anon_count = (
         cache_get_or_set(
             'cf:%s:crowdfund_widget_data' % crowdfund.pk, lambda: (
@@ -120,6 +115,8 @@ def generate_crowdfund_context(crowdfund, context):
     obj_url = crowdfund.get_crowdfund_object().get_absolute_url()
     # Remove the autofocus attribute from the login form in order to not scroll down
     # to the crowdfund widget on page load
+    login_form = AuthenticationForm()
+    login_form.fields['username'].widget.attrs.pop('autofocus', None)
     return {
         'crowdfund': crowdfund,
         'named_contributors': named,
@@ -127,10 +124,11 @@ def generate_crowdfund_context(crowdfund, context):
         'anon_contributors_count': anon_count,
         'contributor_summary': contrib_sum,
         'endpoint': endpoint,
+        'login_form': login_form,
         'logged_in': logged_in,
         'user_email': user_email,
         'payment_form': payment_form,
-        'request': the_request,
+        'request': request,
         'stripe_pk': settings.STRIPE_PUB_KEY,
         'obj_url': obj_url,
         'domain': context['domain'],

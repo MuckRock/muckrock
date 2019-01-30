@@ -54,17 +54,14 @@ def validate_stripe_email(email):
     return email
 
 
-def stripe_get_customer(user, email, description):
+def stripe_get_customer(email, description):
     """Get a customer for an authenticated or anonymous user"""
-    if user and user.is_authenticated:
-        return user.profile.customer()
-    else:
-        return stripe_retry_on_error(
-            stripe.Customer.create,
-            description=description,
-            email=email,
-            idempotency_key=True,
-        )
+    return stripe_retry_on_error(
+        stripe.Customer.create,
+        description=description,
+        email=email,
+        idempotency_key=True,
+    )
 
 
 def mailchimp_subscribe(

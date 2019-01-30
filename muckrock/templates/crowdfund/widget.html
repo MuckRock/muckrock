@@ -45,13 +45,16 @@
   </main>
   {% if not crowdfund.expired %}
     <footer class="crowdfund__widget__footer">
-      <form method="POST" action="{{ endpoint }}" class="crowdfund-form" id="crowdfund-form">
+      <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
         {% csrf_token %}
-        <div class="hidden-fields">
-          {% for field in payment_form.hidden_fields %}
-            {{ field }}
-          {% endfor %}
-        </div>
+        <input type="hidden" name="stripe_token" value="" />
+        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+        <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+        <input type="hidden" name="stripe_email" value="{{ user_email }}" />
+        <input type="hidden" name="stripe_label" value="Contribute" />
+        <input type="hidden" name="stripe_description" value="Crowdfund contribution" />
+        <input type="hidden" name="stripe_bitcoin" value="true" />
+        <input type="hidden" name="stripe_fee" value="0" />
         {{ payment_form.crowdfund }}
         <section class="anonymity">
           <label for="id_show">{{ payment_form.show }} <strong>List me as a backer</strong></label>
@@ -65,24 +68,6 @@
               {{payment_form.full_name}}
             </div>
           {% endif %}
-
-          <div class="field">
-            {% if payment_form.use_card_on_file %}
-              {% include "lib/pattern/field.html" with field=payment_form.use_card_on_file only %}
-            {% endif %}
-          </div>
-          <div class="form-group field" id="card-element-container">
-            <label for="card-element">
-              Credit or debit card
-            </label>
-            <div id="card-element" class="form-control"></div>
-          </div>
-          <div class="field">
-            {% if payment_form.save_card %}
-              {% include "lib/pattern/field.html" with field=payment_form.save_card only %}
-            {% endif %}
-          </div>
-
           {% if crowdfund.can_recur %}
             <p>
             <label for="id_recurring">
