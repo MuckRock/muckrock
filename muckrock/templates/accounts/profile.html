@@ -58,7 +58,7 @@
   </ul>
   {% if user == user_obj %}
     <dl class="stats">
-      {% if user.profile.acct_type != 'basic' %}
+      {% if user.profile.individual_organization.requests_per_month %}
         <dt>Monthly Requests</dt>
         <dd>{{ user_obj.profile.individual_organization.monthly_requests }}</dd>
       {% endif %}
