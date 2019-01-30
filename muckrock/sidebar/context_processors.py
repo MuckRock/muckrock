@@ -55,6 +55,8 @@ def get_organization(user):
 def sidebar_broadcast(user):
     """Displays a broadcast to a given usertype"""
 
+    # XXX remove?
+
     def load_broadcast(user_class):
         """Return a function to load the correct broadcast"""
 

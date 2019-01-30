@@ -191,15 +191,10 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
-        from muckrock.accounts.models import Profile
-        proxy = (
-            Profile.objects.filter(acct_type='proxy', state=self.legal.abbrev)
-            .order_by('-preferred_proxy').first()
-        )
-        if proxy:
-            return proxy.user
-        else:
-            return None
+        return User.objects.filter(
+            organizations__plan__slug='proxy',
+            profile__state=self.legal.abbrev,
+        ).order_by('-preferred_proxy').first()
 
     def get_requests(self):
         """State level jurisdictions should return requests from their localities as well."""
