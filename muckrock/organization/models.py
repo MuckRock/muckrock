@@ -50,6 +50,8 @@ class Organization(models.Model):
     number_requests = models.IntegerField(default=0)
     date_update = models.DateField(null=True)
 
+    # XXX add payment failed
+
     # deprecate #
     owner = models.ForeignKey(User, blank=True, null=True)
     max_users = models.IntegerField(default=3)
