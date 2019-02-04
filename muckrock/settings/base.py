@@ -157,6 +157,7 @@ TEMPLATES = [{
             'muckrock.core.context_processors.google_analytics',
             'muckrock.core.context_processors.mixpanel',
             'muckrock.core.context_processors.domain',
+            'muckrock.core.context_processors.settings',
             'muckrock.core.context_processors.cache_timeout',
         ],
         'libraries': {

@@ -110,8 +110,10 @@ def sidebar_info(request):
             'my_projects':
                 Project.objects.get_for_contributor(request.user).optimize()
                 [:4],
-            'payment_failed':
-                request.user.profile.payment_failed
+            'payment_failed_organizations':
+                request.user.organizations.filter(
+                    memberships__admin=True, payment_failed=True
+                )
         })
 
     return sidebar_info_dict

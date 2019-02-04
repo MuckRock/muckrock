@@ -50,6 +50,8 @@ class Organization(models.Model):
     number_requests = models.IntegerField(default=0)
     date_update = models.DateField(null=True)
 
+    payment_failed = models.BooleanField(default=False)
+
     # XXX add payment failed
 
     # deprecate #
@@ -120,9 +122,11 @@ class Organization(models.Model):
             'private',
             'date_update',
             'card',
+            'payment_failed',
         ]
         for field in fields:
-            setattr(self, field, data[field])
+            if field in data:
+                setattr(self, field, data[field])
         self.save()
 
     @transaction.atomic

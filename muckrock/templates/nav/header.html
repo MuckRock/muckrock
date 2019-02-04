@@ -182,7 +182,23 @@
                     </span>
                     <span class="text">
                       <p>A recent charge made against your credit card has failed.</p>
-                      <a class="basic red button" href="{% url 'acct-settings' %}#billing">Update your billing info</a>
+                      {% for organization in payment_failed_organizations %}
+                        <p>
+                          {% if organization.individual %}
+                            <a
+                            class="basic red button"
+                            href="{{ settings.SQUARELET_URL }}/users/~payment/">
+                              Update your billing info
+                            </a>
+                          {% else %}
+                            <a
+                            class="basic red button"
+                            href="{{ settings.SQUARELET_URL }}/organizations/{{ organization.slug }}/update/">
+                              Update the billing info for {{ organization.name }}.
+                            </a>
+                          {% endif %}
+                        </p>
+                      {% endfor %}
                     </span>
                   </li>
                 {% endif %}
