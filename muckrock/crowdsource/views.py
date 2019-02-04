@@ -658,6 +658,7 @@ def message_response(request):
         msg = TemplateEmail(
             subject=form.cleaned_data['subject'],
             from_email='info@muckrock.com',
+            reply_to=[request.user.email],
             user=response.user,
             text_template='crowdsource/email/message_user.txt',
             html_template='crowdsource/email/message_user.html',
@@ -666,7 +667,6 @@ def message_response(request):
                 'assignment': response.crowdsource,
                 'from_user': request.user,
             },
-            headers={'h:Reply-To': request.user.email},
         )
         msg.send()
         return JsonResponse({'status': 'ok'})
