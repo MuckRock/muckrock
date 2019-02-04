@@ -17,12 +17,15 @@ class OrganizationQuerySet(models.QuerySet):
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
             raise ValueError('Missing required fields: {}'.format(missing))
+        # rename update_on to date_update
         # convert date_update from string to date
-        # XXX error handle
         if data['update_on'] is not None:
+            # XXX error handle
             data['date_update'] = datetime.strptime(
                 data['update_on'], '%Y-%m-%d'
             ).date()
+        else:
+            data['date_update'] = data['update_on']
 
         organization, created = self.model.objects.get_or_create(uuid=uuid)
         organization.update_data(data)

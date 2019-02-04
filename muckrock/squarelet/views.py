@@ -25,14 +25,14 @@ def webhook(request):
     """Receive a cache invalidation webhook from squarelet"""
 
     type_ = request.POST.get('type', '')
-    uuid = request.POST.get('uuid', '')
+    uuids = request.POST.getlist('uuids', '')
     timestamp = request.POST.get('timestamp', '')
     signature = request.POST.get('signature', '')
 
     # verify signature
     hmac_digest = hmac.new(
         key=settings.SQUARELET_SECRET,
-        msg='{}{}{}'.format(timestamp, type_, uuid),
+        msg='{}{}{}'.format(timestamp, type_, ''.join(uuids)),
         digestmod=hashlib.sha256,
     ).hexdigest()
     match = hmac.compare_digest(
@@ -47,5 +47,6 @@ def webhook(request):
         return HttpResponseForbidden()
 
     # pull the new data asynchrnously
-    pull_data.delay(type_, uuid)
+    for uuid in uuids:
+        pull_data.delay(type_, uuid)
     return HttpResponse('OK')
