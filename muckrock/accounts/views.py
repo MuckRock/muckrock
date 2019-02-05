@@ -62,7 +62,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class AccountsView(RedirectView):
     """Accounts view redirects to squarelet"""
-    url = '{}/plans/'.format(settings.SQUARELET_URL)
+    url = '{}/selectplan/'.format(settings.SQUARELET_URL)
 
 
 def account_logout_helper(request, url):
