@@ -167,7 +167,7 @@ def has_feature_level(level):
     @predicate('has_feature_level:{}'.format(level))
     @user_authenticated
     def inner(user):
-        return user.profile.feature_level() >= level
+        return user.profile.feature_level >= level
 
     return inner
 
