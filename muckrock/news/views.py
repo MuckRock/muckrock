@@ -34,7 +34,8 @@ class NewsDetail(DateDetailView):
 
     def get_queryset(self):
         """Get articles for this view"""
-        queryset = Article.objects.prefetch_authors().prefetch_editors()
+        queryset = Article.objects.prefetch_authors().prefetch_editors(
+        ).prefetch_related('tags', 'projects')
         if self.request.user.is_staff:
             return queryset.all()
         else:
@@ -46,18 +47,20 @@ class NewsDetail(DateDetailView):
 
     def get_related_articles(self, article):
         """Get articles related to the current one."""
+        projects = list(article.projects.all())
+        tags = list(article.tags.all())
         # articles in the same project as this one
-        project_filter = Q(projects__in=article.projects.all())
+        project_filter = Q(projects__in=projects)
         # articles with the same tag as this one
-        tag_filter = Q(tags__in=article.tags.all())
+        tag_filter = Q(tags__in=tags)
         # articles in projects with the same tag as this one
-        project_tag_filter = Q(projects__tags__in=article.tags.all())
-        related_articles = (
-            Article.objects.get_published()
-            .filter(project_filter | tag_filter | project_tag_filter)
-            .exclude(pk=article.pk).distinct().prefetch_authors()
-            .prefetch_editors()
-        )
+        project_tag_filter = Q(projects__tags__in=tags)
+        published = Article.objects.get_published().only(
+            'image', 'title', 'slug', 'pub_date'
+        ).exclude(pk=article.pk).order_by()
+        related_articles = published.filter(project_filter).union(
+            published.filter(tag_filter), published.filter(project_tag_filter)
+        ).order_by('-pub_date').prefetch_authors()
         return related_articles[:4]
 
     def get_context_data(self, **kwargs):
