@@ -21,6 +21,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """API views for User
     This is used by squarelet to push changes to MuckRock
     """
+    # XXX
     queryset = (
         User.objects.order_by('id').prefetch_related('profile', 'groups')
     )

@@ -45,6 +45,7 @@ class Organization(models.Model):
     plan = models.ForeignKey('organization.Plan', null=True)
     card = models.CharField(max_length=255, blank=True)
 
+    # XXX comments / documentation
     requests_per_month = models.IntegerField(default=0)
     monthly_requests = models.IntegerField(default=0)
     number_requests = models.IntegerField(default=0)
