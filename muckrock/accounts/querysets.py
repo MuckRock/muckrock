@@ -64,11 +64,13 @@ class ProfileQuerySet(models.QuerySet):
             'name': 'full_name',
             'picture': 'avatar_url',
             'email_verified': 'email_confirmed',
+            'use_autologin': 'use_autologin',
         }
         profile_defaults = {
             'name': '',
             'picture': '',
             'email_verified': False,
+            'use_autologin': True,
         }
         if reset_email_failed:
             profile_defaults['email_failed'] = False

@@ -7,6 +7,7 @@ from django import template
 from django.conf import settings
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
+from django.core.urlresolvers import reverse
 from django.template import (
     Library,
     Node,
@@ -35,11 +36,12 @@ register = Library()
 
 
 @register.simple_tag
-def autologin(user):
-    """Generate an autologin token for the user."""
-    if user and user.is_authenticated():
-        return urlencode(user.profile.autologin())
-    return ''
+def autologin(url, user):
+    """Generate an autologin url for the user."""
+    if not user or not user.is_authenticated:
+        return '{}/{}'.format(settings.MUCKROCK_URL, url)
+
+    return user.profile.wrap_url(url)
 
 
 @register.simple_tag

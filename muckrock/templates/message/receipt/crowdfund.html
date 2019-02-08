@@ -3,7 +3,7 @@
 {% block description %}
 {% with crowdfund.get_crowdfund_object as object %}
 {% if crowdfund %}
-<p>This email confirms your payment to a MuckRock crowdfund for <a href="{{object.get_absolute_url}}?{% autologin user %}">{{object}}</a>.</p>
+<p>This email confirms your payment to a MuckRock crowdfund for <a href="{% autologin object.get_absolute_url user %}">{{object}}</a>.</p>
 {% else %}
 <p>This email confirms your payment to a MuckRock crowdfund.</p>
 {% endif %}

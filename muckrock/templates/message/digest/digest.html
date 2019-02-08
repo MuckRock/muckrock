@@ -58,5 +58,6 @@
 {% endblock body %}
 
 {% block settings %}
-<p>Change your digest frequency or disable digests from your <a href="{% url 'acct-settings' %}?{% autologin user %}">account settings</a>.</p>
+{% url "acct-settings" as url_acct_settings %}
+<p>Change your digest frequency or disable digests from your <a href="{% autologin url_acct_settings user %}">account settings</a>.</p>
 {% endblock %}

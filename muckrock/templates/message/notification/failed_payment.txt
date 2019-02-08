@@ -1,34 +1,34 @@
 {% extends 'message/base.txt' %}
 {% load tags %}
 {% load humanize %}
-{% block body %}
+{% block body %}{% url "accounts" as url_accounts %}{% url "acct-settings" as url_acct_settings %}{% url "donate" as url_donate %}
 Hi {{user.profile.full_name}},
 {% if type == 'pro' %}{% if attempt == "final" %}
 Your Pro subscription has been cancelled.
 
-Our final attempt to charge your card has failed and your account has been reverted back to a free Basic account. Resubscribe here: {{base_url}}{% url 'accounts' %}?{% autologin user %}
+Our final attempt to charge your card has failed and your account has been reverted back to a free Basic account. Resubscribe here: {% autologin url_accounts user %}
 {% else %}
 Your Pro subscription payment has failed.
 
-This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}?{% autologin user %}
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here: {% autologin url_acct_settings user %}
 {% endif %}
-{% elif type == 'org' %}{% if attempt == "final" %}
+{% elif type == 'org' %}{% if attempt == "final" %}{% url "org-activate" slug=org.slug as url_org %}
 Your Organization has been deactivated.
 
-Our final attempt to charge your card has failed and your organization has been deactivated. Reactivate here: {{base_url}}{% url 'org-activate' slug=org.slug %}?{% autologin user %}
+Our final attempt to charge your card has failed and your organization has been deactivated. Reactivate here: {% autologin url_org user %}
 {% else %}
 Your Organization subscription payment has failed.
 
-This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}?{% autologin user %}
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here: {% autologin url_acct_settings user %}
 {% endif %}
 {% elif type == 'donate' %}{% if attempt == "final" %}
 Your recurring donation has been deactivated.
 
-Our final attempt to charge your card has failed and your recurring donation has been deactivated. Reactivate here: {{base_url}}{% url 'donate' %}?{% autologin user %}
+Our final attempt to charge your card has failed and your recurring donation has been deactivated. Reactivate here: {% autologin url_donate user %}
 {% else %}
 Your recurring donation payment has failed.
 
-This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here:  {{base_url}}{% url 'acct-settings' %}?{% autologin user %}
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Update your billing information here: {% autologin url_acct_settings user %}
 {% endif %}
 {% endif %}
 
