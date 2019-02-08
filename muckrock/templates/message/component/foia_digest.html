@@ -9,7 +9,7 @@
         {% with notification.action.target as foia %}
         <div>
             <p>
-            <a href="{{foia.get_absolute_url}}?{% autologin user %}">{{ foia }}</a>
+            <a href="{% autologin foia.get_absolute_url user %}">{{ foia }}</a>
                 <br/>
                 <small>{{foia.agency}}</small>
             </p>

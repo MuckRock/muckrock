@@ -26,7 +26,12 @@ from memoize import mproperty
 
 # MuckRock
 from muckrock.accounts.querysets import ProfileQuerySet
-from muckrock.core.utils import get_image_storage, stripe_retry_on_error
+from muckrock.core.utils import (
+    cache_get_or_set,
+    get_image_storage,
+    squarelet_get,
+    stripe_retry_on_error,
+)
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -254,18 +259,43 @@ class Profile(models.Model):
             idempotency_key=True,
         )
 
-    def autologin(self):
-        """Generate an autologin key and value for this user if they set this preference."""
-        autologin_dict = {}
-        if self.use_autologin:
-            lot = LOT.objects.create(user=self.user, type='slow-login')
-            autologin_dict = {settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid}
-        return autologin_dict
-
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
-        extra.update(self.autologin())
-        return u'{}?{}'.format(link, urlencode(extra))
+        if not self.use_autologin:
+            return u'{}/{}'.format(settings.MUCKROCK_URL, link)
+
+        url_auth_token = self.get_url_auth_token()
+        if not url_auth_token:
+            return u'{}/{}'.format(settings.MUCKROCK_URL, link)
+
+        extra['next'] = link
+        muckrock_url = u'{}{}?{}'.format(
+            settings.MUCKROCK_URL, reverse('acct-login'), urlencode(extra)
+        )
+        return u'{}/accounts/login/?{}'.format(
+            settings.SQUARELET_URL,
+            urlencode({
+                'next': muckrock_url,
+                'url_auth_token': url_auth_token,
+            })
+        )
+
+    def get_url_auth_token(self):
+        """Get a URL auth token for the user
+        Cache it so a single email will use a single auth token"""
+
+        def get_url_auth_token_squarelet():
+            """Get the URL auth token from squarelet"""
+            resp = squarelet_get('/api/url_auth_tokens/{}/'.format(self.uuid))
+            if resp.status_code != 200:
+                return None
+            return resp.json().get('url_auth_token')
+
+        return cache_get_or_set(
+            'url_auth_token:{}'.format(self.uuid),
+            get_url_auth_token_squarelet,
+            60 * 5,
+        )
 
 
 # XXX deprecate ##
