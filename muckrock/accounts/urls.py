@@ -16,7 +16,9 @@ urlpatterns = [
     url(r'^$', views.AccountsView.as_view(), name='accounts'),
     url(
         r'^signup/$',
-        RedirectView.as_view(url=settings.SQUARELET_URL + '/accounts/signup/'),
+        RedirectView.as_view(
+            url=settings.SQUARELET_URL + '/accounts/signup/?intent=muckrock'
+        ),
         name='accounts-signup'
     ),
     url(
