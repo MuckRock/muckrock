@@ -1,0 +1,39 @@
+# General
+# ------------------------------------------------------------------------------
+USE_DOCKER=yes
+SECRET_KEY=
+
+# Redis
+# ------------------------------------------------------------------------------
+REDIS_URL=redis://redis:6379/0
+
+# Sign up for a DocumentCloud account at https://www.documentcloud.org
+# DocumentCloud is used to host and embed PDF documents
+DOCUMENTCLOUD_USERNAME=info@muckrock.com
+DOCUMENTCLOUD_PASSWORD=
+
+# Sign up for a Stripe account at https://stripe.com
+# Stripe is used for payment processing
+STRIPE_SECRET_KEY=
+STRIPE_PUB_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# Sign up for a mailgun account at https://www.mailgun.org
+# Mailgun is used for sending and receiving email
+MAILGUN_ACCESS_KEY=
+
+# Sign up for an AWS account at https://aws.amazon.com
+# AWS is used for the S3 service in order to store uploaded files
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+
+# Sign up for a Phaxio account at https://www.phaxio.com
+# Phaxio is used for sending faxes
+PHAXIO_KEY=
+PHAXIO_SECRET=
+PHAXIO_CALLBACK_TOKEN=
+
+ZOHO_TOKEN=
+
+SQUARELET_KEY=
+SQUARELET_SECRET=
