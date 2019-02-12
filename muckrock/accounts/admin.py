@@ -139,7 +139,7 @@ class RecurringDonationAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
-# XXX what to do with recurring donations
+# this move to squarelet in the future
 
 
 class RecurringDonationAdmin(VersionAdmin):

@@ -7,7 +7,6 @@ from django import template
 from django.conf import settings
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
-from django.core.urlresolvers import reverse
 from django.template import (
     Library,
     Node,
@@ -22,7 +21,6 @@ from django.utils.safestring import mark_safe
 import re
 import zlib
 from email.parser import Parser
-from urllib import urlencode
 
 # Third Party
 import bleach
