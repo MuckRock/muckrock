@@ -175,8 +175,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'muckrock.core.middleware.LOTMiddleware',
-    'muckrock.core.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -225,7 +223,6 @@ INSTALLED_APPS = (
     'taggit',
     'watson',
     'webpack_loader',
-    'lot',
     'image_diet',
     'django_hosts',
     'queued_storage',
@@ -315,7 +312,6 @@ CELERY_ROUTES = {
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
     'muckrock.accounts.backends.SquareletBackend',
-    'lot.auth_backend.LOTBackend',
 )
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user':
@@ -527,15 +523,6 @@ SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
-
-LOT = {
-    'slow-login': {
-        'name': u'Slow login',
-        'duration': 60 * 60 * 24 * 2,
-        'one-time': True,
-    },
-}
-LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
 
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 ROBOTS_SITE_BY_REQUEST = True

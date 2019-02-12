@@ -167,7 +167,7 @@ class ProfileSettings(TemplateView):
             instance=user_profile,
         )
         org_form = OrgPreferencesForm(instance=user_profile)
-        # XXX this contains a lot of stuff moving to squarelet
+        # these move to squarelet in the future
         donations = RecurringDonation.objects.filter(user=self.request.user)
         crowdfunds = RecurringCrowdfundPayment.objects.filter(
             user=self.request.user
@@ -202,15 +202,15 @@ class ProfileView(BuyRequestsMixin, FormView):
         context_data = super(ProfileView, self).get_context_data(**kwargs)
         queryset = self.user.organizations.order_by('name')
         if self.request.user.is_staff:
-            organizations = [o for o in queryset]
+            organizations = queryset
         elif self.request.user.is_authenticated:
             # XXX test
-            organizations = [
-                o for o in
-                queryset.filter(Q(private=False) | Q(users=self.request.user))
-            ]
+            organizations = queryset.filter(
+                Q(private=False) | Q(users=self.request.user)
+            )
+
         else:
-            organizations = [o for o in queryset.filter(private=False)]
+            organizations = queryset.filter(private=False)
         if self.request.user == self.user:
             context_data['admin_organizations'] = (
                 self.user.organizations.filter(memberships__admin=True)

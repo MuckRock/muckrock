@@ -19,13 +19,12 @@ from dateutil.relativedelta import relativedelta
 from requests.exceptions import RequestException
 
 # MuckRock
-from muckrock.accounts.models import Profile, RecurringDonation
+from muckrock.accounts.models import RecurringDonation
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.message import digests, receipts
 from muckrock.message.email import TemplateEmail
 from muckrock.message.notifications import SlackNotification
-from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 

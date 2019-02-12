@@ -261,3 +261,10 @@ def npm_watch():
     """Continuously build assets"""
     with env.cd(env.base_path):
         env.run(DJANGO_RUN.format(cmd='npm run watch'))
+
+
+@task(name='npm-lint')
+def npm_lint():
+    """ESLint"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='npm run lint'))

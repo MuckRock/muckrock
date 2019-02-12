@@ -24,15 +24,15 @@ var style = {
     fontFamily: 'system-ui, sans-serif',
     fontSmoothing: 'antialiased',
     '::placeholder': {
-      color: '#899194',
-    },
+      color: '#899194'
+    }
   },
   invalid: {
     color: '#e5424d',
     ':focus': {
-      color: '#303238',
-    },
-  },
+      color: '#303238'
+    }
+  }
 };
 
 $("document").ready(function(){

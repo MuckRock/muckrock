@@ -62,6 +62,7 @@ class TestProfileUnit(TestCase):
 
     def _test_is_advanced(self):
         """Test whether the users are marked as advanced."""
+        # XXX need to change all the acct types to plan types
         beta = ProfileFactory(acct_type='beta')
         proxy = ProfileFactory(acct_type='beta')
         admin = ProfileFactory(acct_type='admin')

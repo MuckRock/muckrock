@@ -21,7 +21,6 @@ import stripe
 from actstream.models import Action
 from easy_thumbnails.fields import ThumbnailerImageField
 from localflavor.us.models import PhoneNumberField, USStateField
-from lot.models import LOT
 from memoize import mproperty
 
 # MuckRock
@@ -32,6 +31,7 @@ from muckrock.core.utils import (
     squarelet_get,
     stripe_retry_on_error,
 )
+from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -93,7 +93,6 @@ class Profile(models.Model):
     phone = PhoneNumberField(blank=True)
 
     # XXX deprecate ##
-    # XXX this is everywhere!!! XXX
     acct_type = models.CharField(
         max_length=10, choices=ACCT_TYPES, default='basic'
     )
@@ -105,7 +104,7 @@ class Profile(models.Model):
         on_delete=models.SET_NULL,
         db_column='organization',
     )
-    # XXX deprecate ##
+    # deprecate ##
 
     # extended information
     profile = models.TextField(blank=True)
@@ -121,7 +120,7 @@ class Profile(models.Model):
     linkedin = models.URLField(
         max_length=255, blank=True, help_text='Begin with http://'
     )
-    # remove after migrating
+    # deprecate
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True,
@@ -144,7 +143,6 @@ class Profile(models.Model):
         verbose_name='Digest Frequency',
         help_text=('Receive updates on site activity as an emailed digest.')
     )
-    # XXX move to squarelet
     use_autologin = models.BooleanField(
         default=True,
         help_text=(
@@ -157,7 +155,7 @@ class Profile(models.Model):
     # notification preferences
     new_question_notifications = models.BooleanField(default=False)
 
-    # XXX deprecate ##
+    # deprecate after projects on squarelet #
     org_share = models.BooleanField(
         default=False,
         verbose_name='Share',
@@ -165,7 +163,7 @@ class Profile(models.Model):
         'my embargoed requests',
     )
 
-    # XXX deprecate ##
+    # deprecate ##
     # paid for requests
     num_requests = models.IntegerField(default=0)
     # for limiting # of requests / month
@@ -175,7 +173,7 @@ class Profile(models.Model):
     customer_id = models.CharField(max_length=255, blank=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     payment_failed = models.BooleanField(default=False)
-    # XXX deprecate ##
+    # deprecate ##
 
     preferred_proxy = models.BooleanField(
         default=False,
@@ -224,10 +222,10 @@ class Profile(models.Model):
     @mproperty
     def individual_organization(self):
         """Get the user's individual organization
-        There should always be exactly one individual organization
+        There should always be exactly one individual organization,
+        which has a matching UUID
         """
-        # XXX matching uuids
-        return self.user.organizations.filter(individual=True).first()
+        return Organization.objects.get(uuid=self.uuid)
 
     @mproperty
     def feature_level(self):
@@ -298,7 +296,7 @@ class Profile(models.Model):
         )
 
 
-# XXX deprecate ##
+# deprecate ##
 class ReceiptEmail(models.Model):
     """An additional email address to send receipts to"""
     user = models.ForeignKey(
