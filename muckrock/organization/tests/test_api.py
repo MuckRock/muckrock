@@ -26,6 +26,7 @@ from muckrock.core.factories import UserFactory
 from muckrock.organization.factories import OrganizationFactory
 from muckrock.organization.models import Membership, Organization, Plan
 
+
 # pylint: disable=invalid-name
 
 # XXX remove me

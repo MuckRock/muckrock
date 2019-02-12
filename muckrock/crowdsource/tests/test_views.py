@@ -19,6 +19,7 @@ from muckrock.crowdsource.views import (
     CrowdsourceFormView,
 )
 
+
 # pylint: disable=invalid-name
 
 

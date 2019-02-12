@@ -69,6 +69,7 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
 from muckrock.task.models import StatusChangeTask
 
+
 # pylint: disable=invalid-name
 # pylint: disable=too-many-lines
 

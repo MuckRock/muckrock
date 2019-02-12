@@ -19,6 +19,7 @@ from muckrock.organization.factories import (
     OrganizationFactory,
 )
 
+
 # pylint: disable=invalid-name
 # pylint: disable=protected-access
 

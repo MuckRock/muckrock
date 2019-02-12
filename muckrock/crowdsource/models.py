@@ -35,6 +35,7 @@ from muckrock.crowdsource import fields
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE
 from muckrock.tags.models import TaggedItemBase
 
+
 DOCCLOUD_EMBED = """
 <div class="DC-embed DC-embed-document DV-container">
   <div style="position:relative;padding-bottom:129.42857142857142%;height:0;overflow:hidden;max-width:100%;">

@@ -15,6 +15,7 @@ from smart_open.smart_open_lib import smart_open
 # MuckRock
 from muckrock.organization.models import Membership, Organization
 
+
 # XXX what to do with agency users?
 
 

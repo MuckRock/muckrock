@@ -5,6 +5,7 @@ Field choices for the organization app
 # Third Party
 from djchoices import ChoiceItem, DjangoChoices
 
+
 # XXX remove me
 
 
