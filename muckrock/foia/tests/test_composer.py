@@ -2,6 +2,9 @@
 Tests for the FOIA Composer
 """
 
+# pylint: disable=invalid-name
+# pylint: disable=protected-access
+
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
@@ -18,9 +21,6 @@ from muckrock.organization.factories import (
     MembershipFactory,
     OrganizationFactory,
 )
-
-# pylint: disable=invalid-name
-# pylint: disable=protected-access
 
 
 class TestFOIAComposer(TestCase):

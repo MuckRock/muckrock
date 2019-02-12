@@ -15,8 +15,6 @@ from smart_open.smart_open_lib import smart_open
 # MuckRock
 from muckrock.organization.models import Membership, Organization
 
-# XXX what to do with agency users?
-
 
 class Command(BaseCommand):
     """
@@ -41,6 +39,7 @@ class Command(BaseCommand):
 
     def export_users(self):
         """Export users"""
+        # XXX what to do with agency users?
         key = self.bucket.new_key('squarelet_export/users.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)

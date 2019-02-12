@@ -2,6 +2,9 @@
 Tests for the FOIA views
 """
 
+# pylint: disable=invalid-name
+# pylint: disable=too-many-lines
+
 # Django
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.urlresolvers import resolve, reverse
@@ -68,9 +71,6 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
 from muckrock.task.models import StatusChangeTask
-
-# pylint: disable=invalid-name
-# pylint: disable=too-many-lines
 
 
 class TestFOIAViews(TestCase):

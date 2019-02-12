@@ -2,6 +2,11 @@
 Tests using nose for the FOIA application
 """
 
+# allow methods that could be functions and too many public methods in tests
+# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-lines
+# pylint: disable=invalid-name
+
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
@@ -39,11 +44,6 @@ from muckrock.foia.factories import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.task.models import SnailMailTask
-
-# allow methods that could be functions and too many public methods in tests
-# pylint: disable=too-many-public-methods
-# pylint: disable=too-many-lines
-# pylint: disable=invalid-name
 
 
 class TestFOIARequestUnit(TestCase):
