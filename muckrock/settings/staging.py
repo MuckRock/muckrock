@@ -20,6 +20,11 @@ SQUARELET_URL = 'https://squarelet-staging.herokuapp.com'
 INSTALLED_APPS += ('bandit',)
 
 BANDIT_EMAIL = 'staging@muckrock.com'
+BANDIT_WHITELIST = [
+    e.strip()
+    for e in os.environ.get('BANDIT_WHITELIST', '').split(',')
+    if e.strip()
+]
 
 
 class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
