@@ -29,3 +29,4 @@ npm-debug.log
 tags
 .lvimrc
 .ipython
+.envs
