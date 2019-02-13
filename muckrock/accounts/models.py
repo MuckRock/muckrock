@@ -17,6 +17,7 @@ from urllib import urlencode
 from uuid import uuid4
 
 # Third Party
+import requests
 import stripe
 from actstream.models import Action
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -264,6 +265,8 @@ class Profile(models.Model):
 
         url_auth_token = self.get_url_auth_token()
         if not url_auth_token:
+            # if there was an error getting the auth token from squarelet,
+            # just send the email without the autologin links
             return u'{}/{}'.format(settings.MUCKROCK_URL, link)
 
         extra['next'] = link
@@ -284,8 +287,12 @@ class Profile(models.Model):
 
         def get_url_auth_token_squarelet():
             """Get the URL auth token from squarelet"""
-            resp = squarelet_get('/api/url_auth_tokens/{}/'.format(self.uuid))
-            if resp.status_code != 200:
+            try:
+                resp = squarelet_get(
+                    '/api/url_auth_tokens/{}/'.format(self.uuid)
+                )
+                resp.raise_for_status()
+            except requests.exceptions.RequestException:
                 return None
             return resp.json().get('url_auth_token')
 

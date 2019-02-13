@@ -20,7 +20,6 @@ import re
 
 # Third Party
 import requests
-from stripe.error import StripeError
 
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin

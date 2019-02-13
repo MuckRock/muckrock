@@ -13,7 +13,7 @@ from celery import current_app
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import F
 from django.db.models.functions import Least
 from django.db.models.signals import post_delete
@@ -172,12 +172,12 @@ class FOIAComposer(models.Model):
 
         self._return_requests(return_amts)
 
+    @transaction.atomic
     def _return_requests(self, return_amts):
         """Helper method for return requests
 
         Does the actually returning
         """
-        # XXX make this all atomic?
         self.num_reg_requests = (
             F('num_reg_requests') -
             Least(return_amts['regular'], F('num_reg_requests'))

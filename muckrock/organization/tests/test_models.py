@@ -17,7 +17,6 @@ from muckrock.organization.factories import (
     OrganizationFactory,
     OrganizationPlanFactory,
     PlanFactory,
-    ProfessionalPlanFactory,
 )
 
 

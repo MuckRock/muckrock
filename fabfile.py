@@ -253,14 +253,14 @@ def pip_sync():
 def npm_build():
     """Build assets"""
     with env.cd(env.base_path):
-        env.run(DJANGO_RUN.format(cmd='npm run build'))
+        env.run(DJANGO_RUN_USER.format(cmd='npm run build'))
 
 
 @task(name='npm-watch')
 def npm_watch():
     """Continuously build assets"""
     with env.cd(env.base_path):
-        env.run(DJANGO_RUN.format(cmd='npm run watch'))
+        env.run(DJANGO_RUN_USER.format(cmd='npm run watch'))
 
 
 @task(name='npm-lint')
@@ -268,3 +268,10 @@ def npm_lint():
     """ESLint"""
     with env.cd(env.base_path):
         env.run(DJANGO_RUN.format(cmd='npm run lint'))
+
+
+@task()
+def npm(cmd):
+    """Run NPM tasks"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN_USER.format(cmd='npm {}'.format(cmd)))

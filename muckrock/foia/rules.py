@@ -92,9 +92,8 @@ def is_read_collaborator(user, foia):
 @skip_if_not_obj
 @user_authenticated
 def is_org_shared(user, foia):
-    # XXX only active org?
     return (
-        foia.user.is_authenticated() and foia.user.profile.org_share
+        foia.user.profile.org_share
         and foia.composer.organization.has_member(user)
     )
 

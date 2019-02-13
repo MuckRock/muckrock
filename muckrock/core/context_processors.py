@@ -12,6 +12,7 @@ def domain(request):
 
 def settings(request):
     """Add settings to the context"""
+    # pylint: disable=unused-argument
     return {'settings': django_settings}
 
 

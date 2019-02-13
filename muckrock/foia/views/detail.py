@@ -2,6 +2,8 @@
 Detail view for a FOIA request
 """
 
+# pylint: disable=too-many-lines
+
 # Django
 from celery import current_app
 from django.conf import settings
