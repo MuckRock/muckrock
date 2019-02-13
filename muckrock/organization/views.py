@@ -6,7 +6,6 @@ from django.conf import settings
 from django.views.generic import RedirectView
 
 
-# XXX this is wrong - slugs dont match
 class OrganizationDetailView(RedirectView):
     """Organization detail view redirects to squarelet"""
     url = '{}/organizations/%(slug)s/'.format(settings.SQUARELET_URL)

@@ -39,21 +39,31 @@ class Organization(models.Model):
     )
 
     name = models.CharField(max_length=255, unique=True)
-    slug = models.SlugField(max_length=255, blank=True)  # XXX no blank
+    slug = models.SlugField(max_length=255, unique=True)
     private = models.BooleanField(default=False)
     individual = models.BooleanField(default=True)
     plan = models.ForeignKey('organization.Plan', null=True)
     card = models.CharField(max_length=255, blank=True)
 
-    # XXX comments / documentation
-    requests_per_month = models.IntegerField(default=0)
-    monthly_requests = models.IntegerField(default=0)
-    number_requests = models.IntegerField(default=0)
+    requests_per_month = models.IntegerField(
+        default=0,
+        help_text='How many monthly requests this organization gets each month',
+    )
+    monthly_requests = models.IntegerField(
+        default=0,
+        help_text=
+        'How many recurring monthly requests are left for this month - these do '
+        'not roll over and are just reset to `requests_per_month` on `date_update`'
+    )
+    number_requests = models.IntegerField(
+        default=0,
+        help_text=
+        'How many individually purchased requests this organization has - '
+        'these never expire and are unaffected by the monthly roll over'
+    )
     date_update = models.DateField(null=True)
 
     payment_failed = models.BooleanField(default=False)
-
-    # XXX add payment failed
 
     # deprecate #
     owner = models.ForeignKey(User, blank=True, null=True)
@@ -61,11 +71,6 @@ class Organization(models.Model):
     monthly_cost = models.IntegerField(default=10000)
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-        """Autogenerates the slug based on the org name"""
-        self.slug = slugify(self.name)
-        super(Organization, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
@@ -87,8 +92,9 @@ class Organization(models.Model):
     def update_data(self, data):
         """Set updated data from squarelet"""
         # XXX test this
-        # XXX comment this better
 
+        # plan should always be created on client sites before being used
+        # get_or_create is used as a precauitionary measure
         self.plan, created = Plan.objects.get_or_create(
             slug=data['plan'],
             defaults={'name': data['plan'].replace('-', ' ').title()},

@@ -31,8 +31,8 @@ def pull_data(type_, uuid, **kwargs):
     if type_ not in types_url:
         logger.warn('Pull data received invalid type: %s', type_)
         return
-    resp = squarelet_get('/api/{}/{}/'.format(types_url[type_], uuid))
     try:
+        resp = squarelet_get('/api/{}/{}/'.format(types_url[type_], uuid))
         resp.raise_for_status()
     except requests.exceptions.RequestException as exc:
         logger.warn(

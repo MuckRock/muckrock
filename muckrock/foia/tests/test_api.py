@@ -47,6 +47,7 @@ class TestFOIAViewsetCreate(TestCase):
         status=None
     ):
         """Helper for API calls"""
+        # pylint: disable=too-many-arguments
         if data is None:
             data = {}
         if 'agency' not in data:

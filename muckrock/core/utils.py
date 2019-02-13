@@ -232,7 +232,6 @@ def get_squarelet_access_token():
     return access_token
 
 
-# XXX catch network errors?
 def _squarelet(method, path, **kwargs):
     """Helper function for squarelet requests"""
     api_url = '{}{}'.format(settings.SQUARELET_URL, path)
