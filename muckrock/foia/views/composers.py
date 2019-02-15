@@ -92,7 +92,7 @@ class GenericComposer(BuyRequestsMixin):
             self.buy_requests(form)
         if (
             form.cleaned_data.get('use_contact_information')
-            and self.request.user.profile.is_advanced()
+            and self.request.user.has_perm('foia.set_info_foiarequest')
             and len(composer.agencies.all()) == 1
         ):
             contact_info = {

@@ -499,9 +499,7 @@ class Detail(DetailView):
         """Handle follow ups for non-admins"""
         has_perm = foia.has_perm(request.user, 'followup')
         contact_info_form = ContactInfoForm(request.POST, foia=foia)
-        has_contact_perm = (
-            request.user.is_authenticated and request.user.profile.is_advanced()
-        )
+        has_contact_perm = request.user.has_perm('foia.set_info_foiarequest')
         contact_valid = contact_info_form.is_valid()
         use_contact_info = (
             has_contact_perm

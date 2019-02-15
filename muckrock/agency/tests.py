@@ -3,6 +3,7 @@ Tests for Agency application
 """
 
 # Django
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import RequestFactory, TestCase
@@ -198,7 +199,7 @@ class TestAgencyViews(TestCase):
             })
         )
         request = mock_middleware(request)
-        request.user = UserFactory()
+        request.user = AnonymousUser()
         response = contact_info(request, agency.pk)
         eq_(response.status_code, 200)
         data = json.loads(response.content)
@@ -210,7 +211,7 @@ class TestAgencyViews(TestCase):
             })
         )
         request = mock_middleware(request)
-        request.user = UserFactory(profile__acct_type='pro')
+        request.user = UserFactory()
         response = contact_info(request, agency.pk)
         eq_(response.status_code, 200)
         data = json.loads(response.content)
