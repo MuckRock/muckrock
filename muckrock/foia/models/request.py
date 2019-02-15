@@ -456,6 +456,9 @@ class FOIARequest(models.Model):
 
     def update_address_from_info(self, agency, appeal, contact_info):
         """Update the contact information manually"""
+        # We are not reviewing user supplied contact information before sending
+        # for now - I will leave the code in place to do so, however, in case we
+        # switch back
 
         # first clear all current contact information
         self.portal = None
@@ -483,9 +486,9 @@ class FOIARequest(models.Model):
                 category='contact info changed',
                 text='This request was filed with a user supplied email '
                 'address: {}.  Please check that this is an appropriate email '
-                'address before sending this request'.format(self.email),
+                'address'.format(self.email),
             )
-            return True
+            return False
         elif contact_info['via'] == 'fax' and contact_info['fax']:
             self.fax, _ = PhoneNumber.objects.update_or_create(
                 number=contact_info['fax'],
@@ -502,9 +505,9 @@ class FOIARequest(models.Model):
                 category='contact info changed',
                 text='This request was filed with a user supplied fax '
                 'number: {}.  Please check that this is an appropriate fax '
-                'number before sending this request'.format(self.fax),
+                'number'.format(self.fax),
             )
-            return True
+            return False
 
         # Does not need review
         return False
