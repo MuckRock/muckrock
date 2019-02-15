@@ -18,6 +18,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 # Standard Library
+import json
 import logging
 import os.path
 from datetime import date, timedelta
@@ -562,10 +563,16 @@ class FOIARequest(models.Model):
         """Get the appeal contact info"""
         agency = self.agency.appeal_agency or self.agency
         return {
-            'email': agency.get_emails('appeal', 'to').first(),
-            'cc_emails': agency.get_emails('appeal', 'cc'),
-            'fax': agency.get_faxes('appeal').first(),
-            'address': agency.get_addresses('appeal').first(),
+            'email':
+                agency.get_emails('appeal', 'to').first(),
+            'cc_emails':
+                json.dumps([
+                    unicode(e) for e in agency.get_emails('appeal', 'cc')
+                ]),
+            'fax':
+                agency.get_faxes('appeal').first(),
+            'address':
+                agency.get_addresses('appeal').first(),
         }
 
     def _flag_proxy_resubmit(self):
@@ -649,7 +656,7 @@ class FOIARequest(models.Model):
             switch=switch,
         )
 
-    def appeal(self, appeal_message, user):
+    def appeal(self, appeal_message, user, **kwargs):
         """Send an appeal to the agency or its appeal agency."""
         return self.create_out_communication(
             from_user=user,
@@ -659,6 +666,7 @@ class FOIARequest(models.Model):
             # we include the latest pdf here under the assumption
             # it is the rejection letter
             include_latest_pdf=True,
+            **kwargs
         )
 
     def pay(self, user, amount):

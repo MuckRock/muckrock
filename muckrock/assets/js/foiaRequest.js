@@ -306,123 +306,127 @@ function formatCC(ccEmails) {
 }
 
 export default function showOrigContactInfo() {
-  var
-  portalType = $(".contact-info .info").data("portal-type"),
-  portalURL = $(".contact-info .info").data("portal-url"),
-  email = $(".contact-info .info").data("email"),
-  ccEmails = $(".contact-info .info").data("cc-emails"),
-  fax = $(".contact-info .info").data("fax"),
-  address = $(".contact-info .info").data("address"),
-  type = $(".contact-info .info").data("type");
+  $(".contact-info").each(function() {
+    var
+    portalType = $(this).find(".info").data("portal-type"),
+    portalURL = $(this).find(".info").data("portal-url"),
+    email = $(this).find(".info").data("email"),
+    ccEmails = $(this).find(".info").data("cc-emails"),
+    fax = $(this).find(".info").data("fax"),
+    address = $(this).find(".info").data("address"),
+    type = $(this).find(".info").data("type");
 
-  if (type === "portal") {
-    $(".contact-info .info span").text("will be submitted via a portal.");
-  } else if (type === "email") {
-    $(".contact-info .info span").text("will be submitted via email.");
-  } else if (type === "fax") {
-    $(".contact-info .info span").text("will be submitted via fax.");
-  } else if (type === "snail") {
-    $(".contact-info .info span").text("will be submitted via mail.");
-  } else if (type === "none") {
-    $(".contact-info .info span").text("currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.");
-  } else if (portalURL) {
-    $(".contact-info .info span").text(
-      "will be submitted via the "
-    ).append(
-      portalType
-    ).append(
-      " portal, located at "
-    ).append(
-      portalURL
-    ).append(".");
-  } else if (email) {
-    var text = "will be submitted via email to " + email;
-    if (ccEmails.length > 0) {
-      text += ", as well as CCed to " + formatCC(ccEmails);
+    if (type === "portal") {
+      $(this).find(".info span").text("will be submitted via a portal.");
+    } else if (type === "email") {
+      $(this).find(".info span").text("will be submitted via email.");
+    } else if (type === "fax") {
+      $(this).find(".info span").text("will be submitted via fax.");
+    } else if (type === "snail") {
+      $(this).find(".info span").text("will be submitted via mail.");
+    } else if (type === "none") {
+      $(this).find(".info span").text("currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.");
+    } else if (portalURL) {
+      $(this).find(".info span").text(
+        "will be submitted via the "
+      ).append(
+        portalType
+      ).append(
+        " portal, located at "
+      ).append(
+        portalURL
+      ).append(".");
+    } else if (email) {
+      var text = "will be submitted via email to " + email;
+      if (ccEmails.length > 0) {
+        text += ", as well as CCed to " + formatCC(ccEmails);
+      }
+      text += ".";
+      $(this).find(".info span").text(text);
+    } else if (fax) {
+      $(this).find(".info span").text(
+        "will be submitted via fax to "
+      ).append(
+        fax
+      ).append(".");
+    } else if (address) {
+      $(this).find(".info span").text(
+        "will be submitted via mail to "
+      ).append(
+        address
+      ).append(".");
+    } else {
+      $(this).find(".info span").text("currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.");
     }
-    text += ".";
-    $(".contact-info .info span").text(text);
-  } else if (fax) {
-    $(".contact-info .info span").text(
-      "will be submitted via fax to "
-    ).append(
-      fax
-    ).append(".");
-  } else if (address) {
-    $(".contact-info .info span").text(
-      "will be submitted via mail to "
-    ).append(
-      address
-    ).append(".");
-  } else {
-    $(".contact-info .info span").text("currently has no valid contact information.  We will review it and find a suitable means of submitting it for you.");
-  }
-
+  });
 }
 
 $('document').ready(function(){
 
   $(".contact-info .see-where").click(function(e) {
     e.preventDefault();
-    $(".contact-info .see-where").hide();
-    $(".contact-info .info").show();
+    $(this).hide();
+    $(this).siblings(".info").show();
   });
 
   $(".contact-info .change").click(function(e) {
     e.preventDefault();
-    $(".contact-info .form").show();
-    $(".contact-info .change").hide();
-    $("#id_use_contact_information").val(true);
+    var $contactInfo = $(this).closest(".contact-info");
+    $contactInfo.find(".form").show();
+    $contactInfo.find(".change").hide();
+    $contactInfo.find(".use_contact_information").val(true);
 
-    $(".contact-info #id_email").change();
-    $(".contact-info #id_fax").change();
-    $(".contact-info #id_via").change();
+    $contactInfo.find(".email").change();
+    $contactInfo.find(".fax").change();
+    $contactInfo.find(".via").change();
   });
   $(".contact-info .cancel").click(function(e) {
     e.preventDefault();
-    $(".contact-info .form").hide();
-    $(".contact-info .change").show();
-    $("#id_use_contact_information").val(false);
-    $(".contact-info #id_other_email").removeAttr("required");
-    $(".contact-info #id_other_fax").removeAttr("required");
+    var $contactInfo = $(this).closest(".contact-info");
+    $contactInfo.find(".form").hide();
+    $contactInfo.find(".change").show();
+    $contactInfo.find(".use_contact_information").val(false);
+    $contactInfo.find(".other_email").removeAttr("required");
+    $contactInfo.find(".other_fax").removeAttr("required");
     showOrigContactInfo();
   });
   showOrigContactInfo();
 
-  $(".contact-info #id_via").change(function() {
+  $(".contact-info .via").change(function() {
+    var $contactInfo = $(this).closest(".contact-info");
     if($(this).val() === "email") {
-      $(".contact-info #id_email").parent().show();
-      $(".contact-info #id_email").change();
+      $contactInfo.find(".email").parent().show();
+      $contactInfo.find(".email").change();
     } else {
-      $(".contact-info #id_email").parent().hide();
-      $(".contact-info #id_other_email").parent().hide();
-      $(".contact-info #id_other_email").val('');
-      $(".contact-info #id_other_email").removeAttr("required");
+      $contactInfo.find(".email").parent().hide();
+      $contactInfo.find(".other_email").parent().hide();
+      $contactInfo.find(".other_email").val('');
+      $contactInfo.find(".other_email").removeAttr("required");
     }
     if($(this).val() === "fax") {
-      $(".contact-info #id_fax").parent().show();
-      $(".contact-info #id_fax").change();
+      $contactInfo.find(".fax").parent().show();
+      $contactInfo.find(".fax").change();
     } else {
-      $(".contact-info #id_fax").parent().hide();
-      $(".contact-info #id_other_fax").parent().hide();
-      $(".contact-info #id_other_fax").val('');
-      $(".contact-info #id_other_fax").removeAttr("required");
+      $contactInfo.find(".fax").parent().hide();
+      $contactInfo.find(".other_fax").parent().hide();
+      $contactInfo.find(".other_fax").val('');
+      $contactInfo.find(".other_fax").removeAttr("required");
     }
     if($(this).val() === "snail") {
-      if($(".contact-info .info").data("address")) {
-        $(".contact-info .info span").text(
+      if($contactInfo.find(".info").data("address")) {
+        $contactInfo.find(".info span").text(
           "will be submitted via mail to " +
-          $(".contact-info .info").data("address") + "."
+          $contactInfo.find(".info").data("address") + "."
         );
       } else {
-        $(".contact-info .info span").text("will be submitted via mail.");
+        $contactInfo.find(".info span").text("will be submitted via mail.");
       }
     } else if($(this).val() == "portal") {
-      var portal_url = $(".contact-info .info").data("portal-url");
-      $(".contact-info .info span").text(
+      var portal_url = $contactInfo.find(".info").data("portal-url");
+      $contactInfo.find(".info span").text(
         "will be submitted via the "
       ).append(
-        $(".contact-info .info").data("portal-type")
+        $contactInfo.find(".info").data("portal-type")
       ).append(
         " portal, located at "
       ).append(
@@ -431,49 +435,53 @@ $('document').ready(function(){
     }
   });
 
-  $(".contact-info #id_email").change(function() {
+  $(".contact-info .email").change(function() {
+    var $contactInfo = $(this).closest(".contact-info");
     var full_email;
     if($(this).val() === "") {
-      $(".contact-info #id_other_email").parent().show();
-      $(".contact-info #id_other_email").attr("required", "required");
-      full_email = $(".contact-info #id_other_email").val();
+      $contactInfo.find(".other_email").parent().show();
+      $contactInfo.find(".other_email").attr("required", "required");
+      full_email = $contactInfo.find(".other_email").val();
     } else {
-      $(".contact-info #id_other_email").parent().hide();
-      $(".contact-info #id_other_email").val('');
-      $(".contact-info #id_other_email").removeAttr("required");
+      $contactInfo.find(".other_email").parent().hide();
+      $contactInfo.find(".other_email").val('');
+      $contactInfo.find(".other_email").removeAttr("required");
       full_email = $(this).children("option:selected").text();
     }
 
-    $(".contact-info .info span").text(
+    $contactInfo.find(".info span").text(
       "will be submitted via email to " + full_email + "."
     );
   });
-  $(".contact-info #id_other_email").on("input properychange paste", function() {
+  $(".contact-info .other_email").on("input properychange paste", function() {
     var email = $(this).val();
-    $(".contact-info .info span").text(
+    var $contactInfo = $(this).closest(".contact-info");
+    $contactInfo.find(".info span").text(
       "will be submitted via email to " + email + "."
     );
   });
 
-  $(".contact-info #id_fax").change(function() {
+  $(".contact-info .fax").change(function() {
+    var $contactInfo = $(this).closest(".contact-info");
     var fax;
     if($(this).val() === "") {
-      $(".contact-info #id_other_fax").parent().show();
-      $(".contact-info #id_other_fax").attr("required", "required");
-      fax = $(".contact-info #id_other_fax").val();
+      $contactInfo.find(".other_fax").parent().show();
+      $contactInfo.find(".other_fax").attr("required", "required");
+      fax = $contactInfo.find(".other_fax").val();
     } else {
-      $(".contact-info #id_other_fax").parent().hide();
-      $(".contact-info #id_other_fax").val('');
-      $(".contact-info #id_other_fax").removeAttr("required");
+      $contactInfo.find(".other_fax").parent().hide();
+      $contactInfo.find(".other_fax").val('');
+      $contactInfo.find(".other_fax").removeAttr("required");
       fax = $(this).children("option:selected").text();
     }
-    $(".contact-info .info span").text(
+    $contactInfo.find(".info span").text(
       "will be submitted via fax to " + fax + "."
     );
   });
-  $(".contact-info #id_other_fax").on("input properychange paste", function() {
+  $(".contact-info .other_fax").on("input properychange paste", function() {
     var fax = $(this).val();
-    $(".contact-info .info span").text(
+    var $contactInfo = $(this).closest(".contact-info");
+    $contactInfo.find(".info span").text(
       "will be submitted via fax to " + fax + "."
     );
   });

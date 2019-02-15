@@ -406,11 +406,17 @@ Sincerely,
                     <noscript>To search for exemptions and appeals, please enable Javascript.</noscript>
                   </div>
                   <form class="composer-input" method="post">
-                    {% if foia.agency.appeal_agency %}
-                      <header>Send an appeal to the {{ foia.agency.appeal_agency.name }}</header>
-                    {% else %}
-                      <header>Send an appeal to the {{ foia.agency.name }}</header>
-                    {% endif %}
+                    <header>
+                      Send an appeal to the
+                      {{ foia.agency.appeal_agency.name|default:foia.agency.name }}
+                      <br class="nomargin">
+                      <div class="contact-info">
+                        <a class="see-where" href="#">See {% if perms.foia.set_info_foiarequest %}where{% else %}how{% endif %} this appeal will be sent</a>
+                        {% with appeal_info=foia.get_appeal_contact_info %}
+                          {% include "lib/pattern/contact_info.html" with email=appeal_info.email cc_emails=appeal_info.cc_emails fax=appeal_info.fax address=appeal_info.address subject="appeal communication" has_perm=perms.foia.set_info_foiarequest form=appeal_contact_info_form only %}
+                        {% endwith %}
+                      </div>
+                    </header>
                     {% csrf_token %}
                     <textarea name="text" id="appeal-composer"></textarea>
                     <label class="bold">Attachments</label>

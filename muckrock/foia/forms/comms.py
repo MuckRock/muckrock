@@ -76,7 +76,7 @@ class FOIAAgencyReplyForm(forms.Form):
 
 class SendViaForm(forms.Form):
     """Form logic for specifying an address type to send to
-    Shoul dbe subclassed"""
+    Should be subclassed"""
 
     via = forms.ChoiceField(
         choices=(
@@ -306,12 +306,16 @@ class ContactInfoForm(SendViaForm):
     def __init__(self, *args, **kwargs):
         self.foia = kwargs.pop('foia', None)
         self.agency = kwargs.pop('agency', None)
+        appeal = kwargs.pop('appeal', False)
         super(ContactInfoForm, self).__init__(*args, **kwargs)
         self.fields['via'].required = False
+        # add class we can reference from javascript
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = field
         if self.agency:
             agency = self.agency
         elif self.foia:
-            agency = self.foia.agency
+            agency = self.foia.agency.appeal_agency if appeal else self.foia.agency
         else:
             agency = None
         if agency:

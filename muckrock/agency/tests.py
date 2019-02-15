@@ -189,7 +189,7 @@ class TestAgencyViews(TestCase):
         assert_in('{ days }', data['outro'])
         assert_in('John Doe', data['outro'])
 
-    def test_contact_info(self):
+    def test_contact_info_anonymous(self):
         """Test the contact_info ajax view"""
         agency = AgencyFactory()
 
@@ -204,6 +204,10 @@ class TestAgencyViews(TestCase):
         eq_(response.status_code, 200)
         data = json.loads(response.content)
         eq_(data['type'], 'email')
+
+    def test_contact_info(self):
+        """Test the contact_info ajax view"""
+        agency = AgencyFactory()
 
         request = RequestFactory().get(
             reverse('agency-contact-info', kwargs={

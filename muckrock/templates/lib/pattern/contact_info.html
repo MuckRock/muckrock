@@ -7,7 +7,7 @@
     data-email="{% if email.status == "good" %}{{ email }}{% endif %}"
     data-cc-emails="{{ cc_emails }}"
     data-fax="{% if fax.status == "good" %}{{ fax }}{% endif %}"
-    data-address="{{ address }}"
+    data-address="{{ address|default:"" }}"
   {% else %}
     {% if portal %}
       data-type="portal"
