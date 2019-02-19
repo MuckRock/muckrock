@@ -3,6 +3,7 @@ Tests for Agency application
 """
 
 # Django
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.test import RequestFactory, TestCase
@@ -188,6 +189,22 @@ class TestAgencyViews(TestCase):
         assert_in('{ days }', data['outro'])
         assert_in('John Doe', data['outro'])
 
+    def test_contact_info_anonymous(self):
+        """Test the contact_info ajax view"""
+        agency = AgencyFactory()
+
+        request = RequestFactory().get(
+            reverse('agency-contact-info', kwargs={
+                'idx': agency.pk
+            })
+        )
+        request = mock_middleware(request)
+        request.user = AnonymousUser()
+        response = contact_info(request, agency.pk)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['type'], 'email')
+
     def test_contact_info(self):
         """Test the contact_info ajax view"""
         agency = AgencyFactory()
@@ -199,18 +216,6 @@ class TestAgencyViews(TestCase):
         )
         request = mock_middleware(request)
         request.user = UserFactory()
-        response = contact_info(request, agency.pk)
-        eq_(response.status_code, 200)
-        data = json.loads(response.content)
-        eq_(data['type'], 'email')
-
-        request = RequestFactory().get(
-            reverse('agency-contact-info', kwargs={
-                'idx': agency.pk
-            })
-        )
-        request = mock_middleware(request)
-        request.user = UserFactory(profile__acct_type='pro')
         response = contact_info(request, agency.pk)
         eq_(response.status_code, 200)
         data = json.loads(response.content)

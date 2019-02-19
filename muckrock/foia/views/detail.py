@@ -231,7 +231,14 @@ class Detail(DetailView):
         )
         context['tracking_id_form'] = TrackingNumberForm()
         context['portal_form'] = PortalForm(foia=foia)
-        context['contact_info_form'] = ContactInfoForm(foia=foia)
+        context['contact_info_form'] = ContactInfoForm(
+            foia=foia, prefix='followup'
+        )
+        context['appeal_contact_info_form'] = ContactInfoForm(
+            foia=foia,
+            appeal=True,
+            prefix='appeal',
+        )
 
         if user_can_edit or user.is_staff:
             all_tasks = Task.objects.filter_by_foia(foia, user)
@@ -498,10 +505,10 @@ class Detail(DetailView):
     def _user_follow_up(self, request, foia):
         """Handle follow ups for non-admins"""
         has_perm = foia.has_perm(request.user, 'followup')
-        contact_info_form = ContactInfoForm(request.POST, foia=foia)
-        has_contact_perm = (
-            request.user.is_authenticated and request.user.profile.is_advanced()
+        contact_info_form = ContactInfoForm(
+            request.POST, foia=foia, prefix='followup'
         )
+        has_contact_perm = request.user.has_perm('foia.set_info_foiarequest')
         contact_valid = contact_info_form.is_valid()
         use_contact_info = (
             has_contact_perm
@@ -554,6 +561,18 @@ class Detail(DetailView):
         """
         form = AppealForm(request.POST)
         has_perm = foia.has_perm(request.user, 'appeal')
+        contact_info_form = ContactInfoForm(
+            request.POST,
+            foia=foia,
+            prefix='appeal',
+            appeal=True,
+        )
+        has_contact_perm = request.user.has_perm('foia.set_info_foiarequest')
+        contact_valid = contact_info_form.is_valid()
+        use_contact_info = (
+            has_contact_perm
+            and contact_info_form.cleaned_data.get('use_contact_information')
+        )
         if not has_perm:
             messages.error(
                 request, 'You do not have permission to submit an appeal.'
@@ -567,12 +586,25 @@ class Detail(DetailView):
                 request, 'Total attachment size must be less than 20MB'
             )
             return redirect(foia.get_absolute_url() + '#')
-        communication = foia.appeal(form.cleaned_data['text'], request.user)
+        if use_contact_info and not contact_valid:
+            messages.error(request, 'Invalid contact information')
+            return redirect(foia.get_absolute_url() + '#')
+        communication = foia.appeal(
+            form.cleaned_data['text'],
+            request.user,
+            contact_info=contact_info_form.cleaned_data
+            if use_contact_info else None,
+        )
         base_language = form.cleaned_data['base_language']
         appeal = Appeal.objects.create(communication=communication)
         appeal.base_language.set(base_language)
         new_action(request.user, 'appealed', target=foia)
         messages.success(request, 'Your appeal has been sent.')
+        if use_contact_info:
+            foia.add_contact_info_note(
+                request.user,
+                contact_info_form.cleaned_data,
+            )
         return redirect(foia.get_absolute_url() + '#')
 
     def _update_estimate(self, request, foia):

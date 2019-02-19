@@ -198,14 +198,14 @@
             </div>
 
             <div class="contact-info">
-              <a class="see-where" href="#">See {% if user.profile.is_advanced %}where{% else %}how{% endif %} this request will be sent</a>
+              <a class="see-where" href="#">See {% if perms.foia.set_info_foiarequest %}where{% else %}how{% endif %} this request will be sent</a>
               <div class="info">
                 This request <span></span>
-                {% if user.profile.is_advanced %}
+                {% if perms.foia.set_info_foiarequest %}
                   <p><a href="#" class="change">Not where this needs to go?</a></p>
                 {% endif %}
               </div>
-              {% if user.profile.is_advanced %}
+              {% if perms.foia.set_info_foiarequest %}
                 <div class="form">
                   {% include "lib/pattern/field.html" with field=form.via only %}
                   {% include "lib/pattern/field.html" with field=form.email only %}

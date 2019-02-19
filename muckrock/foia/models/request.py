@@ -18,6 +18,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 # Standard Library
+import json
 import logging
 import os.path
 from datetime import date, timedelta
@@ -456,6 +457,9 @@ class FOIARequest(models.Model):
 
     def update_address_from_info(self, agency, appeal, contact_info):
         """Update the contact information manually"""
+        # We are not reviewing user supplied contact information before sending
+        # for now - I will leave the code in place to do so, however, in case we
+        # switch back
 
         # first clear all current contact information
         self.portal = None
@@ -483,9 +487,9 @@ class FOIARequest(models.Model):
                 category='contact info changed',
                 text='This request was filed with a user supplied email '
                 'address: {}.  Please check that this is an appropriate email '
-                'address before sending this request'.format(self.email),
+                'address'.format(self.email),
             )
-            return True
+            return False
         elif contact_info['via'] == 'fax' and contact_info['fax']:
             self.fax, _ = PhoneNumber.objects.update_or_create(
                 number=contact_info['fax'],
@@ -502,9 +506,9 @@ class FOIARequest(models.Model):
                 category='contact info changed',
                 text='This request was filed with a user supplied fax '
                 'number: {}.  Please check that this is an appropriate fax '
-                'number before sending this request'.format(self.fax),
+                'number'.format(self.fax),
             )
-            return True
+            return False
 
         # Does not need review
         return False
@@ -554,6 +558,22 @@ class FOIARequest(models.Model):
         elif via == 'snail':
             self.address = self.agency.get_addresses().first()
         self.save(comment='update address')
+
+    def get_appeal_contact_info(self):
+        """Get the appeal contact info"""
+        agency = self.agency.appeal_agency or self.agency
+        return {
+            'email':
+                agency.get_emails('appeal', 'to').first(),
+            'cc_emails':
+                json.dumps([
+                    unicode(e) for e in agency.get_emails('appeal', 'cc')
+                ]),
+            'fax':
+                agency.get_faxes('appeal').first(),
+            'address':
+                agency.get_addresses('appeal').first(),
+        }
 
     def _flag_proxy_resubmit(self):
         """Flag this request to be re-submitted with a proxy"""
@@ -636,7 +656,7 @@ class FOIARequest(models.Model):
             switch=switch,
         )
 
-    def appeal(self, appeal_message, user):
+    def appeal(self, appeal_message, user, **kwargs):
         """Send an appeal to the agency or its appeal agency."""
         return self.create_out_communication(
             from_user=user,
@@ -646,6 +666,7 @@ class FOIARequest(models.Model):
             # we include the latest pdf here under the assumption
             # it is the rejection letter
             include_latest_pdf=True,
+            **kwargs
         )
 
     def pay(self, user, amount):
@@ -1311,6 +1332,10 @@ class FOIARequest(models.Model):
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
             ('pay_foiarequest', 'Can pay for a request'),
             ('export_csv', 'Can export a CSV of search results'),
+            (
+                'set_info_foiarequest',
+                'Can send communications to custom addresses'
+            ),
             (
                 'zip_download_foiarequest',
                 'Can download a zip file of all communications and files'

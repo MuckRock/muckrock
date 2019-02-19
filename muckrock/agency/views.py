@@ -223,7 +223,7 @@ def boilerplate(request):
 def contact_info(request, idx):
     """Return the agencies contact info"""
     agency = get_object_or_404(Agency, pk=idx)
-    if request.user.is_anonymous or not request.user.profile.is_advanced():
+    if not request.user.has_perm('foia.set_info_foiarequest'):
         if agency.portal:
             type_ = 'portal'
         elif agency.email:
