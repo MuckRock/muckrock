@@ -268,12 +268,27 @@ class ReviewAgencyTask(Task):
             """Helper function to get email or fax data"""
             if email_or_fax == 'email':
                 address_model = EmailAddress
-                error_model = EmailError
                 confirm_rel = 'to_emails'
+                error_fields = [
+                    'email',
+                    'datetime',
+                    'recipient',
+                    'code',
+                    'error',
+                    'event',
+                    'reason',
+                ]
             elif email_or_fax == 'fax':
                 address_model = PhoneNumber
-                error_model = FaxError
                 confirm_rel = 'faxes'
+                error_fields = [
+                    'fax',
+                    'datetime',
+                    'recipient',
+                    'error_type',
+                    'error_code',
+                    'error_id',
+                ]
 
             open_requests = (
                 self.agency.foiarequest_set.get_open().order_by(
@@ -300,6 +315,21 @@ class ReviewAgencyTask(Task):
                             models.DurationField(),
                         )
                     )
+                ).only(
+                    'pk',
+                    'status',
+                    'title',
+                    'slug',
+                    'agency__jurisdiction__slug',
+                    'agency__jurisdiction__id',
+                    'composer__datetime_submitted',
+                    'date_estimate',
+                    'portal__name',
+                    'email__email',
+                    'email__name',
+                    'email__status',
+                    'fax__number',
+                    'fax__status',
                 )
             )
             grouped_requests = [
@@ -312,14 +342,6 @@ class ReviewAgencyTask(Task):
                 address_model.objects.annotate(
                     error_count=Count('errors', distinct=True),
                     last_error=Max('errors__datetime'),
-                ).prefetch_related(
-                    Prefetch(
-                        'errors',
-                        error_model.objects.select_related(
-                            '%s__communication__foia__agency__jurisdiction' %
-                            email_or_fax
-                        ).order_by('-datetime')
-                    )
                 )
             )
             addresses = addresses.in_bulk(g[0].pk for g in grouped_requests)
@@ -347,7 +369,17 @@ class ReviewAgencyTask(Task):
                     'error':
                         addr.status == 'error',
                     'errors':
-                        list(addr.errors.all())[:5],
+                        addr.errors.select_related(
+                            '%s__communication__foia__agency__jurisdiction' %
+                            email_or_fax
+                        ).order_by('-datetime').only(
+                            *error_fields + [
+                                '%s__communication__foia__agency__jurisdiction__slug'
+                                % email_or_fax,
+                                '%s__communication__foia__slug' % email_or_fax,
+                                '%s__communication__foia__title' % email_or_fax,
+                            ]
+                        )[:5],
                     'foias':
                         foias,
                     'unacknowledged':
@@ -362,7 +394,7 @@ class ReviewAgencyTask(Task):
                         addresses_open[addr.pk].last_open
                         if email_or_fax == 'email' else None,
                     'checkbox_name':
-                        'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
+                        u'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
                     'email_or_fax':
                         email_or_fax,
                 })
@@ -394,13 +426,28 @@ class ReviewAgencyTask(Task):
                         models.DurationField(),
                     )
                 )
+            ).only(
+                'pk',
+                'status',
+                'title',
+                'slug',
+                'agency__jurisdiction__slug',
+                'agency__jurisdiction__id',
+                'composer__datetime_submitted',
+                'date_estimate',
+                'portal__name',
+                'email__email',
+                'email__name',
+                'email__status',
+                'fax__number',
+                'fax__status',
             )
         )
         if foias:
             review_data.append({
-                'address': 'Snail Mail',
+                'address': u'Snail Mail',
                 'foias': foias,
-                'checkbox_name': '%d-snail' % self.pk,
+                'checkbox_name': u'%d-snail' % self.pk,
                 'unacknowledged': any(f.status == 'ack' for f in foias),
             })
 

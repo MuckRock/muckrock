@@ -320,12 +320,12 @@ class ReviewAgencyTaskNode(TaskNode):
             if f.phone.type == 'fax'
         ]
         extra_context['phones'] = [
-            str(p)
+            unicode(p)
             for p in self.task.agency.agencyphone_set.all()
             if p.phone.type == 'phone'
         ]
         extra_context['addresses'] = [
-            str(a) for a in self.task.agency.agencyaddress_set.all()
+            unicode(a) for a in self.task.agency.agencyaddress_set.all()
         ]
         extra_context['num_open_requests'
                       ] = (self.task.agency.foiarequest_set.get_open().count())
@@ -343,7 +343,7 @@ class ReviewAgencyTaskNode(TaskNode):
             and e.email.status == 'good'
         ]
         if email:
-            initial = str(email[0])
+            initial = unicode(email[0])
         else:
             fax = [
                 p.phone
@@ -352,15 +352,15 @@ class ReviewAgencyTaskNode(TaskNode):
                 and p.phone.status == 'good'
             ]
             if fax:
-                initial = str(fax[0])
+                initial = unicode(fax[0])
             else:
-                initial = ''
+                initial = u''
         followup_text = (
-            'To Whom It May Concern:\n'
-            'I wanted to follow up on the following request, copied below. '
-            'Please let me know when I can expect to receive a response.\n'
-            'Thanks for your help, and let me know if further '
-            'clarification is needed.'
+            u'To Whom It May Concern:\n'
+            u'I wanted to follow up on the following request, copied below. '
+            u'Please let me know when I can expect to receive a response.\n'
+            u'Thanks for your help, and let me know if further '
+            u'clarification is needed.'
         )
         extra_context['form'] = task.forms.ReviewAgencyTaskForm(
             initial={
