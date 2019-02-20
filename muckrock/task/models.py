@@ -8,7 +8,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
-from django.db.models import Case, Count, Max, Prefetch, When
+from django.db.models import Case, Count, Max, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -25,12 +25,7 @@ import requests
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
-from muckrock.communication.models import (
-    EmailAddress,
-    EmailError,
-    FaxError,
-    PhoneNumber,
-)
+from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core.models import ExtractDay
 from muckrock.foia.models import STATUS, FOIANote
 from muckrock.jurisdiction.models import Jurisdiction
