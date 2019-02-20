@@ -239,6 +239,22 @@ $('document').ready(function(){
     }
   });
   $(".new-agency-forms .new-agency.red select[name=replace_jurisdiction]").change();
-      
+
+  // Defered loading of review agency tasks
+  $(".review-agency-placeholder").each(function() {
+    var id = $(this).data('id');
+    var that = this;
+    console.log(id);
+    $.ajax({
+      url: '/task/review-agency-ajax/' + id + '/',
+      type: 'get',
+      success: function(data) {
+        $(that).html(data);
+      },
+      error: function() {
+        $(that).html("<summary class='task__data'><p class='error'>Error</p></summary>");
+      }
+    });
+  });
 
 });
