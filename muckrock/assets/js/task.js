@@ -244,7 +244,6 @@ $('document').ready(function(){
   $(".review-agency-placeholder").each(function() {
     var id = $(this).data('id');
     var that = this;
-    console.log(id);
     $.ajax({
       url: '/task/review-agency-ajax/' + id + '/',
       type: 'get',
