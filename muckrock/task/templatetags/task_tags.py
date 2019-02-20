@@ -312,30 +312,6 @@ class ReviewAgencyTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds a form for updating the email"""
         extra_context = super(ReviewAgencyTaskNode, self).get_extra_context()
-        extra_context['emails'] = [
-            e for e in self.task.agency.agencyemail_set.all()
-        ]
-        extra_context['faxes'] = [
-            f for f in self.task.agency.agencyphone_set.all()
-            if f.phone.type == 'fax'
-        ]
-        extra_context['phones'] = [
-            unicode(p)
-            for p in self.task.agency.agencyphone_set.all()
-            if p.phone.type == 'phone'
-        ]
-        extra_context['addresses'] = [
-            unicode(a) for a in self.task.agency.agencyaddress_set.all()
-        ]
-        extra_context['num_open_requests'
-                      ] = (self.task.agency.foiarequest_set.get_open().count())
-        latest_response = self.task.latest_response()
-        if latest_response:
-            extra_context['latest_response'] = (
-                latest_response,
-                (timezone.now() - latest_response).days,
-            )
-        extra_context['review_data'] = self.task.get_review_data()
         email = [
             e.email
             for e in self.task.agency.agencyemail_set.all()

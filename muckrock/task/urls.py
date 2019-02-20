@@ -140,6 +140,11 @@ urlpatterns = [
         name='snail-mail-pdf',
     ),
     url(
+        r'^review-agency-ajax/(?P<pk>\d+)/$',
+        views.review_agency_ajax,
+        name='review-agency-ajax',
+    ),
+    url(
         r'^assign-to/$',
         views.assign_to,
         name='task-assign',

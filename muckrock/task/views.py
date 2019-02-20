@@ -18,7 +18,7 @@ from django.http import (
     HttpResponseForbidden,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, TemplateView
@@ -730,6 +730,28 @@ def assign_to(request):
         task.assigned = get_object_or_404(User, pk=asignee_pk)
     task.save()
     return HttpResponse('OK')
+
+
+@user_passes_test(lambda u: u.is_staff)
+def review_agency_ajax(request, pk):
+    """Render a single review agency task"""
+    task = get_object_or_404(ReviewAgencyTask, pk=pk)
+    context = {}
+    context['task'] = task
+    context['emails'] = task.agency.agencyemail_set.all()
+    context['faxes'] = task.agency.agencyphone_set.filter(phone__type='fax')
+    context['phones'] = task.agency.agencyphone_set.filter(phone__type='phone')
+    context['addresses'] = task.agency.agencyaddress_set.all()
+    context['num_open_requests'
+            ] = (task.agency.foiarequest_set.get_open().count())
+    latest_response = task.latest_response()
+    if latest_response:
+        context['latest_response'] = (
+            latest_response,
+            (timezone.now() - latest_response).days,
+        )
+    context['review_data'] = task.get_review_data()
+    return render(request, 'lib/review_agency.html', context)
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
