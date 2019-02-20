@@ -37,14 +37,15 @@ class TestNewsUnit(TestCase):
 
     def test_article_model_url(self):
         """Test the Article model's get_absolute_url method"""
+        pub_date = timezone.localtime(self.article.pub_date)
         eq_(
             self.article.get_absolute_url(),
             reverse(
                 'news-detail',
                 kwargs={
-                    'year': self.article.pub_date.strftime('%Y'),
-                    'month': self.article.pub_date.strftime('%b').lower(),
-                    'day': self.article.pub_date.strftime('%d'),
+                    'year': pub_date.strftime('%Y'),
+                    'month': pub_date.strftime('%b').lower(),
+                    'day': pub_date.strftime('%d'),
                     'slug': self.article.slug
                 }
             )
@@ -217,12 +218,13 @@ class TestNewsArticleViews(TestCase):
         request = self.request_factory.post(self.url, data)
         request.user = user
         request = mock_middleware(request)
+        pub_date = timezone.localtime(self.article.pub_date)
         return self.view(
             request,
             slug=self.article.slug,
-            year=self.article.pub_date.strftime('%Y'),
-            month=self.article.pub_date.strftime('%b').lower(),
-            day=self.article.pub_date.strftime('%d')
+            year=pub_date.strftime('%Y'),
+            month=pub_date.strftime('%b').lower(),
+            day=pub_date.strftime('%d')
         )
 
     def test_set_tags(self):

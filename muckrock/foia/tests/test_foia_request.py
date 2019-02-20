@@ -194,7 +194,8 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.assert_in('I can expect', mail.outbox[-1].body)
         nose.tools.eq_(
             foia.date_followup,
-            date.today() + timedelta(foia._followup_days())
+            foia.communications.last().datetime.date() +
+            timedelta(foia._followup_days())
         )
 
         nose.tools.eq_(foia._followup_days(), 15)
