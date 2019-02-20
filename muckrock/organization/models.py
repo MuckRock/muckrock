@@ -8,7 +8,6 @@ from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models.expressions import F
 from django.db.models.functions import Greatest
-from django.utils.text import slugify
 
 # Standard Library
 import logging
@@ -215,7 +214,6 @@ class Plan(models.Model):
     minimum_users = models.PositiveSmallIntegerField(default=1)
     base_requests = models.PositiveSmallIntegerField(default=0)
     requests_per_user = models.PositiveSmallIntegerField(default=0)
-    # XXX
     feature_level = models.PositiveSmallIntegerField(default=0)
 
     def __unicode__(self):

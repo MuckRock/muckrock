@@ -13,12 +13,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
-from muckrock.accounts.models import (
-    Profile,
-    ReceiptEmail,
-    RecurringDonation,
-    Statistics,
-)
+from muckrock.accounts.models import Profile, RecurringDonation, Statistics
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
