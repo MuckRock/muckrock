@@ -27,8 +27,20 @@ stripe.api_version = '2015-10-16'
 logger = logging.getLogger(__name__)
 
 
+class CrowdfundQuerySet(models.QuerySet):
+    """Query set for crowdfunds"""
+
+    def filter_by_plan(self, plan):
+        """Filter for Crowdfunds by users with a certain plan type"""
+        return self.filter(
+            Q(foia__composer__organization__plan__slug=plan)
+            | Q(projects__contributors__organizations__plan__slug=plan)
+        )
+
+
 class Crowdfund(models.Model):
     """Crowdfunding campaign"""
+    objects = CrowdfundQuerySet.as_manager()
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     payment_capped = models.BooleanField(default=False)

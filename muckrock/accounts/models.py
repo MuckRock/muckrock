@@ -491,6 +491,7 @@ class Statistics(models.Model):
     daily_requests_proxy = models.IntegerField(null=True, blank=True)
     daily_requests_admin = models.IntegerField(null=True, blank=True)
     daily_requests_org = models.IntegerField(null=True, blank=True)
+    daily_requests_other = models.IntegerField(null=True, blank=True)
     daily_articles = models.IntegerField(null=True, blank=True)
 
     # Task statistics
