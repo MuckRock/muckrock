@@ -434,20 +434,7 @@ def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
     if email_comm is None:
-        # This was an email to a user
-        try:
-            user = (
-                User.objects.select_related('profile')
-                .get(email=request.POST.get('recipient'))
-            )
-        except User.DoesNotExist:
-            # Can't find the user, nothing to do
-            pass
-        else:
-            user.profile.email_failed = True
-            user.profile.save()
-
-        # stop further processing
+        # This was an email to a user, it will be handled by squarelet
         return
 
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))

@@ -24,15 +24,10 @@ class ProfileQuerySet(models.QuerySet):
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
             raise ValueError('Missing required fields: {}'.format(missing))
-        old_user = User.objects.filter(profile__uuid=uuid).first()
 
         user, created = self._squarelet_update_or_create_user(uuid, data)
-        # if they have changed their email address, reset email failed flag
-        reset_email_failed = old_user and (old_user.email != user.email)
 
-        profile = self._squarelet_update_or_create_profile(
-            uuid, data, user, reset_email_failed
-        )
+        profile = self._squarelet_update_or_create_profile(uuid, data, user)
 
         self._update_organizations(user, profile, data)
 
@@ -60,13 +55,12 @@ class ProfileQuerySet(models.QuerySet):
             profile__uuid=uuid, defaults=user_data
         )
 
-    def _squarelet_update_or_create_profile(
-        self, uuid, data, user, reset_email_failed
-    ):
+    def _squarelet_update_or_create_profile(self, uuid, data, user):
         """Format user data and update or create the user"""
         profile_map = {
             'name': 'full_name',
             'picture': 'avatar_url',
+            'email_failed': 'email_failed',
             'email_verified': 'email_confirmed',
             'use_autologin': 'use_autologin',
             'agency': 'agency',
@@ -74,12 +68,11 @@ class ProfileQuerySet(models.QuerySet):
         profile_defaults = {
             'name': '',
             'picture': '',
+            'email_failed': False,
             'email_verified': False,
             'use_autologin': True,
             'agency': None,
         }
-        if reset_email_failed:
-            profile_defaults['email_failed'] = False
         profile_data = {
             profile_map[k]: data.get(k, profile_defaults[k])
             for k in profile_map.iterkeys()
