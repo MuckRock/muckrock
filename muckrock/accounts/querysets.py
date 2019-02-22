@@ -52,6 +52,10 @@ class ProfileQuerySet(models.QuerySet):
             user_map[k]: data.get(k, user_defaults[k])
             for k in user_map.iterkeys()
         }
+        if user_data['email'] is None:
+            # the mail should only be null for agency users
+            # on MuckRock that must be stored as a blank string
+            user_data['email'] = ''
         return User.objects.update_or_create(
             profile__uuid=uuid, defaults=user_data
         )
@@ -65,12 +69,14 @@ class ProfileQuerySet(models.QuerySet):
             'picture': 'avatar_url',
             'email_verified': 'email_confirmed',
             'use_autologin': 'use_autologin',
+            'agency': 'agency',
         }
         profile_defaults = {
             'name': '',
             'picture': '',
             'email_verified': False,
             'use_autologin': True,
+            'agency': None,
         }
         if reset_email_failed:
             profile_defaults['email_failed'] = False
