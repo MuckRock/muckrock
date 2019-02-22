@@ -8,7 +8,7 @@ from celery.schedules import crontab
 from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.db.models import Count, F, Q, Sum
+from django.db.models import Count, F, Sum
 from django.utils import timezone
 
 # Standard Library
@@ -21,7 +21,7 @@ from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
 
 # MuckRock
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Statistics
 from muckrock.agency.models import Agency
 from muckrock.communication.models import (
     EmailCommunication,
@@ -44,7 +44,6 @@ from muckrock.jurisdiction.models import (
     InvokedExemption,
 )
 from muckrock.news.models import Article
-from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.task.models import (
     CrowdfundTask,
@@ -480,14 +479,6 @@ def store_statistics():
     ).count()
 
     stats = Statistics.objects.create(**kwargs)
-
-    # stats needs to be saved before many to many relationships can be set
-    stats.users_today = User.objects.filter(
-        last_login__year=yesterday.year,
-        last_login__month=yesterday.month,
-        last_login__day=yesterday.day
-    )
-    stats.save()
 
 
 @periodic_task(
