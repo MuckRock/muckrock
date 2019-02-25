@@ -478,7 +478,7 @@ def store_statistics():
         user__organizations__plan__slug='admin'
     ).count()
 
-    stats = Statistics.objects.create(**kwargs)
+    Statistics.objects.create(**kwargs)
 
 
 @periodic_task(
