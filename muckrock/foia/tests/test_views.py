@@ -1243,6 +1243,7 @@ class TestFOIAComposerViews(TestCase):
             'requested_docs': 'ABC',
             'agencies': agency.pk,
             'action': 'submit',
+            'stripe_pk': 'STRIPE_PK',
         }
         request = self.request_factory.post(
             reverse('foia-draft', kwargs={
