@@ -250,6 +250,8 @@ class TestRequestDetailView(TestCase):
 
     def setUp(self):
         agency = AgencyFactory(appeal_agency=AppealAgencyFactory())
+        # creat an agency user so it doesn't attempt to contact squarelet
+        UserFactory(profile__agency=agency)
         self.foia = FOIARequestFactory(agency=agency)
         self.view = Detail.as_view()
         self.url = self.foia.get_absolute_url()
