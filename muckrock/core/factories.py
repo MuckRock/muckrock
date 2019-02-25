@@ -58,6 +58,14 @@ class UserFactory(factory.django.DjangoModelFactory):
             self.set_password(extracted)
             self.save()
 
+    @factory.post_generation
+    def uuid(self, create, extracted, **kwargs):
+        """Match individual UUID to user UUID"""
+        # pylint: disable=unused-argument
+        membership = self.memberships.first()
+        membership.organization.uuid = self.profile.uuid
+        membership.organization.save()
+
 
 class ProfessionalUserFactory(UserFactory):
     """A professional user"""
