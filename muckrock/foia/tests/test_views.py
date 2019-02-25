@@ -1174,6 +1174,7 @@ class TestFOIAComposerViews(TestCase):
             'action': 'save',
             'register_full_name': 'John Doe',
             'register_email': 'john@example.com',
+            'stripe_pk': 'STRIPE_PK',
         }
         request = self.request_factory.post(reverse('foia-create'), data)
         request.user = AnonymousUser()

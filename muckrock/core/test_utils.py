@@ -6,6 +6,7 @@ Utilities for testing MuckRock applications
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
+from django.utils.text import slugify
 
 # Standard Library
 import re
@@ -55,14 +56,33 @@ def mock_squarelet(mock_requests, requests_json=None):
     def users_cb(request, context):
         """Call back to generate json response for user creation"""
         data = parse_qs(request.body)
-        username = re.sub(r'[^\w\-.]', '', data['username'][0])
+        username = re.sub(r'[^\w\-.]', '', data['preferred_username'][0])
+        uuid_ = unicode(uuid.uuid4())
         return {
-            'id': unicode(uuid.uuid4()),
-            'username': username,
-            'name': data['name'][0],
-            'email': data['email'][0],
-            'org_name': username,
-            'org_uuid': unicode(uuid.uuid4()),
+            'uuid':
+                uuid_,
+            'preferred_username':
+                username,
+            'name':
+                data['name'][0],
+            'email':
+                data['email'][0],
+            'email_failed':
+                False,
+            'email_verified':
+                False,
+            'is_agency':
+                False,
+            'organizations': [{
+                'uuid': uuid_,
+                'name': username,
+                'slug': slugify(username),
+                'update_on': None,
+                'max_users': 1,
+                'plan': 'free',
+                'individual': True,
+                'admin': True,
+            }]
         }
 
     def requests_cb(request, context):
