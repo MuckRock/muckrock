@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
     def export_users(self):
         """Export users"""
-        # XXX what to do with agency users?
+        # XXX this needs to be redone
         key = self.bucket.new_key('squarelet_export/users.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)

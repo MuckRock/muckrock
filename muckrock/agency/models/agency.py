@@ -12,14 +12,12 @@ from django.utils.safestring import mark_safe
 
 # Standard Library
 import logging
-from datetime import date
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.accounts.utils import unique_username
 from muckrock.core.utils import squarelet_post
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock.task.models import NewAgencyTask
