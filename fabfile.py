@@ -18,6 +18,18 @@ env.run = local
 env.cd = lcd
 env.base_path = os.path.dirname(env.real_fabfile)
 
+DOCKER_COMPOSE_RUN_OPT = "docker-compose run {opt} --rm {service} {cmd}"
+DOCKER_COMPOSE_RUN_OPT_USER = DOCKER_COMPOSE_RUN_OPT.format(
+    opt="-u $(id -u):$(id -g) {opt}", service="{service}", cmd="{cmd}"
+)
+DOCKER_COMPOSE_RUN = DOCKER_COMPOSE_RUN_OPT.format(
+    opt="", service="{service}", cmd="{cmd}"
+)
+DJANGO_RUN = DOCKER_COMPOSE_RUN.format(service="django", cmd="{cmd}")
+DJANGO_RUN_USER = DOCKER_COMPOSE_RUN_OPT_USER.format(
+    opt="", service="django", cmd="{cmd}"
+)
+
 
 @task(alias='prod')
 def production(force=False):
@@ -71,6 +83,22 @@ def coverage(settings='test', reuse='0'):
 
 
 @task
+def coverage_(settings='test', reuse='0'):
+    """Run the tests and generate a coverage report"""
+    cmd = DOCKER_COMPOSE_RUN_OPT.format(
+        opt='-e REUSE_DB={reuse}'.format(reuse=reuse),
+        service='django',
+        cmd=
+        'coverage run --branch --source muckrock --omit="*/migrations/*" manage.py test --settings=muckrock.settings.{settings}'
+        .format(settings=settings)
+    )
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='coverage erase'))
+        env.run(cmd)
+        env.run(DJANGO_RUN.format(cmd='coverage html'))
+
+
+@task
 def pylint():
     """Run pylint"""
     with env.cd(env.base_path):
@@ -97,17 +125,44 @@ def format():
         env.run('isort -sp config -rc muckrock')
 
 
-@task
-def mail():
-    """Run the test mail server"""
-    env.run('python -m smtpd -n -c DebuggingServer localhost:1025')
-
-
 @task(alias='rs')
 def runserver():
     """Run the test server"""
     with env.cd(env.base_path):
-        env.run('./manage.py runserver 0.0.0.0:8000')
+        env.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt='--service-ports --use-aliases', service='django', cmd=''
+            )
+        )
+
+
+@task()
+def shell():
+    """Run python shell"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='python manage.py shell_plus'))
+
+
+@task()
+def celeryworker():
+    """Run celery worker"""
+    with env.cd(env.base_path):
+        env.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt='--use-aliases', service='celeryworker', cmd=''
+            )
+        )
+
+
+@task()
+def celerybeat():
+    """Run celery beat"""
+    with env.cd(env.base_path):
+        env.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt='--use-aliases', service='celerybeat', cmd=''
+            )
+        )
 
 
 @task
@@ -172,48 +227,6 @@ def sync_aws():
 def hello():
     """'Hello world' for testing purposes"""
     env.run('echo hello world')
-
-
-@task(alias='v')
-def vagrant(cmd=None):
-    """Run a vagrant command or a task on the vagrant VM"""
-    # run as `fab vagrant:up`
-    if cmd:
-        with lcd(os.path.join(env.base_path, 'vm')):
-            local('vagrant %s' % cmd)
-
-    # run as `fab vagrant runserver`
-    else:
-        # change from the default user to 'vagrant'
-        env.user = 'vagrant'
-        # connect to the port-forwarded ssh
-        env.hosts = ['127.0.0.1:2222']
-
-        # use vagrant ssh key
-        with lcd(os.path.join(env.base_path, 'vm')):
-            result = local(
-                'vagrant ssh-config | grep IdentityFile', capture=True
-            )
-        env.key_filename = result.split()[1]
-
-        env.run = run
-        env.cd = cd
-        env.base_path = '/home/vagrant/muckrock'
-
-
-@task
-def setup():
-    """Run to initialize your VM"""
-    # XXX this doesnt work yet
-    vagrant('up')
-    with lcd(os.path.join(env.base_path, 'vm')):
-        result = local('vagrant ssh-config | grep IdentityFile', capture=True)
-    with settings(
-        user='vagrant',
-        host_string='127.0.0.1:2222',
-        key_filename=result.split()[1]
-    ):
-        manage('migrate')
 
 
 @task(name='update-staging-db')
