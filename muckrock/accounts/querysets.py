@@ -20,7 +20,7 @@ class ProfileQuerySet(models.QuerySet):
     def squarelet_update_or_create(self, uuid, data):
         """Update or create records based on data from squarelet"""
 
-        required_fields = {'preferred_username', 'email'}
+        required_fields = {'preferred_username', 'email', 'organizations'}
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
             raise ValueError('Missing required fields: {}'.format(missing))
