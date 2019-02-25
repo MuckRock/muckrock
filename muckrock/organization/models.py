@@ -138,6 +138,7 @@ class Organization(models.Model):
     @transaction.atomic
     def make_requests(self, amount):
         """Try to deduct requests from the organization's balance"""
+        # XXX test this
         request_count = {"monthly": 0, "regular": 0}
         organization = Organization.objects.select_for_update().get(pk=self.pk)
 
