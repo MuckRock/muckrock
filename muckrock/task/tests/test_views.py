@@ -763,7 +763,8 @@ class ResponseTaskListViewTests(TestCase):
 
     def test_foia_integrity(self):
         """
-        Updating a request through a task should maintain integrity of that request's data.
+        Updating a request through a task should maintain integrity of that
+        request's data.
         This is in response to issue #387.
         """
         # first saving a comm
