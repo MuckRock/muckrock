@@ -204,7 +204,7 @@ class Jurisdiction(models.Model, RequestHelper):
         return User.objects.filter(
             organizations__plan__slug='proxy',
             profile__state=self.legal.abbrev,
-        ).order_by('-preferred_proxy').first()
+        ).order_by('-profile__preferred_proxy').first()
 
     def get_requests(self):
         """State level jurisdictions should return requests from their localities as well."""
