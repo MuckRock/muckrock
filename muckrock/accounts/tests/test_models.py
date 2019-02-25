@@ -18,6 +18,11 @@ from muckrock.core.factories import (
 )
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.organization.factories import (
+    FreePlanFactory,
+    OrganizationPlanFactory,
+    ProfessionalPlanFactory,
+)
 
 # Creates Mock items for testing methods that involve Stripe
 #
@@ -53,78 +58,28 @@ class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
 
     def setUp(self):
-        self.profile = ProfileFactory(acct_type='pro',)
+        self.profile = ProfileFactory()
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""
         expected = "%s's Profile" % unicode(self.profile.user).capitalize()
         eq_(unicode(self.profile), expected)
 
-    def _test_is_advanced(self):
+    def test_is_advanced(self):
         """Test whether the users are marked as advanced."""
-        # XXX need to change all the acct types to plan types
-        beta = ProfileFactory(acct_type='beta')
-        proxy = ProfileFactory(acct_type='beta')
-        admin = ProfileFactory(acct_type='admin')
-        basic = ProfileFactory(acct_type='basic')
-        # XXX active vs inactive is closest to free vs paid
-        active_org_member = ProfileFactory(acct_type='basic')
-        inactive_org_member = ProfileFactory(acct_type='basic')
-        assert_true(self.profile.is_advanced())
-        assert_true(beta.is_advanced())
-        assert_true(proxy.is_advanced())
-        assert_true(admin.is_advanced())
-        assert_true(active_org_member.is_advanced())
-        assert_false(basic.is_advanced())
-        assert_false(inactive_org_member.is_advanced())
+        pro = ProfileFactory(
+            user__membership__organization__plan=ProfessionalPlanFactory()
+        )
+        org = ProfileFactory(
+            user__membership__organization__plan=OrganizationPlanFactory()
+        )
+        free = ProfileFactory(
+            user__membership__organization__plan=FreePlanFactory()
+        )
 
-    def _test_multiple_requests(self):
-        """Test how many of each request type you need"""
-        # XXX redo how this is tested
-        profile = ProfileFactory(
-            monthly_requests=2,
-            num_requests=3,
-        )
-        eq_(
-            profile.multiple_requests(2),
-            {
-                'org': 1,
-                'monthly': 1,
-                'regular': 0,
-                'extra': 0,
-            },
-        )
-        eq_(
-            profile.multiple_requests(7),
-            {
-                'org': 1,
-                'monthly': 2,
-                'regular': 3,
-                'extra': 1,
-            },
-        )
-        profile = ProfileFactory(
-            monthly_requests=2,
-            num_requests=0,
-        )
-        eq_(
-            profile.multiple_requests(2),
-            {
-                'org': 0,
-                'monthly': 2,
-                'regular': 0,
-                'extra': 0,
-            },
-        )
-        eq_(
-            profile.multiple_requests(7),
-            {
-                'org': 0,
-                'monthly': 2,
-                'regular': 0,
-                'extra': 5,
-            },
-        )
+        assert_true(pro.is_advanced())
+        assert_true(org.is_advanced())
+        assert_false(free.is_advanced())
 
 
 class TestNotifications(TestCase):

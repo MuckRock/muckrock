@@ -208,7 +208,7 @@ class TestCrowdsource(TestCase):
     def test_get_viewable(self):
         """Get the list of viewable crowdsources for the user"""
         project = ProjectFactory()
-        admin = UserFactory(profile__acct_type='admin', is_staff=True)
+        admin = UserFactory(is_staff=True)
         proj_user, owner, user = UserFactory.create_batch(3)
         project.contributors.add(proj_user)
 
