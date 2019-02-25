@@ -176,12 +176,12 @@ class TestJurisdictionUnit(TestCase):
         """Test getting the proxy user for a state"""
         eq_(self.state.get_proxy(), None)
         UserFactory(
-            profile__acct_type='proxy',
+            membership__organization__plan__name='Proxy',
             profile__state=self.state.abbrev,
             profile__preferred_proxy=False,
         )
         preferred_proxy = UserFactory(
-            profile__acct_type='proxy',
+            membership__organization__plan__name='Proxy',
             profile__state=self.state.abbrev,
             profile__preferred_proxy=True,
         )
