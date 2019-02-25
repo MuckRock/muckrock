@@ -9,6 +9,7 @@ from django.utils.text import slugify
 
 # Standard Library
 import datetime
+import uuid
 
 # Third Party
 import factory
@@ -30,8 +31,12 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Profile
 
+    uuid = factory.LazyFunction(uuid.uuid4)
+
     user = factory.SubFactory(
-        'muckrock.core.factories.UserFactory', profile=None
+        'muckrock.core.factories.UserFactory',
+        profile=None,
+        uuid=factory.SelfAttribute('..uuid'),
     )
 
 
@@ -63,7 +68,10 @@ class UserFactory(factory.django.DjangoModelFactory):
         """Match individual UUID to user UUID"""
         # pylint: disable=unused-argument
         membership = self.memberships.first()
-        membership.organization.uuid = self.profile.uuid
+        if extracted:
+            membership.organization.uuid = extracted
+        else:
+            membership.organization.uuid = self.profile.uuid
         membership.organization.save()
 
 
@@ -113,6 +121,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
         request_type='primary',
         phone__type='fax',
     )
+    profile = factory.RelatedFactory(ProfileFactory, 'agency')
 
     @factory.post_generation
     def other_emails(self, create, extracted, **kwargs):
