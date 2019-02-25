@@ -350,16 +350,16 @@ def store_statistics():
         .count()
     )
     kwargs['open_crowdfunds_basic'] = (
-        Crowdfund.objects.filter_by_plan('free').filter(close=False).count()
+        Crowdfund.objects.filter_by_plan('free').filter(closed=False).count()
     )
     kwargs['open_crowdfunds_beta'] = (
-        Crowdfund.objects.filter_by_plan('beta').filter(close=False).count()
+        Crowdfund.objects.filter_by_plan('beta').filter(closed=False).count()
     )
     kwargs['open_crowdfunds_proxy'] = (
-        Crowdfund.objects.filter_by_plan('proxy').filter(close=False).count()
+        Crowdfund.objects.filter_by_plan('proxy').filter(closed=False).count()
     )
     kwargs['open_crowdfunds_admin'] = (
-        Crowdfund.objects.filter_by_plan('admin').filter(close=False).count()
+        Crowdfund.objects.filter_by_plan('admin').filter(closed=False).count()
     )
     kwargs['closed_crowdfunds_0'] = Crowdfund.objects.annotate(
         percent=F('payment_received') / F('payment_required')
