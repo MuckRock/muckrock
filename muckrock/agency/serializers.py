@@ -38,6 +38,20 @@ class AgencySerializer(serializers.ModelSerializer):
     has_fax = serializers.SerializerMethodField()
     has_address = serializers.SerializerMethodField()
 
+    # request counts
+    number_requests = serializers.ReadOnlyField()
+    number_requests_completed = serializers.ReadOnlyField()
+    number_requests_rejected = serializers.ReadOnlyField()
+    number_requests_no_docs = serializers.ReadOnlyField()
+    number_requests_ack = serializers.ReadOnlyField()
+    number_requests_resp = serializers.ReadOnlyField()
+    number_requests_fix = serializers.ReadOnlyField()
+    number_requests_appeal = serializers.ReadOnlyField()
+    number_requests_pay = serializers.ReadOnlyField()
+    number_requests_partial = serializers.ReadOnlyField()
+    number_requests_lawsuit = serializers.ReadOnlyField()
+    number_requests_withdrawn = serializers.ReadOnlyField()
+
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
         check that the current user has permission
@@ -104,4 +118,16 @@ class AgencySerializer(serializers.ModelSerializer):
             'has_email',
             'has_fax',
             'has_address',
+            'number_requests',
+            'number_requests_completed',
+            'number_requests_rejected',
+            'number_requests_no_docs',
+            'number_requests_ack',
+            'number_requests_resp',
+            'number_requests_fix',
+            'number_requests_appeal',
+            'number_requests_pay',
+            'number_requests_partial',
+            'number_requests_lawsuit',
+            'number_requests_withdrawn',
         )

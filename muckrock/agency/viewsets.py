@@ -3,7 +3,7 @@
 # Django
 from django.db.models.aggregates import Avg, Count, Sum
 from django.db.models.expressions import Case, F, Value, When
-from django.db.models.fields import FloatField
+from django.db.models.fields import FloatField, IntegerField
 from django.db.models.functions.base import Coalesce
 from django.db.models.query import Prefetch
 
@@ -16,6 +16,20 @@ from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.core.models import ExtractDay, NullIf
+
+
+def CountWhen(output_field=None, **kwargs):
+    """Use Sum-Case to simulate a filtered Count"""
+    # pylint: disable=invalid-name
+    if output_field is None:
+        output_field = IntegerField()
+    return Sum(
+        Case(
+            When(then=1, **kwargs),
+            default=0,
+        ),
+        output_field=output_field,
+    )
 
 
 class AgencyViewSet(viewsets.ModelViewSet):
@@ -61,15 +75,8 @@ class AgencyViewSet(viewsets.ModelViewSet):
                 ), Value(0)
             ),
             fee_rate_=Coalesce(
-                100 * Sum(
-                    Case(
-                        When(
-                            foiarequest__price__gt=0,
-                            then=1,
-                        ),
-                        default=0,
-                    ),
-                    output_field=FloatField()
+                100 * CountWhen(
+                    foiarequest__price__gt=0, output_field=FloatField()
                 ) / NullIf(
                     Count('foiarequest'),
                     Value(0),
@@ -77,20 +84,28 @@ class AgencyViewSet(viewsets.ModelViewSet):
                 ), Value(0)
             ),
             success_rate_=Coalesce(
-                100 * Sum(
-                    Case(
-                        When(
-                            foiarequest__status__in=['done', 'partial'],
-                            then=1,
-                        ),
-                        default=0,
-                    ),
+                100 * CountWhen(
+                    foiarequest__status__in=['done', 'partial'],
                     output_field=FloatField()
                 ) / NullIf(
                     Count('foiarequest'),
                     Value(0),
                     output_field=FloatField(),
                 ), Value(0)
+            ),
+            number_requests=Count('foiarequest'),
+            number_requests_completed=CountWhen(foiarequest__status='done'),
+            number_requests_rejected=CountWhen(foiarequest__status='rejected'),
+            number_requests_no_docs=CountWhen(foiarequest__status='no_docs'),
+            number_requests_ack=CountWhen(foiarequest__status='ack'),
+            number_requests_resp=CountWhen(foiarequest__status='processed'),
+            number_requests_fix=CountWhen(foiarequest__status='fix'),
+            number_requests_appeal=CountWhen(foiarequest__status='appealing'),
+            number_requests_pay=CountWhen(foiarequest__status='payment'),
+            number_requests_partial=CountWhen(foiarequest__status='partial'),
+            number_requests_lawsuit=CountWhen(foiarequest__status='lawsuit'),
+            number_requests_withdrawn=CountWhen(
+                foiarequest__status='abandoned'
             ),
         )
     )
