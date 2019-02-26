@@ -12,14 +12,9 @@ from django.utils.html import linebreaks
 # Standard Library
 import re
 
-# Third Party
-import django_filters
-from rest_framework import viewsets
-
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.models import Agency
-from muckrock.agency.serializers import AgencySerializer
 from muckrock.agency.utils import initial_communication_template
 from muckrock.core.views import MRSearchFilterListView
 from muckrock.jurisdiction.forms import FlagForm
@@ -145,42 +140,6 @@ def redirect_flag(request, jurisdiction, jidx, slug, idx):
     #pylint: disable=unused-argument
     """Redirect flag urls to base agency"""
     return redirect('agency-detail', jurisdiction, jidx, slug, idx)
-
-
-class AgencyViewSet(viewsets.ModelViewSet):
-    """API views for Agency"""
-    # pylint: disable=too-many-public-methods
-    queryset = (
-        Agency.objects.order_by('id').select_related(
-            'jurisdiction', 'parent', 'appeal_agency'
-        ).prefetch_related('types')
-    )
-    serializer_class = AgencySerializer
-    # don't allow ordering by computed fields
-    ordering_fields = [
-        f for f in AgencySerializer.Meta.fields if f not in (
-            'absolute_url',
-            'average_response_time',
-            'fee_rate',
-            'success_rate',
-        )
-    ]
-
-    class Filter(django_filters.FilterSet):
-        """API Filter for Agencies"""
-        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
-        types = django_filters.CharFilter(
-            name='types__name',
-            lookup_expr='iexact',
-        )
-
-        class Meta:
-            model = Agency
-            fields = (
-                'name', 'status', 'jurisdiction', 'types', 'requires_proxy'
-            )
-
-    filter_class = Filter
 
 
 def boilerplate(request):

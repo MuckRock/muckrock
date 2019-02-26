@@ -26,9 +26,17 @@ class AgencySerializer(serializers.ModelSerializer):
         style={'base_template': 'input.html'},
     )
     absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
-    average_response_time = serializers.ReadOnlyField()
+    average_response_time = serializers.ReadOnlyField(
+        source='average_response_time_'
+    )
     fee_rate = serializers.ReadOnlyField()
     success_rate = serializers.ReadOnlyField()
+
+    # contact fields
+    has_portal = serializers.SerializerMethodField()
+    has_email = serializers.SerializerMethodField()
+    has_fax = serializers.SerializerMethodField()
+    has_address = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
@@ -42,6 +50,25 @@ class AgencySerializer(serializers.ModelSerializer):
             # keeping logic here for future use
             self.fields.pop('email', None)
             self.fields.pop('other_emails', None)
+
+    def get_has_portal(self, obj):
+        """Does this have a portal?"""
+        return obj.portal is not None
+
+    def get_has_email(self, obj):
+        """Does this have a primary email address?"""
+        # primary_emails attribute comes from prefetching
+        return bool(obj.primary_emails)
+
+    def get_has_fax(self, obj):
+        """Does this have a primary fax number?"""
+        # primary_faxes attribute comes from prefetching
+        return bool(obj.primary_faxes)
+
+    def get_has_address(self, obj):
+        """Does this have a primary snail mail address?"""
+        # primary_addresses attribute comes from prefetching
+        return bool(obj.primary_addresses)
 
     class Meta:
         model = Agency
@@ -73,4 +100,8 @@ class AgencySerializer(serializers.ModelSerializer):
             'average_response_time',
             'fee_rate',
             'success_rate',
+            'has_portal',
+            'has_email',
+            'has_fax',
+            'has_address',
         )
