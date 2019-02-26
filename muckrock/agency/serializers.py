@@ -29,8 +29,8 @@ class AgencySerializer(serializers.ModelSerializer):
     average_response_time = serializers.ReadOnlyField(
         source='average_response_time_'
     )
-    fee_rate = serializers.ReadOnlyField()
-    success_rate = serializers.ReadOnlyField()
+    fee_rate = serializers.ReadOnlyField(source='fee_rate_')
+    success_rate = serializers.ReadOnlyField(source='success_rate_')
 
     # contact fields
     has_portal = serializers.SerializerMethodField()
@@ -53,7 +53,7 @@ class AgencySerializer(serializers.ModelSerializer):
 
     def get_has_portal(self, obj):
         """Does this have a portal?"""
-        return obj.portal is not None
+        return obj.portal_id is not None
 
     def get_has_email(self, obj):
         """Does this have a primary email address?"""

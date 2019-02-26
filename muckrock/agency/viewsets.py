@@ -1,8 +1,9 @@
 """Viewsets for Agency"""
 
 # Django
-from django.db.models.aggregates import Avg
-from django.db.models.expressions import F, Value
+from django.db.models.aggregates import Avg, Count, Sum
+from django.db.models.expressions import Case, F, Value, When
+from django.db.models.fields import FloatField
 from django.db.models.functions.base import Coalesce
 from django.db.models.query import Prefetch
 
@@ -14,7 +15,7 @@ from rest_framework import viewsets
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
-from muckrock.core.models import ExtractDay
+from muckrock.core.models import ExtractDay, NullIf
 
 
 class AgencyViewSet(viewsets.ModelViewSet):
@@ -58,7 +59,39 @@ class AgencyViewSet(viewsets.ModelViewSet):
                         F('foiarequest__composer__datetime_submitted')
                     )
                 ), Value(0)
-            )
+            ),
+            fee_rate_=Coalesce(
+                100 * Sum(
+                    Case(
+                        When(
+                            foiarequest__price__gt=0,
+                            then=1,
+                        ),
+                        default=0,
+                    ),
+                    output_field=FloatField()
+                ) / NullIf(
+                    Count('foiarequest'),
+                    Value(0),
+                    output_field=FloatField(),
+                ), Value(0)
+            ),
+            success_rate_=Coalesce(
+                100 * Sum(
+                    Case(
+                        When(
+                            foiarequest__status__in=['done', 'partial'],
+                            then=1,
+                        ),
+                        default=0,
+                    ),
+                    output_field=FloatField()
+                ) / NullIf(
+                    Count('foiarequest'),
+                    Value(0),
+                    output_field=FloatField(),
+                ), Value(0)
+            ),
         )
     )
     serializer_class = AgencySerializer
