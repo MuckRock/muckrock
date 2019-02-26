@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Avg, Count, F, Q, Sum
+from django.db.models.expressions import Value
+from django.db.models.functions.base import Coalesce
 from django.template.defaultfilters import slugify
 
 # Third Party
@@ -14,6 +16,7 @@ from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.business_days.models import Calendar, Holiday, HolidayCalendar
+from muckrock.core.models import ExtractDay
 from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
@@ -26,10 +29,17 @@ class RequestHelper(object):
         requests = self.get_requests()
         avg = (
             requests.aggregate(
-                avg=Avg(F('datetime_done') - F('composer__datetime_submitted'))
+                avg=Coalesce(
+                    ExtractDay(
+                        Avg(
+                            F('datetime_done') -
+                            F('composer__datetime_submitted')
+                        )
+                    ), Value(0)
+                )
             )['avg']
         )
-        return int(avg.days) if avg is not None else 0
+        return avg
 
     def average_fee(self):
         """Get the average fees required on requests that have a price."""

@@ -2,6 +2,9 @@
 Serilizers for the Agency application API
 """
 
+# Django
+from django.conf import settings
+
 # Third Party
 from rest_framework import serializers
 
@@ -25,10 +28,32 @@ class AgencySerializer(serializers.ModelSerializer):
         queryset=Jurisdiction.objects.all(),
         style={'base_template': 'input.html'},
     )
-    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
-    average_response_time = serializers.ReadOnlyField()
-    fee_rate = serializers.ReadOnlyField()
-    success_rate = serializers.ReadOnlyField()
+    absolute_url = serializers.SerializerMethodField()
+    average_response_time = serializers.ReadOnlyField(
+        source='average_response_time_'
+    )
+    fee_rate = serializers.ReadOnlyField(source='fee_rate_')
+    success_rate = serializers.ReadOnlyField(source='success_rate_')
+
+    # contact fields
+    has_portal = serializers.SerializerMethodField()
+    has_email = serializers.SerializerMethodField()
+    has_fax = serializers.SerializerMethodField()
+    has_address = serializers.SerializerMethodField()
+
+    # request counts
+    number_requests = serializers.ReadOnlyField()
+    number_requests_completed = serializers.ReadOnlyField()
+    number_requests_rejected = serializers.ReadOnlyField()
+    number_requests_no_docs = serializers.ReadOnlyField()
+    number_requests_ack = serializers.ReadOnlyField()
+    number_requests_resp = serializers.ReadOnlyField()
+    number_requests_fix = serializers.ReadOnlyField()
+    number_requests_appeal = serializers.ReadOnlyField()
+    number_requests_pay = serializers.ReadOnlyField()
+    number_requests_partial = serializers.ReadOnlyField()
+    number_requests_lawsuit = serializers.ReadOnlyField()
+    number_requests_withdrawn = serializers.ReadOnlyField()
 
     def __init__(self, *args, **kwargs):
         """After initializing the serializer,
@@ -42,6 +67,31 @@ class AgencySerializer(serializers.ModelSerializer):
             # keeping logic here for future use
             self.fields.pop('email', None)
             self.fields.pop('other_emails', None)
+
+    def get_has_portal(self, obj):
+        """Does this have a portal?"""
+        return obj.portal_id is not None
+
+    def get_has_email(self, obj):
+        """Does this have a primary email address?"""
+        # primary_emails attribute comes from prefetching
+        return bool(obj.primary_emails)
+
+    def get_has_fax(self, obj):
+        """Does this have a primary fax number?"""
+        # primary_faxes attribute comes from prefetching
+        return bool(obj.primary_faxes)
+
+    def get_has_address(self, obj):
+        """Does this have a primary snail mail address?"""
+        # primary_addresses attribute comes from prefetching
+        return bool(obj.primary_addresses)
+
+    def get_absolute_url(self, obj):
+        """Prepend the domain name to the URL"""
+        return 'https://{}{}'.format(
+            settings.MUCKROCK_URL, obj.get_absolute_url()
+        )
 
     class Meta:
         model = Agency
@@ -73,4 +123,20 @@ class AgencySerializer(serializers.ModelSerializer):
             'average_response_time',
             'fee_rate',
             'success_rate',
+            'has_portal',
+            'has_email',
+            'has_fax',
+            'has_address',
+            'number_requests',
+            'number_requests_completed',
+            'number_requests_rejected',
+            'number_requests_no_docs',
+            'number_requests_ack',
+            'number_requests_resp',
+            'number_requests_fix',
+            'number_requests_appeal',
+            'number_requests_pay',
+            'number_requests_partial',
+            'number_requests_lawsuit',
+            'number_requests_withdrawn',
         )

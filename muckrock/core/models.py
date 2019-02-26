@@ -17,3 +17,8 @@ class ExtractDay(Func):
         super(ExtractDay, self).__init__(
             expression, output_field=output_field, **extra
         )
+
+
+class NullIf(Func):
+    """DB Function NULLIF"""
+    function = 'NULLIF'
