@@ -2,6 +2,9 @@
 Serilizers for the Agency application API
 """
 
+# Django
+from django.conf import settings
+
 # Third Party
 from rest_framework import serializers
 
@@ -25,7 +28,7 @@ class AgencySerializer(serializers.ModelSerializer):
         queryset=Jurisdiction.objects.all(),
         style={'base_template': 'input.html'},
     )
-    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    absolute_url = serializers.SerializerMethodField()
     average_response_time = serializers.ReadOnlyField(
         source='average_response_time_'
     )
@@ -83,6 +86,12 @@ class AgencySerializer(serializers.ModelSerializer):
         """Does this have a primary snail mail address?"""
         # primary_addresses attribute comes from prefetching
         return bool(obj.primary_addresses)
+
+    def get_absolute_url(self, obj):
+        """Prepend the domain name to the URL"""
+        return 'https://{}{}'.format(
+            settings.MUCKROCK_URL, obj.get_absolute_url()
+        )
 
     class Meta:
         model = Agency

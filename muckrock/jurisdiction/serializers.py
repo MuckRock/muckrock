@@ -2,6 +2,9 @@
 Serilizers for the Jurisdiction application API
 """
 
+# Django
+from django.conf import settings
+
 # Third Party
 from rest_framework import serializers
 
@@ -15,7 +18,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
         queryset=Jurisdiction.objects.order_by(),
         style={'base_template': 'input.html'},
     )
-    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    absolute_url = serializers.SerializerMethodField()
     average_response_time = serializers.ReadOnlyField()
     fee_rate = serializers.ReadOnlyField()
     success_rate = serializers.ReadOnlyField()
@@ -35,6 +38,12 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             'average_response_time',
             'fee_rate',
             'success_rate',
+        )
+
+    def get_absolute_url(self, obj):
+        """Prepend the domain name to the URL"""
+        return 'https://{}{}'.format(
+            settings.MUCKROCK_URL, obj.get_absolute_url()
         )
 
 
