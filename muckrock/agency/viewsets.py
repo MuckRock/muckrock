@@ -105,6 +105,13 @@ class AgencyViewSet(viewsets.ModelViewSet):
         )
     ]
 
+    def get_queryset(self):
+        """Filter out non-approved agencies for non-staff"""
+        if self.request.user.is_staff:
+            return self.queryset
+        else:
+            return self.queryset.filter(status='approved')
+
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
         jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
