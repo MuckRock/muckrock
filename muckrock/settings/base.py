@@ -544,9 +544,9 @@ ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
-MUCKROCK_URL = 'http://dev.muckrock.com:8000'
-FOIAMACHINE_URL = 'http://dev.foiamachine.org:8000'
-SQUARELET_URL = 'http://dev.squarelet.com:8001'
+MUCKROCK_URL = 'http://dev.muckrock.com'
+FOIAMACHINE_URL = 'http://dev.foiamachine.org'
+SQUARELET_URL = 'http://dev.squarelet.com'
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'

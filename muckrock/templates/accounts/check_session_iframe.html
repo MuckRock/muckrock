@@ -36,7 +36,9 @@ function receiveMessage(event) {
   } else if (event.data === 'changed') {
     // state has changed, log out
     console.log('OIDC session management: changed');
-    window.top.location.href = "{% url "acct-logout" %}";
+    // XXX this isnt working and keeps logging out immediately
+    // so comment out for now
+    // window.top.location.href = "{% url "acct-logout" %}";
   } else {
     // Error.
     console.log('OIDC session management: error');
