@@ -49,5 +49,3 @@ def save_session_data(strategy, request, response, *args, **kwargs):
     id_token = response.get('id_token')
     if id_token:
         request.session['id_token'] = id_token
-    import ipdb
-    ipdb.set_trace()
