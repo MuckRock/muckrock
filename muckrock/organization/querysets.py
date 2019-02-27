@@ -20,7 +20,6 @@ class OrganizationQuerySet(models.QuerySet):
             'plan',
             'max_users',
             'individual',
-            'admin',
         }
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
