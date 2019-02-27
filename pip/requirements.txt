@@ -104,7 +104,7 @@ pickleshare==0.7.4        # via ipython
 pillow==4.2.1
 premailer==3.0.0          # via django-premailer
 prompt-toolkit==1.0.15    # via ipython
-psycopg2==2.7.4
+psycopg2-binary==2.7.6.1
 ptyprocess==0.6.0         # via pexpect
 pyasn1-modules==0.2.1     # via oauth2client
 pyasn1==0.4.2             # via oauth2client, pyasn1-modules, rsa
@@ -120,7 +120,7 @@ pypdf2==1.26.0
 pyphaxio==0.11
 python-dateutil==2.5.3
 python-levenshtein==0.12.0
-python-magic==0.4.12      # via pyimagediet
+python-magic==0.4.15      # via pyimagediet
 python-openid==2.2.5      # via social-auth-core
 python-redis-lock[django]==3.2.0
 pytz==2017.2              # via babel, celery, django

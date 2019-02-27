@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+
+rm -f './celerybeat.pid'
+python manage.py celery beat -l DEBUG
