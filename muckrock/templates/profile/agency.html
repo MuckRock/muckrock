@@ -134,6 +134,9 @@
     {% if user.is_authenticated %}
       <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
     {% endif %}
+    {% if user.is_staff %}
+      <a href="{% url "agency-merge" %}?bad_agency={{ agency.pk }}" class="red button">Merge</a>
+    {% endif %}
   </div>
   {% if agency.exempt and agency.exempt_note %}
     <section class="notes">

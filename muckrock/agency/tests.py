@@ -18,8 +18,18 @@ from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.agency.views import AgencyList, boilerplate, contact_info, detail
-from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.communication.factories import (
+    EmailAddressFactory,
+    PhoneNumberFactory,
+)
+from muckrock.core.factories import (
+    AgencyEmailFactory,
+    AgencyFactory,
+    AgencyPhoneFactory,
+    UserFactory,
+)
 from muckrock.core.test_utils import http_get_response, mock_middleware
+from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 
 
 class TestAgencyUnit(TestCase):
@@ -92,6 +102,84 @@ class TestAgencyUnit(TestCase):
         eq_(proxy_info['missing_proxy'], False)
         eq_(proxy_info['from_user'], proxy)
         assert_in('warning', proxy_info)
+
+    def test_agency_relations(self):
+        """Pins the number of relations
+        If we add a relation we must take into account how we want to handle it during
+        a merge
+        """
+        # Relations pointing to the Agency model
+        eq_(
+            len([
+                f for f in Agency._meta.get_fields()
+                if f.is_relation and f.auto_created
+            ]), 16
+        )
+        # Many to many relations defined on the agency model
+        eq_(
+            len([
+                f for f in Agency._meta.get_fields()
+                if f.many_to_many and not f.auto_created
+            ]), 4
+        )
+
+    def test_agency_merge(self):
+        """Test agency merging"""
+        good_agency = AgencyFactory(status='approved', email=None, fax=None)
+        bad_agency = AgencyFactory(status='approved', email=None, fax=None)
+        appeal_agency = AgencyFactory(appeal_agency=bad_agency)
+        foia = FOIARequestFactory(agency=bad_agency)
+        composer = FOIAComposerFactory(agencies=[bad_agency])
+        user = UserFactory()
+
+        email = EmailAddressFactory()
+        AgencyEmailFactory(agency=good_agency, email=email, email_type='to')
+        AgencyEmailFactory(agency=bad_agency, email=email, email_type='cc')
+
+        fax1 = PhoneNumberFactory()
+        fax2 = PhoneNumberFactory()
+        AgencyPhoneFactory(
+            agency=good_agency, phone=fax1, request_type='primary'
+        )
+        AgencyPhoneFactory(
+            agency=bad_agency, phone=fax2, request_type='primary'
+        )
+
+        good_agency.merge(bad_agency, user)
+
+        bad_agency.refresh_from_db()
+        appeal_agency.refresh_from_db()
+        foia.refresh_from_db()
+        composer.refresh_from_db()
+
+        eq_(bad_agency.status, 'rejected')
+        eq_(foia.agency, good_agency)
+        eq_(composer.agencies.first(), good_agency)
+        eq_(appeal_agency.appeal_agency, good_agency)
+
+        # email that already exists is not copied over
+        eq_(good_agency.emails.count(), 1)
+        eq_(good_agency.agencyemail_set.first().email_type, 'to')
+
+        # phone number that doesnt exist is copied over
+        eq_(good_agency.phones.count(), 2)
+        # existing phone number is unaffected
+        ok_(
+            good_agency.agencyphone_set.filter(
+                phone=fax1, request_type='primary'
+            ).exists()
+        )
+        # its type is set to none when copied over
+        ok_(
+            good_agency.agencyphone_set.filter(
+                phone=fax2,
+                request_type='none',
+            ).exists()
+        )
+
+        assert_in(good_agency.name, bad_agency.notes)
+        assert_in(unicode(good_agency.pk), bad_agency.notes)
+        assert_in(user.username, bad_agency.notes)
 
 
 class TestAgencyManager(TestCase):

@@ -38,4 +38,5 @@ urlpatterns = [
         views.contact_info,
         name='agency-contact-info',
     ),
+    url(r'^merge/$', views.MergeAgency.as_view(), name='agency-merge'),
 ]

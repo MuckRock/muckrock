@@ -1,0 +1,351 @@
+{% extends "forms/base_form.html" %}
+{% load tags %}
+{% load thumbnail %}
+
+{% block form-title %}
+  <h1>Merge Agencies</h1>
+{% endblock %}
+
+{% block form-info %}
+  {% if form.fields.confirmed.initial %}
+    <p>
+      {% with good=form.initial.good_agency bad=form.initial.bad_agency %}
+        <p>
+          Please review the two agencies you are about to merge before you
+          confirm this submission.  Be sure to manually reconcile any data if
+          necessary.
+        </p>
+        <table>
+          <tr>
+            <th>&nbsp;</th>
+            <th>Good (This one will be kept)</th>
+            <th>Bad (This one will be rejected)</th>
+          </tr>
+          <tr>
+            <th>ID</th>
+            <td>
+              <a href="{% url "admin:agency_agency_change" good.pk %}">
+                {{ good.pk }}
+              </a>
+            </td>
+            <td>
+              <a href="{% url "admin:agency_agency_change" bad.pk %}">
+                {{ bad.pk }}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td>{% obj_link good %}</td>
+            <td>{% obj_link bad %}</td>
+          </tr>
+          <tr>
+            <th>Aliases</th>
+            <td>{{ good.aliases|linebreaks }}</td>
+            <td>{{ bad.aliases|linebreaks }}</td>
+          </tr>
+          <tr>
+            <th>Image</th>
+            <td>
+              {% if good.image %}
+                <figure class="agency image">
+                  <img
+                        src="{% thumbnail good.image 600x600 %}"
+                        class="header-image"
+                        alt="{{ good.image_attr_line|striptags}}">
+                  {% if good.image_attr_line %}
+                    <figcaption>{{ good.image_attr_line | safe }}</figcaption>
+                  {% endif %}
+                </figure>
+              {% endif %}
+            </td>
+            <td>
+              {% if bad.image %}
+                <figure class="agency image">
+                  <img
+                        src="{% thumbnail bad.image 600x600 %}"
+                        class="header-image"
+                        alt="{{ bad.image_attr_line|striptags}}">
+                  {% if bad.image_attr_line %}
+                    <figcaption>{{ bad.image_attr_line | safe }}</figcaption>
+                  {% endif %}
+                </figure>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>Jurisdiction</th>
+            <td>{% obj_link good.jurisdiction %}</td>
+            <td>{% obj_link bad.jurisdiction %}</td>
+          </tr>
+          <tr>
+            <th>Types</th>
+            <td>{{ good.types.all|join:", " }}</td>
+            <td>{{ bad.types.all|join:", " }}</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>{{ good.get_status_display }}</td>
+            <td>{{ bad.get_status_display }}</td>
+          </tr>
+          <tr>
+            <th>User who submitted this agency</th>
+            <td>{% obj_link good.user %}</td>
+            <td>{% obj_link bad.user %}</td>
+          </tr>
+          <tr>
+            <th>Appeal Agency</th>
+            <td>{% obj_link good.appeal_agency %}</td>
+            <td>{% obj_link bad.appeal_agency %}</td>
+          </tr>
+          <tr>
+            <th>Payable To</th>
+            <td>{% obj_link good.payable_to %}</td>
+            <td>{% obj_link bad.payable_to %}</td>
+          </tr>
+          <tr>
+            <th>Parent</th>
+            <td>{% obj_link good.parent %}</td>
+            <td>{% obj_link bad.parent %}</td>
+          </tr>
+          <tr>
+            <th>Emails</th>
+            <td>
+              <ul>
+                {% for email in good.agencyemail_set.all %}
+                  <li>{{ email }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+            <td>
+              <ul>
+                {% for email in bad.agencyemail_set.all %}
+                  <li>{{ email }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Phones</th>
+            <td>
+              <ul>
+                {% for phone in good.agencyphone_set.all %}
+                  <li>{{ phone }} ({{ phone.phone.type }})</li>
+                {% endfor %}
+              </ul>
+            </td>
+            <td>
+              <ul>
+                {% for phone in bad.agencyphone_set.all %}
+                  <li>{{ phone }} ({{ phone.phone.type }})</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Addresses</th>
+            <td>
+              <ul>
+                {% for address in good.agencyaddress_set.all %}
+                  <li>{{ address }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+            <td>
+              <ul>
+                {% for address in bad.agencyaddress_set.all %}
+                  <li>{{ address }}</li>
+                {% endfor %}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <th>Portal</th>
+            <td>{{ good.portal }}</td>
+            <td>{{ bad.portal }}</td>
+          </tr>
+          <tr>
+            <th>Public Notes</th>
+            <td>{{ good.public_notes|linebreaks }}</td>
+            <td>{{ bad.public_notes|linebreaks }}</td>
+          </tr>
+          <tr>
+            <th>Private Notes</th>
+            <td>{{ good.notes|linebreaks }}</td>
+            <td>{{ bad.notes|linebreaks }}</td>
+          </tr>
+          <tr>
+            <th>Form</th>
+            <td>{{ good.form }}</td>
+            <td>{{ bad.form }}</td>
+          </tr>
+          <tr>
+            <th>URL</th>
+            <td>
+              {% if good.url %}
+                <a href="{{ good.url }}">
+                  {{ good.url }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+            <td>
+              {% if bad.url %}
+                <a href="{{ bad.url }}">
+                  {{ bad.url }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>Website</th>
+            <td>
+              {% if good.website %}
+                <a href="{{ good.website }}">
+                  {{ good.website }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+            <td>
+              {% if bad.website %}
+                <a href="{{ bad.website }}">
+                  {{ bad.website }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>FOIA Logs</th>
+            <td>
+              {% if good.foia_logs %}
+                <a href="{{ good.foia_logs }}">
+                  {{ good.foia_logs }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+            <td>
+              {% if bad.foia_logs %}
+                <a href="{{ bad.foia_logs }}">
+                  {{ bad.foia_logs }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>FOIA Guide</th>
+            <td>
+              {% if good.foia_guide %}
+                <a href="{{ good.foia_guide }}">
+                  {{ good.foia_guide }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+            <td>
+              {% if bad.foia_guide %}
+                <a href="{{ bad.foia_guide }}">
+                  {{ bad.foia_guide }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th>Twitter</th>
+            <td>{{ good.twitter }}</td>
+            <td>{{ bad.twitter }}</td>
+          </tr>
+          <tr>
+            <th>Twitter Handles</th>
+            <td>{{ good.twitter_handles }}</td>
+            <td>{{ bad.twitter_handles }}</td>
+          </tr>
+          <tr>
+            <th>Exempt</th>
+            <td>{{ good.exempt }}</td>
+            <td>{{ bad.exempt }}</td>
+          </tr>
+          <tr>
+            <th>Exempt Note</th>
+            <td>{{ good.exempt_note }}</td>
+            <td>{{ bad.exempt_note }}</td>
+          </tr>
+          <tr>
+            <th>Requires Proxy</th>
+            <td>{{ good.requires_proxy }}</td>
+            <td>{{ bad.requires_proxy }}</td>
+          </tr>
+          <tr>
+            <th>FOIA Request Count</th>
+            <td>{{ good.foiarequest_set.count }}</td>
+            <td>{{ bad.foiarequest_set.count }}</td>
+          </tr>
+          <tr>
+            <th>FOIA Composer Count</th>
+            <td>{{ good.composers.count }}</td>
+            <td>{{ bad.composers.count }}</td>
+          </tr>
+          <tr>
+            <th>FOIA Multirequest Count</th>
+            <td>{{ good.multirequests.count }}</td>
+            <td>{{ bad.multirequests.count }}</td>
+          </tr>
+          <tr>
+            <th>FOIA Machine Request Count</th>
+            <td>{{ good.foiamachinerequest_set.count }}</td>
+            <td>{{ bad.foiamachinerequest_set.count }}</td>
+          </tr>
+          <tr>
+            <th>FOIA Saved Search Count</th>
+            <td>{{ good.foiasavedsearch_set.count }}</td>
+            <td>{{ bad.foiasavedsearch_set.count }}</td>
+          </tr>
+          <tr>
+            <th>Review Agency Task Count</th>
+            <td>{{ good.reviewagencytask_set.count }}</td>
+            <td>{{ bad.reviewagencytask_set.count }}</td>
+          </tr>
+          <tr>
+            <th>Flagged Task Count</th>
+            <td>{{ good.flaggedtask_set.count }}</td>
+            <td>{{ bad.flaggedtask_set.count }}</td>
+          </tr>
+          <tr>
+            <th>New Agency Task Count</th>
+            <td>{{ good.newagencytask_set.count }}</td>
+            <td>{{ bad.newagencytask_set.count }}</td>
+          </tr>
+          <tr>
+            <th>Stale Agency Task Count</th>
+            <td>{{ good.staleagencytask_set.count }}</td>
+            <td>{{ bad.staleagencytask_set.count }}</td>
+          </tr>
+        </table>
+      {% endwith %}
+    </p>
+  {% else %}
+    <p>
+      Select two agencies to merge.  The bad agency will be marked as rejected,
+      and all records pointing to it will now point to the good agency.  Emails,
+      phone numbers, including faxes, and snail mail addresses will be moved over
+      as non-primary forms of communication.  Other data must be reconciled manually.
+      You should only be using this tool if you know what you are doing - if you have
+      any doubts, ask somebody first!  After selecting two agencies on this page,
+      you will see a page with a table of the data for the selected requests, which
+      you can review before you confirm the merger.
+    </p>
+  {% endif %}
+{% endblock %}

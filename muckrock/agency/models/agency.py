@@ -5,9 +5,12 @@ Agency Model
 # Django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
+from django.db.models.expressions import F, Value
+from django.db.models.functions.base import Concat
 from django.template.defaultfilters import slugify
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 # Standard Library
@@ -113,7 +116,9 @@ class Agency(models.Model, RequestHelper):
         blank=True,
         help_text='The user who submitted this agency',
     )
-    appeal_agency = models.ForeignKey('self', null=True, blank=True)
+    appeal_agency = models.ForeignKey(
+        'self', related_name='appeal_for', null=True, blank=True
+    )
     payable_to = models.ForeignKey(
         'self', related_name='receivable', null=True, blank=True
     )
@@ -327,6 +332,84 @@ class Agency(models.Model, RequestHelper):
         """The primary address"""
         return self.get_addresses('primary').first()
 
+    @transaction.atomic
+    def merge(self, agency, user):
+        """Merge the other agency into this agency"""
+        replace_relations = [
+            'foiarequest_set',
+            'foiamachinerequest_set',
+            'reviewagencytask_set',
+            'flaggedtask_set',
+            'newagencytask_set',
+            'staleagencytask_set',
+        ]
+        for relation in replace_relations:
+            getattr(agency, relation).update(agency=self)
+
+        replace_self_relations = [
+            ('appeal_agency', 'appeal_for'),
+            ('payable_to', 'receivable'),
+            ('parent', 'children'),
+        ]
+        for forward, backward in replace_self_relations:
+            getattr(agency, backward).update(**{forward: self})
+
+        replace_m2m = [
+            'composers',
+            'multirequests',
+            'types',
+            'foiasavedsearch_set',
+        ]
+        for relation in replace_m2m:
+            getattr(self, relation).add(*getattr(agency, relation).all())
+            getattr(agency, relation).clear()
+
+        # move emails/phone numbers/addresses over,
+        # with types set to 'none', if doesn't already exist
+        # on new agency (with any types)
+        agency.agencyemail_set.exclude(email__in=self.emails.all()).update(
+            request_type='none', email_type='none', agency=self
+        )
+        agency.agencyphone_set.exclude(phone__in=self.phones.all()).update(
+            request_type='none', agency=self
+        )
+        agency.agencyaddress_set.exclude(
+            address__in=self.addresses.all(),
+        ).update(
+            request_type='none', agency=self
+        )
+
+        # just update user on comms
+        # we don't want to create a user for the bad agency if one doesn't exist
+        try:
+            old_user = agency.profile.user
+            new_user = self.get_user()
+            old_user.sent_communications.update(from_user=new_user)
+            old_user.received_communications.update(to_user=new_user)
+        except Profile.DoesNotExist:
+            pass
+
+        # mark the old agency as rejected and leave a note that it was merged
+        agency.status = 'rejected'
+        agency.notes = (
+            Concat(
+                F('notes'),
+                Value(
+                    u'\n\nThis agency was merged into agency '
+                    u'"{}" (#{}) by {} on {}'.format(
+                        self.name,
+                        self.pk,
+                        user.username,
+                        timezone.now(),
+                    )
+                )
+            )
+        )
+        agency.save()
+
     class Meta:
         verbose_name_plural = 'agencies'
-        permissions = (('view_emails', 'Can view private contact information'),)
+        permissions = (
+            ('view_emails', 'Can view private contact information'),
+            ('merge_agency', 'Can merge two agencies together'),
+        )

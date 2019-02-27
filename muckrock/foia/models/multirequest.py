@@ -39,7 +39,7 @@ class FOIAMultiRequest(models.Model):
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(
         'agency.Agency',
-        related_name='agencies',
+        related_name='multirequests',
         blank=True,
     )
     num_org_requests = models.PositiveSmallIntegerField(default=0)
