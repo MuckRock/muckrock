@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# Standard Library
-import os
-import sys
+import os, sys
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "muckrock.settings.local")
