@@ -433,7 +433,10 @@ class FOIARequest(models.Model):
             self.update_address_from_agency(agency, appeal, kwargs.get('clear'))
 
         # check for a pdf form that needs to be filled out on the initial submission
-        if agency.form and self.communications.count() == 1:
+        initial_submit = (
+            self.communications.count() == 1 and 'comm' not in kwargs
+        )
+        if agency.form and initial_submit:
             # this needs review if it cannot fill out the form automatically
             needs_review |= agency.form.fill(self.communications.first())
 
