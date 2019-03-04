@@ -80,17 +80,14 @@ class Organization(models.Model):
 
     def has_member(self, user):
         """Is the user a member of this organization?"""
-        # XXX test
         return self.users.filter(pk=user.pk).exists()
 
     def has_admin(self, user):
         """Is the user an admin of this organization?"""
-        # XXX test
         return self.users.filter(pk=user.pk, memberships__admin=True).exists()
 
     def update_data(self, data):
         """Set updated data from squarelet"""
-        # XXX test this
 
         # plan should always be created on client sites before being used
         # get_or_create is used as a precauitionary measure
@@ -138,33 +135,32 @@ class Organization(models.Model):
     @transaction.atomic
     def make_requests(self, amount):
         """Try to deduct requests from the organization's balance"""
-        # XXX test this
-        request_count = {"monthly": 0, "regular": 0}
+        request_count = {'monthly': 0, 'regular': 0}
         organization = Organization.objects.select_for_update().get(pk=self.pk)
 
-        request_count["monthly"] = min(amount, organization.monthly_requests)
-        amount -= request_count["monthly"]
+        request_count['monthly'] = min(amount, organization.monthly_requests)
+        amount -= request_count['monthly']
 
-        request_count["regular"] = min(amount, organization.number_requests)
-        amount -= request_count["regular"]
+        request_count['regular'] = min(amount, organization.number_requests)
+        amount -= request_count['regular']
 
         if amount > 0:
             raise InsufficientRequestsError(amount)
 
-        organization.monthly_requests -= request_count["monthly"]
-        organization.number_requests -= request_count["regular"]
+        organization.monthly_requests -= request_count['monthly']
+        organization.number_requests -= request_count['regular']
         organization.save()
         return request_count
 
     def return_requests(self, amounts):
         """Return requests to the organization's balance"""
-        self.monthly_requests = F("monthly_requests") + amounts["monthly"]
-        self.number_requests = F("number_requests") + amounts["regular"]
+        self.monthly_requests = F('monthly_requests') + amounts['monthly']
+        self.number_requests = F('number_requests') + amounts['regular']
         self.save()
 
     def add_requests(self, amount):
         """Add requests"""
-        self.number_requests = F("number_requests") + amount
+        self.number_requests = F('number_requests') + amount
         self.save()
 
     def pay(self, amount, description, token, save_card):

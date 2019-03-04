@@ -30,8 +30,6 @@ from muckrock.foia.models import FOIAComposer
 class TestFOIAViewsetCreate(TestCase):
     """Unit Tests for FOIA API Viewset create method"""
 
-    # XXX redo these tests without num_requests
-
     def setUp(self):
         self.mocker = requests_mock.Mocker()
         mock_squarelet(self.mocker)
