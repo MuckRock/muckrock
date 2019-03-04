@@ -9,15 +9,69 @@ from django.test import TestCase
 from datetime import date
 
 # Third Party
-from nose.tools import eq_
+from nose.tools import assert_false, assert_raises, assert_true, eq_
 
 # MuckRock
+from muckrock.core.factories import UserFactory
+from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.factories import (
     FreePlanFactory,
+    MembershipFactory,
     OrganizationFactory,
     OrganizationPlanFactory,
     PlanFactory,
 )
+
+
+class TestOrganization(TestCase):
+    """Tests for Organization methods"""
+
+    def test_has_member(self):
+        """Test has_member method"""
+        org = OrganizationFactory()
+        users = UserFactory.create_batch(2)
+        MembershipFactory(user=users[0], organization=org)
+
+        assert_true(org.has_member(users[0]))
+        assert_false(org.has_member(users[1]))
+
+    def test_has_admin(self):
+        """Test has_admin method"""
+        org = OrganizationFactory()
+        users = UserFactory.create_batch(2)
+        MembershipFactory(user=users[0], organization=org, admin=True)
+        MembershipFactory(user=users[1], organization=org, admin=False)
+
+        assert_true(org.has_admin(users[0]))
+        assert_false(org.has_admin(users[1]))
+
+    def test_make_requests(self):
+        """Test Org make_requests method"""
+        org = OrganizationFactory(monthly_requests=10, number_requests=10)
+
+        request_count = org.make_requests(5)
+        org.refresh_from_db()
+        eq_(request_count, {'monthly': 5, 'regular': 0})
+        eq_(org.monthly_requests, 5)
+        eq_(org.number_requests, 10)
+
+        request_count = org.make_requests(10)
+        org.refresh_from_db()
+        eq_(request_count, {'monthly': 5, 'regular': 5})
+        eq_(org.monthly_requests, 0)
+        eq_(org.number_requests, 5)
+
+        request_count = org.make_requests(4)
+        org.refresh_from_db()
+        eq_(request_count, {'monthly': 0, 'regular': 4})
+        eq_(org.monthly_requests, 0)
+        eq_(org.number_requests, 1)
+
+        with assert_raises(InsufficientRequestsError):
+            request_count = org.make_requests(2)
+        org.refresh_from_db()
+        eq_(org.monthly_requests, 0)
+        eq_(org.number_requests, 1)
 
 
 class TestSquareletUpdateData(TestCase):
