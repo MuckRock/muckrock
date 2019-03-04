@@ -231,7 +231,6 @@ class Profile(models.Model):
     @mproperty
     def feature_level(self):
         """The user's highest feature level among all of their organizations"""
-        # XXX test this
         return self.user.organizations.aggregate(
             max=Max('plan__feature_level')
         )['max']

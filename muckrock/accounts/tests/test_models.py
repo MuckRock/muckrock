@@ -6,11 +6,10 @@ Tests accounts models
 from django.test import TestCase
 
 # Third Party
-from mock import Mock, patch
 from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
-from muckrock.accounts.models import Notification
+from muckrock.accounts.models import Notification, Profile
 from muckrock.core.factories import (
     NotificationFactory,
     ProfileFactory,
@@ -20,40 +19,12 @@ from muckrock.core.utils import new_action
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.organization.factories import (
     FreePlanFactory,
+    MembershipFactory,
     OrganizationPlanFactory,
     ProfessionalPlanFactory,
 )
 
-# Creates Mock items for testing methods that involve Stripe
-#
-# If you can't tell what's going on here, check out the Profile
-# model methods that make calls with the stripe module then
-# read up on how the Stripe API and mock module work.
-#
-# https://docs.python.org/dev/library/unittest.mock.html
-# https://stripe.com/docs/api
 
-mock_charge = Mock()
-mock_charge.create = Mock()
-mock_subscription = Mock()
-mock_subscription.id = 'test-pro-subscription'
-mock_subscription.save.return_value = mock_subscription
-mock_subscription.delete.return_value = mock_subscription
-mock_customer = Mock()
-mock_customer.id = 'test-customer'
-mock_customer.save.return_value = mock_customer
-mock_customer.update_subscription.return_value = mock_subscription
-mock_customer.cancel_subscription.return_value = mock_subscription
-mock_customer.subscriptions.create.return_value = mock_subscription
-mock_customer.subscriptions.retrieve.return_value = mock_subscription
-mock_customer.subscriptions.data = [mock_subscription]
-MockCustomer = Mock()
-MockCustomer.create.return_value = mock_customer
-MockCustomer.retrieve.return_value = mock_customer
-
-
-@patch('stripe.Customer', MockCustomer)
-@patch('stripe.Charge', mock_charge)
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
 
@@ -64,6 +35,32 @@ class TestProfileUnit(TestCase):
         """Test profile model's __unicode__ method"""
         expected = "%s's Profile" % unicode(self.profile.user).capitalize()
         eq_(unicode(self.profile), expected)
+
+    def test_feature_level(self):
+        """Test getting a users max feature level from their plans"""
+        free = ProfileFactory(
+            user__membership__organization__plan=FreePlanFactory()
+        )
+        pro = ProfileFactory(
+            user__membership__organization__plan=ProfessionalPlanFactory()
+        )
+        org = ProfileFactory(
+            user__membership__organization__plan=OrganizationPlanFactory()
+        )
+
+        eq_(free.feature_level, 0)
+        eq_(pro.feature_level, 1)
+        eq_(org.feature_level, 2)
+
+        MembershipFactory(
+            user=free.user, organization__plan__name='Organization'
+        )
+
+        # refresh from db because feature level is cached
+        free = Profile.objects.get(pk=free.pk)
+
+        # if in free plan and org plan, take the larger one
+        eq_(free.feature_level, 2)
 
     def test_is_advanced(self):
         """Test whether the users are marked as advanced."""

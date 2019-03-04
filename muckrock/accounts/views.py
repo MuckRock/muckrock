@@ -204,13 +204,12 @@ class ProfileView(BuyRequestsMixin, FormView):
         if self.request.user.is_staff:
             organizations = queryset
         elif self.request.user.is_authenticated:
-            # XXX test
             organizations = queryset.filter(
                 Q(private=False) | Q(users=self.request.user)
             )
-
         else:
             organizations = queryset.filter(private=False)
+
         if self.request.user == self.user:
             context_data['admin_organizations'] = (
                 self.user.organizations.filter(memberships__admin=True)
