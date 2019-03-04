@@ -14,6 +14,7 @@ from django.template import (
     VariableDoesNotExist,
 )
 from django.template.defaultfilters import stringfilter
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 # Standard Library
@@ -56,6 +57,15 @@ def page_link(request, page_num):
     query = request.GET.copy()
     query['page'] = page_num
     return '?' + query.urlencode()
+
+
+@register.simple_tag
+def obj_link(obj):
+    """Generate a link if the obj is not None"""
+    if obj:
+        return format_html('<a href="{}">{}</a>', obj.get_absolute_url(), obj)
+    else:
+        return 'None'
 
 
 @register.filter

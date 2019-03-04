@@ -203,3 +203,35 @@ class CSVImportForm(forms.Form):
     type_ = forms.ModelChoiceField(
         queryset=AgencyType.objects.all(), required=False
     )
+
+
+class AgencyMergeForm(forms.Form):
+    """A form to merge two agencies"""
+
+    good_agency = autocomplete_light.ModelChoiceField(
+        'AgencyEasySearchAutocomplete',
+        queryset=Agency.objects.get_approved(),
+    )
+    bad_agency = autocomplete_light.ModelChoiceField(
+        'AgencyEasySearchAutocomplete',
+        queryset=Agency.objects.get_approved(),
+    )
+    confirmed = forms.BooleanField(
+        initial=False, widget=forms.HiddenInput(), required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        confirmed = kwargs.pop('confirmed', False)
+        super(AgencyMergeForm, self).__init__(*args, **kwargs)
+        if confirmed:
+            self.fields['confirmed'].initial = True
+            self.fields['good_agency'].widget = forms.HiddenInput()
+            self.fields['bad_agency'].widget = forms.HiddenInput()
+
+    def clean(self,):
+        cleaned_data = super(AgencyMergeForm, self).clean()
+        good_agency = cleaned_data.get('good_agency')
+        bad_agency = cleaned_data.get('bad_agency')
+        if good_agency and good_agency == bad_agency:
+            raise forms.ValidationError('Cannot merge an agency into itself')
+        return cleaned_data

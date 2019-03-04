@@ -4,16 +4,19 @@ Views for the Agency application
 
 # Django
 from django.contrib import messages
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import linebreaks
+from django.views.generic.edit import FormView
 
 # Standard Library
 import re
 
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
+from muckrock.agency.forms import AgencyMergeForm
 from muckrock.agency.models import Agency
 from muckrock.agency.utils import initial_communication_template
 from muckrock.core.views import MRSearchFilterListView
@@ -219,3 +222,41 @@ def contact_info(request, idx):
             'address':
                 unicode(agency.address) if agency.address else None,
         })
+
+
+class MergeAgency(PermissionRequiredMixin, FormView):
+    """View to merge agencies together"""
+
+    form_class = AgencyMergeForm
+    template_name = 'agency/merge.html'
+    permission_required = 'agency.merge_agency'
+
+    def get_initial(self):
+        """Set initial choice based on get parameter"""
+        initial = super(MergeAgency, self).get_initial()
+        if 'bad_agency' in self.request.GET:
+            initial['bad_agency'] = self.request.GET['bad_agency']
+        return initial
+
+    def form_valid(self, form):
+        """Confirm and merge"""
+        if form.cleaned_data['confirmed']:
+            good = form.cleaned_data['good_agency']
+            bad = form.cleaned_data['bad_agency']
+            good.merge(bad, self.request.user)
+            messages.success(
+                self.request, 'Merged {} into {}!'.format(good, bad)
+            )
+            return redirect('agency-merge')
+        else:
+            initial = {
+                'good_agency': form.cleaned_data['good_agency'],
+                'bad_agency': form.cleaned_data['bad_agency'],
+            }
+            form = self.form_class(confirmed=True, initial=initial)
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def form_invalid(self, form):
+        """Something went wrong"""
+        messages.error(self.request, form.errors)
+        return redirect('agency-merge')

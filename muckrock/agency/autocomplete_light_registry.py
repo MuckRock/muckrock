@@ -48,7 +48,9 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
         return choices.filter(jurisdiction__id=jurisdiction_id)
 
 
-class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
+class AgencyEasySearchAutocomplete(
+    autocomplete_light.AutocompleteModelTemplate
+):
     """Provides an autocomplete field for composing requests"""
     choices = (
         Agency.objects.select_related('jurisdiction__parent').only(
@@ -78,9 +80,6 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
         exclude = self.request.GET.getlist('exclude')
-        # remove "new" agencies from exclude list, as they do not have
-        # valid PKs to filter on
-        exclude = [e for e in exclude if re.match(r'[0-9]+', e)]
         conditions = self._choices_for_request_conditions(
             query,
             self.search_fields,
@@ -99,9 +98,6 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
             choices,
         )
         choices = list(choices) + [c[2] for c in fuzzy_choices]
-        new_agency = self._create_new_agency(query, jurisdiction, choices)
-        if new_agency is not None:
-            choices.append(new_agency)
         return choices
 
     def _fuzzy_choices(self, query, exclude, jurisdiction, choices):
@@ -119,19 +115,6 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
             score_cutoff=83,
             limit=10,
         )
-
-    def _create_new_agency(self, query, jurisdiction, choices):
-        """If there are no exact matches, give the option to create a new one"""
-        if not query.lower() in [c.name.lower() for c in choices]:
-            name = re.sub(r'\$', '', capwords(query))
-            new_agency = Agency(
-                name=name,
-                jurisdiction=jurisdiction,
-                status='pending',
-            )
-            return new_agency
-        else:
-            return None
 
     def _split_jurisdiction(self, query):
         """Try to pull a jurisdiction out of an unmatched query"""
@@ -169,6 +152,56 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
                     return name, jurisdiction
         return query, Jurisdiction.objects.get(level='f')
 
+    def order_choices(self, choices):
+        """Order choices by popularity"""
+        return choices.annotate(count=Count('foiarequest')).order_by('-count')
+
+
+class AgencyComposerAutocomplete(AgencyEasySearchAutocomplete):
+    """Provides an autocomplete field for composing requests"""
+
+    def choices_for_request(self):
+        query = self.request.GET.get('q', '')
+        exclude = self.request.GET.getlist('exclude')
+        # remove "new" agencies from exclude list, as they do not have
+        # valid PKs to filter on
+        exclude = [e for e in exclude if re.match(r'[0-9]+', e)]
+        conditions = self._choices_for_request_conditions(
+            query,
+            self.search_fields,
+        )
+        choices = self.order_choices(
+            self.choices.get_approved_and_pending(
+                self.request.user
+            ).filter(conditions).exclude(pk__in=exclude)
+        )[0:self.limit_choices]
+
+        query, jurisdiction = self._split_jurisdiction(query)
+        fuzzy_choices = self._fuzzy_choices(
+            query,
+            exclude,
+            jurisdiction,
+            choices,
+        )
+        choices = list(choices) + [c[2] for c in fuzzy_choices]
+        new_agency = self._create_new_agency(query, jurisdiction, choices)
+        if new_agency is not None:
+            choices.append(new_agency)
+        return choices
+
+    def _create_new_agency(self, query, jurisdiction, choices):
+        """If there are no exact matches, give the option to create a new one"""
+        if not query.lower() in [c.name.lower() for c in choices]:
+            name = re.sub(r'\$', '', capwords(query))
+            new_agency = Agency(
+                name=name,
+                jurisdiction=jurisdiction,
+                status='pending',
+            )
+            return new_agency
+        else:
+            return None
+
     def validate_values(self):
         """Handle validating new agencies"""
         p_existing = re.compile(r'[0-9]')
@@ -192,10 +225,6 @@ class AgencyComposerAutocomplete(autocomplete_light.AutocompleteModelTemplate):
                 if not isinstance(x, basestring) or re.match(r'[0-9]+', x)
             ]
         )
-
-    def order_choices(self, choices):
-        """Order choices by popularity"""
-        return choices.annotate(count=Count('foiarequest')).order_by('-count')
 
 
 class AgencyAdminAutocomplete(AgencyAutocomplete):
@@ -221,6 +250,7 @@ class AgencyAppealAdminAutocomplete(AgencyAdminAutocomplete):
 
 
 autocomplete_light.register(Agency, AgencyAutocomplete)
+autocomplete_light.register(Agency, AgencyEasySearchAutocomplete)
 autocomplete_light.register(Agency, AgencyComposerAutocomplete)
 autocomplete_light.register(Agency, AgencyAdminAutocomplete)
 autocomplete_light.register(Agency, AgencyAppealAdminAutocomplete)
