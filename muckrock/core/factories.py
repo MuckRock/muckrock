@@ -9,7 +9,7 @@ from django.utils.text import slugify
 
 # Standard Library
 import datetime
-import uuid
+from uuid import uuid4
 
 # Third Party
 import factory
@@ -31,7 +31,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Profile
 
-    uuid = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid4)
 
     user = factory.SubFactory(
         'muckrock.core.factories.UserFactory',
