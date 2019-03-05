@@ -65,6 +65,11 @@ class AccountsView(RedirectView):
     url = '{}/selectplan/'.format(settings.SQUARELET_URL)
 
 
+class AccountsUpgradeView(RedirectView):
+    """Accounts upgrade view redirects to squarelet"""
+    url = '{}/users/~payment/'.format(settings.SQUARELET_URL)
+
+
 def account_logout_helper(request, url):
     """Logout helper to specify the URL"""
     if 'id_token' in request.session:
