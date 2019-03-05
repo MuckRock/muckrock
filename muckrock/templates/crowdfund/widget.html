@@ -47,8 +47,8 @@
     <footer class="crowdfund__widget__footer">
       <form method="POST" action="{{ endpoint }}" class="stripe-checkout crowdfund-form" id="crowdfund-form">
         {% csrf_token %}
-        <input type="hidden" name="stripe_token" value="" />
-        <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
+        <input type="hidden" id="id_stripe_token" name="stripe_token" value="" />
+        <input type="hidden" id="id_stripe_pk" name="stripe_pk" value="{{ stripe_pk }}" />
         <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
         <input type="hidden" name="stripe_email" value="{{ user_email }}" />
         <input type="hidden" name="stripe_label" value="Contribute" />
