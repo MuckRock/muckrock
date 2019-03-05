@@ -14,7 +14,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 # MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.organization.forms import StripeForm
+from muckrock.organization.forms import OrganizationChoiceField, StripeForm
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
@@ -49,14 +49,15 @@ class EmailSettingsForm(forms.ModelForm):
 class OrgPreferencesForm(forms.ModelForm):
     """A form for updating user organization preferences"""
 
-    active_org = forms.ModelChoiceField(
+    active_org = OrganizationChoiceField(
         queryset=Organization.objects.none(), empty_label=None
     )
 
     def __init__(self, *args, **kwargs):
         super(OrgPreferencesForm, self).__init__(*args, **kwargs)
-        self.fields['active_org'
-                    ].queryset = self.instance.user.organizations.all()
+        self.fields['active_org'].queryset = (
+            self.instance.user.organizations.order_by('-individual', 'name')
+        )
         self.fields['active_org'].initial = self.instance.organization
 
     def save(self, *args, **kwargs):
