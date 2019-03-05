@@ -46,3 +46,4 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         read_only_fields = ('date', 'slug')
+        fields = '__all__'

@@ -76,3 +76,4 @@ class CrowdsourceResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CrowdsourceResponse
+        fields = '__all__'

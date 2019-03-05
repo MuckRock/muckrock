@@ -13,6 +13,7 @@ from django.test import RequestFactory, TestCase
 import logging
 
 # Third Party
+import mock
 import nose.tools
 from actstream.models import Action
 from mock import ANY, Mock, patch
@@ -20,13 +21,28 @@ from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.accounts.models import Notification
-from muckrock.core.factories import AnswerFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyFactory,
+    AnswerFactory,
+    ArticleFactory,
+    QuestionFactory,
+    UserFactory,
+)
 from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm, StripeForm
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
 from muckrock.core.utils import new_action, notify
 from muckrock.core.views import DonationFormView, NewsletterSignupView
+from muckrock.crowdsource.factories import CrowdsourceResponseFactory
+from muckrock.foia.factories import FOIARequestFactory
+from muckrock.task.factories import (
+    FlaggedTaskFactory,
+    NewAgencyTaskFactory,
+    OrphanTaskFactory,
+    ResponseTaskFactory,
+    SnailMailTaskFactory,
+)
 
 # pylint: disable=too-many-public-methods
 
@@ -93,6 +109,20 @@ def get_404(client, url):
 class TestFunctional(TestCase):
     """Functional tests for top level"""
 
+    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    def setUp(self):
+        AgencyFactory()
+        ArticleFactory()
+        CrowdsourceResponseFactory()
+        FOIARequestFactory()
+        FlaggedTaskFactory()
+        NewAgencyTaskFactory()
+        OrphanTaskFactory()
+        QuestionFactory()
+        ResponseTaskFactory()
+        SnailMailTaskFactory()
+        UserFactory()
+
     # tests for base level views
     def test_views(self):
         """Test views"""
@@ -118,20 +148,23 @@ class TestFunctional(TestCase):
         user = UserFactory(username='super', is_staff=True)
         self.client.force_login(user)
         api_objs = [
-            'jurisdiction',
             'agency',
-            'foia',
-            'question',
-            'statistics',
             'communication',
-            'user',
-            'news',
-            'task',
-            'orphantask',
-            'snailmailtask',
+            'crowdsource-response',
+            'exemption',
             'flaggedtask',
+            'foia',
+            'jurisdiction',
             'newagencytask',
+            'news',
+            'orphantask',
+            'photos',
+            'question',
             'responsetask',
+            'snailmailtask',
+            'statistics',
+            'task',
+            'user',
         ]
         for obj in api_objs:
             get_allowed(self.client, reverse('api-%s-list' % obj))
