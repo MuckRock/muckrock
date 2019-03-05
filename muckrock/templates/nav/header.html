@@ -167,7 +167,7 @@
           {% if user.is_authenticated %}
             <li class="dropdown dropdown--right">
               <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
-                {% sorl_thumbnail profile.avatar_url "62x62" as avatar %}
+                {% sorl_thumbnail user.profile.avatar_url "62x62" as avatar %}
                   <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
                 {% empty %}
                   <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
