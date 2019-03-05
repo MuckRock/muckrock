@@ -85,17 +85,16 @@ def coverage(settings='test', reuse='0'):
 @task
 def coverage_(settings='test', reuse='0'):
     """Run the tests and generate a coverage report"""
-    cmd = DOCKER_COMPOSE_RUN_OPT.format(
+    cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
         opt='-e REUSE_DB={reuse}'.format(reuse=reuse),
         service='django',
-        cmd=
-        'coverage run --branch --source muckrock --omit="*/migrations/*" manage.py test --settings=muckrock.settings.{settings}'
-        .format(settings=settings)
+        cmd='sh -c \'coverage erase && '
+        'coverage run --branch --source muckrock --omit="*/migrations/*" '
+        'manage.py test --settings=muckrock.settings.{settings} && '
+        'coverage html -i\''.format(settings=settings)
     )
     with env.cd(env.base_path):
-        env.run(DJANGO_RUN.format(cmd='coverage erase'))
         env.run(cmd)
-        env.run(DJANGO_RUN.format(cmd='coverage html'))
 
 
 @task
