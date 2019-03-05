@@ -36,6 +36,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
+        fields = '__all__'
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -43,3 +44,4 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
+        fields = '__all__'
