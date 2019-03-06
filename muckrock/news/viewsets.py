@@ -55,4 +55,4 @@ class PhotoViewSet(viewsets.ModelViewSet):
     model = Photo
     serializer_class = PhotoSerializer
     permission_classes = (DjangoModelPermissions,)
-    queryset = Photo.objects.all()
+    queryset = Photo.objects.order_by('image')

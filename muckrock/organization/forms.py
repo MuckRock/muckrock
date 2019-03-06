@@ -74,10 +74,14 @@ class StripeForm(forms.Form):
             self.fields['organization'].queryset = queryset
             self.fields['organization'
                         ].initial = self._user.profile.individual_organization
-            self.fields['use_card_on_file'].choices = (
-                (True, self._user.profile.individual_organization.card),
-                (False, 'New Card'),
-            )
+            if self._user.profile.individual_organization.card:
+                self.fields['use_card_on_file'].choices = (
+                    (True, self._user.profile.individual_organization.card),
+                    (False, 'New Card'),
+                )
+            else:
+                del self.fields['use_card_on_file']
+                self.fields['stripe_token'].required = True
 
         # if anonymous user is given
         elif not self._user.is_authenticated:
