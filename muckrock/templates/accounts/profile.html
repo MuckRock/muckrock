@@ -120,7 +120,7 @@
             {{ field }}
           {% endfor %}
         </div>
-        {% include "lib/pattern/buy_requests.html" with user=user form=form stripe_pk=stripe_pk admin_organizations=admin_organizations only %}
+        {% include "lib/pattern/buy_requests.html" with user=user form=form admin_organizations=admin_organizations only %}
         <button class="blue button" type="submit">Buy Requests</button>
       </form>
     </section>
