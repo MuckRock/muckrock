@@ -31,7 +31,9 @@ class Organization(models.Model):
 
     objects = OrganizationQuerySet.as_manager()
 
-    uuid = models.UUIDField('UUID', unique=True, editable=False, default=uuid4)
+    uuid = models.UUIDField(
+        'UUID', unique=True, editable=False, default=uuid4, db_index=True
+    )
 
     users = models.ManyToManyField(
         User, through="organization.Membership", related_name='organizations'

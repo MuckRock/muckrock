@@ -68,7 +68,9 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, blank=True)
-    uuid = models.UUIDField(unique=True, editable=False, default=uuid4)
+    uuid = models.UUIDField(
+        unique=True, editable=False, default=uuid4, db_index=True
+    )
     source = models.CharField(
         max_length=20,
         blank=True,
