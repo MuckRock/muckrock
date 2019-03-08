@@ -484,6 +484,7 @@ class MyOrgRequestList(UserPassesTestMixin, RequestList):
 
     def test_func(self):
         """User must have a non-individual org"""
+        # XXX what should this do if it fails?
         user = self.request.user
         return user.is_authenticated and not user.profile.organization.individual
 

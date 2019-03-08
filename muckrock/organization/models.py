@@ -76,6 +76,14 @@ class Organization(models.Model):
     def __unicode__(self):
         return self.name
 
+    @property
+    def display_name(self):
+        """Display 'Personal Accoubnt' for individual organizations"""
+        if self.individual:
+            return u'Personal Account'
+        else:
+            return self.name
+
     def get_absolute_url(self):
         """The url for this object"""
         return reverse('org-detail', kwargs={'slug': self.slug})

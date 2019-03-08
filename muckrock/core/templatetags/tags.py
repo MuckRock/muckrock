@@ -443,3 +443,9 @@ def do_compress_cache(parser, token):
 def sorl_thumbnail(parser, token):
     """Wrapper for sorl thumbnail tag to resolve name clash with easy thumbnails"""
     return thumbnail(parser, token)
+
+
+@register.filter
+def nbsp(value):
+    """Replace spaces with non-breaking spaces"""
+    return mark_safe('&nbsp;'.join(value.split(' ')))

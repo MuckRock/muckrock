@@ -38,11 +38,20 @@ def get_unread_notifications(user):
 
 
 def get_organization(user):
-    """Gets organization, if it exists"""
+    """Gets a users active organization"""
 
     return cache_get_or_set(
         'sb:%s:user_org' % user.username, lambda: user.profile.organization,
         settings.DEFAULT_CACHE_TIMEOUT
+    )
+
+
+def get_organizations(user):
+    """Gets all of the users organizations"""
+
+    return cache_get_or_set(
+        'sb:%s:user_orgs' % user.username, lambda: user.organizations.
+        order_by('-individual', 'name'), settings.DEFAULT_CACHE_TIMEOUT
     )
 
 
@@ -66,6 +75,8 @@ def sidebar_info(request):
                 get_actionable_requests(request.user),
             'organization':
                 get_organization(request.user),
+            'organizations':
+                get_organizations(request.user),
             'my_projects':
                 Project.objects.get_for_contributor(request.user).optimize()
                 [:4],

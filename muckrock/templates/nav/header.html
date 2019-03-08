@@ -77,7 +77,7 @@
                 <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
                 <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
                 <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist-drafts' %}">Drafts</a></li>
-                {% if organization %}
+                {% if organization and not organization.individual %}
                   <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
                 {% endif %}
                 <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
@@ -238,6 +238,34 @@
                 <li><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
               </ul>
             </li>
+
+            {% if organizations|length > 1 %}
+              <li class="dropdown dropdown--right">
+                <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container" data-for="#org-dropdown">
+                  <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
+                  <span class="label">{{ organization.display_name }}</span>
+                </a>
+                <ul id="org-dropdown">
+                  {# <li class="title">Select one of your organizations to activate</li> #}
+                  {% for org in organizations %}
+                    {% if org != organization %}
+                      <li>
+                        <form action="{% url "org-activate" %}" method="post">
+                          {% csrf_token %}
+                          <input type="hidden" name="next" value="{{ request.path }}">
+                          <input type="hidden" name="organization" value="{{ org.pk }}">
+                          <button class="black nav-item align-center avatar-container">
+                            <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="21" width="21">
+                            <span class="label">{{ org.display_name|nbsp }}</span>
+                          </button>
+                        </form>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endif %}
+
             <li>
               {% with unread_notifications_count=unread_notifications.count %}
                 {% if unread_notifications_count > 0 %}

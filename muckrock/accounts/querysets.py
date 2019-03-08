@@ -2,6 +2,7 @@
 
 # Django
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models, transaction
 
 # Standard Library
@@ -117,6 +118,9 @@ class ProfileQuerySet(models.QuerySet):
             user.memberships.filter(
                 organization__individual=True,
             ).update(active=True)
+            active_changed = True
+        else:
+            active_changed = False
 
         # never remove the user's individual organization
         individual_organization = user.memberships.get(
@@ -128,4 +132,13 @@ class ProfileQuerySet(models.QuerySet):
             )
             current_organizations.remove(individual_organization)
 
-        user.memberships.filter(organization__in=current_organizations).delete()
+        total_deleted, _ = user.memberships.filter(
+            organization__in=current_organizations
+        ).delete()
+
+        if new_memberships or total_deleted or active_changed:
+            # remove the orgs from the cache if they changed
+            cache.delete_many([
+                'sb:{}:user_org'.format(user.username),
+                'sb:{}:user_orgs'.format(user.username),
+            ])

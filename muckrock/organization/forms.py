@@ -15,10 +15,7 @@ class OrganizationChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
         """Change individual organization label to personal account"""
-        if obj.individual:
-            return 'Personal Account'
-        else:
-            return super(OrganizationChoiceField, self).label_from_instance(obj)
+        return obj.display_name
 
 
 class StripeForm(forms.Form):
