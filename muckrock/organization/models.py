@@ -45,6 +45,7 @@ class Organization(models.Model):
     individual = models.BooleanField(default=True)
     plan = models.ForeignKey('organization.Plan', null=True)
     card = models.CharField(max_length=255, blank=True)
+    avatar_url = models.URLField(max_length=255, blank=True)
 
     requests_per_month = models.IntegerField(
         default=0,
@@ -136,6 +137,7 @@ class Organization(models.Model):
             'date_update',
             'card',
             'payment_failed',
+            'avatar_url',
         ]
         for field in fields:
             if field in data:

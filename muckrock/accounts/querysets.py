@@ -1,6 +1,7 @@
 """Custom querysets for account app"""
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models, transaction
@@ -118,9 +119,6 @@ class ProfileQuerySet(models.QuerySet):
             user.memberships.filter(
                 organization__individual=True,
             ).update(active=True)
-            active_changed = True
-        else:
-            active_changed = False
 
         # never remove the user's individual organization
         individual_organization = user.memberships.get(
@@ -132,13 +130,16 @@ class ProfileQuerySet(models.QuerySet):
             )
             current_organizations.remove(individual_organization)
 
-        total_deleted, _ = user.memberships.filter(
-            organization__in=current_organizations
-        ).delete()
+        user.memberships.filter(organization__in=current_organizations).delete()
 
-        if new_memberships or total_deleted or active_changed:
-            # remove the orgs from the cache if they changed
-            cache.delete_many([
-                'sb:{}:user_org'.format(user.username),
-                'sb:{}:user_orgs'.format(user.username),
-            ])
+        # update cache after updating orgs
+        cache.set(
+            'sb:{}:user_org'.format(user.username),
+            organization,
+            settings.DEFAULT_CACHE_TIMEOUT,
+        )
+        cache.set(
+            'sb:{}:user_orgs'.format(user.username),
+            user.organiations.order_by('-individual', 'name'),
+            settings.DEFAULT_CACHE_TIMEOUT,
+        )

@@ -189,6 +189,15 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   }
 }
 
+// Some nav-items are for informational purposes only
+.nav-item.nolink {
+  cursor: auto;
+}
+
+.global-navigation .black.nav-item + ul .nav-item.nolink:hover {
+  background: inherit;
+}
+
 /* We drop down a search form when search is triggered, by using the .visible trigger. */
 
 .global-search {
@@ -281,27 +290,20 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
         display: block;
       }
     }
-    #org-dropdown {
-      .title {
-        color: $color-white;
-        font-style: italic;
-        padding: 0.5em;
-      }
-      button {
-        margin-right: 1em;
-        display: inline-block;
-        width: 100%;
-        height: 42px;
-        min-width: 42px;
-        margin-bottom: 0;
-        padding: $vr/2;
-        vertical-align: middle;
-        font-weight: $bold;
-        text-align: left;
-        cursor: pointer;
-        color: $color-white;
-        border: 0;
-      }
+    button {
+      margin-right: 1em;
+      display: inline-block;
+      width: 100%;
+      height: 42px;
+      min-width: 42px;
+      margin-bottom: 0;
+      padding: $vr/2;
+      vertical-align: middle;
+      font-weight: $bold;
+      text-align: left;
+      cursor: pointer;
+      color: $color-white;
+      border: 0;
     }
     /*
     When a list item is hovered, display the dropdown.

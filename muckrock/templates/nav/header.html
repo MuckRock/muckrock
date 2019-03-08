@@ -173,7 +173,16 @@
                   <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
                 {% endthumbnail %}
                 <span class="label">{{ user.profile.full_name }}</span>
+                {% if not organization.individual %}
+                  {% sorl_thumbnail organization.avatar_url "62x62" as avatar %}
+                    <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
+                  {% empty %}
+                    <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
+                  {% endthumbnail %}
+                  <span class="label">{{ organization.display_name }}</span>
+                {% endif %}
               </a>
+
               <ul id="profile-dropdown">
                 {% if payment_failed %}
                   <li class="error message small">
@@ -232,21 +241,13 @@
                 {% if my_projects %}
                   <li><a class="nav-item" href="{% url 'project-contributor' username=request.user.username %}">Your&nbsp;Projects</a></li>
                 {% endif %}
-                {% if organization %}
+                {% if not organization.individual %}
                   <li><a class="nav-item" href="{{organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
                 {% endif %}
-                <li><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
-              </ul>
-            </li>
+                <li class="{% if organizations|length > 1 %}separator{% endif %}"><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
 
-            {% if organizations|length > 1 %}
-              <li class="dropdown dropdown--right">
-                <a href="{% url 'acct-my-profile' %}" class="black nav-item align-center avatar-container" data-for="#org-dropdown">
-                  <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
-                  <span class="label">{{ organization.display_name }}</span>
-                </a>
-                <ul id="org-dropdown">
-                  {# <li class="title">Select one of your organizations to activate</li> #}
+                {% if organizations|length > 1 %}
+                  <li class="separator nav-item nolink">Switch Organization</li>
                   {% for org in organizations %}
                     {% if org != organization %}
                       <li>
@@ -255,16 +256,21 @@
                           <input type="hidden" name="next" value="{{ request.path }}">
                           <input type="hidden" name="organization" value="{{ org.pk }}">
                           <button class="black nav-item align-center avatar-container">
-                            <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="21" width="21">
+                            {% sorl_thumbnail org.avatar_url "62x62" as avatar %}
+                              <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
+                            {% empty %}
+                              <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
+                            {% endthumbnail %}
                             <span class="label">{{ org.display_name|nbsp }}</span>
                           </button>
                         </form>
                       </li>
                     {% endif %}
                   {% endfor %}
-                </ul>
-              </li>
-            {% endif %}
+                {% endif %}
+
+              </ul>
+            </li>
 
             <li>
               {% with unread_notifications_count=unread_notifications.count %}
