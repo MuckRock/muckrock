@@ -175,13 +175,15 @@ class Organization(models.Model):
         self.number_requests = F('number_requests') + amount
         self.save()
 
-    def pay(self, amount, description, token, save_card):
+    def pay(self, amount, description, token, save_card, fee_amount=0):
         """Pay via Squarelet API"""
+        # pylint: disable=too-many-arguments
         resp = squarelet_post(
             '/api/charges/',
             data={
                 'organization': self.uuid,
                 'amount': amount,
+                'fee_amount': fee_amount,
                 'description': description,
                 'token': token,
                 'save_card': save_card,

@@ -224,26 +224,6 @@ class TestFOIAViews(TestCase):
             )
         )
 
-    def test_action_views(self):
-        """Test action views"""
-
-        user = UserFactory(username='adam')
-        self.client.force_login(user)
-
-        foia = FOIARequestFactory(status='payment')
-        get_allowed(
-            self.client,
-            reverse(
-                'foia-pay',
-                kwargs={
-                    'jurisdiction': foia.jurisdiction.slug,
-                    'jidx': foia.jurisdiction.pk,
-                    'idx': foia.pk,
-                    'slug': foia.slug
-                }
-            )
-        )
-
 
 class TestRequestDetailView(TestCase):
     """Request detail views support a wide variety of interactions"""

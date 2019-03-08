@@ -99,56 +99,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
 
 @login_required
-def pay_request(request, jurisdiction, jidx, slug, idx):
-    """Pay us through CC for the payment on a request"""
-    foia = get_object_or_404(
-        FOIARequest,
-        agency__jurisdiction__slug=jurisdiction,
-        agency__jurisdiction__pk=jidx,
-        slug=slug,
-        pk=idx,
-    )
-    token = request.POST.get('stripe_token')
-    email = request.POST.get('stripe_email')
-    email = validate_stripe_email(email)
-    amount = request.POST.get('stripe_amount')
-    if request.method == 'POST':
-        error_msg = None
-        if not token:
-            error_msg = 'Missing Stripe token.'
-        if not email:
-            error_msg = 'Missing email address.'
-        if not amount:
-            error_msg = 'Missing payment amount.'
-        if error_msg is not None:
-            messages.error(request, 'Payment error: %s' % error_msg)
-            logger.warning(
-                'Payment error: %s', error_msg, exc_info=sys.exc_info()
-            )
-            return redirect(foia)
-        try:
-            metadata = {
-                'email': email,
-                'action': 'request-fee',
-                'foia': foia.pk
-            }
-            amount = int(amount)
-            request.user.profile.pay(token, amount, metadata)
-            foia.pay(request.user, amount / 100.0)
-        except (
-            stripe.InvalidRequestError, stripe.CardError, ValueError
-        ) as exception:
-            messages.error(request, 'Payment error: %s' % exception)
-            logger.warning(
-                'Payment error: %s', exception, exc_info=sys.exc_info()
-            )
-            return redirect(foia)
-        msg = 'Your payment was successful. We will get this to the agency right away!'
-        messages.success(request, msg)
-    return redirect(foia)
-
-
-@login_required
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = get_object_or_404(

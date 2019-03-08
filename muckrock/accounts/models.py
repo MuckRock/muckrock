@@ -242,24 +242,6 @@ class Profile(models.Model):
         """Is this an agency user?"""
         return self.agency is not None
 
-    def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
-        """
-        Creates a Stripe charge for the user.
-        Should always expect a 1-cent based integer (e.g. $1.00 = 100)
-        Should apply a baseline fee (5%) to all payments.
-        """
-        modified_amount = int(amount + (amount * fee))
-        if not metadata.get('email') or not metadata.get('action'):
-            raise ValueError('The charge metadata is malformed.')
-        stripe_retry_on_error(
-            stripe.Charge.create,
-            amount=modified_amount,
-            currency='usd',
-            source=token,
-            metadata=metadata,
-            idempotency_key=True,
-        )
-
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
         if not self.use_autologin:

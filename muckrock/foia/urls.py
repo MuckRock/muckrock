@@ -85,7 +85,6 @@ urlpatterns = [
     ),
     url(r'^%s/follow/$' % foia_url, views.follow, name='foia-follow'),
     url(r'^%s/embargo/$' % foia_url, views.embargo, name='foia-embargo'),
-    url(r'^%s/pay/$' % foia_url, views.pay_request, name='foia-pay'),
     url(
         r'^%s/toggle-followups/$' % foia_url,
         views.toggle_autofollowups,
