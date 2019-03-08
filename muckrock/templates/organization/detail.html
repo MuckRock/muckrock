@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block title %}{{ organization.name }}{% endblock %}
+
+{% block content %}
+  <div class="organization detail">
+    <aside class="sidebar">
+      <h1>{{ organization.name }}</h1>
+      {% if is_member or is_staff %}
+        <div class="status">
+          <p class="active badge">{{ organization.plan }}</p>
+          <div class="available requests">
+            <dfn>Monthly Requests</dfn>
+            <div>
+              <div class="progress"><span class="meter" style="width: {{ request_progress }}%"></span></div>
+              <p>{{ organization.monthly_requests }}/{{ organization.requests_per_month }}</p>
+            </div>
+            <p>Request count will refresh on {{ organization.date_update|date }}.</p>
+            <dfn>Requests Remaining</dfn>
+            <p>{{ organization.number_requests }}</p>
+          </div>
+        </div>
+      {% endif %}
+      <div class="actions">
+        <a href="{% url "org-squarelet" organization.slug %}">Update</a>
+      </div>
+    </aside>
+    <main>
+    <ul class="tab-list">
+      <li><a class="tab" href="#members">
+          <span class="counter">{{ members|length }}</span> Member{{ members|pluralize }}
+        </a></li>
+        <li><a class="tab" href="#requests">
+            <span class="counter">{{ requests.count }}</span> Request{{ requests.count|pluralize }}
+          </a></li>
+    </ul>
+    <div class="tab-sections">
+      <section class="active tab-section" id="requests">
+        {% if requests.count > 0 %}
+          {% if requests.filed %}
+            <h2>Recently Filed</h2>
+            {% if is_admin or is_member %}
+              <p><a href="{% url "foia-org-list" %}?sort=date_submitted&order=desc">View all</a></p>
+            {% endif %}
+            {% include 'lib/foia_table.html' with requests=requests.filed %}
+          {% endif %}
+          {% if requests.completed %}
+            <h2>Recently Completed</h2>
+            {% if is_admin or is_member %}
+              <p><a href="{% url "foia-org-list" %}?sort=date_done&order=desc&status=done">View all</a></p>
+            {% endif %}
+            {% include 'lib/foia_table.html' with requests=requests.completed %}
+          {% endif %}
+        {% else %}
+          <p class="empty">This organization has no associated requests.</p>
+        {% endif %}
+      </section>
+      <section class="tab-section" id="members">
+        {% if members %}
+          <table class="members">
+            <tbody>
+              {% for member in members %}
+                <tr class="member">
+                  <td class="name"><a href="{{ member.get_absolute_url }}">{{ member.profile.full_name|default:"(None)" }}</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="empty">This organization has no members.</p>
+        {% endif %}
+      </section>
+    </div>
+    </main>
+  </div>
+{% endblock content %}
+
+{% block scripts %}
+  <script type="text/javascript">
+function activate(element) {
+  console.log(element);
+  $(element).addClass('active');
+  $(element).siblings().removeClass('active');
+}
+  $('.tab').click(function(){
+  var sectionName = $(this).data('section');
+  var selector = '#' + sectionName;
+  var section = $('.tab-sections').find(selector);
+  activate(this);
+  activate(section);
+});
+  $('.tabs').children().first().click();
+  </script>
+{% endblock scripts %}

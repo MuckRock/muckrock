@@ -1,0 +1,14 @@
+{% extends 'base_list.html' %}
+{% block title %}MuckRock &bull; Organizations{% endblock title %}
+{% block list-title %}Organizations{% endblock list-title %}
+{% block list-type %}organization{% endblock list-type %}
+
+{% block list-table-head %}
+  <th data-sort="name">Name</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+  {% with object as organization %}
+    <td><a href="{{ organization.get_absolute_url }}">{{ organization.name }}</a></td>
+  {% endwith %}
+{% endblock list-table-row %}

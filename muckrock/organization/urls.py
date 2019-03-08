@@ -17,4 +17,9 @@ urlpatterns = [
         views.OrganizationDetailView.as_view(),
         name='org-detail'
     ),
+    url(
+        r'^(?P<slug>[\w-]+)/update/$',
+        views.OrganizationSquareletView.as_view(),
+        name='org-squarelet'
+    ),
 ]
