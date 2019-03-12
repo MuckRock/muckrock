@@ -39,7 +39,6 @@ class Command(BaseCommand):
 
     def export_users(self):
         """Export users"""
-        # XXX this needs to be redone
         key = self.bucket.new_key('squarelet_export/users.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
@@ -53,10 +52,13 @@ class Command(BaseCommand):
                 'is_active',
                 'is_superuser',
                 'email_confirmed',
+                'email_failed',
+                'is_agency',
+                'avatar_url',
+                'use_autologin',
+                'source',
             ])
-            for user in User.objects.select_related('profile').exclude(
-                profile__acct_type='agency'
-            ):
+            for user in User.objects.select_related('profile'):
                 writer.writerow([
                     user.profile.uuid,
                     user.username,
@@ -67,6 +69,11 @@ class Command(BaseCommand):
                     user.is_active,
                     user.is_superuser,
                     user.profile.email_confirmed,
+                    user.profile.email_failed,
+                    user.profile.agency is not None,
+                    user.profile.avatar.url,
+                    user.profile.use_autologin,
+                    'muckrock',
                 ])
 
     def export_orgs(self):
@@ -83,11 +90,12 @@ class Command(BaseCommand):
                 'private',
                 'customer_id',
                 'subscription_id',
+                'payment_failed',
                 'date_update',
-                'num_requests',
                 'max_users',
-                'monthly_cost',
+                'requests_per_month',
                 'monthly_requests',
+                'number_requests',
             ])
             for org in Organization.objects.select_related(
                 'owner__profile'
@@ -102,11 +110,12 @@ class Command(BaseCommand):
                     org.private,
                     org.owner.profile.customer_id,
                     org.stripe_id,
+                    org.owner.profile.payment_failed,
                     org.date_update,
-                    org.num_requests,
                     org.max_users,
-                    org.monthly_cost,
-                    org._monthly_requests,
+                    org.requests_per_month,
+                    org.monthly_requests,
+                    org.number_requests,
                 ])
 
     def export_members(self):
@@ -123,7 +132,7 @@ class Command(BaseCommand):
             ])
             for member in Membership.objects.select_related(
                 'user__profile', 'organization'
-            ).exclude(user__profile__acct_type='agency'):
+            ):
                 writer.writerow([
                     member.user.profile.uuid,
                     member.organization.uuid,

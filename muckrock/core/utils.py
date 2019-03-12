@@ -218,8 +218,13 @@ def get_squarelet_access_token():
                     settings.SOCIAL_AUTH_SQUARELET_SECRET,
                 )
                 data = {'grant_type': 'client_credentials'}
+                headers = {
+                    'X-Bypass-Rate-Limit': settings.BYPASS_RATE_LIMIT_SECRET
+                }
                 logger.info(token_url)
-                resp = requests.post(token_url, data=data, auth=auth)
+                resp = requests.post(
+                    token_url, data=data, auth=auth, headers=headers
+                )
                 resp.raise_for_status()
                 resp_json = resp.json()
                 access_token = resp_json['access_token']
@@ -236,7 +241,10 @@ def _squarelet(method, path, **kwargs):
     """Helper function for squarelet requests"""
     api_url = '{}{}'.format(settings.SQUARELET_URL, path)
     access_token = get_squarelet_access_token()
-    headers = {'Authorization': 'Bearer {}'.format(access_token)}
+    headers = {
+        'Authorization': 'Bearer {}'.format(access_token),
+        'X-Bypass-Rate-Limit': settings.BYPASS_RATE_LIMIT_SECRET,
+    }
     return method(api_url, headers=headers, **kwargs)
 
 

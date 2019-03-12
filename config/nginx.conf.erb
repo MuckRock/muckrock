@@ -47,7 +47,7 @@ http {
         "~^1:" "";
         <% if ENV.key?('BYPASS_RATE_LIMIT_SECRET') %>
             # passed the secret in the header, do not rate limit
-            "0:<%= ENV['BYPASS_RATE_LIMIT_SECRET'] %>" ""
+            "0:<%= ENV['BYPASS_RATE_LIMIT_SECRET'] %>" "";
         <% end %>
     }
 
