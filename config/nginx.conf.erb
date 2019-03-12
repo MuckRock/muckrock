@@ -33,16 +33,22 @@ http {
     <% end %>
 	include block_nobis.conf;
 
-    geo $limit {
-        default 1;
+    geo $whitelist {
+        default 0;
         <% ENV.fetch('NO_LIMIT_IPS', '').split(',').each do |ip| %>
-            <%= ip %> 0;
+            <%= ip %> 1;
         <% end %>
     }
 
-    map $limit $limit_key {
-        0 "";
-        1 $binary_remote_addr;
+    map "$whitelist:$http_x_bypass_rate_limit" $limit_key {
+        # default is to limit by ip address
+        default $binary_remote_addr;
+        # on the whitelist, do not rate limit
+        "~^1:" "";
+        <% if ENV.key?('BYPASS_RATE_LIMIT_SECRET') %>
+            # passed the secret in the header, do not rate limit
+            "0:<%= ENV['BYPASS_RATE_LIMIT_SECRET'] %>" ""
+        <% end %>
     }
 
 	limit_req_zone $limit_key zone=one:10m rate=1r/s;
