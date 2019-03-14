@@ -186,7 +186,7 @@ def pip():
 
 
 @task(name='populate-db')
-def populate_db():
+def populate_db(db_name='muckrock'):
     """Populate the local DB with the data from the latest heroku backup"""
     # https://devcenter.heroku.com/articles/heroku-postgres-import-export
 
@@ -198,8 +198,12 @@ def populate_db():
         return
 
     with env.cd(env.base_path):
-        env.run('dropdb muckrock')
-        env.run('heroku pg:pull DATABASE muckrock --app muckrock')
+        env.run('dropdb {}'.format(db_name))
+        env.run(
+            'heroku pg:pull DATABASE {} --app muckrock '
+            '--exclude-table-data="public.reversion_version;public.foia_rawemail"'.
+            format(db_name)
+        )
 
 
 @task(name='sync-aws')

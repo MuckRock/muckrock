@@ -15,6 +15,7 @@ services:
       - postgres
     volumes:
       - .:/app
+      - ~/.netrc:/root/.netrc
     environment:
       - IPYTHONDIR=/app/.ipython
     env_file:

@@ -25,6 +25,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   # for imagediet
   #&& apt-get install libmagic
 
+# heroku cli
+RUN curl https://cli-assets.heroku.com/install.sh | sh
+
 # install NVM
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 5.6.0
