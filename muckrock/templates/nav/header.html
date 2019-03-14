@@ -247,7 +247,7 @@
                 <li class="{% if organizations|length > 1 %}separator{% endif %}"><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
 
                 {% if organizations|length > 1 %}
-                  <li class="separator nav-item nolink">Switch Organization</li>
+                  <li class="separator nav-item nolink">Switch&nbsp;Organization</li>
                   {% for org in organizations %}
                     {% if org != organization %}
                       <li>
@@ -261,7 +261,7 @@
                             {% empty %}
                               <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
                             {% endthumbnail %}
-                            <span class="label">{{ org.display_name|nbsp }}</span>
+                            <span>{{ org.display_name|nbsp }}</span>
                           </button>
                         </form>
                       </li>

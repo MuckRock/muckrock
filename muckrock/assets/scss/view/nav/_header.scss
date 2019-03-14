@@ -129,7 +129,15 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       margin-top: 0;
     }
     .label {
-      display: inline;
+      display: inline-block;
+      max-width: 8em;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+  @media($label-bp-2) {
+    .label {
+      max-width: 12em;
     }
   }
 }
