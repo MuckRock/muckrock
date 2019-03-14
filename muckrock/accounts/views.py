@@ -211,7 +211,7 @@ class ProfileView(BuyRequestsMixin, FormView):
         elif self.request.user.is_authenticated:
             organizations = queryset.filter(
                 Q(private=False) | Q(users=self.request.user)
-            )
+            ).distinct()
         else:
             organizations = queryset.filter(private=False)
 
