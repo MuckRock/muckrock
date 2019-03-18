@@ -18,4 +18,9 @@ class Migration(migrations.Migration):
             name='slug',
             field=models.SlugField(blank=True, max_length=255),
         ),
+        migrations.AlterField(
+            model_name='organization',
+            name='name',
+            field=models.CharField(max_length=255),
+        ),
     ]

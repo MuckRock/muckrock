@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 # Django
 from django.db import migrations
+from django.utils.text import slugify
 
 # Standard Library
 import uuid
@@ -14,20 +15,42 @@ def create_memberships(apps, schema_editor):
     Membership = apps.get_model('organization', 'Membership')
     for org in Organization.objects.all():
         Membership.objects.bulk_create([
-            Membership(user=p.user, organization=org, active=True)
-            for p in org.members.all()
+            Membership(
+                user=p.user,
+                organization=org,
+                active=True,
+                admin=p.user == org.owner
+            ) for p in org.members.all()
         ])
         if not Membership.objects.filter(
             user=org.owner, organization=org
         ).exists():
             Membership.objects.create(
-                user=org.owner, organization=org, active=False
+                user=org.owner, organization=org, active=False, admin=True
             )
 
 
 def delete_memberships(apps, schema_editor):
     Membership = apps.get_model('organization', 'Membership')
     Membership.objects.all().delete()
+
+
+def generate_unqiue_slug(Organization, name):
+    original_slug = slug = slugify(name)[:255]
+    index = 1
+
+    while True:
+        if not Organization.objects.filter(slug=slug).exists():
+            return slug
+
+        index += 1
+
+        tail_length = len(str(index)) + 1
+        combined_length = len(original_slug) + tail_length
+        if combined_length > 255:
+            original_slug = original_slug[:255 - tail_length]
+
+        slug = '{}-{}'.format(original_slug, index)
 
 
 def create_individual_orgs(apps, schema_editor):
@@ -49,11 +72,9 @@ def create_individual_orgs(apps, schema_editor):
             org_type = 1  # pro
         else:
             org_type = 0  # free
-        Organization.objects.filter(name=user.username).update(
-            name=u'{} Org'.format(user.username)
-        )
         org = Organization.objects.create(
             name=user.username,
+            slug=generate_unqiue_slug(Organization, user.username),
             uuid=user.profile.uuid,
             private=True,
             individual=True,
@@ -67,6 +88,7 @@ def create_individual_orgs(apps, schema_editor):
             user=user,
             organization=org,
             active=not user.organizations.filter(active=True).exists(),
+            admin=True,
         )
 
 

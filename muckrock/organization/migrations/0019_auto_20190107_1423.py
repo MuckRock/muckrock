@@ -101,6 +101,16 @@ def migrate_plans(apps, schema_editor):
         new_plan=Plan.objects.get(slug='organization-plus')
     )
 
+    Organization.objects.filter(
+        individual=True, users__profile__acct_type='admin'
+    ).update(new_plan=Plan.objects.get(slug='admin'))
+    Organization.objects.filter(
+        individual=True, users__profile__acct_type='beta'
+    ).update(new_plan=Plan.objects.get(slug='beta'))
+    Organization.objects.filter(
+        individual=True, users__profile__acct_type='proxy'
+    ).update(new_plan=Plan.objects.get(slug='proxy'))
+
 
 class Migration(migrations.Migration):
 

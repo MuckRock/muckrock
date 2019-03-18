@@ -39,7 +39,7 @@ class Organization(models.Model):
         User, through="organization.Membership", related_name='organizations'
     )
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     private = models.BooleanField(default=False)
     individual = models.BooleanField(default=True)
