@@ -226,6 +226,26 @@ def sync_aws():
             )
 
 
+@task(name='sync-aws-staging')
+def sync_aws_staging():
+    """Sync images from AWS to match the production database"""
+
+    folders = [
+        'account_images',
+        'agency_images',
+        'jurisdiction_images',
+        'news_images',
+        'news_photos',
+        'project_images',
+    ]
+    with env.cd(env.base_path), warn_only():
+        for folder in folders:
+            env.run(
+                'aws s3 sync s3://muckrock/{folder} '
+                's3://muckrock-staging/{folder}'.format(folder=folder)
+            )
+
+
 @task
 def hello():
     """'Hello world' for testing purposes"""
