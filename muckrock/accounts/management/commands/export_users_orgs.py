@@ -105,6 +105,7 @@ class Command(BaseCommand):
                 'date_update',
                 'max_users',
                 'receipt_emails',
+                'avatar_url',
             ])
             total = Organization.objects.count()
             customer_ids = set()
@@ -139,6 +140,7 @@ class Command(BaseCommand):
                     org.date_update,
                     org.max_users,
                     ','.join(r.email for r in org.owner.receipt_emails.all()),
+                    org.owner.profile.avatar.name if org.individual else '',
                 ])
         print 'End Organization Export - {}'.format(timezone.now())
 
