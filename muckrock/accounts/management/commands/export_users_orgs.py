@@ -95,6 +95,7 @@ class Command(BaseCommand):
             writer.writerow([
                 'uuid',
                 'name',
+                'slug',
                 'plan',
                 'individual',
                 'private',
@@ -128,6 +129,7 @@ class Command(BaseCommand):
                 writer.writerow([
                     org.uuid,
                     org.name,
+                    org.slug,
                     org.plan.slug,
                     org.individual,
                     org.private,
