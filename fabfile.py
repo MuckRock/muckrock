@@ -242,7 +242,9 @@ def sync_aws_staging():
         for folder in folders:
             env.run(
                 'aws s3 sync s3://muckrock/{folder} '
-                's3://muckrock-staging/{folder}'.format(folder=folder)
+                's3://muckrock-staging/{folder} --acl public-read'.format(
+                    folder=folder
+                )
             )
 
 
