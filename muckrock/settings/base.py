@@ -308,6 +308,9 @@ CELERY_ROUTES = {
         'queue': 'phaxio'
     },
 }
+CELERY_REDIS_MAX_CONNECTIONS = os.environ.get('CELERY_REDIS_MAX_CONNECTIONS')
+if CELERY_REDIS_MAX_CONNECTIONS is not None:
+    CELERY_REDIS_MAX_CONNECTIONS = int(CELERY_REDIS_MAX_CONNECTIONS)
 
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
