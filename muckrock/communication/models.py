@@ -534,7 +534,7 @@ class EmailOpen(models.Model):
 
     device_type = models.CharField(max_length=10)
     user_agent = models.CharField(max_length=255)
-    ip_address = models.CharField(max_length=15, verbose_name='IP Address')
+    ip_address = models.CharField(max_length=45, verbose_name='IP Address')
 
     def __unicode__(self):
         return u'EmailOpen: %s - %s' % (self.email.pk, self.datetime)
