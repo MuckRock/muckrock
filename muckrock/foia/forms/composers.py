@@ -217,14 +217,23 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
         self.fields['num_requests'].required = False
         self.fields['stripe_token'].required = False
 
-    def clean(self):
-        """Buy request fields are only required when buying requests"""
-        cleaned_data = super(ComposerForm, self).clean()
-        action = cleaned_data.get('action')
-        num_requests = cleaned_data.get('num_requests', 0)
-        if (
-            action == 'submit' and num_requests > 0
-            and not self.cleaned_data.get('stripe_token')
+    def _clean_card_required(self, data):
+        action = data.get('action')
+        num_requests = data.get('num_requests', 0)
+
+        require_payment = action == 'submit' and num_requests > 0
+        card_on_file = 'use_card_on_file' in self.fields
+
+        if require_payment and card_on_file and not (
+            data.get('use_card_on_file') or data.get('stripe_token')
+        ):
+            self.add_error(
+                'use_card_on_file',
+                'You must use your card on file or enter a credit card number.',
+            )
+
+        if require_payment and not card_on_file and not data.get(
+            'stripe_token'
         ):
             self.add_error(
                 'stripe_token',
