@@ -86,10 +86,11 @@ if ($("#id_stripe_pk").length) {
       var form = $("#card-element").closest("form");
       form.submit(function(event) {
         var useCardOnFile = $("input[name=use_card_on_file]:checked").val() === "True";
-        var actionInput = $("input[name='action']");
+        var actionInput = form.find("input[name='action']");
         var actionSubmit = true; // assume we are submitting by default
         if (actionInput.length) { // if there is an action input, check it is submit
-          actionSubmit = actionInput.val() === 'submit';
+          actionSubmit = (actionInput.val() === 'submit') ||
+            (actionInput.val() === 'pay_fee');
         }
         if (!useCardOnFile && actionSubmit) {
           event.preventDefault();
