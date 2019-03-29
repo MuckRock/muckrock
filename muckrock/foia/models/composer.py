@@ -50,7 +50,7 @@ class FOIAComposer(models.Model):
         on_delete=models.PROTECT,
         related_name='composers',
     )
-    # XXX only null for initial migration
+    # only null for initial migration
     organization = models.ForeignKey(
         'organization.Organization',
         on_delete=models.PROTECT,

@@ -11,15 +11,12 @@ from django.utils import timezone
 
 # Standard Library
 import logging
-import sys
 from datetime import timedelta
 
 # Third Party
 import actstream
-import stripe
 
 # MuckRock
-from muckrock.accounts.utils import validate_stripe_email
 from muckrock.core.utils import new_action
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import FOIAEmbargoForm

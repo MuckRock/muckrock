@@ -10,7 +10,6 @@ from muckrock.organization import views
 
 urlpatterns = [
     url(r'^$', views.OrganizationListView.as_view(), name='org-index'),
-    # XXX blocks an 'activate' org from existing
     url(r'^activate/$', views.activate, name='org-activate'),
     url(
         r'^(?P<slug>[\w-]+)/$',
