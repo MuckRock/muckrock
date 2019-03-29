@@ -431,6 +431,7 @@ Sincerely,
               {% if user_can_pay %}
                 <div class="composer" id="pay">
                   <form class="composer-input" method="post">
+                    <input type="hidden" name="action" value="pay_fee">
                     <header>
                       <p>Pay your request fees</p>
                       <p class="help-text">We will add a 5% fee to this amount to cover our transaction fees.</p>
@@ -444,7 +445,7 @@ Sincerely,
                       <div id="card-element" class="form-control"></div>
                     </div>
                     <div class="buttons">
-                      <button type="submit" class="primary button" name="action" value="pay_fee">Pay</button>
+                      <button type="submit" class="primary button">Pay</button>
                       <a href="#inactive" class="button">Cancel</a>
                     </div>
                   </form>
