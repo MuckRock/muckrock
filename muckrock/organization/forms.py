@@ -108,6 +108,14 @@ class StripeForm(forms.Form):
                 'card on file.',
             )
 
+        self._clean_card_required(data)
+
+        return data
+
+    def _clean_card_required(self, data):
+        """Logic for checking if a payment is required
+        May be overridden in subclasses
+        """
         if (
             'use_card_on_file' in self.fields
             and not data.get('use_card_on_file')
@@ -117,4 +125,3 @@ class StripeForm(forms.Form):
                 'use_card_on_file',
                 'You must use your card on file or enter a credit card number.',
             )
-        return data

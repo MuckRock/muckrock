@@ -85,14 +85,22 @@ if ($("#id_stripe_pk").length) {
       // Create a token or display an error when the form is submitted.
       var form = $("#card-element").closest("form");
       form.submit(function(event) {
+        var buySection = $(".buy-section");
+        // buy section must be visible to buy
+        // if buy section doesn't exist (such as the detail page for paying fees)
+        // we want to pay, so default to true
+        var buySectionVisible =
+          buySection.length > 0 ? buySection.is(":visible") : true;
         var useCardOnFile = $("input[name=use_card_on_file]:checked").val() === "True";
         var actionInput = form.find("input[name='action']");
         var actionSubmit = true; // assume we are submitting by default
-        if (actionInput.length) { // if there is an action input, check it is submit
+        if (actionInput.length) {
+          // if there is an action input, check it is submit (for composer page)
+          // or pay_fee (for detail page)
           actionSubmit = (actionInput.val() === 'submit') ||
             (actionInput.val() === 'pay_fee');
         }
-        if (!useCardOnFile && actionSubmit) {
+        if (buySectionVisible && !useCardOnFile && actionSubmit) {
           event.preventDefault();
 
           stripe.createToken(card).then(function(result) {
