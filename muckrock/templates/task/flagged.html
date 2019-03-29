@@ -12,7 +12,7 @@
     {% endif %}
     {% if task.user %}
       <dt>User</dt>
-      <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user.get_full_name}}</a></dd>
+      <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user.profile.full_name}}</a></dd>
     {% endif %}
     {% if task.foia %}
       <dt>Request</dt>
@@ -27,7 +27,7 @@
   </dl>
   <form method="POST" action="{{ endpoint }}" class="collapsable flag-reply">
     <header>
-      <p>&crarr; Reply to {{task.user.first_name}} &lt;<a href="mailto:{{task.user.email}}">{{task.user.email}}</a>&gt;</p>
+      <p>&crarr; Reply to {{task.user.profile.full_name}} &lt;<a href="mailto:{{task.user.email}}">{{task.user.email}}</a>&gt;</p>
     </header>
     {% csrf_token %}
     <input type="hidden" name="task" value="{{task.pk}}">

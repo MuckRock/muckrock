@@ -21,7 +21,7 @@
     <meta property="og:title" content="{{ foia.title }}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ request.build_absolute_uri }}" />
-    <meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+    <meta property="og:description" content="{{ foia.user.profile.full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
     <meta property="og:site_name" content="MuckRock" />
   {% endcache %}
 {% endblock open_graph %}
@@ -34,7 +34,7 @@
       <meta name="twitter:creator" content="{{ foia.user.profile.twitter }}" />
     {% endif %}
     <meta name="twitter:title" content="{{ foia.title }}" />
-    <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+    <meta name="twitter:description" content="{{ foia.user.profile.full_name }} {% if foia.datetime_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
   {% endcache %}
 {% endblock twitter_card %}
 
@@ -66,8 +66,8 @@
       </header>
       {% social title=foia.title url=foia.get_absolute_url %}
       <section class="basic-information">
-        <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {{foia.agency.link_display}} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
-        {% if foia.composer.parent and request.user.profile.acct_type != "agency" %}
+        <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.profile.full_name }}</a> filed this request{% if foia.agency %} with the {{foia.agency.link_display}} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
+        {% if foia.composer.parent and not request.user.profile.is_agency_user %}
           <p>It is a clone of <a href="{{ foia.composer.parent.get_absolute_url }}">this request</a>.</p>
         {% endif %}
       </section>
@@ -190,7 +190,7 @@
           </form>
         {% endif %}
         {% include 'foia/component/status.html' %}
-        {% if request.user.profile.acct_type != "agency" %}
+        {% if not request.user.profile.is_agency_user %}
           {% include 'foia/component/embargo.html' %}
           {% project_manager foia %}
           {% tag_manager foia %}
@@ -290,7 +290,7 @@
                 {% if can_agency_reply %}
                   <a href="#agency-reply" class="blue button">Reply Directly</a>
                 {% endif %}
-                {% if not request.user.profile.acct_type == "agency" %}
+                {% if not request.user.profile.is_agency_user %}
                   <a href="#follow-up" class="blue button">Follow Up</a>
                 {% endif %}
                 {% if user_can_pay %}
@@ -306,7 +306,7 @@
                   <a href="#appeal" id="appeal-button" class="red button">Appeal</a>
                 {% endif %}
               </div>
-              {% if not request.user.profile.acct_type == "agency" %}
+              {% if not request.user.profile.is_agency_user %}
                 <span data-modal="#flag-modal" class="modal-link button">
                   Get Help
                 </span>
@@ -315,14 +315,14 @@
             <div class="composer-inputs">
               <div class="composer" id="inactive">
                 <div class="composer-input">
-                  {% if request.user.profile.acct_type == "agency" %}
+                  {% if request.user.profile.is_agency_user %}
                     <p>You may <a href="#agency-reply">reply directly</a> to this request.</p>
                   {% else %}
                     <p>You may <a href="#follow-up">follow up</a> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if can_appeal %} or <a href="#appeal">appeal</a> their decision.  If you appeal, MuckRock staff can review the rejection and help write an appeal{% endif %}.</p>
                   {% endif %}
                 </div>
               </div>
-              {% if not request.user.profile.acct_type == "agency" %}
+              {% if not request.user.profile.is_agency_user %}
                 <div class="follow-up composer" id="follow-up">
                   <form class="composer-input" method="post">
                     <header>
@@ -361,7 +361,7 @@ Hi,
 Thanks so much for your help with this request! I really appreciate it.
 
 Sincerely,
-{{foia.user.get_full_name}}
+{{foia.user.profile.full_name}}
                     </textarea>
                     <div class="buttons">
                       <button class="primary button" type="submit" name="thanks" value="1">Send</button>
@@ -430,23 +430,21 @@ Sincerely,
               {% endif %}
               {% if user_can_pay %}
                 <div class="composer" id="pay">
-                  <form class="composer-input stripe-checkout" method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+                  <form class="composer-input" method="post">
                     <header>
                       <p>Pay your request fees</p>
                       <p class="help-text">We will add a 5% fee to this amount to cover our transaction fees.</p>
                     </header>
                     {% csrf_token %}
-                    <input type="hidden" name="stripe_token" value="" />
-                    <input type="hidden" name="stripe_pk" value="{{ stripe_pk }}" />
-                    <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-                    <input type="hidden" name="stripe_email" value="{{request.user.email}}" />
-                    <input type="hidden" name="stripe_label" value="Pay" />
-                    <input type="hidden" name="stripe_description" value="Request Fee" />
-                    <input type="hidden" name="stripe_bitcoin" value="true" />
-                    <input type="hidden" name="stripe_fee" value="0.05" />
-                    <input type="number" name="stripe_amount" class="currency-field" id="stripe_amount" value="{{ foia.get_stripe_amount }}" />
+                    {% include 'lib/pattern/form.html' with form=fee_form %}
+                    <div class="form-group field" id="card-element-container">
+                      <label for="card-element">
+                        Credit or debit card
+                      </label>
+                      <div id="card-element" class="form-control"></div>
+                    </div>
                     <div class="buttons">
-                      <button type="submit" class="primary button">Pay</button>
+                      <button type="submit" class="primary button" name="action" value="pay_fee">Pay</button>
                       <a href="#inactive" class="button">Cancel</a>
                     </div>
                   </form>
@@ -529,7 +527,6 @@ Sincerely,
       <!-- NOTES -->
       <section role="tabpanel" class="tab-panel notes" id="notes">
         <h2 class="tab-panel-heading">Notes</h2>
-        {% with foia.notes.all as notes %}
           {% if notes %}
             <header class="notes-controls">
               <div class="notes filter">
@@ -540,7 +537,6 @@ Sincerely,
           {% for note in notes %}
             {% include 'foia/note.html' with note=note %}
           {% endfor %}
-        {% endwith %}
         <form class="add-note" method="post">
           {% csrf_token %}
           <header>
@@ -608,13 +604,13 @@ Sincerely,
           <h3>People with access</h3>
           <tbody>
             <tr class="person with-access">
-              <td class="name"><p>{{ foia.user.get_full_name }} <span class="small badge">Creator</span></p></td>
+              <td class="name"><p>{{ foia.user.profile.full_name }} <span class="small badge">Creator</span></p></td>
               <td class="modify nostretch"></td>
             </tr>
             {% for user in foia.edit_collaborators.all %}
               <tr class="person with-access">
                 <td class="name">
-                  <p>{{ user.get_full_name }} <span class="small badge">Editor</span></p>
+                  <p>{{ user.profile.full_name }} <span class="small badge">Editor</span></p>
                 </td>
                 <td class="modify nostretch">
                   <form class="modify-access" method="post">
@@ -629,7 +625,7 @@ Sincerely,
             {% for user in foia.read_collaborators.all %}
               <tr class="person with-access">
                 <td class="name">
-                  <p>{{ user.get_full_name }} <span class="small badge">Viewer</span></p>
+                  <p>{{ user.profile.full_name }} <span class="small badge">Viewer</span></p>
                 </td>
                 <td class="modify nostretch">
                   <form class="modify-access" method="post">

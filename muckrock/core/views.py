@@ -271,7 +271,7 @@ class NewsletterSignupView(View):
         default_list = settings.MAILCHIMP_LIST_DEFAULT if default else None
         # First try subscribing the user to the list they are signing up for.
         path = request.GET.get('next', request.path)
-        url = u'https://{}{}'.format(settings.MUCKROCK_URL, path)
+        url = u'{}{}'.format(settings.MUCKROCK_URL, path)
         primary_error = mailchimp_subscribe(
             request,
             email,
@@ -328,7 +328,7 @@ class Homepage(object):
             FOIARequest.objects.get_public().get_done().
             order_by('-datetime_done', 'pk').select_related(
                 'agency__jurisdiction__parent__parent',
-                'composer__user',
+                'composer__user__profile',
             ).only(
                 'status',
                 'slug',
@@ -343,8 +343,7 @@ class Homepage(object):
                 'agency__jurisdiction__parent__slug',
                 'agency__jurisdiction__parent__parent__slug',
                 'composer__user__username',
-                'composer__user__first_name',
-                'composer__user__last_name',
+                'composer__user__profile__full_name',
             ).get_public_file_count(limit=6)
         )
 
@@ -419,7 +418,8 @@ class DonationFormView(StripeFormMixin, FormView):
         }
 
     def form_valid(self, form):
-        """If the form is valid, charge the token provided by the form, then send a receipt."""
+        """If the form is valid, charge the token provided by the form, then
+        send a receipt."""
         token = form.cleaned_data['stripe_token']
         email = form.cleaned_data['stripe_email']
         amount = form.cleaned_data['stripe_amount']
@@ -490,7 +490,6 @@ class DonationFormView(StripeFormMixin, FormView):
         subscription = None
         quantity = amount / 100
         customer = stripe_get_customer(
-            self.request.user,
             email,
             'Donation for {}'.format(email),
         )

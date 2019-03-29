@@ -18,6 +18,7 @@ import logging
 from datetime import date
 
 # Third Party
+import requests
 import stripe
 from djangosecure.decorators import frame_deny_exempt
 
@@ -71,6 +72,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
     model = Crowdfund
     template_name = 'crowdfund/detail.html'
     minireg_source = 'Crowdfund'
+    field_map = {'full_name': 'name'}
 
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
@@ -106,27 +108,32 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
 
     def post(self, request, **kwargs):
         """
-        First we validate the payment form, so we don't charge someone's card by accident.
-        Next, we charge their card. Finally, use the validated payment form to create and
-        return a CrowdfundRequestPayment object.
+        First we validate the payment form, so we don't charge someone's card by
+        accident.
+        Next, we charge their card. Finally, use the validated payment form to create
+        and return a CrowdfundRequestPayment object.
         """
         # pylint: disable=too-many-locals
         token = request.POST.get('stripe_token')
         email = request.POST.get('stripe_email')
         email = validate_stripe_email(email)
+
         payment_form = CrowdfundPaymentForm(request.POST)
         if payment_form.is_valid() and token and email:
             amount = payment_form.cleaned_data['stripe_amount']
             # If there is no user but the show and full_name fields are filled in,
-            # and a user with that email does not already exists,
-            # create the user with our "miniregistration" functionality and then log them in
+            # and a user with that email does not already exists, create the
+            # user with our "miniregistration" functionality and then log them in
             user = request.user if request.user.is_authenticated else None
             registered = False
             show = payment_form.cleaned_data['show']
             full_name = payment_form.cleaned_data['full_name']
             email_exists = User.objects.filter(email__iexact=email).exists()
             if user is None and show and full_name and not email_exists:
-                user = self.miniregister(full_name, email)
+                try:
+                    user = self.miniregister(payment_form, full_name, email)
+                except requests.exceptions.RequestException:
+                    return self.return_error(request)
                 registered = True
             crowdfund = payment_form.cleaned_data['crowdfund']
             try:

@@ -22,9 +22,11 @@ class AuthorListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         """All authors"""
-        authors = User.objects.exclude(authored_articles=None
-                                       ).order_by('last_name')
-        return tuple((a.pk, a.get_full_name()) for a in authors)
+        authors = (
+            User.objects.exclude(authored_articles=None)
+            .select_related('profile').order_by('profile__full_name')
+        )
+        return tuple((a.pk, a.profile.full_name) for a in authors)
 
     def queryset(self, request, queryset):
         """Articles by the selected author"""

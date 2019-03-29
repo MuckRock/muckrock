@@ -13,11 +13,10 @@ from django.views.generic.base import RedirectView, TemplateView
 # Third Party
 import debug_toolbar
 from dashing.utils import router as dashing_router
-from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
-import muckrock.accounts.views
+import muckrock.accounts.viewsets
 import muckrock.agency.viewsets
 import muckrock.core.views as views
 import muckrock.crowdsource.viewsets
@@ -63,13 +62,14 @@ router.register(
     r'question', muckrock.qanda.views.QuestionViewSet, 'api-question'
 )
 router.register(
-    r'statistics', muckrock.accounts.views.StatisticsViewSet, 'api-statistics'
+    r'statistics', muckrock.accounts.viewsets.StatisticsViewSet,
+    'api-statistics'
 )
 router.register(
     r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet,
     'api-communication'
 )
-router.register(r'user', muckrock.accounts.views.UserViewSet, 'api-user')
+router.register(r'user', muckrock.accounts.viewsets.UserViewSet, 'api-user')
 router.register(r'news', muckrock.news.viewsets.ArticleViewSet, 'api-news')
 router.register(r'photos', muckrock.news.viewsets.PhotoViewSet, 'api-photos')
 router.register(r'task', muckrock.task.viewsets.TaskViewSet, 'api-task')
@@ -122,10 +122,10 @@ urlpatterns = [
     url(r'^dataset/', include('muckrock.dataset.urls')),
     url(r'^fine-uploader/', include('muckrock.fine_uploader.urls')),
     url(r'^communication/', include('muckrock.communication.urls')),
+    url(r'^squarelet/', include('muckrock.squarelet.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', views.SearchView.as_view(), name='search'),
     url(r'^api_v1/', include(router.urls)),
-    url(r'^api_v1/token-auth/', obtain_auth_token, name='api-token-auth'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^robots\.txt$', include('robots.urls')),
     url(

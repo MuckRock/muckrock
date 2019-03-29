@@ -2,6 +2,9 @@
 Tests for the FOIA views
 """
 
+# pylint: disable=invalid-name
+# pylint: disable=too-many-lines
+
 # Django
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.urlresolvers import resolve, reverse
@@ -16,6 +19,7 @@ from operator import attrgetter
 
 # Third Party
 import nose.tools
+import requests_mock
 from actstream.actions import follow, is_following, unfollow
 from nose.tools import (
     assert_false,
@@ -32,10 +36,16 @@ from nose.tools import (
 from muckrock.core.factories import (
     AgencyFactory,
     AppealAgencyFactory,
+    OrganizationUserFactory,
+    ProfessionalUserFactory,
     ProjectFactory,
     UserFactory,
 )
-from muckrock.core.test_utils import http_post_response, mock_middleware
+from muckrock.core.test_utils import (
+    http_post_response,
+    mock_middleware,
+    mock_squarelet,
+)
 from muckrock.core.tests import get_404, get_allowed
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.factories import (
@@ -61,9 +71,6 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.factories import ResponseTaskFactory
 from muckrock.task.models import StatusChangeTask
-
-# pylint: disable=invalid-name
-# pylint: disable=too-many-lines
 
 
 class TestFOIAViews(TestCase):
@@ -213,26 +220,6 @@ class TestFOIAViews(TestCase):
                     'slug': 'test-c',
                     'jurisdiction': 'massachusetts',
                     'jidx': 1
-                }
-            )
-        )
-
-    def test_action_views(self):
-        """Test action views"""
-
-        UserFactory(username='adam', password='abc')
-        self.client.login(username='adam', password='abc')
-
-        foia = FOIARequestFactory(status='payment')
-        get_allowed(
-            self.client,
-            reverse(
-                'foia-pay',
-                kwargs={
-                    'jurisdiction': foia.jurisdiction.slug,
-                    'jidx': foia.jurisdiction.pk,
-                    'idx': foia.pk,
-                    'slug': foia.slug
                 }
             )
         )
@@ -486,7 +473,7 @@ class TestBulkActions(TestCase):
         """Test bulk embargo extending"""
         tomorrow = date.today() + timedelta(1)
         next_month = date.today() + timedelta(30)
-        user = UserFactory(profile__acct_type='pro')
+        user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
             composer__user=user,
@@ -534,7 +521,7 @@ class TestBulkActions(TestCase):
     def test_remove_embargo(self):
         """Test bulk embargo removing"""
         tomorrow = date.today() + timedelta(1)
-        user = UserFactory(profile__acct_type='pro')
+        user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
             composer__user=user,
@@ -579,7 +566,7 @@ class TestBulkActions(TestCase):
     def test_perm_embargo(self):
         """Test bulk permanent embargo"""
         tomorrow = date.today() + timedelta(1)
-        user = UserFactory(profile__acct_type='admin')
+        user = OrganizationUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
             composer__user=user,
@@ -730,7 +717,7 @@ class TestRawEmail(TestCase):
     def setUp(self):
         """Set up for tests"""
         self.comm = FOIACommunicationFactory(
-            foia__composer__user__profile__acct_type='pro'
+            foia__composer__user=ProfessionalUserFactory()
         )
         self.request_factory = RequestFactory()
         self.url = reverse('foia-raw', kwargs={'idx': self.comm.id})
@@ -738,12 +725,12 @@ class TestRawEmail(TestCase):
 
     def test_raw_email_view(self):
         """Advanced users should be able to view raw emails"""
-        basic_user = UserFactory(profile__acct_type='basic')
+        free_user = UserFactory()
         pro_user = self.comm.foia.user
         request = self.request_factory.get(self.url)
-        request.user = basic_user
+        request.user = free_user
         response = self.view(request, self.comm.id)
-        eq_(response.status_code, 302, 'Basic users should be denied access.')
+        eq_(response.status_code, 302, 'Free users should be denied access.')
         request.user = pro_user
         response = self.view(request, self.comm.id)
         eq_(
@@ -1121,6 +1108,10 @@ class TestFOIAComposerViews(TestCase):
 
     def setUp(self):
         self.request_factory = RequestFactory()
+        self.mocker = requests_mock.Mocker()
+        mock_squarelet(self.mocker)
+        self.mocker.start()
+        self.addCleanup(self.mocker.stop)
 
     def test_get_create_composer(self):
         """Get the create composer form"""
@@ -1163,6 +1154,7 @@ class TestFOIAComposerViews(TestCase):
             'action': 'save',
             'register_full_name': 'John Doe',
             'register_email': 'john@example.com',
+            'stripe_pk': 'STRIPE_PK',
         }
         request = self.request_factory.post(reverse('foia-create'), data)
         request.user = AnonymousUser()
@@ -1229,6 +1221,7 @@ class TestFOIAComposerViews(TestCase):
             'requested_docs': 'ABC',
             'agencies': agency.pk,
             'action': 'submit',
+            'stripe_pk': 'STRIPE_PK',
         }
         request = self.request_factory.post(
             reverse('foia-draft', kwargs={

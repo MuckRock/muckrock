@@ -147,15 +147,15 @@
             {% for contributor in contributors %}
               <div class="contributor align-center">
                 <a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
-                  {% if contributor.profile.avatar %}
-                    <img class="avatar" src="{% thumbnail contributor.profile.avatar 50x50 %}">
-                  {% else %}
+                  {% sorl_thumbnail contributor.profile.avatar_url "50x50" as avatar %}
+                    <img class="avatar" src="{{ avatar.url }}" height="50" width="50">
+                  {% empty %}
                     <img class="avatar" src="{% static 'img/defaultavatar.png' %}" height="50" width="50">
-                  {% endif %}
+                  {% endthumbnail %}
                 </a>
                 <div class="info">
                   <p class="name bold mb0"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">
-                    {{ contributor.get_full_name }}
+                    {{ contributor.profile.full_name }}
                   </a></p>
                   <p class="small links space-between">
                   {% if contributor.profile.organization %}

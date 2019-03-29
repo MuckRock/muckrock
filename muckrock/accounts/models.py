@@ -8,28 +8,31 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
+from django.db.models import Max
 from django.utils import timezone
 
 # Standard Library
 import logging
-from datetime import date
-from itertools import izip_longest
 from urllib import urlencode
+from uuid import uuid4
 
 # Third Party
+import requests
 import stripe
 from actstream.models import Action
 from easy_thumbnails.fields import ThumbnailerImageField
 from localflavor.us.models import PhoneNumberField, USStateField
-from lot.models import LOT
+from memoize import mproperty
 
 # MuckRock
+from muckrock.accounts.querysets import ProfileQuerySet
 from muckrock.core.utils import (
-    generate_key,
+    cache_get_or_set,
     get_image_storage,
+    squarelet_get,
     stripe_retry_on_error,
 )
-from muckrock.foia.exceptions import InsufficientRequestsError
+from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -53,6 +56,8 @@ class Profile(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
+    objects = ProfileQuerySet.as_manager()
+
     email_prefs = (
         ('never', 'Never'),
         ('hourly', 'Hourly'),
@@ -62,6 +67,10 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(User)
+    full_name = models.CharField(max_length=255, blank=True)
+    uuid = models.UUIDField(
+        unique=True, editable=False, default=uuid4, db_index=True
+    )
     source = models.CharField(
         max_length=20,
         blank=True,
@@ -85,14 +94,20 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
-    organization = models.ForeignKey(
+
+    # deprecate ##
+    acct_type = models.CharField(
+        max_length=10, choices=ACCT_TYPES, default='basic'
+    )
+    _organization = models.ForeignKey(
         'organization.Organization',
         blank=True,
         null=True,
         related_name='members',
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        db_column='organization',
     )
+    # deprecate ##
 
     # extended information
     profile = models.TextField(blank=True)
@@ -108,6 +123,7 @@ class Profile(models.Model):
     linkedin = models.URLField(
         max_length=255, blank=True, help_text='Begin with http://'
     )
+    # deprecate
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True,
@@ -116,12 +132,12 @@ class Profile(models.Model):
                        'crop': 'smart'},
         storage=get_image_storage(),
     )
+    avatar_url = models.URLField(max_length=255, blank=True)
 
     # provide user access to experimental features
     experimental = models.BooleanField(default=False)
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=24, blank=True)
     # email preferences
     email_pref = models.CharField(
         max_length=10,
@@ -142,6 +158,7 @@ class Profile(models.Model):
     # notification preferences
     new_question_notifications = models.BooleanField(default=False)
 
+    # deprecate after projects on squarelet #
     org_share = models.BooleanField(
         default=False,
         verbose_name='Share',
@@ -149,15 +166,17 @@ class Profile(models.Model):
         'my embargoed requests',
     )
 
+    # deprecate ##
     # paid for requests
     num_requests = models.IntegerField(default=0)
     # for limiting # of requests / month
     monthly_requests = models.IntegerField(default=0)
-    date_update = models.DateField()
+    date_update = models.DateField(blank=True, null=True)
     # for Stripe
     customer_id = models.CharField(max_length=255, blank=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     payment_failed = models.BooleanField(default=False)
+    # deprecate ##
 
     preferred_proxy = models.BooleanField(
         default=False,
@@ -183,244 +202,92 @@ class Profile(models.Model):
 
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""
-        advanced_types = ['admin', 'beta', 'pro', 'proxy']
-        return self.acct_type in advanced_types or self.is_member_of_active_org()
+        return self.feature_level > 0
 
-    def is_member_of(self, organization):
-        """Answers whether the profile is a member of the passed organization"""
-        return self.organization_id == organization.pk
+    @mproperty
+    def organization(self):
+        """Get the user's active organization"""
+        return self.user.memberships.get(active=True).organization
 
-    def is_member_of_active_org(self):
-        """Answers whether the user is a member of an active organization"""
-        return self.organization is not None and self.organization.active
-
-    def get_org(self):
-        """Get the user's org"""
-        owned_org = self.user.organization_set.first()
-        if owned_org:
-            return owned_org
-        return self.organization
-
-    def get_monthly_requests(self):
-        """Get the number of requests left for this month"""
+    @organization.setter
+    def organization(self, organization):
+        """Set the user's active organization"""
+        if not organization.has_member(self.user):
+            raise ValueError(
+                "Cannot set a user's active organization to an organization "
+                "they are not a member of"
+            )
         with transaction.atomic():
-            profile = Profile.objects.select_for_update().get(pk=self.pk)
-            not_this_month = profile.date_update.month != date.today().month
-            not_this_year = profile.date_update.year != date.today().year
-            # update requests if they have not yet been updated this month
-            if not_this_month or not_this_year:
-                profile.date_update = date.today()
-                profile.monthly_requests = settings.MONTHLY_REQUESTS.get(
-                    profile.acct_type, 0
-                )
-                profile.save()
-            return profile.monthly_requests
+            self.user.memberships.filter(active=True).update(active=False)
+            self.user.memberships.filter(organization=organization
+                                         ).update(active=True)
 
-    def total_requests(self):
-        """Get sum of paid for requests and monthly requests"""
-        org_reqs = self.organization.get_requests() if self.organization else 0
-        return self.num_requests + self.get_monthly_requests() + org_reqs
-
-    def add_requests(self, num):
-        """Add requests to the profile"""
-        with transaction.atomic():
-            profile = Profile.objects.select_for_update().get(pk=self.id)
-            profile.num_requests += num
-            profile.save()
-
-    def multiple_requests(self, num):
-        """How many requests of each type would be used for this user to make
-        num requests"""
-        org_reqs = self.organization.get_requests() if self.organization else 0
-        have_amt = [org_reqs, self.get_monthly_requests(), self.num_requests]
-        use_amt = []
-
-        while num > 0:
-            try:
-                have = have_amt.pop(0)
-            except IndexError:
-                use_amt.append(num)
-                break
-            else:
-                use = min(num, have)
-                use_amt.append(use)
-                num -= use
-        types = ['org', 'monthly', 'regular', 'extra']
-        return dict(izip_longest(types, use_amt, fillvalue=0))
-
-    def make_requests(self, num):
-        """Try to deduct `num` requests from the users balance"""
-        with transaction.atomic():
-            if self.organization:
-                # cannot lock on a nullable relation, but we do
-                # want to lock the organization if it exists
-                profile = (
-                    Profile.objects.select_for_update()
-                    .select_related('organization')
-                    .exclude(organization=None).get(pk=self.pk)
-                )
-            else:
-                profile = Profile.objects.select_for_update().get(pk=self.pk)
-            request_count = profile.multiple_requests(num)
-            if request_count['extra'] > 0:
-                raise InsufficientRequestsError(request_count['extra'])
-
-            profile.num_requests -= request_count['regular']
-            profile.monthly_requests -= request_count['monthly']
-            profile.save()
-            if profile.organization:
-                profile.organization.num_requests -= request_count['org']
-                profile.organization.save()
-        return request_count
-
-    def customer(self):
-        """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
-        # pylint: disable=redefined-variable-type
-        try:
-            if not self.customer_id:
-                raise AttributeError('No Stripe ID')
-            customer = stripe_retry_on_error(
-                stripe.Customer.retrieve,
-                self.customer_id,
-            )
-        except (AttributeError, stripe.InvalidRequestError):
-            customer = stripe_retry_on_error(
-                stripe.Customer.create,
-                description=self.user.username,
-                email=self.user.email,
-                idempotency_key=True,
-            )
-            self.customer_id = customer.id
-            self.save()
-        return customer
-
-    def card(self):
-        """Retrieve the default credit card from Stripe, if one exists."""
-        card = None
-        customer = self.customer()
-        if customer.default_source:
-            card = stripe_retry_on_error(
-                customer.sources.retrieve,
-                customer.default_source,
-            )
-        return card
-
-    def has_subscription(self):
-        """Check Stripe to see if this user has any active subscriptions."""
-        customer = self.customer()
-        return customer.subscriptions.total_count > 0
-
-    def start_pro_subscription(self, token=None):
-        """Subscribe this profile to a professional plan. Return the subscription."""
-        # create the stripe subscription
-        customer = self.customer()
-        if self.subscription_id:
-            raise AttributeError(
-                'Only allowed one active subscription at a time.'
-            )
-        if not token and not customer.default_source:
-            raise AttributeError(
-                'No payment method provided for this subscription.'
-            )
-        subscription = stripe_retry_on_error(
-            customer.subscriptions.create,
-            plan='pro',
-            source=token,
-            idempotency_key=True,
-        )
-        stripe_retry_on_error(customer.save, idempotency_key=True)
-        # modify the profile object (should this be part of a webhook callback?)
-        with transaction.atomic():
-            profile = Profile.objects.select_for_update().get(pk=self.pk)
-            profile.subscription_id = subscription.id
-            profile.acct_type = 'pro'
-            profile.date_update = date.today()
-            profile.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
-            profile.save()
-        return subscription
-
-    def cancel_pro_subscription(self):
-        """Unsubscribe this profile from a professional plan. Return the cancelled subscription."""
-        customer = self.customer()
-        subscription = None
-        # subscription reference either exists as a saved field or inside the Stripe customer
-        # if it isn't, then they probably don't have a subscription. in that case, just make
-        # sure that we demote their account and reset them back to basic.
-        try:
-            if (
-                not self.subscription_id
-                and not len(customer.subscriptions.data) > 0
-            ):
-                raise AttributeError('There is no subscription to cancel.')
-            if self.subscription_id:
-                subscription_id = self.subscription_id
-            else:
-                subscription_id = customer.subscriptions.data[0].id
-            subscription = stripe_retry_on_error(
-                customer.subscriptions.retrieve,
-                subscription_id,
-            )
-            subscription = subscription.delete()
-            customer = stripe_retry_on_error(
-                customer.save, idempotency_key=True
-            )
-        except AttributeError as exception:
-            logger.warn(exception)
-        except stripe.error.StripeError as exception:
-            logger.warn(exception)
-        with transaction.atomic():
-            profile = Profile.objects.select_for_update().get(pk=self.pk)
-            profile.subscription_id = ''
-            profile.acct_type = 'basic'
-            profile.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
-            profile.payment_failed = False
-            profile.save()
-        self.refresh_from_db()
-        return subscription
-
-    def pay(self, token, amount, metadata, fee=PAYMENT_FEE):
+    @mproperty
+    def individual_organization(self):
+        """Get the user's individual organization
+        There should always be exactly one individual organization,
+        which has a matching UUID
         """
-        Creates a Stripe charge for the user.
-        Should always expect a 1-cent based integer (e.g. $1.00 = 100)
-        Should apply a baseline fee (5%) to all payments.
-        """
-        modified_amount = int(amount + (amount * fee))
-        if not metadata.get('email') or not metadata.get('action'):
-            raise ValueError('The charge metadata is malformed.')
-        stripe_retry_on_error(
-            stripe.Charge.create,
-            amount=modified_amount,
-            currency='usd',
-            source=token,
-            metadata=metadata,
-            idempotency_key=True,
-        )
+        return Organization.objects.get(uuid=self.uuid)
 
-    def generate_confirmation_key(self):
-        """Generate random key used for validating the email address"""
-        key = generate_key(24)
-        self.confirmation_key = key
-        self.save()
-        return key
+    @mproperty
+    def feature_level(self):
+        """The user's highest feature level among all of their organizations"""
+        return self.user.organizations.aggregate(
+            max=Max('plan__feature_level')
+        )['max']
 
-    def autologin(self):
-        """Generate an autologin key and value for this user if they set this preference."""
-        autologin_dict = {}
-        if self.use_autologin:
-            lot = LOT.objects.create(user=self.user, type='slow-login')
-            autologin_dict = {settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid}
-        return autologin_dict
+    @mproperty
+    def is_agency_user(self):
+        """Is this an agency user?"""
+        return self.agency is not None
 
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
-        extra.update(self.autologin())
-        return u'{}?{}'.format(link, urlencode(extra))
+        if not self.use_autologin:
+            return u'{}/{}'.format(settings.MUCKROCK_URL, link)
 
-    def limit_attachments(self):
-        """Does this user need to have their attachments limited?"""
-        return self.acct_type not in ('admin', 'agency')
+        url_auth_token = self.get_url_auth_token()
+        if not url_auth_token:
+            # if there was an error getting the auth token from squarelet,
+            # just send the email without the autologin links
+            return u'{}/{}'.format(settings.MUCKROCK_URL, link)
+
+        extra['next'] = link
+        muckrock_url = u'{}{}?{}'.format(
+            settings.MUCKROCK_URL, reverse('acct-login'), urlencode(extra)
+        )
+        return u'{}/accounts/login/?{}'.format(
+            settings.SQUARELET_URL,
+            urlencode({
+                'next': muckrock_url,
+                'url_auth_token': url_auth_token,
+            })
+        )
+
+    def get_url_auth_token(self):
+        """Get a URL auth token for the user
+        Cache it so a single email will use a single auth token"""
+
+        def get_url_auth_token_squarelet():
+            """Get the URL auth token from squarelet"""
+            try:
+                resp = squarelet_get(
+                    '/api/url_auth_tokens/{}/'.format(self.uuid)
+                )
+                resp.raise_for_status()
+            except requests.exceptions.RequestException:
+                return None
+            return resp.json().get('url_auth_token')
+
+        return cache_get_or_set(
+            'url_auth_token:{}'.format(self.uuid),
+            get_url_auth_token_squarelet,
+            60 * 5,
+        )
 
 
+# deprecate ##
 class ReceiptEmail(models.Model):
     """An additional email address to send receipts to"""
     user = models.ForeignKey(
@@ -608,6 +475,7 @@ class Statistics(models.Model):
     daily_requests_proxy = models.IntegerField(null=True, blank=True)
     daily_requests_admin = models.IntegerField(null=True, blank=True)
     daily_requests_org = models.IntegerField(null=True, blank=True)
+    daily_requests_other = models.IntegerField(null=True, blank=True)
     daily_articles = models.IntegerField(null=True, blank=True)
 
     # Task statistics

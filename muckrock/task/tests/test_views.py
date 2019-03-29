@@ -203,9 +203,9 @@ class OrphanTaskViewTests(TestCase):
             communication__email__from_email__email='test@example.com',
             communication__likely_foia=FOIARequestFactory(),
         )
-        UserFactory(username='adam', password='abc', is_staff=True)
+        user = UserFactory(username='adam', is_staff=True)
         self.client = Client()
-        self.client.login(username='adam', password='abc')
+        self.client.force_login(user)
 
     def test_get_single(self):
         """Should be able to view a single task"""
@@ -312,9 +312,9 @@ class SnailMailTaskViewTests(TestCase):
     def setUp(self):
         self.url = reverse('snail-mail-task-list')
         self.task = SnailMailTaskFactory()
-        UserFactory(username='adam', password='abc', is_staff=True)
+        user = UserFactory(username='adam', is_staff=True)
         self.client = Client()
-        self.client.login(username='adam', password='abc')
+        self.client.force_login(user)
 
     def test_get_single(self):
         """Should be able to view a single task"""
@@ -527,9 +527,9 @@ class NewAgencyTaskViewTests(TestCase):
     def setUp(self):
         self.url = reverse('new-agency-task-list')
         self.task = NewAgencyTaskFactory(agency__status='pending')
-        UserFactory(username='adam', password='abc', is_staff=True)
+        user = UserFactory(username='adam', is_staff=True)
         self.client = Client()
-        self.client.login(username='adam', password='abc')
+        self.client.force_login(user)
 
     def test_get_single(self):
         """Should be able to view a single task"""
@@ -763,7 +763,8 @@ class ResponseTaskListViewTests(TestCase):
 
     def test_foia_integrity(self):
         """
-        Updating a request through a task should maintain integrity of that request's data.
+        Updating a request through a task should maintain integrity of that
+        request's data.
         This is in response to issue #387.
         """
         # first saving a comm

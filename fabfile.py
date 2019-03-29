@@ -18,6 +18,18 @@ env.run = local
 env.cd = lcd
 env.base_path = os.path.dirname(env.real_fabfile)
 
+DOCKER_COMPOSE_RUN_OPT = "docker-compose run {opt} --rm {service} {cmd}"
+DOCKER_COMPOSE_RUN_OPT_USER = DOCKER_COMPOSE_RUN_OPT.format(
+    opt="-u $(id -u):$(id -g) {opt}", service="{service}", cmd="{cmd}"
+)
+DOCKER_COMPOSE_RUN = DOCKER_COMPOSE_RUN_OPT.format(
+    opt="", service="{service}", cmd="{cmd}"
+)
+DJANGO_RUN = DOCKER_COMPOSE_RUN.format(service="django", cmd="{cmd}")
+DJANGO_RUN_USER = DOCKER_COMPOSE_RUN_OPT_USER.format(
+    opt="", service="django", cmd="{cmd}"
+)
+
 
 @task(alias='prod')
 def production(force=False):
@@ -44,13 +56,15 @@ def staging():
 @task
 def test(test_path='', reuse='0', capture=False):
     """Run all tests, or a specific subset of tests"""
-    cmd = (
-        'REUSE_DB=%(reuse)s ./manage.py test %(test_path)s %(capture)s '
-        '--settings=muckrock.settings.test' % {
-            'reuse': reuse,
-            'test_path': test_path,
-            'capture': '--nologcapture' if not capture else '',
-        }
+    cmd = DOCKER_COMPOSE_RUN_OPT.format(
+        opt='-e REUSE_DB={reuse}'.format(reuse=reuse),
+        service='django',
+        cmd=
+        './manage.py test {test_path} {capture} --settings=muckrock.settings.test'.
+        format(
+            test_path=test_path,
+            capture='--nologcapture' if not capture else '',
+        )
     )
     with env.cd(env.base_path):
         env.run(cmd)
@@ -66,6 +80,21 @@ def coverage(settings='test', reuse='0'):
             % (reuse, settings)
         )
         env.run('coverage html')
+
+
+@task
+def coverage_(settings='test', reuse='0'):
+    """Run the tests and generate a coverage report"""
+    cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
+        opt='-e REUSE_DB={reuse}'.format(reuse=reuse),
+        service='django',
+        cmd='sh -c \'coverage erase && '
+        'coverage run --branch --source muckrock --omit="*/migrations/*" '
+        'manage.py test --settings=muckrock.settings.{settings} && '
+        'coverage html -i\''.format(settings=settings)
+    )
+    with env.cd(env.base_path):
+        env.run(cmd)
 
 
 @task
@@ -95,17 +124,44 @@ def format():
         env.run('isort -sp config -rc muckrock')
 
 
-@task
-def mail():
-    """Run the test mail server"""
-    env.run('python -m smtpd -n -c DebuggingServer localhost:1025')
-
-
 @task(alias='rs')
 def runserver():
     """Run the test server"""
     with env.cd(env.base_path):
-        env.run('./manage.py runserver 0.0.0.0:8000')
+        env.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt='--service-ports --use-aliases', service='django', cmd=''
+            )
+        )
+
+
+@task()
+def shell():
+    """Run python shell"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='python manage.py shell_plus'))
+
+
+@task()
+def celeryworker():
+    """Run celery worker"""
+    with env.cd(env.base_path):
+        env.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt='--use-aliases', service='celeryworker', cmd=''
+            )
+        )
+
+
+@task()
+def celerybeat():
+    """Run celery beat"""
+    with env.cd(env.base_path):
+        env.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt='--use-aliases', service='celerybeat', cmd=''
+            )
+        )
 
 
 @task
@@ -117,9 +173,9 @@ def celery():
 
 @task(alias='m')
 def manage(cmd):
-    """Run a python manage.py command"""
+    """Run python manage command"""
     with env.cd(env.base_path):
-        env.run('./manage.py %s' % cmd)
+        env.run(DJANGO_RUN_USER.format(cmd='python manage.py {}'.format(cmd)))
 
 
 @task
@@ -130,7 +186,7 @@ def pip():
 
 
 @task(name='populate-db')
-def populate_db():
+def populate_db(db_name='muckrock'):
     """Populate the local DB with the data from the latest heroku backup"""
     # https://devcenter.heroku.com/articles/heroku-postgres-import-export
 
@@ -142,8 +198,12 @@ def populate_db():
         return
 
     with env.cd(env.base_path):
-        env.run('dropdb muckrock')
-        env.run('heroku pg:pull DATABASE muckrock --app muckrock')
+        env.run('dropdb {}'.format(db_name))
+        env.run(
+            'heroku pg:pull DATABASE {} --app muckrock '
+            '--exclude-table-data="public.reversion_version;public.foia_rawemail"'.
+            format(db_name)
+        )
 
 
 @task(name='sync-aws')
@@ -166,52 +226,32 @@ def sync_aws():
             )
 
 
+@task(name='sync-aws-staging')
+def sync_aws_staging():
+    """Sync images from AWS to match the production database"""
+
+    folders = [
+        'account_images',
+        'agency_images',
+        'jurisdiction_images',
+        'news_images',
+        'news_photos',
+        'project_images',
+    ]
+    with env.cd(env.base_path), warn_only():
+        for folder in folders:
+            env.run(
+                'aws s3 sync s3://muckrock/{folder} '
+                's3://muckrock-staging/{folder} --acl public-read'.format(
+                    folder=folder
+                )
+            )
+
+
 @task
 def hello():
     """'Hello world' for testing purposes"""
     env.run('echo hello world')
-
-
-@task(alias='v')
-def vagrant(cmd=None):
-    """Run a vagrant command or a task on the vagrant VM"""
-    # run as `fab vagrant:up`
-    if cmd:
-        with lcd(os.path.join(env.base_path, 'vm')):
-            local('vagrant %s' % cmd)
-
-    # run as `fab vagrant runserver`
-    else:
-        # change from the default user to 'vagrant'
-        env.user = 'vagrant'
-        # connect to the port-forwarded ssh
-        env.hosts = ['127.0.0.1:2222']
-
-        # use vagrant ssh key
-        with lcd(os.path.join(env.base_path, 'vm')):
-            result = local(
-                'vagrant ssh-config | grep IdentityFile', capture=True
-            )
-        env.key_filename = result.split()[1]
-
-        env.run = run
-        env.cd = cd
-        env.base_path = '/home/vagrant/muckrock'
-
-
-@task
-def setup():
-    """Run to initialize your VM"""
-    # XXX this doesnt work yet
-    vagrant('up')
-    with lcd(os.path.join(env.base_path, 'vm')):
-        result = local('vagrant ssh-config | grep IdentityFile', capture=True)
-    with settings(
-        user='vagrant',
-        host_string='127.0.0.1:2222',
-        key_filename=result.split()[1]
-    ):
-        manage('migrate')
 
 
 @task(name='update-staging-db')
@@ -230,7 +270,6 @@ def pip_compile():
     with env.cd(os.path.join(env.base_path, 'pip')):
         env.run('pip-compile requirements.in')
         env.run('pip-compile dev-requirements.in')
-        env.run('cp -f requirements.txt ../')
 
 
 @task(name='pip-upgrade')
@@ -239,7 +278,6 @@ def pip_upgrade():
     with env.cd(os.path.join(env.base_path, 'pip')):
         env.run('pip-compile --upgrade requirements.in')
         env.run('pip-compile --upgrade dev-requirements.in')
-        env.run('cp -f requirements.txt ../')
 
 
 @task(name='pip-sync')
@@ -247,3 +285,31 @@ def pip_sync():
     """sync requirements"""
     with env.cd(os.path.join(env.base_path, 'pip')):
         env.run('pip-sync requirements.txt dev-requirements.txt')
+
+
+@task(name='npm-build')
+def npm_build():
+    """Build assets"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN_USER.format(cmd='npm run build'))
+
+
+@task(name='npm-watch')
+def npm_watch():
+    """Continuously build assets"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN_USER.format(cmd='npm run watch'))
+
+
+@task(name='npm-lint')
+def npm_lint():
+    """ESLint"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN.format(cmd='npm run lint'))
+
+
+@task()
+def npm(cmd):
+    """Run NPM tasks"""
+    with env.cd(env.base_path):
+        env.run(DJANGO_RUN_USER.format(cmd='npm {}'.format(cmd)))

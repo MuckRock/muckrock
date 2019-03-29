@@ -5,59 +5,42 @@ Views for the accounts application
 # Django
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import (
+from django.db.models import Q
+from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseNotAllowed,
-    HttpResponseRedirect,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import FormView, ListView, TemplateView
+from django.views.generic import FormView, ListView, RedirectView, TemplateView
 
 # Standard Library
 import json
 import logging
 import sys
-from datetime import date
+from urllib import urlencode
 
 # Third Party
 import stripe
-from rest_framework import viewsets
+from djangosecure.decorators import frame_deny_exempt
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import (
-    DjangoModelPermissionsOrAnonReadOnly,
-    IsAdminUser,
-)
 
 # MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
-    BillingPreferencesForm,
     BuyRequestForm,
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
-    ReceiptForm,
-    RegisterForm,
-    RegisterOrganizationForm,
-    RegistrationCompletionForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
-from muckrock.accounts.models import (
-    ACCT_TYPES,
-    Notification,
-    Profile,
-    ReceiptEmail,
-    RecurringDonation,
-    Statistics,
-)
-from muckrock.accounts.serializers import StatisticsSerializer, UserSerializer
+from muckrock.accounts.models import Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
@@ -66,240 +49,47 @@ from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import (
-    email_verify,
     failed_payment,
     send_charge_receipt,
     send_invoice_receipt,
-    welcome,
 )
 from muckrock.news.models import Article
-from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-def create_new_user(request, valid_form):
-    """Create a user from the valid form, give them a profile, and log them in."""
-    new_user = valid_form.save()
-    Profile.objects.create(
-        user=new_user,
-        acct_type='basic',
-        monthly_requests=0,
-        date_update=date.today()
-    )
-    new_user = authenticate(
-        username=valid_form.cleaned_data['username'],
-        password=valid_form.cleaned_data['password1']
-    )
-    login(request, new_user)
-    mixpanel_event(
-        request,
-        'Sign Up',
-        {'Source': 'Sign Up Page'},
-        signup=True,
-    )
-    return new_user
+class AccountsView(RedirectView):
+    """Accounts view redirects to squarelet"""
+    url = '{}/selectplan/'.format(settings.SQUARELET_URL)
+
+
+class AccountsUpgradeView(RedirectView):
+    """Accounts upgrade view redirects to squarelet"""
+    url = '{}/users/~payment/'.format(settings.SQUARELET_URL)
+
+
+def account_logout_helper(request, url):
+    """Logout helper to specify the URL"""
+    if 'id_token' in request.session:
+        params = {
+            'id_token_hint': request.session['id_token'],
+            'post_logout_redirect_uri': url,
+        }
+        redirect_url = '{}/openid/end-session?{}'.format(
+            settings.SQUARELET_URL, urlencode(params)
+        )
+    else:
+        redirect_url = 'index'
+    logout(request)
+    messages.success(request, 'You have successfully logged out.')
+    return redirect(redirect_url)
 
 
 def account_logout(request):
-    """Logs a user out of their account and redirects to index page"""
-    logout(request)
-    messages.success(request, 'You have successfully logged out.')
-    return redirect('index')
-
-
-class SignupView(FormView):
-    """Generic ancestor for all account signup views."""
-
-    def dispatch(self, *args, **kwargs):
-        """Prevent logged-in users from accessing this view."""
-        if self.request.user.is_authenticated():
-            return HttpResponseRedirect(self.get_success_url())
-        return super(SignupView, self).dispatch(*args, **kwargs)
-
-    def get_success_url(self):
-        """Allows the success URL to be overridden by a query parameter."""
-        url_redirect = self.request.GET.get('next', None)
-        return url_redirect if url_redirect else reverse('acct-my-profile')
-
-
-class BasicSignupView(SignupView):
-    """Allows a logged-out user to register for a basic account."""
-    template_name = 'accounts/signup/basic.html'
-    form_class = RegisterForm
-
-    def form_valid(self, form):
-        """When form is valid, create the user."""
-        new_user = create_new_user(self.request, form)
-        welcome.delay(new_user)
-        success_msg = 'Your account was successfully created. Welcome to MuckRock!'
-        messages.success(self.request, success_msg)
-        return super(BasicSignupView, self).form_valid(form)
-
-
-class ProfessionalSignupView(SignupView):
-    """Allows a logged-out user to register for a professional account."""
-    template_name = 'accounts/signup/professional.html'
-    form_class = RegisterForm
-
-    def get_context_data(self, **kwargs):
-        """Adds Stripe PK to template context data."""
-        context = super(ProfessionalSignupView, self).get_context_data(**kwargs)
-        context['stripe_pk'] = settings.STRIPE_PUB_KEY
-        return context
-
-    def form_valid(self, form):
-        """When form is valid, create the user and begin their professional subscription."""
-        new_user = create_new_user(self.request, form)
-        welcome.delay(new_user)
-        try:
-            new_user.profile.start_pro_subscription(
-                self.request.POST['stripe_token']
-            )
-            success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
-            messages.success(self.request, success_msg)
-            mixpanel_event(
-                self.request,
-                'Pro Subscription Started',
-            )
-        except (KeyError, AttributeError):
-            # no payment information provided
-            logger.warn('No payment information provided.')
-            error_msg = (
-                'Your account was successfully created, '
-                'but you did not provide payment information. '
-                'You can subscribe from the account management page.'
-            )
-            messages.error(self.request, error_msg)
-        except stripe.error.CardError:
-            # card declined
-            logger.warn('Card was declined.')
-            error_msg = (
-                'Your account was successfully created, but your card was declined. '
-                'You can subscribe from the account management page.'
-            )
-            messages.error(self.request, error_msg)
-        except (stripe.error.InvalidRequestError, stripe.error.APIError):
-            # invalid request made to stripe
-            logger.warn('No payment information provided.')
-            error_msg = (
-                'Your account was successfully created, '
-                'but we could not contact our payment provider. '
-                'You can subscribe from the account management page.'
-            )
-            messages.error(self.request, error_msg)
-        return super(ProfessionalSignupView, self).form_valid(form)
-
-
-class OrganizationSignupView(SignupView):
-    """Allows a logged-out user to register for an account and an organization."""
-    template_name = 'accounts/signup/organization.html'
-    form_class = RegisterOrganizationForm
-
-    def form_valid(self, form):
-        """
-        When form is valid, create the user and the organization.
-        Then redirect to the organization activation page.
-        """
-        new_user = create_new_user(self.request, form)
-        new_org = form.create_organization(new_user)
-        mixpanel_event(
-            self.request,
-            'Organization Created',
-            new_org.mixpanel_event(),
-        )
-        welcome.delay(new_user)
-        messages.success(
-            self.request,
-            'Your account and organization were successfully created.'
-        )
-        return HttpResponseRedirect(
-            reverse('org-activate', kwargs={
-                'slug': new_org.slug
-            })
-        )
-
-
-class AccountsView(TemplateView):
-    """
-    Displays the list of payment plans.
-    If user is logged out, it lets them register for any plan.
-    If user is logged in, it lets them up- or downgrade their account to any plan.
-    """
-    template_name = 'accounts/plans.html'
-
-    def get_context_data(self, **kwargs):
-        """Returns a context based on whether the user is logged in or logged out."""
-        context = super(AccountsView, self).get_context_data(**kwargs)
-        logged_in = self.request.user.is_authenticated()
-        if logged_in:
-            context['acct_type'] = self.request.user.profile.acct_type
-            context['email'] = self.request.user.email
-            context['org'] = (
-                Organization.objects.filter(owner=self.request.user).first()
-            )
-        context['stripe_pk'] = settings.STRIPE_PUB_KEY
-        context['logged_in'] = logged_in
-        return context
-
-    def post(self, request, **kwargs):
-        """Handle upgrades and downgrades of accounts"""
-        try:
-            action = request.POST['action']
-            account_actions = {'downgrade': downgrade, 'upgrade': upgrade}
-            account_actions[action](request)
-        except KeyError as exception:
-            logger.error(exception)
-            messages.error(request, 'No available action was specified.')
-        except AttributeError as exception:
-            logger.error(exception)
-            error_msg = 'You cannot be logged out and modify your account.'
-            messages.error(request, error_msg)
-        except ValueError as exception:
-            logger.error(exception)
-            messages.error(request, exception)
-        except stripe.error.CardError:
-            # card declined
-            logger.warn('Card was declined.')
-            messages.error(request, 'Your card was declined')
-        return self.render_to_response(self.get_context_data())
-
-
-def upgrade(request):
-    """Upgrades the user from a Basic to a Professional account."""
-    if not request.user.is_authenticated():
-        raise AttributeError('Cannot upgrade an anonymous user.')
-    is_pro_user = request.user.profile.acct_type in ['pro', 'proxy']
-    is_org_owner = Organization.objects.filter(owner=request.user).exists()
-    if is_pro_user:
-        raise ValueError(
-            'Cannot upgrade this account, it is already Professional.'
-        )
-    if is_org_owner:
-        raise ValueError(
-            'Cannot upgrade this account, it owns an organization.'
-        )
-    token = request.POST.get('stripe_token')
-    if not token:
-        raise ValueError(
-            'Cannot upgrade this account, no Stripe token provided.'
-        )
-    request.user.profile.start_pro_subscription(token)
-    mixpanel_event(request, 'Pro Subscription Started')
-
-
-def downgrade(request):
-    """Downgrades the user from a Professional to a Basic account."""
-    if not request.user.is_authenticated():
-        raise AttributeError('Cannot downgrade an anonymous user.')
-    if request.user.profile.acct_type != 'pro':
-        raise ValueError(
-            'Cannot downgrade this account, it is not Professional.'
-        )
-    request.user.profile.cancel_pro_subscription()
-    mixpanel_event(request, 'Pro Subscription Cancelled')
+    """Logs a user out of their account and redirects to squarelet's logout page"""
+    return account_logout_helper(request, settings.MUCKROCK_URL + '/')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -313,17 +103,11 @@ class ProfileSettings(TemplateView):
         settings_forms = {
             'profile': ProfileSettingsForm,
             'email': EmailSettingsForm,
-            'billing': BillingPreferencesForm,
             'org': OrgPreferencesForm,
         }
         action = request.POST.get('action')
         receipt_form = None
-        if action == 'receipt':
-            receipt_form = ReceiptForm(request.POST)
-            success = self._handle_receipt_form(receipt_form)
-            if success:
-                return redirect('acct-settings')
-        elif action == 'cancel-donations':
+        if action == 'cancel-donations':
             self._handle_cancel_payments('donations', 'cancel-donations')
             return redirect('acct-settings')
         elif action == 'cancel-crowdfunds':
@@ -347,28 +131,6 @@ class ProfileSettings(TemplateView):
         # form was invalid
         context = self.get_context_data(receipt_form=receipt_form)
         return self.render_to_response(context)
-
-    def _handle_receipt_form(self, receipt_form):
-        """Process the receipt form"""
-        if receipt_form.is_valid():
-            new_emails = receipt_form.cleaned_data['emails'].split('\n')
-            new_emails = {e.strip() for e in new_emails}
-            old_emails = {
-                r.email
-                for r in self.request.user.receipt_emails.all()
-            }
-            ReceiptEmail.objects.filter(
-                user=self.request.user,
-                email__in=(old_emails - new_emails),
-            ).delete()
-            ReceiptEmail.objects.bulk_create([
-                ReceiptEmail(user=self.request.user, email=e)
-                for e in new_emails - old_emails
-            ])
-            messages.success(self.request, 'Your settings have been updated.')
-            return True
-        else:
-            return False
 
     def _handle_cancel_payments(self, attr, arg):
         """Handle cancelling recurring donations or crowdfunds"""
@@ -403,76 +165,27 @@ class ProfileSettings(TemplateView):
         """Returns context for the template"""
         context = super(ProfileSettings, self).get_context_data(**kwargs)
         user_profile = self.request.user.profile
-        profile_initial = {
-            'first_name': self.request.user.first_name,
-            'last_name': self.request.user.last_name,
-        }
         email_initial = {'email': self.request.user.email}
-        receipt_initial = {
-            'emails':
-                '\n'
-                .join(r.email for r in self.request.user.receipt_emails.all())
-        }
-        profile_form = ProfileSettingsForm(
-            initial=profile_initial,
-            instance=user_profile,
-        )
+        profile_form = ProfileSettingsForm(instance=user_profile)
         email_form = EmailSettingsForm(
             initial=email_initial,
             instance=user_profile,
         )
         org_form = OrgPreferencesForm(instance=user_profile)
-        receipt_form = (
-            kwargs.get('receipt_form') or ReceiptForm(initial=receipt_initial)
-        )
-        current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
-        if user_profile.organization:
-            current_plan = 'Organization'
+        # these move to squarelet in the future
         donations = RecurringDonation.objects.filter(user=self.request.user)
         crowdfunds = RecurringCrowdfundPayment.objects.filter(
             user=self.request.user
         )
         context.update({
-            'stripe_pk': settings.STRIPE_PUB_KEY,
+            'squarelet_url': settings.SQUARELET_URL,
             'profile_form': profile_form,
             'email_form': email_form,
-            'receipt_form': receipt_form,
             'org_form': org_form,
-            'current_plan': current_plan,
-            'credit_card': user_profile.card(),
             'donations': donations,
             'crowdfunds': crowdfunds,
         })
         return context
-
-
-@login_required
-def verify_email(request):
-    """Verifies a user's email address"""
-    user = request.user
-    _profile = user.profile
-    key = request.GET.get('key')
-    if not _profile.email_confirmed:
-        if key:
-            if key == _profile.confirmation_key:
-                _profile.email_confirmed = True
-                _profile.save()
-                messages.success(
-                    request, 'Your email address has been confirmed.'
-                )
-            else:
-                messages.error(request, 'Your confirmation key is invalid.')
-        else:
-            email_verify.delay(user)
-            messages.info(
-                request,
-                'We just sent you an email containing your verification link.'
-            )
-    else:
-        messages.warning(
-            request, 'Your email is already confirmed, no need to verify again!'
-        )
-    return redirect(_profile)
 
 
 class ProfileView(BuyRequestsMixin, FormView):
@@ -489,43 +202,23 @@ class ProfileView(BuyRequestsMixin, FormView):
         self.user = get_object_or_404(User, username=username, is_active=True)
         return super(ProfileView, self).dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        """Check for cancel pro before checking form"""
-        if (
-            request.user.is_staff and request.POST.get('action') == 'cancel-pro'
-        ):
-            self.user.profile.cancel_pro_subscription()
-            mixpanel_event(request, 'Pro Subscription Cancelled')
-            messages.success(request, 'Pro account has been cancelled')
-            return redirect('acct-profile', username=self.user.username)
-        else:
-            return super(ProfileView, self).post(request, *args, **kwargs)
-
-    def get_initial(self):
-        """Set the form label"""
-        if self.user == self.request.user:
-            return {'stripe_label': 'Buy'}
-        else:
-            return {'stripe_label': 'Gift'}
-
-    def get_form_kwargs(self):
-        """Give the form the current user"""
-        kwargs = super(ProfileView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
     def get_context_data(self, **kwargs):
         """Get data for the profile page"""
         context_data = super(ProfileView, self).get_context_data(**kwargs)
-        org = self.user.profile.organization
-        show_org_link = (
-            org and (
-                not org.private or self.request.user.is_staff or (
-                    self.request.user.is_authenticated()
-                    and self.request.user.profile.is_member_of(org)
-                )
+        queryset = self.user.organizations.order_by('name')
+        if self.request.user.is_staff:
+            organizations = queryset
+        elif self.request.user.is_authenticated:
+            organizations = queryset.filter(
+                Q(private=False) | Q(users=self.request.user)
+            ).distinct()
+        else:
+            organizations = queryset.filter(private=False)
+
+        if self.request.user == self.user:
+            context_data['admin_organizations'] = (
+                self.user.organizations.filter(memberships__admin=True)
             )
-        )
         requests = (
             FOIARequest.objects.filter(composer__user=self.user)
             .get_viewable(self.request.user)
@@ -544,10 +237,8 @@ class ProfileView(BuyRequestsMixin, FormView):
                 self.user,
             'profile':
                 self.user.profile,
-            'org':
-                org,
-            'show_org_link':
-                show_org_link,
+            'organizations':
+                organizations,
             'projects':
                 projects,
             'requests': {
@@ -557,8 +248,6 @@ class ProfileView(BuyRequestsMixin, FormView):
             },
             'articles':
                 articles,
-            'stripe_pk':
-                settings.STRIPE_PUB_KEY,
             'sidebar_admin_url':
                 reverse('admin:auth_user_change', args=(self.user.pk,)),
             'api_token':
@@ -566,9 +255,16 @@ class ProfileView(BuyRequestsMixin, FormView):
         })
         return context_data
 
+    def get_form_kwargs(self):
+        """Give the form the current user"""
+        kwargs = super(ProfileView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         """Buy requests"""
-        self.buy_requests(form, recipient=self.user)
+        if self.request.user == self.user:
+            self.buy_requests(form)
         return redirect('acct-profile', username=self.user.username)
 
 
@@ -643,69 +339,6 @@ def stripe_webhook(request):
 
 
 @method_decorator(login_required, name='dispatch')
-class RegistrationCompletionView(FormView):
-    """Provides a form for a new user to change their username and password.
-    Will verify their email if a key is provided."""
-    template_name = 'forms/base_form.html'
-    form_class = RegistrationCompletionForm
-
-    def get_initial(self):
-        """Adds the username as an initial value."""
-        return {'username': self.request.user.username}
-
-    def get_form_kwargs(self):
-        """Adds the user to the form kwargs."""
-        kwargs = super(RegistrationCompletionView, self).get_form_kwargs()
-        kwargs.update({'user': self.request.user})
-        return kwargs
-
-    def get(self, request, *args, **kwargs):
-        _profile = request.user.profile
-        if 'key' in request.GET:
-            key = request.GET['key']
-            if key == _profile.confirmation_key:
-                _profile.email_confirmed = True
-                _profile.save()
-                messages.success(request, 'Your email is validated.')
-        return super(RegistrationCompletionView,
-                     self).get(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        """Saves the form and redirects to the success url."""
-        form.save(commit=True)
-        messages.success(self.request, 'Your account is now complete.')
-        return redirect(self.get_success_url())
-
-    def get_success_url(self):
-        """Return the user's profile."""
-        return reverse(
-            'acct-profile', kwargs={
-                'username': self.request.user.username
-            }
-        )
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """API views for User"""
-    # pylint: disable=too-many-public-methods
-    queryset = (
-        User.objects.order_by('id').prefetch_related('profile', 'groups')
-    )
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
-    filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')
-
-
-class StatisticsViewSet(viewsets.ModelViewSet):
-    """API views for Statistics"""
-    # pylint: disable=too-many-public-methods
-    queryset = Statistics.objects.all()
-    serializer_class = StatisticsSerializer
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
-    filter_fields = ('date',)
-
-
-@method_decorator(login_required, name='dispatch')
 class NotificationList(ListView):
     """List of notifications for a user."""
     model = Notification
@@ -775,7 +408,7 @@ class ProxyList(MRFilterListView):
     template_name = 'lists/proxy_list.html'
     default_sort = 'profile__state'
     sort_map = {
-        'name': 'last_name',
+        'name': 'profile__full_name',
         'state': 'profile__state',
     }
 
@@ -788,7 +421,7 @@ class ProxyList(MRFilterListView):
         """Display all proxies"""
         objects = super(ProxyList, self).get_queryset()
         return (
-            objects.filter(profile__acct_type='proxy')
+            objects.filter(organizations__plan__slug='proxy')
             .select_related('profile')
         )
 
@@ -836,7 +469,7 @@ def agency_redirect_login(
         return redirect(foia)
 
     authed = request.user.is_authenticated()
-    agency_user = authed and request.user.profile.acct_type == 'agency'
+    agency_user = authed and request.user.profile.is_agency_user
     agency_match = agency_user and request.user.profile.agency == agency
     email = request.GET.get('email', '')
     # valid if this email is associated with the agency
@@ -859,3 +492,13 @@ def agency_redirect_login(
             {'email': email,
              'valid': valid},
         )
+
+
+@frame_deny_exempt
+def rp_iframe(request):
+    """RP iframe for OIDC sesison management"""
+    return render(
+        request,
+        'accounts/check_session_iframe.html',
+        {'settings': settings},
+    )

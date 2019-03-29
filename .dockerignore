@@ -1,0 +1,7 @@
+.*
+!.coveragerc
+!.env
+!.pylintrc
+muckrock/static/media/
+node_modules
+html_cov

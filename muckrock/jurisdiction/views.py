@@ -216,7 +216,7 @@ def detail(request, fed_slug, state_slug, local_slug):
     }
     if request.user.is_staff and jurisdiction.abbrev:
         context['proxies'] = User.objects.filter(
-            profile__acct_type='proxy',
+            organizations__plan__slug='proxy',
             profile__state=jurisdiction.abbrev,
         )
     collect_stats(jurisdiction, context)

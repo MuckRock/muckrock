@@ -219,7 +219,7 @@ class SnailMailTask(Task):
             'number': number,
             'payable_to': payable_to,
             'amount': self.amount,
-            'signed_by': user.get_full_name(),
+            'signed_by': user.profile.full_name,
             'foia_pk': foia.pk,
             'comm_pk': self.communication.pk,
             'type': type_,
@@ -580,8 +580,7 @@ class FlaggedTask(Task):
                 return ''
             else:
                 return (
-                    u'<p><a href="https://{}{}" target="_blank">{}</a></p>'
-                    .format(
+                    u'<p><a href="{}{}" target="_blank">{}</a></p>'.format(
                         settings.MUCKROCK_URL,
                         obj.get_absolute_url(),
                         obj,
@@ -649,9 +648,8 @@ class FlaggedTask(Task):
                 'orgId': settings.ZOHO_ORG_ID,
             },
             json={
-                'firstName': user.first_name,
-                'lastName':
-                    user.last_name or 'Anonymous',  # lastName is required
+                'lastName': user.profile.full_name or
+                            'Anonymous',  # lastName is required
                 'email': user.email,
                 'customFields': {
                     'username': user.username
@@ -790,7 +788,7 @@ class NewAgencyTask(Task):
                 comm = foia.communications.first()
                 comm.communication = initial_communication_template(
                     [foia.agency],
-                    comm.from_user.get_full_name(),
+                    comm.from_user.profile.full_name,
                     foia.composer.requested_docs,
                     edited_boilerplate=foia.composer.edited_boilerplate,
                     proxy=proxy_info['proxy'],

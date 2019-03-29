@@ -157,8 +157,12 @@ TEMPLATES = [{
             'muckrock.core.context_processors.google_analytics',
             'muckrock.core.context_processors.mixpanel',
             'muckrock.core.context_processors.domain',
+            'muckrock.core.context_processors.settings',
             'muckrock.core.context_processors.cache_timeout',
         ],
+        'libraries': {
+            'thumbnail': 'easy_thumbnails.templatetags.thumbnail',
+        },
     }
 }]
 
@@ -171,8 +175,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'muckrock.core.middleware.LOTMiddleware',
-    'muckrock.core.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -206,6 +208,7 @@ INSTALLED_APPS = (
     'djcelery',
     'djcelery_email',
     'easy_thumbnails',
+    'sorl.thumbnail',
     'gunicorn',
     'localflavor',
     'mathfilters',
@@ -220,7 +223,6 @@ INSTALLED_APPS = (
     'taggit',
     'watson',
     'webpack_loader',
-    'lot',
     'image_diet',
     'django_hosts',
     'queued_storage',
@@ -232,6 +234,7 @@ INSTALLED_APPS = (
     'constance',
     'constance.backends.database',
     'django_extensions',
+    'social_django',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -276,9 +279,10 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 
-BROKER_URL = os.environ.get(
+REDIS_URL = os.environ.get(
     'REDISTOGO_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 )
+BROKER_URL = REDIS_URL
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 25 * 60 * 60}
 
 djcelery.setup_loader()
@@ -288,13 +292,14 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
 CELERY_IMPORTS = (
-    'muckrock.foia.tasks',
     'muckrock.accounts.tasks',
     'muckrock.agency.tasks',
-    'muckrock.task.tasks',
-    'muckrock.portal.tasks',
-    'muckrock.dataset.tasks',
     'muckrock.crowdsource.tasks',
+    'muckrock.dataset.tasks',
+    'muckrock.foia.tasks',
+    'muckrock.portal.tasks',
+    'muckrock.squarelet.tasks',
+    'muckrock.task.tasks',
 )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
@@ -303,11 +308,13 @@ CELERY_ROUTES = {
         'queue': 'phaxio'
     },
 }
+CELERY_REDIS_MAX_CONNECTIONS = os.environ.get('CELERY_REDIS_MAX_CONNECTIONS')
+if CELERY_REDIS_MAX_CONNECTIONS is not None:
+    CELERY_REDIS_MAX_CONNECTIONS = int(CELERY_REDIS_MAX_CONNECTIONS)
 
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
-    'muckrock.accounts.backends.CaseInsensitiveModelBackend',
-    'lot.auth_backend.LOTBackend',
+    'muckrock.accounts.backends.SquareletBackend',
 )
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user':
@@ -382,7 +389,7 @@ LOGGING = {
         'django': {
             'handlers': ['null'],
             'propagate': True,
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.request': {
             'handlers': ['console', 'sentry'],
@@ -480,7 +487,14 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
+    },
+    'lock': {
+        'BACKEND': 'redis_lock.django_cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+        },
+    },
 }
 DEFAULT_CACHE_TIMEOUT = 15 * 60
 
@@ -488,7 +502,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'muckrock.core.pagination.StandardPagination',
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
         'rest_framework.filters.SearchFilter',
     ),
@@ -513,15 +527,6 @@ SOUTH_MIGRATION_MODULES = {
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
 
-LOT = {
-    'slow-login': {
-        'name': u'Slow login',
-        'duration': 60 * 60 * 24 * 2,
-        'one-time': True,
-    },
-}
-LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
-
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 ROBOTS_SITE_BY_REQUEST = True
 
@@ -542,8 +547,9 @@ ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
-MUCKROCK_URL = 'localhost:8000'
-FOIAMACHINE_URL = 'dev.foiamachine.org:8000'
+MUCKROCK_URL = 'http://dev.muckrock.com'
+FOIAMACHINE_URL = 'http://dev.foiamachine.org'
+SQUARELET_URL = 'http://dev.squarelet.com'
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r'^/api(_v\d)?/.*$'
@@ -675,3 +681,29 @@ ZOHO_DEPT_IDS = {
     'documentcloud': os.environ.get('ZOHO_DEPT_ID_DC', '280313000000190114'),
     'foiamachine': os.environ.get('ZOHO_DEPT_ID_FM', '280313000000194669'),
 }
+
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_SQUARELET_KEY = os.environ.get('SQUARELET_KEY')
+SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get(
+    'SQUARELET_SECRET'
+)
+SOCIAL_AUTH_SQUARELET_SCOPE = ['uuid', 'organizations', 'preferences']
+SOCIAL_AUTH_TRAILING_SLASH = False
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'muckrock.accounts.pipeline.associate_by_uuid',
+    'social_core.pipeline.user.create_user',
+    'muckrock.accounts.pipeline.save_profile',
+    'muckrock.accounts.pipeline.save_session_data',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+# this allows communication from muckrock to squarelet to bypass rate limiting
+BYPASS_RATE_LIMIT_SECRET = os.environ.get('BYPASS_RATE_LIMIT_SECRET', '')

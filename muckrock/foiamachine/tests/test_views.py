@@ -3,18 +3,16 @@ Tests for FOIA Machine views.
 """
 
 # Django
-from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.test import TestCase
 
 # Third Party
-from django_hosts.resolvers import reverse, reverse_lazy
+from django_hosts.resolvers import reverse
 from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.core.factories import UserFactory
-from muckrock.core.forms import PasswordResetForm
 from muckrock.core.test_utils import http_get_response, http_post_response
 from muckrock.foiamachine import factories, forms, models, views
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
@@ -38,87 +36,6 @@ class TestHomepage(TestCase):
         response = http_get_response(self.url, self.view, user)
         eq_(response.status_code, 302)
         eq_(response.url, reverse('profile', host='foiamachine'))
-
-
-class TestLogin(TestCase):
-    """Users should be able to log in."""
-
-    def setUp(self):
-        self.view = auth.views.login
-        self.url = reverse('login', host='foiamachine')
-        self.password = 'Free the docs.'
-        self.user = UserFactory(password=self.password)
-
-    def test_get_ok(self):
-        """Login should return 200."""
-        response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
-
-    def test_post_ok(self):
-        """Logging in should redirect to the profile page."""
-        data = {
-            'username': self.user.username,
-            'password': self.password,
-        }
-        response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 302)
-
-
-class TestPasswordReset(TestCase):
-    """Submitting an email to password reset for a user should send an email."""
-
-    def setUp(self):
-        self.view = auth.views.password_reset
-        self.url = reverse('password-reset', host='foiamachine')
-        self.user = UserFactory()
-
-    def test_post(self):
-        """A user who posts their email should be sent an email."""
-        data = {'email': self.user.email}
-        kwargs = {
-            'template_name':
-                'foiamachine/views/registration/password_reset.html',
-            'email_template_name':
-                'foiamachine/emails/password_reset_email.html',
-            'post_reset_redirect':
-                reverse_lazy('password-reset-done', host='foiamachine'),
-            'password_reset_form':
-                PasswordResetForm
-        }
-        response = http_post_response(self.url, self.view, data, **kwargs)
-        eq_(response.status_code, 302)
-
-
-class TestSignup(TestCase):
-    """Users should be able to sign up."""
-
-    def setUp(self):
-        self.view = views.Signup.as_view()
-        self.url = reverse('signup', host='foiamachine')
-
-    def test_ok(self):
-        """Signup should return 200."""
-        response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
-
-    def test_signup(self):
-        """Posting the required information to sign up should create an account,
-        log the user into the account, create a profile for their account,
-        and return a redirect to the profile page."""
-        data = {
-            'username': 'TestUser',
-            'email': 'test@email.com',
-            'first_name': 'Test',
-            'last_name': 'User',
-            'password1': 'test',
-            'password2': 'test',
-        }
-        response = http_post_response(self.url, self.view, data)
-        eq_(response.status_code, 302, 'The response should redirect.')
-        eq_(response.url, reverse('profile', host='foiamachine'))
-        user = auth.models.User.objects.get(username=data['username'])
-        ok_(user, 'The user should be created.')
-        ok_(user.profile, 'The user should be given a profile.')
 
 
 class TestProfile(TestCase):

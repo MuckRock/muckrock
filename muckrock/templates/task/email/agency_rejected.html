@@ -13,7 +13,7 @@
   <ul>
     {% for foia in foias %}
       <li>
-        <a href="https://{{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}">
+        <a href="{{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}">
           {{ foia.composer.title }}
         </a>
       </li>

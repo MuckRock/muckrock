@@ -2,12 +2,18 @@
 Site-wide context processors
 """
 # Django
-from django.conf import settings
+from django.conf import settings as django_settings
 
 
 def domain(request):
     """Add the domain to the context for constructing absolute urls."""
     return {'domain': request.get_host()}
+
+
+def settings(request):
+    """Add settings to the context"""
+    # pylint: disable=unused-argument
+    return {'settings': django_settings}
 
 
 def google_analytics(request):
@@ -28,11 +34,11 @@ def mixpanel(request):
         'mp_events': request.session.pop('mp_events', []),
         'mp_alias': request.session.pop('mp_alias', False),
         'mp_charge': request.session.pop('mp_charge', 0),
-        'mp_token': settings.MIXPANEL_TOKEN,
+        'mp_token': django_settings.MIXPANEL_TOKEN,
     }
 
 
 def cache_timeout(request):
     """Cache timeout settings"""
     # pylint: disable=unused-argument
-    return {'cache_timeout': settings.DEFAULT_CACHE_TIMEOUT}
+    return {'cache_timeout': django_settings.DEFAULT_CACHE_TIMEOUT}

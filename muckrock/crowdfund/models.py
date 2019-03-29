@@ -27,8 +27,20 @@ stripe.api_version = '2015-10-16'
 logger = logging.getLogger(__name__)
 
 
+class CrowdfundQuerySet(models.QuerySet):
+    """Query set for crowdfunds"""
+
+    def filter_by_plan(self, plan):
+        """Filter for Crowdfunds by users with a certain plan type"""
+        return self.filter(
+            Q(foia__composer__organization__plan__slug=plan)
+            | Q(projects__contributors__organizations__plan__slug=plan)
+        )
+
+
 class Crowdfund(models.Model):
     """Crowdfunding campaign"""
+    objects = CrowdfundQuerySet.as_manager()
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     payment_capped = models.BooleanField(default=False)
@@ -101,7 +113,7 @@ class Crowdfund(models.Model):
         # returns the list of a set of a list to remove duplicates
         return User.objects.filter(
             crowdfundpayment__crowdfund=self, crowdfundpayment__show=True
-        ).distinct()
+        ).select_related('profile').distinct()
 
     def get_crowdfund_object(self):
         """Is this for a request or a project?"""
@@ -163,7 +175,6 @@ class Crowdfund(models.Model):
         # pylint: disable=too-many-arguments
         plan = self._get_stripe_plan()
         customer = stripe_get_customer(
-            user,
             email,
             'Crowdfund {} for {}'.format(self.pk, email),
         )

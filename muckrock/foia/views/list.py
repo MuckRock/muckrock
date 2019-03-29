@@ -5,6 +5,7 @@ Views to display lists of FOIA requests
 # Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Prefetch
 from django.http import Http404
@@ -121,7 +122,7 @@ class RequestList(MRSearchFilterListView):
     default_order = 'desc'
     sort_map = {
         'title': 'title',
-        'user': 'composer__user__first_name',
+        'user': 'composer__user__profile__full_name',
         'agency': 'agency__name',
         'date_updated': 'datetime_updated',
         'date_submitted': 'composer__datetime_submitted',
@@ -475,28 +476,27 @@ class MyRequestList(RequestList):
         return 'Autofollowups {}'.format(action)
 
 
-@class_view_decorator(
-    user_passes_test(lambda u: u.is_authenticated and u.profile.get_org())
-)
-class MyOrgRequestList(RequestList):
+class MyOrgRequestList(UserPassesTestMixin, RequestList):
     """View requests owned by current user's organization"""
     filter_class = FOIARequestFilterSet
     title = 'Organization Requests'
     template_name = 'foia/list.html'
 
+    def test_func(self):
+        """User must have a non-individual org"""
+        user = self.request.user
+        return user.is_authenticated and not user.profile.organization.individual
+
     def get_queryset(self):
-        """Limit to just requests owned by the current user."""
+        """Limit to just requests owned by the current organization."""
         queryset = super(MyOrgRequestList, self).get_queryset()
         return queryset.filter(
-            composer__user__profile__organization=self.request.user.profile.
-            get_org()
+            composer__organization=self.request.user.profile.organization
         )
 
 
 @class_view_decorator(
-    user_passes_test(
-        lambda u: u.is_authenticated and u.profile.acct_type == 'agency'
-    )
+    user_passes_test(lambda u: u.is_authenticated and u.profile.is_agency_user)
 )
 class AgencyRequestList(RequestList):
     """View requests owned by current agency"""

@@ -99,7 +99,7 @@ def success_comm(request):
         comm=comm,
         title=os.path.basename(request.POST['key']),
         datetime=timezone.now(),
-        source=request.user.get_full_name(),
+        source=request.user.profile.full_name(),
         access=access,
     )
     file_.ffile.name = request.POST['key']
@@ -204,7 +204,7 @@ def _is_valid_policy(user, policy_document):
     bucket = None
     parsed_max_size = None
 
-    if not user.profile.limit_attachments():
+    if user.has_perm('foia.unlimited_attachment_size'):
         max_size = None
     else:
         max_size = settings.MAX_ATTACHMENT_SIZE

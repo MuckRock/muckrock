@@ -28,5 +28,7 @@ npm-debug.log
 .secret_key.sh
 tags
 .lvimrc
+*.pid
+celerybeat-schedule
 .ipython
 .envs

@@ -19,7 +19,7 @@ from django.views.generic import CreateView, UpdateView
 import re
 
 # Third Party
-from stripe.error import StripeError
+import requests
 
 # MuckRock
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
@@ -36,11 +36,28 @@ class GenericComposer(BuyRequestsMixin):
     form_class = ComposerForm
     context_object_name = 'composer'
 
+    def _get_organizations(self, user):
+        """Get the active organization and which organization should pay
+        This is the active org if the user is an admin of that org,
+        else it is the user's individual org
+        """
+        if not user.is_authenticated:
+            return None, None
+        active = user.profile.organization
+        if active.has_admin(user):
+            payer = active
+        else:
+            payer = user.profile.individual_organization
+        return (active, payer)
+
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
         kwargs = super(GenericComposer, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         kwargs['request'] = self.request
+        _, payer = self._get_organizations(self.request.user)
+        kwargs['organization'] = payer
+
         if len(self.request.POST.getlist('agencies')) == 1:
             # pass the agency for contact info form
             try:
@@ -59,13 +76,13 @@ class GenericComposer(BuyRequestsMixin):
             foias_filed = (
                 self.request.user.composers.exclude(status='started').count()
             )
+            organization, payer = self._get_organizations(self.request.user)
+            context['organization'] = organization
+            context['payer'] = payer
             requests_left = {
-                'regular': self.request.user.profile.num_requests,
-                'monthly': self.request.user.profile.get_monthly_requests(),
+                'regular': organization.number_requests,
+                'monthly': organization.monthly_requests,
             }
-            org = self.request.user.profile.get_org()
-            if org is not None:
-                requests_left['org'] = org.get_requests()
             context['sidebar_admin_url'] = reverse(
                 'admin:foia_foiacomposer_change',
                 args=(self.object.pk,),
@@ -77,6 +94,7 @@ class GenericComposer(BuyRequestsMixin):
             'settings': settings,
             'foias_filed': foias_filed,
             'requests_left': requests_left,
+            'stripe_pk': settings.STRIPE_PUB_KEY,
         })
         return context
 
@@ -89,7 +107,8 @@ class GenericComposer(BuyRequestsMixin):
             )
             return
         if form.cleaned_data.get('num_requests', 0) > 0:
-            self.buy_requests(form)
+            active, payer = self._get_organizations(self.request.user)
+            self.buy_requests(form, active, payer)
         if (
             form.cleaned_data.get('use_contact_information')
             and self.request.user.has_perm('foia.set_info_foiarequest')
@@ -170,6 +189,10 @@ class GenericComposer(BuyRequestsMixin):
 class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     """Create a new composer"""
     minireg_source = 'Composer'
+    field_map = {
+        'email': 'register_email',
+        'name': 'register_full_name',
+    }
 
     # pylint: disable=attribute-defined-outside-init
 
@@ -219,7 +242,8 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if self.request.user.is_authenticated:
             self.object = (
                 FOIAComposer.objects.get_or_create_draft(
-                    user=self.request.user
+                    user=self.request.user,
+                    organization=self.request.user.profile.organization,
                 )
             )
         context = super(CreateComposer, self).get_context_data(**kwargs)
@@ -234,24 +258,11 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         # form validation guarentees we have either registration or login info
         if form.cleaned_data.get('register_full_name'):
             user = self.miniregister(
+                form,
                 form.cleaned_data['register_full_name'],
                 form.cleaned_data['register_email'],
                 form.cleaned_data.get('register_newsletter'),
             )
-            if form.cleaned_data.get('register_pro'):
-                try:
-                    user.profile.start_pro_subscription(
-                        form.cleaned_data.get('stripe_token'),
-                    )
-                except StripeError:
-                    messages.error(
-                        self.request, 'There was an error processing your '
-                        'payment.  Your account has been created, but you '
-                        'have not been subscribed to a professional account.  '
-                        'You can subscribe from the settings page.'
-                    )
-                else:
-                    mixpanel_event(self.request, 'Pro Subscription Started')
             return user
         else:
             login(self.request, form.user)
@@ -262,10 +273,14 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if self.request.user.is_authenticated:
             user = self.request.user
         else:
-            user = self._handle_anonymous_submitter(form)
+            try:
+                user = self._handle_anonymous_submitter(form)
+            except requests.exceptions.RequestException:
+                return self.form_invalid(form)
         if form.cleaned_data['action'] in ('save', 'submit'):
             composer = form.save(commit=False)
             composer.user = user
+            composer.organization = user.profile.organization
             composer.save()
             form.save_m2m()
             # if a new agency is added while the user is anonymous,

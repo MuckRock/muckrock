@@ -27,7 +27,7 @@
             {% if article.authors.all %}
             <div class="nomargin article__overview__authors">by
                 {% for author in article.authors.all %}
-                    <a class="article__overview__author" href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    <a class="article__overview__author" href="{{ author.profile.get_absolute_url }}" title="{{ author.profile.full_name }}">{{ author.profile.full_name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </div>
             {% endif %}

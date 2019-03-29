@@ -19,6 +19,7 @@ import string
 # Third Party
 import requests
 import stripe
+from social_django.utils import load_backend, load_strategy
 
 # MuckRock
 from muckrock.core.utils import retry_on_error, stripe_retry_on_error
@@ -53,17 +54,14 @@ def validate_stripe_email(email):
     return email
 
 
-def stripe_get_customer(user, email, description):
+def stripe_get_customer(email, description):
     """Get a customer for an authenticated or anonymous user"""
-    if user and user.is_authenticated:
-        return user.profile.customer()
-    else:
-        return stripe_retry_on_error(
-            stripe.Customer.create,
-            description=description,
-            email=email,
-            idempotency_key=True,
-        )
+    return stripe_retry_on_error(
+        stripe.Customer.create,
+        description=description,
+        email=email,
+        idempotency_key=True,
+    )
 
 
 def mailchimp_subscribe(
@@ -146,3 +144,19 @@ def mixpanel_event(request, event, props=None, **kwargs):
         request.session['mp_alias'] = True
     if kwargs.get('charge'):
         request.session['mp_charge'] = kwargs['charge']
+
+
+def mini_login(request, username, password):
+    """Provide authentication via squarelet via the password grant type"""
+    strategy = load_strategy(request)
+    backend = load_backend(strategy, 'squarelet', redirect_uri=None)
+    backend.password_grant_auth = (username, password)
+    backend.STATE_PARAMETER = False
+    backend.REDIRECT_STATE = False
+    user = backend.complete(request=request)
+    return user
+
+
+def user_plan_count(plan):
+    """Count how many users have a certain plan"""
+    User.objects.filter(organizations__plan__slug=plan).distinct().count()

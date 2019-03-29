@@ -91,7 +91,7 @@
           I look forward to receiving your response to this request within
           { days }.</p>
           <p>Sincerely,</p>
-          <p>{{ user.get_full_name|default:"{ name }" }}</p>
+          <p>{{ user.profile.full_name|default:"{ name }" }}</p>
         </div>
         <div class="tags-explanation">
           <p>Words in { brackets } are automatically replaced based on the agency and jurisdiction. You can use the following variables:</p>
@@ -118,7 +118,7 @@
         {% else %}
           <fieldset class="no-embargo">
             <p>This request will be filed publicly. Need to keep your request private?
-            <a href="{% url "accounts" %}">
+            <a href="{% url "accounts-upgrade" %}">
               Upgrade to a Pro or Organizational account
             </a>
             to embargo your request as long as you need to.</p>
@@ -147,7 +147,6 @@
             {% include "lib/pattern/new_request_field.html" with field=form.register_full_name only %}
             {% include "lib/pattern/new_request_field.html" with field=form.register_email only %}
             {% include "lib/pattern/new_request_field.html" with field=form.register_newsletter only %}
-            {% include "lib/pattern/new_request_field.html" with field=form.register_pro only %}
           </div>
           <div class="login-form">
             {% include "lib/pattern/new_request_field.html" with field=form.login_username only %}
@@ -159,30 +158,28 @@
           <footer class="footer--submit">
             <p id="submit_help" class="error"></p>
             <div class="requests-left"
-                 data-org="{{ requests_left.org }}"
                  data-month="{{ requests_left.monthly }}"
                  data-reg="{{ requests_left.regular }}"
                  >
-               {% with org=user.profile.get_org %}
-                 <p>
-                   You have
-                    {% if org %}
-                      <strong>{{ requests_left.org }}</strong> organizational
-                      (<a href="{{ org.get_absolute_url }}">{{ org.name }} </a>)
-                      requests left,
-                    {% endif %}
-                    {% if user.profile.is_advanced %}
-                      <strong>{{ requests_left.monthly }}</strong>
-                      monthly requests left and
-                    {% endif %}
-                    <strong>{{ requests_left.regular }}</strong> purchased requests
-                    left.
-                 </p>
-                 <p class="using-requests"></p>
-               {% endwith %}
+              {% if not organization.individual %}
+                <p>You are currently working on behalf of the organization {{ organization.name }}.</p>
+              {% endif %}
+              <p>
+                You have
+                {% if user.profile.is_advanced %}
+                  <strong>{{ requests_left.monthly }}</strong>
+                  monthly requests left and
+                {% endif %}
+                <strong>{{ requests_left.regular }}</strong> purchased requests
+                left.
+              </p>
+              <p class="using-requests"></p>
             </div>
 
-            <div class="buy-section{% if not use.profile.is_advanced %} hide-form{% endif %}">
+            <div class="buy-section{% if not user.profile.is_advanced %} hide-form{% endif %}">
+              {% if organization != payer %}
+                <p><strong>Note:</strong> Since you are not an admin of your currently active organization, {{ organization.name }}, requests will be purchased using your personal payment information.</p>
+              {% endif %}
               {% if not user.profile.is_advanced %}
                 <p class="simple-buy">
                   Click buy &amp; submit to purchase a bundle of

@@ -142,7 +142,7 @@ class FOIACommunication(models.Model):
         if self.foia and self.foia.agency:
             return self.foia.agency.name[:70]
         elif self.from_user:
-            return self.from_user.get_full_name()[:70]
+            return self.from_user.profile.full_name[:70]
         else:
             return ''
 
@@ -366,10 +366,10 @@ class FOIACommunication(models.Model):
 
     def from_line(self):
         """What to display for who this communication is from"""
-        if self.from_user and self.from_user.profile.acct_type == 'agency':
+        if self.from_user and self.from_user.profile.is_agency_user:
             return self.from_user.profile.agency.name
         elif self.from_user:
-            return self.from_user.get_full_name()
+            return self.from_user.profile.full_name
         else:
             return self.from_who
 
@@ -483,7 +483,7 @@ class FOIANote(models.Model):
             user = self.author
         else:
             user = self.foia.user
-        return 'Note by %s on %s' % (user.get_full_name(), self.foia.title)
+        return 'Note by %s on %s' % (user.profile.full_name, self.foia.title)
 
     class Meta:
         ordering = ['foia', 'datetime']

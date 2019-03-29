@@ -35,21 +35,6 @@ from muckrock.crowdsource import fields
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE
 from muckrock.tags.models import TaggedItemBase
 
-DOCCLOUD_EMBED = """
-<div class="DC-embed DC-embed-document DV-container">
-  <div style="position:relative;padding-bottom:129.42857142857142%;height:0;overflow:hidden;max-width:100%;">
-    <iframe
-        src="//www.documentcloud.org/documents/{doc_id}.html?
-            embed=true&amp;responsive=false&amp;sidebar=false"
-        title="{doc_id} (Hosted by DocumentCloud)"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-        frameborder="0"
-        style="position:absolute;top:0;left:0;width:100%;height:100%;border:1px solid #aaa;border-bottom:0;box-sizing:border-box;">
-    </iframe>
-  </div>
-</div>
-"""
-
 
 class CrowdsourceQuerySet(models.QuerySet):
     """Object manager for crowdsources"""
@@ -258,6 +243,22 @@ class CrowdsourceDataQuerySet(models.QuerySet):
         elif ip_address is not None:
             choices = choices.exclude(responses__ip_address=ip_address)
         return choices
+
+
+DOCCLOUD_EMBED = """
+<div class="DC-embed DC-embed-document DV-container">
+  <div style="position:relative;padding-bottom:129.42857142857142%;height:0;overflow:hidden;max-width:100%;">
+    <iframe
+        src="//www.documentcloud.org/documents/{doc_id}.html?
+            embed=true&amp;responsive=false&amp;sidebar=false"
+        title="{doc_id} (Hosted by DocumentCloud)"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+        frameborder="0"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:1px solid #aaa;border-bottom:0;box-sizing:border-box;">
+    </iframe>
+  </div>
+</div>
+"""
 
 
 class CrowdsourceData(models.Model):
@@ -489,7 +490,7 @@ class CrowdsourceResponse(models.Model):
                 self.get_values(metadata),
             )
         )
-        text += '\nhttps://{}{}#assignment-responses'.format(
+        text += '\n{}{}#assignment-responses'.format(
             settings.MUCKROCK_URL,
             self.crowdsource.get_absolute_url(),
         )

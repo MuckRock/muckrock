@@ -143,8 +143,9 @@ class TaskList(MRFilterListView):
         context['processing_count'] = FOIARequest.objects.filter(
             status='submitted'
         ).count()
-        context['asignees'] = User.objects.filter(is_staff=True
-                                                  ).order_by('last_name')
+        context['asignees'] = (
+            User.objects.filter(is_staff=True).order_by('profile__full_name')
+        )
         # this is for fine-uploader
         context['settings'] = settings
         return context

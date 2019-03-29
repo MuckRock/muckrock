@@ -173,7 +173,7 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
         ga('create', 'UA-16635809-1', 'auto');
         // Track the account type of the current user
         {% if request.user.is_authenticated %}
-          var dimensionValue = '{{request.user.profile.acct_type}}';
+          var dimensionValue = '{{request.user.profile.organization.plan}}';
         {% else %}
           var dimensionValue = 'anonymous';
         {% endif %}
@@ -227,7 +227,7 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
       {% endif %}
       {% if request.user.is_authenticated %}
         mixpanel.register({
-          "Account Type": "{{ request.user.profile.acct_type }}",
+          "Account Type": "{{ request.user.profile.organization.plan }}",
           "Date Joined": "{{ request.user.date_joined|date:"c" }}",
           {% if request.user.profile.organization %}
             "Organization": "{{ request.user.profile.organization.name }}",
@@ -235,9 +235,8 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
         });
         mixpanel.people.set({
           "$email": "{{ request.user.email }}",
-          "$first_name": "{{ request.user.first_name }}",
-          "$last_name": "{{ request.user.last_name }}",
-          "Account Type": "{{ request.user.profile.acct_type }}",
+          "$name": "{{ request.user.profile.full_name }}",
+          "Account Type": "{{ request.user.profile.organization.plan }}",
           "Date Joined": "{{ request.user.date_joined|date:"c" }}",
           {% if request.user.profile.organization %}
             "Organization": "{{ request.user.profile.organization.name }}",
@@ -245,6 +244,7 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
         })
       {% endif %}
 		</script>
+    <script src="https://js.stripe.com/v3/"></script>
     {% block prescripts %}
     {% endblock prescripts %}
     {% compress js %}
@@ -259,5 +259,9 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
     {% block scripts %}
     {% endblock scripts %}
     <!-- END SCRIPTS -->
+    {# iframe for OpenID Connect session management #}
+    {% if request.session.session_state %}
+      <iframe src="{% url "acct-rp-iframe" %}" frameborder="0" width="0" height="0"></iframe>
+    {% endif %}
   </body>
 </html>

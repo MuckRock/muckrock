@@ -65,7 +65,7 @@ class JurisdictionViewSet(ModelViewSet):
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
         template = get_template('text/foia/request.txt')
         if request.user.is_authenticated():
-            user_name = request.user.get_full_name()
+            user_name = request.user.profile.full_name
         else:
             user_name = 'Anonymous User'
         context = {

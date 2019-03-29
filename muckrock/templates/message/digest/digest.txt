@@ -56,5 +56,6 @@ Following
 {% endblock %}
 
 {% block settings %}
-Change your digest frequency or disable digests from your account settings ({{base_url}}{% url 'acct-settings' %}?{% autologin user %}).</p>
+{% url "acct-settings" as url_acct_settings %}
+Change your digest frequency or disable digests from your account settings ({{base_url}}{% autologin url_acct_settings user %}).</p>
 {% endblock %}

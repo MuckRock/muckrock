@@ -7,7 +7,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 # Standard Library
@@ -20,13 +19,12 @@ from dateutil.relativedelta import relativedelta
 from requests.exceptions import RequestException
 
 # MuckRock
-from muckrock.accounts.models import Profile, RecurringDonation
+from muckrock.accounts.models import RecurringDonation
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.message import digests, receipts
 from muckrock.message.email import TemplateEmail
 from muckrock.message.notifications import SlackNotification
-from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
 
@@ -142,47 +140,36 @@ def send_invoice_receipt(invoice_id):
         return
 
     try:
-        profile = Profile.objects.get(customer_id=invoice.customer)
-    except Profile.DoesNotExist:
-        user = None
-        try:
-            customer = stripe_retry_on_error(
-                stripe.Customer.retrieve,
-                invoice.customer,
-            )
-            charge.metadata['email'] = customer.email
-        except stripe.error.InvalidRequestError:
-            logger.error('Could not retrieve customer')
-            return
-    else:
-        user = profile.user
+        customer = stripe_retry_on_error(
+            stripe.Customer.retrieve,
+            invoice.customer,
+        )
+        charge.metadata['email'] = customer.email
+    except stripe.error.InvalidRequestError:
+        logger.error('Could not retrieve customer')
+        return
 
     plan = get_subscription_type(invoice)
-    try:
-        receipt_functions = {
-            'pro': receipts.pro_subscription_receipt,
-            'org': receipts.org_subscription_receipt,
-            'donate': receipts.donation_receipt,
-        }
-        receipt_function = receipt_functions[plan]
-    except KeyError:
-        if plan.startswith('crowdfund'):
-            receipt_function = receipts.crowdfund_payment_receipt
-            charge.metadata['crowdfund_id'] = plan.split('-')[1]
-            recurring_payment = RecurringCrowdfundPayment.objects.filter(
-                subscription_id=invoice.subscription,
-            ).first()
-            if recurring_payment:
-                recurring_payment.log_payment(charge)
-            else:
-                logger.error(
-                    'No recurring crowdfund payment for: %s',
-                    invoice.subscription,
-                )
+    if plan == 'donate':
+        receipt_function = receipts.donation_receipt
+    elif plan.startswith('crowdfund'):
+        receipt_function = receipts.crowdfund_payment_receipt
+        charge.metadata['crowdfund_id'] = plan.split('-')[1]
+        recurring_payment = RecurringCrowdfundPayment.objects.filter(
+            subscription_id=invoice.subscription,
+        ).first()
+        if recurring_payment:
+            recurring_payment.log_payment(charge)
         else:
-            logger.warning('Invoice charged for unrecognized plan: %s', plan)
-            receipt_function = receipts.generic_receipt
-    receipt = receipt_function(user, charge)
+            logger.error(
+                'No recurring crowdfund payment for: %s',
+                invoice.subscription,
+            )
+    else:
+        # other types are handled by squarelet
+        return
+
+    receipt = receipt_function(None, charge)
     receipt.send(fail_silently=False)
 
 
@@ -202,6 +189,7 @@ def send_charge_receipt(charge_id):
         user_email = charge.metadata['email']
         user_action = charge.metadata['action']
     except KeyError:
+        # squarelet charges will not have matching metadata
         logger.warning('Malformed charge metadata, no receipt sent: %s', charge)
         return
     # try getting the user based on the provided email
@@ -213,13 +201,12 @@ def send_charge_receipt(charge_id):
     logger.info('Charge Receipt User: %s', user)
     try:
         receipt_functions = {
-            'request-purchase': receipts.request_purchase_receipt,
-            'request-fee': receipts.request_fee_receipt,
             'crowdfund-payment': receipts.crowdfund_payment_receipt,
             'donation': receipts.donation_receipt,
         }
         receipt_function = receipt_functions[user_action]
     except KeyError:
+        # squarelet charges will be handled on squarelet
         logger.warning('Unrecognized charge: %s', user_action)
         receipt_function = receipts.generic_receipt
     receipt = receipt_function(user, charge)
@@ -247,7 +234,6 @@ def failed_payment(invoice_id):
     attempt = invoice.attempt_count
     subscription_type = get_subscription_type(invoice)
     recurring_donation = None
-    profile = None
     crowdfund = None
     if subscription_type == 'donate':
         recurring_donation = RecurringDonation.objects.filter(
@@ -279,36 +265,22 @@ def failed_payment(invoice_id):
                 invoice.subscription,
             )
     else:
-        profile = Profile.objects.get(customer_id=invoice.customer)
-        user = profile.user
-        # raise the failed payment flag on the profile
-        profile.payment_failed = True
-        profile.save()
+        # squarelet handles other types
+        return
     subject = u'Your payment has failed'
-    org = None
-    if subscription_type == 'org':
-        org = Organization.objects.get(owner=user)
     context = {
         'attempt': attempt,
         'type': subscription_type,
-        'org': org,
         'crowdfund': crowdfund,
     }
     if subscription_type.startswith('crowdfund'):
         context['type'] = 'crowdfund'
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed payment flag
-        if subscription_type == 'pro':
-            profile.cancel_pro_subscription()
-        elif subscription_type == 'org':
-            org.cancel_subscription()
-        elif subscription_type == 'donate' and recurring_donation:
+        if subscription_type == 'donate' and recurring_donation:
             recurring_donation.cancel()
         elif subscription_type.startswith('crowdfund') and recurring_payment:
             recurring_payment.cancel()
-        if subscription_type in ('pro', 'org'):
-            profile.payment_failed = False
-            profile.save()
         logger.info(
             '%s subscription has been cancelled due to failed payment', user
         )
@@ -322,88 +294,6 @@ def failed_payment(invoice_id):
         text_template='message/notification/failed_payment.txt',
         html_template='message/notification/failed_payment.html',
         subject=subject,
-    )
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.welcome')
-def welcome(user):
-    """Send a welcome notification to a new user. Hello!"""
-    verification_url = reverse('acct-verify-email')
-    key = user.profile.generate_confirmation_key()
-    context = {
-        'verification_link': user.profile.wrap_url(verification_url, key=key)
-    }
-    notification = TemplateEmail(
-        user=user,
-        extra_context=context,
-        text_template='message/notification/welcome.txt',
-        html_template='message/notification/welcome.html',
-        subject=u'Welcome to MuckRock!'
-    )
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.welcome_miniregister')
-def welcome_miniregister(user):
-    """Send a welcome notification to a new users who signed up with miniregister.
-    Provide them a link to verify their email and update their username/password."""
-    completion_url = reverse('accounts-complete-registration')
-    key = user.profile.generate_confirmation_key()
-    context = {'completion_url': user.profile.wrap_url(completion_url, key=key)}
-    notification = TemplateEmail(
-        user=user,
-        extra_context=context,
-        text_template='message/notification/welcome_miniregister.txt',
-        html_template='message/notification/welcome_miniregister.html',
-        subject=u'Welcome to MuckRock!'
-    )
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.gift')
-def gift(to_user, from_user, gift_description):
-    """Notify the user when they have been gifted requests."""
-    context = {'from': from_user, 'gift': gift_description}
-    notification = TemplateEmail(
-        user=to_user,
-        extra_context=context,
-        text_template='message/notification/gift.txt',
-        html_template='message/notification/gift.html',
-        subject=u'You got a gift!'
-    )
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.email_change')
-def email_change(user, old_email):
-    """Notify the user when their email is changed."""
-    context = {'old_email': old_email, 'new_email': user.email}
-    notification = TemplateEmail(
-        user=user,
-        extra_context=context,
-        text_template='message/notification/email_change.txt',
-        html_template='message/notification/email_change.html',
-        subject=u'Changed email address'
-    )
-    notification.to.append(
-        old_email
-    )  # Send to both the new and old email addresses
-    notification.send(fail_silently=False)
-
-
-@task(name='muckrock.message.tasks.email_verify')
-def email_verify(user):
-    """Verify the user's email by sending them a message."""
-    url = reverse('acct-verify-email')
-    key = user.profile.generate_confirmation_key()
-    context = {'verification_link': user.profile.wrap_url(url, key=key)}
-    notification = TemplateEmail(
-        user=user,
-        extra_context=context,
-        text_template='message/notification/email_verify.txt',
-        html_template='message/notification/email_verify.html',
-        subject=u'Verify your email'
     )
     notification.send(fail_silently=False)
 
@@ -448,3 +338,17 @@ def slack(payload):
             args=[payload],
             exc=exc,
         )
+
+
+@task(name='muckrock.message.tasks.gift')
+def gift(to_user, from_user, gift_description):
+    """Notify the user when they have been gifted requests."""
+    context = {'from': from_user, 'gift': gift_description}
+    notification = TemplateEmail(
+        user=to_user,
+        extra_context=context,
+        text_template='message/notification/gift.txt',
+        html_template='message/notification/gift.html',
+        subject=u'You got a gift!'
+    )
+    notification.send(fail_silently=False)

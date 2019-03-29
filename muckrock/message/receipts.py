@@ -3,7 +3,6 @@ Receipt objects for the messages app
 """
 
 # Django
-from django.conf import settings
 from django.utils import timezone
 
 # Standard Library
@@ -12,11 +11,11 @@ from datetime import datetime
 
 # MuckRock
 from muckrock.crowdfund.models import Crowdfund
-from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
-from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
+
+# move receipts to squarelet once crowdfunds and donations are moved over
 
 
 class LineItem(object):
@@ -112,61 +111,6 @@ def generic_receipt(user, charge):
     )
 
 
-def request_purchase_receipt(user, charge):
-    """Generates a receipt for a request purchase and then returns it."""
-    subject = u'Request Bundle Receipt'
-    text = 'message/receipt/request_purchase.txt'
-    html = 'message/receipt/request_purchase.html'
-    num_requests = charge.metadata.get('amount')
-    if num_requests:
-        item_name = '{} requests'.format(num_requests)
-    else:
-        item_name = 'Requests'
-    item = LineItem(item_name, charge.amount)
-    return Receipt(
-        charge,
-        [item],
-        user=user,
-        subject=subject,
-        text_template=text,
-        html_template=html,
-    )
-
-
-def request_fee_receipt(user, charge):
-    """Generates a receipt for a payment of request fees."""
-    subject = u'Request Fee Receipt'
-    text = 'message/receipt/request_fees.txt'
-    html = 'message/receipt/request_fees.html'
-    amount = charge.amount
-    agency_amount = int(amount / 1.05)
-    muckrock_amount = amount - agency_amount
-    items = [
-        LineItem('Agency fee', agency_amount),
-        LineItem('Processing fee', muckrock_amount),
-    ]
-    context = {}
-    try:
-        foia_pk = charge.metadata['foia']
-        foia = FOIARequest.objects.get(pk=foia_pk)
-        context.update({'foia': foia})
-    except KeyError:
-        logger.error('No FOIA identified in Charge metadata.')
-    except FOIARequest.DoesNotExist:
-        logger.error(
-            'Could not find FOIARequest identified by Charge metadata.'
-        )
-    return Receipt(
-        charge,
-        items,
-        user=user,
-        subject=subject,
-        extra_context=context,
-        text_template=text,
-        html_template=html,
-    )
-
-
 def crowdfund_payment_receipt(user, charge):
     """Generates a receipt for a payment on a crowdfund."""
     subject = u'Crowdfund Payment Receipt'
@@ -182,46 +126,6 @@ def crowdfund_payment_receipt(user, charge):
         logger.error('No Crowdfund identified in Charge metadata.')
     except Crowdfund.DoesNotExist:
         logger.error('Could not find Crowdfund identified by Charge metadata.')
-    return Receipt(
-        charge,
-        [item],
-        user=user,
-        subject=subject,
-        extra_context=context,
-        text_template=text,
-        html_template=html,
-    )
-
-
-def pro_subscription_receipt(user, charge):
-    """Generates a receipt for a payment on a pro account."""
-    subject = u'Professional Account Receipt'
-    text = 'message/receipt/pro_subscription.txt'
-    html = 'message/receipt/pro_subscription.html'
-    item = LineItem('Professional Account', charge.amount)
-    context = {'monthly_requests': settings.MONTHLY_REQUESTS['pro']}
-    return Receipt(
-        charge,
-        [item],
-        user=user,
-        subject=subject,
-        extra_context=context,
-        text_template=text,
-        html_template=html,
-    )
-
-
-def org_subscription_receipt(user, charge):
-    """Generates a receipt for a payment on an org account."""
-    subject = u'Organization Account Receipt'
-    text = 'message/receipt/org_subscription.txt'
-    html = 'message/receipt/org_subscription.html'
-    item = LineItem('Organization Account', charge.amount)
-    try:
-        context = {'org': Organization.objects.get(owner=user)}
-    except Organization.DoesNotExist:
-        logger.warning('Org receipt generated for non-owner User.')
-        context = {'org': None}
     return Receipt(
         charge,
         [item],

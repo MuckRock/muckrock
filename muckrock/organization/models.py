@@ -3,23 +3,23 @@ Models for the organization application
 """
 
 # Django
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
-from django.template.loader import render_to_string
-from django.utils.text import slugify
+from django.db.models.expressions import F
+from django.db.models.functions import Greatest
 
 # Standard Library
 import logging
-from datetime import date
+from uuid import uuid4
 
 # Third Party
 import stripe
 
 # MuckRock
-from muckrock.core.utils import stripe_retry_on_error
+from muckrock.core.utils import squarelet_post
+from muckrock.foia.exceptions import InsufficientRequestsError
+from muckrock.organization.querysets import OrganizationQuerySet
 
 logger = logging.getLogger(__name__)
 stripe.api_version = '2015-10-16'
@@ -29,268 +29,211 @@ class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
     # pylint: disable=too-many-instance-attributes
 
-    name = models.CharField(max_length=255, unique=True)
+    objects = OrganizationQuerySet.as_manager()
+
+    uuid = models.UUIDField(
+        'UUID', unique=True, editable=False, default=uuid4, db_index=True
+    )
+
+    users = models.ManyToManyField(
+        User, through="organization.Membership", related_name='organizations'
+    )
+
+    name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
-    owner = models.ForeignKey(User)
-    date_update = models.DateField(auto_now_add=True, null=True)
-    num_requests = models.IntegerField(default=0)
+    private = models.BooleanField(default=False)
+    individual = models.BooleanField(default=True)
+    plan = models.ForeignKey('organization.Plan', null=True)
+    card = models.CharField(max_length=255, blank=True)
+    avatar_url = models.URLField(max_length=255, blank=True)
+
+    requests_per_month = models.IntegerField(
+        default=0,
+        help_text='How many monthly requests this organization gets each month',
+    )
+    monthly_requests = models.IntegerField(
+        default=0,
+        help_text=
+        'How many recurring monthly requests are left for this month - these do '
+        'not roll over and are just reset to `requests_per_month` on `date_update`'
+    )
+    number_requests = models.IntegerField(
+        default=0,
+        help_text=
+        'How many individually purchased requests this organization has - '
+        'these never expire and are unaffected by the monthly roll over'
+    )
+    date_update = models.DateField(null=True)
+
+    payment_failed = models.BooleanField(default=False)
+
+    # deprecate #
+    owner = models.ForeignKey(User, blank=True, null=True)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
-    monthly_requests = models.IntegerField(
-        default=settings.MONTHLY_REQUESTS.get('org', 0)
-    )
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
-    private = models.BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-        """Autogenerates the slug based on the org name"""
-        self.slug = slugify(self.name)
-        super(Organization, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def display_name(self):
+        """Display 'Personal Accoubnt' for individual organizations"""
+        if self.individual:
+            return u'Personal Account'
+        else:
+            return self.name
 
     def get_absolute_url(self):
         """The url for this object"""
         return reverse('org-detail', kwargs={'slug': self.slug})
 
-    def restore_requests(self):
-        """Restore the number of requests credited to the org."""
-        if self.active:
-            self.date_update = date.today()
-            self.num_requests = self.monthly_requests
-            self.save()
-
-    def get_requests(self):
-        """
-        Get the number of requests left for this month.
-        Before doing so, restore the org's requests if they have not
-        been restored for this month, or ever.
-        """
-        with transaction.atomic():
-            org = Organization.objects.select_for_update().get(pk=self.pk)
-            today = date.today()
-            if org.date_update:
-                not_this_month = org.date_update.month != today.month
-                not_this_year = org.date_update.year != today.year
-                if not_this_month or not_this_year:
-                    org.restore_requests()
-            else:
-                org.restore_requests()
-            return org.num_requests
-
-    def is_owned_by(self, user):
-        """Returns true IFF the passed-in user is the owner of the org"""
-        return self.owner == user
-
     def has_member(self, user):
-        """Returns true IFF the passed-in user is a member of the org"""
-        return user.profile in self.members.all()
+        """Is the user a member of this organization?"""
+        return self.users.filter(pk=user.pk).exists()
 
-    def send_email_notification(self, user, subject, template):
-        """Notifies a user via email about a change to their organization membership."""
-        msg = render_to_string(
-            template, {
-                'member_name':
-                    user.first_name,
-                'organization_name':
-                    self.name,
-                'organization_owner':
-                    self.owner.get_full_name(),
-                'organization_link':
-                    user.profile.wrap_url(self.get_absolute_url()),
-                'settings_link':
-                    user.profile.wrap_url(reverse('acct-settings')) +
-                    '#organization',
+    def has_admin(self, user):
+        """Is the user an admin of this organization?"""
+        return self.users.filter(pk=user.pk, memberships__admin=True).exists()
+
+    def update_data(self, data):
+        """Set updated data from squarelet"""
+
+        # plan should always be created on client sites before being used
+        # get_or_create is used as a precauitionary measure
+        self.plan, created = Plan.objects.get_or_create(
+            slug=data['plan'],
+            defaults={'name': data['plan'].replace('-', ' ').title()},
+        )
+        if created:
+            logger.warning('Unknown plan: %s', data['plan'])
+
+        # calc reqs/month in case it has changed
+        self.requests_per_month = self.plan.requests_per_month(
+            data['max_users']
+        )
+
+        # if date update has changed, then this is a monthly restore of the
+        # subscription, and we should restore monthly requests.  If not, requests
+        # per month may have changed if they changed their plan or their user count,
+        # in which case we should add the difference to their monthly requests
+        # if requests per month increased
+        if self.date_update == data['date_update']:
+            # add additional monthly requests immediately
+            self.monthly_requests = F('monthly_requests') + Greatest(
+                self.requests_per_month - F('requests_per_month'), 0
+            )
+        else:
+            # reset monthly requests when date_update is updated
+            self.monthly_requests = self.requests_per_month
+
+        # update the remaining fields
+        fields = [
+            'name',
+            'slug',
+            'individual',
+            'private',
+            'date_update',
+            'card',
+            'payment_failed',
+            'avatar_url',
+        ]
+        for field in fields:
+            if field in data:
+                setattr(self, field, data[field])
+        self.save()
+
+    @transaction.atomic
+    def make_requests(self, amount):
+        """Try to deduct requests from the organization's balance"""
+        request_count = {'monthly': 0, 'regular': 0}
+        organization = Organization.objects.select_for_update().get(pk=self.pk)
+
+        request_count['monthly'] = min(amount, organization.monthly_requests)
+        amount -= request_count['monthly']
+
+        request_count['regular'] = min(amount, organization.number_requests)
+        amount -= request_count['regular']
+
+        if amount > 0:
+            raise InsufficientRequestsError(amount)
+
+        organization.monthly_requests -= request_count['monthly']
+        organization.number_requests -= request_count['regular']
+        organization.save()
+        return request_count
+
+    def return_requests(self, amounts):
+        """Return requests to the organization's balance"""
+        self.monthly_requests = F('monthly_requests') + amounts['monthly']
+        self.number_requests = F('number_requests') + amounts['regular']
+        self.save()
+
+    def add_requests(self, amount):
+        """Add requests"""
+        self.number_requests = F('number_requests') + amount
+        self.save()
+
+    def pay(self, amount, description, token, save_card, fee_amount=0):
+        """Pay via Squarelet API"""
+        # pylint: disable=too-many-arguments
+        resp = squarelet_post(
+            '/api/charges/',
+            data={
+                'organization': self.uuid,
+                'amount': amount,
+                'fee_amount': fee_amount,
+                'description': description,
+                'token': token,
+                'save_card': save_card,
             }
         )
-        email = EmailMessage(
-            subject=subject,
-            body=msg,
-            from_email='info@muckrock.com',
-            to=[user.email],
-            bcc=['diagnostics@muckrock.com']
+        logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
+        resp.raise_for_status()
+        resp_json = resp.json()
+        if 'card' in resp_json:
+            self.card = resp_json['card']
+            self.save()
+
+
+class Membership(models.Model):
+    """Through table for organization membership"""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='memberships'
+    )
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='memberships'
+    )
+    active = models.BooleanField(default=False)
+    admin = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("user", "organization")
+
+    def __unicode__(self):
+        return u"{} in {}".format(self.user, self.organization)
+
+
+class Plan(models.Model):
+    """Plans that organizations can subscribe to"""
+
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
+
+    minimum_users = models.PositiveSmallIntegerField(default=1)
+    base_requests = models.PositiveSmallIntegerField(default=0)
+    requests_per_user = models.PositiveSmallIntegerField(default=0)
+    feature_level = models.PositiveSmallIntegerField(default=0)
+
+    def __unicode__(self):
+        return self.name
+
+    def requests_per_month(self, users):
+        """Calculate how many requests an organization gets per month on this plan
+        for a given number of users"""
+        return (
+            self.base_requests +
+            (users - self.minimum_users) * self.requests_per_user
         )
-        email.send(fail_silently=False)
-
-    def update_num_seats(self, num_seats):
-        """Updates the max users and adjusts the monthly cost and monthly requests in response."""
-        # since the compute methods use the current max_seat values, update the max_seats last
-        new_cost = self.compute_monthly_cost(num_seats)
-        new_requests = self.compute_monthly_requests(num_seats)
-        self.monthly_cost = new_cost
-        self.monthly_requests = new_requests
-        self.max_users = num_seats
-        self.save()
-
-    def compute_monthly_cost(self, num_seats):
-        """Computes the monthly cost given the number of seats, which can be negative."""
-        price_per_user = settings.ORG_PRICE_PER_SEAT
-        current_monthly_cost = self.monthly_cost
-        seat_difference = num_seats - self.max_users
-        cost_adjustment = price_per_user * seat_difference
-        return current_monthly_cost + cost_adjustment
-
-    def compute_monthly_requests(self, num_seats):
-        """Computes the monthly requests given the number of seats, which can be negative."""
-        requests_per_user = settings.ORG_REQUESTS_PER_SEAT
-        current_requests = self.monthly_requests
-        seat_difference = num_seats - self.max_users
-        request_adjustment = requests_per_user * seat_difference
-        return current_requests + request_adjustment
-
-    def add_member(self, user):
-        """Adds the given user as a member of the organization."""
-        added = False
-        if not self.active:
-            raise AttributeError(
-                'Cannot add members to an inactive organization.'
-            )
-        if self.members.count() == self.max_users:
-            raise AttributeError('No open seat for new members.')
-        if user.profile.organization:
-            which_org = 'this' if user.profile.organization == self else 'a different'
-            raise AttributeError(
-                '%s is already a member of %s organization.' %
-                (user.first_name, which_org)
-            )
-        is_an_owner = Organization.objects.filter(owner=user).exists()
-        owns_this_org = self.is_owned_by(user)
-        if is_an_owner and not owns_this_org:
-            user_name = user.first_name
-            raise AttributeError(
-                '%s is already an owner of a different organization.' %
-                user_name
-            )
-        if not self.has_member(user):
-            user.profile.organization = self
-            user.profile.save()
-            self.send_email_notification(
-                user, '[MuckRock] You were added to an organization',
-                'text/organization/add_member.txt'
-            )
-            added = True
-        return added
-
-    def remove_member(self, user):
-        """Removes the given user from this organization if they are a member."""
-        removed = False
-        if self.has_member(user):
-            user.profile.organization = None
-            user.profile.save()
-            self.send_email_notification(
-                user, '[MuckRock] You were removed from an organization',
-                'text/organization/remove_member.txt'
-            )
-            removed = True
-        return removed
-
-    def activate_subscription(self, token, num_seats):
-        """Subscribes the owner to the org plan, given a variable quantity"""
-        if self.active:
-            raise AttributeError('Cannot activate an active organization.')
-        if num_seats < settings.ORG_MIN_SEATS:
-            raise ValueError(
-                'Cannot have an organization with less than three member seats.'
-            )
-
-        quantity = self.compute_monthly_cost(num_seats) / 100
-        customer = self.owner.profile.customer()
-        subscription = stripe_retry_on_error(
-            customer.subscriptions.create,
-            plan='org',
-            source=token,
-            quantity=quantity,
-            idempotency_key=True,
-        )
-        with transaction.atomic():
-            org = Organization.objects.select_for_update().get(pk=self.pk)
-            org.update_num_seats(num_seats)
-            org.num_requests = org.monthly_requests
-            org.stripe_id = subscription.id
-            org.active = True
-            org.save()
-
-        # If the owner has a pro account, cancel it.
-        # Assume the pro user has an active subscription.
-        # On the off chance that they don't, just silence the error.
-        if self.owner.profile.acct_type == 'pro':
-            try:
-                self.owner.profile.cancel_pro_subscription()
-            except AttributeError:
-                pass
-        self.owner.profile.subscription_id = subscription.id
-        self.owner.profile.save()
-        return subscription
-
-    def update_subscription(self, num_seats):
-        """Updates the quantity of the subscription, but only if the subscription is active"""
-        with transaction.atomic():
-            org = (
-                Organization.objects.select_for_update()
-                .select_related('owner').get(pk=self.pk)
-            )
-            if not org.active:
-                raise AttributeError('Cannot update an inactive subscription.')
-            if num_seats < settings.ORG_MIN_SEATS:
-                raise ValueError(
-                    'Cannot have an organization with less than three member seats.'
-                )
-            quantity = org.compute_monthly_cost(num_seats) / 100
-            customer = org.owner.profile.customer()
-            try:
-                subscription = customer.subscriptions.retrieve(org.stripe_id)
-                subscription.quantity = quantity
-                subscription = subscription.save()
-                org.stripe_id = subscription.id
-                org.owner.profile.subscription_id = subscription.id
-                org.owner.profile.save()
-            except stripe.InvalidRequestError:
-                logger.error((
-                    'No subscription is associated with organization '
-                    'owner %s.'
-                ), org.owner.username)
-                return
-            old_monthly_requests = org.monthly_requests
-            org.update_num_seats(num_seats)
-            new_monthly_requests = org.monthly_requests
-            # if it goes up, let it go up. if it goes down, don't let it go down
-            if new_monthly_requests > old_monthly_requests:
-                org.num_requests += new_monthly_requests - old_monthly_requests
-            org.save()
-        return subscription
-
-    def cancel_subscription(self):
-        """Cancels the owner's subscription to this org's plan"""
-        if not self.active:
-            raise AttributeError('Cannot cancel an inactive subscription.')
-        customer = self.owner.profile.customer()
-        try:
-            subscription = customer.subscriptions.retrieve(self.stripe_id)
-            subscription = subscription.delete()
-        except stripe.InvalidRequestError:
-            subscription = None
-            logger.warning((
-                'No subscription is associated with organization '
-                'owner %s.'
-            ), self.owner.username)
-        self.stripe_id = ''
-        self.active = False
-        self.owner.profile.subscription_id = ''
-        self.owner.profile.payment_failed = False
-        self.save()
-        self.owner.profile.save()
-        return subscription
-
-    def mixpanel_event(self):
-        """Return data for a mixpanel event"""
-        return {
-            'Organization': self.name,
-            'Organization ID': self.pk,
-            'Seats': self.max_users,
-            'Monthly Requests': self.monthly_requests,
-            'Monthly Cost': self.monthly_cost,
-            'Active': self.active,
-            'Private': self.private,
-        }

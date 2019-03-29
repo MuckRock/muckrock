@@ -21,11 +21,11 @@ from django.utils.safestring import mark_safe
 import re
 import zlib
 from email.parser import Parser
-from urllib import urlencode
 
 # Third Party
 import bleach
 import markdown
+from sorl.thumbnail.templatetags.thumbnail import thumbnail
 
 # MuckRock
 from muckrock.core.forms import NewsletterSignupForm, TagManagerForm
@@ -35,11 +35,12 @@ register = Library()
 
 
 @register.simple_tag
-def autologin(user):
-    """Generate an autologin token for the user."""
-    if user and user.is_authenticated():
-        return urlencode(user.profile.autologin())
-    return ''
+def autologin(url, user):
+    """Generate an autologin url for the user."""
+    if not user or not user.is_authenticated:
+        return '{}/{}'.format(settings.MUCKROCK_URL, url)
+
+    return user.profile.wrap_url(url)
 
 
 @register.simple_tag
@@ -436,3 +437,15 @@ def do_cache(parser, token):
 def do_compress_cache(parser, token):
     """Cache tag that can compress its contents"""
     return CacheNode(*parse_cache(parser, token), compress=True)
+
+
+@register.tag
+def sorl_thumbnail(parser, token):
+    """Wrapper for sorl thumbnail tag to resolve name clash with easy thumbnails"""
+    return thumbnail(parser, token)
+
+
+@register.filter
+def nbsp(value):
+    """Replace spaces with non-breaking spaces"""
+    return mark_safe('&nbsp;'.join(value.split(' ')))

@@ -24,6 +24,7 @@ from smart_open import smart_open
 
 # MuckRock
 from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.utils import user_plan_count
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import cache_get_or_set
 from muckrock.crowdsource.models import CrowdsourceResponse
@@ -243,7 +244,7 @@ class ProUserGraphWidget(StatGraphWidget):
 
     def get_value(self):
         """Get value"""
-        return Profile.objects.filter(acct_type='pro').count()
+        return user_plan_count('pro')
 
 
 class ReviewAgencyGraphWidget(StatGraphWidget):
@@ -352,7 +353,7 @@ class ProUserCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return Profile.objects.filter(acct_type='pro').count()
+        return user_plan_count('pro')
 
     def get_previous_value(self):
         """Get previous value"""
@@ -366,6 +367,8 @@ class OrgUserCountWidget(CompareNumberWidget):
     title = 'Org Users'
     direction = 1
     more_info = 'vs one month ago'
+
+    # XXX
 
     def get_value(self):
         """Get value"""
@@ -426,7 +429,7 @@ class RegisteredUsersWidget(GoalCompareNumberWidget):
         month_start = date.today().replace(day=1)
         return (
             User.objects.filter(date_joined__gte=month_start)
-            .exclude(profile__acct_type='agency').count()
+            .filter(profile__agency=None).count()
         )
 
 

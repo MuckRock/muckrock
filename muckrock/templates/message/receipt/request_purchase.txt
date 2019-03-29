@@ -1,5 +1,0 @@
-{% extends 'message/receipt/base.txt' %}
-
-{% block description %}
-This email confirms your purchase of requests from MuckRock.
-{% endblock %}

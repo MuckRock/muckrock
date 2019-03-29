@@ -14,6 +14,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
+from django.db.models import F
+from django.db.models.functions import Least
 from django.db.models.signals import post_delete
 from django.utils import timezone
 from django.utils.text import slugify
@@ -26,12 +28,10 @@ from itertools import izip_longest
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock.accounts.models import Profile
 from muckrock.core.utils import TempDisconnectSignal
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.querysets import FOIAComposerQuerySet
-from muckrock.organization.models import Organization
 from muckrock.tags.models import TaggedItemBase
 
 STATUS = [
@@ -49,6 +49,13 @@ class FOIAComposer(models.Model):
         User,
         on_delete=models.PROTECT,
         related_name='composers',
+    )
+    # only null for initial migration
+    organization = models.ForeignKey(
+        'organization.Organization',
+        on_delete=models.PROTECT,
+        related_name='composers',
+        null=True,
     )
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
@@ -73,9 +80,10 @@ class FOIAComposer(models.Model):
     )
 
     # for refunding requests if necessary
-    num_org_requests = models.PositiveSmallIntegerField(default=0)
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
+    # deprecate this field
+    num_org_requests = models.PositiveSmallIntegerField(default=0)
 
     # for delayed submission
     delayed_id = models.CharField(blank=True, max_length=255)
@@ -117,10 +125,9 @@ class FOIAComposer(models.Model):
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
         num_requests = self.agencies.count()
-        request_count = self.user.profile.make_requests(num_requests)
+        request_count = self.organization.make_requests(num_requests)
         self.num_reg_requests = request_count['regular']
         self.num_monthly_requests = request_count['monthly']
-        self.num_org_requests = request_count['org']
         self.status = 'submitted'
         self.datetime_submitted = timezone.now()
 
@@ -159,56 +166,35 @@ class FOIAComposer(models.Model):
             return_amts = {
                 'regular': self.num_reg_requests,
                 'monthly': self.num_monthly_requests,
-                'org': self.num_org_requests,
             }
         else:
             return_amts = self._calc_return_requests(num_requests)
 
         self._return_requests(return_amts)
 
+    @transaction.atomic
     def _return_requests(self, return_amts):
         """Helper method for return requests
+
         Does the actually returning
         """
-        with transaction.atomic():
-            self.num_reg_requests -= min(
-                return_amts['regular'], self.num_reg_requests
-            )
-            self.num_monthly_requests -= min(
-                return_amts['monthly'], self.num_monthly_requests
-            )
-            self.num_org_requests -= min(
-                return_amts['org'], self.num_org_requests
-            )
-            self.save()
+        self.num_reg_requests = (
+            F('num_reg_requests') -
+            Least(return_amts['regular'], F('num_reg_requests'))
+        )
+        self.num_monthly_requests = (
+            F('num_monthly_requests') -
+            Least(return_amts['monthly'], F('num_monthly_requests'))
+        )
+        self.save()
 
-            # add the return requests to the user's profile
-            profile = (
-                Profile.objects.select_for_update()
-                .get(pk=self.user.profile.id)
-            )
-            profile.num_requests += return_amts['regular']
-            profile.get_monthly_requests()
-            profile.monthly_requests += return_amts['monthly']
-            if profile.organization:
-                org = (
-                    Organization.objects.select_for_update().get(
-                        pk=profile.organization.pk
-                    )
-                )
-                org.get_requests()
-                org.num_requests += return_amts['org']
-                org.save()
-            else:
-                profile.monthly_requests += return_amts['org']
-            profile.save()
+        self.organization.return_requests(return_amts)
 
     def _calc_return_requests(self, num_requests):
         """Determine how many of each type of request to return"""
         used = [
             self.num_reg_requests,
             self.num_monthly_requests,
-            self.num_org_requests,
         ]
         ret = []
         while num_requests:
@@ -223,7 +209,7 @@ class FOIAComposer(models.Model):
                 ret.append(num_ret)
         ret_dict = dict(
             izip_longest(
-                ['regular', 'monthly', 'org', 'extra'],
+                ['regular', 'monthly', 'extra'],
                 ret,
                 fillvalue=0,
             )

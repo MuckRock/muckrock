@@ -375,7 +375,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
         )
 
     files = [f.ffile for f in comm.files.all()]
-    callback_url = 'https://%s%s' % (
+    callback_url = '{}{}'.format(
         settings.MUCKROCK_URL,
         reverse('phaxio-callback'),
     )

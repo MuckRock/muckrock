@@ -17,9 +17,9 @@ from muckrock.organization.models import Organization
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking users"""
-    choices = User.objects.all()
+    choices = User.objects.all().select_related('profile')
     choice_template = 'autocomplete/user.html'
-    search_fields = ['^username', '^first_name', '^last_name', '^email']
+    search_fields = ['^username', 'profile__full_name', '^email']
     attrs = {
         'placeholder': 'Search users',
         'data-autocomplete-minimum-characters': 2
@@ -27,7 +27,7 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 
     def choice_label(self, choice):
         """Uses the user's full name and username as the choice label."""
-        label = choice.get_full_name() + ' (' + choice.username + ')'
+        label = choice.profile.full_name + ' (' + choice.username + ')'
         return label
 
 
@@ -35,7 +35,7 @@ class AuthorAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
     choices = (
         User.objects.annotate(article_count=Count('authored_articles'))
-        .exclude(article_count=0)
+        .select_related('profile').exclude(article_count=0)
     )
     attrs = {
         'placeholder': 'Search authors',
@@ -47,7 +47,7 @@ class UserTaskAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
     choices = (
         User.objects.annotate(resolved_task_count=Count('resolved_tasks'))
-        .exclude(resolved_task_count=0)
+        .select_related('profile').exclude(resolved_task_count=0)
     )
 
 

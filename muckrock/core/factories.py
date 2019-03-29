@@ -9,6 +9,7 @@ from django.utils.text import slugify
 
 # Standard Library
 import datetime
+from uuid import uuid4
 
 # Third Party
 import factory
@@ -20,7 +21,6 @@ from muckrock.communication.models import EmailAddress
 from muckrock.core.utils import new_action
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.news.models import Article
-from muckrock.organization.models import Organization
 from muckrock.project.models import Project
 from muckrock.qanda.models import Answer, Question
 
@@ -31,12 +31,13 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Profile
 
+    uuid = factory.LazyFunction(uuid4)
+
     user = factory.SubFactory(
-        'muckrock.core.factories.UserFactory', profile=None
+        'muckrock.core.factories.UserFactory',
+        profile=None,
+        uuid=factory.SelfAttribute('..uuid'),
     )
-    acct_type = 'basic'
-    date_update = timezone.now()
-    customer_id = "cus_RTW3KxBMCknuhB"
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -48,6 +49,11 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+    membership = factory.RelatedFactory(
+        'muckrock.organization.factories.MembershipFactory',
+        'user',
+        organization__individual=True,
+    )
 
     @factory.post_generation
     def password(self, create, extracted, **kwargs):
@@ -56,6 +62,31 @@ class UserFactory(factory.django.DjangoModelFactory):
         if extracted:
             self.set_password(extracted)
             self.save()
+
+    @factory.post_generation
+    def uuid(self, create, extracted, **kwargs):
+        """Match individual UUID to user UUID"""
+        # pylint: disable=unused-argument
+        membership = self.memberships.first()
+        if extracted:
+            membership.organization.uuid = extracted
+        else:
+            membership.organization.uuid = self.profile.uuid
+        membership.organization.save()
+
+
+class ProfessionalUserFactory(UserFactory):
+    """A professional user"""
+    membership__organization__plan = factory.SubFactory(
+        'muckrock.organization.factories.ProfessionalPlanFactory'
+    )
+
+
+class OrganizationUserFactory(UserFactory):
+    """An organization user"""
+    membership__organization__plan = factory.SubFactory(
+        'muckrock.organization.factories.OrganizationPlanFactory'
+    )
 
 
 class NotificationFactory(factory.django.DjangoModelFactory):
@@ -66,17 +97,6 @@ class NotificationFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     action = factory.LazyAttribute(lambda obj: new_action(obj.user, 'acted'))
-
-
-class OrganizationFactory(factory.django.DjangoModelFactory):
-    """A factory for creating Organization test objects."""
-
-    class Meta:
-        model = Organization
-
-    name = factory.Sequence(lambda n: "Organization %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    owner = factory.SubFactory(UserFactory)
 
 
 class AgencyFactory(factory.django.DjangoModelFactory):
@@ -101,6 +121,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
         request_type='primary',
         phone__type='fax',
     )
+    profile = factory.RelatedFactory(ProfileFactory, 'agency')
 
     @factory.post_generation
     def other_emails(self, create, extracted, **kwargs):

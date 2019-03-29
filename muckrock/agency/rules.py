@@ -7,6 +7,6 @@ from __future__ import absolute_import
 from rules import add_perm
 
 # MuckRock
-from muckrock.foia.rules import is_advanced
+from muckrock.foia.rules import has_feature_level
 
-add_perm('agency.view_emails', is_advanced)
+add_perm('agency.view_emails', has_feature_level(1))

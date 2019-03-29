@@ -4,7 +4,6 @@ Views for mailgun
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import EmailMessage, send_mail
 from django.core.urlresolvers import reverse
@@ -434,20 +433,7 @@ def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
     if email_comm is None:
-        # This was an email to a user
-        try:
-            user = (
-                User.objects.select_related('profile')
-                .get(email=request.POST.get('recipient'))
-            )
-        except User.DoesNotExist:
-            # Can't find the user, nothing to do
-            pass
-        else:
-            user.profile.email_failed = True
-            user.profile.save()
-
-        # stop further processing
+        # This was an email to a user, it will be handled by squarelet
         return
 
     recipient = EmailAddress.objects.fetch(request.POST.get('recipient', ''))
@@ -535,7 +521,7 @@ def delivered(_request, email_comm, timestamp):
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
     # pylint: disable=too-many-branches
-    url = 'https://%s%s' % (
+    url = '{}{}'.format(
         settings.MUCKROCK_URL,
         reverse('phaxio-callback'),
     )

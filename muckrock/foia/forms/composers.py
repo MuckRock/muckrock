@@ -4,15 +4,16 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
+from requests.exceptions import HTTPError
 
 # MuckRock
 from muckrock.accounts.forms import BuyRequestForm
+from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
 from muckrock.core.forms import TaggitWidget
 from muckrock.foia.fields import ComposerAgencyField
@@ -101,13 +102,6 @@ class BaseComposerForm(forms.ModelForm):
         label='Get MuckRock\'s weekly newsletter with '
         'FOIA news, tips, and more',
     )
-    register_pro = forms.BooleanField(
-        initial=False,
-        required=False,
-        label='Go Pro',
-        help_text='Get 20 requests for $40 per month, as well as the ability to '
-        'keep your requests private',
-    )
 
     login_username = forms.CharField(label='Username', required=False)
     login_password = forms.CharField(
@@ -131,26 +125,26 @@ class BaseComposerForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        if not hasattr(self, 'user'):
-            self.user = kwargs.pop('user')
+        if not hasattr(self, '_user'):
+            self._user = kwargs.pop('user')
         self.request = kwargs.pop('request')
         super(BaseComposerForm, self).__init__(*args, **kwargs)
-        if self.user.is_authenticated:
+        if self._user.is_authenticated:
             del self.fields['register_full_name']
             del self.fields['register_email']
             del self.fields['register_newsletter']
             del self.fields['login_username']
             del self.fields['login_password']
-        if not self.user.has_perm('foia.embargo_foiarequest'):
+        if not self._user.has_perm('foia.embargo_foiarequest'):
             del self.fields['embargo']
-        if not self.user.has_perm('foia.embargo_perm_foiarequest'):
+        if not self._user.has_perm('foia.embargo_perm_foiarequest'):
             del self.fields['permanent_embargo']
         self.fields['parent'].queryset = (
-            FOIAComposer.objects.get_viewable(self.user).distinct()
+            FOIAComposer.objects.get_viewable(self._user).distinct()
         )
-        self.fields['agencies'].user = self.user
+        self.fields['agencies'].user = self._user
         self.fields['agencies'].queryset = (
-            Agency.objects.get_approved_and_pending(self.user)
+            Agency.objects.get_approved_and_pending(self._user)
         )
 
     def clean_register_email(self):
@@ -186,7 +180,7 @@ class BaseComposerForm(forms.ModelForm):
                     )
         if cleaned_data.get('permanent_embargo'):
             cleaned_data['embargo'] = True
-        if not self.user.is_authenticated:
+        if not self._user.is_authenticated:
             register = (
                 cleaned_data.get('register_full_name')
                 and cleaned_data.get('register_email')
@@ -201,14 +195,16 @@ class BaseComposerForm(forms.ModelForm):
                     'login information'
                 )
             if login:
-                form = AuthenticationForm(
-                    data={
-                        'username': cleaned_data.get('login_username'),
-                        'password': cleaned_data.get('login_password'),
-                    }
-                )
-                form.full_clean()
-                self.user = form.get_user()
+                try:
+                    self._user = mini_login(
+                        self.request,
+                        cleaned_data.get('login_username'),
+                        cleaned_data.get('login_password'),
+                    )
+                except HTTPError:
+                    raise forms.ValidationError(
+                        'Please enter a correct username and password'
+                    )
         return cleaned_data
 
 
@@ -218,20 +214,19 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     def __init__(self, *args, **kwargs):
         super(ComposerForm, self).__init__(*args, **kwargs)
         # Make sub-form fields non-required
-        self.fields['stripe_token'].required = False
-        self.fields['stripe_email'].required = False
         self.fields['num_requests'].required = False
+        self.fields['stripe_token'].required = False
 
     def clean(self):
         """Buy request fields are only required when buying requests"""
         cleaned_data = super(ComposerForm, self).clean()
         action = cleaned_data.get('action')
         num_requests = cleaned_data.get('num_requests', 0)
-        pro = cleaned_data.get('register_pro')
-        if action == 'submit' and (num_requests > 0 or pro):
-            for field in ['stripe_token', 'stripe_email']:
-                if not self.cleaned_data.get(field):
-                    self.add_error(
-                        field,
-                        'This field is required when making a purchase',
-                    )
+        if (
+            action == 'submit' and num_requests > 0
+            and not self.cleaned_data.get('stripe_token')
+        ):
+            self.add_error(
+                'stripe_token',
+                'This field is required when making a purchase',
+            )

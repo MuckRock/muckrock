@@ -26,6 +26,7 @@ from muckrock.core.factories import (
     AgencyEmailFactory,
     AgencyFactory,
     AgencyPhoneFactory,
+    ProfessionalUserFactory,
     UserFactory,
 )
 from muckrock.core.test_utils import http_get_response, mock_middleware
@@ -94,7 +95,7 @@ class TestAgencyUnit(TestCase):
         assert_in('warning', proxy_info)
 
         proxy = UserFactory(
-            profile__acct_type='proxy',
+            membership__organization__plan__name='Proxy',
             profile__state=agency_.jurisdiction.legal.abbrev,
         )
         proxy_info = agency_.get_proxy_info()
@@ -269,7 +270,7 @@ class TestAgencyViews(TestCase):
             },
         )
         request = mock_middleware(request)
-        request.user = UserFactory(first_name='John', last_name='Doe')
+        request.user = UserFactory(profile__full_name='John Doe')
         response = boilerplate(request)
         eq_(response.status_code, 200)
         data = json.loads(response.content)
@@ -303,7 +304,7 @@ class TestAgencyViews(TestCase):
             })
         )
         request = mock_middleware(request)
-        request.user = UserFactory()
+        request.user = ProfessionalUserFactory()
         response = contact_info(request, agency.pk)
         eq_(response.status_code, 200)
         data = json.loads(response.content)

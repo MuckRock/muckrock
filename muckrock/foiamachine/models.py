@@ -77,7 +77,7 @@ class FoiaMachineRequest(models.Model):
         context = {
             'jurisdiction': self.jurisdiction,
             'document_request': self.request_language,
-            'user_name': self.user.get_full_name()
+            'user_name': self.user.profile.full_name,
         }
         return render_to_string(template, context=context).strip()
 

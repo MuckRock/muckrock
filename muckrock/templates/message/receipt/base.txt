@@ -17,7 +17,7 @@ Total: ${{total|floatformat:2}}
 
 ============
 {% endblock %}
-{% if user %}Hi {{ user.first_name }},{% else %}Hi {{charge.name}},{% endif %}
+{% if user %}Hi {{ user.profile.full_name }},{% else %}Hi {{charge.name}},{% endif %}
 {% block description %}
 This email confirms your payment to MuckRock.
 {% endblock %}

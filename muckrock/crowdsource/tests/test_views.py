@@ -1,4 +1,7 @@
 """Tests for crowdsource views"""
+
+# pylint: disable=invalid-name
+
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
@@ -18,8 +21,6 @@ from muckrock.crowdsource.views import (
     CrowdsourceDetailView,
     CrowdsourceFormView,
 )
-
-# pylint: disable=invalid-name
 
 
 class TestCrowdsourceDetailView(TestCase):

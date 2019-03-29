@@ -15,14 +15,13 @@ from django.utils.safestring import mark_safe
 
 # Standard Library
 import logging
-from datetime import date
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
 
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.accounts.utils import unique_username
+from muckrock.core.utils import squarelet_post
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock.task.models import NewAgencyTask
 
@@ -244,12 +243,18 @@ class Agency(models.Model, RequestHelper):
         try:
             return self.profile.user
         except Profile.DoesNotExist:
-            user = User.objects.create_user(unique_username(self.name))
-            Profile.objects.create(
-                user=user,
-                acct_type='agency',
-                date_update=date.today(),
-                agency=self,
+            data = {
+                'name': self.name,
+                'preferred_username': self.name,
+                'email': self.get_emails().first(),
+                'is_agency': True,
+            }
+            # error handling?
+            resp = squarelet_post('/api/users/', data=data)
+            user_json = resp.json()
+            user_json['agency'] = self
+            user, _ = Profile.objects.squarelet_update_or_create(
+                user_json['uuid'], user_json
             )
             return user
 

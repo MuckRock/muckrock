@@ -9,8 +9,12 @@ from django.test import TestCase
 from nose.tools import assert_false, assert_true, ok_
 
 # MuckRock
-from muckrock.core.factories import OrganizationFactory, UserFactory
+from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.organization.factories import (
+    MembershipFactory,
+    OrganizationFactory,
+)
 
 
 class TestRequestSharing(TestCase):
@@ -115,14 +119,15 @@ class TestRequestSharing(TestCase):
     def test_org_share(self):
         """Test sharing with your organization"""
         org = OrganizationFactory()
+        user = UserFactory()
+        MembershipFactory(user=user, organization=org, active=False)
         self.foia.embargo = True
-        org.owner.profile.organization = org
-        self.foia.user.profile.organization = org
+        self.foia.composer.organization = org
         # fellow org member cannot view it before sharing is turned on
-        assert_false(self.foia.has_perm(org.owner, 'view'))
+        assert_false(self.foia.has_perm(user, 'view'))
 
         self.creator.profile.org_share = True
         # now org member can view it
-        assert_true(self.foia.has_perm(org.owner, 'view'))
+        assert_true(self.foia.has_perm(user, 'view'))
         # non-org member still cannot view it
         assert_false(self.foia.has_perm(self.editor, 'view'))

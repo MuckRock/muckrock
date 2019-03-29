@@ -13,12 +13,18 @@ from django_mailgun import MailgunBackend
 # MuckRock
 from muckrock.settings.heroku import *
 
-MUCKROCK_URL = 'muckrock-staging.herokuapp.com'
-FOIAMACHINE_URL = 'staging.foiamachine.org'
+MUCKROCK_URL = 'https://muckrock-staging.herokuapp.com'
+FOIAMACHINE_URL = 'https://staging.foiamachine.org'
+SQUARELET_URL = 'https://squarelet-staging.herokuapp.com'
 
 INSTALLED_APPS += ('bandit',)
 
 BANDIT_EMAIL = 'staging@muckrock.com'
+BANDIT_WHITELIST = [
+    e.strip()
+    for e in os.environ.get('BANDIT_WHITELIST', '').split(',')
+    if e.strip()
+]
 
 
 class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
@@ -26,3 +32,8 @@ class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
 
 
 EMAIL_BACKEND = 'muckrock.settings.staging.HijackMailgunBackend'
+
+# set proxy for static outgoing IP address, so we can cross
+# white list muckrock and squarelet staging sites
+os.environ['http_proxy'] = os.environ.get('FIXIE_URL', '')
+os.environ['https_proxy'] = os.environ.get('FIXIE_URL', '')

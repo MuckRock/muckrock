@@ -5,10 +5,7 @@ Forms for MuckRock
 # Django
 from django import forms
 from django.conf import settings
-from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import User
-from django.core.mail import EmailMultiAlternatives
-from django.template import loader
 
 # Third Party
 import six
@@ -113,46 +110,9 @@ class SearchForm(forms.Form):
     )
 
 
-class PasswordResetForm(auth_forms.PasswordResetForm):
-    """Password reset form - subclass to bcc emails to diagnostics"""
-
-    # pylint: disable=too-many-arguments
-
-    def send_mail(
-        self,
-        subject_template_name,
-        email_template_name,
-        context,
-        from_email,
-        to_email,
-        html_email_template_name=None
-    ):
-        """
-        Sends a django.core.mail.EmailMultiAlternatives to `to_email`.
-        """
-        subject = loader.render_to_string(subject_template_name, context)
-        # Email subject *must not* contain newlines
-        subject = ''.join(subject.splitlines())
-        body = loader.render_to_string(email_template_name, context)
-
-        email_message = EmailMultiAlternatives(
-            subject=subject,
-            body=body,
-            from_email=from_email,
-            to=[to_email],
-            bcc=['diagnostics@muckrock.com'],
-        )
-        if html_email_template_name is not None:
-            html_email = loader.render_to_string(
-                html_email_template_name, context
-            )
-            email_message.attach_alternative(html_email, 'text/html')
-
-        email_message.send()
-
-
 class StripeForm(forms.Form):
     """A form to collect a stripe token for a given amount and email."""
+    # remove after crowdunds and donations moved to stripe
     stripe_pk = forms.CharField(
         initial=settings.STRIPE_PUB_KEY,
         required=False,

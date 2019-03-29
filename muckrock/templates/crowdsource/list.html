@@ -28,7 +28,7 @@
     {% if crowdsource.project %}
       <td><a href="{{ crowdsource.project.get_absolute_url }}">{{ crowdsource.project.title }}</a></td>
     {% else %}
-      <td><a href="{% url "acct-profile" crowdsource.user.username %}">{{ crowdsource.user.get_full_name }}</a></td>
+      <td><a href="{% url "acct-profile" crowdsource.user.username %}">{{ crowdsource.user.profile.full_name }}</a></td>
     {% endif %}
     <td>
       {{ crowdsource.responses.all|length|intcomma }}

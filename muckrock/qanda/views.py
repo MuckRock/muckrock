@@ -44,7 +44,7 @@ class QuestionList(MRSearchFilterListView):
     default_order = 'desc'
     sort_map = {
         'title': 'title',
-        'user': 'user__first_name',
+        'user': 'user__profile__full_name',
         'date': 'date',
     }
 
@@ -162,7 +162,7 @@ class Detail(DetailView):
         )
         context['answers'] = (
             context['object'].answers.filter(user__is_active=True)
-            .select_related('user')
+            .select_related('user__profile')
         )
         context['answer_form'] = AnswerForm()
         foia = self.object.foia

@@ -2,6 +2,8 @@
 Detail view for a FOIA request
 """
 
+# pylint: disable=too-many-lines
+
 # Django
 from celery import current_app
 from django.conf import settings
@@ -19,7 +21,11 @@ from django.views.generic import DetailView
 # Standard Library
 import json
 import logging
+import sys
 from datetime import timedelta
+
+# Third Party
+import requests
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -44,6 +50,7 @@ from muckrock.foia.forms import (
     FOIAFlagForm,
     FOIANoteForm,
     FOIASoftDeleteForm,
+    RequestFeeForm,
     ResendForm,
     TrackingNumberForm,
 )
@@ -71,6 +78,8 @@ from muckrock.task.models import (
     Task,
 )
 
+logger = logging.getLogger(__name__)
+
 AGENCY_STATUS = [
     ('processed', 'Further Response Coming'),
     ('fix', 'Fix Required'),
@@ -94,6 +103,7 @@ class Detail(DetailView):
         self.agency_reply_form = FOIAAgencyReplyForm()
         self.admin_fix_form = None
         self.resend_form = None
+        self.fee_form = None
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -109,6 +119,10 @@ class Detail(DetailView):
             }
         )
         self.resend_form = ResendForm()
+        self.fee_form = RequestFeeForm(
+            user=self.request.user,
+            initial={'amount': foia.get_stripe_amount()},
+        )
         if request.POST:
             try:
                 return self.post(request)
@@ -218,6 +232,8 @@ class Detail(DetailView):
                     foia
             }
         )
+        context['fee_form'] = self.fee_form
+
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
         context['status_choices'] = [(k, v)
@@ -248,9 +264,8 @@ class Detail(DetailView):
             context['open_tasks'] = open_tasks
             context['asignees'] = User.objects.filter(
                 is_staff=True,
-            ).order_by('last_name')
+            ).order_by('profile__full_name')
 
-        context['stripe_pk'] = settings.STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse(
             'admin:foia_foiarequest_change', args=(foia.pk,)
         )
@@ -268,6 +283,7 @@ class Detail(DetailView):
         context['cc_emails'] = json.dumps([
             unicode(e) for e in foia.cc_emails.all()
         ])
+        context['notes'] = foia.notes.select_related('author').all()
         if (
             foia.composer.status == 'submitted'
             and foia.composer.datetime_submitted is not None
@@ -324,6 +340,7 @@ class Detail(DetailView):
             'update_new_agency': self._update_new_agency,
             'agency_reply': self._agency_reply,
             'staff_pay': self._staff_pay,
+            'pay_fee': self._pay_fee,
             'tracking_id': self._tracking_id,
             'portal': self._portal,
         }
@@ -399,7 +416,7 @@ class Detail(DetailView):
             foia_note.author = request.user
             foia_note.datetime = timezone.now()
             foia_note.save()
-            logging.info(
+            logger.info(
                 '%s added %s to %s', foia_note.author, foia_note, foia_note.foia
             )
             messages.success(request, 'Your note is attached to the request.')
@@ -713,7 +730,7 @@ class Detail(DetailView):
             )
         else:
             success_msg = '%s can now %s this request.' % (
-                users[0].first_name, access
+                users[0].profile.full_name, access
             )
         messages.success(request, success_msg)
         return redirect(foia.get_absolute_url() + '#')
@@ -729,8 +746,8 @@ class Detail(DetailView):
             elif foia.has_viewer(user):
                 foia.remove_viewer(user)
             messages.success(
-                request,
-                '%s no longer has access to this request.' % user.first_name
+                request, '%s no longer has access to this request.' %
+                user.profile.full_name
             )
         return redirect(foia.get_absolute_url() + '#')
 
@@ -742,7 +759,8 @@ class Detail(DetailView):
         if has_perm and user:
             foia.demote_editor(user)
             messages.success(
-                request, '%s can now only view this request.' % user.first_name
+                request,
+                '%s can now only view this request.' % user.profile.full_name
             )
         return redirect(foia.get_absolute_url() + '#')
 
@@ -754,7 +772,8 @@ class Detail(DetailView):
         if has_perm and user:
             foia.promote_viewer(user)
             messages.success(
-                request, '%s can now edit this request.' % user.first_name
+                request,
+                '%s can now edit this request.' % user.profile.full_name
             )
         return redirect(foia.get_absolute_url() + '#')
 
@@ -809,6 +828,45 @@ class Detail(DetailView):
             else:
                 foia.pay(request.user, amount / 100.0)
         return redirect(foia.get_absolute_url() + '#')
+
+    def _pay_fee(self, request, foia):
+        """A user pays the fee for a request"""
+        form = RequestFeeForm(request.POST, user=self.request.user)
+        if not self.request.user.is_authenticated:
+            messages.error(self.request, 'Must be logged in to pay')
+            return redirect(foia.get_absolute_url() + '#')
+        if form.is_valid():
+            try:
+                form.cleaned_data['organization'].pay(
+                    amount=int(form.cleaned_data['amount'] * 1.05),
+                    fee_amount=5,
+                    description='Pay ${:.2f} fee for request #{}'.format(
+                        form.cleaned_data['amount'] / 100.0, foia.pk
+                    ),
+                    token=form.cleaned_data['stripe_token'],
+                    save_card=form.cleaned_data['save_card'],
+                )
+            except requests.exceptions.RequestException as exc:
+                messages.error(
+                    self.request, 'Payment Error: {}'.format(
+                        '\n'.join(
+                            '{}: {}'.format(k, v)
+                            for k, v in exc.response.json().iteritems()
+                        )
+                    )
+                )
+                logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
+                return redirect(foia.get_absolute_url() + '#')
+            else:
+                messages.success(
+                    self.request, 'Your payment was successful. '
+                    'We will get this to the agency right away!'
+                )
+                foia.pay(self.request.user, form.cleaned_data['amount'] / 100.0)
+                return redirect(foia.get_absolute_url() + '#')
+        else:
+            self.fee_form = form
+            raise FoiaFormError
 
     def _resend_comm(self, request, foia):
         """Resend a communication"""

@@ -613,7 +613,7 @@ class FOIARequest(models.Model):
             file_ = comm.files.create(
                 title=os.path.basename(attachment.ffile.name),
                 datetime=comm.datetime,
-                source=user.get_full_name(),
+                source=user.profile.full_name,
                 access=access,
             )
             file_.ffile.name = attachment.ffile.name
@@ -675,10 +675,11 @@ class FOIARequest(models.Model):
     def pay(self, user, amount):
         """
         Users can make payments for request fees.
-        Upon payment, we create a snail mail task and we set the request to a processing status.
-        Payments are always snail mail, because we need to mail the check to the agency.
-        Since collaborators may make payments, we do not assume the user is the request creator.
-        Returns the communication that was generated.
+        Upon payment, we create a snail mail task and we set the request to
+        a processing status.  Payments are always snail mail, because we need to
+        mail the check to the agency.  Since collaborators may make payments, we
+        do not assume the user is the request creator.  Returns the
+        communication that was generated.
         """
         # We create the payment communication and a snail mail task for it.
         payable_to = self.agency.payable_to if self.agency else None
@@ -707,7 +708,8 @@ class FOIARequest(models.Model):
             self.title
         )
         utils.new_action(user, 'paid fees', target=self)
-        # We return the communication we generated, in case the caller wants to do anything with it
+        # We return the communication we generated, in case the caller wants to
+        # do anything with it
         return comm
 
     def _send_msg(self, **kwargs):
@@ -1052,7 +1054,7 @@ class FOIARequest(models.Model):
         )
         is_owner = self.created_by(user)
         is_agency_user = (
-            user.is_authenticated() and user.profile.acct_type == 'agency'
+            user.is_authenticated() and user.profile.is_agency_user
         )
         can_follow = (
             user.is_authenticated() and not is_owner and not is_agency_user
@@ -1239,7 +1241,7 @@ class FOIARequest(models.Model):
         """Create the initial request communication"""
         text = initial_communication_template(
             [self.agency],
-            from_user.get_full_name(),
+            from_user.profile.full_name,
             self.composer.requested_docs,
             edited_boilerplate=self.composer.edited_boilerplate,
             proxy=proxy,
@@ -1335,6 +1337,7 @@ class FOIARequest(models.Model):
             ('upload_attachment_foiarequest', 'Can upload an attachment'),
             ('pay_foiarequest', 'Can pay for a request'),
             ('export_csv', 'Can export a CSV of search results'),
+            ('unlimited_attachment_size', 'Can upload attachments of any size'),
             (
                 'set_info_foiarequest',
                 'Can send communications to custom addresses'

@@ -17,11 +17,8 @@ import requests_mock
 from nose.tools import assert_false, eq_, ok_, raises
 
 # MuckRock
-from muckrock.core.factories import (
-    AgencyFactory,
-    OrganizationFactory,
-    UserFactory,
-)
+from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import mock_squarelet
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
@@ -545,7 +542,6 @@ class MultiRequestTaskTests(TestCase):
 
     def setUp(self):
         self.agencies = AgencyFactory.create_batch(6)
-        self.organization = OrganizationFactory(num_requests=100)
         self.composer = FOIAComposerFactory(
             status='submitted',
             agencies=self.agencies,
@@ -554,9 +550,13 @@ class MultiRequestTaskTests(TestCase):
             num_reg_requests=3,
             user__profile__num_requests=5,
             user__profile__monthly_requests=10,
-            user__profile__organization=self.organization,
         )
         self.task = MultiRequestTask.objects.create(composer=self.composer)
+
+        self.mocker = requests_mock.Mocker()
+        mock_squarelet(self.mocker)
+        self.mocker.start()
+        self.addCleanup(self.mocker.stop)
 
     def test_get_absolute_url(self):
         eq_(
@@ -622,7 +622,7 @@ class TestTaskManager(TestCase):
         The task manager should return all tasks that explictly
         or implicitly reference the provided FOIA.
         """
-        staff_user = UserFactory(is_staff=True, profile__acct_type='admin')
+        staff_user = UserFactory(is_staff=True)
         returned_tasks = Task.objects.filter_by_foia(self.foia, staff_user)
         eq_(
             returned_tasks, self.tasks,

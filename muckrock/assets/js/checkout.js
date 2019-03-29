@@ -8,6 +8,8 @@
 ** add back to the form before resubmitting it.
 */
 
+// This is used only for donations & crowdfunds now
+// Once those have been ported to squarelet, this can be removed
 (function( $ ){
 
     var $form = null;

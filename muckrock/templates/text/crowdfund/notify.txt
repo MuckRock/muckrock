@@ -1,4 +1,4 @@
-{{user.get_full_name}} has launched a new crowdfunding campaign, trying to raise ${{crowdfund.payment_required|floatformat:2}} for "{{crowdfund.foia.title}}".  It will run through {{crowdfund.date_due|date}} unless modified.
+{{user.profile.full_name}} has launched a new crowdfunding campaign, trying to raise ${{crowdfund.payment_required|floatformat:2}} for "{{crowdfund.foia.title}}".  It will run through {{crowdfund.date_due|date}} unless modified.
 
 Please reach out to the user and schedule promotion on the calendar if applicable.
 
