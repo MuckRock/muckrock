@@ -315,6 +315,7 @@ if CELERY_REDIS_MAX_CONNECTIONS is not None:
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
     'muckrock.accounts.backends.SquareletBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user':
