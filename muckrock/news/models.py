@@ -122,7 +122,9 @@ class Article(models.Model):
 
     def get_authors_names(self):
         """Get all authors names for a byline"""
-        authors = self.authors.values_list('profile__full_name', flat=True)
+        authors = list(
+            self.authors.values_list('profile__full_name', flat=True)
+        )
         if not authors:
             return ''
         names = u', '.join(a for a in authors[:-1])
