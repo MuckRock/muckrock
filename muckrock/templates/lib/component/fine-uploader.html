@@ -75,7 +75,7 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       pk = element.getAttribute(dataAttr);
     }
     {% has_perm 'foia.unlimited_attachment_size' request.user as unlimited_attachment %}
-    {% if unlimited_attachment_size %}
+    {% if unlimited_attachment %}
       var limitAttachments = false;
     {% else %}
       var limitAttachments = true;
