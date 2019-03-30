@@ -47,6 +47,7 @@ from muckrock.foia.tasks import (
     set_document_cloud_pages,
     upload_document_cloud,
 )
+from muckrock.organization.models import Organization
 from muckrock.portal.models import Portal
 
 
@@ -567,6 +568,10 @@ class FOIAComposerAdminForm(forms.ModelForm):
     user = autocomplete_light.ModelChoiceField(
         'UserAutocomplete',
         queryset=User.objects.all(),
+    )
+    organization = autocomplete_light.ModelChoiceField(
+        'OrganizationAutocomplete',
+        queryset=Organization.objects.all(),
     )
     agencies = autocomplete_light.ModelMultipleChoiceField(
         'AgencyAdminAutocomplete',

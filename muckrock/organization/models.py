@@ -75,7 +75,10 @@ class Organization(models.Model):
     active = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.name
+        if self.individual:
+            return "{} (Individual)".format(self.name)
+        else:
+            return self.name
 
     @property
     def display_name(self):

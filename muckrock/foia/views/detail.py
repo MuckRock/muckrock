@@ -479,6 +479,9 @@ class Detail(DetailView):
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
+        if request.user.is_anonymous:
+            messages.error(request, 'You must be logged in to follow up')
+            return redirect(foia.get_absolute_url() + '#')
         if foia.attachments_over_size_limit(request.user):
             messages.error(
                 request, 'Total attachment size must be less than 20MB'
