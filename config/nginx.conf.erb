@@ -9,6 +9,9 @@ events {
 }
 
 http {
+
+    map_hash_bucket_size <%= ENV.fetch("NGINX_HASH_BUCKET_SIZE", 64) %>;
+
 	gzip on;
 	gzip_http_version 1.0;
 	gzip_comp_level 5;
