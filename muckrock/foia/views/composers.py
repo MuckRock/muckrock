@@ -256,6 +256,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     def _handle_anonymous_submitter(self, form):
         """Handle a submission from an anonymous user"""
         # form validation guarentees we have either registration or login info
+        # pylint: disable=protected-access
         if form.cleaned_data.get('register_full_name'):
             user = self.miniregister(
                 form,
@@ -265,8 +266,8 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             )
             return user
         else:
-            login(self.request, form.user)
-            return form.user
+            login(self.request, form._user)
+            return form._user
 
     def form_valid(self, form):
         """Create the request"""
