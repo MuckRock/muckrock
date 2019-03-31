@@ -709,3 +709,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 # this allows communication from muckrock to squarelet to bypass rate limiting
 BYPASS_RATE_LIMIT_SECRET = os.environ.get('BYPASS_RATE_LIMIT_SECRET', '')
+
+# for sorl-thumbnails to avoid error
+# https://github.com/jazzband/sorl-thumbnail/issues/564
+THUMBNAIL_PRESERVE_FORMAT = True
