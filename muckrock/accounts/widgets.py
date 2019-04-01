@@ -246,7 +246,7 @@ class ProUserGraphWidget(StatGraphWidget):
 
     def get_value(self):
         """Get value"""
-        return user_plan_count('pro')
+        return user_plan_count('professional')
 
 
 class ReviewAgencyGraphWidget(StatGraphWidget):
@@ -355,7 +355,7 @@ class ProUserCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return user_plan_count('pro')
+        return user_plan_count('professional')
 
     def get_previous_value(self):
         """Get previous value"""
@@ -370,16 +370,9 @@ class OrgUserCountWidget(CompareNumberWidget):
     direction = 1
     more_info = 'vs one month ago'
 
-    # XXX
-
     def get_value(self):
         """Get value"""
-        return (
-            Profile.objects.filter(
-                organization__active=True,
-                organization__monthly_cost__gt=0,
-            ).count()
-        )
+        return user_plan_count('organization')
 
     def get_previous_value(self):
         """Get previous value"""
