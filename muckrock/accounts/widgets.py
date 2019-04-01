@@ -47,6 +47,8 @@ class CompareNumberWidget(NumberWidget):
         """Get data to pass to javascript"""
         value = self.get_value()
         previous = self.get_previous_value()
+        value = 0 if value is None else value
+        previous = 0 if previous is None else previous
         delta = value - previous
         if self.percent and previous != 0:
             delta = (100 * delta) / previous
