@@ -99,7 +99,7 @@ def success_comm(request):
         comm=comm,
         title=os.path.basename(request.POST['key']),
         datetime=timezone.now(),
-        source=request.user.profile.full_name(),
+        source=request.user.profile.full_name,
         access=access,
     )
     file_.ffile.name = request.POST['key']
