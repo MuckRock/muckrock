@@ -23,7 +23,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from smart_open import smart_open
 
 # MuckRock
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Statistics
 from muckrock.accounts.utils import user_plan_count
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import cache_get_or_set
