@@ -850,15 +850,18 @@ class Detail(DetailView):
                     save_card=form.cleaned_data['save_card'],
                 )
             except requests.exceptions.RequestException as exc:
-                messages.error(
-                    self.request, 'Payment Error: {}'.format(
-                        '\n'.join(
-                            '{}: {}'.format(k, v)
-                            for k, v in exc.response.json().iteritems()
+                logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
+                if exc.response.status_code / 100 == 4:
+                    messages.error(
+                        self.request, 'Payment Error: {}'.format(
+                            '\n'.join(
+                                '{}: {}'.format(k, v)
+                                for k, v in exc.response.json().iteritems()
+                            )
                         )
                     )
-                )
-                logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
+                else:
+                    messages.error(self.request, 'Payment Error')
                 return redirect(foia.get_absolute_url() + '#')
             else:
                 messages.success(
