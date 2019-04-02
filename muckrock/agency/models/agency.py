@@ -243,10 +243,15 @@ class Agency(models.Model, RequestHelper):
         try:
             return self.profile.user
         except Profile.DoesNotExist:
+            email_address = self.get_emails().first()
+            if email_address is not None:
+                email = email_address.email
+            else:
+                email = None
             data = {
                 'name': self.name,
                 'preferred_username': self.name,
-                'email': self.get_emails().first(),
+                'email': email,
                 'is_agency': True,
             }
             # error handling?
