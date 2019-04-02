@@ -117,7 +117,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
             'average_response_time',
             'fee_rate',
             'success_rate',
-        )
+        ) and not f.startswith(('has_', 'number_'))
     ]
 
     def get_queryset(self):
