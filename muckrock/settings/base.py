@@ -179,6 +179,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     'reversion.middleware.RevisionMiddleware',
     'django_hosts.middleware.HostsResponseMiddleware',
 )
