@@ -86,8 +86,8 @@ class FOIARequestQuerySet(models.QuerySet):
             # Requests are visible if you own them, have view or edit permissions,
             # or if they are not embargoed
             query = (
-                Q(composer__user=user) | Q(edit_collaborators=user)
-                | Q(read_collaborators=user) | ~Q(embargo=True)
+                Q(composer__user=user) | Q(pk__in=user.edit_access.all())
+                | Q(pk__in=user.read_access.all()) | ~Q(embargo=True)
             )
             # agency users may also view requests for their agency
             if user.profile.is_agency_user:
@@ -95,7 +95,7 @@ class FOIARequestQuerySet(models.QuerySet):
             # organizational users may also view requests from their org that are shared
             query = query | Q(
                 composer__user__profile__org_share=True,
-                composer__organization__users=user,
+                composer__organization__in=user.organizations.all(),
             )
             return self.filter(query)
         else:

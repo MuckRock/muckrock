@@ -134,7 +134,7 @@ class RequestList(MRSearchFilterListView):
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related(
             'agency__jurisdiction__parent',
-            'composer__user',
+            'composer__user__profile',
             'crowdfund',
         ).only(
             'title',
@@ -149,8 +149,7 @@ class RequestList(MRSearchFilterListView):
             'agency__jurisdiction__parent__abbrev',
             'crowdfund__date_due',
             'crowdfund__closed',
-            'composer__user__first_name',
-            'composer__user__last_name',
+            'composer__user__profile__full_name',
             'composer__datetime_submitted',
         )
         return objects.get_viewable(self.request.user)
