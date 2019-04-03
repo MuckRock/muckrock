@@ -707,6 +707,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/'
 
 # this allows communication from muckrock to squarelet to bypass rate limiting
 BYPASS_RATE_LIMIT_SECRET = os.environ.get('BYPASS_RATE_LIMIT_SECRET', '')
