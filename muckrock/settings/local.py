@@ -55,6 +55,7 @@ DEBUG_TOOLBAR_CONFIG = {
     'JQUERY_URL': '',
 }
 
+EMAIL_HOST = 'dev.mailhog.com'
 EMAIL_PORT = 1025
 
 QUERYCOUNT = {

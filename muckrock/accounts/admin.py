@@ -7,6 +7,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -55,6 +56,7 @@ class ProfileInline(admin.StackedInline):
     extra = 0
     max_num = 1
     fields = (
+        'org_link',
         'uuid',
         'full_name',
         'email_confirmed',
@@ -71,11 +73,23 @@ class ProfileInline(admin.StackedInline):
         'agency',
     )
     readonly_fields = (
+        'org_link',
         'uuid',
         'full_name',
         'email_confirmed',
         'avatar_url',
     )
+
+    def org_link(self, obj):
+        """Link to the individual org"""
+        link = reverse(
+            'admin:organization_organization_change',
+            args=(obj.individual_organization.pk,)
+        )
+        return '<a href="%s">%s</a>' % (link, obj.individual_organization.name)
+
+    org_link.allow_tags = True
+    org_link.short_description = 'Individual Organization'
 
 
 class MRUserAdmin(UserAdmin):
