@@ -70,7 +70,13 @@
         >
         {% csrf_token %}
         {% for field in form.hidden_fields %}
-          {{ field }}
+          {% if field.name != "use_contact_information" %}
+            {% comment %}
+              Use contact information needs to be rendered below within the
+              .contact-info div so the javascript can find it
+            {% endcomment %}
+            {{ field }}
+          {% endif %}
         {% endfor %}
 
         {% include "lib/pattern/new_request_field.html" with field=form.title only %}
@@ -204,6 +210,7 @@
               </div>
               {% if perms.foia.set_info_foiarequest %}
                 <div class="form">
+                  {{ form.use_contact_information }} {# this is a hidden field #}
                   {% include "lib/pattern/field.html" with field=form.via only %}
                   {% include "lib/pattern/field.html" with field=form.email only %}
                   {% include "lib/pattern/field.html" with field=form.other_email only %}
