@@ -89,9 +89,7 @@ class AgencySerializer(serializers.ModelSerializer):
 
     def get_absolute_url(self, obj):
         """Prepend the domain name to the URL"""
-        return 'https://{}{}'.format(
-            settings.MUCKROCK_URL, obj.get_absolute_url()
-        )
+        return '{}{}'.format(settings.MUCKROCK_URL, obj.get_absolute_url())
 
     class Meta:
         model = Agency

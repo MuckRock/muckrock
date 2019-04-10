@@ -42,9 +42,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
 
     def get_absolute_url(self, obj):
         """Prepend the domain name to the URL"""
-        return 'https://{}{}'.format(
-            settings.MUCKROCK_URL, obj.get_absolute_url()
-        )
+        return '{}{}'.format(settings.MUCKROCK_URL, obj.get_absolute_url())
 
 
 class ExampleAppealSerializer(serializers.ModelSerializer):
@@ -68,7 +66,11 @@ class ExemptionSerializer(serializers.ModelSerializer):
         }
     )
     example_appeals = ExampleAppealSerializer(many=True)
-    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    absolute_url = serializers.SerializerMethodField()
+
+    def get_absolute_url(self, obj):
+        """Prepend the domain name to the URL"""
+        return '{}{}'.format(settings.MUCKROCK_URL, obj.get_absolute_url())
 
     class Meta:
         model = Exemption
