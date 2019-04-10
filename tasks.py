@@ -39,33 +39,31 @@ def staging(c):
 
 
 @task
-def test(c, test_path='', reuse='0', capture=False):
+def test(c, test_path="", reuse="0", capture=False):
     """Run all tests, or a specific subset of tests"""
     cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
-        opt='-e REUSE_DB={reuse}'.format(reuse=reuse),
-        service='muckrock_django',
-        cmd=
-        './manage.py test {test_path} {capture} --settings=muckrock.settings.test'.
-        format(
-            test_path=test_path,
-            capture='--nologcapture' if not capture else '',
-        )
+        opt="-e REUSE_DB={reuse}".format(reuse=reuse),
+        service="muckrock_django",
+        cmd="./manage.py test {test_path} {capture} --settings=muckrock.settings.test".format(
+            test_path=test_path, capture="--nologcapture" if not capture else ""
+        ),
     )
     c.run(cmd)
 
 
 @task
-def coverage(c, settings='test', reuse='0'):
+def coverage(c, settings="test", reuse="0"):
     """Run the tests and generate a coverage report"""
     cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
-        opt='-e REUSE_DB={reuse}'.format(reuse=reuse),
-        service='muckrock_django',
-        cmd='sh -c \'coverage erase && '
+        opt="-e REUSE_DB={reuse}".format(reuse=reuse),
+        service="muckrock_django",
+        cmd="sh -c 'coverage erase && "
         'coverage run --branch --source muckrock --omit="*/migrations/*" '
-        'manage.py test --settings=muckrock.settings.{settings} && '
-        'coverage html -i\''.format(settings=settings)
+        "manage.py test --settings=muckrock.settings.{settings} && "
+        "coverage html -i'".format(settings=settings),
     )
     c.run(cmd)
+
 
 # Code Quality
 # --------------------------------------------------------------------------------
@@ -74,7 +72,12 @@ def coverage(c, settings='test', reuse='0'):
 @task
 def pylint(c):
     """Run the linter"""
-    c.run(DJANGO_RUN.format(cmd="pylint muckrock"))
+    c.run(
+        DJANGO_RUN.format(
+            cmd="pylint muckrock --rcfile=config/pylint.conf "
+            "--jobs=$(expr $(nproc) / 2)"
+        )
+    )
 
 
 @task
@@ -82,12 +85,8 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black muckrock --exclude migrations && "
-            "black config/urls.py && "
-            "black config/settings && "
-            "isort -rc muckrock && "
-            "isort -c config/urls.py && "
-            "isort -rc config/settings"
+            cmd='yapf -i -r --style config/style.yapf -e "*/migrations/*" '
+            "-p muckrock && isort -sp config -rc muckrock"
         )
     )
 
@@ -127,7 +126,10 @@ def celerybeat(c):
 @task
 def shell(c, opts=""):
     """Run an interactive python shell"""
-    c.run(DJANGO_RUN.format(cmd="python manage.py shell_plus {opts}".format(opts=opts)), pty=True)
+    c.run(
+        DJANGO_RUN.format(cmd="python manage.py shell_plus {opts}".format(opts=opts)),
+        pty=True,
+    )
 
 
 @task
@@ -144,7 +146,10 @@ def sh(c):
 @task
 def dbshell(c, opts=""):
     """Run an interactive db shell"""
-    c.run(DJANGO_RUN.format(cmd="python manage.py dbshell {opts}".format(opts=opts)), pty=True)
+    c.run(
+        DJANGO_RUN.format(cmd="python manage.py dbshell {opts}".format(opts=opts)),
+        pty=True,
+    )
 
 
 @task(aliases=["m"])
@@ -162,11 +167,7 @@ def run(c, cmd):
 @task
 def npm(c, cmd):
     """Run an NPM command"""
-    c.run(
-        DOCKER_COMPOSE_RUN_OPT.format(
-            opt="--workdir /app/frontend", service="muckrock_django", cmd="npm {cmd}".format(cmd=cmd)
-        )
-    )
+    c.run(DJANGO_RUN.format(cmd="npm {cmd}".format(cmd=cmd)), pty=True)
 
 
 @task
@@ -194,9 +195,10 @@ def pip_compile(c, upgrade=False, package=None):
         upgrade_flag = ""
     c.run(
         DJANGO_RUN.format(
-            cmd="pip-compile {upgrade_flag} requirements/base.in &&"
-            "pip-compile {upgrade_flag} requirements/local.in &&"
-            "pip-compile {upgrade_flag} requirements/production.in".format(upgrade_flag=upgrade_flag)
+            cmd="pip-compile {upgrade_flag} pip/requirements.in &&"
+            "pip-compile {upgrade_flag} pip/requirements-dev.in".format(
+                upgrade_flag=upgrade_flag
+            )
         )
     )
 
@@ -251,7 +253,9 @@ def sync_aws(c):
     folders = ["account_images", "avatars", "org_avatars"]
     for folder in folders:
         c.run(
-            "aws s3 sync s3://muckrock/media/{folder} ./muckrock/media/{folder}".format(folder=folder)
+            "aws s3 sync s3://muckrock/media/{folder} ./muckrock/media/{folder}".format(
+                folder=folder
+            )
         )
 
 
