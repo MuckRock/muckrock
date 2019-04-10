@@ -72,7 +72,7 @@
         {% endif %}
       </section>
       <section class="specific-information">
-        {% if request.user.is_staff or foia.current_tracking_id %}
+        {% if request.user.is_staff or foia.current_tracking_id or foia.composer.foias.count > 1 %}
           <table class="numbers">
             {% if request.user.is_staff %}
               <tr class="muckrock-number">
