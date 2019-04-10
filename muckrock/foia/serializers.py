@@ -3,6 +3,7 @@ Serilizers for the FOIA application API
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.timezone import get_default_timezone
 
@@ -167,7 +168,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     tags = serializers.StringRelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
-    absolute_url = serializers.ReadOnlyField(source='get_absolute_url')
+    absolute_url = serializers.SerializerMethodField()
     tracking_id = serializers.ReadOnlyField(source='current_tracking_id')
     datetime_submitted = DateTimeField(
         read_only=True, source='composer.datetime_submitted'
@@ -215,6 +216,10 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         for field in self.fields.keys():
             if field not in allowed:
                 self.fields.pop(field)
+
+    def get_absolute_url(self, obj):
+        """Prepend the domain name to the URL"""
+        return '{}{}'.format(settings.MUCKROCK_URL, obj.get_absolute_url())
 
     class Meta:
         model = FOIARequest
