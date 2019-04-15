@@ -15,6 +15,9 @@ def random_string(n):
     )
 
 
+PGUSER = random_string(30)
+PGPASSWORD = random_string(60)
+
 CONFIG = [
     {
         "name":
@@ -32,6 +35,17 @@ CONFIG = [
             {
                 "name": "Redis",
                 "envvars": [("REDIS_URL", "redis://redis:6379/0")]
+            },
+            {
+                "name": "Squarelet",
+                "url": "https://github.com/muckrock/squarelet/",
+                "description":
+                    "Squarelet is the user account service for MuckRock - it's "
+                    "development environment should be installed in parallel to MuckRock",
+                "envvars": [
+                    ("SQUARELET_KEY", ""),
+                    ("SQUARELET_SECRET", ""),
+                ]
             },
             {
                 "name":
@@ -92,6 +106,12 @@ CONFIG = [
                     ("PHAXIO_CALLBACK_TOKEN", ""),
                 ],
             },
+            {
+                "name": "Zoho Desk",
+                "url": "https://www.zoho.com",
+                "description": "We use Zoho desk for help ticket management",
+                "envvars": [("ZOHO_TOKEN", ""),],
+            },
         ],
     },
     {
@@ -100,12 +120,18 @@ CONFIG = [
         "sections": [{
             "name":
                 "PostgreSQL",
+            "description":
+                "POSTGRES values are used by Django, PG values are used for importing DB from Heroku",
             "envvars": [
-                ("POSTGRES_HOST", "postgres"),
+                ("POSTGRES_HOST", "muckrock_postgres"),
                 ("POSTGRES_PORT", "5432"),
-                ("POSTGRES_DB", "squarelet"),
-                ("POSTGRES_USER", lambda: random_string(30)),
-                ("POSTGRES_PASSWORD", lambda: random_string(60)),
+                ("POSTGRES_DB", "muckrock"),
+                ("POSTGRES_USER", PGUSER),
+                ("POSTGRES_PASSWORD", PGPASSWORD),
+                ("PGHOST", "muckrock_postgres"),
+                ("PGUSER", PGUSER),
+                ("PGPASSWORD", PGPASSWORD),
+                ("PGSSLMODE", 'allow'),
             ],
         }],
     },
@@ -117,7 +143,9 @@ def main():
     for file_config in CONFIG:
         with open(".envs/.local/{}".format(file_config["name"]), "w") as file_:
             for section in file_config["sections"]:
-                file_.write("# {}\n".format(section["name"]))
+                for key in ['name', 'url', 'description']:
+                    if key in section:
+                        file_.write("# {}\n".format(section[key]))
                 file_.write("# {}\n".format("-" * 78))
                 for var, value in section["envvars"]:
                     file_.write(
