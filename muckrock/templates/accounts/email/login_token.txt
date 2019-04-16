@@ -1,5 +1,5 @@
 {% extends 'message/base.txt' %}
 
 {% block body %}
-Thank you for requesting a new login token.  Upload documents directly: https://www.muckrock.com{{ reply_link }}#agency-reply
+Thank you for requesting a new login token.  Upload documents directly: {{ reply_link }}
 {% endblock body %}
