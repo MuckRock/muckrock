@@ -1,8 +1,8 @@
 version: '2'
 
 volumes:
-  postgres_data_local_3: {}
-  postgres_backup_local_3: {}
+  postgres_data_local: {}
+  postgres_backup_local: {}
 
 services:
   muckrock_django: &django
@@ -38,8 +38,8 @@ services:
       dockerfile: ./compose/production/postgres/Dockerfile
     image: muckrock_production_postgres
     volumes:
-      - postgres_data_local_3:/var/lib/postgresql/data
-      - postgres_backup_local_3:/backups
+      - postgres_data_local:/var/lib/postgresql/data
+      - postgres_backup_local:/backups
     env_file:
       - ./.envs/.local/.postgres
 
