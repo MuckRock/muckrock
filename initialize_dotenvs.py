@@ -28,13 +28,13 @@ CONFIG = [
                     "General",
                 "envvars": [
                     ("USE_DOCKER", "yes"),
-                    ("DJANGO_SECRET_KEY", lambda: random_string(20)),
+                    ("SECRET_KEY", lambda: random_string(20)),
                     ("IPYTHONDIR", "/app/.ipython"),
                 ],
             },
             {
                 "name": "Redis",
-                "envvars": [("REDIS_URL", "redis://redis:6379/0")]
+                "envvars": [("REDIS_URL", "redis://muckrock_redis:6379/0")]
             },
             {
                 "name": "Squarelet",

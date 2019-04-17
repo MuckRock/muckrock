@@ -110,7 +110,7 @@ def celeryworker(c):
     """Run a celery worker"""
     c.run(
         DOCKER_COMPOSE_RUN_OPT.format(
-            opt="--use-aliases", service="celeryworker", cmd=""
+            opt="--use-aliases", service="muckrock_celeryworker", cmd=""
         )
     )
 
@@ -119,7 +119,7 @@ def celeryworker(c):
 def celerybeat(c):
     """Run the celery scheduler"""
     c.run(
-        DOCKER_COMPOSE_RUN_OPT.format(opt="--use-aliases", service="celerybeat", cmd="")
+        DOCKER_COMPOSE_RUN_OPT.format(opt="--use-aliases", service="muckrock_celerybeat", cmd="")
     )
 
 
@@ -218,19 +218,21 @@ def populate_db(c, db_name="muckrock"):
     """Populate the local DB with the data from heroku"""
     # https://devcenter.heroku.com/articles/heroku-postgres-import-export
 
-    confirm = input(
+    confirm = raw_input(
         "This will over write your local database ({db_name}).  "
-        "Are you sure you want to continue? [y/N]".format(db_name=db_name)
+        "Are you sure you want to continue? [y/N] ".format(db_name=db_name)
     )
     if confirm.lower() not in ["y", "yes"]:
         return
 
-    c.run(DJANGO_RUN_USER.format(cmd="dropdb {db_name}".format(db_name=db_name)))
     c.run(
-        DJANGO_RUN_USER.format(
-            cmd="heroku pg:pull DATABASE {db_name} --app muckrock "
-            "--exclude-table-data=public.reversion_version".format(db_name=db_name)
-        )
+        DJANGO_RUN.format(
+            cmd='sh -c "dropdb {db_name} && '
+            "heroku pg:pull DATABASE {db_name} --app muckrock "
+            '--exclude-table-data=\\"public.reversion_version;public.foia_rawemail\\""'.format(
+                db_name=db_name
+            ),
+        ),
     )
 
 
@@ -250,12 +252,18 @@ def update_staging_db(c):
 def sync_aws(c):
     """Sync images from AWS to match the production database"""
 
-    folders = ["account_images", "avatars", "org_avatars"]
+    folders = [
+        "account_images",
+        "agency_images",
+        "jurisdiction_images",
+        "news_images",
+        "news_photos/2019",
+        "project_images",
+    ]
     for folder in folders:
         c.run(
-            "aws s3 sync s3://muckrock/media/{folder} ./muckrock/media/{folder}".format(
-                folder=folder
-            )
+            "aws s3 sync s3://muckrock/{folder} ./muckrock/static/media/{folder}"
+            .format(folder=folder)
         )
 
 
@@ -263,9 +271,16 @@ def sync_aws(c):
 def sync_aws_staging(c):
     """Sync images from AWS to match the production database"""
 
-    folders = ["account_images", "avatars", "org_avatars"]
+    folders = [
+        "account_images",
+        "agency_images",
+        "jurisdiction_images",
+        "news_images",
+        "news_photos",
+        "project_images",
+    ]
     for folder in folders:
         c.run(
-            "aws s3 sync s3://muckrock/media/{folder} "
-            "s3://muckrock-staging/media/{folder}".format(folder=folder)
+            "aws s3 sync s3://muckrock/{folder} "
+            "s3://muckrock-staging//{folder} --acl public-read".format(folder=folder)
         )
