@@ -65,7 +65,6 @@ class ProfileQuerySet(models.QuerySet):
             'email_failed': 'email_failed',
             'email_verified': 'email_confirmed',
             'use_autologin': 'use_autologin',
-            'agency': 'agency',
         }
         profile_defaults = {
             'name': '',
@@ -73,7 +72,6 @@ class ProfileQuerySet(models.QuerySet):
             'email_failed': False,
             'email_verified': False,
             'use_autologin': True,
-            'agency': None,
         }
         profile_data = {
             profile_map[k]: data.get(k, profile_defaults[k])
