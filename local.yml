@@ -27,7 +27,7 @@ services:
         aliases:
           - dev.muckrock.com
           - dev.foiamachine.org
-      squarelet_testing_default:
+      squarelet_default:
         aliases:
           - dev.muckrock.com
           - dev.foiamachine.org
@@ -59,7 +59,7 @@ services:
     networks:
       default:
         aliases: []
-      squarelet_testing_default:
+      squarelet_default:
         aliases: []
 
   muckrock_celerybeat:
@@ -73,9 +73,9 @@ services:
     networks:
       default:
         aliases: []
-      squarelet_testing_default:
+      squarelet_default:
         aliases: []
 
 networks:
-  squarelet_testing_default:
+  squarelet_default:
     external: true
