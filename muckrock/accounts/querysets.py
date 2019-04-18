@@ -65,6 +65,7 @@ class ProfileQuerySet(models.QuerySet):
             'email_failed': 'email_failed',
             'email_verified': 'email_confirmed',
             'use_autologin': 'use_autologin',
+            'agency': 'agency',
         }
         profile_defaults = {
             'name': '',
@@ -73,9 +74,12 @@ class ProfileQuerySet(models.QuerySet):
             'email_verified': False,
             'use_autologin': True,
         }
+        # if key is not present in profile_defaults, the default is to
+        # leave it unchanged, do not include it in profile_data
         profile_data = {
-            profile_map[k]: data.get(k, profile_defaults[k])
+            profile_map[k]: data.get(k, profile_defaults.get(k))
             for k in profile_map.iterkeys()
+            if k in data or k in profile_defaults
         }
         profile_data['user'] = user
         profile, _ = self.update_or_create(uuid=uuid, defaults=profile_data)

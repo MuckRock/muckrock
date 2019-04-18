@@ -245,24 +245,24 @@ class Profile(models.Model):
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
         if not self.use_autologin:
-            return u'{}/{}'.format(settings.MUCKROCK_URL, link)
+            return u'{}{}'.format(settings.MUCKROCK_URL, link)
 
         url_auth_token = self.get_url_auth_token()
         if not url_auth_token:
             # if there was an error getting the auth token from squarelet,
             # just send the email without the autologin links
-            return u'{}/{}'.format(settings.MUCKROCK_URL, link)
+            return u'{}{}'.format(settings.MUCKROCK_URL, link)
 
         extra['next'] = link
         muckrock_url = u'{}{}?{}'.format(
             settings.MUCKROCK_URL, reverse('acct-login'), urlencode(extra)
         )
+        params = {'next': muckrock_url, 'url_auth_token': url_auth_token}
+        if self.is_agency_user:
+            params['agency'] = 'true'
         return u'{}/accounts/login/?{}'.format(
             settings.SQUARELET_URL,
-            urlencode({
-                'next': muckrock_url,
-                'url_auth_token': url_auth_token,
-            })
+            urlencode(params)
         )
 
     def get_url_auth_token(self):
