@@ -480,7 +480,7 @@ def agency_redirect_login(
     )
 
     if agency_match:
-        return redirect(foia)
+        return redirect(foia.get_absolute_url() + "#agency-reply")
     elif agency_user:
         return redirect('foia-agency-list')
     elif authed:
