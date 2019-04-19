@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 def associate_by_uuid(backend, response, user=None, *args, **kwargs):
     """Associate current auth with a user with the same uuid in the DB."""
     # pylint: disable=unused-argument
-    if user:
-        return None
 
     uuid = response.get('uuid')
     if uuid:
