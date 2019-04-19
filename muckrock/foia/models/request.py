@@ -1034,7 +1034,7 @@ class FOIARequest(models.Model):
                     'foia_slug': self.slug,
                     'foia_idx': self.pk,
                 },
-            ) + "#agency-reply", **email_args
+            ), **email_args
         )
 
     def update_tags(self, tags):

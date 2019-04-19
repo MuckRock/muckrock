@@ -5,14 +5,14 @@ volumes:
   postgres_backup_local: {}
 
 services:
-  django: &django
+  muckrock_django: &django
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
     image: muckrock_local_django
     depends_on:
-      - redis
-      - postgres
+      - muckrock_redis
+      - muckrock_postgres
     volumes:
       - .:/app
       - ~/.netrc:/root/.netrc
@@ -32,7 +32,7 @@ services:
           - dev.muckrock.com
           - dev.foiamachine.org
 
-  postgres:
+  muckrock_postgres:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
@@ -43,15 +43,15 @@ services:
     env_file:
       - ./.envs/.local/.postgres
 
-  redis:
+  muckrock_redis:
     image: redis:3.2
 
-  celeryworker:
+  muckrock_celeryworker:
     <<: *django
     image: muckrock_local_celeryworker
     depends_on:
-      - redis
-      - postgres
+      - muckrock_redis
+      - muckrock_postgres
     ports: []
     command: /start-celeryworker
     environment:
@@ -62,12 +62,12 @@ services:
       squarelet_default:
         aliases: []
 
-  celerybeat:
+  muckrock_celerybeat:
     <<: *django
     image: muckrock_local_celerybeat
     depends_on:
-      - redis
-      - postgres
+      - muckrock_redis
+      - muckrock_postgres
     ports: []
     command: /start-celerybeat
     networks:
