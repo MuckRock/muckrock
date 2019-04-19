@@ -189,7 +189,10 @@ def heroku(c, staging=False):
         app = "muckrock-staging"
     else:
         app = "muckrock"
-    c.run("heroku run --app {app} python manage.py shell_plus".format(app=app))
+    c.run(
+        "heroku run --app {app} python manage.py shell_plus".format(app=app),
+        pty=True
+    )
 
 
 # Dependency Management
