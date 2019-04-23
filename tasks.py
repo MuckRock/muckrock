@@ -211,7 +211,7 @@ def pip_compile(c, upgrade=False, package=None):
     c.run(
         DJANGO_RUN.format(
             cmd="pip-compile {upgrade_flag} pip/requirements.in &&"
-            "pip-compile {upgrade_flag} pip/requirements-dev.in".
+            "pip-compile {upgrade_flag} pip/dev-requirements.in".
             format(upgrade_flag=upgrade_flag)
         )
     )
