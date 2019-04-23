@@ -140,7 +140,7 @@ class FOIARequestQuerySet(models.QuerySet):
         return (
             self.select_related(
                 'agency__jurisdiction__parent__parent',
-            ).filter(composer__user__organization=organization)
+            ).filter(composer__organization=organization)
             .order_by('-composer__datetime_submitted')
         )
 
