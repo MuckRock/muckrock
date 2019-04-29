@@ -393,18 +393,6 @@ DELIVERED_CHOICES = (
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIACommunication"""
     # pylint: disable=too-many-public-methods
-    queryset = FOIACommunication.objects.prefetch_related(
-        'files',
-        'emails',
-        'faxes',
-        'mails',
-        'web_comms',
-        'portals',
-        Prefetch(
-            'responsetask_set',
-            queryset=ResponseTask.objects.select_related('resolved_by'),
-        ),
-    )
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 
@@ -444,3 +432,17 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
             )
 
     filter_class = Filter
+
+    def get_queryset(self):
+        return FOIACommunication.objects.prefetch_related(
+            'files',
+            'emails',
+            'faxes',
+            'mails',
+            'web_comms',
+            'portals',
+            Prefetch(
+                'responsetask_set',
+                queryset=ResponseTask.objects.select_related('resolved_by'),
+            ),
+        ).get_viewable(self.request.user)
