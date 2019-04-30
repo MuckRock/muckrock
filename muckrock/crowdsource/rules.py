@@ -40,7 +40,7 @@ def is_project_only(user, crowdsource):
 @skip_if_not_obj
 @user_authenticated
 def is_contributor(user, crowdsource):
-    return crowdsource.project.has_contributor(user)
+    return crowdsource.project and crowdsource.project.has_contributor(user)
 
 
 @predicate
