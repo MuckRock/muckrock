@@ -12,6 +12,7 @@ from datetime import date
 from itertools import groupby
 
 # Third Party
+import emoji
 from fpdf import FPDF
 
 
@@ -78,6 +79,8 @@ class SnailMailPDF(PDF):
             self._extra_header(u'{} APPEAL'.format(law_name))
         self.set_font('DejaVu', '', 10)
         msg_body = self.comm.foia.render_msg_body(self.comm, appeal=self.appeal)
+        # remove emoji's, as they break pdf rendering
+        msg_body = emoji.get_emoji_regexp().sub(u'', msg_body)
         self.multi_cell(0, 13, msg_body.rstrip(), 0, 'L')
 
     def _extra_header(self, text):

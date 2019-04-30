@@ -39,6 +39,7 @@ from muckrock.task.models import (
     StatusChangeTask,
     Task,
 )
+from muckrock.task.pdf import SnailMailPDF
 from muckrock.task.signals import domain_blacklist
 
 mock_send = mock.Mock()
@@ -345,6 +346,15 @@ class SnailMailTaskTests(TestCase):
         self.task.save()
         note = self.task.record_check(check_number, user)
         ok_(isinstance(note, FOIANote), 'The method should return a FOIANote.')
+
+    def test_pdf_emoji(self):
+        """Strip emojis to prevent PDF generation from crashing"""
+        comm = FOIACommunicationFactory(
+            communication=u'Thank you\U0001f60a\n\n'
+        )
+        pdf = SnailMailPDF(comm, 'n')
+        pdf.generate()
+        pdf.output(dest='S')
 
 
 class NewAgencyTaskTests(TestCase):

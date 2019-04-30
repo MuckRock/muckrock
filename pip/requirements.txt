@@ -69,6 +69,7 @@ docutils==0.14            # via botocore
 dogslow==0.9.7
 drf-nested-routers==0.91
 easy-thumbnails==2.4.1
+emoji==0.5.2
 enum34==1.1.6             # via traitlets
 fpdf==1.7.2
 furl==1.0.1
