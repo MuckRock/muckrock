@@ -411,6 +411,22 @@ class Agency(models.Model, RequestHelper):
         )
         agency.save()
 
+        self.notes = (
+            Concat(
+                F('notes'),
+                Value(
+                    u'\n\nAgency "{}" (#{}) was merged into this agency '
+                    u'by {} on {}'.format(
+                        agency.name,
+                        agency.pk,
+                        user.username,
+                        timezone.now(),
+                    )
+                )
+            )
+        )
+        self.save()
+
     class Meta:
         verbose_name_plural = 'agencies'
         permissions = (
