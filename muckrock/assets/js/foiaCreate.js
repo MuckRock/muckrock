@@ -58,7 +58,9 @@ $(document).ready(function(){
         + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : "") + ".");
       $(".buy-section").show();
       $("#submit_button").text("Buy & Submit");
-      $("#id_num_requests").val(Math.max(useExtra, $("#id_num_requests").attr("min")));
+      $("#id_num_requests").val(Math.max(
+        useExtra, $("#id_num_requests").attr("min"), $("#id_num_requests").val()
+      ));
       $("#id_num_requests").trigger("change");
       $(".simple-buy .amount").text($("#id_num_requests").val());
     } else {
@@ -91,6 +93,8 @@ $(document).ready(function(){
     $("[name='stripe_amount']").val(price * 100);
     $("[name='stripe_description']").val(num + " request" + (num > 1 ? "s" : "") +
       " ($" + price + ".00)");
+    $(".simple-buy .price").text("$" + price + ".00");
+    $(".buy-request-form .price").text("$" + price + ".00");
   });
   $("#id_num_requests").trigger("change");
 
