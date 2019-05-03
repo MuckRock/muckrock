@@ -85,7 +85,7 @@
       </p>
     {% endif %}
   {% endfor %}
-  {% if user == user_obj and user.is_staff %}
+  {% if user == user_obj %}
     <p class="api-token">API Token:&nbsp;<a href="#">show...</a><input type="text" value={{ api_token }} readonly></p>
   {% endif %}
 {% endblock metadata %}
