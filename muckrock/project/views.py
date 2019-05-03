@@ -229,11 +229,7 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
         self.notify_new_contributors(existing_contributors, new_contributors)
         messages.success(self.request, 'Your edits were saved.')
         # clear the template cache for the project after its been edited
-        key = make_template_fragment_key(
-            'project_detail_objects',
-            [self.object.pk],
-        )
-        cache.delete(key)
+        self.object.clear_cache()
         return super(ProjectEditView, self).form_valid(form)
 
     def notify_new_contributors(self, existing, new):

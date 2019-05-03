@@ -107,7 +107,8 @@ def runserver(c):
             opt="--service-ports --use-aliases",
             service="muckrock_django",
             cmd=""
-        )
+        ),
+        pty=True,
     )
 
 
