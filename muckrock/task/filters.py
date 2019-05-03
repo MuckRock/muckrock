@@ -102,6 +102,11 @@ class SnailMailTaskFilterSet(TaskFilterSet):
         label='Has address',
         choices=BOOLEAN_CHOICES,
     )
+    has_attachments = django_filters.ChoiceFilter(
+        method='filter_has_attachments',
+        label='Has attachments',
+        choices=BOOLEAN_CHOICES,
+    )
     has_tracking_number = django_filters.ChoiceFilter(
         method='filter_has_tracking_number',
         label='Has tracking number',
@@ -136,6 +141,14 @@ class SnailMailTaskFilterSet(TaskFilterSet):
         else:
             return queryset.filter(communication__foia__address=None)
 
+    def filter_has_attachments(self, queryset, name, value):
+        """Check if the communication has attachments."""
+        #pylint: disable=unused-argument
+        if value == 'True':
+            return queryset.exclude(communication__files=None)
+        else:
+            return queryset.filter(communication__files=None)
+
     def filter_has_tracking_number(self, queryset, name, value):
         """Check if the foia has a tracking number."""
         #pylint: disable=unused-argument
@@ -156,6 +169,7 @@ class SnailMailTaskFilterSet(TaskFilterSet):
         fields = [
             'category',
             'has_address',
+            'has_attachments',
             'has_tracking_number',
             'has_agency_notes',
             'resolved',
