@@ -3,6 +3,8 @@ Models for the project application.
 """
 
 # Django
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
@@ -224,6 +226,14 @@ class Project(models.Model):
         """Publishing a project sets it public and returns a ProjectReviewTask."""
         self.make_public()
         return ProjectReviewTask.objects.create(project=self, notes=notes)
+
+    def clear_cache(self):
+        """Clear the template cache for this project"""
+        key = make_template_fragment_key(
+            'project_detail_objects',
+            [self.pk],
+        )
+        cache.delete(key)
 
 
 class ProjectCrowdfunds(models.Model):

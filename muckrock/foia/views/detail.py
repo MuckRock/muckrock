@@ -19,6 +19,7 @@ from django.utils import timezone
 from django.views.generic import DetailView
 
 # Standard Library
+import itertools
 import json
 import logging
 import sys
@@ -361,6 +362,9 @@ class Detail(DetailView):
         has_perm = foia.has_perm(request.user, 'change')
         if has_perm and form.is_valid():
             projects = form.cleaned_data['projects']
+            for proj in itertools.chain(foia.projects.all(), projects):
+                # clear cache for old and new projects
+                proj.clear_cache()
             foia.projects = projects
         return redirect(foia.get_absolute_url() + '#')
 
