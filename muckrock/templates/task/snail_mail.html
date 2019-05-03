@@ -63,7 +63,11 @@
         {% if files %}
             <dt>Attachments</dt>
                 {% for file in files %}
-                    <dd><a href="{{file.ffile.url}}" target="_blank">{{file.title}}</a></dd>
+                  <dd>
+                    <a href="{{file.ffile.url}}" target="_blank">{{file.title}}</a>
+                    - {{file.pages}} page{{file.pages|pluralize}}
+                    - {{file.ffile.size|filesizeformat}}
+                  </dd>
                 {% endfor %}
         {% endif %}
     {% endwith %}

@@ -63,8 +63,10 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 
     snails = SnailMailTaskFilterSet(
         get,
-        queryset=SnailMailTask.objects.filter(resolved=False)
-        .order_by('communication__foia__agency').preload_pdf(),
+        queryset=SnailMailTask.objects.filter(resolved=False).order_by(
+            '-amount',
+            'communication__foia__agency',
+        ).preload_pdf(),
     ).qs[:100]
 
     blank_pdf = FPDF()
