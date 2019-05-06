@@ -15,6 +15,8 @@ from itertools import groupby
 import emoji
 from fpdf import FPDF
 
+CERTIFIED_AMOUNT = os.environ.get('CERTIFIED_AMOUNT', 150)
+
 
 class PDF(FPDF):
     """Shared PDF settings"""
@@ -159,8 +161,11 @@ class CoverPDF(PDF):
                     )
                 if snail.category == 'p':
                     lines.append(
-                        u'{}□ Write a check for ${:.2f}'.format(
-                            2 * tab, snail.amount
+                        u'{}□ Write a {}check for ${:.2f}'.format(
+                            2 * tab,
+                            'CERTIFIED '
+                            if snail.amount >= CERTIFIED_AMOUNT else '',
+                            snail.amount,
                         )
                     )
                 for file_, status, pages in files:
