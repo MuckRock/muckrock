@@ -717,4 +717,6 @@ BYPASS_RATE_LIMIT_SECRET = os.environ.get('BYPASS_RATE_LIMIT_SECRET', '')
 THUMBNAIL_PRESERVE_FORMAT = True
 
 # Google Tag Manager
-USE_GOOGLE_TAG_MANAGER = os.environ.get('USE_GOOGLE_TAG_MANAGER', False)
+USE_GOOGLE_TAG_MANAGER = boolcheck(
+    os.environ.get('USE_GOOGLE_TAG_MANAGER', False)
+)
