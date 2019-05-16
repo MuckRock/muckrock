@@ -715,3 +715,6 @@ BYPASS_RATE_LIMIT_SECRET = os.environ.get('BYPASS_RATE_LIMIT_SECRET', '')
 # for sorl-thumbnails to avoid error
 # https://github.com/jazzband/sorl-thumbnail/issues/564
 THUMBNAIL_PRESERVE_FORMAT = True
+
+# Google Tag Manager
+USE_GOOGLE_TAG_MANAGER = os.environ.get('USE_GOOGLE_TAG_MANAGER', False)
