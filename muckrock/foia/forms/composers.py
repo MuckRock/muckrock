@@ -150,8 +150,8 @@ class BaseComposerForm(forms.ModelForm):
     def save(self, commit=True, update_owners=True):
         """Update the composer's user and organization"""
         if update_owners:
-            self.instance.user = self._user
-            self.instance.organization = self._user.profile.organization
+            self.instance.user = self.request.user
+            self.instance.organization = self.request.user.profile.organization
         return super(BaseComposerForm, self).save(commit)
 
     def clean_register_email(self):
