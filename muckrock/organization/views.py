@@ -4,6 +4,7 @@ Views for the organization application
 # Django
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -105,6 +106,7 @@ class OrganizationSquareletView(RedirectView):
             return '{}/organizations/{}/'.format(settings.SQUARELET_URL, slug)
 
 
+@login_required
 def activate(request):
     """Activate one of your organizations"""
     redirect_url = request.POST.get('next', '/')
