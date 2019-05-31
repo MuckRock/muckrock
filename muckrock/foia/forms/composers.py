@@ -149,6 +149,7 @@ class BaseComposerForm(forms.ModelForm):
 
     def save(self, commit=True, update_owners=True):
         """Update the composer's user and organization"""
+        # pylint: disable=arguments-differ
         if update_owners:
             self.instance.user = self.request.user
             self.instance.organization = self.request.user.profile.organization
