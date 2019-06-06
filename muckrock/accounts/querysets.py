@@ -136,12 +136,12 @@ class ProfileQuerySet(models.QuerySet):
 
         # update cache after updating orgs
         cache.set(
-            'sb:{}:user_org'.format(user.username),
+            u'sb:{}:user_org'.format(user.username),
             organization,
             settings.DEFAULT_CACHE_TIMEOUT,
         )
         cache.set(
-            'sb:{}:user_orgs'.format(user.username),
+            u'sb:{}:user_orgs'.format(user.username),
             user.organizations.order_by('-individual', 'name'),
             settings.DEFAULT_CACHE_TIMEOUT,
         )
