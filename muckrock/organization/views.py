@@ -119,7 +119,7 @@ def activate(request):
         request.user.profile.organization = organization
         # update the navbar header cache
         cache.set(
-            'sb:{}:user_org'.format(request.user.username),
+            u'sb:{}:user_org'.format(request.user.username),
             organization,
             settings.DEFAULT_CACHE_TIMEOUT,
         )
