@@ -1,4 +1,5 @@
 {% autoescape off %}{% for comm in msg_comms %}{% if not forloop.first %}On {{ comm.datetime|date }}:
+Subject: {{comm.subject}}
 {% endif %}{{ comm.communication }}
 {% if forloop.first or forloop.last %}
 {% include "text/foia/msg_footer.txt" %}{% endif %}{% if not forloop.last %}---
