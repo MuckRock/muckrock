@@ -92,7 +92,7 @@ def foiaonline_autologin():
                         foia.pk
                     )
                     FlaggedTask.objects.create(
-                        text='FOIAOnline autologin failed: account locked',
+                        text='FOIAOnline autologin failed: unknown',
                         foia=foia,
                         category='foiaonline',
                     )
