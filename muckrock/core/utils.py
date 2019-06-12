@@ -258,3 +258,25 @@ def squarelet_get(path, params=None):
     if params is None:
         params = {}
     return _squarelet(requests.get, path, params=params)
+
+
+def _zoho(method, path, **kwargs):
+    """Helper function for zoho requests"""
+    api_url = '{}{}'.format(settings.ZOHO_URL, path)
+    headers = {
+        'Authorization': settings.ZOHO_TOKEN,
+        'orgId': settings.ZOHO_ORG_ID,
+    }
+    return method(api_url, headers=headers, **kwargs)
+
+
+def zoho_post(path, json):
+    """Make a post request to Zoho"""
+    return _zoho(requests.post, path, json=json)
+
+
+def zoho_get(path, params=None):
+    """Make a post request to Zoho"""
+    if params is None:
+        params = {}
+    return _zoho(requests.get, path, params=params)
