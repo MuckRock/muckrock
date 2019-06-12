@@ -21,12 +21,12 @@ from itertools import groupby
 
 # Third Party
 import bleach
-import requests
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core.models import ExtractDay
+from muckrock.core.utils import zoho_get, zoho_post
 from muckrock.foia.models import STATUS, FOIANote
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
@@ -598,12 +598,8 @@ class FlaggedTask(Task):
         description += make_url(self.agency)
         description += make_url(self.jurisdiction)
 
-        response = requests.post(
-            settings.ZOHO_URL + 'tickets',
-            headers={
-                'Authorization': settings.ZOHO_TOKEN,
-                'orgId': settings.ZOHO_ORG_ID,
-            },
+        response = zoho_post(
+            'tickets',
             json={
                 'subject': subject,
                 'departmentId': settings.ZOHO_DEPT_IDS['muckrock'],
@@ -613,7 +609,7 @@ class FlaggedTask(Task):
                 'channel': 'Web',
                 'category': 'Flag',
                 'subCategory': self.get_category_display(),
-            },
+            }
         )
         response.raise_for_status()
         if response.status_code == 200:
@@ -623,12 +619,8 @@ class FlaggedTask(Task):
         """Get a zoho contact id for the contact with the given email address"""
         if user is None:
             user = User.objects.get(username='MuckrockStaff')
-        response = requests.get(
-            settings.ZOHO_URL + 'contacts/search',
-            headers={
-                'Authorization': settings.ZOHO_TOKEN,
-                'orgId': settings.ZOHO_ORG_ID,
-            },
+        response = zoho_get(
+            'contacts/search',
             params={
                 'limit': 1,
                 'email': user.email,
@@ -641,12 +633,8 @@ class FlaggedTask(Task):
                 return contacts['data'][0]['id']
 
         # if we could not find an existing contact, we will create one
-        response = requests.post(
-            settings.ZOHO_URL + 'contacts',
-            headers={
-                'Authorization': settings.ZOHO_TOKEN,
-                'orgId': settings.ZOHO_ORG_ID,
-            },
+        response = zoho_post(
+            'contacts',
             json={
                 'lastName': user.profile.full_name or
                             'Anonymous',  # lastName is required
