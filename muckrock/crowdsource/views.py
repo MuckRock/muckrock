@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.urlresolvers import reverse
+from django.db.models import Count
+from django.db.models.query import Prefetch
 from django.http import (
     Http404,
     HttpResponse,
@@ -50,6 +52,40 @@ from muckrock.crowdsource.models import (
 )
 from muckrock.crowdsource.tasks import export_csv
 from muckrock.message.email import TemplateEmail
+
+
+class CrowdsourceExploreView(TemplateView):
+    """Provides a space for exploring active assignments"""
+    template_name = 'crowdsource/explore.html'
+
+    def get_context_data(self, **kwargs):
+        """Data for the explore page"""
+        context = super(CrowdsourceExploreView, self).get_context_data(**kwargs)
+        context['crowdsource_users'
+                ] = CrowdsourceResponse.objects.get_user_count()
+        context['crowdsource_data'] = CrowdsourceResponse.objects.count()
+        context['crowdsource_count'] = Crowdsource.objects.exclude(
+            status='draft'
+        ).count()
+        context['crowdsources'] = (
+            Crowdsource.objects.annotate(
+                user_count=Count('responses__user', distinct=True)
+            ).order_by('-datetime_created').filter(
+                status='open',
+                project_only=False,
+            ).select_related(
+                'user',
+                'project',
+            ).prefetch_related(
+                'data',
+                Prefetch(
+                    'responses',
+                    queryset=CrowdsourceResponse.objects.
+                    select_related('user__profile')
+                ),
+            )[:100]
+        )
+        return context
 
 
 class CrowdsourceDetailView(DetailView):

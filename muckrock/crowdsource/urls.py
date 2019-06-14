@@ -42,7 +42,7 @@ urlpatterns = [
     ),
     url(
         r'^$',
-        RedirectView.as_view(url='/assignment/list'),
+        views.CrowdsourceExploreView.as_view(),
         name='crowdsource-index',
     ),
     url(

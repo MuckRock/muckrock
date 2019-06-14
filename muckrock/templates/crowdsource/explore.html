@@ -1,0 +1,61 @@
+{% extends "base_explore.html" %}
+{% load humanize %}
+
+{% block classes %}project{% endblock %}
+
+{% block explore_header_description %}
+  <h1>Assignments</h1>
+  <div class="crowdsource__explore__header">
+    <table>
+    <tr>
+      <td class="number">{{ crowdsource_users|intcomma }}</span>
+      <td>volunteers have helped analyzed over</span>
+    </tr>
+    <tr>
+      <td class="number">{{ crowdsource_data|intcomma }}</span>
+      <td>pieces of information across</span>
+    </tr>
+    <tr>
+      <td class="number">{{ crowdsource_count|intcomma }}</span>
+      <td>different projects.  You can help out by reading below.</span>
+    </tr>
+    </table>
+  </div>
+  <p>
+    Have a lot of documents to go through?  Assignments make it easy to split up
+    the work, either privately with people you invite or by asking the public to
+    help out.  <a href="#">Learn more in this video</a> and then
+    <a href="{% url "crowdsource-create" %}">create an assignment yourself</a>.
+    (Professional or Organization account required).
+  </p>
+{% endblock %}
+
+{% block explore_header_links %}
+  <ul class="nostyle">
+    <li>
+      <iframe width="215" height="121" src="https://www.youtube.com/embed/DLzxrzFCyOs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </li>
+    <li class="mb1">
+      <a class="blue button" href="{% url "crowdsource-create" %}">
+        Create Assignment
+      </a>
+    </li>
+    <li>
+      <a class="action" href="{% url "crowdsource-list" %}">
+        Browse all assignments &rarr;
+      </a>
+    </li>
+    <li>
+      <a class="action" href="#">Learn more &rarr;</a>
+    </li>
+  </ul>
+{% endblock %}
+
+{% block explore_main %}
+  <div class="explore__section">
+    {% for crowdsource in crowdsources %}
+      {% include 'lib/pattern/crowdsource.html' %}
+    {% endfor %}
+  </div>
+{% endblock %}
+

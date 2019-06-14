@@ -3,12 +3,12 @@
 
 # Django
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Case, Q, Sum, Value, When
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -33,23 +33,12 @@ from taggit.managers import TaggableManager
 # MuckRock
 from muckrock.crowdsource import fields
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE
+from muckrock.crowdsource.querysets import (
+    CrowdsourceDataQuerySet,
+    CrowdsourceQuerySet,
+    CrowdsourceResponseQuerySet,
+)
 from muckrock.tags.models import TaggedItemBase
-
-
-class CrowdsourceQuerySet(models.QuerySet):
-    """Object manager for crowdsources"""
-
-    def get_viewable(self, user):
-        """Get the viewable crowdsources for the user"""
-        if user.is_staff:
-            return self
-        elif user.is_authenticated:
-            return self.filter(
-                Q(user=user) | Q(status='open', project_only=False) |
-                Q(status='open', project_only=True, project__contributors=user)
-            )
-        else:
-            return self.filter(status='open', project_only=False)
 
 
 class Crowdsource(models.Model):
@@ -214,35 +203,44 @@ class Crowdsource(models.Model):
             return None
         return len(self.data.all()) * self.data_limit
 
+    def percent_complete(self):
+        """Percent of tasks complete"""
+        total = self.total_assignments()
+        if not total:
+            return 0
+        return int(100 * self.responses.count() / float(total))
+
+    def contributor_line(self):
+        """Line about who has contributed"""
+        users = list({r.user for r in self.responses.all() if r.user})
+        total = len(users)
+
+        def join_names(users):
+            """Create a comma seperated list of user names"""
+            return ', '.join(u.profile.full_name or u.username for u in users)
+
+        if total > 4:
+            return '{} and {} others helped'.format(
+                join_names(users[:3]), total - 3
+            )
+        elif total > 1:
+            return '{} and {} helped'.format(
+                join_names(users[:-1]), users[-1].profile.full_name
+                or users[-1].username
+            )
+        elif total == 1:
+            return '{} helped'.format(
+                users[0].profile.full_name or users[0].username
+            )
+        else:
+            return 'No one has helped yet, be the first!'
+
     class Meta:
         verbose_name = 'assignment'
         permissions = ((
             'form_crowdsource',
             'Can view and fill out the assignments for this crowdsource'
         ),)
-
-
-class CrowdsourceDataQuerySet(models.QuerySet):
-    """Object manager for crowdsource data"""
-
-    def get_choices(self, data_limit, user, ip_address):
-        """Get choices for data to show"""
-        choices = (
-            self.annotate(
-                count=Sum(
-                    Case(
-                        When(responses__number=1, then=Value(1)),
-                        default=0,
-                        output_field=models.IntegerField(),
-                    )
-                )
-            ).filter(count__lt=data_limit)
-        )
-        if user is not None:
-            choices = choices.exclude(responses__user=user)
-        elif ip_address is not None:
-            choices = choices.exclude(responses__ip_address=ip_address)
-        return choices
 
 
 DOCCLOUD_EMBED = """
@@ -422,6 +420,7 @@ class CrowdsourceResponse(models.Model):
     )
     edit_datetime = models.DateTimeField(null=True, blank=True)
 
+    objects = CrowdsourceResponseQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):

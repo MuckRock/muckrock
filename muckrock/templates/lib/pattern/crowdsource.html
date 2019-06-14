@@ -1,0 +1,83 @@
+{% load thumbnail %}
+{% load tags %}
+
+<div class="project component grid__row">
+  <header class="project__header grid__column third" {% if crowdsource.project.image %}style="background-image: url('{% thumbnail crowdsource.project.image 1200x600 crop %}');"{% endif %}>
+    <a href="{% url 'crowdsource-detail' idx=crowdsource.pk slug=crowdsource.slug %}" class="project__header__wrapper">
+      <div>
+        <h2 class="title">{{ crowdsource.title }}</h2>
+        {% if crowdsource.project_only %}
+          <span class="small red badge">&empty; Private</span>
+        {% endif %}
+      </div>
+    </a>
+  </header>
+  <div class="grid__column two-thirds">
+
+    <div class="project__crowdfund nomargin">
+      <div>
+        Launched by
+          <a href="{{ crowdsource.user.get_absolute_url }}">
+          {{ crowdsource.user.get_full_name }}
+        </a>
+      </div>
+      {% if crowdsource.total_assignments %}
+        <div class="progress">
+          <span class="meter" style="width: {{ crowdsource.percent_complete }}%"></span>
+        </div>
+      {% endif %}
+      <ul class="nostyle inline stats nomargin">
+        <li>
+          <a class="success button" href="{% url 'crowdsource-assignment' idx=crowdsource.pk slug=crowdsource.slug %}">
+            Contribute
+          </a>
+        </li>
+        {% if crowdsource.total_assignments %}
+          <li class="stat">
+            <span class="value">{{ crowdsource.percent_complete }}%</span> completed
+          </li>
+        {% endif %}
+        <li class="stat">
+          {% with crowdsource.responses.all|length as submission_count %}
+            <span class="value">{{ submission_count }}</span>
+            submission{{ submission_count|pluralize }}
+          {% endwith %}
+        </li>
+        {% if crowdsource.user_count is not None %}
+          <li class="stat">
+            <span class="value">{{ crowdsource.user_count }}</span>
+            contributor{{ crowdsource.user_count|pluralize }}
+          </li>
+        {% endif %}
+        {% if crowdfund.date_due %}
+          <li class="stat">
+            <span class="value">{{crowdfund.date_due|timeuntil}}</span> remaining
+          </li>
+        {% endif %}
+      </ul>
+      <div class="small">{{ crowdsource.contributor_line }}</div>
+    </div>
+
+    <div class="project__overview">
+      <summary>
+        {{ crowdsource.description|markdown }}
+      </summary>
+      <div class="grid__row">
+        <div class="grid__column half">
+          {% if crowdsource.project %}
+            <p class="bold">
+              Part of the
+              <a href="{% url "project-detail" pk=crowdsource.project.pk slug=crowdsource.project.slug %}">
+                {{ crowdsource.project.title }}
+              </a>
+            </p>
+          {% endif %}
+        </div>
+        <div class="grid__column half">
+          {% social title=crowdsource.title url=crowdsource.get_absolute_url %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

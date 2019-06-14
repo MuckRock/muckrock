@@ -77,3 +77,20 @@
     }
   }
 }
+
+.crowdsource__explore__header {
+  table {
+    background: inherit;
+    tr {
+      border-style: none;
+    }
+    td {
+      padding-top: 1.2rem;
+      padding-right: 0.5rem;
+    }
+    .number {
+      font-size: $size-8;
+      text-align: right;
+    }
+  }
+}
