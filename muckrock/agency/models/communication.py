@@ -10,6 +10,12 @@ REQUEST_TYPES = (
     ('appeal', 'Appeal'),
     ('none', 'None'),
 )
+ADDRESS_REQUEST_TYPES = (
+    ('primary', 'Primary'),
+    ('appeal', 'Appeal'),
+    ('check', 'Check'),
+    ('none', 'None'),
+)
 
 EMAIL_TYPES = (
     ('to', 'To'),
@@ -29,7 +35,7 @@ class AgencyAddress(models.Model):
     )
     request_type = models.CharField(
         max_length=7,
-        choices=REQUEST_TYPES,
+        choices=ADDRESS_REQUEST_TYPES,
         default='none',
     )
 
