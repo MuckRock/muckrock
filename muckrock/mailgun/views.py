@@ -5,7 +5,7 @@ Views for mailgun
 # Django
 from django.conf import settings
 from django.core.cache import cache
-from django.core.mail import EmailMessage, send_mail
+from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden
@@ -234,12 +234,13 @@ def _handle_request(request, mail_id):
 
         if foia.deleted:
             if from_email is not None:
-                send_mail(
-                    'Request Withdrawn: {}'.format(subject),
-                    render_to_string('text/foia/deleted_autoreply.txt'),
-                    'info@muckrock.com',
-                    [unicode(from_email)],
-                )
+                EmailMessage(
+                    subject='Request Withdrawn: {}'.format(subject),
+                    body=render_to_string('text/foia/deleted_autoreply.txt'),
+                    from_email=foia.get_request_email(),
+                    to=[unicode(from_email)],
+                    bcc=['diagnostics@muckrock.com'],
+                ).send(fail_silently=False)
             return HttpResponse('WARNING')
 
         if from_email is not None:

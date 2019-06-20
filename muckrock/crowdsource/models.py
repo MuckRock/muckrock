@@ -4,7 +4,7 @@
 # Django
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
-from django.core.mail import send_mail
+from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -494,15 +494,16 @@ class CrowdsourceResponse(models.Model):
             settings.MUCKROCK_URL,
             self.crowdsource.get_absolute_url(),
         )
-        send_mail(
-            '[Assignment Response] {} by {}'.format(
+        EmailMessage(
+            subject='[Assignment Response] {} by {}'.format(
                 self.crowdsource.title,
                 self.user.username if self.user else 'Anonymous',
             ),
-            text,
-            'info@muckrock.com',
-            [email],
-        )
+            body=text,
+            from_email='info@muckrock.com',
+            to=[email],
+            bcc=['diagnostics@muckrock.com'],
+        ).send(fail_silently=False)
 
     class Meta:
         verbose_name = 'assignment response'

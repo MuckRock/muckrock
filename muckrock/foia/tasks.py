@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
+from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now
@@ -487,16 +488,18 @@ def embargo_warn():
     for foia in FOIARequest.objects.filter(
         embargo=True, permanent_embargo=False, date_embargo=date.today()
     ):
-        send_mail(
-            '[MuckRock] Embargo about to expire for FOI Request "%s"' %
-            foia.title,
-            render_to_string(
+        EmailMessage(
+            subject='[MuckRock] Embargo about to expire for FOI Request "{}"'.
+            format(foia.title),
+            body=render_to_string(
                 'text/foia/embargo_will_expire.txt', {
                     'request': foia
                 }
-            ), 'info@muckrock.com',
-            [foia.user.email]
-        )
+            ),
+            from_email='info@muckrock.com',
+            to=[foia.user.email],
+            bcc=['diagnostics@muckrock.com'],
+        ).send(fail_silently=False)
 
 
 @periodic_task(
@@ -510,15 +513,19 @@ def embargo_expire():
     ):
         foia.embargo = False
         foia.save(comment='embargo expired')
-        send_mail(
-            '[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
-            render_to_string(
+        EmailMessage(
+            subject='[MuckRock] Embargo expired for FOI Request "{}"'.format(
+                foia.title
+            ),
+            body=render_to_string(
                 'text/foia/embargo_did_expire.txt', {
                     'request': foia
                 }
-            ), 'info@muckrock.com',
-            [foia.user.email]
-        )
+            ),
+            from_email='info@muckrock.com',
+            to=[foia.user.email],
+            bcc=['diagnostics@muckrock.com'],
+        ).send(fail_silently=False)
 
 
 @periodic_task(
