@@ -379,10 +379,16 @@ class Detail(DetailView):
         if foia.status != 'submitted' and (user_editable or staff_editable):
             foia.status = status
             foia.save(comment='status updated')
+            if staff_editable:
+                kwargs = {
+                    'resolved': True,
+                    'resolved_by': request.user,
+                    'date_done': timezone.now(),
+                }
+            else:
+                kwargs = {}
             StatusChangeTask.objects.create(
-                user=request.user,
-                old_status=old_status,
-                foia=foia,
+                user=request.user, old_status=old_status, foia=foia, **kwargs
             )
             response_tasks = ResponseTask.objects.filter(
                 resolved=False,

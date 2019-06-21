@@ -26,7 +26,7 @@
         {% else %}
           <h1 class="grid__column half">File a request</h1>
           <summary class="grid__column half">
-            Not sure where to start? <a href="/about/foia-101/">We can help.</a>
+            Not sure where to start? <a href="{% url "project-detail" slug="foia-101-tips-and-tricks-to-make-you-a-transparency-master" pk=234 %}">Check out our FOIA guides.</a>
             <br>
             {% if featured %}
               Out of ideas? <a href="#clone">Try cloning a request.</a>
