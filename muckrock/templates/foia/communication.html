@@ -85,7 +85,7 @@
         <span class="notification warning">
           <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
           <span class="text">
-            <p>There are too many files to display on this communication. <a class="action" href="{% url 'foia-files' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">See all files</a></p>
+            <p>There are too many files to display on this communication. <a class="action" href="{% url 'foia-files' jurisdiction=communication.foia.jurisdiction.slug jidx=communication.foia.jurisdiction.pk idx=communication.foia.id slug=communication.foia.slug %}">See all files</a></p>
           </span>
         </span>
       {% endif %}
@@ -98,7 +98,7 @@
           <label for="status">Change Communication Status</label>
           <select name="status">
             {% for choice in status_choices %}
-              <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+              <option value="{{ choice|first }}" {% if choice|first == communication.foia.status %}selected{% endif %}>{{ choice|last }}</option>
             {% endfor %}
           </select>
           <p class="help-text">This will only change the status of the communication, it will not effect the status of the request.</p>
@@ -109,7 +109,7 @@
           {% csrf_token %}
           <input type="hidden" name="comm_pk" value="{{communication.pk}}" />
           <label for="new_foia_pk">Move to Requests</label>
-          <input type="text" name="new_foia_pks" value="{{ foia.pk }}" placeholder="Enter MuckRock number" />
+          <input type="text" name="new_foia_pks" value="{{ communication.foia.pk }}" placeholder="Enter MuckRock number" />
           <button type="submit" name="action" value="move_comm" class="primary button">Move</button>
           <button class="cancel button" id="cancel-move-communication">Close</button>
         </form>

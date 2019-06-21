@@ -804,6 +804,7 @@ class ResponseTask(Task):
         max_length=10, choices=STATUS, blank=True, null=True
     )
     status_probability = models.IntegerField(blank=True, null=True)
+    scan = models.BooleanField(default=False)
 
     objects = ResponseTaskQuerySet.as_manager()
 
@@ -816,7 +817,7 @@ class ResponseTask(Task):
     def set_status(self, status):
         """Forward to form logic, for use in classify_status task"""
         from muckrock.task.forms import ResponseTaskForm
-        form = ResponseTaskForm()
+        form = ResponseTaskForm(task=self)
         form.set_status(status, set_foia=True, comms=[self.communication])
 
 

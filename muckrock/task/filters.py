@@ -77,10 +77,11 @@ class TaskFilterSet(django_filters.FilterSet):
 class ResponseTaskFilterSet(TaskFilterSet):
     """Allows response tasks to be filtered by predicted status."""
     predicted_status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
+    scan = django_filters.BooleanFilter(label='Scans')
 
     class Meta:
         model = ResponseTask
-        fields = ['predicted_status', 'resolved', 'resolved_by']
+        fields = ['predicted_status', 'scan', 'resolved', 'resolved_by']
 
 
 class NewAgencyTaskFilterSet(TaskFilterSet):

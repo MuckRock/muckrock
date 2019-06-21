@@ -16,6 +16,7 @@ from muckrock.accounts.models import Notification
 from muckrock.agency.models import Agency
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.core.utils import generate_status_action
+from muckrock.foia.codes import CODE_CHOICES, CODES
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -114,10 +115,19 @@ class ResponseTaskForm(forms.Form):
         ]  # '25 October, 2006'
     )
     status = forms.ChoiceField(choices=STATUS)
+    code = forms.ChoiceField(choices=CODE_CHOICES)
     set_foia = forms.BooleanField(
         label='Set request status', initial=True, required=False
     )
     proxy = forms.BooleanField(required=False, widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        self.task = kwargs.pop('task')
+        super(ResponseTaskForm, self).__init__(*args, **kwargs)
+        if self.task.scan:
+            del self.fields['status']
+        else:
+            del self.fields['code']
 
     def clean_move(self):
         """Splits a comma separated string into an array"""
@@ -132,53 +142,64 @@ class ResponseTaskForm(forms.Form):
     def process_form(self, task, user):
         """Handle the form for the task"""
         cleaned_data = self.cleaned_data
-        status = cleaned_data['status']
-        set_foia = cleaned_data['set_foia']
-        move = cleaned_data['move']
-        tracking_number = cleaned_data['tracking_number']
-        date_estimate = cleaned_data['date_estimate']
-        price = cleaned_data['price']
-        proxy = cleaned_data['proxy']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
         comms = [task.communication]
         error_msgs = []
-        if move:
+        action_taken = False
+
+        steps = [
+            (
+                cleaned_data['status'],
+                lambda s: self.set_status(s, cleaned_data['set_foia'], comms),
+                'You tried to set the request to an invalid status.',
+            ),
+            (
+                cleaned_data['code'],
+                lambda c: self.set_status(c, cleaned_data['set_foia'], comms),
+                'You tried to set the request to an invalid code.',
+            ),
+            (
+                cleaned_data['tracking_number'],
+                lambda t: self.set_tracking_id(t, comms),
+                'You tried to set an invalid tracking id. '
+                'Just use a string of characters.',
+            ),
+            (
+                cleaned_data['date_estimate'],
+                lambda d: self.set_date_estimate(d, comms),
+                'You tried to set the request to an invalid date.',
+            ),
+            (
+                cleaned_data['price'],
+                lambda p: self.set_price(p, comms),
+                'You tried to set a non-numeric price.',
+            ),
+        ]
+
+        if cleaned_data['move']:
+            action_taken = True
             try:
-                comms = self.move_communication(task.communication, move, user)
+                comms = self.move_communication(
+                    task.communication, cleaned_data['move'], user
+                )
             except ValueError:
                 error_msgs.append(
                     'No valid destination for moving the request.'
                 )
-        if status:
-            try:
-                self.set_status(status, set_foia, comms)
-            except ValueError:
-                error_msgs.append(
-                    'You tried to set the request to an invalid status.'
-                )
-        if tracking_number:
-            try:
-                self.set_tracking_id(tracking_number, comms)
-            except ValueError:
-                error_msgs.append(
-                    'You tried to set an invalid tracking id. Just use a string of characters.'
-                )
-        if date_estimate:
-            try:
-                self.set_date_estimate(date_estimate, comms)
-            except ValueError:
-                error_msgs.append(
-                    'You tried to set the request to an invalid date.'
-                )
-        if price:
-            try:
-                self.set_price(price, comms)
-            except ValueError:
-                error_msgs.append('You tried to set a non-numeric price.')
-        if proxy:
+
+        for value, func, error_msg in steps:
+            if value:
+                action_taken = True
+                try:
+                    func(value)
+                except ValueError:
+                    error_msgs.append(error_msg)
+
+        if cleaned_data['proxy']:
+            action_taken = True
             self.proxy_reject(comms)
-        action_taken = move or status or tracking_number or price or proxy
+
         return (action_taken, error_msgs)
 
     def move_communication(self, communication, foia_pks, user):
@@ -196,19 +217,28 @@ class ResponseTaskForm(forms.Form):
             foia.add_tracking_id(tracking_id)
             foia.save(comment='response task tracking id')
 
-    def set_status(self, status, set_foia, comms):
+    def set_status(self, status, set_foia, comms, title=None, body=None):
         """Sets status of comm and foia"""
+        # pylint: disable=too-many-arguments
         # check that status is valid
-        if status not in [status_set[0] for status_set in STATUS]:
+        if status is not None and status not in [
+            status_set[0] for status_set in STATUS
+        ]:
             raise ValueError('Invalid status.')
         for comm in comms:
             # save comm first
-            comm.status = status
+            if status is not None:
+                comm.status = status
+            if body is not None:
+                comm.body = body
+            if title is not None:
+                comm.files.update(title=title)
             comm.save()
             # save foia next, unless just updating comm status
             if set_foia:
                 foia = comm.foia
-                foia.status = status
+                if status is not None:
+                    foia.status = status
                 if status in ['rejected', 'no_docs', 'done', 'abandoned']:
                     foia.datetime_done = comm.datetime
                 foia.update()
@@ -226,6 +256,18 @@ class ResponseTaskForm(forms.Form):
                 )
                 for generic_notification in generic_notifications:
                     generic_notification.mark_read()
+
+    def set_code(self, code, set_foia, comms):
+        """Sets status of comm and foia based on scan code"""
+        # check that code is valid
+        if code not in CODES:
+            raise ValueError('Invalid code.')
+        title, status, body = CODES[code]
+        self.set_status(status, set_foia, comms, title=title, body=body)
+
+        if code == 'REJ-P':
+            for comm in comms:
+                comm.foia.proxy_reject()
 
     def set_price(self, price, comms):
         """Sets the price of the communication's request"""

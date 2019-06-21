@@ -105,3 +105,6 @@ CODES = {
         'An acknowledgment that the requester has withdrawn an appeal.'
     ),
 }
+
+CODE_CHOICES = sorted([(code, '{} - {}'.format(code, title)) for code,
+                       (title, status, description) in CODES.iteritems()])
