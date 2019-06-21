@@ -133,17 +133,30 @@ $(document).ready(function(){
     // update the request count
     var requestCount = agencyField.find(".deck > .choice").length;
     var exemptCount = agencyField.find(".exempt").length;
-    var nonExemptCount = requestCount - exemptCount;
+    var uncoopCount = agencyField.find(".uncooperative").length;
+    var allowedCount = requestCount - exemptCount - uncoopCount;
 
-    updateRequestCount(nonExemptCount);
+    updateRequestCount(allowedCount);
 
-    // handle exempt agencies
-    if ((exemptCount > 0) && (nonExemptCount > 0)) {
+    // handle exempt & uncooperative agencies
+    if ((uncoopCount > 0) && (exemptCount > 0) && (allowedCount > 0)) {
+      $("#submit_button").prop("disabled", "");
+      $("#submit_help").text("Some of the agencies you have selected are exempt or uncooperative with MuckRock and have refused to process our requests in the past.  You may submit this request to the non-exempt, non-uncooperative agencies, but the selected exempt and uncooperative agencies will not be included.");
+    } else if ((exemptCount > 0) && (allowedCount > 0)) {
       $("#submit_button").prop("disabled", "");
       $("#submit_help").text("Some of the agencies you have selected are exempt.  You may submit this request to the non-exempt agencies, but the selected exempt agencies will not be included.");
+    } else if ((uncoopCount > 0) && (allowedCount > 0)) {
+      $("#submit_button").prop("disabled", "");
+      $("#submit_help").text("Some of the agencies you have selected are uncooperative with MuckRock and have refused to process our requests in the past.  We are not allowing submission of requests to these agencies until we are able to resolve these issues.  You may submit this request to the non-uncooperative agencies, but the selected uncooperative agencies will not be included.");
+    } else if ((uncoopCount > 0) && (exemptCount > 0)) {
+      $("#submit_button").prop("disabled", "disabled");
+      $("#submit_help").text("All of the agencies you have selected are exempt or uncooperative with MuckRock and have refused to process our requests in the past.  Please select other agencies.");
     } else if (exemptCount > 0) {
       $("#submit_button").prop("disabled", "disabled");
       $("#submit_help").text("The agency you have selected is exempt from public records requests.  Please select another agency.");
+    } else if (uncoopCount > 0) {
+      $("#submit_button").prop("disabled", "disabled");
+      $("#submit_help").text("The agency you have selected is uncooperative with MuckRock and has refused to process our requests in the past.  We are not allowing submission of requests to these agencies until we are able to resolve this issue.  Please select another agency.");
     } else {
       $("#submit_button").prop("disabled", "");
       $("#submit_help").text("");

@@ -173,8 +173,11 @@ class BaseComposerForm(forms.ModelForm):
             return 'Untitled'
 
     def clean_agencies(self):
-        """Remove exempt agencies"""
-        return [a for a in self.cleaned_data['agencies'] if not a.exempt]
+        """Remove exempt and uncooperative agencies"""
+        return [
+            a for a in self.cleaned_data['agencies']
+            if not (a.exempt or a.uncooperative)
+        ]
 
     def clean(self):
         """Check cross field dependencies"""
