@@ -143,7 +143,7 @@ class AgencyAdmin(VersionAdmin):
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction', 'status')
-    list_filter = ['status', 'exempt', 'types']
+    list_filter = ['status', 'exempt', 'uncooperative', 'types']
     search_fields = ['name', 'aliases']
     filter_horizontal = ('types',)
     form = AgencyAdminForm
@@ -184,6 +184,7 @@ class AgencyAdmin(VersionAdmin):
                 'foia_logs',
                 'foia_guide',
                 'exempt',
+                'uncooperative',
                 'exempt_note',
                 'requires_proxy',
             ),
