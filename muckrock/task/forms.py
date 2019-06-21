@@ -121,10 +121,14 @@ class ResponseTaskForm(forms.Form):
     )
     proxy = forms.BooleanField(required=False, widget=forms.HiddenInput())
 
+    # allows disabling of scan checking in subclasses
+    check_scans = True
+
     def __init__(self, *args, **kwargs):
-        self.task = kwargs.pop('task')
+        if self.check_scans:
+            task = kwargs.pop('task')
         super(ResponseTaskForm, self).__init__(*args, **kwargs)
-        if self.task.scan:
+        if self.check_scans and task.scan:
             del self.fields['status']
         else:
             del self.fields['code']
@@ -311,6 +315,9 @@ class IncomingPortalForm(ResponseTaskForm):
         required=False,
     )
     communication = forms.CharField(widget=forms.Textarea(), required=False)
+
+    # skip checking the task for if it is a scan (only applicable to response tasks)
+    check_scans = False
 
 
 class ReplaceNewAgencyForm(forms.Form):
