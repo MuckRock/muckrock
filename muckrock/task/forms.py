@@ -150,13 +150,13 @@ class ResponseTaskForm(forms.Form):
 
         steps = [
             (
-                cleaned_data['status'],
+                cleaned_data.get('status'),
                 lambda s: self.set_status(s, cleaned_data['set_foia'], comms),
                 'You tried to set the request to an invalid status.',
             ),
             (
-                cleaned_data['code'],
-                lambda c: self.set_status(c, cleaned_data['set_foia'], comms),
+                cleaned_data.get('code'),
+                lambda c: self.set_code(c, cleaned_data['set_foia'], comms),
                 'You tried to set the request to an invalid code.',
             ),
             (
@@ -230,8 +230,8 @@ class ResponseTaskForm(forms.Form):
             if status is not None:
                 comm.status = status
             if body is not None:
-                comm.body = body
-            if title is not None:
+                comm.communication = body
+            if title is not None and comm.files.count() == 1:
                 comm.files.update(title=title)
             comm.save()
             # save foia next, unless just updating comm status

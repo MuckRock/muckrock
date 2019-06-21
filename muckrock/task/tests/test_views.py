@@ -12,7 +12,7 @@ import logging
 
 # Third Party
 import mock
-from nose.tools import eq_, ok_
+from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
@@ -23,6 +23,7 @@ from muckrock.core.test_utils import (
     mock_middleware,
 )
 from muckrock.core.views import MRFilterListView
+from muckrock.foia.codes import CODES
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.models import FOIANote
 from muckrock.task.factories import (
@@ -625,7 +626,9 @@ class ResponseTaskListViewTests(TestCase):
         ok_(self.task.resolved, 'Setting the price should resolve the task.')
 
     def test_post_set_status(self):
-        """Setting the status should save it to the response and request, then resolve task."""
+        """Setting the status should save it to the response and request, then
+        resolve task.
+        """
         status_change = 'done'
         data = {
             'status': status_change,
@@ -648,6 +651,28 @@ class ResponseTaskListViewTests(TestCase):
             self.task.resolved, True,
             'Setting the status should resolve the task'
         )
+
+    def test_post_set_code(self):
+        """Setting the scan code should save it to the response and request, then
+        resolve task, and unhide to communication.
+        """
+        task = ResponseTaskFactory(scan=True, communication__hidden=True)
+        code = 'RES'
+        data = {
+            'code': code,
+            'set_foia': True,
+            'task': task.pk,
+            'save': True,
+        }
+        http_post_response(self.url, self.view, data, self.user)
+        task.refresh_from_db()
+        task.communication.refresh_from_db()
+        task.communication.foia.refresh_from_db()
+        eq_(task.communication.communication, CODES[code][2])
+        eq_(task.communication.status, CODES[code][1])
+        eq_(task.communication.foia.status, CODES[code][1])
+        eq_(task.resolved, True)
+        assert_false(task.communication.hidden)
 
     def test_post_set_comm_status(self):
         """Setting the status on just the communication should not influence its request."""
