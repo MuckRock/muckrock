@@ -572,7 +572,7 @@ def autoimport():
     # pylint: disable=too-many-statements
     p_name = re.compile(
         r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
-        r'(?P<docs>(?:mr\d+ )+)', re.I
+        r'(?P<docs>(?:mr\d+(?: |$))+)', re.I
     )
 
     def s3_copy(bucket, key_or_pre, dest_name):
