@@ -445,7 +445,7 @@ class ResponseTaskList(TaskList):
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to ResponseTask"""
         if request.POST.get('proxy') or request.POST.get('save'):
-            form = ResponseTaskForm(request.POST)
+            form = ResponseTaskForm(request.POST, task=task)
             if not form.is_valid():
                 messages.error(request, 'Form is invalid')
                 return
@@ -462,6 +462,10 @@ class ResponseTaskList(TaskList):
                     # to string for json
                     form_data['date_estimate'] = form_data['date_estimate'
                                                            ].isoformat()
+                if task.scan:
+                    task.communication.hidden = False
+                    task.communication.create_agency_notifications()
+                    task.communication.save()
                 task.resolve(request.user, form.cleaned_data)
         return super(ResponseTaskList, self).task_post_helper(request, task)
 

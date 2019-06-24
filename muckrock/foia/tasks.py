@@ -26,7 +26,6 @@ import re
 import sys
 import urllib2
 from datetime import date, datetime, time, timedelta
-from decimal import Decimal
 from random import randint
 from urllib import quote_plus
 
@@ -53,8 +52,7 @@ from muckrock.communication.models import (
 )
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
-from muckrock.core.utils import generate_status_action, read_in_chunks
-from muckrock.foia.codes import CODES
+from muckrock.core.utils import read_in_chunks
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
@@ -574,9 +572,7 @@ def autoimport():
     # pylint: disable=too-many-statements
     p_name = re.compile(
         r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
-        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?:\$(?P<arg>\S+))?'
-        r'(?: ID#(?P<id>\S+))?'
-        r'(?: EST(?P<estm>\d\d?)-(?P<estd>\d\d?)-(?P<esty>\d\d))?', re.I
+        r'(?P<docs>(?:mr\d+(?: |$))+)', re.I
     )
 
     def s3_copy(bucket, key_or_pre, dest_name):
@@ -617,9 +613,6 @@ def autoimport():
             raise ValueError(
                 'ERROR: %s does not match the file name format' % name
             )
-        code = m_name.group('code').upper()
-        if code not in CODES:
-            raise ValueError('ERROR: %s uses an unknown code' % name)
         foia_pks = [pk[2:] for pk in m_name.group('docs').split()]
         file_datetime = datetime.combine(
             datetime(
@@ -629,34 +622,20 @@ def autoimport():
             ),
             time(tzinfo=timezone.get_current_timezone()),
         )
-        title, status, body = CODES[code]
-        arg = m_name.group('arg')
-        id_ = m_name.group('id')
-        if m_name.group('esty'):
-            est_date = date(
-                int(m_name.group('esty')) + 2000, int(m_name.group('estm')),
-                int(m_name.group('estd'))
-            )
-        else:
-            est_date = None
 
-        return (
-            foia_pks, file_datetime, code, title, status, body, arg, id_,
-            est_date
-        )
+        return foia_pks, file_datetime
 
-    def import_key(key, storage_bucket, comm, log, title=None):
+    def import_key(key, storage_bucket, comm, log):
         """Import a key"""
 
         foia = comm.foia
         file_name = os.path.split(key.name)[1]
 
-        title = title or file_name
         access = 'private' if foia.embargo else 'public'
 
         foia_file = FOIAFile(
             comm=comm,
-            title=title,
+            title=file_name,
             datetime=comm.datetime,
             source=comm.get_source(),
             access=access,
@@ -721,10 +700,7 @@ def autoimport():
             file_name = key.name[6:]
 
             try:
-                (
-                    foia_pks, file_datetime, code, title, status, body, arg,
-                    id_, est_date
-                ) = parse_name(file_name)
+                foia_pks, file_datetime = parse_name(file_name)
             except ValueError as exc:
                 s3_copy(bucket, key, 'review/%s' % file_name)
                 s3_delete(bucket, key)
@@ -742,37 +718,19 @@ def autoimport():
                         to_user=foia.user,
                         response=True,
                         datetime=file_datetime,
-                        communication=body,
-                        status=status,
+                        communication='',
+                        hidden=True,
                     )
+                    comm.responsetask_set.create(scan=True)
                     MailCommunication.objects.create(
                         communication=comm,
                         sent_datetime=file_datetime,
                     )
 
-                    foia.status = status or foia.status
-                    if foia.status in [
-                        'partial', 'done', 'rejected', 'no_docs'
-                    ]:
-                        foia.datetime_done = file_datetime
-                    if code == 'FEE' and arg:
-                        foia.price = Decimal(arg)
-                    if id_:
-                        foia.add_tracking_id(id_)
-                    if est_date:
-                        foia.date_estimate = est_date
-                    if code == 'REJ-P':
-                        foia.proxy_reject()
-
                     if key.name.endswith('/'):
                         import_prefix(key, bucket, storage_bucket, comm, log)
                     else:
-                        import_key(key, storage_bucket, comm, log, title=title)
-
-                    foia.save(comment='updated from autoimport files')
-                    action = generate_status_action(foia)
-                    foia.notify(action)
-                    foia.update(comm.anchor())
+                        import_key(key, storage_bucket, comm, log)
 
                 except FOIARequest.DoesNotExist:
                     s3_copy(bucket, key, 'review/%s' % file_name)

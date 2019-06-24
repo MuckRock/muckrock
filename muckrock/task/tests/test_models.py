@@ -423,7 +423,7 @@ class ResponseTaskTests(TestCase):
         agency = AgencyFactory()
         comm = FOIACommunicationFactory(response=True, foia__agency=agency)
         self.task = ResponseTask.objects.create(communication=comm)
-        self.form = ResponseTaskForm()
+        self.form = ResponseTaskForm(task=self.task)
         self.user = UserFactory()
 
     def test_get_absolute_url(self):

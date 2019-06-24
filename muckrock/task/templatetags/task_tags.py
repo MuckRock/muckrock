@@ -192,7 +192,7 @@ class ResponseTaskNode(TaskNode):
             extra_context['previous_communications'
                           ] = _foia.reverse_communications
         extra_context['response_form'] = task.forms.ResponseTaskForm(
-            initial=form_initial
+            initial=form_initial, task=self.task
         )
         extra_context['attachments'] = self.task.communication.files.all()
         return extra_context
