@@ -141,22 +141,22 @@ $(document).ready(function(){
     // handle exempt & uncooperative agencies
     if ((uncoopCount > 0) && (exemptCount > 0) && (allowedCount > 0)) {
       $("#submit_button").prop("disabled", "");
-      $("#submit_help").text("Some of the agencies you have selected are exempt or uncooperative with MuckRock and have refused to process our requests in the past.  You may submit this request to the non-exempt, non-uncooperative agencies, but the selected exempt and uncooperative agencies will not be included.");
+      $("#submit_help").text("Some of the agencies you have selected are exempt or have refused to process MuckRock requests in the past.  You may submit this request to the non-exempt agencies, but the selected exempt and scofflaw agencies will not be included when you file.");
     } else if ((exemptCount > 0) && (allowedCount > 0)) {
       $("#submit_button").prop("disabled", "");
       $("#submit_help").text("Some of the agencies you have selected are exempt.  You may submit this request to the non-exempt agencies, but the selected exempt agencies will not be included.");
     } else if ((uncoopCount > 0) && (allowedCount > 0)) {
       $("#submit_button").prop("disabled", "");
-      $("#submit_help").text("Some of the agencies you have selected are uncooperative with MuckRock and have refused to process our requests in the past.  We are not allowing submission of requests to these agencies until we are able to resolve these issues.  You may submit this request to the non-uncooperative agencies, but the selected uncooperative agencies will not be included.");
+      $("#submit_help").text("Some of the agencies you have selected have refused to process MuckRock requests in the past.  We are not allowing submission of requests to these agencies until we resolve these issues.  You may submit this request to the other agencies normally, but the selected scofflaw agencies will not be included when you file.");
     } else if ((uncoopCount > 0) && (exemptCount > 0)) {
       $("#submit_button").prop("disabled", "disabled");
-      $("#submit_help").text("All of the agencies you have selected are exempt or uncooperative with MuckRock and have refused to process our requests in the past.  Please select other agencies.");
+      $("#submit_help").text("All of the agencies you have selected are exempt or have refused to process our requests in the past.  Please select other agencies.");
     } else if (exemptCount > 0) {
       $("#submit_button").prop("disabled", "disabled");
       $("#submit_help").text("The agency you have selected is exempt from public records requests.  Please select another agency.");
     } else if (uncoopCount > 0) {
       $("#submit_button").prop("disabled", "disabled");
-      $("#submit_help").text("The agency you have selected is uncooperative with MuckRock and has refused to process our requests in the past.  We are not allowing submission of requests to these agencies until we are able to resolve this issue.  Please select another agency.");
+      $("#submit_help").text("The agency you have selected has refused to process requests filed through MuckRock in the past.  We are not allowing submission of requests to these agencies until we are able to resolve this issue.  Please select another agency.");
     } else {
       $("#submit_button").prop("disabled", "");
       $("#submit_help").text("");
@@ -354,7 +354,7 @@ $(document).ready(function(){
 
   // Autosaving
   // https://stackoverflow.com/questions/19910843/autosave-input-boxs-to-database-during-pause-in-typing
-	var timeoutId, hiddenId;
+  var timeoutId, hiddenId;
   var composerPk = $("form.create-request").data("composer-pk");
 
   function changeText(text, error) {
