@@ -537,8 +537,9 @@ def phaxio_callback(request):
 
     logger.warning('In Phaxio Call Back %s', request.POST)
     fax_info = json.loads(request.POST['fax'])
-    fax_id = fax_info['tags'].get('fax_id')
-    error_count = int(fax_info['tags'].get('error_count', 0))
+    tags = fax_info.get('tags', {})
+    fax_id = tags.get('fax_id')
+    error_count = int(tags.get('error_count', 0))
     if fax_id:
         fax_comm = FaxCommunication.objects.filter(pk=fax_id).first()
     else:
