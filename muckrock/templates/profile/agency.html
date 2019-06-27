@@ -138,9 +138,15 @@
       <a href="{% url "agency-merge" %}?bad_agency={{ agency.pk }}" class="red button">Merge</a>
     {% endif %}
   </div>
-  {% if agency.exempt and agency.exempt_note %}
+  {% if agency.exempt %}
     <section class="notes">
       <h2>Exempt</h2>
+      {{ agency.exempt_note|safe }}
+    </section>
+  {% endif %}
+  {% if agency.uncooperative %}
+    <section class="notes">
+      <h2>Scofflaw</h2>
       {{ agency.exempt_note|safe }}
     </section>
   {% endif %}
