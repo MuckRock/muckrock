@@ -191,8 +191,19 @@ class Agency(models.Model, RequestHelper):
         verbose_name='FOIA Processing Guide',
         help_text='Begin with http://'
     )
-    exempt = models.BooleanField(default=False)
-    uncooperative = models.BooleanField(default=False)
+    exempt = models.BooleanField(
+        default=False,
+        help_text=
+        'Mark agencies as exempt from public record laws.  Use the exempt note '
+        'for further explanation'
+    )
+    uncooperative = models.BooleanField(
+        default=False,
+        verbose_name='Scowfflaw',
+        help_text=
+        'Mark agencies as unwilling to process our requests.  Use the exempt '
+        'note for further explanation'
+    )
     exempt_note = models.CharField(max_length=255, blank=True)
     requires_proxy = models.BooleanField(default=False)
 

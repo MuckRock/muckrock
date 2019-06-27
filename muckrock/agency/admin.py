@@ -142,7 +142,9 @@ class AgencyAdmin(VersionAdmin):
     """Agency admin options"""
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
-    list_display = ('name', 'jurisdiction', 'status')
+    list_display = (
+        'name', 'jurisdiction', 'status', 'get_types', 'exempt', 'uncooperative'
+    )
     list_filter = ['status', 'exempt', 'uncooperative', 'types']
     search_fields = ['name', 'aliases']
     filter_horizontal = ('types',)
@@ -153,43 +155,87 @@ class AgencyAdmin(VersionAdmin):
         AgencyEmailInline,
         AgencyPhoneInline,
     )
-    fieldsets = ((
-        None,
-        {
-            'fields': (
-                'name',
-                'slug',
-                'jurisdiction',
-                'types',
-                'status',
-                'user',
-                'appeal_agency',
-                'payable_to',
-                'image',
-                'image_attr_line',
-                'public_notes',
-                'portal',
-                'contact_salutation',
-                'contact_first_name',
-                'contact_last_name',
-                'contact_title',
-                'form',
-                'url',
-                'notes',
-                'aliases',
-                'parent',
-                'website',
-                'twitter',
-                'twitter_handles',
-                'foia_logs',
-                'foia_guide',
-                'exempt',
-                'uncooperative',
-                'exempt_note',
-                'requires_proxy',
-            ),
-        },
-    ),)
+    save_on_top = True
+    fieldsets = (
+        (
+            None,
+            {
+                'fields': (
+                    'name',
+                    'slug',
+                    'aliases',
+                    'jurisdiction',
+                    'types',
+                    'status',
+                    'user',
+                    'requires_proxy',
+                ),
+            },
+        ),
+        (
+            'Image',
+            {
+                'fields': (
+                    'image',
+                    'image_attr_line',
+                ),
+            },
+        ),
+        (
+            'Notes',
+            {
+                'fields': (
+                    'public_notes',
+                    'notes',
+                ),
+            },
+        ),
+        (
+            'Related Agencies',
+            {
+                'fields': (
+                    'appeal_agency',
+                    'payable_to',
+                    'parent',
+                ),
+            },
+        ),
+        (
+            'Exempt',
+            {
+                'fields': (
+                    'exempt',
+                    'uncooperative',
+                    'exempt_note',
+                ),
+            },
+        ),
+        (
+            'Contact Information',
+            {
+                'fields': (
+                    'contact_salutation',
+                    'contact_first_name',
+                    'contact_last_name',
+                    'contact_title',
+                    'portal',
+                    'form',
+                    'url',
+                    'website',
+                    'foia_logs',
+                    'foia_guide',
+                    'twitter',
+                    'twitter_handles',
+                ),
+            },
+        ),
+    )
+
+    def get_types(self, obj):
+        """Return the types for display"""
+        return ', '.join(obj.types.values_list('name', flat=True))
+
+    get_types.short_description = 'Types'
 
     def get_urls(self):
         """Add custom URLs here"""
