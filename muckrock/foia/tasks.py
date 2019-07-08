@@ -487,7 +487,7 @@ def embargo_warn():
         embargo=True, permanent_embargo=False, date_embargo=date.today()
     ):
         EmailMessage(
-            subject='[MuckRock] Embargo about to expire for FOI Request "{}"'.
+            subject=u'[MuckRock] Embargo about to expire for FOI Request "{}"'.
             format(foia.title),
             body=render_to_string(
                 'text/foia/embargo_will_expire.txt', {
@@ -512,7 +512,7 @@ def embargo_expire():
         foia.embargo = False
         foia.save(comment='embargo expired')
         EmailMessage(
-            subject='[MuckRock] Embargo expired for FOI Request "{}"'.format(
+            subject=u'[MuckRock] Embargo expired for FOI Request "{}"'.format(
                 foia.title
             ),
             body=render_to_string(
