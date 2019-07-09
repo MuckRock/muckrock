@@ -3,7 +3,6 @@
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
@@ -105,6 +104,10 @@ class Crowdsource(models.Model):
         help_text='Is registration required to complete this assignment?',
     )
     submission_emails = models.ManyToManyField('communication.EmailAddress')
+    featured = models.BooleanField(
+        default=False,
+        help_text='Featured assignments will appear on the homepage.'
+    )
 
     objects = CrowdsourceQuerySet.as_manager()
 

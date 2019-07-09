@@ -73,6 +73,7 @@ class CrowdsourceExploreView(TemplateView):
             ).order_by('-datetime_created').filter(
                 status='open',
                 project_only=False,
+                featured=True,
             ).select_related(
                 'user',
                 'project',
@@ -83,7 +84,7 @@ class CrowdsourceExploreView(TemplateView):
                     queryset=CrowdsourceResponse.objects.
                     select_related('user__profile')
                 ),
-            )[:100]
+            )[:5]
         )
         return context
 
