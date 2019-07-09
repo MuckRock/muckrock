@@ -33,6 +33,7 @@
           <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
           <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
           <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
+          <li><a class="nav-item" href="{% url 'crowdsource-index' %}">Assignments</a></li>
         {% elif not user.profile.is_agency_user %}
           <ul class="authenticated section-list" id="nav-list-sections">
             <li class="dropdown">
@@ -86,6 +87,7 @@
                 {% endif %}
               </ul>
             </li>
+            <li><a class="nav-item" href="{% url 'crowdsource-index' %}">Assignments</a></li>
             {% if user.is_staff %}
               <li class="dropdown">
                 <span class="nav-item">Tasks</span>

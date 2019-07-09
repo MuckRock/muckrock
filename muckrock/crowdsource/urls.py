@@ -4,7 +4,6 @@ URL mappings for the crowdsource app
 
 # Django
 from django.conf.urls import url
-from django.views.generic.base import RedirectView
 
 # MuckRock
 from muckrock.crowdsource import views
@@ -42,7 +41,7 @@ urlpatterns = [
     ),
     url(
         r'^$',
-        RedirectView.as_view(url='/assignment/list'),
+        views.CrowdsourceExploreView.as_view(),
         name='crowdsource-index',
     ),
     url(

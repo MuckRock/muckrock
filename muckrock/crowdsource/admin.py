@@ -70,6 +70,11 @@ class CrowdsourceAdmin(admin.ModelAdmin):
     form = CrowdsourceAdminForm
     prepopulated_fields = {'slug': ('title',)}
     inlines = (CrowdsourceFieldInline,)
+    list_display = ('title', 'user', 'datetime_created', 'status', 'featured')
+    list_filter = ['status', 'project_only', 'featured']
+    date_hierarchy = 'datetime_created'
+    search_fields = ['title', 'description']
+    save_on_top = True
 
 
 class CrowdsourceChoiceInline(admin.TabularInline):

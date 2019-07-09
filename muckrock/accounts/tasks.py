@@ -458,9 +458,7 @@ def store_statistics():
         status='close'
     ).count()
     kwargs['num_crowdsource_responded_users'
-           ] = CrowdsourceResponse.objects.aggregate(
-               Count('user', distinct=True)
-           )['user__count']
+           ] = CrowdsourceResponse.objects.get_user_count()
     kwargs['total_crowdsource_responses'] = CrowdsourceResponse.objects.count()
     kwargs['crowdsource_responses_pro'] = CrowdsourceResponse.objects.filter(
         user__organizations__plan__slug='professional'
