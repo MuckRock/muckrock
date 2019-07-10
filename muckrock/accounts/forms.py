@@ -50,7 +50,13 @@ class OrgPreferencesForm(forms.ModelForm):
     """A form for updating user organization preferences"""
 
     active_org = OrganizationChoiceField(
-        queryset=Organization.objects.none(), empty_label=None
+        queryset=Organization.objects.none(),
+        empty_label=None,
+        label='Choose active organization',
+        help_text=
+        "You can also change your current organizational page by hovering over "
+        "your name (or tapping it on mobile), and then selecting the "
+        "organization you'd like to use from the selection that appears.",
     )
 
     def __init__(self, *args, **kwargs):

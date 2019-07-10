@@ -20,7 +20,8 @@ $(document).ready(function(){
     hasRegular = requestsLeft.data("reg") || 0,
     useMonthly = 0,
     useRegular = 0,
-    useExtra = 0;
+    useExtra = 0,
+    requestOrgs = $(".request-organizations");
 
     if (num < hasMonthly) {
       useMonthly = num;
@@ -55,7 +56,12 @@ $(document).ready(function(){
     }
     if (useExtra > 0) {
       text += ("You will " + (useAny ? "also " : "") + "need to purchase <strong>"
-        + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : "") + ".");
+        + useExtra + "</strong> extra request" + (useExtra > 1 ? "s" : ""));
+      if (hasMonthly === 0 && hasRegular === 0 && requestOrgs.length > 0) {
+        text += requestOrgs.html();
+      } else{
+        text += ".";
+      }
       $(".buy-section").show();
       $("#submit_button").text("Buy & Submit");
       $("#id_num_requests").val(Math.max(

@@ -167,19 +167,37 @@
                  data-month="{{ requests_left.monthly }}"
                  data-reg="{{ requests_left.regular }}"
                  >
-              {% if not organization.individual %}
-                <p>You are currently working on behalf of the organization {{ organization.name }}.</p>
-              {% endif %}
+              <p>
+                You are currently working on behalf of
+                {% if organization.individual %}
+                  your personal account
+                {% else %}
+                  the organization {{ organization.name }}
+                {% endif %}
+                <a href="{% url "acct-settings" %}#organization">
+                  (Switch to {{ other_organizations }})
+                </a>.
+              </p>
               <p>
                 You have
-                {% if user.profile.is_advanced %}
+                {% if organization.requests_per_month > 0 %}
                   <strong>{{ requests_left.monthly }}</strong>
                   monthly requests left and
                 {% endif %}
                 <strong>{{ requests_left.regular }}</strong> purchased requests
                 left.
               </p>
-              <p class="using-requests"></p>
+              <p class="using-requests">
+              </p>
+              {% if request_organizations %}
+                <p class="request-organizations">
+                  , or
+                  <a href="{% url "acct-settings" %}#organization">
+                    switch your active account to {{ request_organizations }}
+                  </a>,
+                  which have requests left you can use.
+                </p>
+              {% endif %}
             </div>
 
             <div class="buy-section{% if not user.profile.is_advanced %} hide-form{% endif %}">
