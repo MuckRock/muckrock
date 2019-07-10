@@ -9,6 +9,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.encoding import smart_text
@@ -28,6 +29,31 @@ from muckrock.agency.models import Agency
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIARequest
+
+
+def format_org_list(organizations):
+    """Return a comma separated list of organizations for display"""
+
+    organizations = list(organizations)
+
+    def name(organization):
+        if organization.individual:
+            return 'your personal account'
+        else:
+            return organization.name
+
+    if len(organizations) == 0:
+        return ''
+    elif len(organizations) == 1:
+        return name(organizations[0])
+    elif len(organizations) == 2:
+        return "{} or {}".format(
+            name(organizations[0]),
+            name(organizations[1]),
+        )
+    elif len(organizations) > 2:
+        formatted = ", ".join(name(o) for o in organizations[:-1])
+        return '{}, or {}'.format(formatted, name(organizations[-1]))
 
 
 class GenericComposer(BuyRequestsMixin):
@@ -79,6 +105,14 @@ class GenericComposer(BuyRequestsMixin):
             organization, payer = self._get_organizations(self.request.user)
             context['organization'] = organization
             context['payer'] = payer
+            context['other_organizations'] = format_org_list(
+                self.request.user.organizations.exclude(pk=organization.pk)
+            )
+            context['request_organizations'] = format_org_list(
+                self.request.user.organizations.exclude(
+                    pk=organization.pk
+                ).filter(Q(monthly_requests__gt=0) | Q(number_requests__gt=0))
+            )
             requests_left = {
                 'regular': organization.number_requests,
                 'monthly': organization.monthly_requests,

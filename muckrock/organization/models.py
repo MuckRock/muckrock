@@ -82,7 +82,7 @@ class Organization(models.Model):
 
     @property
     def display_name(self):
-        """Display 'Personal Accoubnt' for individual organizations"""
+        """Display 'Personal Account' for individual organizations"""
         if self.individual:
             return u'Personal Account'
         else:

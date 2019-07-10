@@ -89,7 +89,7 @@ class ProfileQuerySet(models.QuerySet):
         """Update the user's organizations"""
         current_organizations = set(user.organizations.all())
         new_memberships = []
-        no_active = not user.organizations.filter(active=True).exists()
+        active = True
 
         # process each organization
         for org_data in data.get('organizations', []):
@@ -103,17 +103,23 @@ class ProfileQuerySet(models.QuerySet):
                 current_organizations.remove(organization)
             else:
                 # if not currently a member, create the new membership
-                # if there is no active org, make their individual
-                # organization active
+                # automatically activate new organizations (only first one)
                 new_memberships.append(
                     Membership(
                         user=user,
                         organization=organization,
-                        active=no_active and org_data['individual'],
+                        active=active,
                         admin=org_data['admin'],
                     )
                 )
-        user.memberships.bulk_create(new_memberships)
+                active = False
+
+        if new_memberships:
+            with transaction.atomic():
+                # first new membership will be made active, de-activate current
+                # active org first
+                user.memberships.filter(active=True).update(active=False)
+                user.memberships.bulk_create(new_memberships)
 
         # user must have an active organization, if the current
         # active one is removed, we will activate the user's individual organization
@@ -137,7 +143,7 @@ class ProfileQuerySet(models.QuerySet):
         # update cache after updating orgs
         cache.set(
             u'sb:{}:user_org'.format(user.username),
-            organization,
+            profile.organization,
             settings.DEFAULT_CACHE_TIMEOUT,
         )
         cache.set(
