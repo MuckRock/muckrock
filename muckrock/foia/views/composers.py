@@ -37,6 +37,7 @@ def format_org_list(organizations):
     organizations = list(organizations)
 
     def name(organization):
+        """Display name for the organization"""
         if organization.individual:
             return 'your personal account'
         else:
