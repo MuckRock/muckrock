@@ -13,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="google-site-verification" content="j3QyPvF_0QX1v2YTWeY0Al5JCiBVdxhDjJM5JgFkxVE" />
     <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
+    {% if meta_noindex %}<meta name="robots" content="noindex">{% endif %}
     {% block rss %}
     <link rel="alternate" type="application/rss+xml" title="MuckRock News Feed" href="{% url 'news-feed' %}" />
     {% endblock rss %}
