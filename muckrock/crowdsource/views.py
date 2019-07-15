@@ -696,7 +696,7 @@ def message_response(request):
     if form.is_valid():
         response = form.cleaned_data['response']
         if not request.user.has_perm(
-            'crowdsource.edit_crowdsource', response.crowdsource
+            'crowdsource.change_crowdsource', response.crowdsource
         ):
             return JsonResponse({'error': 'permission denied'}, status=403)
         if not response.user or not response.user.email:

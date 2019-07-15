@@ -296,6 +296,8 @@ class Detail(DetailView):
             context['can_revoke'] = user_can_edit and foia.composer.revokable()
         if foia.sidebar_html:
             messages.info(self.request, foia.sidebar_html)
+        if foia.noindex:
+            context['meta_noindex'] = True
         return context
 
     def get(self, request, *args, **kwargs):

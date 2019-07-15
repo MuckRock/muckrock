@@ -180,6 +180,11 @@ class FOIARequest(models.Model):
         help_text=
         'This request has been "deleted" and should reject new communications'
     )
+    noindex = models.BooleanField(
+        default=False,
+        verbose_name="No Index",
+        help_text="This request's page should not be indexed by search engines"
+    )
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
