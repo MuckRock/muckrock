@@ -3,6 +3,7 @@
 
 # Django
 from django.conf import settings
+from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.postgres.fields import JSONField
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
@@ -317,7 +318,7 @@ class CrowdsourceField(models.Model):
     crowdsource = models.ForeignKey(Crowdsource, related_name='fields')
     label = models.CharField(max_length=255)
     type = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=fields.FIELD_CHOICES,
     )
     help_text = models.CharField(max_length=255, blank=True)
@@ -456,9 +457,9 @@ class CrowdsourceResponse(models.Model):
             values.append(self.data.url)
             values.extend(self.data.metadata.get(k, '') for k in metadata_keys)
         values += list(
-            self.values.order_by('field__order').values_list(
-                'value', flat=True
-            )
+            self.values.order_by('field__order').values('field').annotate(
+                agg_value=StringAgg('value', ', ')
+            ).values_list('agg_value', flat=True)
         )
         return values
 
@@ -470,18 +471,21 @@ class CrowdsourceResponse(models.Model):
             data.pop(key, None)
         for pk, value in data.iteritems():
             value = value if value is not None else ''
-            try:
-                field = CrowdsourceField.objects.get(
-                    crowdsource=self.crowdsource,
-                    pk=pk,
-                )
-                self.values.create(
-                    field=field,
-                    value=value,
-                    original_value=value,
-                )
-            except CrowdsourceField.DoesNotExist:
-                pass
+            if not isinstance(value, list):
+                value = [value]
+            for value_item in value:
+                try:
+                    field = CrowdsourceField.objects.get(
+                        crowdsource=self.crowdsource,
+                        pk=pk,
+                    )
+                    self.values.create(
+                        field=field,
+                        value=value_item,
+                        original_value=value_item,
+                    )
+                except CrowdsourceField.DoesNotExist:
+                    pass
 
     def send_email(self, email):
         """Send an email of this response"""

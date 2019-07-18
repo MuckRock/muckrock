@@ -9,7 +9,6 @@ $(document).ready(function(){
       disableFields: [
         'autocomplete',
         'button',
-        'checkbox-group',
         'file',
         'header',
         'hidden',
