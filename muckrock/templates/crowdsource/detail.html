@@ -11,10 +11,6 @@
   <div class="actions">
     <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Assignment</a>
     <a href="?csv=1" class="button primary">Results CSV</a>
-    <form method="post">
-      {% csrf_token %}
-      <input type="submit" name="action" value="Create Data Set" class="button primary" id="dataset-button">
-    </form>
     {% if crowdsource.status == "draft" %}
       <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
     {% endif %}

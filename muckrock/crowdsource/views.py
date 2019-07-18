@@ -137,8 +137,6 @@ class CrowdsourceDetailView(DetailView):
             crowdsource.status = 'close'
             crowdsource.save()
             messages.success(request, 'The assignment has been closed')
-        elif request.POST.get('action') == 'Create Data Set':
-            return self.create_dataset()
         elif request.POST.get('action') == 'Add Data':
             form = CrowdsourceDataCsvForm(request.POST, request.FILES)
             has_perm = self.request.user.has_perm(
@@ -157,16 +155,6 @@ class CrowdsourceDetailView(DetailView):
             else:
                 messages.error(request, form.errors)
         return redirect(crowdsource)
-
-    def create_dataset(self):
-        """Create a dataset from a crowdsource's responses"""
-        from muckrock.dataset.models import DataSet
-        crowdsource = self.get_object()
-        dataset = DataSet.objects.create_from_crowdsource(
-            self.request.user,
-            crowdsource,
-        )
-        return redirect(dataset)
 
     def get_context_data(self, **kwargs):
         """Admin link"""
