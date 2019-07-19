@@ -9,6 +9,7 @@ class Field(object):
     """Base field for crowdsource form"""
     accepts_choices = False
     widget = None
+    multiple_values = False
 
     def get_form_field(self, field, **kwargs):
         """Create the form field"""
@@ -56,6 +57,7 @@ class CheckboxGroupField(Field):
     field = forms.MultipleChoiceField
     accepts_choices = True
     widget = forms.CheckboxSelectMultiple
+    multiple_values = True
 
 
 class DateField(Field):

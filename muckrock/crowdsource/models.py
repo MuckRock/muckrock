@@ -457,9 +457,15 @@ class CrowdsourceResponse(models.Model):
             values.append(self.data.url)
             values.extend(self.data.metadata.get(k, '') for k in metadata_keys)
         values += list(
-            self.values.order_by('field__order').values('field').annotate(
-                agg_value=StringAgg('value', ', ')
-            ).values_list('agg_value', flat=True)
+            self.values.order_by('field__order')
+            # filter out blank values
+            .exclude(value='')
+            # group by field
+            .values('field')
+            # concat all values for the same field with commas
+            .annotate(agg_value=StringAgg('value', ', '))
+            # select the concated value
+            .values_list('agg_value', flat=True)
         )
         return values
 

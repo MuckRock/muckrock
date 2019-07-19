@@ -10,7 +10,7 @@ from django.db.models import F
 from rest_framework import serializers
 
 # MuckRock
-from muckrock.crowdsource.models import CrowdsourceResponse, CrowdsourceValue
+from muckrock.crowdsource.models import CrowdsourceResponse
 from muckrock.tags.models import Tag, parse_tags
 
 
@@ -72,6 +72,8 @@ class CrowdsourceResponseSerializer(serializers.ModelSerializer):
         """Get the values to return"""
         return list(
             obj.values.order_by('field__order')
+            # filter out blank values
+            .exclude(value='')
             # group by field, rename so we can shadow it later
             .values(field_id=F('field'))
             # concat all values for the same field with commas
