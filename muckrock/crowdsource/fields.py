@@ -8,6 +8,8 @@ from django import forms
 class Field(object):
     """Base field for crowdsource form"""
     accepts_choices = False
+    widget = None
+    multiple_values = False
 
     def get_form_field(self, field, **kwargs):
         """Create the form field"""
@@ -16,6 +18,8 @@ class Field(object):
         if self.accepts_choices:
             kwargs['choices'] = [(c.value, c.choice)
                                  for c in field.choices.all()]
+        if self.widget:
+            kwargs['widget'] = self.widget
         if field.help_text:
             kwargs['help_text'] = field.help_text
         return self.field(**kwargs)
@@ -47,13 +51,22 @@ class CheckboxField(Field):
         return form_field
 
 
+class CheckboxGroupField(Field):
+    """A checkbox group field"""
+    name = 'checkbox-group'
+    field = forms.MultipleChoiceField
+    accepts_choices = True
+    widget = forms.CheckboxSelectMultiple
+    multiple_values = True
+
+
 class DateField(Field):
     """A date field"""
     name = 'date'
     field = forms.DateField
 
     def get_form_field(self, field, **kwargs):
-        """Checkboxes should never be required"""
+        """Set a class for date fields"""
         form_field = super(DateField, self).get_form_field(field)
         form_field.widget.attrs['class'] = 'datepicker-simple'
         return form_field
@@ -65,7 +78,7 @@ class NumberField(Field):
     field = forms.FloatField
 
     def get_form_field(self, field, **kwargs):
-        """Checkboxes should never be required"""
+        """Set min and max attributes for numbers"""
         if field.min is not None:
             kwargs['min_value'] = field.min
         if field.max is not None:
@@ -79,7 +92,7 @@ class TextareaField(Field):
     field = forms.CharField
 
     def get_form_field(self, field, **kwargs):
-        """Checkboxes should never be required"""
+        """Set a max length for text areas"""
         kwargs['widget'] = forms.Textarea
         kwargs['max_length'] = 2000
         return super(TextareaField, self).get_form_field(field, **kwargs)
@@ -89,6 +102,7 @@ FIELDS = [
     TextField,
     SelectField,
     CheckboxField,
+    CheckboxGroupField,
     DateField,
     NumberField,
     TextareaField,

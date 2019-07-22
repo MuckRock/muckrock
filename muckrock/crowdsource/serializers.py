@@ -2,22 +2,16 @@
 Serializers for the Crowdsource application API
 """
 
+# Django
+from django.contrib.postgres.aggregates.general import StringAgg
+from django.db.models import F
+
 # Third Party
 from rest_framework import serializers
 
 # MuckRock
-from muckrock.crowdsource.models import CrowdsourceResponse, CrowdsourceValue
+from muckrock.crowdsource.models import CrowdsourceResponse
 from muckrock.tags.models import Tag, parse_tags
-
-
-class CrowdsourceValueSerializer(serializers.ModelSerializer):
-    """Serializer for the Crowdsource Value model"""
-
-    field = serializers.StringRelatedField(source='field.label')
-
-    class Meta:
-        model = CrowdsourceValue
-        exclude = ('id', 'response')
 
 
 class TagField(serializers.ListField):
@@ -32,7 +26,7 @@ class TagField(serializers.ListField):
 class CrowdsourceResponseSerializer(serializers.ModelSerializer):
     """Serializer for the Crowdsource Response model"""
 
-    values = CrowdsourceValueSerializer(many=True, read_only=True)
+    values = serializers.SerializerMethodField()
     user = serializers.StringRelatedField(source='user.profile.full_name')
     ip_address = serializers.CharField()
     edit_user = serializers.StringRelatedField(
@@ -73,6 +67,20 @@ class CrowdsourceResponseSerializer(serializers.ModelSerializer):
                 new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
             instance.tags.set(*tag_set)
+
+    def get_values(self, obj):
+        """Get the values to return"""
+        return list(
+            obj.values.order_by('field__order')
+            # filter out blank values
+            .exclude(value='')
+            # group by field, rename so we can shadow it later
+            .values(field_id=F('field'))
+            # concat all values for the same field with commas
+            .annotate(value=StringAgg('value', ', '))
+            # select the concated value and the field label
+            .values('value', field=F('field__label'))
+        )
 
     class Meta:
         model = CrowdsourceResponse

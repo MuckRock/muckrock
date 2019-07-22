@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Count
 from django.db.models.query import Prefetch
 from django.http import (
@@ -27,6 +28,9 @@ from django.views.generic import (
 )
 from django.views.generic.detail import BaseDetailView
 
+# Standard Library
+from itertools import izip_longest
+
 # Third Party
 import requests
 from djangosecure.decorators import frame_deny_exempt
@@ -47,6 +51,7 @@ from muckrock.crowdsource.forms import (
 from muckrock.crowdsource.models import (
     Crowdsource,
     CrowdsourceData,
+    CrowdsourceField,
     CrowdsourceResponse,
     CrowdsourceValue,
 )
@@ -132,8 +137,6 @@ class CrowdsourceDetailView(DetailView):
             crowdsource.status = 'close'
             crowdsource.save()
             messages.success(request, 'The assignment has been closed')
-        elif request.POST.get('action') == 'Create Data Set':
-            return self.create_dataset()
         elif request.POST.get('action') == 'Add Data':
             form = CrowdsourceDataCsvForm(request.POST, request.FILES)
             has_perm = self.request.user.has_perm(
@@ -152,16 +155,6 @@ class CrowdsourceDetailView(DetailView):
             else:
                 messages.error(request, form.errors)
         return redirect(crowdsource)
-
-    def create_dataset(self):
-        """Create a dataset from a crowdsource's responses"""
-        from muckrock.dataset.models import DataSet
-        crowdsource = self.get_object()
-        dataset = DataSet.objects.create_from_crowdsource(
-            self.request.user,
-            crowdsource,
-        )
-        return redirect(dataset)
 
     def get_context_data(self, **kwargs):
         """Admin link"""
@@ -431,9 +424,22 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
     def get_initial(self):
         """Fetch the crowdsource data item to show with this form,
         if there is one, and the latest values"""
+        return self._get_initial('value')
+
+    def _get_initial(self, value_attr):
+        """Helper function to allow overriding of the value attribute for the
+        revert view"""
         initial = {'data_id': self.object.data_id}
-        for value in self.object.values.all():
-            initial[str(value.field.pk)] = value.value
+        for value in self.object.values.exclude(**{value_attr: ''}):
+            key = str(value.field.pk)
+            if key in initial:
+                # if a single field has multiple values, make a list of values
+                if isinstance(initial[key], list):
+                    initial[key].append(getattr(value, value_attr))
+                else:
+                    initial[key] = [initial[key], getattr(value, value_attr)]
+            else:
+                initial[key] = getattr(value, value_attr)
         return initial
 
     def get_context_data(self, **kwargs):
@@ -444,6 +450,7 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
             edit=True,
         )
 
+    @transaction.atomic
     def form_valid(self, form):
         """Save the form results"""
         response = self.object
@@ -453,11 +460,32 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
 
         form.cleaned_data.pop('data_id', None)
         for field_id, new_value in form.cleaned_data.iteritems():
-            new_value = new_value if new_value is not None else ''
-            response.values.update_or_create(
-                field_id=field_id,
-                defaults={'value': new_value},
-            )
+            field = CrowdsourceField.objects.filter(pk=field_id).first()
+            if field and field.field.multiple_values:
+                # for multi valued fields, collect all old and new values together
+                # and recreate all values
+                original_value = response.values.filter(
+                    field_id=field_id,
+                ).exclude(original_value='').values_list(
+                    'original_value',
+                    flat=True,
+                )
+                response.values.filter(field_id=field_id).delete()
+                for orig, new in izip_longest(
+                    original_value, new_value, fillvalue=''
+                ):
+                    response.values.create(
+                        field_id=field_id,
+                        value=new,
+                        original_value=orig,
+                    )
+            else:
+                # for single valued field, just update the current value
+                new_value = new_value if new_value is not None else ''
+                response.values.update_or_create(
+                    field_id=field_id,
+                    defaults={'value': new_value},
+                )
 
         return redirect(
             'crowdsource-detail',
@@ -471,11 +499,8 @@ class CrowdsourceRevertResponseView(CrowdsourceEditResponseView):
 
     def get_initial(self):
         """Fetch the crowdsource data item to show with this form,
-        if there is one, and the original values"""
-        initial = {'data_id': self.object.data_id}
-        for value in self.object.values.all():
-            initial[str(value.field.pk)] = value.original_value
-        return initial
+        if there is one, and the latest values"""
+        return self._get_initial('original_value')
 
 
 @method_decorator(frame_deny_exempt, name='dispatch')
