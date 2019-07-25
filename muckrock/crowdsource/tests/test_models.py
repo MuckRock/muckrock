@@ -23,6 +23,7 @@ from nose.tools import (
 # MuckRock
 from muckrock.core.factories import ProjectFactory, UserFactory
 from muckrock.crowdsource.factories import (
+    CrowdsourceCheckboxGroupFieldFactory,
     CrowdsourceDataFactory,
     CrowdsourceFactory,
     CrowdsourceResponseFactory,
@@ -356,5 +357,71 @@ class TestCrowdsourceResponse(TestCase):
                 False,
                 '',
                 'Value',
+            ],
+        )
+
+    def test_get_values_blank(self):
+        """Test getting the values from the response
+        Blank responses should only be ignored for multiselect fields
+        """
+        crowdsource = CrowdsourceFactory()
+        response = CrowdsourceResponseFactory(
+            crowdsource=crowdsource,
+            user__username='Username',
+            datetime=datetime(
+                2017, 1, 2, tzinfo=timezone.get_current_timezone()
+            ),
+            data=None,
+        )
+        text_field = CrowdsourceTextFieldFactory(
+            crowdsource=crowdsource,
+            order=0,
+        )
+        CrowdsourceValueFactory(
+            response=response,
+            field=text_field,
+            value='',
+        )
+        check_field = CrowdsourceCheckboxGroupFieldFactory(
+            crowdsource=crowdsource,
+            order=1,
+        )
+        CrowdsourceValueFactory(
+            response=response,
+            field=check_field,
+            value='',
+        )
+        CrowdsourceValueFactory(
+            response=response,
+            field=check_field,
+            value='Foo',
+        )
+        CrowdsourceValueFactory(
+            response=response,
+            field=check_field,
+            value='Foo',
+        )
+        check_field2 = CrowdsourceCheckboxGroupFieldFactory(
+            crowdsource=crowdsource,
+            order=2,
+        )
+        CrowdsourceValueFactory(
+            response=response,
+            field=check_field2,
+            value='',
+        )
+
+        eq_(
+            response.get_values([]),
+            [
+                'Username',
+                '2017-01-02 00:00:00',
+                False,
+                False,
+                False,
+                '',
+                '',
+                'Foo, Foo',
+                '',
             ],
         )

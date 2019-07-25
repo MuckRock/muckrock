@@ -2,10 +2,6 @@
 Serializers for the Crowdsource application API
 """
 
-# Django
-from django.contrib.postgres.aggregates.general import StringAgg
-from django.db.models import F
-
 # Third Party
 from rest_framework import serializers
 
@@ -20,7 +16,7 @@ class TagField(serializers.ListField):
     child = serializers.CharField()
 
     def to_representation(self, data):
-        return data.values_list('name', flat=True)
+        return [t.name for t in data.all()]
 
 
 class CrowdsourceResponseSerializer(serializers.ModelSerializer):
@@ -70,17 +66,22 @@ class CrowdsourceResponseSerializer(serializers.ModelSerializer):
 
     def get_values(self, obj):
         """Get the values to return"""
-        return list(
-            obj.values.order_by('field__order')
-            # filter out blank values
-            .exclude(value='')
-            # group by field, rename so we can shadow it later
-            .values(field_id=F('field'))
-            # concat all values for the same field with commas
-            .annotate(value=StringAgg('value', ', '))
-            # select the concated value and the field label
-            .values('value', field=F('field__label'))
-        )
+        # use `.all()` calls so they can be prefetched
+        # form data in python
+        fields = obj.crowdsource.fields.all()
+        values = obj.values.all()
+        field_values = {}
+        field_labels = {}
+        for field in fields:
+            field_values[field.pk] = []
+            field_labels[field.pk] = field.label
+        for value in values:
+            if value.value:
+                field_values[value.field_id].append(value.value)
+        return [{
+            'field': field_labels[fpk],
+            'value': ', '.join(field_values[fpk])
+        } for fpk in field_labels]
 
     class Meta:
         model = CrowdsourceResponse
