@@ -56,9 +56,8 @@ class CrowdsourceTextFieldFactory(CrowdsourceFieldFactory):
     type = 'text'
 
 
-class CrowdsourceSelectFieldFactory(CrowdsourceFieldFactory):
-    """A factory for creating a select field"""
-    type = 'select'
+class CrowdsourceChoiceFieldFactory(CrowdsourceFieldFactory):
+    """An abstract base class factory for fields with choices"""
     choice0 = factory.RelatedFactory(
         'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
         'field',
@@ -74,6 +73,16 @@ class CrowdsourceSelectFieldFactory(CrowdsourceFieldFactory):
         'field',
         order=3,
     )
+
+
+class CrowdsourceSelectFieldFactory(CrowdsourceChoiceFieldFactory):
+    """A factory for creating a select field"""
+    type = 'select'
+
+
+class CrowdsourceCheckboxGroupFieldFactory(CrowdsourceChoiceFieldFactory):
+    """A factory for creating a checkbox group field"""
+    type = 'checkbox-group'
 
 
 class CrowdsourceChoiceFactory(factory.django.DjangoModelFactory):

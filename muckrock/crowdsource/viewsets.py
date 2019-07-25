@@ -3,14 +3,14 @@ Viewsets for the Crowdsource application API
 """
 
 # Django
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 
 # Third Party
 from django_filters import rest_framework as django_filters
 from rest_framework import permissions, viewsets
 
 # MuckRock
-from muckrock.crowdsource.models import CrowdsourceResponse, CrowdsourceValue
+from muckrock.crowdsource.models import CrowdsourceResponse
 from muckrock.crowdsource.serializers import CrowdsourceResponseSerializer
 
 
@@ -32,13 +32,12 @@ class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
         CrowdsourceResponse.objects.select_related(
             'crowdsource',
             'data',
-            'user',
+            'user__profile',
+            'edit_user__profile',
         ).prefetch_related(
-            Prefetch(
-                'values',
-                queryset=CrowdsourceValue.objects.select_related('field')
-                .order_by('field__order')
-            )
+            'crowdsource__fields',
+            'values',
+            'tags',
         ).order_by('id')
     )
     serializer_class = CrowdsourceResponseSerializer

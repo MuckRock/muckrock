@@ -111,3 +111,5 @@ FIELDS = [
 FIELD_CHOICES = [(f.name, f.name) for f in FIELDS]
 
 FIELD_DICT = {f.name: f for f in FIELDS}
+
+MULTI_FIELDS = [f.name for f in FIELDS if f.multiple_values]

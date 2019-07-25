@@ -456,18 +456,30 @@ class CrowdsourceResponse(models.Model):
         if self.data:
             values.append(self.data.url)
             values.extend(self.data.metadata.get(k, '') for k in metadata_keys)
-        values += list(
+        field_labels = self.crowdsource.fields.values_list('label', flat=True)
+        field_values = self.get_field_values()
+        # ensure exactly one value per field - default to empty string
+        # a multivalued field may have no values
+        values += [field_values.get(label, '') for label in field_labels]
+        return values
+
+    def get_field_values(self):
+        """Return a dictionary of field labels to field values
+        This handle filtering and aggregating of multivalued fields
+        """
+        return dict(
             self.values.order_by('field__order')
-            # filter out blank values
-            .exclude(value='')
+            # filter out blank values for multivalued fields
+            # there might be blank ones to hold original values,
+            # and we do not want that in the comma separated list
+            .exclude(value='', field__type__in=fields.MULTI_FIELDS)
             # group by field
             .values('field')
             # concat all values for the same field with commas
             .annotate(agg_value=StringAgg('value', ', '))
             # select the concated value
-            .values_list('agg_value', flat=True)
+            .values_list('field__label', 'agg_value')
         )
-        return values
 
     def create_values(self, data):
         """Given the form data, create the values for this response"""
