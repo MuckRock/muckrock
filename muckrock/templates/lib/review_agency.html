@@ -3,6 +3,35 @@
   Javascript for performance reasons
 {% endcomment %}
 <dl class="task__data">
+  {% if task.agency.jurisdiction.level == "f" %}
+    <div class="message warning">
+      <span class="symbol">
+        {% include "lib/component/icon/warning.svg" %}
+      </span>
+      <span class="text">
+        <p>
+          This task is for a Federal Agency.  These tend to be complicated.  If
+          you are not 100% sure of how to handle this task, please ask for
+          help before proceeding.
+        </p>
+      </span>
+    </div>
+  {% endif %}
+  {% if num_open_requests > 10 %}
+    <div class="message warning">
+      <span class="symbol">
+        {% include "lib/component/icon/warning.svg" %}
+      </span>
+      <span class="text">
+        <p>
+          This task has more than 10 open requests.  These tend to be complicated.
+          If you are not 100% sure of how to handle this task, please ask for help
+          before proceeding.
+        </p>
+      </span>
+    </div>
+  {% endif %}
+
   <dt>Agency</dt>
   <dd>
     <a href="{{task.agency.get_absolute_url}}">{{task.agency}}</a>
