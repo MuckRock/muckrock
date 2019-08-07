@@ -269,6 +269,29 @@ class Address(models.Model):
         )
         return '\n'.join(address)
 
+    def lob_format(self, agency):
+        """Format an address for use with Lob"""
+        # XXX validate lengths here
+        lob = {}
+        if self.agency_override:
+            lob['name'] = self.agency_override
+        else:
+            lob['name'] = agency.name
+        if self.attn_override:
+            lob['company'] = self.attn_override
+        else:
+            lob['company'] = u'{} Office'.format(
+                agency.jurisdiction.get_law_name(abbrev=True)
+            )
+        if self.street:
+            lob['address_line1'] = self.street
+        if self.suite:
+            lob['address_line2'] = self.suite
+        lob['address_city'] = self.city
+        lob['address_state'] = self.state
+        lob['address_zip'] = self.zip_code
+        return lob
+
     class Meta:
         verbose_name_plural = 'addresses'
         unique_together = (
@@ -383,6 +406,7 @@ class MailCommunication(models.Model):
         blank=True,
         null=True,
     )
+    lob_id = models.CharField(max_length=20, blank=True, default='')
 
     delivered = 'mail'
 

@@ -86,6 +86,7 @@ ipython==5.8.0
 jmespath==0.9.3           # via boto3, botocore
 jsonfield==2.0.2
 kombu==3.0.35             # via celery
+lob==4.0.1
 lxml==3.6.4               # via premailer
 markdown==2.6.7
 memoize==1.0.0

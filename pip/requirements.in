@@ -53,6 +53,7 @@ gunicorn # Python WSGI app server
 image-diet2 # Used to compress images on upload
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson
+lob # sending mail via lob.com
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
 newrelic # Interface to newrelic service

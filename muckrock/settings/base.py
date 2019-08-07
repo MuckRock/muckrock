@@ -463,6 +463,8 @@ PHAXIO_SECRET = os.environ.get('PHAXIO_SECRET')
 PHAXIO_BATCH_DELAY = os.environ.get('PHAXIO_BATCH_DELAY', 300)
 PHAXIO_CALLBACK_TOKEN = os.environ.get('PHAXIO_CALLBACK_TOKEN')
 
+LOB_API_KEY = os.environ.get('LOB_API_KEY')
+
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
 
 PUBLICATION_NAME = 'MuckRock'

@@ -855,6 +855,8 @@ class FOIARequest(models.Model):
 
     def _send_snail_mail(self, comm, **kwargs):
         """Send the message as a snail mail"""
+        from muckrock.foia.tasks import prepare_snail_mail
+
         category, extra = self.process_manual_send(**kwargs)
 
         switch = bool(
@@ -865,27 +867,25 @@ class FOIARequest(models.Model):
                 (self.last_request().sent_to() == self.fax))
         )
 
-        # if no address, try to find one on the agency
-        if not self.address:
-            if kwargs.get('appeal') and self.agency.appeal_agency:
-                agency = self.agency.appeal_agency
-                request_type = 'appeal'
-            elif kwargs.get('appeal'):
-                agency = self.agency
-                request_type = 'appeal'
-            else:
-                agency = self.agency
-                request_type = 'primary'
-            self.address = agency.get_addresses(request_type).first()
-            self.save()
+        with transaction.atomic():
+            # if no address, try to find one on the agency
+            if not self.address:
+                if kwargs.get('appeal') and self.agency.appeal_agency:
+                    agency = self.agency.appeal_agency
+                    request_type = 'appeal'
+                elif kwargs.get('appeal'):
+                    agency = self.agency
+                    request_type = 'appeal'
+                else:
+                    agency = self.agency
+                    request_type = 'primary'
+                self.address = agency.get_addresses(request_type).first()
+                self.save()
 
-        task.models.SnailMailTask.objects.create(
-            category=category,
-            communication=comm,
-            user=comm.from_user,
-            switch=switch,
-            **extra
-        )
+            transaction.on_commit(
+                lambda: prepare_snail_mail.
+                delay(comm.pk, category, switch, extra)
+            )
 
     def process_manual_send(self, **kwargs):
         """Select a category and set status for manually processed
@@ -910,15 +910,21 @@ class FOIARequest(models.Model):
         return (category, extra)
 
     def render_msg_body(
-        self, comm, reply_link=False, switch=False, appeal=False
+        self,
+        comm,
+        reply_link=False,
+        switch=False,
+        appeal=False,
+        include_address=True,
     ):
         """Render the message body for outgoing messages"""
+        # pylint: disable=too-many-arguments
         context = {
             'request': self,
             'switch': switch,
             'msg_comms': self.get_msg_comms(comm),
         }
-        if self.address:
+        if self.address and include_address:
             if appeal and self.agency and self.agency.appeal_agency:
                 agency = self.agency.appeal_agency
             else:

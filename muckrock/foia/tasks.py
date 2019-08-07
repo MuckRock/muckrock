@@ -31,6 +31,7 @@ from urllib import quote_plus
 
 # Third Party
 import dill as pickle
+import lob
 import numpy as np
 import requests
 import unicodecsv as csv
@@ -61,6 +62,7 @@ from muckrock.foia.models import (
     FOIARequest,
 )
 from muckrock.task.models import ResponseTask, ReviewAgencyTask
+from muckrock.task.pdf import LobPDF
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -70,6 +72,8 @@ logger = logging.getLogger(__name__)
 client = Client(os.environ.get('SENTRY_DSN'))
 register_logger_signal(client)
 register_signal(client)
+
+lob.api_key = settings.LOB_API_KEY
 
 
 def authenticate_documentcloud(request):
@@ -951,3 +955,60 @@ def foia_send_email(foia_pk, comm_pk, kwargs):
     foia = FOIARequest.objects.get(pk=foia_pk)
     comm = FOIACommunication.objects.get(pk=comm_pk)
     foia.send_delayed_email(comm, **kwargs)
+
+
+@task(ignore_result=True, name='muckrock.foia.tasks.prepare_snail_mail')
+def prepare_snail_mail(comm_pk, category, switch, extra):
+    """Determine if we should use Lob or a snail mail task to send this snail mail"""
+    comm = FOIACommunication.objects.get(pk=comm_pk)
+    address = comm.foia.address
+
+    if not address or category in ('a', 'p'):
+        task.models.SnailMailTask.objects.create(
+            category=category,
+            communication=comm,
+            user=comm.from_user,
+            switch=switch,
+            **extra
+        )
+
+    pdf = LobPDF(comm, category, switch, amount=extra.get('amount'))
+    prepared_pdf, page_count, files, mail = pdf.prepare()
+
+    if prepared_pdf:
+        # page count will be None if prepare_pdf is None
+        total_page_count = page_count + sum(f[2] for f in files)
+        file_error = any(f[1] in ('error', 'skipped') for f in files)
+
+    if prepared_pdf is None or total_page_count > 12 or file_error:
+        task.models.SnailMailTask.objects.create(
+            category=category,
+            communication=comm,
+            user=comm.from_user,
+            switch=switch,
+            **extra
+        )
+    else:
+        # send via lob
+        # XXX check that the address can be lob formatted
+        # XXX have a way to send
+        letter = lob.Letter.create(
+            description="Letter for communication {}".format(comm_pk),
+            to_address=address.lob_format(comm.foia.agency),
+            from_address={
+                'name': 'MuckRock News',
+                'company': 'DEPT MR {}'.format(comm.foia.pk),
+                'address_line1': '411A Highland Ave',
+                'address_city': 'Somerville',
+                'address_state': 'MA',
+                'address_zip': '02144-2516',
+            },
+            color=False,
+            file=prepared_pdf,
+            double_sided=True,
+            metadata={
+                'mail_id': mail.pk
+            }
+        )
+        mail.lob_id = letter.id
+        mail.save()

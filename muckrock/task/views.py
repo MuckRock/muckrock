@@ -72,7 +72,7 @@ from muckrock.task.models import (
     StatusChangeTask,
     Task,
 )
-from muckrock.task.pdf import SnailMailPDF
+from muckrock.task.pdf import LobPDF, SnailMailPDF
 from muckrock.task.tasks import snail_mail_bulk_pdf_task, submit_review_update
 
 
@@ -144,7 +144,9 @@ class TaskList(MRFilterListView):
             status='submitted'
         ).count()
         context['asignees'] = (
-            User.objects.filter(is_staff=True).order_by('profile__full_name')
+            User.objects.filter(
+                is_staff=True
+            ).select_related('profile').order_by('profile__full_name')
         )
         # this is for fine-uploader
         context['settings'] = settings
@@ -685,38 +687,25 @@ def snail_mail_pdf(request, pk):
     """Return a PDF file for a snail mail request"""
     # pylint: disable=unused-argument
     snail = get_object_or_404(SnailMailTask.objects.preload_pdf(), pk=pk)
-    merger = PdfFileMerger(strict=False)
 
     # generate the pdf and merge all pdf attachments
-    pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
-    pdf.generate()
-    merger.append(StringIO(pdf.output(dest='S')))
-    for file_ in snail.communication.files.all():
-        if file_.get_extension() == 'pdf':
-            merger.append(file_.ffile)
-    output = StringIO()
-    merger.write(output)
+    pdf = SnailMailPDF(
+        snail.communication, snail.category, snail.switch, snail.amount
+    )
+    prepared_pdf, _page_count, _files, _mail = pdf.prepare()
 
-    # attach to the mail communication
-    mail, _ = MailCommunication.objects.update_or_create(
-        communication=snail.communication,
-        defaults={
-            'to_address': snail.communication.foia.address,
-            'sent_datetime': timezone.now(),
-        }
-    )
-    output.seek(0)
-    mail.pdf.save(
-        '{}.pdf'.format(snail.communication.pk),
-        ContentFile(output.read()),
-    )
+    if prepared_pdf is None:
+        return render(
+            request,
+            'error.html',
+            {'message': 'There was an error processing this PDF'},
+        )
 
     # return as a response
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'
              ] = ('filename="{}.pdf"'.format(snail.communication.pk))
-    output.seek(0)
-    response.write(output.read())
+    response.write(prepared_pdf.read())
     return response
 
 

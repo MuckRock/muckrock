@@ -74,51 +74,19 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     blank = StringIO(blank_pdf.output(dest='S'))
     for snail in snails.iterator():
         # generate the pdf and merge all pdf attachments
-        pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
-        pdf.generate()
-        single_merger = PdfFileMerger(strict=False)
-        single_merger.append(StringIO(pdf.output(dest='S')))
-        files = []
-        for file_ in snail.communication.files.all():
-            if file_.get_extension() == 'pdf':
-                try:
-                    pages = PdfFileReader(file_.ffile).getNumPages()
-                    single_merger.append(file_.ffile)
-                    files.append((file_, 'attached', pages))
-                except (PdfReadError, ValueError):
-                    files.append((file_, 'error', 0))
-            else:
-                files.append((file_, 'skipped', 0))
-        single_pdf = StringIO()
-        try:
-            single_merger.write(single_pdf)
-        except PdfReadError:
-            cover_info.append((snail, None, files))
-            continue
-        else:
-            cover_info.append((snail, pdf.page, files))
-
-        # attach to the mail communication
-        mail, _ = MailCommunication.objects.update_or_create(
-            communication=snail.communication,
-            defaults={
-                'to_address': snail.communication.foia.address,
-                'sent_datetime': timezone.now(),
-            }
+        pdf = SnailMailPDF(
+            snail.communication, snail.category, snail.switch, snail.amount
         )
-        single_pdf.seek(0)
-        mail.pdf.save(
-            '{}.pdf'.format(snail.communication.pk),
-            ContentFile(single_pdf.read()),
-        )
+        prepared_pdf, page_count, files, _mail = pdf.prepare()
+        cover_info.append((snail, page_count, files))
 
-        # append to the bulk pdf
-        single_pdf.seek(0)
-        bulk_merger.append(single_pdf)
-        # ensure we align for double sided printing
-        if PdfFileReader(single_pdf).getNumPages() % 2 == 1:
-            blank.seek(0)
-            bulk_merger.append(blank)
+        if prepared_pdf is not None:
+            # append to the bulk pdf
+            bulk_merger.append(prepared_pdf)
+            # ensure we align for double sided printing
+            if PdfFileReader(prepared_pdf).getNumPages() % 2 == 1:
+                blank.seek(0)
+                bulk_merger.append(blank)
 
     # preprend the cover sheet
     cover_pdf = CoverPDF(cover_info)
