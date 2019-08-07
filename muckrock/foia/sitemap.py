@@ -17,8 +17,8 @@ class FoiaSitemap(Sitemap):
     limit = 500
 
     def items(self):
-        """Return all public FOIA requests"""
+        """Return all public FOIA requests except for noindex requests"""
         return (
             FOIARequest.objects.select_related('agency__jurisdiction')
-            .get_public()
+            .exclude(noindex=True).get_public()
         )
