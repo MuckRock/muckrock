@@ -12,6 +12,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.agency.viewsets import CountWhen
 from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
@@ -194,6 +195,8 @@ class FlaggedTaskFilterSet(TaskFilterSet):
 class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
     """Allows a review agency task to be filtered by jurisdiction."""
 
+    COMPLICATED_LIMIT = 10
+
     jurisdiction_field = 'agency__jurisdiction'
 
     agency = django_filters.ModelMultipleChoiceFilter(
@@ -202,9 +205,44 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
         widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
     )
 
+    federal = django_filters.ChoiceFilter(
+        method='filter_federal',
+        label='Federal Agencies',
+        choices=BOOLEAN_CHOICES,
+    )
+
+    complicated = django_filters.ChoiceFilter(
+        method='filter_complicated',
+        label='Complicated Tasks',
+        choices=BOOLEAN_CHOICES,
+    )
+
     class Meta:
         model = ReviewAgencyTask
         fields = ['jurisdiction', 'agency', 'resolved', 'resolved_by']
+
+    def filter_federal(self, queryset, name, value):
+        """Check if the task is for a federal agency"""
+        #pylint: disable=unused-argument
+        if value == 'True':
+            return queryset.filter(agency__jurisdiction__level='f')
+        else:
+            return queryset.exclude(agency__jurisdiction__level='f')
+
+    def filter_complicated(self, queryset, name, value):
+        """Check if the task is for a federal agency"""
+        #pylint: disable=unused-argument
+        queryset = queryset.annotate(
+            c=CountWhen(
+                agency__foiarequest__status__in=[
+                    'ack', 'processed', 'appealing'
+                ]
+            )
+        )
+        if value == 'True':
+            return queryset.filter(c__gte=self.COMPLICATED_LIMIT)
+        else:
+            return queryset.exclude(c__gte=self.COMPLICATED_LIMIT)
 
 
 class PortalTaskFilterSet(TaskFilterSet):
