@@ -101,6 +101,9 @@ class ProfileQuerySet(models.QuerySet):
                 # remove organizations from our set as we see them
                 # any that are left will need to be removed
                 current_organizations.remove(organization)
+                user.memberships.filter(
+                    organization=organization,
+                ).update(admin=org_data['admin'])
             else:
                 # if not currently a member, create the new membership
                 # automatically activate new organizations (only first one)
@@ -115,11 +118,10 @@ class ProfileQuerySet(models.QuerySet):
                 active = False
 
         if new_memberships:
-            with transaction.atomic():
-                # first new membership will be made active, de-activate current
-                # active org first
-                user.memberships.filter(active=True).update(active=False)
-                user.memberships.bulk_create(new_memberships)
+            # first new membership will be made active, de-activate current
+            # active org first
+            user.memberships.filter(active=True).update(active=False)
+            user.memberships.bulk_create(new_memberships)
 
         # user must have an active organization, if the current
         # active one is removed, we will activate the user's individual organization
