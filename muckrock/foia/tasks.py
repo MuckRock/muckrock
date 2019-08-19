@@ -1030,6 +1030,8 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         )
         mail.lob_id = letter.id
         mail.save()
+        comm.foia.status = comm.foia.sent_status(category == 'a', comm.thanks)
+        comm.foia.save()
     except lob.error.APIConnectionError as exc:
         prepare_snail_mail.retry(
             countdown=(2 ** prepare_snail_mail.request.retries) * 300 +

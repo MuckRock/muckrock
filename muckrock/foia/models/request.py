@@ -760,7 +760,7 @@ class FOIARequest(models.Model):
         # set status and mail id here to avoid altering the request in the
         # celery task and creating a race condition
         with transaction.atomic():
-            self.status = self._sent_status(
+            self.status = self.sent_status(
                 kwargs.get('appeal'),
                 kwargs.get('thanks'),
             )
@@ -835,7 +835,7 @@ class FOIARequest(models.Model):
             comm=comm, switch=switch, appeal=kwargs.get('appeal')
         )
 
-        self.status = self._sent_status(
+        self.status = self.sent_status(
             kwargs.get('appeal'),
             kwargs.get('thanks'),
         )
@@ -952,7 +952,7 @@ class FOIARequest(models.Model):
             context,
         )
 
-    def _sent_status(self, appeal, thanks):
+    def sent_status(self, appeal, thanks):
         """After sending out the message, set the correct new status"""
         if thanks:
             return self.status
