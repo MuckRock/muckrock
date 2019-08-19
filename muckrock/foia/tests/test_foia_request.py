@@ -46,16 +46,8 @@ from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.task.models import SnailMailTask
 
 
-class TestFOIARequestUnit(TestCase):
-    """Unit tests for FOIARequests"""
-
-    def setUp(self):
-        """Set up tests"""
-
-        mail.outbox = []
-
-        self.foia = FOIARequestFactory(status='submitted', title='Test 1')
-        UserFactory(username='MuckrockStaff')
+class RunCommitHooksMixin(object):
+    """Mixin to include run commit hooks for test cases"""
 
     def run_commit_hooks(self):
         """
@@ -70,6 +62,18 @@ class TestFOIARequestUnit(TestCase):
                 transaction.get_connection(
                     using=db_name,
                 ).run_and_clear_commit_hooks()
+
+
+class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
+    """Unit tests for FOIARequests"""
+
+    def setUp(self):
+        """Set up tests"""
+
+        mail.outbox = []
+
+        self.foia = FOIARequestFactory(status='submitted', title='Test 1')
+        UserFactory(username='MuckrockStaff')
 
     # models
     def test_foia_model_unicode(self):
@@ -272,7 +276,7 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.eq_(foia.status, 'abandoned')
 
 
-class TestFOIAIntegration(TestCase):
+class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
     """Integration tests for FOIA"""
 
     @requests_mock.Mocker()
@@ -302,6 +306,7 @@ class TestFOIAIntegration(TestCase):
             composer.submit()
             foia = FOIARequest.objects.get(composer=composer)
             comm = foia.communications.last()
+            self.run_commit_hooks()
 
             # check that a snail mail task was created
             nose.tools.ok_(
@@ -382,6 +387,7 @@ class TestFOIAIntegration(TestCase):
             foia.status = 'submitted'
             foia.save()
             foia.submit()
+            self.run_commit_hooks()
 
             # check that another snail mail task is created
             nose.tools.ok_(
@@ -439,7 +445,7 @@ class TestFOIAIntegration(TestCase):
             nose.tools.ok_(foia.days_until_due is None)
 
 
-class TestFOIARequestAppeal(TestCase):
+class TestFOIARequestAppeal(RunCommitHooksMixin, TestCase):
     """A request should be able to send an appeal to the agency that receives them."""
 
     def setUp(self):
@@ -448,20 +454,6 @@ class TestFOIARequestAppeal(TestCase):
             status='approved', appeal_agency=self.appeal_agency
         )
         self.foia = FOIARequestFactory(agency=self.agency, status='rejected')
-
-    def run_commit_hooks(self):
-        """
-        Fake transaction commit to run delayed on_commit functions
-        https://medium.com/gitux/speed-up-django-transaction-hooks-tests-6de4a558ef96
-        """
-        for db_name in reversed(self._databases_names()):
-            with mock.patch(
-                'django.db.backends.base.base.BaseDatabaseWrapper.'
-                'validate_no_atomic_block', lambda a: False
-            ):
-                transaction.get_connection(
-                    using=db_name,
-                ).run_and_clear_commit_hooks()
 
     def test_appeal(self):
         """Sending an appeal to the agency should require the message for the appeal,
@@ -505,6 +497,7 @@ class TestFOIARequestAppeal(TestCase):
         # Check that everything happened like we expected
         self.foia.refresh_from_db()
         appeal_comm.refresh_from_db()
+        self.run_commit_hooks()
         eq_(
             self.foia.status, 'submitted',
             'The status of the request should be updated. Actually: %s' %
@@ -527,7 +520,7 @@ class TestFOIARequestAppeal(TestCase):
         eq_(task.category, 'a')
 
 
-class TestRequestPayment(TestCase):
+class TestRequestPayment(RunCommitHooksMixin, TestCase):
     """Allow users to pay fees on a request"""
 
     def setUp(self):
@@ -539,6 +532,7 @@ class TestRequestPayment(TestCase):
         user = self.foia.user
         amount = 100.0
         comm = self.foia.pay(user, amount)
+        self.run_commit_hooks()
         self.foia.refresh_from_db()
         eq_(self.foia.status, 'submitted')
         eq_(self.foia.date_processing, date.today())

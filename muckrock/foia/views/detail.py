@@ -265,7 +265,7 @@ class Detail(DetailView):
             context['open_tasks'] = open_tasks
             context['asignees'] = User.objects.filter(
                 is_staff=True,
-            ).order_by('profile__full_name')
+            ).select_related('profile').order_by('profile__full_name')
 
         context['sidebar_admin_url'] = reverse(
             'admin:foia_foiarequest_change', args=(foia.pk,)

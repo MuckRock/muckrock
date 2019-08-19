@@ -1,5 +1,7 @@
 """Celery Tasks for the FOIA application"""
 
+# pylint: disable=too-many-lines
+
 # Django
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
@@ -31,6 +33,7 @@ from urllib import quote_plus
 
 # Third Party
 import dill as pickle
+import lob
 import numpy as np
 import requests
 import unicodecsv as csv
@@ -60,7 +63,8 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIARequest,
 )
-from muckrock.task.models import ResponseTask, ReviewAgencyTask
+from muckrock.task.models import ResponseTask, ReviewAgencyTask, SnailMailTask
+from muckrock.task.pdf import LobPDF
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -70,6 +74,8 @@ logger = logging.getLogger(__name__)
 client = Client(os.environ.get('SENTRY_DSN'))
 register_logger_signal(client)
 register_signal(client)
+
+lob.api_key = settings.LOB_SECRET_KEY
 
 
 def authenticate_documentcloud(request):
@@ -951,3 +957,87 @@ def foia_send_email(foia_pk, comm_pk, kwargs):
     foia = FOIARequest.objects.get(pk=foia_pk)
     comm = FOIACommunication.objects.get(pk=comm_pk)
     foia.send_delayed_email(comm, **kwargs)
+
+
+@task(
+    ignore_result=True,
+    max_retries=6,
+    rate_limit='15/s',
+    name='muckrock.foia.tasks.prepare_snail_mail',
+)
+def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
+    """Determine if we should use Lob or a snail mail task to send this snail mail"""
+    # pylint: disable=too-many-locals
+    comm = FOIACommunication.objects.get(pk=comm_pk)
+
+    def create_snail_mail_task(reason):
+        """Create a snail mail task for this communication"""
+        SnailMailTask.objects.create(
+            category=category,
+            communication=comm,
+            user=comm.from_user,
+            switch=switch,
+            reason=reason,
+            **extra
+        )
+
+    for test, reason in [
+        (not config.AUTO_LOB and not force, 'auto'),
+        (not comm.foia.address, 'addr'),
+        (category == 'a', 'appeal'),
+        (category == 'p', 'pay'),
+    ]:
+        if test:
+            create_snail_mail_task(reason)
+            return
+
+    pdf = LobPDF(comm, category, switch, amount=extra.get('amount'))
+    prepared_pdf, page_count, files, mail = pdf.prepare()
+
+    if prepared_pdf:
+        # page count will be None if prepare_pdf is None
+        total_page_count = page_count + sum(f[2] for f in files)
+        file_error = any(f[1] in ('error', 'skipped') for f in files)
+
+    for test, reason in [
+        (prepared_pdf is None, 'pdf'),
+        (total_page_count > 12, 'page'),
+        (file_error, 'attm'),
+    ]:
+        if test:
+            create_snail_mail_task(reason)
+            return
+
+    # send via lob
+    try:
+        letter = lob.Letter.create(
+            description="Letter for communication {}".format(comm_pk),
+            to_address=comm.foia.address.lob_format(comm.foia.agency),
+            from_address={
+                'name': 'MuckRock News',
+                'company': 'DEPT MR {}'.format(comm.foia.pk),
+                'address_line1': '411A Highland Ave',
+                'address_city': 'Somerville',
+                'address_state': 'MA',
+                'address_zip': '02144-2516',
+            },
+            color=False,
+            file=prepared_pdf,
+            double_sided=True,
+            metadata={
+                'mail_id': mail.pk
+            }
+        )
+        mail.lob_id = letter.id
+        mail.save()
+    except lob.error.APIConnectionError as exc:
+        prepare_snail_mail.retry(
+            countdown=(2 ** prepare_snail_mail.request.retries) * 300 +
+            randint(0, 300),
+            args=[comm_pk, category, switch, extra, force],
+            kwargs=kwargs,
+            exc=exc,
+        )
+    except lob.error.LobError as exc:
+        logger.error(exc, exc_info=sys.exc_info())
+        create_snail_mail_task('lob')

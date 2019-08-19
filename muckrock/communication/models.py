@@ -269,6 +269,28 @@ class Address(models.Model):
         )
         return '\n'.join(address)
 
+    def lob_format(self, agency):
+        """Format an address for use with Lob"""
+        lob = {}
+        if self.agency_override:
+            lob['name'] = self.agency_override
+        else:
+            lob['name'] = agency.name
+        if self.attn_override:
+            lob['company'] = self.attn_override
+        else:
+            lob['company'] = u'{} Office'.format(
+                agency.jurisdiction.get_law_name(abbrev=True)
+            )
+        if self.street:
+            lob['address_line1'] = self.street
+        if self.suite:
+            lob['address_line2'] = self.suite
+        lob['address_city'] = self.city
+        lob['address_state'] = self.state
+        lob['address_zip'] = self.zip_code
+        return lob
+
     class Meta:
         verbose_name_plural = 'addresses'
         unique_together = (
@@ -383,6 +405,7 @@ class MailCommunication(models.Model):
         blank=True,
         null=True,
     )
+    lob_id = models.CharField(max_length=20, blank=True, default='')
 
     delivered = 'mail'
 
@@ -538,6 +561,23 @@ class EmailOpen(models.Model):
 
     def __unicode__(self):
         return u'EmailOpen: %s - %s' % (self.email.pk, self.datetime)
+
+    class Meta:
+        ordering = ['datetime']
+
+
+class MailEvent(models.Model):
+    """A letter sent through Lob has had a tracking event occur"""
+    mail = models.ForeignKey(
+        'communication.MailCommunication', related_name='events'
+    )
+    datetime = models.DateTimeField()
+    event = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'MailEvent: {} -{} - {}'.format(
+            self.mail.pk, self.datetime, self.event
+        )
 
     class Meta:
         ordering = ['datetime']

@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
-from django.core.files.base import ContentFile
 from django.core.urlresolvers import resolve
 from django.db import transaction
 from django.db.models import Count
@@ -25,19 +24,18 @@ from django.views.generic import FormView, TemplateView
 
 # Standard Library
 import logging
-from cStringIO import StringIO
 from datetime import datetime
 
 # Third Party
 from django_filters import FilterSet
-from PyPDF2 import PdfFileMerger
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
-from muckrock.communication.models import MailCommunication, PortalCommunication
+from muckrock.communication.models import PortalCommunication
 from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.models import STATUS, FOIARequest
+from muckrock.foia.tasks import prepare_snail_mail
 from muckrock.portal.forms import PortalForm
 from muckrock.task.filters import (
     FlaggedTaskFilterSet,
@@ -144,7 +142,9 @@ class TaskList(MRFilterListView):
             status='submitted'
         ).count()
         context['asignees'] = (
-            User.objects.filter(is_staff=True).order_by('profile__full_name')
+            User.objects.filter(
+                is_staff=True
+            ).select_related('profile').order_by('profile__full_name')
         )
         # this is for fine-uploader
         context['settings'] = settings
@@ -258,6 +258,16 @@ class SnailMailTaskList(TaskList):
         # a snail mail task so that the request leaves processing status
         if request.POST.get('no_mail'):
             task.resolve(request.user, {'no_mail': True})
+            return task
+        elif request.POST.get('lob'):
+            task.resolve(request.user, {'lob': True})
+            prepare_snail_mail.delay(
+                task.communication.pk,
+                task.category,
+                task.switch,
+                {'amount': task.amount},
+                force=True,
+            )
             return task
         elif request.POST.get('save'):
             form_data = {}
@@ -685,38 +695,25 @@ def snail_mail_pdf(request, pk):
     """Return a PDF file for a snail mail request"""
     # pylint: disable=unused-argument
     snail = get_object_or_404(SnailMailTask.objects.preload_pdf(), pk=pk)
-    merger = PdfFileMerger(strict=False)
 
     # generate the pdf and merge all pdf attachments
-    pdf = SnailMailPDF(snail.communication, snail.category, snail.amount)
-    pdf.generate()
-    merger.append(StringIO(pdf.output(dest='S')))
-    for file_ in snail.communication.files.all():
-        if file_.get_extension() == 'pdf':
-            merger.append(file_.ffile)
-    output = StringIO()
-    merger.write(output)
+    pdf = SnailMailPDF(
+        snail.communication, snail.category, snail.switch, snail.amount
+    )
+    prepared_pdf, _page_count, _files, _mail = pdf.prepare()
 
-    # attach to the mail communication
-    mail, _ = MailCommunication.objects.update_or_create(
-        communication=snail.communication,
-        defaults={
-            'to_address': snail.communication.foia.address,
-            'sent_datetime': timezone.now(),
-        }
-    )
-    output.seek(0)
-    mail.pdf.save(
-        '{}.pdf'.format(snail.communication.pk),
-        ContentFile(output.read()),
-    )
+    if prepared_pdf is None:
+        return render(
+            request,
+            'error.html',
+            {'message': 'There was an error processing this PDF'},
+        )
 
     # return as a response
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'
              ] = ('filename="{}.pdf"'.format(snail.communication.pk))
-    output.seek(0)
-    response.write(output.read())
+    response.write(prepared_pdf.read())
     return response
 
 
