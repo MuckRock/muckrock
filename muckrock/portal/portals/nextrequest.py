@@ -21,6 +21,7 @@ from furl import furl
 # MuckRock
 from muckrock.communication.models import PortalCommunication
 from muckrock.foia.models import FOIACommunication
+from muckrock.foia.tasks import prepare_snail_mail
 from muckrock.portal.exceptions import PortalError
 from muckrock.portal.portals.automated import PortalAutoReceiveMixin
 from muckrock.portal.portals.manual import ManualPortal
@@ -90,12 +91,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             )
         elif category == 'p':
             # Payments are still always mailed
-            SnailMailTask.objects.create(
-                category=category,
-                communication=comm,
-                user=comm.from_user,
-                **extra
-            )
+            prepare_snail_mail.delay(comm.pk, category, False, extra)
         else:
             super(NextRequestPortal, self).send_msg(
                 comm, reason='Unknown category of send message', **kwargs

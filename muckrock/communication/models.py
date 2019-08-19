@@ -271,7 +271,6 @@ class Address(models.Model):
 
     def lob_format(self, agency):
         """Format an address for use with Lob"""
-        # XXX validate lengths here
         lob = {}
         if self.agency_override:
             lob['name'] = self.agency_override
@@ -565,3 +564,12 @@ class EmailOpen(models.Model):
 
     class Meta:
         ordering = ['datetime']
+
+
+class MailEvent(models.Model):
+    """A letter sent through Lob has had a tracking event occur"""
+    mail = models.ForeignKey(
+        'communication.MailCommunication', related_name='events'
+    )
+    datetime = models.DateTimeField()
+    event = models.CharField(max_length=255)

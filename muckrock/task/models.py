@@ -168,6 +168,22 @@ class SnailMailTask(Task):
         'from another formof communication due to some sort of error.  A '
         'note should be included in the communication with an explanation.',
     )
+    reason = models.CharField(
+        max_length=6,
+        choices=(
+            ('auto', 'Automatic Lob sending was disabled'),
+            ('addr', 'FOIA had no address'),
+            ('appeal', 'This is an appeal'),
+            ('pay', 'This is a payment'),
+            ('pdf', 'There was an error processing the PDF'),
+            ('page', 'The PDF was over the page limit'),
+            ('attm', 'There was an error processing an attachment'),
+            ('lob', 'There was an error sending via Lob'),
+        ),
+        help_text='Reason the snail mail task was created instead of '
+        'auto sending via lob',
+        blank=True,
+    )
 
     objects = SnailMailTaskQuerySet.as_manager()
 

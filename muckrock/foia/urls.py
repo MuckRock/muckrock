@@ -146,6 +146,13 @@ urlpatterns = [
         name='file-embed',
     ),
 
+    # Webhooks
+    url(
+        r'^lob/$',
+        views.lob_webhook,
+        name='lob-webhook',
+    ),
+
     # Old URLS
     url(r'^multi/$', RedirectView.as_view(url='/foi/create/')),
     url(

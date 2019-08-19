@@ -18,6 +18,7 @@ from muckrock.communication.models import (
     FaxCommunication,
     FaxError,
     MailCommunication,
+    MailEvent,
     PhoneNumber,
     PortalCommunication,
     WebCommunication,
@@ -58,6 +59,12 @@ class EmailErrorInline(ReadOnlyMixin, admin.StackedInline):
 class EmailOpenInline(ReadOnlyMixin, admin.StackedInline):
     """Email Open Inline admin options"""
     model = EmailOpen
+    extra = 0
+
+
+class MailEventInline(ReadOnlyMixin, admin.StackedInline):
+    """Mail Event Inline admin options"""
+    model = MailEvent
     extra = 0
 
 
@@ -148,9 +155,18 @@ class FaxCommunicationInline(admin.StackedInline):
     error.boolean = True
 
 
+class MailCommunicationAdmin(
+    CommunicationLinkMixin, ReadOnlyMixin, VersionAdmin
+):
+    """Mail Communication admin"""
+    model = MailCommunication
+    inlines = [MailEventInline]
+
+
 class MailCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     """Mail Communication Inline admin"""
     model = MailCommunication
+    show_change_link = True
     extra = 0
 
 
@@ -214,6 +230,7 @@ class AddressAdmin(VersionAdmin):
 
 admin.site.register(EmailCommunication, EmailCommunicationAdmin)
 admin.site.register(FaxCommunication, FaxCommunicationAdmin)
+admin.site.register(MailCommunication, MailCommunicationAdmin)
 admin.site.register(EmailAddress, EmailAddressAdmin)
 admin.site.register(PhoneNumber, PhoneNumberAdmin)
 admin.site.register(Address, AddressAdmin)
