@@ -1,115 +1,117 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
-<dl class="task__data">
-{% with task.communication.foia as foia %}
-    <dt>Category</dt>
-    <dd>{{task.get_category_display}}</dd>
-{% if task.amount %}
-    <dt>Amount</dt>
-    <dd class="success">${{task.amount|floatformat:2}}</dd>
-{% endif %}
-{% if foia %}
-    <dt>Is Acknowledged</dt>
-    <dd>{{foia.ack|yesno:"True,False"}}</dd>
-    <dt>Submitter</dt>
-    <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
-    <dt>Request</dt>
-    <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>) - MR #{{foia.pk}}</dd>
-    {% if foia.current_tracking_id %}
-    <dt>Tracking #</dt>
-    <dd>{{foia.current_tracking_id}}</dd>
-    {% endif %}
-    {# agency info #}
-    <dt>Agency</dt>
-    <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
-      {% if emails %}
-        <dt>Email</dt>
-        {% for email in emails %}
-          <dd>{{ email }}</dd>
-        {% endfor %}
+  <dl class="task__data">
+    {% with task.communication.foia as foia %}
+      <dt>Category</dt>
+      <dd>{{task.get_category_display}}</dd>
+      <dt>Reason</dt>
+      <dd>{{task.get_reason_display}}</dd>
+      {% if task.amount %}
+        <dt>Amount</dt>
+        <dd class="success">${{task.amount|floatformat:2}}</dd>
       {% endif %}
-      {% if faxes %}
-        <dt>Fax</dt>
-        {% for fax in faxes %}
-          <dd>{{ fax }}</dd>
-        {% endfor %}
-      {% endif %}
-      {% if phones %}
-        <dt>Phone</dt>
-        {% for phone in phones %}
-          <dd>{{ phone }}</dd>
-        {% endfor %}
-      {% endif %}
-      {% if addresses %}
-        <dt>Address</dt>
-        {% for address in addresses %}
-          <dd>{{ address|linebreaks }}</dd>
-        {% endfor %}
-      {% endif %}
-    {% if agency.portal %}
-        <dt>Portal</dt>
-        <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
-        <dt>Username</dt>
-        <dd>{{foia.get_request_email}}</dd>
-        <dt>Password</dt>
-        <dd>{{foia.portal_password}}</dd>
-    {% endif %}
-	{% if agency.notes %}
-    <dt>Agency Notes</dt>
-    <dd>{{agency.notes}}</dd>
-	{% endif %}
-    {% with task.communication.files.all as files %}
-        {% if files %}
-            <dt>Attachments</dt>
-                {% for file in files %}
-                  <dd>
-                    <a href="{{file.ffile.url}}" target="_blank">{{file.title}}</a>
-                    - {{file.pages}} page{{file.pages|pluralize}}
-                    - {{file.ffile.size|filesizeformat}}
-                  </dd>
-                {% endfor %}
+      {% if foia %}
+        <dt>Is Acknowledged</dt>
+        <dd>{{foia.ack|yesno:"True,False"}}</dd>
+        <dt>Submitter</dt>
+        <dd><a href="{% url 'admin:auth_user_change' foia.user.pk %}">{{foia.user}}</a></dd>
+        <dt>Request</dt>
+        <dd><a href="{{foia.get_absolute_url}}">{{foia}}</a> (<a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">admin</a>) - MR #{{foia.pk}}</dd>
+        {% if foia.current_tracking_id %}
+          <dt>Tracking #</dt>
+          <dd>{{foia.current_tracking_id}}</dd>
         {% endif %}
-    {% endwith %}
-    <dt>Print</dt>
-    <dd><a href="{% url 'snail-mail-pdf' pk=task.pk %}">PDF</a></dd>
-{% endif %}
-</dl>
-<div class="collapsed collapsable full-letter">
+        {# agency info #}
+        <dt>Agency</dt>
+        <dd><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency}}</a></dd>
+        {% if emails %}
+          <dt>Email</dt>
+          {% for email in emails %}
+            <dd>{{ email }}</dd>
+          {% endfor %}
+        {% endif %}
+        {% if faxes %}
+          <dt>Fax</dt>
+          {% for fax in faxes %}
+            <dd>{{ fax }}</dd>
+          {% endfor %}
+        {% endif %}
+        {% if phones %}
+          <dt>Phone</dt>
+          {% for phone in phones %}
+            <dd>{{ phone }}</dd>
+          {% endfor %}
+        {% endif %}
+        {% if addresses %}
+          <dt>Address</dt>
+          {% for address in addresses %}
+            <dd>{{ address|linebreaks }}</dd>
+          {% endfor %}
+        {% endif %}
+        {% if agency.portal %}
+          <dt>Portal</dt>
+          <dd><a href="{{agency.portal.url}}">{{agency.portal.name}}</a> ({{agency.portal.get_type_display}})</dd>
+          <dt>Username</dt>
+          <dd>{{foia.get_request_email}}</dd>
+          <dt>Password</dt>
+          <dd>{{foia.portal_password}}</dd>
+        {% endif %}
+        {% if agency.notes %}
+          <dt>Agency Notes</dt>
+          <dd>{{agency.notes}}</dd>
+        {% endif %}
+        {% with task.communication.files.all as files %}
+          {% if files %}
+            <dt>Attachments</dt>
+            {% for file in files %}
+              <dd>
+              <a href="{{file.ffile.url}}" target="_blank">{{file.title}}</a>
+              - {{file.pages}} page{{file.pages|pluralize}}
+              - {{file.ffile.size|filesizeformat}}
+              </dd>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <dt>Print</dt>
+        <dd><a href="{% url 'snail-mail-pdf' pk=task.pk %}">PDF</a></dd>
+      {% endif %}
+  </dl>
+  <div class="collapsed collapsable full-letter">
     {# full letter here, hidden #}
     <header>Full letter</header>
     <textarea name="full-communication" id="full-letter-{{task.pk}}">
-{{ body }}
+      {{ body }}
     </textarea>
-</div>
+  </div>
 {% endwith %}
 {% endblock %}
 
 {% block task-actions %}
-    <div class="input-group">
-        <div class="form-field">
-            <label for="id_status">Set Status</label>
-            <select name="status" id="id_status">
-                <option value="" selected>---</option>
-            {% for s in status %}
-                <option value="{{s|first}}">{{s|last}}</option>
-            {% endfor %}
-            </select>
-        </div>
-        {% if task.category == 'p' %}
-        <div class="form-field">
-            <label for="id_check_number">Check Number</label>
-            <input type="number" name="check_number" id="id_check_number" placeholder="$$$" />
-        </div>
-        {% endif %}
+  <div class="input-group">
+    <div class="form-field">
+      <label for="id_status">Set Status</label>
+      <select name="status" id="id_status">
+        <option value="" selected>---</option>
+        {% for s in status %}
+          <option value="{{s|first}}">{{s|last}}</option>
+        {% endfor %}
+      </select>
     </div>
-    <span class="task-defer">
-      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
-      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
-    </span>
-    <div class="button-group">
-        <button class="button" type="submit" name="lob" value="true">Send via Lob</button>
-        <button class="button" type="submit" name="no_mail" value="true">Did Not Mail</button>
-        <button class="primary button" type="submit" name="save" value="true">Save &amp; Resolve</button>
-    </div>
+    {% if task.category == 'p' %}
+      <div class="form-field">
+        <label for="id_check_number">Check Number</label>
+        <input type="number" name="check_number" id="id_check_number" placeholder="$$$" />
+      </div>
+    {% endif %}
+  </div>
+  <span class="task-defer">
+    <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
+    <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+  </span>
+  <div class="button-group">
+    <button class="button" type="submit" name="no_mail" value="true">Did Not Mail</button>
+    <button class="primary button" type="submit" name="lob" value="true">Send via Lob</button>
+    <button class="primary button" type="submit" name="save" value="true">Save &amp; Resolve</button>
+  </div>
 {% endblock %}

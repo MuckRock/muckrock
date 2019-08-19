@@ -573,3 +573,11 @@ class MailEvent(models.Model):
     )
     datetime = models.DateTimeField()
     event = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return u'MailEvent: {} -{} - {}'.format(
+            self.mail.pk, self.datetime, self.event
+        )
+
+    class Meta:
+        ordering = ['datetime']

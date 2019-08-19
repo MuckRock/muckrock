@@ -464,11 +464,9 @@ PHAXIO_BATCH_DELAY = os.environ.get('PHAXIO_BATCH_DELAY', 300)
 PHAXIO_CALLBACK_TOKEN = os.environ.get('PHAXIO_CALLBACK_TOKEN')
 
 LOB_SECRET_KEY = os.environ.get('LOB_SECRET_KEY')
-LOB_PUBLIC_KEY = os.environ.get('LOB_PUBLIC_KEY')
 LOB_WEBHOOK_KEY = os.environ.get('LOB_WEBHOOK_KEY', 'secret')
 
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
-AUTO_LOB = boolcheck(os.environ.get('AUTO_LOB', False))
 
 PUBLICATION_NAME = 'MuckRock'
 PUBLICATION_TIME_ZONE = '-05:00'
@@ -626,6 +624,7 @@ CONSTANCE_CONFIG = OrderedDict([
         'ENABLE_WEEKEND_FOLLOWUP',
         (False, 'Enable automated followups during weekends')
     ),
+    ('AUTO_LOB', (False, 'Automatically send snail mail via Lob')),
     (
         'ENABLE_ML',
         (True, 'Automatically resolve response tasks by machine learning')
@@ -659,7 +658,11 @@ CONSTANCE_CONFIG = OrderedDict([
     ),
 ])
 CONSTANCE_CONFIG_FIELDSETS = {
-    'FOIA Options': ('ENABLE_FOLLOWUP', 'ENABLE_WEEKEND_FOLLOWUP'),
+    'FOIA Options': (
+        'ENABLE_FOLLOWUP',
+        'ENABLE_WEEKEND_FOLLOWUP',
+        'AUTO_LOB',
+    ),
     'Machine Learning Options': ('ENABLE_ML', 'CONFIDENCE_MIN'),
     'Dashboard Options': (
         'NEW_USER_GOAL_INIT',

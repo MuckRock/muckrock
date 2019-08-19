@@ -7,7 +7,6 @@ from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.files.base import ContentFile
 from django.utils import timezone
 
 # Standard Library
@@ -19,11 +18,9 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from fpdf import FPDF
 from PyPDF2 import PdfFileMerger, PdfFileReader
-from PyPDF2.utils import PdfReadError
 from requests.exceptions import RequestException
 
 # MuckRock
-from muckrock.communication.models import MailCommunication
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.filters import SnailMailTaskFilterSet
 from muckrock.task.models import FlaggedTask, SnailMailTask

@@ -352,7 +352,7 @@ class SnailMailTaskTests(TestCase):
         comm = FOIACommunicationFactory(
             communication=u'Thank you\U0001f60a\n\n'
         )
-        pdf = SnailMailPDF(comm, 'n')
+        pdf = SnailMailPDF(comm, 'n', switch=False)
         pdf.generate()
         pdf.output(dest='S')
 

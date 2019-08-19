@@ -70,7 +70,7 @@ from muckrock.task.models import (
     StatusChangeTask,
     Task,
 )
-from muckrock.task.pdf import LobPDF, SnailMailPDF
+from muckrock.task.pdf import SnailMailPDF
 from muckrock.task.tasks import snail_mail_bulk_pdf_task, submit_review_update
 
 

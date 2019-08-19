@@ -26,7 +26,7 @@ from muckrock.portal.exceptions import PortalError
 from muckrock.portal.portals.automated import PortalAutoReceiveMixin
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
-from muckrock.task.models import PortalTask, SnailMailTask
+from muckrock.task.models import PortalTask
 
 
 class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
