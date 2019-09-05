@@ -76,7 +76,7 @@ class Organization(models.Model):
 
     def __unicode__(self):
         if self.individual:
-            return "{} (Individual)".format(self.name)
+            return u"{} (Individual)".format(self.name)
         else:
             return self.name
 
