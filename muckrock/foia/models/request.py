@@ -1328,6 +1328,22 @@ class FOIARequest(models.Model):
         self.status = 'abandoned'
         self.save()
 
+    def mixpanel_data(self, extra_data=None):
+        """Get properties for tracking composer events in mixpanel"""
+        data = {
+            'Title': self.title,
+            'Agency': self.agency.name,
+            'Jurisdiction': unicode(self.agency.jurisdiction),
+            'Embargo': self.embargo,
+            'Permanent Embargo': self.permanent_embargo,
+            'Created At': self.composer.datetime_created.isoformat(),
+            'Composer': self.composer_id,
+            'ID': self.pk,
+        }
+        if extra_data is not None:
+            data.update(extra_data)
+        return data
+
     class Meta:
         ordering = ['title']
         verbose_name = 'FOIA Request'

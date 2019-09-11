@@ -30,6 +30,7 @@ import requests
 
 # MuckRock
 from muckrock.accounts.models import Notification
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.forms import AgencyForm
 from muckrock.communication.models import (
     EmailCommunication,
@@ -561,6 +562,13 @@ class Detail(DetailView):
             )
         if comm_sent:
             new_action(request.user, 'followed up on', target=foia)
+            mixpanel_event(
+                request,
+                'Follow Up',
+                foia.mixpanel_data({
+                    'Use Contact Info': use_contact_info,
+                }),
+            )
         return redirect(foia.get_absolute_url() + '#')
 
     def _thank(self, request, foia):
@@ -880,7 +888,16 @@ class Detail(DetailView):
                     self.request, 'Your payment was successful. '
                     'We will get this to the agency right away!'
                 )
-                foia.pay(self.request.user, form.cleaned_data['amount'] / 100.0)
+                amount = form.cleaned_data['amount'] / 100.0
+                foia.pay(self.request.user, amount)
+                mixpanel_event(
+                    request,
+                    'Request Fee Paid',
+                    foia.mixpanel_data({
+                        'Price': amount
+                    }),
+                    charge=amount,
+                )
                 return redirect(foia.get_absolute_url() + '#')
         else:
             self.fee_form = form
