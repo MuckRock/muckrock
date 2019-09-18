@@ -33,10 +33,21 @@ class Command(BaseCommand):
             settings.AWS_SECRET_ACCESS_KEY,
         )
         self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-        with transaction.atomic():
-            self.export_users()
-            self.export_orgs()
-            self.export_members()
+        if kwargs['date_joined']:
+            with transaction.atomic():
+                self.export_date_joined()
+        else:
+            with transaction.atomic():
+                self.export_users()
+                self.export_orgs()
+                self.export_members()
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--date_joined',
+            action='store_true',
+            help='Only export date joined data',
+        )
 
     def export_users(self):
         """Export users"""
@@ -173,3 +184,23 @@ class Command(BaseCommand):
                     member.organization.owner == member.user,
                 ])
         print 'End Membership Export - {}'.format(timezone.now())
+
+    def export_date_joined(self):
+        """Export date joined data"""
+        print 'Begin Date Joined Export - {}'.format(timezone.now())
+        key = self.bucket.new_key('squarelet_export/date_joined.csv')
+        with smart_open(key, 'wb') as out_file:
+            writer = csv.writer(out_file)
+            writer.writerow([
+                'uuid',
+                'date_joined',
+            ])
+            total = User.objects.count()
+            for i, user in enumerate(User.objects.select_related('profile')):
+                if i % 1000 == 0:
+                    print 'User {} / {} - {}'.format(i, total, timezone.now())
+                writer.writerow([
+                    user.profile.uuid,
+                    user.date_joined.isoformat(),
+                ])
+        print 'End Date Joined Export - {}'.format(timezone.now())
