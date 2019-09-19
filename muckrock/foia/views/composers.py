@@ -268,6 +268,11 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             'parent': composer,
         }
         self.clone = composer
+        mixpanel_event(
+            self.request,
+            'Request Cloned',
+            self._composer_mixpanel_properties(composer),
+        )
         return initial_data
 
     def get_context_data(self, **kwargs):

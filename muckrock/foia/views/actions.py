@@ -17,6 +17,7 @@ from datetime import timedelta
 import actstream
 
 # MuckRock
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.core.utils import new_action
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.foia.forms import FOIAEmbargoForm
@@ -108,9 +109,19 @@ def follow(request, jurisdiction, jidx, slug, idx):
     if actstream.actions.is_following(request.user, foia):
         actstream.actions.unfollow(request.user, foia)
         messages.success(request, 'You are no longer following this request.')
+        mixpanel_event(
+            request,
+            'Unfollow',
+            foia.mixpanel_data(),
+        )
     else:
         actstream.actions.follow(request.user, foia, actor_only=False)
         messages.success(request, 'You are now following this request.')
+        mixpanel_event(
+            request,
+            'Follow',
+            foia.mixpanel_data(),
+        )
     return redirect(foia)
 
 
@@ -145,7 +156,12 @@ def crowdfund_request(request, idx, **kwargs):
     # pylint: disable=unused-argument
     # select for update locks this request in order to prevent a race condition
     # allowing multiple crowdfunds to be created for it
-    foia = FOIARequest.objects.select_for_update().get(pk=idx)
+    foia = get_object_or_404(
+        FOIARequest.objects.select_for_update().select_related(
+            'agency__jurisdiction', 'composer'
+        ),
+        pk=idx
+    )
     # check for unauthorized access
     if not foia.has_perm(request.user, 'crowdfund'):
         messages.error(request, 'You may not crowdfund this request.')
@@ -167,6 +183,16 @@ def crowdfund_request(request, idx, **kwargs):
                 target=foia
             )
             crowdfund.send_intro_email(request.user)
+            mixpanel_event(
+                request,
+                'Launch Request Crowdfund',
+                foia.mixpanel_data({
+                    'Name': crowdfund.name,
+                    'Payment Capped': crowdfund.payment_capped,
+                    'Payment Required': float(crowdfund.payment_required),
+                    'Date Due': crowdfund.date_due.isoformat(),
+                }),
+            )
             return redirect(foia)
 
     elif request.method == 'GET':
@@ -186,6 +212,11 @@ def crowdfund_request(request, idx, **kwargs):
                 foia
         }
         form = CrowdfundForm(initial=initial)
+        mixpanel_event(
+            request,
+            'Start Request Crowdfund',
+            foia.mixpanel_data(),
+        )
 
     return render(
         request,

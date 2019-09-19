@@ -132,6 +132,7 @@ def mixpanel_event(request, event, props=None, **kwargs):
     """Add an event to the session to be sent via javascript on the next page
     load
     """
+    # only tracking logged in users for now
     if props is None:
         props = {}
     if 'mp_events' in request.session:

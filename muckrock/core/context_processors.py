@@ -3,6 +3,7 @@ Site-wide context processors
 """
 # Django
 from django.conf import settings as django_settings
+from django.utils.functional import SimpleLazyObject
 
 
 def domain(request):
@@ -31,10 +32,14 @@ def mixpanel(request):
     Retrieve and delete any mixpanel analytics session data and send it to the template
     """
     return {
-        'mp_events': request.session.pop('mp_events', []),
-        'mp_alias': request.session.pop('mp_alias', False),
-        'mp_charge': request.session.pop('mp_charge', 0),
-        'mp_token': django_settings.MIXPANEL_TOKEN,
+        'mp_events':
+            SimpleLazyObject(lambda: request.session.pop('mp_events', [])),
+        'mp_alias':
+            SimpleLazyObject(lambda: request.session.pop('mp_alias', False)),
+        'mp_charge':
+            SimpleLazyObject(lambda: request.session.pop('mp_charge', 0)),
+        'mp_token':
+            django_settings.MIXPANEL_TOKEN,
     }
 
 

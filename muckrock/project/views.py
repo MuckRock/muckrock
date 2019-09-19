@@ -26,6 +26,7 @@ from datetime import date, timedelta
 from actstream.models import followers
 
 # MuckRock
+from muckrock.accounts.utils import mixpanel_event
 from muckrock.core.utils import new_action
 from muckrock.core.views import MRSearchFilterListView
 from muckrock.crowdfund.forms import CrowdfundForm
@@ -328,9 +329,46 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
             target=relationship.project
         )
         crowdfund.send_intro_email(self.request.user)
+        mixpanel_event(
+            self.request,
+            'Launch Project Crowdfund',
+            self._project_mixpanel_properties(
+                project,
+                {
+                    'Name': crowdfund.name,
+                    'Payment Capped': crowdfund.payment_capped,
+                    'Payment Required': float(crowdfund.payment_required),
+                    'Date Due': crowdfund.date_due.isoformat(),
+                },
+            ),
+        )
         return redirection
 
     def get_success_url(self):
         """Generates actions before returning URL"""
         project = self.get_project()
         return project.get_absolute_url()
+
+    def get(self, request, *args, **kwargs):
+        response = super(ProjectCrowdfundView,
+                         self).get(request, *args, **kwargs)
+        mixpanel_event(
+            request,
+            'Start Project Crowdfund',
+            self._project_mixpanel_properties(self.object),
+        )
+        return response
+
+    def _project_mixpanel_properties(self, project, extra_data=None):
+        """Get properties for tracking project events in mixpanel"""
+        data = {
+            'Title': project.title,
+            'ID': project.id,
+            'Private': project.private,
+            'Approved': project.approved,
+            'Featured': project.featured,
+            'Created At': project.date_created.isoformat(),
+        }
+        if extra_data is not None:
+            data.update(extra_data)
+        return data
