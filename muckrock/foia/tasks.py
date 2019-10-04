@@ -49,6 +49,7 @@ from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
 from muckrock.communication.models import (
+    Check,
     FaxCommunication,
     FaxError,
     MailCommunication,
@@ -63,7 +64,12 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIARequest,
 )
-from muckrock.task.models import ResponseTask, ReviewAgencyTask, SnailMailTask
+from muckrock.task.models import (
+    PaymentInfoTask,
+    ResponseTask,
+    ReviewAgencyTask,
+    SnailMailTask,
+)
 from muckrock.task.pdf import LobPDF
 from muckrock.vendor import MultipartPostHandler
 
@@ -970,7 +976,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
 
-    def create_snail_mail_task(reason):
+    def create_snail_mail_task(reason, error_msg=''):
         """Create a snail mail task for this communication"""
         SnailMailTask.objects.create(
             category=category,
@@ -978,14 +984,28 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             user=comm.from_user,
             switch=switch,
             reason=reason,
+            error_msg=error_msg,
             **extra
         )
+
+    if category == 'p':
+        check_address = comm.foia.agency.get_addresses('check').first()
+        if check_address is None:
+            PaymentInfoTask.objects.create(
+                communication=comm,
+                amount=extra['amount'],
+            )
+            return
 
     for test, reason in [
         (not config.AUTO_LOB and not force, 'auto'),
         (not comm.foia.address, 'addr'),
-        (category == 'a', 'appeal'),
-        (category == 'p', 'pay'),
+        (
+            category == 'a' and not config.AUTO_LOB_APPEAL and not force,
+            'appeal'
+        ),
+        (category == 'p' and not config.AUTO_LOB_PAY and not force, 'pay'),
+        (extra.get('amount', 0) > settings.CHECK_LIMIT, 'limit'),
     ]:
         if test:
             create_snail_mail_task(reason)
@@ -1010,25 +1030,13 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
 
     # send via lob
     try:
-        letter = lob.Letter.create(
-            description="Letter for communication {}".format(comm_pk),
-            to_address=comm.foia.address.lob_format(comm.foia.agency),
-            from_address={
-                'name': 'MuckRock News',
-                'company': 'DEPT MR {}'.format(comm.foia.pk),
-                'address_line1': '411A Highland Ave',
-                'address_city': 'Somerville',
-                'address_state': 'MA',
-                'address_zip': '02144-2516',
-            },
-            color=False,
-            file=prepared_pdf,
-            double_sided=True,
-            metadata={
-                'mail_id': mail.pk
-            }
-        )
-        mail.lob_id = letter.id
+        if category == 'p':
+            lob_obj = _lob_create_check(
+                comm, prepared_pdf, mail, check_address, extra['amount']
+            )
+        else:
+            lob_obj = _lob_create_letter(comm, prepared_pdf, mail)
+        mail.lob_id = lob_obj.id
         mail.save()
         comm.foia.status = comm.foia.sent_status(category == 'a', comm.thanks)
         comm.foia.save()
@@ -1042,4 +1050,66 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         )
     except lob.error.LobError as exc:
         logger.error(exc, exc_info=sys.exc_info())
-        create_snail_mail_task('lob')
+        create_snail_mail_task('lob', exc.args[0])
+
+
+def _lob_create_letter(comm, prepared_pdf, mail):
+    """Send a letter via Lob"""
+    return lob.Letter.create(
+        description="Letter for communication {}".format(comm.pk),
+        to_address=comm.foia.address.lob_format(comm.foia.agency),
+        from_address={
+            'name': 'MuckRock News',
+            'company': 'DEPT MR {}'.format(comm.foia.pk),
+            'address_line1': '411A Highland Ave',
+            'address_city': 'Somerville',
+            'address_state': 'MA',
+            'address_zip': '02144-2516',
+        },
+        color=False,
+        file=prepared_pdf,
+        double_sided=True,
+        metadata={
+            'mail_id': mail.pk
+        }
+    )
+
+
+def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
+    """Send a check via Lob"""
+    memo = 'MR {}'.format(comm.foia.pk)
+    tracking_number = comm.foia.current_tracking_id()
+    if tracking_number:
+        old_memo = memo
+        memo += ' / {}'.format(tracking_number)
+        if len(memo) > 40:
+            memo = old_memo
+
+    check = lob.Check.create(
+        description="Check for communication {}".format(comm.pk),
+        to_address=check_address.lob_format(comm.foia.agency),
+        from_address={
+            'name': 'MuckRock News',
+            'company': 'DEPT MR {}'.format(comm.foia.pk),
+            'address_line1': '411A Highland Ave',
+            'address_city': 'Somerville',
+            'address_state': 'MA',
+            'address_zip': '02144-2516',
+        },
+        bank_account=settings.LOB_BANK_ACCOUNT_ID,
+        amount=amount,
+        memo=memo,
+        attachment=prepared_pdf,
+        metadata={
+            'mail_id': mail.pk
+        }
+    )
+    mr_check = Check.objects.create(
+        number=check.check_number,
+        agency=comm.foia.agency,
+        amount=amount,
+        communication=comm,
+        user=User.objects.get(username='MuckrockStaff'),
+    )
+    mr_check.send_email()
+    return check

@@ -14,7 +14,7 @@ class PortalChoiceField(forms.ModelChoiceField):
     """Choice field to display more information about the portal"""
 
     def label_from_instance(self, obj):
-        return '{} ({}) <{}>'.format(
+        return u'{} ({}) <{}>'.format(
             obj.name,
             obj.get_type_display(),
             obj.url,

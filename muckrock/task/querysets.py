@@ -43,6 +43,7 @@ class TaskQuerySet(models.QuerySet):
         communication_task_types = [
             task.models.ResponseTask,
             task.models.SnailMailTask,
+            task.models.PaymentInfoTask,
             task.models.PortalTask,
         ]
         if user.is_staff:
@@ -466,4 +467,22 @@ class NewPortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                 'communication__foia__composer__user',
                 'resolved_by',
             ).preload_communication()
+        )
+
+
+class PaymentInfoTaskQuerySet(TaskQuerySet):
+    """Object manager for payment info tasks"""
+
+    def preload_list(self):
+        """Preload relations for list display"""
+        return self.select_related(
+            'communication__foia__agency__jurisdiction',
+            'resolved_by',
+        ).prefetch_related(
+            Prefetch(
+                'communication__foia__communications',
+                queryset=FOIACommunication.objects.order_by('-datetime')
+                .select_related('from_user__profile__agency').preload_list(),
+                to_attr='reverse_communications'
+            )
         )

@@ -123,6 +123,16 @@ urlpatterns = [
         views.ProjectReviewTaskList.as_view(),
         name='projectreview-task'
     ),
+    url(
+        r'^payment-info/$',
+        views.PaymentInfoTaskList.as_view(),
+        name='payment-info-task-list'
+    ),
+    url(
+        r'^payment-info/(?P<pk>\d+)/$',
+        views.PaymentInfoTaskList.as_view(),
+        name='payment-info-task'
+    ),
     # tasks for a specific request
     url(
         r'^request/(?P<pk>\d+)/$',

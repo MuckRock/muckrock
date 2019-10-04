@@ -5,12 +5,10 @@ Models for the Task application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
-from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Case, Count, Max, When
 from django.db.models.functions import Cast, Now
-from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import linebreaks, urlize
 
@@ -24,10 +22,10 @@ import bleach
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
-from muckrock.communication.models import EmailAddress, PhoneNumber
+from muckrock.communication.models import Check, EmailAddress, PhoneNumber
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import zoho_get, zoho_post
-from muckrock.foia.models import STATUS, FOIANote
+from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
@@ -44,6 +42,7 @@ from muckrock.task.querysets import (
     NewAgencyTaskQuerySet,
     NewPortalTaskQuerySet,
     OrphanTaskQuerySet,
+    PaymentInfoTaskQuerySet,
     PortalTaskQuerySet,
     ProjectReviewTaskQuerySet,
     ResponseTaskQuerySet,
@@ -155,6 +154,18 @@ class OrphanTask(Task):
         blacklist.resolve_matches()
 
 
+class PaymentInfoTask(Task):
+    """Pull who to make the payment to"""
+    type = 'PaymentInfoTask'
+    communication = models.ForeignKey('foia.FOIACommunication')
+    amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
+
+    objects = PaymentInfoTaskQuerySet.as_manager()
+
+    def __unicode__(self):
+        return u'Payment Info Task'
+
+
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     type = 'SnailMailTask'
@@ -165,7 +176,7 @@ class SnailMailTask(Task):
     switch = models.BooleanField(
         default=False,
         help_text='Designates we have switched to sending to this address '
-        'from another formof communication due to some sort of error.  A '
+        'from another form of communication due to some sort of error.  A '
         'note should be included in the communication with an explanation.',
     )
     reason = models.CharField(
@@ -175,6 +186,7 @@ class SnailMailTask(Task):
             ('addr', 'FOIA had no address'),
             ('appeal', 'This is an appeal'),
             ('pay', 'This is a payment'),
+            ('limit', 'Over the payment limit'),
             ('pdf', 'There was an error processing the PDF'),
             ('page', 'The PDF was over the page limit'),
             ('attm', 'There was an error processing an attachment'),
@@ -183,6 +195,11 @@ class SnailMailTask(Task):
         help_text='Reason the snail mail task was created instead of '
         'auto sending via lob',
         blank=True,
+    )
+    error_msg = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='The error message returned by lob'
     )
 
     objects = SnailMailTaskQuerySet.as_manager()
@@ -217,44 +234,14 @@ class SnailMailTask(Task):
 
     def record_check(self, number, user):
         """Records the check to a note on the request"""
-        foia = self.communication.foia
-        text = "A check (#%(number)d) of $%(amount).2f was mailed to the agency." % {
-            'number': number,
-            'amount': self.amount
-        }
-        note = FOIANote.objects.create(foia=foia, note=text, author=user)
-        if foia.agency.payable_to:
-            payable_to = foia.agency.payable_to
-        else:
-            payable_to = foia.agency
-        if foia.user.is_staff:
-            type_ = 'Staff'
-        else:
-            type_ = 'User'
-        context = {
-            'number': number,
-            'payable_to': payable_to,
-            'amount': self.amount,
-            'signed_by': user.profile.full_name,
-            'foia_pk': foia.pk,
-            'comm_pk': self.communication.pk,
-            'type': type_,
-            'today': date.today(),
-        }
-        body = render_to_string(
-            'text/task/check.txt',
-            context,
+        check = Check.objects.create(
+            number=number,
+            agency=self.communication.foia.agency,
+            amount=self.amount,
+            communication=self.communication,
+            user=user,
         )
-        msg = EmailMessage(
-            subject='[CHECK MAILED] Check #{}'.format(number),
-            body=body,
-            from_email='info@muckrock.com',
-            to=[settings.CHECK_EMAIL],
-            cc=['info@muckrock.com'],
-            bcc=['diagnostics@muckrock.com'],
-        )
-        msg.send(fail_silently=False)
-        return note
+        check.send_email()
 
 
 class ReviewAgencyTask(Task):

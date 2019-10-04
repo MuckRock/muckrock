@@ -16,6 +16,7 @@ from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
+from muckrock.communication.models import Check
 from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.core.test_utils import (
     http_get_response,
@@ -25,7 +26,6 @@ from muckrock.core.test_utils import (
 from muckrock.core.views import MRFilterListView
 from muckrock.foia.codes import CODES
 from muckrock.foia.factories import FOIARequestFactory
-from muckrock.foia.models import FOIANote
 from muckrock.task.factories import (
     FlaggedTaskFactory,
     NewAgencyTaskFactory,
@@ -357,9 +357,9 @@ class SnailMailTaskViewTests(TestCase):
             }
         )
         self.task.refresh_from_db()
-        note = FOIANote.objects.filter(foia=self.task.communication.foia
-                                       ).first()
-        ok_(note, 'A note should be generated.')
+        check = Check.objects.filter(communication=self.task.communication
+                                     ).first()
+        ok_(check, 'A check should be generated.')
 
     @tag('slow')
     def _test_n_plus_one_query(self):

@@ -362,6 +362,24 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+/* Payment Info Task */
+
+.payment-info.task .task-post-actions {
+    margin-bottom: 0;
+    .input-group {
+        text-align: left;
+        .helptext {
+            color: $color-grey-4;
+            line-height: $lh;
+        }
+    }
+    .button-group {
+        text-align: right;
+    }
+}
+
+
+
 /* Portal Task */
 
 .portal .form-field {

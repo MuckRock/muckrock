@@ -65,6 +65,7 @@ class AgencyAddressInline(admin.TabularInline):
     """Inline for agency's addresses"""
     model = AgencyAddress
     form = AgencyAddressAdminForm
+    show_change_link = True
     extra = 1
 
 
@@ -116,11 +117,6 @@ class AgencyAdminForm(forms.ModelForm):
     )
     appeal_agency = autocomplete_light.ModelChoiceField(
         'AgencyAppealAdminAutocomplete',
-        queryset=Agency.objects.all(),
-        required=False
-    )
-    payable_to = autocomplete_light.ModelChoiceField(
-        'AgencyAdminAutocomplete',
         queryset=Agency.objects.all(),
         required=False
     )
@@ -195,7 +191,6 @@ class AgencyAdmin(VersionAdmin):
             {
                 'fields': (
                     'appeal_agency',
-                    'payable_to',
                     'parent',
                 ),
             },

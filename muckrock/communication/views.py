@@ -3,12 +3,16 @@ Views for the communication app
 """
 
 # Django
+from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
+from django.db.models.aggregates import Sum
 from django.db.models.query import Prefetch
 from django.views.generic.detail import DetailView
 
 # MuckRock
+from muckrock.communication.filters import CheckFilterSet
 from muckrock.communication.models import (
+    Check,
     EmailAddress,
     EmailCommunication,
     EmailError,
@@ -17,6 +21,7 @@ from muckrock.communication.models import (
     FaxError,
     PhoneNumber,
 )
+from muckrock.core.views import MRFilterListView, class_view_decorator
 
 
 class EmailDetailView(DetailView):
@@ -89,4 +94,23 @@ class PhoneDetailView(DetailView):
         context['sidebar_admin_url'] = reverse(
             'admin:communication_phonenumber_change', args=(phone_number.pk,)
         )
+        return context
+
+
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+class CheckListView(MRFilterListView):
+    """List of all checks we have issued"""
+    model = Check
+    title = 'Checks'
+    template_name = 'communication/check_list.html'
+    filter_class = CheckFilterSet
+    queryset = Check.objects.select_related(
+        'agency__jurisdiction', 'communication__foia', 'user'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super(CheckListView, self).get_context_data(**kwargs)
+        context['outstanding'] = Check.objects.filter(
+            deposit_time=None
+        ).aggregate(total=Sum('amount'))['total']
         return context

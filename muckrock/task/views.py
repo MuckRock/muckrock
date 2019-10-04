@@ -32,7 +32,9 @@ from django_filters import FilterSet
 # MuckRock
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
-from muckrock.communication.models import PortalCommunication
+from muckrock.agency.models.communication import AgencyAddress
+from muckrock.communication.forms import AddressForm
+from muckrock.communication.models import Address, PortalCommunication
 from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.models import STATUS, FOIARequest
 from muckrock.foia.tasks import prepare_snail_mail
@@ -62,6 +64,7 @@ from muckrock.task.models import (
     NewAgencyTask,
     NewPortalTask,
     OrphanTask,
+    PaymentInfoTask,
     PortalTask,
     ProjectReviewTask,
     ResponseTask,
@@ -91,6 +94,7 @@ def count_tasks():
             multirequest=Count('multirequesttask'),
             portal=Count('portaltask'),
             new_portal=Count('newportaltask'),
+            payment_info=Count('paymentinfotask'),
         )
     )
     return count
@@ -200,7 +204,7 @@ class TaskList(MRFilterListView):
                 self.task_post_helper(request, task)
         except ValueError as exception:
             if request.is_ajax():
-                return HttpResponseBadRequest()
+                return HttpResponseBadRequest(exception.args[0])
             else:
                 messages.warning(self.request, exception)
                 return redirect(self.get_redirect_url())
@@ -646,6 +650,55 @@ class NewPortalTaskList(TaskList):
             task.resolve(request.user, {'reject': 'true'})
             messages.error(request, 'New portal rejected')
         return super(NewPortalTaskList, self).task_post_helper(request, task)
+
+
+class PaymentInfoTaskList(TaskList):
+    """List view for Payment Info Tasks"""
+    model = PaymentInfoTask
+    title = 'Payment Info'
+    queryset = PaymentInfoTask.objects.preload_list()
+
+    def task_post_helper(self, request, task, form_data=None):
+        if request.POST.get('save'):
+            agency = task.communication.foia.agency
+            form = AddressForm(request.POST, agency=agency)
+            if not form.is_valid():
+                raise ValueError(form.errors)
+            if agency.get_addresses('check').exists():
+                raise ValueError('This agency already has a check address')
+            address, _created = Address.objects.get_or_create(
+                # set address override to blank for uniqueness purposes
+                address='',
+                **form.cleaned_data
+            )
+            AgencyAddress.objects.create(
+                agency=agency,
+                address=address,
+                request_type='check',
+            )
+            tasks = PaymentInfoTask.objects.filter(
+                resolved=False, communication__foia__agency=agency
+            )
+            for task in tasks:
+                # send the check
+                prepare_snail_mail.delay(
+                    task.communication.pk,
+                    'p',
+                    False,
+                    {'amount': task.amount},
+                )
+                task.resolve(request.user, form.cleaned_data)
+        elif request.POST.get('reject'):
+            SnailMailTask.objects.create(
+                category='p',
+                communication=task.communication,
+                user=task.communication.from_user,
+                reason='pay',
+                amount=task.amount,
+            )
+            task.resolve(request.user, {'reject': 'true'})
+            messages.error(request, 'Payment info task rejected')
+        return super(PaymentInfoTaskList, self).task_post_helper(request, task)
 
 
 class RequestTaskList(TemplateView):

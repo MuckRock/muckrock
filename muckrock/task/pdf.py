@@ -24,8 +24,6 @@ from PyPDF2.utils import PdfReadError
 # MuckRock
 from muckrock.communication.models import MailCommunication
 
-CERTIFIED_AMOUNT = os.environ.get('CERTIFIED_AMOUNT', 150)
-
 
 class PDF(FPDF):
     """Shared PDF settings"""
@@ -90,7 +88,8 @@ class MailPDF(PDF):
             self.comm,
             appeal=self.appeal,
             switch=self.switch,
-            include_address=self.include_address
+            include_address=self.include_address,
+            payment=self.amount is not None,
         )
         # remove emoji's, as they break pdf rendering
         msg_body = emoji.get_emoji_regexp().sub(u'', msg_body)
@@ -256,7 +255,7 @@ class CoverPDF(PDF):
                         u'{}□ Write a {}check for ${:.2f}'.format(
                             2 * tab,
                             'CERTIFIED '
-                            if snail.amount >= CERTIFIED_AMOUNT else '',
+                            if snail.amount >= settings.CHECK_LIMIT else '',
                             snail.amount,
                         )
                     )

@@ -24,6 +24,7 @@ import json
 import logging
 import sys
 from datetime import timedelta
+from heapq import merge
 
 # Third Party
 import requests
@@ -33,6 +34,7 @@ from muckrock.accounts.models import Notification
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.forms import AgencyForm
 from muckrock.communication.models import (
+    Check,
     EmailCommunication,
     FaxCommunication,
     WebCommunication,
@@ -187,7 +189,7 @@ class Detail(DetailView):
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
-        # pylint: disable=too-many-statements
+        # pylint: disable=too-many-statements, too-many-locals
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
         user = self.request.user
@@ -285,7 +287,13 @@ class Detail(DetailView):
         context['cc_emails'] = json.dumps([
             unicode(e) for e in foia.cc_emails.all()
         ])
-        context['notes'] = foia.notes.select_related('author').all()
+        notes = [(n.datetime, 'note', n)
+                 for n in foia.notes.select_related('author').all()]
+        checks = [(c.created_datetime, 'check', c)
+                  for c in Check.objects.filter(communication__foia=foia)
+                  .select_related('user__profile')
+                  .prefetch_related('communication__mails__events')]
+        context['notes'] = [(t, v) for _, t, v in merge(notes, checks)]
         if (
             foia.composer.status == 'submitted'
             and foia.composer.datetime_submitted is not None

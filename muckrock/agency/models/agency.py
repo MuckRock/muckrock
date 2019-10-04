@@ -118,9 +118,6 @@ class Agency(models.Model, RequestHelper):
     appeal_agency = models.ForeignKey(
         'self', related_name='appeal_for', null=True, blank=True
     )
-    payable_to = models.ForeignKey(
-        'self', related_name='receivable', null=True, blank=True
-    )
     image = ThumbnailerImageField(
         upload_to='agency_images',
         blank=True,
@@ -294,7 +291,7 @@ class Agency(models.Model, RequestHelper):
 
     def get_addresses(self, request_type='primary'):
         """Get the contact addresses"""
-        return self.addresses.filter(agencyaddress__request_type=request_type,)
+        return self.addresses.filter(agencyaddress__request_type=request_type)
 
     def get_proxy_info(self):
         """Handle proxy users for request creation in this agency"""
@@ -364,7 +361,6 @@ class Agency(models.Model, RequestHelper):
 
         replace_self_relations = [
             ('appeal_agency', 'appeal_for'),
-            ('payable_to', 'receivable'),
             ('parent', 'children'),
         ]
         for forward, backward in replace_self_relations:

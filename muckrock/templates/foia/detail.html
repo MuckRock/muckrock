@@ -228,7 +228,7 @@
       {% if foia.user == user or user.is_staff %}
         <li>
           <a role="tab" class="tab" aria-controls="notes" href="#notes">
-            {% with foia.notes.count as notes_count %}
+            {% with notes|length as notes_count %}
               <span class="counter">{{notes_count}}</span>
               <span class="label">Note{{notes_count|pluralize}}</span>
             {% endwith %}
@@ -535,8 +535,12 @@ Sincerely,
               </div>
             </header>
           {% endif %}
-          {% for note in notes %}
-            {% include 'foia/note.html' with note=note %}
+          {% for type, note in notes %}
+            {% if type == "note" %}
+              {% include 'foia/note.html' with note=note %}
+            {% elif type == "check" %}
+              {% include 'foia/check.html' with check=note %}
+            {% endif %}
           {% endfor %}
         <form class="add-note" method="post">
           {% csrf_token %}

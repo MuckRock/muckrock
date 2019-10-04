@@ -52,7 +52,6 @@ services:
     depends_on:
       - muckrock_redis
       - muckrock_postgres
-    ports: []
     command: /start-celeryworker
     environment:
       - C_FORCE_ROOT=true
@@ -68,7 +67,6 @@ services:
     depends_on:
       - muckrock_redis
       - muckrock_postgres
-    ports: []
     command: /start-celerybeat
     networks:
       default:

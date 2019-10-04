@@ -4,12 +4,16 @@ Models for keeping track of how we send and receive communications
 """
 
 # Django
+from django.conf import settings
+from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
+from django.template.loader import render_to_string
 
 # Standard Library
+from datetime import date
 from email.utils import getaddresses, parseaddr
 
 # Third Party
@@ -209,21 +213,14 @@ class Address(models.Model):
                 self.state,
                 self.zip_code,
             )
-            if self.street and self.suite:
-                street = u'{}, {}'.format(self.street, self.suite)
-            elif self.street:
-                street = self.street
-            elif self.attn_override:
-                street = self.attn_override
-            elif self.agency_override:
-                street = self.agency_override
-            else:
-                return address
-
-            address = u'{}, {}'.format(
-                street,
+            parts = [
+                self.agency_override,
+                self.attn_override,
+                self.street,
+                self.suite,
                 address,
-            )
+            ]
+            address = ', '.join(p for p in parts if p)
             return address
         else:
             return self.address
@@ -581,3 +578,80 @@ class MailEvent(models.Model):
 
     class Meta:
         ordering = ['datetime']
+
+
+class Check(models.Model):
+    """A check we have mailed out, for tracking purposes"""
+    number = models.PositiveIntegerField(db_index=True)
+    agency = models.ForeignKey(
+        'agency.Agency', on_delete=models.PROTECT, related_name='checks'
+    )
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    communication = models.ForeignKey(
+        'foia.FOIACommunication',
+        on_delete=models.CASCADE,
+        related_name='checks',
+    )
+    user = models.ForeignKey(
+        'auth.User', on_delete=models.PROTECT, related_name='checks'
+    )
+    created_datetime = models.DateTimeField(auto_now_add=True)
+    deposit_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['created_datetime']
+
+    def __unicode__(self):
+        return u"Check #{}".format(self.number)
+
+    def send_email(self):
+        """Send an email record of this check"""
+        foia = self.communication.foia
+        if foia.user.is_staff:
+            type_ = 'Staff'
+        else:
+            type_ = 'User'
+        context = {
+            'number': self.number,
+            'payable_to': self.agency,
+            'amount': self.amount,
+            'signed_by': self.user.profile.full_name,
+            'foia_pk': foia.pk,
+            'comm_pk': self.communication.pk,
+            'type': type_,
+            'today': date.today(),
+        }
+        body = render_to_string(
+            'text/task/check.txt',
+            context,
+        )
+        msg = EmailMessage(
+            subject='[CHECK MAILED] Check #{}'.format(self.number),
+            body=body,
+            from_email='info@muckrock.com',
+            to=[settings.CHECK_EMAIL],
+            cc=['info@muckrock.com'],
+            bcc=['diagnostics@muckrock.com'],
+        )
+        msg.send(fail_silently=False)
+
+    def mailed_to(self):
+        """Return a formatted address of where this check was mailed to"""
+        mails = self.communication.mails.all()
+        if mails:
+            mail = mails[0]
+        else:
+            return ''
+        return mail.to_address.format(self.agency)
+
+    def mail_status(self):
+        """The latest Lob event for this checks mailing"""
+        mails = self.communication.mails.all()
+        if mails:
+            mail = mails[0]
+        else:
+            return ''
+        event = mail.events.last()
+        if not event:
+            return ''
+        return event.event

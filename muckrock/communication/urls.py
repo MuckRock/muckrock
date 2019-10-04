@@ -19,4 +19,5 @@ urlpatterns = [
         views.PhoneDetailView.as_view(),
         name='phone-detail'
     ),
+    url(r'checks/$', views.CheckListView.as_view(), name='check-list'),
 ]
