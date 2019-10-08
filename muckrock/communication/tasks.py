@@ -55,7 +55,7 @@ def plaid_checks():
             except Check.DoesNotExist:
                 logger.warning("Check #%s does not exist", check_number)
                 continue
-            if check.deposit_time:
+            if check.deposit_date:
                 continue
 
             if not isclose(amount, float(check.amount)):

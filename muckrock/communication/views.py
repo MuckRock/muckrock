@@ -111,6 +111,6 @@ class CheckListView(MRFilterListView):
     def get_context_data(self, **kwargs):
         context = super(CheckListView, self).get_context_data(**kwargs)
         context['outstanding'] = Check.objects.filter(
-            deposit_time=None
+            deposit_date=None
         ).aggregate(total=Sum('amount'))['total']
         return context

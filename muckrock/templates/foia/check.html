@@ -25,8 +25,8 @@
       <p>Status: {{ check.mail_status|default:"Unknown" }}</p>
       <p>
         Deposited:
-        {% if check.deposit_time %}
-          {{ check.deposit_time|date }}
+        {% if check.deposit_date %}
+          {{ check.deposit_date|date }}
         {% else %}
           No
         {% endif %}
