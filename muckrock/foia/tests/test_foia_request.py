@@ -43,7 +43,7 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
-from muckrock.task.models import SnailMailTask
+from muckrock.task.models import PaymentInfoTask, SnailMailTask
 
 
 class RunCommitHooksMixin(object):
@@ -537,9 +537,8 @@ class TestRequestPayment(RunCommitHooksMixin, TestCase):
         eq_(self.foia.status, 'submitted')
         eq_(self.foia.date_processing, date.today())
         ok_(comm, 'The function should return a communication.')
-        task = SnailMailTask.objects.filter(communication=comm).first()
-        ok_(task, 'A snail mail task should be created.')
-        eq_(task.user, user)
+        task = PaymentInfoTask.objects.filter(communication=comm).first()
+        ok_(task, 'A payment info task should be created.')
         eq_(task.amount, amount)
 
 
