@@ -34,6 +34,13 @@ class CrowdsourceAssignmentForm(forms.Form):
         widget=forms.HiddenInput,
         required=False,
     )
+    public = forms.BooleanField(
+        label='Publicly credit you',
+        help_text=
+        'When selected, we will note you contributed to the project and list '
+        'your name next to responses marked public',
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
         crowdsource = kwargs.pop('crowdsource')
@@ -55,6 +62,8 @@ class CrowdsourceAssignmentForm(forms.Form):
                 label='Get MuckRock\'s weekly newsletter with '
                 'FOIA news, tips, and more',
             )
+        # move public to the end
+        self.fields['public'] = self.fields.pop('public')
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""

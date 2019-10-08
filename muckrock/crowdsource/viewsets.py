@@ -7,26 +7,36 @@ from django.db.models import Q
 
 # Third Party
 from django_filters import rest_framework as django_filters
-from rest_framework import permissions, viewsets
+from rest_framework import mixins, permissions, viewsets
 
 # MuckRock
-from muckrock.crowdsource.models import CrowdsourceResponse
-from muckrock.crowdsource.serializers import CrowdsourceResponseSerializer
+from muckrock.crowdsource.models import Crowdsource, CrowdsourceResponse
+from muckrock.crowdsource.serializers import (
+    CrowdsourceResponseAdminSerializer,
+    CrowdsourceResponseGallerySerializer,
+)
 
 
-class CrowdsourceResponsePermissions(permissions.BasePermission):
-    """
-    Object-level permission to allow access only to owners of a crowdsource or staff
-    """
+class Permissions(permissions.DjangoObjectPermissions):
+    """Use Django Object permissions as the base for our assignment permissions"""
 
-    def has_object_permission(self, request, view, obj):
-        """Is owner or staff?"""
-        return request.user.has_perm(
-            'crowdsource.view_crowdsource', obj.crowdsource
-        )
+    def has_permission(self, request, view):
+        """Authenticated users permissions will be checked on a per object basis
+        Return true here to continue to the object check
+        Anonymous users have read-only access
+        """
+        if request.user.is_authenticated:
+            return True
+        else:
+            return request.method in permissions.SAFE_METHODS
 
 
-class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
+class CrowdsourceResponseViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     """API views for CrowdsourceResponse"""
     queryset = (
         CrowdsourceResponse.objects.select_related(
@@ -40,8 +50,25 @@ class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
             'tags',
         ).order_by('id')
     )
-    serializer_class = CrowdsourceResponseSerializer
-    permission_classes = (CrowdsourceResponsePermissions,)
+    permission_classes = (Permissions,)
+
+    def get_serializer_class(self):
+        """Get the serializer class"""
+        if self.request.user.is_staff:
+            return CrowdsourceResponseAdminSerializer
+        try:
+            crowdsource = Crowdsource.objects.get(
+                pk=self.request.GET.get('crowdsource')
+            )
+        except Crowdsource.DoesNotExist:
+            return CrowdsourceResponseGallerySerializer
+
+        if self.request.user.has_perm(
+            'crowdsource.change_crowdsource', crowdsource
+        ):
+            return CrowdsourceResponseAdminSerializer
+        else:
+            return CrowdsourceResponseGallerySerializer
 
     def get_queryset(self):
         """Filter the queryset"""
@@ -52,10 +79,10 @@ class CrowdsourceResponseViewSet(viewsets.ModelViewSet):
                 Q(crowdsource__user=self.request.user) | Q(
                     crowdsource__project_admin=True,
                     crowdsource__project__contributors=self.request.user,
-                )
+                ) | Q(gallery=True)
             )
         else:
-            return self.queryset.none()
+            return self.queryset.filter(gallery=True)
 
     class Filter(django_filters.FilterSet):
         """API Filter for Crowdsource Responses"""

@@ -398,6 +398,11 @@ class CrowdsourceResponse(models.Model):
         blank=True,
         null=True,
     )
+    public = models.BooleanField(
+        default=False,
+        help_text=
+        'Publically credit the user who submitted this response in the gallery'
+    )
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime = models.DateTimeField(default=timezone.now)
     data = models.ForeignKey(
@@ -485,7 +490,7 @@ class CrowdsourceResponse(models.Model):
         """Given the form data, create the values for this response"""
         # these values are passed in the form, but should not have
         # values created for them
-        for key in ['data_id', 'full_name', 'email', 'newsletter']:
+        for key in ['data_id', 'full_name', 'email', 'newsletter', 'public']:
             data.pop(key, None)
         for pk, value in data.iteritems():
             value = value if value is not None else ''

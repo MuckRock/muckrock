@@ -121,8 +121,12 @@ class CrowdsourceDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         """Handle CSV downloads"""
-        if self.request.GET.get('csv'):
-            export_csv.delay(self.get_object().pk, self.request.user.pk)
+        crowdsource = self.get_object()
+        has_perm = self.request.user.has_perm(
+            'crowdsource.change_crowdsource', crowdsource
+        )
+        if self.request.GET.get('csv') and has_perm:
+            export_csv.delay(crowdsource.pk, self.request.user.pk)
             messages.info(
                 self.request,
                 'Your CSV is being processed.  It will be emailed to you when '
@@ -133,20 +137,20 @@ class CrowdsourceDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         """Handle actions on the crowdsource"""
         crowdsource = self.get_object()
+        has_perm = self.request.user.has_perm(
+            'crowdsource.change_crowdsource', crowdsource
+        )
+        if not has_perm:
+            messages.error(
+                request, 'You do not have permission to edit this assignment'
+            )
+            return redirect(crowdsource)
         if request.POST.get('action') == 'Close':
             crowdsource.status = 'close'
             crowdsource.save()
             messages.success(request, 'The assignment has been closed')
         elif request.POST.get('action') == 'Add Data':
             form = CrowdsourceDataCsvForm(request.POST, request.FILES)
-            has_perm = self.request.user.has_perm(
-                'crowdsource.edit_crowdsource', crowdsource
-            )
-            if not has_perm:
-                messages.error(
-                    request,
-                    'You do not have permission to edit this assignment'
-                )
             if form.is_valid():
                 form.process_data_csv(crowdsource)
                 messages.success(
@@ -165,6 +169,9 @@ class CrowdsourceDetailView(DetailView):
         )
         context['message_form'] = CrowdsourceMessageResponseForm()
         context['data_form'] = CrowdsourceDataCsvForm()
+        context['edit_access'] = self.request.user.has_perm(
+            'crowdsource.change_crowdsource', self.object
+        )
         return context
 
 
@@ -321,6 +328,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             response = CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
                 user=user,
+                public=form.cleaned_data['public'],
                 ip_address=ip_address,
                 data=self.data,
                 number=number,
