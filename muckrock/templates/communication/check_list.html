@@ -11,7 +11,7 @@
   <th width="25%">FOIA Request</th>
   <th width="10%" data-sort="user">User</th>
   <th width="10%" data-sort="created_datetime">Created</th>
-  <th width="10%" data-sort="deposit_time">Cashed</th>
+  <th width="10%" data-sort="deposit_date">Cashed</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
@@ -26,6 +26,6 @@
     </td>
     <td><a href="{{ check.user.get_absolute_url }}">{{ check.user }}</a></td>
     <td>{{ check.created_datetime|date:"m/d/Y" }}</td>
-    <td>{{ check.deposit_time|date:"m/d/Y"|default:"Outstanding" }}</td>
+    <td>{{ check.deposit_date|date:"m/d/Y"|default:"Outstanding" }}</td>
   {% endwith %}
 {% endblock list-table-row %}

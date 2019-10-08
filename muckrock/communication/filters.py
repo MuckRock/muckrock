@@ -45,9 +45,9 @@ class CheckFilterSet(django_filters.FilterSet):
         if value is None:
             return queryset
         elif value:
-            return queryset.filter(deposit_time=None)
+            return queryset.filter(deposit_date=None)
         else:
-            return queryset.exclude(deposit_time=None)
+            return queryset.exclude(deposit_date=None)
 
     class Meta:
         model = Check
