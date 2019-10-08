@@ -220,7 +220,7 @@ class Address(models.Model):
                 self.suite,
                 address,
             ]
-            address = ', '.join(p for p in parts if p)
+            address = u', '.join(p for p in parts if p)
             return address
         else:
             return self.address
