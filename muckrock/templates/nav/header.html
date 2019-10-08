@@ -78,7 +78,7 @@
                 <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
                 <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
                 <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist-drafts' %}">Drafts</a></li>
-                {% if organization and not organization.individual %}
+                {% if user_organization and not user_organization.individual %}
                   <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
                 {% endif %}
                 <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
@@ -175,13 +175,13 @@
                   <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
                 {% endthumbnail %}
                 <span class="label">{{ user.profile.full_name }}</span>
-                {% if not organization.individual %}
-                  {% sorl_thumbnail organization.avatar_url "62x62" as avatar %}
+                {% if not user_organization.individual %}
+                  {% sorl_thumbnail user_organization.avatar_url "62x62" as avatar %}
                     <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
                   {% empty %}
                     <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
                   {% endthumbnail %}
-                  <span class="label">{{ organization.display_name }}</span>
+                  <span class="label">{{ user_organization.display_name }}</span>
                 {% endif %}
               </a>
 
@@ -243,15 +243,15 @@
                 {% if my_projects %}
                   <li><a class="nav-item" href="{% url 'project-contributor' username=request.user.username %}">Your&nbsp;Projects</a></li>
                 {% endif %}
-                {% if not organization.individual %}
-                  <li><a class="nav-item" href="{{organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
+                {% if not user_organization.individual %}
+                  <li><a class="nav-item" href="{{user_organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
                 {% endif %}
                 <li class="{% if organizations|length > 1 %}separator{% endif %}"><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
 
                 {% if organizations|length > 1 %}
                   <li class="separator nav-item nolink">Switch&nbsp;Organization</li>
                   {% for org in organizations %}
-                    {% if org != organization %}
+                    {% if org != user_qorganization %}
                       <li>
                         <form action="{% url "org-activate" %}" method="post">
                           {% csrf_token %}

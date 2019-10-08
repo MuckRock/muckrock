@@ -73,7 +73,7 @@ def sidebar_info(request):
                 get_unread_notifications(request.user),
             'actionable_requests':
                 get_actionable_requests(request.user),
-            'organization':
+            'user_organization':
                 get_organization(request.user),
             'organizations':
                 get_organizations(request.user),
