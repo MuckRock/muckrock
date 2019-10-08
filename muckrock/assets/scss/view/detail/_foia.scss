@@ -353,6 +353,9 @@ $request-breakpoint: 768px;
         }
         .note-body {
             padding: $vr/2;
+            br {
+              margin-bottom: 0;
+            }
         }
         &.collapsed .note-body {
             display: none;

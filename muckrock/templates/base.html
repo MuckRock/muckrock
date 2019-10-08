@@ -217,11 +217,11 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
     <!-- End Google Analytics -->
     <script>
       {% if request.user.is_authenticated %}
+        mixpanel.identify("{{ request.user.profile.uuid }}");
         mixpanel.people.set_once({
           "Requests Filed": 0,
           "Assignments Completed": 0,
         })
-        mixpanel.identify("{{ request.user.profile.uuid }}");
         {% for event, props in mp_events %}
           mixpanel.track("{{ event }}", {{ props }});
           {% if event == "Request Submitted" %}

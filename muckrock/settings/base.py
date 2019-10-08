@@ -296,6 +296,7 @@ CELERY_IGNORE_RESULTS = True
 CELERY_IMPORTS = (
     'muckrock.accounts.tasks',
     'muckrock.agency.tasks',
+    'muckrock.communication.tasks',
     'muckrock.crowdsource.tasks',
     'muckrock.dataset.tasks',
     'muckrock.foia.tasks',
@@ -465,6 +466,7 @@ PHAXIO_CALLBACK_TOKEN = os.environ.get('PHAXIO_CALLBACK_TOKEN')
 
 LOB_SECRET_KEY = os.environ.get('LOB_SECRET_KEY')
 LOB_WEBHOOK_KEY = os.environ.get('LOB_WEBHOOK_KEY', 'secret')
+LOB_BANK_ACCOUNT_ID = os.environ.get('LOB_BANK_ACCOUNT_ID')
 
 SLACK_WEBHOOK_URL = os.environ.get('SLACK_WEBHOOK_URL', '')
 
@@ -611,6 +613,7 @@ OPENSEARCH_DESCRIPTION = 'Search MuckRock for public documents and news'
 FONT_PATH = '/usr/share/fonts/truetype/dejavu/'
 
 CHECK_EMAIL = os.environ.get('CHECK_EMAIL', '')
+CHECK_LIMIT = int(os.environ.get('CHECK_LIMIT', 200))
 
 DASHING = {
     'INSTALLED_WIDGETS': ('number', 'list', 'graph', 'requestlist'),
@@ -626,6 +629,11 @@ CONSTANCE_CONFIG = OrderedDict([
         (False, 'Enable automated followups during weekends')
     ),
     ('AUTO_LOB', (False, 'Automatically send snail mail via Lob')),
+    ('AUTO_LOB_PAY', (False, 'Automatically send checks via Lob')),
+    (
+        'AUTO_LOB_APPEAL',
+        (False, 'Automatically send appeal snail mail via Lob')
+    ),
     (
         'ENABLE_ML',
         (True, 'Automatically resolve response tasks by machine learning')
@@ -662,7 +670,11 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'FOIA Options': (
         'ENABLE_FOLLOWUP',
         'ENABLE_WEEKEND_FOLLOWUP',
+    ),
+    'Lob Options': (
         'AUTO_LOB',
+        'AUTO_LOB_PAY',
+        'AUTO_LOB_APPEAL',
     ),
     'Machine Learning Options': ('ENABLE_ML', 'CONFIDENCE_MIN'),
     'Dashboard Options': (
@@ -732,3 +744,10 @@ THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
 USE_GOOGLE_TAG_MANAGER = boolcheck(
     os.environ.get('USE_GOOGLE_TAG_MANAGER', False)
 )
+
+# Plaid allows programtic access to our bank account transactions
+PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID')
+PLAID_SECRET = os.environ.get('PLAID_SECRET')
+PLAID_PUBLIC_KEY = os.environ.get('PLAID_PUBLIC_KEY')
+PLAID_ENV = os.environ.get('PLAID_ENV', 'development')
+PLAID_ACCESS_TOKEN = os.environ.get('PLAID_ACCESS_TOKEN')

@@ -23,6 +23,8 @@
     {% portal_task task %}
 {% elif task.type == "NewPortalTask" %}
     {% new_portal_task task %}
+{% elif task.type == "PaymentInfoTask" %}
+    {% payment_info_task task %}
 {% else %}
     {% default_task task %}
 {% endif %}

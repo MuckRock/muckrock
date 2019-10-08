@@ -24,7 +24,7 @@ from muckrock.foia.factories import (
     FOIAComposerFactory,
     FOIARequestFactory,
 )
-from muckrock.foia.models import FOIANote, FOIARequest
+from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
 from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.forms import ResponseTaskForm
@@ -339,13 +339,13 @@ class SnailMailTaskTests(TestCase):
         )
 
     def test_record_check(self):
-        """When given a check number, a note should be attached to the request."""
+        """Given a check number, a check should be attached to the communication."""
         user = UserFactory(is_staff=True)
         check_number = 1
         self.task.amount = 100.00
         self.task.save()
-        note = self.task.record_check(check_number, user)
-        ok_(isinstance(note, FOIANote), 'The method should return a FOIANote.')
+        self.task.record_check(check_number, user)
+        ok_(self.task.communication.checks.exists())
 
     def test_pdf_emoji(self):
         """Strip emojis to prevent PDF generation from crashing"""

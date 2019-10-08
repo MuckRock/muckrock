@@ -1,0 +1,37 @@
+{% load tags %}
+
+{% if check %}
+  <div class="note" id="check-{{ check.id }}">
+    <header class="note-header">
+      <p class="note-author">
+        {{ check.user.profile.full_name }}
+        {% if check.user.is_staff %}
+          &nbsp;<span class="small blue badge">Staff</span>
+        {% endif %}
+      </p>
+      <a href="{% if not foia_url %}{{ check.communication.foia.get_absolute_url }}{% endif %}#check-{{check.id}}">
+        <time
+          datetime="{{ check.created_datetime|date:'c' }}"
+          title="{{ check.created_datetime|date:'c' }}"
+          class="note-date">
+          {{ check.created_datetime|date }}
+        </time>
+      </a>
+    </header>
+    <main class="note-body">
+      <p>Check #{{ check.number }}</p>
+      <p>Amount: ${{ check.amount }}</p>
+      <p>To:<br>{{ check.mailed_to|linebreaks }}</p>
+      <p>Status: {{ check.mail_status|default:"Unknown" }}</p>
+      <p>
+        Deposited:
+        {% if check.deposit_time %}
+          {{ check.deposit_time|date }}
+        {% else %}
+          No
+        {% endif %}
+      </p>
+    </main>
+  </div>
+{% endif %}
+

@@ -57,6 +57,12 @@
     </li>
 </ul>
 <ul class="nostyle list__sections">
+    <li class="{% active request '^/task/payment-info/$' %}">
+        <a href="{% url 'payment-info-task-list' %}">
+            <span class="counter">{{ counters.payment_info }}</span>
+            Payment Info
+        </a>
+    </li>
     <li class="{% active request '^/task/review-agency/$' %}">
         <a href="{% url 'review-agency-task-list' %}">
             <span class="counter">{{ counters.review_agency }}</span>

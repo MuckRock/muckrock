@@ -1,0 +1,31 @@
+{% extends 'base_list.html' %}
+
+{% block list-sections %}
+  <p>Amount outstanding: {{ outstanding }}</p>
+{% endblock list-sections %}
+
+{% block list-table-head %}
+  <th width="10%" data-sort="number">Number</th>
+  <th width="25%" data-sort="agency">Agency</th>
+  <th width="10%" data-sort="amount">Amount</th>
+  <th width="25%">FOIA Request</th>
+  <th width="10%" data-sort="user">User</th>
+  <th width="10%" data-sort="created_datetime">Created</th>
+  <th width="10%" data-sort="deposit_time">Cashed</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+  {% with object as check %}
+    <td>{{ check.number }}</td>
+    <td><a href="{{ check.agency.get_absolute_url }}">{{ check.agency }}</a></td>
+    <td>${{ check.amount }}</td>
+    <td>
+      <a href="{{ check.communication.get_absolute_url }}">
+        {{ check.communication.foia }}
+      </a>
+    </td>
+    <td><a href="{{ check.user.get_absolute_url }}">{{ check.user }}</a></td>
+    <td>{{ check.created_datetime|date:"m/d/Y" }}</td>
+    <td>{{ check.deposit_time|date:"m/d/Y"|default:"Outstanding" }}</td>
+  {% endwith %}
+{% endblock list-table-row %}

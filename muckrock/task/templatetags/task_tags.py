@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 
 # MuckRock
 from muckrock import agency, foia, task
+from muckrock.communication.forms import AddressForm
 from muckrock.portal.forms import PortalForm
 # imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
@@ -355,6 +356,22 @@ class StatusChangeTaskNode(TaskNode):
     class_name = 'status-change'
 
 
+class PaymentInfoTaskNode(TaskNode):
+    """Renders a payment info task."""
+    model = task.models.SnailMailTask
+    task_template = 'task/payment_info.html'
+    endpoint_name = 'payment-info-task-list'
+    class_name = 'payment-info'
+
+    def get_extra_context(self):
+        """Adds status to the context"""
+        foia_ = self.task.communication.foia
+        extra_context = super(PaymentInfoTaskNode, self).get_extra_context()
+        extra_context['form'] = AddressForm(agency=foia_.agency)
+        extra_context['previous_communications'] = foia_.reverse_communications
+        return extra_context
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
@@ -443,6 +460,12 @@ def status_change_task(parser, token):
 def crowdfund_task(parser, token):
     """Returns a CrowdfundTaskNode"""
     return CrowdfundTaskNode(get_id(token))
+
+
+@register.tag
+def payment_info_task(parser, token):
+    """Returns a PaymentInfoTaskNode"""
+    return PaymentInfoTaskNode(get_id(token))
 
 
 @register.tag

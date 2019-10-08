@@ -7,6 +7,10 @@
       <dd>{{task.get_category_display}}</dd>
       <dt>Reason</dt>
       <dd>{{task.get_reason_display}}</dd>
+      {% if task.error_msg %}
+        <dt>Error</dt>
+        <dd>{{task.error_msg}}</dd>
+      {% endif %}
       {% if task.amount %}
         <dt>Amount</dt>
         <dd class="success">${{task.amount|floatformat:2}}</dd>
