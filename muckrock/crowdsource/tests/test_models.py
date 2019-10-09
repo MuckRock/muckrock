@@ -26,6 +26,7 @@ from muckrock.crowdsource.factories import (
     CrowdsourceCheckboxGroupFieldFactory,
     CrowdsourceDataFactory,
     CrowdsourceFactory,
+    CrowdsourceHeaderFieldFactory,
     CrowdsourceResponseFactory,
     CrowdsourceSelectFieldFactory,
     CrowdsourceTextFieldFactory,
@@ -145,15 +146,21 @@ class TestCrowdsource(TestCase):
             help_text='Help',
             order=0,
         )
+        CrowdsourceHeaderFieldFactory(
+            crowdsource=crowdsource,
+            label='Header',
+            order=1,
+        )
         CrowdsourceSelectFieldFactory(
             crowdsource=crowdsource,
             label='Select Field',
-            order=1,
+            order=2,
         )
         eq_(
             crowdsource.get_header_values(['meta']),
             [
                 'user',
+                'public',
                 'datetime',
                 'skip',
                 'flag',
@@ -168,6 +175,7 @@ class TestCrowdsource(TestCase):
             crowdsource.get_header_values(['meta']),
             [
                 'user',
+                'public',
                 'datetime',
                 'skip',
                 'flag',
@@ -183,6 +191,7 @@ class TestCrowdsource(TestCase):
             crowdsource.get_header_values(['meta']),
             [
                 'user',
+                'public',
                 'datetime',
                 'skip',
                 'flag',
@@ -341,6 +350,7 @@ class TestCrowdsourceResponse(TestCase):
             crowdsource=crowdsource,
             order=0,
         )
+        CrowdsourceHeaderFieldFactory(crowdsource=crowdsource, order=1)
         CrowdsourceValueFactory(
             response=response,
             field=field,
@@ -351,6 +361,7 @@ class TestCrowdsourceResponse(TestCase):
             response.get_values([]),
             [
                 'Username',
+                False,
                 '2017-01-02 00:00:00',
                 False,
                 False,
@@ -368,6 +379,7 @@ class TestCrowdsourceResponse(TestCase):
         response = CrowdsourceResponseFactory(
             crowdsource=crowdsource,
             user__username='Username',
+            public=True,
             datetime=datetime(
                 2017, 1, 2, tzinfo=timezone.get_current_timezone()
             ),
@@ -415,6 +427,7 @@ class TestCrowdsourceResponse(TestCase):
             response.get_values([]),
             [
                 'Username',
+                True,
                 '2017-01-02 00:00:00',
                 False,
                 False,

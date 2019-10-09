@@ -80,6 +80,11 @@ class CrowdsourceSelectFieldFactory(CrowdsourceChoiceFieldFactory):
     type = 'select'
 
 
+class CrowdsourceHeaderFieldFactory(CrowdsourceChoiceFieldFactory):
+    """A factory for creating a header field"""
+    type = 'header'
+
+
 class CrowdsourceCheckboxGroupFieldFactory(CrowdsourceChoiceFieldFactory):
     """A factory for creating a checkbox group field"""
     type = 'checkbox-group'
