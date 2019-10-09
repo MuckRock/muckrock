@@ -216,7 +216,11 @@ class Crowdsource(models.Model):
 
     def contributor_line(self):
         """Line about who has contributed"""
-        users = list({r.user for r in self.responses.all() if r.user})
+        users = list({
+            r.user
+            for r in self.responses.filter()
+            if r.user and r.public
+        })
         total = len(users)
 
         def join_names(users):

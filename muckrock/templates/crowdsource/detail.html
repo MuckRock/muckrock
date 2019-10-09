@@ -5,11 +5,23 @@
 
 {% block type %}crowdsource{% endblock type %}
 
-{% block header %}<h1>{{ crowdsource.title }}</h1>{% endblock header %}
+{% block header %}
+  <h1>{{ crowdsource.title }}</h1>
+  <p>
+    An assignment by
+    <a href="{{ crowdsource.user.get_absolute_url }}">{{ crowdsource.user.profile.full_name }}</a>{% if crowdsource.project %}, as part of the
+      <a href="{{ crowdsource.project.get_absolute_url }}">
+        {{ crowdsource.project.title }}
+    </a> project{%endif%}.
+  </p>
+  {% social title=crowdsource.title url=crowdsource.get_absolute_url %}
+  <p>{{ crowdsource.description|markdown }}</p>
+  <p>{{ crowdsource.contributor_line }}</p>
+{% endblock header %}
 
 {% block actions %}
   <div class="actions">
-    <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Assignment</a>
+    <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Submit to this assignment</a>
     {% if edit_access %}
       <a href="?csv=1" class="button primary">Results CSV</a>
       {% if crowdsource.status == "draft" %}
@@ -22,13 +34,16 @@
         </form>
       {% endif %}
     {% endif %}
+    {% if crowdsource.project %}
+      <a href="{{ crowdsource.project.get_absolute_url }}" class="button primary">See the related project</a>
+    {% endif %}
   </div>
 {% endblock actions %}
 
 {% block main %}
-  {% if edit_access %}
-    <div class="tab-container">
-      <ul role="tablist" class="tab-list">
+  <div class="tab-container">
+    <ul role="tablist" class="tab-list">
+      {% if edit_access %}
         <li>
           <a role="tab" class="tab" aria-controls="info" href="#info">
             <span class="label">Info</span>
@@ -39,17 +54,19 @@
             <span class="label">Add Data</span>
           </a>
         </li>
-        <li>
-          <a role="tab" class="tab" aria-controls="responses" href="#assignment-responses">
-            {% with crowdsource.responses.count as count %}
-              <span class="counter">{{ count }}</span>
-              <span class="label">Response{{ count|pluralize }}</span>
-            {% endwith %}
-          </a>
-        </li>
-      </ul>
-    </div>
+      {% endif %}
+      <li>
+        <a role="tab" class="tab" aria-controls="responses" href="#assignment-responses">
+          {% with crowdsource.responses.count as count %}
+            <span class="counter">{{ count }}</span>
+            <span class="label">Response{{ count|pluralize }}</span>
+          {% endwith %}
+        </a>
+      </li>
+    </ul>
+  </div>
 
+  {% if edit_access %}
     <section role="tabpanel" class="tab-panel communications" id="info">
       <h2 class="tab-panel-heading">Information</h2>
       <dl>
