@@ -131,13 +131,13 @@
     <h2 class="tab-panel-heading">Responses</h2>
     <section>
       <form>
-        <label>Search: <input type="textbox" id="assignment-search"></label>
+        <label>Search: <input type="textbox" id="assignment-search" value="{{ request.GET.search }}"></label>
         <label>
           Filter:
           <select id="filter">
-            <option value="">All</option>
-            <option value="flag">Flagged</option>
-            <option value="no-flag">Unflagged</option>
+            <option value="" {% if request.GET.flag == "null" %}selected{% endif %}>All</option>
+            <option value="flag" {% if request.GET.flag == "true" %}selected{% endif %}>Flagged</option>
+            <option value="no-flag" {% if request.GET.flag == "false" %}selected{% endif %}>Unflagged</option>
           </select>
         </label>
         {% if crowdsource.data.all %}

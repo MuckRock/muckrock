@@ -137,12 +137,13 @@ $(document).ready(function(){
     $(selector).after(newElement);
   }
 
+  const params = new URLSearchParams(window.location.search);
   var
     page = 1,
     pageSize = 10,
     lastPage = 1,
-    flag = null,
-    search = "";
+    flag = params.get("flag") || null,
+    search = params.get("search") || "";
 
   function handleUpdateResponses(data) {
     var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried,
@@ -353,6 +354,11 @@ $(document).ready(function(){
   });
 
   function updateResponses() {
+    history.pushState(
+      '',
+      document.title,
+      `?flag=${flag}&search=${search}#assignment-responses`,
+    )
     $.ajax({
       url: "/api_v1/assignment-responses/",
       type: 'GET',
