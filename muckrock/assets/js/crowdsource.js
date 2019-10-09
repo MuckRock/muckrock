@@ -11,9 +11,7 @@ $(document).ready(function(){
         'autocomplete',
         'button',
         'file',
-        'header',
         'hidden',
-        'paragraph',
         'radio-group'
       ],
       disabledAttrs: [
@@ -36,7 +34,7 @@ $(document).ready(function(){
         "checkbox-group": {
           gallery: {
             label: "Gallery",
-            type: "checkbox"
+            type: "checkbox",
           }
         },
         checkbox2: {

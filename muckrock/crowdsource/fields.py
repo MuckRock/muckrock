@@ -98,6 +98,54 @@ class TextareaField(Field):
         return super(TextareaField, self).get_form_field(field, **kwargs)
 
 
+class StaticWidget(forms.widgets.Widget):
+    """Widget for a static text element"""
+    template_name = 'crowdsource/widgets/static.html'
+
+    def get_context(self, name, value, attrs):
+        """Add the tag to the context"""
+        context = super(StaticWidget, self).get_context(name, value, attrs)
+        context['widget']['tag'] = self.tag
+        return context
+
+
+class HeaderWidget(StaticWidget):
+    """Widget for a header"""
+    tag = 'h2'
+
+
+class ParagraphWidget(StaticWidget):
+    """Widget for a paragraph"""
+    tag = 'p'
+
+
+class StaticField(Field):
+    """A field containing static text"""
+    field = forms.CharField
+
+    def get_form_field(self, field, **kwargs):
+        """Set a static widget"""
+        return self.field(
+            widget=self.widget,
+            label="",
+            initial=field.label,
+            max_length=0,
+            required=False,
+        )
+
+
+class HeaderField(StaticField):
+    """A header"""
+    name = 'header'
+    widget = HeaderWidget
+
+
+class ParagraphField(StaticField):
+    """A paragraph"""
+    name = 'paragraph'
+    widget = ParagraphWidget
+
+
 FIELDS = [
     TextField,
     SelectField,
@@ -106,6 +154,8 @@ FIELDS = [
     DateField,
     NumberField,
     TextareaField,
+    HeaderField,
+    ParagraphField,
 ]
 
 FIELD_CHOICES = [(f.name, f.name) for f in FIELDS]
@@ -113,3 +163,5 @@ FIELD_CHOICES = [(f.name, f.name) for f in FIELDS]
 FIELD_DICT = {f.name: f for f in FIELDS}
 
 MULTI_FIELDS = [f.name for f in FIELDS if f.multiple_values]
+
+STATIC_FIELDS = [f.name for f in FIELDS if issubclass(f, StaticField)]

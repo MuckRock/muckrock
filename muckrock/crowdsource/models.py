@@ -182,7 +182,9 @@ class Crowdsource(models.Model):
 
     def get_header_values(self, metadata_keys, include_emails=False):
         """Get header values for CSV export"""
-        values = ['user', 'datetime', 'skip', 'flag', 'gallery', 'tags']
+        values = [
+            'user', 'public', 'datetime', 'skip', 'flag', 'gallery', 'tags'
+        ]
         if include_emails:
             values.insert(1, 'email')
         if self.multiple_per_page:
@@ -190,7 +192,11 @@ class Crowdsource(models.Model):
         if self.data.exists():
             values.append('datum')
             values.extend(metadata_keys)
-        field_labels = list(self.fields.values_list('label', flat=True))
+        field_labels = list(
+            self.fields.exclude(type__in=fields.STATIC_FIELDS).values_list(
+                'label', flat=True
+            )
+        )
         return values + field_labels
 
     def get_metadata_keys(self):
@@ -452,6 +458,7 @@ class CrowdsourceResponse(models.Model):
         """Get the values for this response for CSV export"""
         values = [
             self.user.username if self.user else 'Anonymous',
+            self.public,
             self.datetime.strftime('%Y-%m-%d %H:%M:%S'),
             self.skip,
             self.flag,
@@ -465,7 +472,11 @@ class CrowdsourceResponse(models.Model):
         if self.data:
             values.append(self.data.url)
             values.extend(self.data.metadata.get(k, '') for k in metadata_keys)
-        field_labels = self.crowdsource.fields.values_list('label', flat=True)
+        field_labels = self.crowdsource.fields.exclude(
+            type__in=fields.STATIC_FIELDS
+        ).values_list(
+            'label', flat=True
+        )
         field_values = self.get_field_values()
         # ensure exactly one value per field - default to empty string
         # a multivalued field may have no values
@@ -478,6 +489,8 @@ class CrowdsourceResponse(models.Model):
         """
         return dict(
             self.values.order_by('field__order')
+            # exclude headers and paragraph fields
+            .exclude(field__type__in=fields.STATIC_FIELDS)
             # filter out blank values for multivalued fields
             # there might be blank ones to hold original values,
             # and we do not want that in the comma separated list
