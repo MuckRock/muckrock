@@ -5,20 +5,37 @@
 
 {% block type %}crowdsource{% endblock type %}
 
-{% block header %}<h1>{{ crowdsource.title }}</h1>{% endblock header %}
+{% block header %}
+  <h1>{{ crowdsource.title }}</h1>
+  <p>
+    An assignment by
+    <a href="{{ crowdsource.user.get_absolute_url }}">{{ crowdsource.user.profile.full_name }}</a>{% if crowdsource.project %}, as part of the
+      <a href="{{ crowdsource.project.get_absolute_url }}">
+        {{ crowdsource.project.title }}
+    </a> project{%endif%}.
+  </p>
+  {% social title=crowdsource.title url=crowdsource.get_absolute_url %}
+  <p>{{ crowdsource.description|markdown }}</p>
+  <p>{{ crowdsource.contributor_line }}</p>
+{% endblock header %}
 
 {% block actions %}
   <div class="actions">
-    <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Assignment</a>
-    <a href="?csv=1" class="button primary">Results CSV</a>
-    {% if crowdsource.status == "draft" %}
-      <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
+    <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Submit to this assignment</a>
+    {% if edit_access %}
+      <a href="?csv=1" class="button primary">Results CSV</a>
+      {% if crowdsource.status == "draft" %}
+        <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
+      {% endif %}
+      {% if crowdsource.status == "open" %}
+        <form method="post">
+          {% csrf_token %}
+          <input type="submit" name="action" value="Close" class="button primary form-button">
+        </form>
+      {% endif %}
     {% endif %}
-    {% if crowdsource.status == "open" %}
-      <form method="post">
-        {% csrf_token %}
-        <input type="submit" name="action" value="Close" class="button primary form-button">
-      </form>
+    {% if crowdsource.project %}
+      <a href="{{ crowdsource.project.get_absolute_url }}" class="button primary">See the related project</a>
     {% endif %}
   </div>
 {% endblock actions %}
@@ -26,16 +43,18 @@
 {% block main %}
   <div class="tab-container">
     <ul role="tablist" class="tab-list">
-      <li>
-        <a role="tab" class="tab" aria-controls="info" href="#info">
-          <span class="label">Info</span>
-        </a>
-      </li>
-      <li>
-        <a role="tab" class="tab" aria-controls="info" href="#data">
-          <span class="label">Add Data</span>
-        </a>
-      </li>
+      {% if edit_access %}
+        <li>
+          <a role="tab" class="tab" aria-controls="info" href="#info">
+            <span class="label">Info</span>
+          </a>
+        </li>
+        <li>
+          <a role="tab" class="tab" aria-controls="info" href="#data">
+            <span class="label">Add Data</span>
+          </a>
+        </li>
+      {% endif %}
       <li>
         <a role="tab" class="tab" aria-controls="responses" href="#assignment-responses">
           {% with crowdsource.responses.count as count %}
@@ -47,76 +66,78 @@
     </ul>
   </div>
 
-  <section role="tabpanel" class="tab-panel communications" id="info">
-    <h2 class="tab-panel-heading">Information</h2>
-    <dl>
-      <dt>User</dt>
-      <dd>{{ crowdsource.user }}</dd>
-      <dt>Created</dt>
-      <dd>{{ crowdsource.datetime_created|date }}</dd>
-      <dt>Status</dt>
-      <dd>{{ crowdsource.get_status_display }}</dd>
-      <dt>Description</dt>
-      <dd>{{ crowdsource.description|markdown }}</dd>
-      {% if crowdsource.project %}
-        <dt>Project</dt>
-        <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
-        <dt>Project Only</dt>
-        <dd>{{crowdsource.project_only}}</dd>
-        <dt>Project Admin</dt>
-        <dd>{{crowdsource.project_admin}}</dd>
-      {% endif %}
-      {% if crowdsource.data.all %}
-        <dt>Data Count</dt>
-        <dd>{{ crowdsource.data.all|length }}</dd>
-        <dt>Data Limit</dt>
-        <dd>{{crowdsource.data_limit}}</dd>
-        <dt>Multiple Per Page</dt>
-        <dd>{{crowdsource.multiple_per_page}}</dd>
-      {% else %}
-        <dt>User Limit</dt>
-        <dd>{{crowdsource.user_limit}}</dd>
-      {% endif %}
-      {% if crowdsource.submission_emails.all %}
-        <dt>Submission Email</dt>
-        {% for email in crowdsource.submission_emails.all %}
-          <dd>{{ email }}</dd>
-        {% endfor %}
-      {% endif %}
-      <dt>
-      <dt>Embed Code</dt>
-      <dd>
-      <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-embed" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
-      </dd>
-      <dt>Gallery Code</dt>
-      <dd>
-      <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-gallery" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
-      </dd>
-    </dl>
-  </section>
+  {% if edit_access %}
+    <section role="tabpanel" class="tab-panel communications" id="info">
+      <h2 class="tab-panel-heading">Information</h2>
+      <dl>
+        <dt>User</dt>
+        <dd>{{ crowdsource.user }}</dd>
+        <dt>Created</dt>
+        <dd>{{ crowdsource.datetime_created|date }}</dd>
+        <dt>Status</dt>
+        <dd>{{ crowdsource.get_status_display }}</dd>
+        <dt>Description</dt>
+        <dd>{{ crowdsource.description|markdown }}</dd>
+        {% if crowdsource.project %}
+          <dt>Project</dt>
+          <dd><a href="{% url "project-detail" slug=crowdsource.project.slug pk=crowdsource.project.pk %}">{{crowdsource.project.title}}</a>
+          <dt>Project Only</dt>
+          <dd>{{crowdsource.project_only}}</dd>
+          <dt>Project Admin</dt>
+          <dd>{{crowdsource.project_admin}}</dd>
+        {% endif %}
+        {% if crowdsource.data.all %}
+          <dt>Data Count</dt>
+          <dd>{{ crowdsource.data.all|length }}</dd>
+          <dt>Data Limit</dt>
+          <dd>{{crowdsource.data_limit}}</dd>
+          <dt>Multiple Per Page</dt>
+          <dd>{{crowdsource.multiple_per_page}}</dd>
+        {% else %}
+          <dt>User Limit</dt>
+          <dd>{{crowdsource.user_limit}}</dd>
+        {% endif %}
+        {% if crowdsource.submission_emails.all %}
+          <dt>Submission Email</dt>
+          {% for email in crowdsource.submission_emails.all %}
+            <dd>{{ email }}</dd>
+          {% endfor %}
+        {% endif %}
+        <dt>
+        <dt>Embed Code</dt>
+        <dd>
+        <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-embed" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
+        </dd>
+        <dt>Gallery Code</dt>
+        <dd>
+        <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-gallery" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
+        </dd>
+      </dl>
+    </section>
 
-  <section role="tabpanel" class="tab-panel communications" id="data">
-    <h2 class="tab-panel-heading">Add Data</h2>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {% with data_form as form %}
-        {% include "lib/pattern/form.html" %}
-      {% endwith %}
-      <input type="submit" name="action" value="Add Data" class="button primary" id="add-data-button">
-    </form>
-  </section>
+    <section role="tabpanel" class="tab-panel communications" id="data">
+      <h2 class="tab-panel-heading">Add Data</h2>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% with data_form as form %}
+          {% include "lib/pattern/form.html" %}
+        {% endwith %}
+        <input type="submit" name="action" value="Add Data" class="button primary" id="add-data-button">
+      </form>
+    </section>
+  {% endif %}
 
   <section role="tabpanel" class="tab-panel" id="assignment-responses">
     <h2 class="tab-panel-heading">Responses</h2>
     <section>
       <form>
-        <label>Search: <input type="textbox" id="assignment-search"></label>
+        <label>Search: <input type="textbox" id="assignment-search" value="{{ request.GET.search }}"></label>
         <label>
           Filter:
           <select id="filter">
-            <option value="">All</option>
-            <option value="flag">Flagged</option>
-            <option value="no-flag">Unflagged</option>
+            <option value="" {% if request.GET.flag == "null" %}selected{% endif %}>All</option>
+            <option value="flag" {% if request.GET.flag == "true" %}selected{% endif %}>Flagged</option>
+            <option value="no-flag" {% if request.GET.flag == "false" %}selected{% endif %}>Unflagged</option>
           </select>
         </label>
         {% if crowdsource.data.all %}

@@ -167,6 +167,8 @@ TEMPLATES = [{
     }
 }]
 
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
+
 MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'django_hosts.middleware.HostsRequestMiddleware',
@@ -202,6 +204,7 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
+    'django.forms',
     'compressor',
     'corsheaders',
     'debug_toolbar',

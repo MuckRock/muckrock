@@ -3,6 +3,7 @@
 */
 
 import modal from './modal';
+import showdown from 'showdown';
 
 $(document).ready(function(){
   var formBuilder = $("#build-wrap").formBuilder({
@@ -10,9 +11,7 @@ $(document).ready(function(){
         'autocomplete',
         'button',
         'file',
-        'header',
         'hidden',
-        'paragraph',
         'radio-group'
       ],
       disabledAttrs: [
@@ -32,6 +31,36 @@ $(document).ready(function(){
         'value'
       ],
       typeUserAttrs: {
+        "checkbox-group": {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox",
+          }
+        },
+        checkbox2: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        },
+        date: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        },
+        number: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        },
+        select: {
+          gallery: {
+            label: "Gallery",
+            type: "checkbox"
+          }
+        },
         text: {
           gallery: {
             label: "Gallery",
@@ -106,20 +135,22 @@ $(document).ready(function(){
     $(selector).after(newElement);
   }
 
+  const params = new URLSearchParams(window.location.search);
   var
     page = 1,
     pageSize = 10,
     lastPage = 1,
-    flag = null,
-    search = "";
+    flag = params.get("flag") || null,
+    search = params.get("search") || "";
 
   function handleUpdateResponses(data) {
     var response, values, dataValues, dataUrlP, oEmbed, flagged, galleried,
-      tags, dataSection, mailLink;
+      tags, dataSection, mailLink, editAccess;
     var responses = $("section.assignment-responses");
     responses.html("");
     var pencil = $("#pencil-svg").html();
     var mail = $("#email-svg").html();
+    var converter = new showdown.Converter();
 
     // generate the responses
     for(var i = 0; i < data.results.length; i++) {
@@ -133,58 +164,72 @@ $(document).ready(function(){
         dataUrlP = "";
         oEmbed = "";
       }
-      flagged = data.results[i].flag ? "checked" : "";
-      galleried = data.results[i].gallery ? "checked" : "";
-      tags = data.results[i].tags.join(', ');
-      if (data.results[i].user) {
-        mailLink = `<a href="#" class="message-link" data-response="${data.results[i].id}" data-name="${data.results[i].user}">${mail}</a>`;
+      editAccess = data.results[i].flag !== undefined;
+      if (editAccess) {
+        flagged = data.results[i].flag ? "checked" : "";
+        galleried = data.results[i].gallery ? "checked" : "";
+        tags = data.results[i].tags ? data.results[i].tags.join(', ') : '';
+        if (data.results[i].user) {
+          mailLink = `<a href="#" class="message-link" data-response="${data.results[i].id}" data-name="${data.results[i].user}">${mail}</a>`;
+        } else {
+          mailLink = "";
+        }
+        response.append(`
+          <header class="textbox__header">
+            <p class="from nocollapse">
+              <a href="/assignment/${data.results[i].id}/edit/" class="edit-link">
+                ${pencil}
+              </a>
+              ${mailLink}
+              From: ${data.results[i].user || data.results[i].ip_address || 'Anonymous'}
+            </p>
+            ${dataUrlP}
+            <time class="date">
+              ${data.results[i].datetime}
+            </time>
+          </header>
+          <section class="textbox__section actionables">
+            <label>
+              Flagged:
+              <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${flagged}>
+            </label>
+            <label>
+              Gallery:
+              <input type="checkbox" class="gallery-checkbox" data-crowdsource="${data.results[i].id}" ${galleried}>
+            </label>
+            <label>
+              Tags:
+              <input type="text" class="tag-box" data-crowdsource="${data.results[i].id}" value="${tags}">
+            </label>
+          </section>`);
       } else {
-        mailLink = "";
+        response.append(`
+          <header class="textbox__header">
+            <p class="from nocollapse">
+              From: ${data.results[i].user || data.results[i].ip_address || 'Anonymous'}
+            </p>
+            ${dataUrlP}
+            <time class="date">
+              ${data.results[i].datetime}
+            </time>
+          </header>`);
       }
-      response.append(`
-        <header class="textbox__header">
-          <p class="from nocollapse">
-            <a href="/assignment/${data.results[i].id}/edit/" class="edit-link">
-              ${pencil}
-            </a>
-            ${mailLink}
-            From: ${data.results[i].user || data.results[i].ip_address || 'Anonymous'}
-          </p>
-          ${dataUrlP}
-          <time class="date">
-            ${data.results[i].datetime}
-          </time>
-        </header>
-        <section class="textbox__section actionables">
-          <label>
-            Flagged:
-            <input type="checkbox" class="flag-checkbox" data-crowdsource="${data.results[i].id}" ${flagged}>
-          </label>
-          <label>
-            Gallery:
-            <input type="checkbox" class="gallery-checkbox" data-crowdsource="${data.results[i].id}" ${galleried}>
-          </label>
-          <label>
-            Tags:
-            <input type="text" class="tag-box" data-crowdsource="${data.results[i].id}" value="${tags}">
-          </label>
-        </section>
-      `);
       values = $("<dl>");
       dataValues = data.results[i].values;
       for (var j = 0; j < dataValues.length; j++) {
         values.append("<dt>" + dataValues[j].field + "</dt>");
-        values.append("<dd>" + dataValues[j].value + "</dd>");
+        values.append("<dd>" + converter.makeHtml(dataValues[j].value) + "</dd>");
       }
       dataSection = $("<section>").addClass("textbox__section").html(values);
       response.append(dataSection);
       if (data.results[i].edit_user) {
         dataSection.append($("<p>").html(
           `<em>This submission was edited by ${data.results[i].edit_user} at
-          ${data.results[i].edit_datetime}.
-          <a href="/assignment/${data.results[i].id}/revert">
+          ${data.results[i].edit_datetime}.` + 
+          (editAccess ? `<a href="/assignment/${data.results[i].id}/revert">
             View the original submission and, if necessary, revert.
-          </a></em>`
+          </a>` : '') +
+          `</em>`
         ));
       }
       response.append(oEmbed);
@@ -307,6 +352,11 @@ $(document).ready(function(){
   });
 
   function updateResponses() {
+    history.pushState(
+      '',
+      document.title,
+      `?flag=${flag}&search=${search}#assignment-responses`,
+    )
     $.ajax({
       url: "/api_v1/assignment-responses/",
       type: 'GET',
