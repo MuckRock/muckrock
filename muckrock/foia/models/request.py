@@ -1190,7 +1190,7 @@ class FOIARequest(models.Model):
     def default_subject(self):
         """Make a subject line for a communication for this request"""
         law_name = self.jurisdiction.get_law_name()
-        tracking_id = self.current_tracking_id()
+        tracking_id = self.all_tracking_ids()
         if tracking_id:
             return 'RE: %s Request #%s' % (law_name, tracking_id)
         elif self.communications.count() > 1:
@@ -1211,7 +1211,7 @@ class FOIARequest(models.Model):
         # it on to the end
         if comms[-1] != comm:
             comms.append(comm)
-        # if theirs only one communication, do not double include it
+        # if there's only one communication, do not double include it
         if len(comms) == 1:
             return comms
         # always show the latest message
@@ -1287,6 +1287,14 @@ class FOIARequest(models.Model):
         else:
             self._tracking_id = ''
         return self._tracking_id
+    
+    def all_tracking_ids(self):
+        """Gets all the tracking ids as a single string"""
+        tracking_ids = self.tracking_ids.all()
+        if tracking_ids:
+            return ', '.join(set(e.tracking_id for e in self.tracking_ids.all()))
+        else:
+            return ''
 
     def add_tracking_id(self, tracking_id, reason=None):
         """Add a new tracking ID"""
