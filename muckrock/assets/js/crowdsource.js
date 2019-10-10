@@ -34,7 +34,7 @@ $(document).ready(function(){
         "checkbox-group": {
           gallery: {
             label: "Gallery",
-            type: "checkbox",
+            type: "checkbox"
           }
         },
         checkbox2: {
@@ -355,8 +355,8 @@ $(document).ready(function(){
     history.pushState(
       '',
       document.title,
-      `?flag=${flag}&search=${search}#assignment-responses`,
-    )
+      `?flag=${flag}&search=${search}#assignment-responses`
+    );
     $.ajax({
       url: "/api_v1/assignment-responses/",
       type: 'GET',
