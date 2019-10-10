@@ -536,12 +536,12 @@ class CrowdsourceResponse(models.Model):
                 self.get_values(metadata),
             )
         )
-        text += '\n{}{}#assignment-responses'.format(
+        text += u'\n{}{}#assignment-responses'.format(
             settings.MUCKROCK_URL,
             self.crowdsource.get_absolute_url(),
         )
         EmailMessage(
-            subject='[Assignment Response] {} by {}'.format(
+            subject=u'[Assignment Response] {} by {}'.format(
                 self.crowdsource.title,
                 self.user.username if self.user else 'Anonymous',
             ),
