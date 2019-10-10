@@ -93,3 +93,10 @@ class BuyRequestForm(StripeForm):
         self.fields['num_requests'].validators[0].limit_value = limit_val
         self.fields['num_requests'].widget.attrs['min'] = limit_val
         self.fields['num_requests'].initial = limit_val
+
+
+class ContactForm(forms.Form):
+    """A form for contacting the user"""
+
+    subject = forms.CharField(max_length=255)
+    message = forms.CharField(widget=forms.Textarea)

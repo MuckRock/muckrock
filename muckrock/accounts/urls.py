@@ -55,6 +55,11 @@ urlpatterns = [
         name='acct-profile'
     ),
     url(
+        r'^contact_user/(?P<idx>\d+)/$',
+        views.contact_user,
+        name='acct-contact-user'
+    ),
+    url(
         r'^notifications/$',
         views.NotificationList.as_view(),
         name='acct-notifications'

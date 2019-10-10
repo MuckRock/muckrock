@@ -35,6 +35,7 @@ from rest_framework.authtoken.models import Token
 from muckrock.accounts.filters import ProxyFilterSet
 from muckrock.accounts.forms import (
     BuyRequestForm,
+    ContactForm,
     EmailSettingsForm,
     OrgPreferencesForm,
     ProfileSettingsForm,
@@ -252,6 +253,8 @@ class ProfileView(BuyRequestsMixin, FormView):
                 reverse('admin:auth_user_change', args=(self.user.pk,)),
             'api_token':
                 Token.objects.get_or_create(user=self.user)[0],
+            'contact_form':
+                ContactForm,
         })
         return context_data
 
@@ -266,6 +269,27 @@ class ProfileView(BuyRequestsMixin, FormView):
         if self.request.user == self.user:
             self.buy_requests(form)
         return redirect('acct-profile', username=self.user.username)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def contact_user(request, idx):
+    """Let staff send messages to users"""
+    user = get_object_or_404(User, pk=idx)
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            email = TemplateEmail(
+                user=user,
+                extra_context={'message': form.cleaned_data['message']},
+                subject=form.cleaned_data['subject'],
+                text_template='message/accounts/contact.txt',
+                html_template='message/accounts/contact.html',
+            )
+            email.send(fail_silently=False)
+            messages.success(request, 'Message sent!')
+        else:
+            messages.error(request, 'Message failed!')
+    return redirect(user)
 
 
 @csrf_exempt
