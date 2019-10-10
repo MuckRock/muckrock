@@ -93,6 +93,20 @@
 {% block activity %}
   <section class="actions">
     <div>
+      {% if request.user.is_staff %}
+        <span data-modal="#contact-modal" class="modal-link blue button">
+          Contact User
+        </span>
+        <div class="modal" id="contact-modal">
+          <h1>Contact {{ user_obj.profile.full_name }}</h1>
+          <form method="post" action="{% url "acct-contact-user" idx=user_obj.pk %}">
+            {% csrf_token %}
+            {% include "lib/pattern/form.html" with form=contact_form %}
+            <button type="submit" name="action" value="contact" class="primary button">Send</button>
+            <span class="close-modal button">Close</span>
+          </form>
+        </div>
+      {% endif %}
       {% if request.user.is_staff and not user_obj.is_superuser %}
         <form method="post" action="/hijack/{{user_obj.pk}}/">
           {% csrf_token %}
