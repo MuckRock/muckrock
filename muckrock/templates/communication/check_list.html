@@ -1,7 +1,7 @@
 {% extends 'base_list.html' %}
 
 {% block list-sections %}
-  <p>Amount outstanding: {{ outstanding }}</p>
+  <p>Amount outstanding: ${{ outstanding|floatformat:2|default:"0.00" }}</p>
 {% endblock list-sections %}
 
 {% block list-table-head %}
