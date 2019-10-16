@@ -285,7 +285,7 @@ class Profile(models.Model):
         return cache_get_or_set(
             'url_auth_token:{}'.format(self.uuid),
             get_url_auth_token_squarelet,
-            60 * 5,
+            10,
         )
 
 
