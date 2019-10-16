@@ -89,7 +89,7 @@ class MailPDF(PDF):
             appeal=self.appeal,
             switch=self.switch,
             include_address=self.include_address,
-            payment=self.amount is not None,
+            payment=self.amount > 0,
         )
         # remove emoji's, as they break pdf rendering
         msg_body = emoji.get_emoji_regexp().sub(u'', msg_body)
