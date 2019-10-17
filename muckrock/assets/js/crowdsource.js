@@ -352,11 +352,13 @@ $(document).ready(function(){
   });
 
   function updateResponses() {
-    history.pushState(
-      '',
-      document.title,
-      `?flag=${flag}&search=${search}#assignment-responses`
-    );
+    if (window.location.hash == "#assignment-responses") {
+      history.pushState(
+        '',
+        document.title,
+        `?flag=${flag}&search=${search}#assignment-responses`
+      );
+    }
     $.ajax({
       url: "/api_v1/assignment-responses/",
       type: 'GET',
