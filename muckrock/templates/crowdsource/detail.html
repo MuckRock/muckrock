@@ -145,6 +145,10 @@
             Show data inline: <input type="checkbox" id="data-inline">
           </label>
         {% endif %}
+        {% if edit_access %}
+          <label>Flag All: <input type="checkbox" class="flag-all"></label>
+          <label>Gallery All: <input type="checkbox" class="gallery-all"></label>
+        {% endif %}
       </form>
       <nav class="pagination small">
         <div class="pagination__control">

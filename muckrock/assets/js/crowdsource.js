@@ -243,7 +243,7 @@ $(document).ready(function(){
       // Prevent click from propagating up to the collapsable header.
       event.stopPropagation();
     });
-    $('.flag-checkbox').click(function(){
+    $('.flag-checkbox').change(function(){
       $.ajax({
         url: "/api_v1/assignment-responses/" + $(this).data("crowdsource") + "/",
         type: "PATCH",
@@ -252,7 +252,7 @@ $(document).ready(function(){
         }
       });
     });
-    $('.gallery-checkbox').click(function(){
+    $('.gallery-checkbox').change(function(){
       $.ajax({
         url: "/api_v1/assignment-responses/" + $(this).data("crowdsource") + "/",
         type: "PATCH",
@@ -260,6 +260,12 @@ $(document).ready(function(){
           'gallery': $(this).prop("checked")
         }
       });
+    });
+    $('.flag-all').click(function(){
+      $('.flag-checkbox').prop('checked', $(this).prop('checked')).change();
+    });
+    $('.gallery-all').click(function(){
+      $('.gallery-checkbox').prop('checked', $(this).prop('checked')).change();
     });
     $('.message-link').click(function(e){
       e.preventDefault();
