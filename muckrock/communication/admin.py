@@ -197,7 +197,7 @@ class PhoneNumberAdmin(VersionAdmin):
 
 class AddressAdmin(VersionAdmin):
     """Address admin"""
-    search_fields = ['address']
+    search_fields = ['address', 'street', 'suite', 'city', 'state', 'zip_code']
     fieldsets = (
         (None, {
             'fields': (
