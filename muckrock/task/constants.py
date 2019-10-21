@@ -15,7 +15,7 @@ PUBLIC_FLAG_CATEGORIES = [
     ),
     (
         'no response',
-        'This agency hasn\'t responded after multiple submissions.',
+        'This agency has not responded after multiple submissions.',
     ),
     (
         'wrong agency',
