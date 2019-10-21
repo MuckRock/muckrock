@@ -112,6 +112,33 @@ CONFIG = [
                 "description": "We use Zoho desk for help ticket management",
                 "envvars": [("ZOHO_TOKEN", ""),],
             },
+            {
+                "name":
+                    "Lob",
+                "url":
+                    "https://lob.com",
+                "description":
+                    "Lob is used for sending snail mail",
+                "envvars": [
+                    ("LOB_SECRET_KEY", ""),
+                    ("LOB_BANK_ACCOUNT_ID", ""),
+                ],
+            },
+            {
+                "name":
+                    "Plaid",
+                "url":
+                    "https://plaid.com",
+                "description":
+                    "Plaid is used for checking our bank account",
+                "envvars": [
+                    ("PLAID_CLIENT_ID", ""),
+                    ("PLAID_SECRET", ""),
+                    ("PLAID_PUBLIC_KEY", ""),
+                    ("PLAID_ENV", ""),
+                    ("PLAID_ACCESS_TOKEN", ""),
+                ],
+            },
         ],
     },
     {
