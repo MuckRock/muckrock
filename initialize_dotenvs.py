@@ -148,17 +148,17 @@ CONFIG = [
             "name":
                 "PostgreSQL",
             "description":
-                "POSTGRES values are used by Django, PG values are used for importing DB from Heroku",
+                "POSTGRES values are used by Django, PG values are used for importing DB from Heroku - only uncomment them if needed",
             "envvars": [
                 ("POSTGRES_HOST", "muckrock_postgres"),
                 ("POSTGRES_PORT", "5432"),
                 ("POSTGRES_DB", "muckrock"),
                 ("POSTGRES_USER", PGUSER),
                 ("POSTGRES_PASSWORD", PGPASSWORD),
-                ("PGHOST", "muckrock_postgres"),
-                ("PGUSER", PGUSER),
-                ("PGPASSWORD", PGPASSWORD),
-                ("PGSSLMODE", 'allow'),
+                ("#PGHOST", "muckrock_postgres"),
+                ("#PGUSER", PGUSER),
+                ("#PGPASSWORD", PGPASSWORD),
+                ("#PGSSLMODE", 'allow'),
             ],
         }],
     },
@@ -166,11 +166,13 @@ CONFIG = [
 
 
 def main():
+    print("Initializing the dot env environment for Squarelet development")
     os.makedirs(".envs/.local/", 0o775)
+    print("Created the directories")
     for file_config in CONFIG:
         with open(".envs/.local/{}".format(file_config["name"]), "w") as file_:
             for section in file_config["sections"]:
-                for key in ['name', 'url', 'description']:
+                for key in ["name", "url", "description"]:
                     if key in section:
                         file_.write("# {}\n".format(section[key]))
                 file_.write("# {}\n".format("-" * 78))
@@ -182,6 +184,8 @@ def main():
                         )
                     )
                 file_.write("\n")
+        print("Created file .envs/.local/{}".format(file_config["name"]))
+    print("Initialization Complete")
 
 
 if __name__ == "__main__":
