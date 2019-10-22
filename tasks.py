@@ -100,6 +100,12 @@ def format(c):
 
 
 @task
+def up(c):
+    """Start the docker images"""
+    c.run("docker-compose up -d")
+
+
+@task
 def runserver(c):
     """Run the development server"""
     c.run(
