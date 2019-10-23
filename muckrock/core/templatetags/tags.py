@@ -86,7 +86,7 @@ def abs_filter(value):
 
 
 email_re = re.compile(
-    r'[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})'
+    r'[a-zA-Z0-9._%+-]{1,64}@(?P<domain>[a-zA-Z0-9.-]{1,255}\.[a-zA-Z]{2,4})'
 )
 
 
