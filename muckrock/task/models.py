@@ -139,7 +139,7 @@ class OrphanTask(Task):
         """Gets the domain of the sender's email address."""
         try:
             return self.communication.emails.all()[0].from_email.domain
-        except IndexError:
+        except (IndexError, AttributeError):
             return None
 
     def blacklist(self):
