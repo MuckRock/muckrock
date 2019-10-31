@@ -50,7 +50,9 @@ class Portal(models.Model):
         # pylint: disable=access-member-before-definition
         # pylint: disable=attribute-defined-outside-init
         portal_classes = {
-            'nextrequest': NextRequestPortal,
+            # disabling next request integration for now,
+            # as it is causing issues
+            '__nextrequest': NextRequestPortal,
             'fbi': FBIPortal,
             'webform': WebFormPortal,
         }
