@@ -60,7 +60,7 @@ class TestManualPortal(TestCase):
         eq_(len(password), 12)
 
 
-class TestNextRequestPortal(TestCase):
+class _TestNextRequestPortal(TestCase):
     """Test cases for the NextRequest portal integration"""
 
     def setUp(self):
