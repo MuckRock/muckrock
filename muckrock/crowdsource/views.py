@@ -466,7 +466,9 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
         response.edit_datetime = timezone.now()
         response.save()
 
+        # remove non-assignment field fields
         form.cleaned_data.pop('data_id', None)
+        form.cleaned_data.pop('public', None)
         for field_id, new_value in form.cleaned_data.iteritems():
             field = CrowdsourceField.objects.filter(pk=field_id).first()
             if field and field.field.multiple_values:
