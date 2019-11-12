@@ -355,7 +355,7 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         mixpanel_event(
             request,
             'Start Project Crowdfund',
-            self._project_mixpanel_properties(self.object),
+            self._project_mixpanel_properties(self.get_project()),
         )
         return response
 
