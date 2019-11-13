@@ -235,12 +235,15 @@ def failed_payment(invoice_id):
     subscription_type = get_subscription_type(invoice)
     recurring_donation = None
     crowdfund = None
+    email_to = []
     if subscription_type == 'donate':
         recurring_donation = RecurringDonation.objects.filter(
             subscription_id=invoice.subscription,
         ).first()
         if recurring_donation:
             user = recurring_donation.user
+            if user is None:
+                email_to = [recurring_donation.email]
             recurring_donation.payment_failed = True
             recurring_donation.save()
         else:
@@ -255,6 +258,8 @@ def failed_payment(invoice_id):
         ).first()
         if recurring_payment:
             user = recurring_payment.user
+            if user is None:
+                email_to = [recurring_payment.email]
             crowdfund = recurring_payment.crowdfund
             recurring_payment.payment_failed = True
             recurring_payment.save()
@@ -290,6 +295,7 @@ def failed_payment(invoice_id):
         logger.info('Failed payment by %s, attempt %s', user, attempt)
     notification = TemplateEmail(
         user=user,
+        to=email_to,
         extra_context=context,
         text_template='message/notification/failed_payment.txt',
         html_template='message/notification/failed_payment.html',

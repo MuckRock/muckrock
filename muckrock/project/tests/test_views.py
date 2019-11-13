@@ -56,7 +56,7 @@ class TestProjectCreateView(TestCase):
         self.url = reverse('project-create')
 
     def test_basic(self):
-        """Basic users should not be able to GET the ProjectCreateView."""
+        """Basic users should be able to GET the ProjectCreateView."""
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
         eq_(
@@ -283,6 +283,18 @@ class TestProjectCrowdfundView(TestCase):
         )
         self.view = views.ProjectCrowdfundView.as_view()
         self.request_factory = RequestFactory()
+
+    def test_get(self):
+        """Users should be able to GET the ProjectCrowdfundView."""
+        user = UserFactory(is_staff=True)
+        response = http_get_response(
+            self.url,
+            self.view,
+            user,
+            slug=self.project.slug,
+            pk=self.project.pk
+        )
+        eq_(response.status_code, 200)
 
     def test_post(self):
         """Posting data for a crowdfund should create it."""
