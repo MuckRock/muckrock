@@ -601,13 +601,18 @@ class FlaggedTask(Task):
         description += make_url(self.agency)
         description += make_url(self.jurisdiction)
 
+        email = (
+            self.user.email
+            if self.user and self.user.email else 'info@muckrock.com'
+        )
+
         response = zoho_post(
             'tickets',
             json={
                 'subject': subject,
                 'departmentId': settings.ZOHO_DEPT_IDS['muckrock'],
                 'contactId': contact_id,
-                'email': self.user.email if self.user else 'info@muckrock.com',
+                'email': email,
                 'description': description,
                 'channel': 'Web',
                 'category': 'Flag',
@@ -620,7 +625,7 @@ class FlaggedTask(Task):
 
     def get_contact_id(self, user):
         """Get a zoho contact id for the contact with the given email address"""
-        if user is None:
+        if user is None or not user.email:
             user = User.objects.get(username='MuckrockStaff')
         response = zoho_get(
             'contacts/search',
