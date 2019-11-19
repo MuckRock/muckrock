@@ -112,6 +112,19 @@
         <dd>
         <textarea rows="1" readonly><iframe src="https://{{ domain }}{% url "crowdsource-gallery" slug=crowdsource.slug idx=crowdsource.pk %}" width="100%" height="600px"></iframe></textarea>
         </dd>
+        <dt>Responses per Day</dt>
+        <dd>
+          <div class="crowdsource-daily-response-table">
+            <table>
+              {% for day in crowdsource.responses_per_day %}
+                <tr>
+                  <td>{{ day.date|date }}</td>
+                  <td>{{ day.count }}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        <dd>
       </dl>
     </section>
 
