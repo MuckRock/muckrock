@@ -9,6 +9,8 @@ from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.aggregates import Count
+from django.db.models.functions.datetime import TruncDay
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -224,7 +226,7 @@ class Crowdsource(models.Model):
         """Line about who has contributed"""
         users = list({
             r.user
-            for r in self.responses.filter()
+            for r in self.responses.select_related('user__profile')
             if r.user and r.public
         })
         total = len(users)
@@ -248,6 +250,12 @@ class Crowdsource(models.Model):
             )
         else:
             return 'No one has helped yet, be the first!'
+
+    def responses_per_day(self):
+        """How many responses there have been per day"""
+        return self.responses.annotate(
+            date=TruncDay('datetime')
+        ).values('date').annotate(count=Count('id')).order_by('date')
 
     class Meta:
         verbose_name = 'assignment'
