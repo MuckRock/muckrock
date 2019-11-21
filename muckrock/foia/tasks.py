@@ -13,6 +13,7 @@ from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
@@ -223,18 +224,28 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
     """Create all the foias for a composer"""
     # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
-    for agency in composer.agencies.select_related(
-        'jurisdiction__law',
-        'jurisdiction__parent__law',
-    ).iterator():
-        FOIARequest.objects.create_new(
-            composer=composer,
-            agency=agency,
-        )
-    # mark all attachments as sent here, after all requests have been sent
-    composer.pending_attachments.filter(
-        user=composer.user, sent=False
-    ).update(sent=True)
+    logger.info(
+        u'Starting composer_create_foias: (%s, %s, %s)',
+        composer_pk,
+        contact_info,
+        composer.agencies.count(),
+    )
+    with transaction.atomic():
+        for agency in composer.agencies.select_related(
+            'jurisdiction__law',
+            'jurisdiction__parent__law',
+        ).iterator():
+            logger.info(
+                u'Creating the foia for agency (%s, %s)', agency.pk, agency.name
+            )
+            FOIARequest.objects.create_new(
+                composer=composer,
+                agency=agency,
+            )
+        # mark all attachments as sent here, after all requests have been sent
+        composer.pending_attachments.filter(
+            user=composer.user, sent=False
+        ).update(sent=True)
 
 
 @task(
