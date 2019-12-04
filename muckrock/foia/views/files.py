@@ -18,6 +18,7 @@ from muckrock.foia.models import FOIAFile, FOIARequest
 class FileEmbedView(DetailView):
     """Presents an embeddable view for a single file."""
     model = FOIAFile
+    queryset = FOIAFile.objects.filter(comm__foia__embargo=False)
     template_name = 'foia/file/embed.html'
 
 
