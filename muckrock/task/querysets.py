@@ -14,7 +14,12 @@ from datetime import date
 from muckrock import task
 from muckrock.communication.models import EmailCommunication
 from muckrock.core.models import ExtractDay
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAComposer,
+    FOIAFile,
+    FOIARequest,
+)
 from muckrock.foia.querysets import (
     FOIACommunicationQuerySet,
     PreloadFileQuerysetMixin,
@@ -272,14 +277,13 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         from muckrock.agency.models import (
-            Agency,
             AgencyEmail,
             AgencyPhone,
             AgencyAddress,
         )
         return (
             self.select_related(
-                'agency__jurisdiction',
+                'agency__jurisdiction__parent',
                 'agency__user',
                 'agency__portal',
                 'user',
@@ -299,14 +303,14 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
                 ),
                 Prefetch(
                     'agency__foiarequest_set',
-                    queryset=FOIARequest.objects.
-                    select_related('agency__jurisdiction')
+                    queryset=FOIARequest.objects.select_related(
+                        'agency__jurisdiction', 'composer'
+                    )
                 ),
                 Prefetch(
-                    'agency__jurisdiction__agencies',
-                    queryset=Agency.objects.filter(status='approved',
-                                                   ).order_by('name'),
-                    to_attr='other_agencies'
+                    'agency__composers',
+                    queryset=FOIAComposer.objects.filter(status='started'),
+                    to_attr='pending_drafts'
                 )
             )
         )
