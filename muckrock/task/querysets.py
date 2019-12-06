@@ -471,6 +471,7 @@ class NewPortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
             self.select_related(
                 'communication__foia__agency__jurisdiction',
                 'communication__foia__composer__user',
+                'communication__from_user__profile__agency',
                 'resolved_by',
             ).preload_communication()
         )
