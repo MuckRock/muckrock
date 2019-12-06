@@ -440,7 +440,7 @@ class PortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                 'communication__foia__agency__jurisdiction',
                 'communication__foia__composer__user',
                 'communication__foia__portal',
-                'communication__from_user__profile',
+                'communication__from_user__profile__agency',
                 'resolved_by',
             ).prefetch_related(
                 Prefetch(
@@ -452,10 +452,11 @@ class PortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related(
-                        'from_user__profile',
+                        'from_user__profile__agency',
                     ).preload_list(),
                     to_attr='reverse_communications'
                 ),
+                'communication__files',
                 'communication__foia__tracking_ids',
             ).preload_communication()
         )

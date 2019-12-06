@@ -240,7 +240,7 @@ class Profile(models.Model):
     @mproperty
     def is_agency_user(self):
         """Is this an agency user?"""
-        return self.agency is not None
+        return self.agency_id is not None
 
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
