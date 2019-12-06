@@ -180,6 +180,7 @@ class SnailMailTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                 'resolved_by',
             ).prefetch_related(
                 'communication__foia__tracking_ids',
+                'communication__files',
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
