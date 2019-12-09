@@ -10,6 +10,10 @@ from datetime import datetime
 class OrganizationQuerySet(models.QuerySet):
     """Object manager for profiles"""
 
+    def get_cache(self):
+        """Return organizationsto cache for a user"""
+        return self.order_by('-individual', 'name').select_related('plan')
+
     @transaction.atomic
     def squarelet_update_or_create(self, uuid, data):
         """Update or create records based on data from squarelet"""

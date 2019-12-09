@@ -150,6 +150,6 @@ class ProfileQuerySet(models.QuerySet):
         )
         cache.set(
             u'sb:{}:user_orgs'.format(user.username),
-            user.organizations.order_by('-individual', 'name'),
+            user.organizations.get_cache(),
             settings.DEFAULT_CACHE_TIMEOUT,
         )

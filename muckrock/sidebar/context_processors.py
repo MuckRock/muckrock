@@ -50,8 +50,9 @@ def get_organizations(user):
     """Gets all of the users organizations"""
 
     return cache_get_or_set(
-        u'sb:%s:user_orgs' % user.username, lambda: user.organizations.
-        order_by('-individual', 'name'), settings.DEFAULT_CACHE_TIMEOUT
+        u'sb:%s:user_orgs' % user.username,
+        lambda: user.organizations.get_cache(),
+        settings.DEFAULT_CACHE_TIMEOUT,
     )
 
 

@@ -244,7 +244,7 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
           "$name": "{{ request.user.profile.full_name }}",
           "Username": "{{ request.user.username }}",
           "Organizations": [
-              {% for organization in request.user.organizations.all %}
+              {% for organization in organizations %}
                 {
                   "UUID": "{{organization.uuid}}",
                   "Name": "{{organization.name}}",

@@ -340,7 +340,8 @@ class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
             query = (
                 Q(foia__composer__user=user)
                 | Q(foia__in=user.edit_access.all())
-                | Q(foia__in=user.read_access.all()) | ~Q(foia__embargo=True)
+                | Q(foia__in=user.read_access.all())
+                | Q(foia__embargo=False)
             )
             # organizational users may also view requests from their org that are shared
             query = query | Q(
@@ -350,7 +351,7 @@ class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
             return self.filter(query)
         else:
             # anonymous user, filter out embargoes
-            return self.exclude(foia__embargo=True)
+            return self.filter(foia__embargo=False)
 
 
 class FOIAFileQuerySet(models.QuerySet):

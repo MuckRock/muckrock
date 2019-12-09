@@ -14,7 +14,12 @@ from datetime import date
 from muckrock import task
 from muckrock.communication.models import EmailCommunication
 from muckrock.core.models import ExtractDay
-from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAComposer,
+    FOIAFile,
+    FOIARequest,
+)
 from muckrock.foia.querysets import (
     FOIACommunicationQuerySet,
     PreloadFileQuerysetMixin,
@@ -137,7 +142,7 @@ class OrphanTaskQuerySet(TaskQuerySet):
         return (
             self.select_related(
                 'communication__likely_foia__agency__jurisdiction',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related(
                 'communication__files',
                 Prefetch(
@@ -172,9 +177,10 @@ class SnailMailTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                 'communication__foia__agency__jurisdiction__parent__law',
                 'communication__foia__composer__user',
                 'communication__foia__address',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related(
                 'communication__foia__tracking_ids',
+                'communication__files',
                 Prefetch(
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.filter(response=True),
@@ -229,7 +235,7 @@ class FlaggedTaskQuerySet(TaskQuerySet):
             'foia__agency__jurisdiction',
             'jurisdiction',
             'user',
-            'resolved_by',
+            'resolved_by__profile',
         )
 
     def get_processing_days(self):
@@ -253,7 +259,7 @@ class ProjectReviewTaskQuerySet(TaskQuerySet):
         return (
             self.select_related(
                 'project',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related(
                 Prefetch(
                     'project__requests',
@@ -272,18 +278,17 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         from muckrock.agency.models import (
-            Agency,
             AgencyEmail,
             AgencyPhone,
             AgencyAddress,
         )
         return (
             self.select_related(
-                'agency__jurisdiction',
+                'agency__jurisdiction__parent',
                 'agency__user',
                 'agency__portal',
                 'user',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related(
                 Prefetch(
                     'agency__agencyemail_set',
@@ -299,14 +304,14 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
                 ),
                 Prefetch(
                     'agency__foiarequest_set',
-                    queryset=FOIARequest.objects.
-                    select_related('agency__jurisdiction')
+                    queryset=FOIARequest.objects.select_related(
+                        'agency__jurisdiction', 'composer'
+                    )
                 ),
                 Prefetch(
-                    'agency__jurisdiction__agencies',
-                    queryset=Agency.objects.filter(status='approved',
-                                                   ).order_by('name'),
-                    to_attr='other_agencies'
+                    'agency__composers',
+                    queryset=FOIAComposer.objects.filter(status='started'),
+                    to_attr='pending_drafts'
                 )
             )
         )
@@ -326,7 +331,7 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             self.select_related(
                 'agency__jurisdiction',
                 'agency__portal',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related(
                 Prefetch(
                     'agency__agencyemail_set',
@@ -365,7 +370,7 @@ class ResponseTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
             self.select_related(
                 'communication__foia__agency__jurisdiction',
                 'communication__from_user__profile__agency',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related(
                 Prefetch(
                     'communication__files',
@@ -397,7 +402,7 @@ class StatusChangeTaskQuerySet(TaskQuerySet):
         return self.select_related(
             'foia__agency__jurisdiction',
             'user',
-            'resolved_by',
+            'resolved_by__profile',
         )
 
 
@@ -408,7 +413,7 @@ class CrowdfundTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return self.select_related(
             'crowdfund__foia__agency__jurisdiction',
-            'resolved_by',
+            'resolved_by__profile',
         )
 
 
@@ -420,7 +425,7 @@ class MultiRequestTaskQuerySet(TaskQuerySet):
         return (
             self.select_related(
                 'composer__user',
-                'resolved_by',
+                'resolved_by__profile',
             ).prefetch_related('composer__agencies')
         )
 
@@ -435,8 +440,8 @@ class PortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                 'communication__foia__agency__jurisdiction',
                 'communication__foia__composer__user',
                 'communication__foia__portal',
-                'communication__from_user__profile',
-                'resolved_by',
+                'communication__from_user__profile__agency',
+                'resolved_by__profile',
             ).prefetch_related(
                 Prefetch(
                     'communication__foia__communications',
@@ -447,10 +452,11 @@ class PortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
                     'communication__foia__communications',
                     queryset=FOIACommunication.objects.order_by('-datetime')
                     .select_related(
-                        'from_user__profile',
+                        'from_user__profile__agency',
                     ).preload_list(),
                     to_attr='reverse_communications'
                 ),
+                'communication__files',
                 'communication__foia__tracking_ids',
             ).preload_communication()
         )
@@ -465,7 +471,8 @@ class NewPortalTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
             self.select_related(
                 'communication__foia__agency__jurisdiction',
                 'communication__foia__composer__user',
-                'resolved_by',
+                'communication__from_user__profile__agency',
+                'resolved_by__profile',
             ).preload_communication()
         )
 
@@ -477,7 +484,7 @@ class PaymentInfoTaskQuerySet(TaskQuerySet):
         """Preload relations for list display"""
         return self.select_related(
             'communication__foia__agency__jurisdiction',
-            'resolved_by',
+            'resolved_by__profile',
         ).prefetch_related(
             Prefetch(
                 'communication__foia__communications',
