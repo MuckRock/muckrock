@@ -51,7 +51,7 @@ def get_organizations(user):
 
     return cache_get_or_set(
         u'sb:%s:user_orgs' % user.username,
-        lambda: user.organizations.get_cache(),
+        user.organizations.get_cache,
         settings.DEFAULT_CACHE_TIMEOUT,
     )
 
