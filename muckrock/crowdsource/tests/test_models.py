@@ -81,7 +81,7 @@ class TestCrowdsource(TestCase):
                 },
             ])
         )
-        assert_false(crowdsource.fields.filter(label='Delete Me').exists())
+        ok_(crowdsource.fields.get(label='Delete Me').deleted)
         ok_(
             crowdsource.fields.filter(
                 label='Text Field',

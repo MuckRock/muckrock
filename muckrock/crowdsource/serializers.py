@@ -2,6 +2,9 @@
 Serializers for the Crowdsource application API
 """
 
+# Standard Library
+from collections import OrderedDict
+
 # Third Party
 from rest_framework import serializers
 
@@ -39,13 +42,13 @@ class CrowdsourceResponseBaseSerializer(serializers.ModelSerializer):
         fields = obj.crowdsource.fields.all()
         values = obj.values.all()
         field_values = {}
-        field_labels = {}
+        field_labels = OrderedDict()
         for field in fields:
             if (
                 field.gallery or self.show_all
             ) and field.type not in STATIC_FIELDS:
                 field_values[field.pk] = []
-                field_labels[field.pk] = field.label
+                field_labels[field.pk] = unicode(field)
         for value in values:
             if value.value and value.field_id in field_values:
                 field_values[value.field_id].append(value.value)
