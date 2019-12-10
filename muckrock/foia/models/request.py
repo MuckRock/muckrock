@@ -1129,7 +1129,7 @@ class FOIARequest(models.Model):
                 'form': FOIAFlagForm(),
             },
             {
-                'test': self.has_perm(user, 'delete'),
+                'test': user.has_perm('foia.delete_foiarequest'),
                 'title': 'Delete Request',
                 'action': 'delete',
                 'desc':
