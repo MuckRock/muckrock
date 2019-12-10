@@ -11,14 +11,7 @@ import json
 from datetime import datetime
 
 # Third Party
-from nose.tools import (
-    assert_false,
-    assert_in,
-    assert_is_none,
-    assert_not_in,
-    eq_,
-    ok_,
-)
+from nose.tools import assert_in, assert_is_none, assert_not_in, eq_, ok_
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory, UserFactory
