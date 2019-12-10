@@ -24,9 +24,7 @@
     <a href="{% url "crowdsource-assignment" slug=crowdsource.slug idx=crowdsource.pk %}" class="button primary">Submit to this assignment</a>
     {% if edit_access %}
       <a href="?csv=1" class="button primary">Results CSV</a>
-      {% if crowdsource.status == "draft" %}
-        <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
-      {% endif %}
+      <a href="{% url "crowdsource-draft" idx=crowdsource.pk slug=crowdsource.slug %}" class="button primary">Edit</a>
       {% if crowdsource.status == "open" %}
         <form method="post">
           {% csrf_token %}

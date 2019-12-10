@@ -47,7 +47,7 @@ class CrowdsourceAssignmentForm(forms.Form):
         user = kwargs.pop('user')
         super(CrowdsourceAssignmentForm, self).__init__(*args, **kwargs)
 
-        for field in crowdsource.fields.all():
+        for field in crowdsource.fields.filter(deleted=False):
             self.fields[str(field.pk)] = field.get_form_field()
         if user.is_anonymous and crowdsource.registration != 'off':
             required = crowdsource.registration == 'required'

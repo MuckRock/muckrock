@@ -1,11 +1,21 @@
 {% extends 'base.html' %}
 {% load static from staticfiles %}
-{% block title %}MuckRock &bull; New Crowdsource{% endblock %}
+{% block title %}
+  {% if crowdsource %}
+    MuckRock &bull; Edit Crowdsource
+  {% else %}
+    MuckRock &bull; New Crowdsource
+  {% endif %}
+{% endblock %}
 
 {% block content %}
   <div class="create crowdsource form">
     <header>
-      <h1>Create a new crowdsource</h1>
+      {% if crowdsource %}
+        <h1>Edit crowdsource</h1>
+      {% else %}
+        <h1>Create a new crowdsource</h1>
+      {% endif %}
     </header>
     <form method="post" enctype="multipart/form-data" class="create-crowdsource">
       {% csrf_token %}
@@ -50,8 +60,12 @@
       {% endfor %}
 
       <p><a href="#" id="add-crowdsource-data">Add another...</a></p>
-      <button type="submit" name="submit" value="save" class="button">Save</button>
-      <button type="submit" name="submit" value="start" class="blue button">Start</button>
+      {% if crowdsource.status == "open" %}
+        <button type="submit" name="submit" value="start" class="blue button">Update</button>
+      {% else %}
+        <button type="submit" name="submit" value="save" class="button">Save</button>
+        <button type="submit" name="submit" value="start" class="blue button">Start</button>
+      {% endif %}
     </form>
   </div>
 {% endblock %}

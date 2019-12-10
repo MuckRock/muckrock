@@ -8,8 +8,10 @@ from django.contrib.postgres.fields import JSONField
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.aggregates import Count
+from django.db.models.expressions import Case, Value, When
+from django.db.models.functions.base import Concat
 from django.db.models.functions.datetime import TruncDay
 from django.utils import timezone
 from django.utils.html import format_html
@@ -135,37 +137,54 @@ class Crowdsource(models.Model):
         else:
             return None
 
+    @transaction.atomic
     def create_form(self, form_json):
         """Create the crowdsource form from the form builder json"""
-        # delete any old fields and re-create from the new JSON
-        self.fields.all().delete()
         form_data = json.loads(form_json)
         seen_labels = set()
         cleaner = Cleaner(tags=[], attributes={}, styles=[], strip=True)
         htmlparser = HTMLParser()
+        # reset the order for all fields to avoid violating the unique constraint
+        # it also allows for detection of deleted fields
+        self.fields.update(order=None)
         for order, field_data in enumerate(form_data):
             label = cleaner.clean(field_data['label'])[:255]
             label = htmlparser.unescape(label)
             label = self._uniqify_label_name(seen_labels, label)
-            field = self.fields.create(
-                label=label,
-                type=field_data['type'],
-                help_text=cleaner.clean(
-                    field_data.get('description', ''),
-                )[:255],
-                min=field_data.get('min'),
-                max=field_data.get('max'),
-                required=field_data.get('required', False),
-                gallery=field_data.get('gallery', False),
-                order=order,
-            )
+            description = cleaner.clean(field_data.get('description', ''))[:255]
+            kwargs = {
+                "label": label,
+                "type": field_data['type'],
+                "help_text": description,
+                "min": field_data.get('min'),
+                "max": field_data.get('max'),
+                "required": field_data.get('required', False),
+                "gallery": field_data.get('gallery', False),
+                "order": order,
+            }
+            try:
+                field = self.fields.get(pk=field_data.get('name'))
+                self.fields.filter(pk=field.pk).update(**kwargs)
+            except (CrowdsourceField.DoesNotExist, ValueError):
+                field = self.fields.create(**kwargs)
+
             if 'values' in field_data and field.field.accepts_choices:
+                # delete existing choices and re-create them to avoid
+                # violating unique constraints on edits, and to delete removed
+                # choices - responses store by value, so this does not destroy
+                # any data
+                field.choices.all().delete()
                 for choice_order, value in enumerate(field_data['values']):
-                    field.choices.create(
+                    field.choices.update_or_create(
                         choice=cleaner.clean(value['label'])[:255],
-                        value=cleaner.clean(value['value'])[:255],
-                        order=choice_order,
+                        defaults=dict(
+                            value=cleaner.clean(value['value'])[:255],
+                            order=choice_order,
+                        )
                     )
+        # any field which has no order after all fields are
+        # re-created has been deleted
+        self.fields.filter(order=None).update(deleted=True)
 
     def _uniqify_label_name(self, seen_labels, label):
         """Ensure the label names are all unique"""
@@ -180,7 +199,9 @@ class Crowdsource(models.Model):
 
     def get_form_json(self):
         """Get the form JSON for editing the form"""
-        return json.dumps([f.get_json() for f in self.fields.all()])
+        return json.dumps([
+            f.get_json() for f in self.fields.filter(deleted=False)
+        ])
 
     def get_header_values(self, metadata_keys, include_emails=False):
         """Get header values for CSV export"""
@@ -196,7 +217,13 @@ class Crowdsource(models.Model):
             values.extend(metadata_keys)
         field_labels = list(
             self.fields.exclude(type__in=fields.STATIC_FIELDS).values_list(
-                'label', flat=True
+                Case(
+                    When(
+                        deleted=True, then=Concat('label', Value(' (deleted)'))
+                    ),
+                    default='label',
+                ),
+                flat=True
             )
         )
         return values + field_labels
@@ -344,10 +371,14 @@ class CrowdsourceField(models.Model):
     max = models.PositiveSmallIntegerField(blank=True, null=True)
     required = models.BooleanField(default=True)
     gallery = models.BooleanField(default=False)
-    order = models.PositiveSmallIntegerField()
+    order = models.PositiveSmallIntegerField(blank=True, null=True)
+    deleted = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return self.label
+        if self.deleted:
+            return "{} (Deleted)".format(self.label)
+        else:
+            return self.label
 
     def get_form_field(self):
         """Return a form field appropriate for rendering this field"""
@@ -361,6 +392,7 @@ class CrowdsourceField(models.Model):
             'description': self.help_text,
             'required': self.required,
             'gallery': self.gallery,
+            'name': str(self.pk),
         }
         if self.field.accepts_choices:
             data['values'] = [{

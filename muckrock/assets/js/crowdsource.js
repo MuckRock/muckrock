@@ -5,6 +5,40 @@
 import modal from './modal';
 import showdown from 'showdown';
 
+// https://github.com/kevinchappell/formBuilder/issues/787
+function setOptionValue(evt) {
+  evt.target.nextSibling.value = evt.target.value;
+}
+
+function applyOptionChanges(option) {
+  option.removeEventListener("input", setOptionValue, false);
+  option.addEventListener("input", setOptionValue, false);
+  option.nextSibling.style.display = "none";
+}
+
+function selectOptions(fld) {
+  const optionLabelInputs = fld.querySelectorAll(".option-label");
+  for (var i = 0; i < optionLabelInputs.length; i++) {
+    applyOptionChanges(optionLabelInputs[i]);
+  }
+}
+
+function createObserver(fld) {
+  const callback = function(mutationsList) {
+    for (var mutation of mutationsList) {
+      selectOptions(fld);
+    }
+  };
+  const observer = new MutationObserver(callback);
+  observer.observe(fld.querySelector(".sortable-options"), { childList: true });
+  return observer
+}
+
+function onAddOptionInput(fld) {
+  selectOptions(fld);
+  const observer = createObserver(fld);
+}
+
 $(document).ready(function(){
   var formBuilder = $("#build-wrap").formBuilder({
       disableFields: [
@@ -20,7 +54,6 @@ $(document).ready(function(){
         'inline',
         'maxlength',
         'multiple',
-        'name',
         'other',
         'placeholder',
         'rows',
@@ -72,6 +105,17 @@ $(document).ready(function(){
             label: "Gallery",
             type: "checkbox"
           }
+        }
+      },
+      typeUserEvents: {
+        "checkbox-group": {
+          onadd: onAddOptionInput
+        },
+        "radio-group": {
+          onadd: onAddOptionInput
+        },
+        select: {
+          onadd: onAddOptionInput
         }
       },
       disabledActionButtons: ['data', 'save', 'clear'],

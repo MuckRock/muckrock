@@ -649,13 +649,18 @@ class CrowdsourceUpdateView(UpdateView):
         """Check permissions"""
         # pylint: disable=attribute-defined-outside-init
         crowdsource = self.get_object()
-        editable = crowdsource.status == 'draft'
         user_allowed = request.user.has_perm(
             'crowdsource.change_crowdsource', crowdsource
         )
-        if not editable or not user_allowed:
+        if not user_allowed:
             messages.error(request, 'You may not edit this crowdsource')
             return redirect(crowdsource)
+        if crowdsource.status != "draft":
+            export_csv.delay(crowdsource.pk, self.request.user.pk)
+            messages.info(
+                self.request,
+                'A CSV of the results so far will be emailed to you'
+            )
         return super(CrowdsourceUpdateView,
                      self).dispatch(request, *args, **kwargs)
 
