@@ -6,6 +6,9 @@
 # needed for rules
 from __future__ import absolute_import
 
+# Django
+from django.contrib.auth import load_backend
+
 # Standard Library
 import inspect
 from datetime import date
@@ -175,6 +178,15 @@ def has_feature_level(level):
 @user_authenticated
 def is_agency_user(user):
     return user.profile.agency is not None
+
+
+@predicate
+@user_authenticated
+def has_perm_embargo(user):
+    # we want to directly check the model backend for a permissions to avoid
+    # infinite recursion
+    backend = load_backend('django.contrib.auth.backends.ModelBackend')
+    return backend.has_perm(user, 'foia.embargo_perm_foiarequest')
 
 
 is_from_agency = is_agency_user & match_agency
