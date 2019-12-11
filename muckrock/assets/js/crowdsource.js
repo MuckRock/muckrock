@@ -24,19 +24,17 @@ function selectOptions(fld) {
 }
 
 function createObserver(fld) {
-  const callback = function(mutationsList) {
-    for (var mutation of mutationsList) {
-      selectOptions(fld);
-    }
+  const callback = function() {
+    selectOptions(fld);
   };
   const observer = new MutationObserver(callback);
   observer.observe(fld.querySelector(".sortable-options"), { childList: true });
-  return observer
+  return observer;
 }
 
 function onAddOptionInput(fld) {
   selectOptions(fld);
-  const observer = createObserver(fld);
+  createObserver(fld);
 }
 
 $(document).ready(function(){
@@ -269,7 +267,7 @@ $(document).ready(function(){
       if (data.results[i].edit_user) {
         dataSection.append($("<p>").html(
           `<em>This submission was edited by ${data.results[i].edit_user} at
-          ${data.results[i].edit_datetime}.` + 
+          ${data.results[i].edit_datetime}.` +
           (editAccess ? `<a href="/assignment/${data.results[i].id}/revert">
             View the original submission and, if necessary, revert.
           </a>` : '') +
