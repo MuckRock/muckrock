@@ -461,7 +461,7 @@ class Detail(DetailView):
     def _delete(self, request, foia):
         """Allow staff to soft delete requests"""
         form = FOIASoftDeleteForm(request.POST, foia=foia)
-        has_perm = foia.has_perm(request.user, 'delete')
+        has_perm = request.user.has_perm('foia.delete_foiarequest')
         if has_perm and form.is_valid():
             foia.soft_delete(
                 request.user,
