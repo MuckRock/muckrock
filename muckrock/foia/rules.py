@@ -195,7 +195,7 @@ can_edit = is_owner | is_editor | is_staff
 
 can_embargo = has_feature_level(1)
 
-can_embargo_permananently = has_feature_level(2)
+can_embargo_permananently = has_feature_level(2) | has_perm_embargo
 
 can_view = can_edit | is_viewer | is_from_agency | ~is_private
 
