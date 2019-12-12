@@ -98,7 +98,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
                 comm.foia.email = comm.foia.agency.get_emails('primary',
                                                               'to').first()
                 comm.foia.save()
-            if comm.foia.email.status == 'good':
+            if comm.foia.email and comm.foia.email.status == 'good':
                 # do not send email to bad email addresses
                 comm.foia.send_email(comm, **kwargs)
             else:
