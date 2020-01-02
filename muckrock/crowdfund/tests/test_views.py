@@ -136,6 +136,21 @@ class TestCrowdfundView(TestCase):
             'The crowdfund should have the payment added to it.'
         )
 
+    def test_expired(self):
+        """
+        Expired crowdfunds should not accept new payments
+        """
+        crowdfund = CrowdfundFactory(closed=True)
+        data = {
+            'stripe_amount': 200,
+            'show': '',
+            'crowdfund': crowdfund.pk,
+            'stripe_email': 'test@example.com',
+            'stripe_token': 'test'
+        }
+        self.post(data)
+        eq_(crowdfund.payments.count(), 0)
+
     def test_anonymous_authenticated(self):
         """
         An attributed contribution checks if the user is logged in, but still

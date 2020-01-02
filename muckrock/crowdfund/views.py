@@ -136,6 +136,8 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
                     return self.return_error(request)
                 registered = True
             crowdfund = payment_form.cleaned_data['crowdfund']
+            if crowdfund.expired():
+                return self.return_error(request)
             try:
                 if (
                     crowdfund.can_recur()
