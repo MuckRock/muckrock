@@ -4,7 +4,7 @@
 {% load cache %}
 
 {% block content %}
-{% cache cache_timeout tag_detail tag.pk %}
+{% cache cache_timeout tag_detail tag.pk request.user.pk %}
 <div class="tag-list master-detail">
     <section class="master">
         <h1>{{ tags|length }} Tag{{ tags|length|pluralize }}</h1>
