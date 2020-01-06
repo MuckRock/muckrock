@@ -69,6 +69,7 @@ class ProfileInline(admin.StackedInline):
         'email_failed',
         'new_question_notifications',
         'org_share',
+        'state',
         'preferred_proxy',
         'agency',
     )
