@@ -70,7 +70,7 @@ def _validate_lob(signature, timestamp, body):
     """Verify the message is from Lob"""
     digest = hmac.new(
         key=settings.LOB_WEBHOOK_KEY.encode('utf-8'),
-        msg=u'{}.{}'.format(timestamp, body).encode('utf-8'),
+        msg='{}.{}'.format(timestamp, body),
         digestmod=hashlib.sha256,
     ).hexdigest()
     match = hmac.compare_digest(signature, digest)
