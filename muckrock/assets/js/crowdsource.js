@@ -103,6 +103,16 @@ $(document).ready(function(){
             label: "Gallery",
             type: "checkbox"
           }
+        },
+        header: {
+          name: {
+            label: "Name"
+          }
+        },
+        paragraph: {
+          name: {
+            label: "Name"
+          }
         }
       },
       typeUserEvents: {
