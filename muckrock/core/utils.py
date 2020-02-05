@@ -20,8 +20,10 @@ import uuid
 
 # Third Party
 import actstream
+import boto
 import requests
 import stripe
+from boto.s3.connection import S3Connection
 
 # MuckRock
 from muckrock.core.storage import QueuedS3DietStorage
@@ -280,3 +282,32 @@ def zoho_get(path, params=None):
     if params is None:
         params = {}
     return _zoho(requests.get, path, params=params)
+
+
+def get_s3_storage_bucket():
+    """Return the S3 storage bucket"""
+    conn = S3Connection(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+    return conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+
+
+def clear_cloudfront_cache(file_names):
+    """Clear file from the cloudfront cache"""
+    # also clear the cloudfront cache
+    cloudfront = boto.connect_cloudfront(
+        settings.AWS_ACCESS_KEY_ID,
+        settings.AWS_SECRET_ACCESS_KEY,
+    )
+    # find the current distribution
+    distributions = [
+        d for d in cloudfront.get_all_distributions()
+        if settings.AWS_S3_CUSTOM_DOMAIN in d.cnames
+    ]
+    if distributions:
+        distribution = distributions[0]
+        cloudfront.create_invalidation_request(
+            distribution.id,
+            file_names,
+        )

@@ -12,6 +12,7 @@ from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.urlresolvers import reverse
 from django.db import connection, models, transaction
 from django.db.models import Sum
+from django.db.models.signals import post_delete
 from django.http.request import QueryDict
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
@@ -39,6 +40,11 @@ from muckrock.communication.models import (
     PhoneNumber,
 )
 from muckrock.core import utils
+from muckrock.core.utils import (
+    TempDisconnectSignal,
+    clear_cloudfront_cache,
+    get_s3_storage_bucket,
+)
 from muckrock.foia.querysets import FOIARequestQuerySet
 from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
 
@@ -1317,13 +1323,14 @@ class FOIARequest(models.Model):
             )
         )
 
+    @transaction.atomic
     def soft_delete(self, user, final_message, note):
         """If a user requests that this request be deleted, use this to wipe the
         sensitive data without destroying the history that a request existed with
         this MR number"""
         from muckrock.foia.models.communication import RawEmail
 
-        self.get_files().delete()
+        self.delete_files()
         RawEmail.objects.filter(email__communication__foia=self).delete()
         self.communications.all().update(communication='')
 
@@ -1336,6 +1343,36 @@ class FOIARequest(models.Model):
         self.permanent_embargo = True
         self.status = 'abandoned'
         self.save()
+
+    def delete_files(self):
+        """Delete all files for this request, batching the delete from
+        cloudfront to avoid throttle errors
+        """
+        from muckrock.foia.models.file import FOIAFile
+        from muckrock.foia.signals import foia_file_delete_s3
+        files = self.get_files()
+        if settings.CLEAN_S3_ON_FOIA_DELETE:
+            # only delete from s3/cloudfront if we are using s3
+
+            # delete from s3
+            bucket = get_s3_storage_bucket()
+            for file_ in files:
+                key = bucket.get_key(file_.ffile.name)
+                if key:
+                    key.delete()
+
+            clear_cloudfront_cache([f.ffile.name for f in files])
+
+        # disconnect the post delete signal, since we have already cleaned up
+        # s3 and cloudfront here
+        disconnect_kwargs = {
+            'signal': post_delete,
+            'receiver': foia_file_delete_s3,
+            'sender': FOIAFile,
+            'dispatch_uid': 'muckrock.foia.signals.file_delete_s3',
+        }
+        with TempDisconnectSignal(**disconnect_kwargs):
+            files.delete()
 
     def mixpanel_data(self, extra_data=None):
         """Get properties for tracking composer events in mixpanel"""
