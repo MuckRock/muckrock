@@ -29,6 +29,7 @@ from sorl.thumbnail.templatetags.thumbnail import thumbnail
 
 # MuckRock
 from muckrock.core.forms import NewsletterSignupForm, TagManagerForm
+from muckrock.foia.models import FOIARequest
 from muckrock.project.forms import ProjectManagerForm
 
 register = Library()
@@ -156,7 +157,10 @@ def tag_manager(context, mr_object):
         owner = mr_object.user
     except AttributeError:
         owner = None
-    is_authorized = context['user'].is_staff or context['user'] == owner
+    if isinstance(mr_object, FOIARequest):
+        is_authorized = mr_object.has_perm(context['user'], 'change')
+    else:
+        is_authorized = context['user'].is_staff or context['user'] == owner
     form = TagManagerForm(initial={'tags': tags})
     return {
         'tags': tags,
