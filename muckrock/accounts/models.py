@@ -158,6 +158,12 @@ class Profile(models.Model):
     # notification preferences
     new_question_notifications = models.BooleanField(default=False)
 
+    # profile preferences
+    private_profile = models.BooleanField(
+        default=False,
+        help_text=('Keep your profile private even if you have filed requests')
+    )
+
     # deprecate after projects on squarelet #
     org_share = models.BooleanField(
         default=False,
@@ -287,6 +293,13 @@ class Profile(models.Model):
             get_url_auth_token_squarelet,
             10,
         )
+
+    def public_profile_page(self):
+        """Does this user have a public profile page?"""
+        filed_request = (
+            self.user.composers.exclude(status='started').count() > 0
+        )
+        return not self.private_profile and filed_request
 
 
 # deprecate ##

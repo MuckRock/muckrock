@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http.response import (
+    Http404,
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseNotAllowed,
@@ -201,6 +202,13 @@ class ProfileView(BuyRequestsMixin, FormView):
         if username is None:
             return redirect('acct-profile', username=request.user.username)
         self.user = get_object_or_404(User, username=username, is_active=True)
+        if (
+            self.user != request.user
+            and not self.user.profile.public_profile_page()
+            and not request.user.is_staff
+        ):
+            raise Http404
+
         return super(ProfileView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

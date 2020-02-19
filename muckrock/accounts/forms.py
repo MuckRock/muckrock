@@ -30,7 +30,7 @@ class ProfileSettingsForm(forms.ModelForm):
 
     class Meta():
         model = Profile
-        fields = ['twitter', 'location']
+        fields = ['twitter', 'location', 'private_profile']
 
     def clean_twitter(self):
         """Stripe @ from beginning of Twitter name, if it exists."""
