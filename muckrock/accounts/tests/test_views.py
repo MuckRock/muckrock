@@ -7,11 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
+from django.http.response import Http404
 from django.test import RequestFactory, TestCase
 
 # Third Party
 from mock import patch
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.accounts import views
@@ -27,7 +28,7 @@ from muckrock.core.test_utils import (
     mock_middleware,
 )
 from muckrock.core.utils import new_action, notify
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.views import Detail as FOIARequestDetail
 from muckrock.qanda.views import Detail as QuestionDetail
 
@@ -47,6 +48,8 @@ class TestAccountFunctional(TestCase):
 
     def test_public_views(self):
         """Test public views while not logged in"""
+        # give the user a composer so they have a public profile
+        FOIAComposerFactory(user=self.user, status='submitted')
         response = http_get_response(reverse('acct-login'), login)
         eq_(response.status_code, 200)
         # account overview page
@@ -63,6 +66,25 @@ class TestAccountFunctional(TestCase):
             request, username=self.user.username
         )
         eq_(response.status_code, 200)
+
+    @raises(Http404)
+    def test_private_profile(self):
+        """Test public views while not logged in"""
+        response = http_get_response(reverse('acct-login'), login)
+        eq_(response.status_code, 200)
+        # account overview page
+        response = http_get_response(
+            reverse('accounts'), views.AccountsView.as_view()
+        )
+        eq_(response.status_code, 302)
+        # profile page
+        request_factory = RequestFactory()
+        request = request_factory.get(self.user.profile.get_absolute_url())
+        request = mock_middleware(request)
+        request.user = AnonymousUser()
+        response = views.ProfileView.as_view()(
+            request, username=self.user.username
+        )
 
     def test_unallowed_views(self):
         """Private URLs should redirect logged-out users to the log in page"""
