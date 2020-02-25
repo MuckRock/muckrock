@@ -965,15 +965,35 @@ def clean_export_csv():
                     key.delete()
 
 
-@task(ignore_result=True, name='muckrock.foia.tasks.foia_send_email')
-def foia_send_email(foia_pk, comm_pk, kwargs):
+@task(
+    ignore_result=True,
+    max_retries=10,
+    name='muckrock.foia.tasks.foia_send_email'
+)
+def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     """Send outgoing request emails asynchrnously"""
     # We do not want to do this using djcelery-email, as that
     # requires the entire email body be serialized through redis,
     # which could be quite large
-    foia = FOIARequest.objects.get(pk=foia_pk)
-    comm = FOIACommunication.objects.get(pk=comm_pk)
-    foia.send_delayed_email(comm, **kwargs)
+    try:
+        foia = FOIARequest.objects.get(pk=foia_pk)
+        comm = FOIACommunication.objects.get(pk=comm_pk)
+        foia.send_delayed_email(comm, **options)
+    except IOError as exc:
+        countdown = ((2 ** foia_send_email.request.retries) * 60 +
+                     randint(0, 300))
+        logger.error(
+            'foia_send_email error, will retry in %d minutes: %s',
+            countdown,
+            exc,
+            exc_info=sys.exc_info(),
+        )
+        foia_send_email.retry(
+            countdown=countdown,
+            args=[foia_pk, comm_pk, options],
+            kwargs=kwargs,
+            exc=exc,
+        )
 
 
 @task(
