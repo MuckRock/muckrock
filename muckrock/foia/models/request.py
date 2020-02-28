@@ -1351,6 +1351,9 @@ class FOIARequest(models.Model):
         from muckrock.foia.models.file import FOIAFile
         from muckrock.foia.signals import foia_file_delete_s3
         files = self.get_files()
+        if not files:
+            return
+
         if settings.CLEAN_S3_ON_FOIA_DELETE:
             # only delete from s3/cloudfront if we are using s3
 

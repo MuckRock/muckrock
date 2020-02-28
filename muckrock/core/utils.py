@@ -295,7 +295,9 @@ def get_s3_storage_bucket():
 
 def clear_cloudfront_cache(file_names):
     """Clear file from the cloudfront cache"""
-    # also clear the cloudfront cache
+    if not file_names:
+        # invalidation fails if file names is empty
+        return
     cloudfront = boto.connect_cloudfront(
         settings.AWS_ACCESS_KEY_ID,
         settings.AWS_SECRET_ACCESS_KEY,
