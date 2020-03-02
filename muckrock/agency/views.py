@@ -260,3 +260,10 @@ class MergeAgency(PermissionRequiredMixin, FormView):
         """Something went wrong"""
         messages.error(self.request, form.errors)
         return redirect('agency-merge')
+
+    def handle_no_permission(self):
+        """What to do if the user does not have permisson to view this page"""
+        messages.error(
+            self.request, 'You do not have permission to view this page'
+        )
+        return redirect('index')
