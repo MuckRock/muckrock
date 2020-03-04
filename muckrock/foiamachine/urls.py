@@ -11,7 +11,6 @@ from django.views.static import serve
 
 # Third Party
 import debug_toolbar
-from django_hosts.resolvers import reverse_lazy
 
 # MuckRock
 from muckrock.accounts import views as account_views
