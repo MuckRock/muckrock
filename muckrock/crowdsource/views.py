@@ -328,7 +328,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             response = CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
                 user=user,
-                public=form.cleaned_data['public'],
+                public=form.cleaned_data.get('public', False),
                 ip_address=ip_address,
                 data=self.data,
                 number=number,

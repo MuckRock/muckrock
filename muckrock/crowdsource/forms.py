@@ -62,8 +62,12 @@ class CrowdsourceAssignmentForm(forms.Form):
                 label='Get MuckRock\'s weekly newsletter with '
                 'FOIA news, tips, and more',
             )
-        # move public to the end
-        self.fields['public'] = self.fields.pop('public')
+        if crowdsource.ask_public:
+            # move public to the end
+            self.fields['public'] = self.fields.pop('public')
+        else:
+            # remove public
+            self.fields.pop('public')
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
@@ -182,6 +186,7 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
             'project_only',
             'project_admin',
             'submission_emails',
+            'ask_public',
         )
 
     def __init__(self, *args, **kwargs):
