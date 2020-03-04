@@ -15,6 +15,7 @@ from django.views.generic import (
     UpdateView,
     View,
 )
+from django.views.generic.base import RedirectView
 from django.views.generic.detail import SingleObjectMixin
 
 # Third Party
@@ -136,6 +137,17 @@ class Profile(LoginRequiredMixin, TemplateView):
             'filter': filter_,
         })
         return context
+
+
+class LoginView(RedirectView):
+    """Redirect to squarelet with proper intent"""
+
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse(
+            'social:begin', host='foiamachine', kwargs={
+                'backend': 'squarelet'
+            }
+        ) + '?intent=foiamachine'
 
 
 class FoiaMachineRequestCreateView(LoginRequiredMixin, CreateView):
