@@ -41,18 +41,7 @@ urlpatterns = [
         ),
         name='signup'
     ),
-    url(
-        r'^accounts/login/$',
-        RedirectView.as_view(
-            url=reverse_lazy(
-                'social:begin',
-                host='foiamachine',
-                kwargs={'backend': 'squarelet'},
-            ),
-            query_string=True
-        ),
-        name='login'
-    ),
+    url(r'^accounts/login/$', views.LoginView.as_view(), name='login'),
     url(r'^accounts/logout/$', views.account_logout, name='acct-logout'),
     url(r'^accounts/profile/$', views.Profile.as_view(), name='profile'),
     url(
