@@ -19,6 +19,7 @@ from muckrock.agency.models import Agency
 from muckrock.core.filters import (
     BLANK_STATUS,
     NULL_BOOLEAN_CHOICES,
+    AutocompleteModelMultipleChoiceFilter,
     RangeWidget,
 )
 from muckrock.foia.models import FOIARequest
@@ -70,10 +71,10 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         queryset=Agency.objects.get_approved(),
         widget=autocomplete_light.MultipleChoiceWidget('AgencyAutocomplete')
     )
-    projects = django_filters.ModelMultipleChoiceFilter(
+    projects = AutocompleteModelMultipleChoiceFilter(
         name='projects',
         queryset=lambda request: Project.objects.get_visible(request.user),
-        widget=autocomplete_light.MultipleChoiceWidget('ProjectAutocomplete'),
+        autocomplete='ProjectAutocomplete',
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name='tags__name',
