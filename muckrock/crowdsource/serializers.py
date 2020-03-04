@@ -111,7 +111,7 @@ class CrowdsourceResponseGallerySerializer(CrowdsourceResponseBaseSerializer):
 
     def get_user(self, obj):
         """Only show user's name if they chose to be publically credited"""
-        if obj.public:
+        if obj.public and obj.user:
             return obj.user.profile.full_name
         else:
             return 'Anonymous'

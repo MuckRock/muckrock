@@ -113,6 +113,11 @@ class Crowdsource(models.Model):
         default=False,
         help_text='Featured assignments will appear on the homepage.'
     )
+    ask_public = models.BooleanField(
+        default=True,
+        help_text='Add a field asking users if we can publically credit them '
+        'for their response'
+    )
 
     objects = CrowdsourceQuerySet.as_manager()
 
@@ -251,11 +256,8 @@ class Crowdsource(models.Model):
 
     def contributor_line(self):
         """Line about who has contributed"""
-        users = list({
-            r.user
-            for r in self.responses.select_related('user__profile')
-            if r.user and r.public
-        })
+        responses = self.responses.select_related('user__profile')
+        users = list({r.user for r in responses if r.user and r.public})
         total = len(users)
 
         def join_names(users):
@@ -275,6 +277,9 @@ class Crowdsource(models.Model):
             return '{} helped'.format(
                 users[0].profile.full_name or users[0].username
             )
+        elif responses:
+            # there have been responses, but none of them are public
+            return ''
         else:
             return 'No one has helped yet, be the first!'
 
