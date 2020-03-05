@@ -80,7 +80,7 @@ class CrowdsourceResponseViewSet(
                     crowdsource__project_admin=True,
                     crowdsource__project__contributors=self.request.user,
                 ) | Q(gallery=True)
-            )
+            ).distinct()
         else:
             return self.queryset.filter(gallery=True)
 
