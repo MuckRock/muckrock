@@ -1046,7 +1046,7 @@ class FOIARequest(models.Model):
         if email is None:
             email_args = {}
         else:
-            email_args = {'email': email}
+            email_args = {'email': email.encode('utf8')}
         return agency_user_profile.wrap_url(
             reverse(
                 'acct-agency-redirect-login',

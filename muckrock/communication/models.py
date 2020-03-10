@@ -70,6 +70,8 @@ class EmailAddressQuerySet(models.QuerySet):
     @staticmethod
     def _normalize_email(email):
         """Username is case sensitive, domain is not"""
+        # strip invisible spaces
+        email = email.replace(u'\u200b', '')
         validate_email(email)
         username, domain = email.rsplit('@', 1)
         return '%s@%s' % (username, domain.lower())
