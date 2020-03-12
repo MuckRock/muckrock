@@ -164,6 +164,8 @@ TEMPLATES = [{
         'libraries': {
             'thumbnail': 'easy_thumbnails.templatetags.thumbnail',
         },
+        'debug':
+            True,
     }
 }]
 
