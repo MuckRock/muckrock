@@ -275,7 +275,9 @@ class PortalTaskNode(TaskNode):
                 extra_context['password'] = foia_.portal.get_new_password()
             extra_context['reply_link'] = 'https://{}{}'.format(
                 settings.MUCKROCK_URL,
-                foia_.get_agency_reply_link(email=foia_.email.email),
+                foia_.get_agency_reply_link(
+                    email=foia_.email.email if foia_.email else None
+                ),
             )
 
         return extra_context
