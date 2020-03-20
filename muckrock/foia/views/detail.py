@@ -28,6 +28,7 @@ from heapq import merge
 
 # Third Party
 import requests
+from constance import config
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -307,6 +308,8 @@ class Detail(DetailView):
             messages.info(self.request, foia.sidebar_html)
         if foia.noindex:
             context['meta_noindex'] = True
+        context['enable_followup'] = config.ENABLE_FOLLOWUP
+        context['disabled_followup_message'] = config.DISABLED_FOLLOWUP_MESSAGE
         return context
 
     def get(self, request, *args, **kwargs):
