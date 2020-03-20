@@ -633,6 +633,12 @@ CONSTANCE_CONFIG = OrderedDict([
         'ENABLE_WEEKEND_FOLLOWUP',
         (False, 'Enable automated followups during weekends')
     ),
+    (
+        'DISABLED_FOLLOWUP_MESSAGE', (
+            'Automated followups are currently globally disabled.',
+            'Message to show while automated followups are disabled'
+        )
+    ),
     ('AUTO_LOB', (False, 'Automatically send snail mail via Lob')),
     ('AUTO_LOB_PAY', (False, 'Automatically send checks via Lob')),
     (
@@ -675,6 +681,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'FOIA Options': (
         'ENABLE_FOLLOWUP',
         'ENABLE_WEEKEND_FOLLOWUP',
+        'DISABLED_FOLLOWUP_MESSAGE',
     ),
     'Lob Options': (
         'AUTO_LOB',

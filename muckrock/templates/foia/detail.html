@@ -273,7 +273,15 @@
               <p>Automatic follow ups are disabled.</p>
               <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a>
             {% else %}
-              <p>We'll automatically follow-up with the agency{% if foia.date_followup %} in {{ foia.date_followup|timeuntil }}{% endif %}.</p>
+              {% if enable_followup %}
+                <p>
+                  We'll automatically follow-up with the
+                  agency{% if foia.date_followup %} in
+                  {{ foia.date_followup|timeuntil }}{% endif %}.
+                </p>
+              {% else %}
+                <p>{{ disabled_followup_message }}</p>
+              {% endif %}
               <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a>
             {% endif %}
           </div>
