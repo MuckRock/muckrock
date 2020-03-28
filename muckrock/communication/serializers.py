@@ -1,3 +1,7 @@
+"""
+Serilizers for the Communication application API
+"""
+
 # Third Party
 from rest_framework import serializers
 
