@@ -5,10 +5,12 @@ Models for the Task application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Case, Count, Max, When
 from django.db.models.functions import Cast, Now
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import linebreaks, urlize
 
@@ -792,14 +794,28 @@ class NewAgencyTask(Task):
                 comm.save()
                 foia.submit(clear=True)
 
-    def spam(self):
+    def spam(self, user):
         """Reject the agency and block the user"""
         self.agency.status = 'rejected'
         self.agency.save()
         if self.user.is_authenticated:
             self.user.is_active = False
             self.user.save()
-        self.agency.foiarequest_set.all().delete()
+
+        send_mail(
+            '%s blocked as spammer' % self.user.username,
+            render_to_string(
+                'text/task/spam.txt',
+                {
+                    'url': settings.MUCKROCK_URL + self.get_absolute_url(),
+                    'spammer': self.user.username,
+                    'moderator': user.username,
+                    'agency': self.agency.name,
+                },
+            ),
+            'info@muckrock.com',
+            ['info@muckrock.com'],
+        )
 
 
 class ResponseTask(Task):
