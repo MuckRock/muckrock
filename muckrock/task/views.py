@@ -444,7 +444,7 @@ class NewAgencyTaskList(TaskList):
             form_data = {'reject': True}
             task.resolve(request.user, form_data)
         elif request.POST.get('spam'):
-            task.spam()
+            task.spam(request.user)
             form_data = {'spam': True}
             task.resolve(request.user, form_data)
         return super(NewAgencyTaskList, self).task_post_helper(request, task)

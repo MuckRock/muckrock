@@ -1,0 +1,5 @@
+{% autoescape off %}
+{{ moderator }} marked {{ spammer }} as a spammer for creating the agency {{ agency }}.
+
+{{ url }}
+{% endautoescape %}
