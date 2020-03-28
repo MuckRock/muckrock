@@ -70,7 +70,7 @@ class AgencyEmail(models.Model):
 
 
 class AgencyPhone(models.Model):
-    "," "Through model for agency to phone M2M" ""
+    """Through model for agency to phone M2M"""
 
     agency = models.ForeignKey('Agency')
     phone = models.ForeignKey('communication.PhoneNumber')

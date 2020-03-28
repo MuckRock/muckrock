@@ -9,8 +9,45 @@ from django.conf import settings
 from rest_framework import serializers
 
 # MuckRock
-from muckrock.agency.models import Agency
+from muckrock.agency.models import (
+    Agency,
+    AgencyAddress,
+    AgencyEmail,
+    AgencyPhone,
+)
+from muckrock.communication.serializers import (
+    AddressSerializer,
+    EmailAddressSerializer,
+    PhoneNumberSerializer,
+)
 from muckrock.jurisdiction.models import Jurisdiction
+
+
+class AgencyAddressSerializer(serializers.ModelSerializer):
+    """Serializer for AgencyAddress model"""
+    address = AddressSerializer(read_only=True)
+
+    class Meta:
+        model = AgencyAddress
+        fields = ('address', 'request_type')
+
+
+class AgencyEmailSerializer(serializers.ModelSerializer):
+    """Serializer for AgencyEmail model"""
+    email = EmailAddressSerializer(read_only=True)
+
+    class Meta:
+        model = AgencyEmail
+        fields = ('email', 'request_type', 'email_type')
+
+
+class AgencyPhoneSerializer(serializers.ModelSerializer):
+    """Serializer for AgencyPhone model"""
+    phone = PhoneNumberSerializer(read_only=True)
+
+    class Meta:
+        model = AgencyPhone
+        fields = ('phone', 'request_type')
 
 
 class AgencySerializer(serializers.ModelSerializer):
@@ -40,6 +77,15 @@ class AgencySerializer(serializers.ModelSerializer):
     has_email = serializers.SerializerMethodField()
     has_fax = serializers.SerializerMethodField()
     has_address = serializers.SerializerMethodField()
+    addresses = AgencyAddressSerializer(
+        many=True, read_only=True, source="agencyaddress_set"
+    )
+    emails = AgencyEmailSerializer(
+        many=True, read_only=True, source="agencyemail_set"
+    )
+    phones = AgencyPhoneSerializer(
+        many=True, read_only=True, source="agencyphone_set"
+    )
 
     # request counts
     number_requests = serializers.ReadOnlyField()
@@ -62,11 +108,14 @@ class AgencySerializer(serializers.ModelSerializer):
         # pylint: disable=super-on-old-class
         super(AgencySerializer, self).__init__(*args, **kwargs)
         request = self.context.get('request', None)
-        if request is None or not request.user.is_staff:
-            # email and other_emails no longer exists
-            # keeping logic here for future use
-            self.fields.pop('email', None)
-            self.fields.pop('other_emails', None)
+        if not (
+            request is not None and request.user.is_authenticated
+            and request.user.profile.is_advanced()
+        ):
+            # remove contact info fields for non advanced users
+            self.fields.pop('addresses', None)
+            self.fields.pop('emails', None)
+            self.fields.pop('phones', None)
 
     def get_has_portal(self, obj):
         """Does this have a portal?"""
@@ -107,6 +156,9 @@ class AgencySerializer(serializers.ModelSerializer):
             'website',
             'twitter',
             'twitter_handles',
+            'addresses',
+            'emails',
+            'phones',
             # connects to other agencies
             'parent',
             'appeal_agency',
