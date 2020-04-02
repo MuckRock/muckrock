@@ -801,6 +801,7 @@ class NewAgencyTask(Task):
         if self.user.is_authenticated:
             self.user.is_active = False
             self.user.save()
+        self.agency.foiarequest_set.all().delete()
 
         send_mail(
             '%s blocked as spammer' % self.user.username,
