@@ -406,11 +406,12 @@ class NewAgencyTaskTests(TestCase):
         )
 
     def test_spam(self):
+        moderator = UserFactory()
         existing_foia = FOIARequestFactory(
             agency=self.agency,
             status='submitted',
         )
-        self.task.spam()
+        self.task.spam(moderator)
         eq_(self.agency.status, 'rejected')
         assert_false(self.user.is_active)
         assert_false(FOIARequest.objects.filter(pk=existing_foia.pk).exists())
