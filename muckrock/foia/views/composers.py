@@ -133,6 +133,10 @@ class GenericComposer(BuyRequestsMixin):
         })
         return context
 
+    def get_initial(self):
+        """Set the initial value for tags"""
+        return {'tags': self.object.tags.all()}
+
     def _submit_composer(self, composer, form):
         """Submit a composer"""
         # pylint: disable=not-an-iterable
