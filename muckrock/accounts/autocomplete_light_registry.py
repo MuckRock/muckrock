@@ -12,18 +12,22 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.foia.models import FOIARequest
-from muckrock.organization.models import Organization
 
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking users"""
     choices = User.objects.all().select_related('profile')
     choice_template = 'autocomplete/user.html'
-    search_fields = ['^username', 'profile__full_name', '^email']
+    search_fields = ['^username', 'profile__full_name']
     attrs = {
         'placeholder': 'Search users',
         'data-autocomplete-minimum-characters': 2
     }
+
+    def __init__(self, *args, **kwargs):
+        super(UserAutocomplete, self).__init__(*args, **kwargs)
+        if self.request and self.request.user.is_staff:
+            self.search_fields = ['^username', 'profile__full_name', '^email']
 
     def choice_label(self, choice):
         """Uses the user's full name and username as the choice label."""
@@ -77,33 +81,7 @@ class RequestSharingAutocomplete(UserAutocomplete):
         return self.order_choices(choices)[0:self.limit_choices]
 
 
-class OrganizationAutocomplete(UserAutocomplete):
-    """Adds organization-specific filtering for users"""
-
-    def choices_for_request(self):
-        # get filters
-        query = self.request.GET.get('q', '')
-        exclude = self.request.GET.getlist('exclude', '')
-        org_id = self.request.GET.get('orgId', '')
-        # get all choices
-        choices = self.choices.all()
-        # exclude choices based on filters
-        if query:
-            choices = choices.filter(username__icontains=query)
-        for user_id in exclude:
-            choices = choices.exclude(pk=int(user_id))
-        if org_id:  # exclude owner and members from choices
-            organization = get_object_or_404(Organization, pk=org_id)
-            owner = organization.owner
-            profiles = organization.members.all()
-            exclude_pks = [owner.pk] + [profile.user.pk for profile in profiles]
-            choices = choices.exclude(pk__in=exclude_pks)
-        # return final list of choices
-        return self.order_choices(choices)[0:self.limit_choices]
-
-
 autocomplete_light.register(User, UserAutocomplete)
-autocomplete_light.register(User, OrganizationAutocomplete)
 autocomplete_light.register(User, RequestSharingAutocomplete)
 autocomplete_light.register(User, AuthorAutocomplete)
 autocomplete_light.register(User, UserTaskAutocomplete)
