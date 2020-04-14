@@ -237,6 +237,22 @@ class SnailMailTaskNode(TaskNode):
             str(a) for a in agency_.agencyaddress_set.all()
         ]
 
+        def get_file_size(file_):
+            """We will sometimes get an AttributeError when checking file sizes on S3
+            This may be able to be changed when upgrading to the latest djang-storages
+            """
+            try:
+                return file_.size
+            except AttributeError:
+                return None
+
+        files = list(self.task.communication.files.all())
+        extra_context['files'] = [
+            (f.ffile.url, f.title, f.pages, get_file_size(f.ffile))
+            for f in files[:5]
+        ]
+        extra_context['files_length'] = len(files)
+
         return extra_context
 
 

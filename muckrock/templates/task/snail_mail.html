@@ -65,23 +65,25 @@
           <dt>Agency Notes</dt>
           <dd>{{agency.notes}}</dd>
         {% endif %}
-        {% with task.communication.files.all as files %}
-          {% if files %}
-            <dt>Attachments</dt>
-            {% for file in files|slice:":5" %}
-              <dd>
-              <a href="{{file.ffile.url}}" target="_blank">{{file.title}}</a>
-              - {{file.pages}} page{{file.pages|pluralize}}
-              - {{file.ffile.size|filesizeformat}}
-              </dd>
-            {% endfor %}
-            {% if files|length > 5 %}
-              <p>There are too many files ({{files|length}}) to display on this communication.
-                <a class="action" href="{% url 'foia-files' jurisdiction=task.communication.foia.jurisdiction.slug jidx=task.communication.foia.jurisdiction.pk idx=task.communication.foia.id slug=task.communication.foia.slug %}">See all files</a>
-              </p>
-            {% endif %}
+        {% if files %}
+          <dt>Attachments</dt>
+          {% for url, title, pages, size in files %}
+            <dd>
+              <a href="{{url}}" target="_blank">{{title}}</a>
+              - {{pages}} page{{pages|pluralize}}
+              - {% if size is None %}Error{% else %}{{size|filesizeformat}}{% endif %}
+            </dd>
+          {% endfor %}
+          {% if files_length > 5 %}
+            <p>
+              There are too many files ({{files_length}})
+              to display on this communication.
+              <a class="action" href="{{ task.communication.get_absolute_url }}">
+                See all files
+              </a>
+            </p>
           {% endif %}
-        {% endwith %}
+        {% endif %}
         <dt>Print</dt>
         <dd><a href="{% url 'snail-mail-pdf' pk=task.pk %}">PDF</a></dd>
       {% endif %}
