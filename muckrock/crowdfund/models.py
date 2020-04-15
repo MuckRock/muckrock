@@ -77,7 +77,10 @@ class Crowdfund(models.Model):
 
     def percent_funded(self):
         """Reports the percent of the amount required that has been funded."""
-        return int(self.payment_received / self.payment_required * 100)
+        if self.payment_required == 0:
+            return 100
+        else:
+            return int(self.payment_received / self.payment_required * 100)
 
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
