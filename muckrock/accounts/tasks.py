@@ -202,30 +202,30 @@ def store_statistics():
     kwargs['pro_users'] = 0  # squarelet
     kwargs['pro_user_names'] = ''  # squarelet
     kwargs['daily_requests_pro'] = FOIARequest.objects.filter(
-        composer__organization__plan__slug='professional'
+        composer__organization__entitlement__slug='professional'
     ).get_submitted_range(yesterday_midnight,
                           today_midnight).exclude_org_users().count()
     kwargs['daily_requests_basic'] = FOIARequest.objects.filter(
-        composer__organization__plan__slug='free'
+        composer__organization__entitlement__slug='free'
     ).get_submitted_range(yesterday_midnight,
                           today_midnight).exclude_org_users().count()
     kwargs['daily_requests_beta'] = FOIARequest.objects.filter(
-        composer__organization__plan__slug='beta'
+        composer__organization__entitlement__slug='beta'
     ).get_submitted_range(yesterday_midnight,
                           today_midnight).exclude_org_users().count()
     kwargs['daily_requests_proxy'] = FOIARequest.objects.filter(
-        composer__organization__plan__slug='proxy'
+        composer__organization__entitlement__slug='proxy'
     ).get_submitted_range(yesterday_midnight,
                           today_midnight).exclude_org_users().count()
     kwargs['daily_requests_admin'] = FOIARequest.objects.filter(
-        composer__organization__plan__slug='admin'
+        composer__organization__entitlement__slug='admin'
     ).get_submitted_range(yesterday_midnight,
                           today_midnight).exclude_org_users().count()
     kwargs['daily_requests_org'] = FOIARequest.objects.filter(
-        composer__organization__plan__slug='organization',
+        composer__organization__entitlement__slug='organization',
     ).get_submitted_range(yesterday_midnight, today_midnight).count()
     kwargs['daily_requests_other'] = FOIARequest.objects.exclude(
-        composer__organization__plan__slug__in=[
+        composer__organization__entitlement__slug__in=[
             'professional',
             'free',
             'beta',
@@ -334,32 +334,38 @@ def store_statistics():
     kwargs['total_active_org_members'] = 0
     kwargs['total_active_orgs'] = 0
     kwargs['total_crowdfunds'] = Crowdfund.objects.count()
-    kwargs['total_crowdfunds_pro'
-           ] = (Crowdfund.objects.filter_by_plan('professional').count())
+    kwargs['total_crowdfunds_pro'] = (
+        Crowdfund.objects.filter_by_entitlement('professional').count()
+    )
     kwargs['total_crowdfunds_basic'
-           ] = (Crowdfund.objects.filter_by_plan('free').count())
+           ] = (Crowdfund.objects.filter_by_entitlement('free').count())
     kwargs['total_crowdfunds_beta'
-           ] = (Crowdfund.objects.filter_by_plan('beta').count())
+           ] = (Crowdfund.objects.filter_by_entitlement('beta').count())
     kwargs['total_crowdfunds_proxy'
-           ] = (Crowdfund.objects.filter_by_plan('proxy').count())
+           ] = (Crowdfund.objects.filter_by_entitlement('proxy').count())
     kwargs['total_crowdfunds_admin'
-           ] = (Crowdfund.objects.filter_by_plan('admin').count())
+           ] = (Crowdfund.objects.filter_by_entitlement('admin').count())
     kwargs['open_crowdfunds'] = (Crowdfund.objects.filter(closed=False).count())
     kwargs['open_crowdfunds_pro'] = (
-        Crowdfund.objects.filter_by_plan('professional').filter(closed=False)
-        .count()
+        Crowdfund.objects.filter_by_entitlement('professional').filter(
+            closed=False
+        ).count()
     )
     kwargs['open_crowdfunds_basic'] = (
-        Crowdfund.objects.filter_by_plan('free').filter(closed=False).count()
+        Crowdfund.objects.filter_by_entitlement('free').filter(closed=False
+                                                               ).count()
     )
     kwargs['open_crowdfunds_beta'] = (
-        Crowdfund.objects.filter_by_plan('beta').filter(closed=False).count()
+        Crowdfund.objects.filter_by_entitlement('beta').filter(closed=False
+                                                               ).count()
     )
     kwargs['open_crowdfunds_proxy'] = (
-        Crowdfund.objects.filter_by_plan('proxy').filter(closed=False).count()
+        Crowdfund.objects.filter_by_entitlement('proxy').filter(closed=False
+                                                                ).count()
     )
     kwargs['open_crowdfunds_admin'] = (
-        Crowdfund.objects.filter_by_plan('admin').filter(closed=False).count()
+        Crowdfund.objects.filter_by_entitlement('admin').filter(closed=False
+                                                                ).count()
     )
     kwargs['closed_crowdfunds_0'] = Crowdfund.objects.annotate(
         percent=F('payment_received') / F('payment_required')
@@ -430,19 +436,19 @@ def store_statistics():
     ).count()
     kwargs['project_users'] = User.objects.exclude(projects=None).count()
     kwargs['project_users_pro'] = User.objects.filter(
-        organizations__plan__slug='professional',
+        organizations__entitlement__slug='professional',
     ).exclude(projects=None).count()
     kwargs['project_users_basic'] = User.objects.filter(
-        organizations__plan__slug='free'
+        organizations__entitlement__slug='free'
     ).exclude(projects=None).count()
     kwargs['project_users_beta'] = User.objects.filter(
-        organizations__plan__slug='beta'
+        organizations__entitlement__slug='beta'
     ).exclude(projects=None).count()
     kwargs['project_users_proxy'] = User.objects.filter(
-        organizations__plan__slug='proxy'
+        organizations__entitlement__slug='proxy'
     ).exclude(projects=None).count()
     kwargs['project_users_admin'] = User.objects.filter(
-        organizations__plan__slug='admin'
+        organizations__entitlement__slug='admin'
     ).exclude(projects=None).count()
     kwargs['total_exemptions'] = Exemption.objects.count()
     kwargs['total_invoked_exemptions'] = InvokedExemption.objects.count()
@@ -461,19 +467,19 @@ def store_statistics():
            ] = CrowdsourceResponse.objects.get_user_count()
     kwargs['total_crowdsource_responses'] = CrowdsourceResponse.objects.count()
     kwargs['crowdsource_responses_pro'] = CrowdsourceResponse.objects.filter(
-        user__organizations__plan__slug='professional'
+        user__organizations__entitlement__slug='professional'
     ).count()
     kwargs['crowdsource_responses_basic'] = CrowdsourceResponse.objects.filter(
-        user__organizations__plan__slug='free'
+        user__organizations__entitlement__slug='free'
     ).count()
     kwargs['crowdsource_responses_beta'] = CrowdsourceResponse.objects.filter(
-        user__organizations__plan__slug='beta'
+        user__organizations__entitlement__slug='beta'
     ).count()
     kwargs['crowdsource_responses_proxy'] = CrowdsourceResponse.objects.filter(
-        user__organizations__plan__slug='proxy'
+        user__organizations__entitlement__slug='proxy'
     ).count()
     kwargs['crowdsource_responses_admin'] = CrowdsourceResponse.objects.filter(
-        user__organizations__plan__slug='admin'
+        user__organizations__entitlement__slug='admin'
     ).count()
 
     Statistics.objects.create(**kwargs)

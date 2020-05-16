@@ -95,7 +95,7 @@ class TestAgencyUnit(TestCase):
         assert_in('warning', proxy_info)
 
         proxy = UserFactory(
-            membership__organization__plan__name='Proxy',
+            membership__organization__entitlement__name='Proxy',
             profile__state=agency_.jurisdiction.legal.abbrev,
         )
         proxy_info = agency_.get_proxy_info()

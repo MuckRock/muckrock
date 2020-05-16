@@ -453,7 +453,7 @@ class ProxyList(MRFilterListView):
         """Display all proxies"""
         objects = super(ProxyList, self).get_queryset()
         return (
-            objects.filter(organizations__plan__slug='proxy')
+            objects.filter(organizations__entitlement__slug='proxy')
             .select_related('profile')
         )
 

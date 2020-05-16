@@ -107,7 +107,7 @@ class Command(BaseCommand):
                 'uuid',
                 'name',
                 'slug',
-                'plan',
+                'entitlement',
                 'individual',
                 'private',
                 'customer_id',
@@ -121,8 +121,9 @@ class Command(BaseCommand):
             total = Organization.objects.count()
             customer_ids = set()
             for i, org in enumerate(
-                Organization.objects.select_related('owner__profile', 'plan')
-                .prefetch_related(
+                Organization.objects.select_related(
+                    'owner__profile', 'entitlement'
+                ).prefetch_related(
                     'owner__receipt_emails', 'owner__organization_set'
                 )
             ):
@@ -142,7 +143,7 @@ class Command(BaseCommand):
                     org.uuid,
                     org.name,
                     org.slug,
-                    org.plan.slug,
+                    org.entitlement.slug,
                     org.individual,
                     org.private,
                     customer_id,

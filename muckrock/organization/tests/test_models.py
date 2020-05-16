@@ -15,11 +15,11 @@ from nose.tools import assert_false, assert_raises, assert_true, eq_
 from muckrock.core.factories import UserFactory
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.factories import (
-    FreePlanFactory,
+    EntitlementFactory,
+    FreeEntitlementFactory,
     MembershipFactory,
+    OrganizationEntitlementFactory,
     OrganizationFactory,
-    OrganizationPlanFactory,
-    PlanFactory,
 )
 
 
@@ -74,20 +74,30 @@ class TestOrganization(TestCase):
         eq_(org.number_requests, 1)
 
 
+def ent_json(entitlement, date_update):
+    """Helper function for serializing entitlement data"""
+    return {
+        "name": entitlement.name,
+        "slug": entitlement.slug,
+        "description": entitlement.description,
+        "resources": entitlement.resources,
+        "date_update": date_update,
+    }
+
+
 class TestSquareletUpdateData(TestCase):
     """Test cases for updating organization data from squarelet"""
 
     def test_create_subscription(self):
         """Create a new subscription"""
-        OrganizationPlanFactory()
+        ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory()
         organization.update_data({
             'name': organization.name,
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'organization',
-            'date_update': date(2019, 2, 21),
+            'entitlements': [ent_json(ent, date(2019, 2, 21))],
             'max_users': 5,
             'card': '',
         })
@@ -97,9 +107,9 @@ class TestSquareletUpdateData(TestCase):
 
     def test_cancel_subscription(self):
         """Cancel a subscription"""
-        FreePlanFactory()
+        ent = FreeEntitlementFactory()
         organization = OrganizationFactory(
-            plan=OrganizationPlanFactory(),
+            entitlement=OrganizationEntitlementFactory(),
             date_update=date(2019, 2, 21),
             max_users=5,
             requests_per_month=50,
@@ -110,8 +120,7 @@ class TestSquareletUpdateData(TestCase):
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'free',
-            'date_update': None,
+            'entitlements': [ent_json(ent, None)],
             'max_users': 5,
             'card': '',
         })
@@ -121,13 +130,15 @@ class TestSquareletUpdateData(TestCase):
 
     def test_upgrade_subscription(self):
         """Upgrade a subscription"""
-        PlanFactory(
+        ent = EntitlementFactory(
             name='Plus',
-            minimum_users=5,
-            base_requests=100,
+            resources=dict(
+                minimum_users=5,
+                base_requests=100,
+            ),
         )
         organization = OrganizationFactory(
-            plan=OrganizationPlanFactory(),
+            entitlement=OrganizationEntitlementFactory(),
             date_update=date(2019, 2, 21),
             max_users=5,
             requests_per_month=50,
@@ -138,8 +149,7 @@ class TestSquareletUpdateData(TestCase):
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'plus',
-            'date_update': date(2019, 2, 21),
+            'entitlements': [ent_json(ent, date(2019, 2, 21))],
             'max_users': 5,
             'card': '',
         })
@@ -150,14 +160,16 @@ class TestSquareletUpdateData(TestCase):
     def test_downgrade_subscription(self):
         """Downgrade a subscription"""
         # Downgrades only happen at monthly restore
-        OrganizationPlanFactory()
-        plus = PlanFactory(
+        ent = OrganizationEntitlementFactory()
+        plus = EntitlementFactory(
             name='Plus',
-            minimum_users=5,
-            base_requests=100,
+            resources=dict(
+                minimum_users=5,
+                base_requests=100,
+            ),
         )
         organization = OrganizationFactory(
-            plan=plus,
+            entitlement=plus,
             date_update=date(2019, 2, 21),
             max_users=5,
             requests_per_month=100,
@@ -168,8 +180,7 @@ class TestSquareletUpdateData(TestCase):
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'organization',
-            'date_update': date(2019, 3, 21),
+            'entitlements': [ent_json(ent, date(2019, 3, 21))],
             'max_users': 5,
             'card': '',
         })
@@ -179,8 +190,9 @@ class TestSquareletUpdateData(TestCase):
 
     def test_increase_max_users(self):
         """Increase max users"""
+        ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory(
-            plan=OrganizationPlanFactory(),
+            entitlement=ent,
             date_update=date(2019, 2, 21),
             max_users=5,
             requests_per_month=50,
@@ -191,8 +203,7 @@ class TestSquareletUpdateData(TestCase):
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'organization',
-            'date_update': date(2019, 2, 21),
+            'entitlements': [ent_json(ent, date(2019, 2, 21))],
             'max_users': 9,
             'card': '',
         })
@@ -202,8 +213,9 @@ class TestSquareletUpdateData(TestCase):
 
     def test_decrease_max_users(self):
         """Decrease max users"""
+        ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory(
-            plan=OrganizationPlanFactory(),
+            entitlement=ent,
             date_update=date(2019, 2, 21),
             max_users=10,
             requests_per_month=75,
@@ -214,8 +226,7 @@ class TestSquareletUpdateData(TestCase):
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'organization',
-            'date_update': date(2019, 2, 21),
+            'entitlements': [ent_json(ent, date(2019, 2, 21))],
             'max_users': 7,
             'card': '',
         })
@@ -225,8 +236,9 @@ class TestSquareletUpdateData(TestCase):
 
     def test_monthly_restore(self):
         """Monthly restore"""
+        ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory(
-            plan=OrganizationPlanFactory(),
+            entitlement=ent,
             date_update=date(2019, 2, 21),
             max_users=5,
             requests_per_month=50,
@@ -237,8 +249,7 @@ class TestSquareletUpdateData(TestCase):
             'slug': organization.slug,
             'individual': False,
             'private': False,
-            'plan': 'organization',
-            'date_update': date(2019, 3, 21),
+            'entitlements': [ent_json(ent, date(2019, 3, 21))],
             'max_users': 5,
             'card': '',
         })

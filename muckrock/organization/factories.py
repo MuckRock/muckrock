@@ -8,7 +8,7 @@ from django.utils.text import slugify
 import factory
 
 # MuckRock
-from muckrock.organization.models import Membership, Organization, Plan
+from muckrock.organization.models import Entitlement, Membership, Organization
 
 
 class OrganizationFactory(factory.django.DjangoModelFactory):
@@ -20,7 +20,9 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Organization %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     individual = False
-    plan = factory.SubFactory('muckrock.organization.factories.FreePlanFactory')
+    entitlement = factory.SubFactory(
+        'muckrock.organization.factories.FreeEntitlementFactory'
+    )
 
 
 class MembershipFactory(factory.django.DjangoModelFactory):
@@ -36,34 +38,45 @@ class MembershipFactory(factory.django.DjangoModelFactory):
     active = True
 
 
-class PlanFactory(factory.django.DjangoModelFactory):
-    """A factory for creating Plan test objects"""
+class EntitlementFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Entitlement test objects"""
 
     class Meta:
-        model = Plan
+        model = Entitlement
         django_get_or_create = ('name',)
 
-    name = factory.Sequence(lambda n: "Plan %d" % n)
+    name = factory.Sequence(lambda n: "Entitlement %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
 
 
-class FreePlanFactory(PlanFactory):
-    """A free plan factory"""
+class FreeEntitlementFactory(EntitlementFactory):
+    """A free entitlement factory"""
     name = 'Free'
+    resources = {
+        "minimum_users": 1,
+        "base_requests": 0,
+        "requests_per_user": 0,
+        "feature_level": 0,
+    }
 
 
-class ProfessionalPlanFactory(PlanFactory):
-    """A professional plan factory"""
+class ProfessionalEntitlementFactory(EntitlementFactory):
+    """A professional entitlement factory"""
     name = 'Professional'
-    minimum_users = 1
-    base_requests = 20
-    feature_level = 1
+    resources = {
+        "minimum_users": 1,
+        "base_requests": 20,
+        "requests_per_user": 0,
+        "feature_level": 1,
+    }
 
 
-class OrganizationPlanFactory(PlanFactory):
-    """An organization plan factory"""
+class OrganizationEntitlementFactory(EntitlementFactory):
+    """An organization entitlement factory"""
     name = 'Organization'
-    minimum_users = 5
-    base_requests = 50
-    requests_per_user = 5
-    feature_level = 2
+    resources = {
+        "minimum_users": 5,
+        "base_requests": 50,
+        "requests_per_user": 5,
+        "feature_level": 2,
+    }

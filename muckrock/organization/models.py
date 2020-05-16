@@ -4,6 +4,7 @@ Models for the organization application
 
 # Django
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models.expressions import F
@@ -43,7 +44,7 @@ class Organization(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     private = models.BooleanField(default=False)
     individual = models.BooleanField(default=True)
-    plan = models.ForeignKey('organization.Plan', null=True)
+    entitlement = models.ForeignKey('organization.Entitlement', null=True)
     card = models.CharField(max_length=255, blank=True)
     avatar_url = models.URLField(max_length=255, blank=True)
 
@@ -68,6 +69,7 @@ class Organization(models.Model):
     payment_failed = models.BooleanField(default=False)
 
     # deprecate #
+    plan = models.ForeignKey('organization.Plan', null=True)
     owner = models.ForeignKey(User, blank=True, null=True)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
@@ -103,17 +105,31 @@ class Organization(models.Model):
     def update_data(self, data):
         """Set updated data from squarelet"""
 
-        # plan should always be created on client sites before being used
-        # get_or_create is used as a precauitionary measure
-        self.plan, created = Plan.objects.get_or_create(
-            slug=data['plan'],
-            defaults={'name': data['plan'].replace('-', ' ').title()},
-        )
-        if created:
-            logger.warning('Unknown plan: %s', data['plan'])
+        if len(data['entitlements']) > 1:
+            logger.warning(
+                'Organization %s has multiple entitlements: %s', self.pk,
+                ', '.join(e['slug'] for e in data['entitlements'])
+            )
+        if data['entitlements']:
+            entitlement_data = max(
+                data['entitlements'],
+                key=lambda e: e['resources'].get('base_requests', 0)
+            )
+            self.entitlement, _created = Entitlement.objects.update_or_create(
+                slug=entitlement_data['slug'],
+                defaults={
+                    'name': entitlement_data['name'],
+                    'description': entitlement_data['description'],
+                    'resources': entitlement_data['resources'],
+                },
+            )
+            date_update = entitlement_data['date_update']
+        else:
+            self.entitlement = Entitlement.objects.get(slug='free')
+            date_update = None
 
         # calc reqs/month in case it has changed
-        self.requests_per_month = self.plan.requests_per_month(
+        self.requests_per_month = self.entitlement.requests_per_month(
             data['max_users']
         )
 
@@ -122,7 +138,7 @@ class Organization(models.Model):
         # per month may have changed if they changed their plan or their user count,
         # in which case we should add the difference to their monthly requests
         # if requests per month increased
-        if self.date_update == data['date_update']:
+        if self.date_update == date_update:
             # add additional monthly requests immediately
             self.monthly_requests = F('monthly_requests') + Greatest(
                 self.requests_per_month - F('requests_per_month'), 0
@@ -130,6 +146,7 @@ class Organization(models.Model):
         else:
             # reset monthly requests when date_update is updated
             self.monthly_requests = self.requests_per_month
+            self.date_update = date_update
 
         # update the remaining fields
         fields = [
@@ -137,7 +154,6 @@ class Organization(models.Model):
             'slug',
             'individual',
             'private',
-            'date_update',
             'card',
             'payment_failed',
             'avatar_url',
@@ -219,6 +235,7 @@ class Membership(models.Model):
         return u"{} in {}".format(self.user, self.organization)
 
 
+# remove, convert to entitlement
 class Plan(models.Model):
     """Plans that organizations can subscribe to"""
 
@@ -236,6 +253,47 @@ class Plan(models.Model):
     def requests_per_month(self, users):
         """Calculate how many requests an organization gets per month on this plan
         for a given number of users"""
+        return (
+            self.base_requests +
+            (users - self.minimum_users) * self.requests_per_user
+        )
+
+
+class Entitlement(models.Model):
+    """Entitlements represent features and resources an organization has paid for"""
+
+    name = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
+    description = models.TextField()
+
+    resources = JSONField(default=dict)
+
+    def __unicode__(self):
+        return self.name
+
+    @property
+    def minimum_users(self):
+        """Get the minimum users from the resource field"""
+        return self.resources.get('minimum_users', 1)
+
+    @property
+    def feature_level(self):
+        """Get the feature level from the resource field"""
+        return self.resources.get('feature_level', 0)
+
+    @property
+    def base_requests(self):
+        """Get the base requests from the resource field"""
+        return self.resources.get('base_requests', 0)
+
+    @property
+    def requests_per_user(self):
+        """Get the requests per user from the resource field"""
+        return self.resources.get('requests_per_user', 0)
+
+    def requests_per_month(self, users):
+        """Calculate how many requests an organization gets per month on this
+        entitlement for a given number of users"""
         return (
             self.base_requests +
             (users - self.minimum_users) * self.requests_per_user

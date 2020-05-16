@@ -24,7 +24,7 @@ from smart_open import smart_open
 
 # MuckRock
 from muckrock.accounts.models import Statistics
-from muckrock.accounts.utils import user_plan_count
+from muckrock.accounts.utils import user_entitlement_count
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import cache_get_or_set
 from muckrock.crowdsource.models import CrowdsourceResponse
@@ -246,7 +246,7 @@ class ProUserGraphWidget(StatGraphWidget):
 
     def get_value(self):
         """Get value"""
-        return user_plan_count('professional')
+        return user_entitlement_count('professional')
 
 
 class ReviewAgencyGraphWidget(StatGraphWidget):
@@ -355,7 +355,7 @@ class ProUserCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return user_plan_count('professional')
+        return user_entitlement_count('professional')
 
     def get_previous_value(self):
         """Get previous value"""
@@ -372,7 +372,7 @@ class OrgUserCountWidget(CompareNumberWidget):
 
     def get_value(self):
         """Get value"""
-        return user_plan_count('organization')
+        return user_entitlement_count('organization')
 
     def get_previous_value(self):
         """Get previous value"""

@@ -6,9 +6,11 @@ Models for the accounts application
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Max
+from django.db.models.functions import Cast
 from django.utils import timezone
 
 # Standard Library
@@ -239,9 +241,12 @@ class Profile(models.Model):
     @mproperty
     def feature_level(self):
         """The user's highest feature level among all of their organizations"""
-        return self.user.organizations.aggregate(
-            max=Max('plan__feature_level')
-        )['max']
+        return self.user.organizations.annotate(
+            feature_level=Cast(
+                KeyTextTransform('feature_level', 'entitlement__resources'),
+                models.IntegerField()
+            )
+        ).aggregate(max=Max('feature_level'))['max']
 
     @mproperty
     def is_agency_user(self):
