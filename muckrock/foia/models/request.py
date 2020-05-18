@@ -27,6 +27,7 @@ from hashlib import md5
 
 # Third Party
 from actstream.models import followers
+from constance import config
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
@@ -1033,11 +1034,11 @@ class FOIARequest(models.Model):
             return date_difference.days
         if self.portal is not None:
             # if it is using a portal, give them extra time
-            return 90
+            return config.FOLLOWUP_DAYS_PORTAL
         if self.jurisdiction and self.jurisdiction.level == 'f':
-            return 30
+            return config.FOLLOWUP_DAYS_FEDERAL
         else:
-            return 15
+            return config.FOLLOWUP_DAYS_OTHER
 
     def get_agency_reply_link(self, email=None):
         """Get the link for the agency user to log in"""

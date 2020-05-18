@@ -639,6 +639,22 @@ CONSTANCE_CONFIG = OrderedDict([
             'Message to show while automated followups are disabled'
         )
     ),
+    (
+        'FOLLOWUP_DAYS_PORTAL', (
+            90,
+            'Number of days between auto followups for requests using a portal'
+        )
+    ),
+    (
+        'FOLLOWUP_DAYS_FEDERAL',
+        (30, 'Number of days between auto followups for federal requests')
+    ),
+    (
+        'FOLLOWUP_DAYS_OTHER', (
+            15,
+            'Number of days between auto followups for state and local requests'
+        )
+    ),
     ('AUTO_LOB', (False, 'Automatically send snail mail via Lob')),
     ('AUTO_LOB_PAY', (False, 'Automatically send checks via Lob')),
     (
@@ -682,6 +698,9 @@ CONSTANCE_CONFIG_FIELDSETS = {
         'ENABLE_FOLLOWUP',
         'ENABLE_WEEKEND_FOLLOWUP',
         'DISABLED_FOLLOWUP_MESSAGE',
+        'FOLLOWUP_DAYS_PORTAL',
+        'FOLLOWUP_DAYS_FEDERAL',
+        'FOLLOWUP_DAYS_OTHER',
     ),
     'Lob Options': (
         'AUTO_LOB',
