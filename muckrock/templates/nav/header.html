@@ -252,7 +252,7 @@
                 {% if organizations|length > 1 %}
                   <li class="separator nav-item nolink">Switch&nbsp;Organization</li>
                   {% for org in organizations %}
-                    {% if org != user_qorganization %}
+                    {% if org != user_organization %}
                       <li>
                         <form action="{% url "org-activate" %}" method="post">
                           {% csrf_token %}
