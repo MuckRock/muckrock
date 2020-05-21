@@ -3,6 +3,7 @@ Models for the organization application
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
@@ -125,7 +126,9 @@ class Organization(models.Model):
             )
             date_update = entitlement_data['date_update']
         else:
-            self.entitlement = Entitlement.objects.get(slug='free')
+            self.entitlement = Entitlement.objects.get(
+                slug='{}-free'.format(settings.SQUARELET_CLIENT_NAME)
+            )
             date_update = None
 
         # calc reqs/month in case it has changed

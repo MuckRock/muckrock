@@ -764,6 +764,8 @@ SOCIAL_AUTH_PIPELINE = (
 )
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/'
 
+SQUARELET_CLIENT_NAME = os.environ.get('CLIENT_NAME', 'muckrock')
+
 # this allows communication from muckrock to squarelet to bypass rate limiting
 BYPASS_RATE_LIMIT_SECRET = os.environ.get('BYPASS_RATE_LIMIT_SECRET', '')
 
