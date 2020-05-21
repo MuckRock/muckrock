@@ -174,9 +174,11 @@
                 {% else %}
                   the organization {{ organization.name }}
                 {% endif %}
-                <a href="{% url "acct-settings" %}#organization">
-                  (Switch to {{ other_organizations }})
-                </a>.
+                {% if other_organizations %}
+                  <a href="{% url "acct-settings" %}#organization">
+                    (Switch to {{ other_organizations }})
+                  </a>.
+                {% endif %}
               </p>
               <p>
                 You have
