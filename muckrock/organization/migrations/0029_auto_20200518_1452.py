@@ -8,8 +8,6 @@ from django.db import migrations
 # Standard Library
 import os
 
-CLIENT_NAME = os.environ.get('CLIENT_NAME', 'muckrock')
-
 
 def entitlements(apps, schema_editor):
     Organization = apps.get_model("organization", "Organization")
@@ -17,17 +15,25 @@ def entitlements(apps, schema_editor):
     Entitlement = apps.get_model("organization", "Entitlement")
 
     for plan in Plan.objects.all():
+        resources = {
+            'minimum_users': plan.minimum_users,
+            'base_requests': plan.base_requests,
+            'requests_per_user': plan.requests_per_user,
+            'feature_level': plan.feature_level,
+        }
+        if plan.slug == 'proxy':
+            resources['proxy'] = True
         entitlement = Entitlement.objects.create(
             name=plan.name,
-            slug="{}-{}".format(CLIENT_NAME, plan.slug),
-            resources={
-                'minimum_users': plan.minimum_users,
-                'base_requests': plan.base_requests,
-                'requests_per_user': plan.requests_per_user,
-                'feature_level': plan.feature_level,
-            }
+            slug=plan.slug,
+            resources=resources,
         )
         Organization.objects.filter(plan=plan).update(entitlement=entitlement)
+
+
+def delete_entitlements(apps, schema_editor):
+    Entitlement = apps.get_model("organization", "Entitlement")
+    Entitlement.objects.all().delete()
 
 
 class Migration(migrations.Migration):
@@ -37,5 +43,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(entitlements, migrations.RunPython.noop),
+        migrations.RunPython(entitlements, delete_entitlements),
     ]

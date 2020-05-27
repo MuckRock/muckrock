@@ -126,8 +126,9 @@ class Organization(models.Model):
             )
             date_update = entitlement_data['date_update']
         else:
-            self.entitlement = Entitlement.objects.get(
-                slug='{}-free'.format(settings.SQUARELET_CLIENT_NAME)
+            self.entitlement, _created = Entitlement.objects.get_or_create(
+                slug='free',
+                defaults={'name': 'Free'},
             )
             date_update = None
 
