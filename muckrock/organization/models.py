@@ -45,7 +45,9 @@ class Organization(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     private = models.BooleanField(default=False)
     individual = models.BooleanField(default=True)
-    entitlement = models.ForeignKey('organization.Entitlement', null=True)
+    entitlement = models.ForeignKey(
+        'organization.Entitlement', on_delete=models.PROTECT, null=True
+    )
     card = models.CharField(max_length=255, blank=True)
     avatar_url = models.URLField(max_length=255, blank=True)
 
@@ -271,29 +273,16 @@ class Entitlement(models.Model):
     description = models.TextField()
 
     resources = JSONField(default=dict)
+    resource_fields = {
+        'minimum_users': 1,
+        'feature_level': 0,
+        'base_requests': 0,
+        'requests_per_user': 0,
+        'proxy': False,
+    }
 
     def __unicode__(self):
         return self.name
-
-    @property
-    def minimum_users(self):
-        """Get the minimum users from the resource field"""
-        return self.resources.get('minimum_users', 1)
-
-    @property
-    def feature_level(self):
-        """Get the feature level from the resource field"""
-        return self.resources.get('feature_level', 0)
-
-    @property
-    def base_requests(self):
-        """Get the base requests from the resource field"""
-        return self.resources.get('base_requests', 0)
-
-    @property
-    def requests_per_user(self):
-        """Get the requests per user from the resource field"""
-        return self.resources.get('requests_per_user', 0)
 
     def requests_per_month(self, users):
         """Calculate how many requests an organization gets per month on this
@@ -302,3 +291,12 @@ class Entitlement(models.Model):
             self.base_requests +
             (users - self.minimum_users) * self.requests_per_user
         )
+
+
+# dynamically create properties for all defined resource fields
+for field, default in Entitlement.resource_fields.iteritems():
+    setattr(
+        Entitlement,
+        field,
+        property(lambda self, f=field, d=default: self.resources.get(f, d)),
+    )

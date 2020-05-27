@@ -32,7 +32,9 @@ def entitlements(apps, schema_editor):
 
 
 def delete_entitlements(apps, schema_editor):
+    Organization = apps.get_model("organization", "Organization")
     Entitlement = apps.get_model("organization", "Entitlement")
+    Organization.objects.update(entitlement=None)
     Entitlement.objects.all().delete()
 
 
