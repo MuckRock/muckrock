@@ -3,7 +3,6 @@ Models for the organization application
 """
 
 # Django
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
@@ -294,9 +293,9 @@ class Entitlement(models.Model):
 
 
 # dynamically create properties for all defined resource fields
-for field, default in Entitlement.resource_fields.iteritems():
+for field_, default in Entitlement.resource_fields.iteritems():
     setattr(
         Entitlement,
-        field,
-        property(lambda self, f=field, d=default: self.resources.get(f, d)),
+        field_,
+        property(lambda self, f=field_, d=default: self.resources.get(f, d)),
     )
