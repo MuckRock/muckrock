@@ -190,7 +190,8 @@ class ProjectDetailView(DetailView):
         project = self.get_object()
         user = self.request.user
         contributor_or_staff = user.is_staff or project.has_contributor(user)
-        if project.private and not contributor_or_staff:
+        public = not project.private and project.approved
+        if not public and not contributor_or_staff:
             raise Http404()
         return super(ProjectDetailView, self).dispatch(*args, **kwargs)
 
