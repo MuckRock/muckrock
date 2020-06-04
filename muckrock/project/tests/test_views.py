@@ -48,6 +48,86 @@ test_image = SimpleUploadedFile(
 )
 
 
+class TestProjectDetailView(TestCase):
+    """Tests creating a project as a user."""
+
+    def setUp(self):
+        self.contributor = UserFactory()
+        self.user = UserFactory()
+        self.project = ProjectFactory()
+        self.project.contributors.add(self.contributor)
+
+        self.kwargs = {'slug': self.project.slug, 'pk': self.project.pk}
+        self.url = reverse('project-detail', kwargs=self.kwargs)
+        self.view = views.ProjectDetailView.as_view()
+
+    @raises(Http404)
+    def test_private_user(self):
+        """Users should not be able to see private projects"""
+        self.project.private = True
+        self.project.approved = False
+        self.project.save()
+
+        response = http_get_response(
+            self.url, self.view, self.user, **self.kwargs
+        )
+
+    def test_private_contributor(self):
+        """Contributors should be able to see private projects"""
+        self.project.private = True
+        self.project.approved = False
+        self.project.save()
+
+        response = http_get_response(
+            self.url, self.view, self.contributor, **self.kwargs
+        )
+        eq_(response.status_code, 200)
+
+    @raises(Http404)
+    def test_pending_user(self):
+        """Users should not be able to see pending projects"""
+        self.project.private = False
+        self.project.approved = False
+        self.project.save()
+
+        response = http_get_response(
+            self.url, self.view, self.user, **self.kwargs
+        )
+
+    def test_pending_contributor(self):
+        """Contributors should be able to see pending projects"""
+        self.project.private = False
+        self.project.approved = False
+        self.project.save()
+
+        response = http_get_response(
+            self.url, self.view, self.contributor, **self.kwargs
+        )
+        eq_(response.status_code, 200)
+
+    def test_public_user(self):
+        """Users should be able to see public projects"""
+        self.project.private = False
+        self.project.approved = True
+        self.project.save()
+
+        response = http_get_response(
+            self.url, self.view, self.user, **self.kwargs
+        )
+        eq_(response.status_code, 200)
+
+    def test_public_contributor(self):
+        """Contributors should be able to see public projects"""
+        self.project.private = False
+        self.project.approved = True
+        self.project.save()
+
+        response = http_get_response(
+            self.url, self.view, self.contributor, **self.kwargs
+        )
+        eq_(response.status_code, 200)
+
+
 class TestProjectCreateView(TestCase):
     """Tests creating a project as a user."""
 
@@ -113,8 +193,6 @@ class TestProjectEditView(TestCase):
         self.contributor = UserFactory()
         self.project = ProjectFactory()
         self.project.contributors.add(self.contributor)
-        self.project.save()
-        self.factory = RequestFactory()
         self.kwargs = {'slug': self.project.slug, 'pk': self.project.pk}
         self.url = reverse('project-edit', kwargs=self.kwargs)
         self.view = views.ProjectEditView.as_view()
