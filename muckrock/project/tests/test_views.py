@@ -68,9 +68,7 @@ class TestProjectDetailView(TestCase):
         self.project.approved = False
         self.project.save()
 
-        response = http_get_response(
-            self.url, self.view, self.user, **self.kwargs
-        )
+        http_get_response(self.url, self.view, self.user, **self.kwargs)
 
     def test_private_contributor(self):
         """Contributors should be able to see private projects"""
@@ -90,9 +88,7 @@ class TestProjectDetailView(TestCase):
         self.project.approved = False
         self.project.save()
 
-        response = http_get_response(
-            self.url, self.view, self.user, **self.kwargs
-        )
+        http_get_response(self.url, self.view, self.user, **self.kwargs)
 
     def test_pending_contributor(self):
         """Contributors should be able to see pending projects"""
