@@ -26,7 +26,14 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     choices = Agency.objects.filter(status='approved'
                                     ).select_related('jurisdiction')
     choice_template = 'autocomplete/agency.html'
-    search_fields = ['name', 'aliases']
+    split_words = 'and'
+    search_fields = [
+        'name',
+        'aliases',
+        'jurisdiction__name',
+        '=jurisdiction__abbrev',
+        '=jurisdiction__parent__abbrev',
+    ]
     attrs = {
         'data-autocomplete-minimum-characters': 1,
         'placeholder': 'Search agencies',
