@@ -30,11 +30,14 @@ logger = logging.getLogger(__name__)
 class CrowdfundQuerySet(models.QuerySet):
     """Query set for crowdfunds"""
 
-    def filter_by_plan(self, plan):
-        """Filter for Crowdfunds by users with a certain plan type"""
+    def filter_by_entitlement(self, entitlement):
+        """Filter for Crowdfunds by users with a certain entitlement type"""
         return self.filter(
-            Q(foia__composer__organization__plan__slug=plan)
-            | Q(projects__contributors__organizations__plan__slug=plan)
+            Q(foia__composer__organization__entitlement__slug=entitlement)
+            | Q(
+                projects__contributors__organizations__entitlement__slug=
+                entitlement
+            )
         )
 
 

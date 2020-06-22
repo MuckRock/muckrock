@@ -79,7 +79,7 @@ def mock_squarelet(mock_requests, requests_json=None):
                 'slug': slugify(username),
                 'update_on': None,
                 'max_users': 1,
-                'plan': 'free',
+                'entitlements': [],
                 'individual': True,
                 'admin': True,
             }]

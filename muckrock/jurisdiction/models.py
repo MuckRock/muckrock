@@ -202,7 +202,7 @@ class Jurisdiction(models.Model, RequestHelper):
     def get_proxy(self):
         """Get a random proxy user for this jurisdiction"""
         return User.objects.filter(
-            organizations__plan__slug='proxy',
+            organizations__entitlement__resources__proxy=True,
             profile__state=self.legal.abbrev,
         ).order_by('-profile__preferred_proxy').first()
 

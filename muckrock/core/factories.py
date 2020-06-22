@@ -77,15 +77,17 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 class ProfessionalUserFactory(UserFactory):
     """A professional user"""
-    membership__organization__plan = factory.SubFactory(
-        'muckrock.organization.factories.ProfessionalPlanFactory'
+    # pylint: disable=invalid-name
+    membership__organization__entitlement = factory.SubFactory(
+        'muckrock.organization.factories.ProfessionalEntitlementFactory'
     )
 
 
 class OrganizationUserFactory(UserFactory):
     """An organization user"""
-    membership__organization__plan = factory.SubFactory(
-        'muckrock.organization.factories.OrganizationPlanFactory'
+    # pylint: disable=invalid-name
+    membership__organization__entitlement = factory.SubFactory(
+        'muckrock.organization.factories.OrganizationEntitlementFactory'
     )
 
 

@@ -18,10 +18,10 @@ from muckrock.core.factories import (
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.organization.factories import (
-    FreePlanFactory,
+    FreeEntitlementFactory,
     MembershipFactory,
-    OrganizationPlanFactory,
-    ProfessionalPlanFactory,
+    OrganizationEntitlementFactory,
+    ProfessionalEntitlementFactory,
 )
 
 
@@ -37,15 +37,17 @@ class TestProfileUnit(TestCase):
         eq_(unicode(self.profile), expected)
 
     def test_feature_level(self):
-        """Test getting a users max feature level from their plans"""
+        """Test getting a users max feature level from their entitlements"""
         free = ProfileFactory(
-            user__membership__organization__plan=FreePlanFactory()
+            user__membership__organization__entitlement=FreeEntitlementFactory()
         )
         pro = ProfileFactory(
-            user__membership__organization__plan=ProfessionalPlanFactory()
+            user__membership__organization__entitlement=
+            ProfessionalEntitlementFactory()
         )
         org = ProfileFactory(
-            user__membership__organization__plan=OrganizationPlanFactory()
+            user__membership__organization__entitlement=
+            OrganizationEntitlementFactory()
         )
 
         eq_(free.feature_level, 0)
@@ -53,25 +55,27 @@ class TestProfileUnit(TestCase):
         eq_(org.feature_level, 2)
 
         MembershipFactory(
-            user=free.user, organization__plan__name='Organization'
+            user=free.user, organization__entitlement__name='Organization'
         )
 
         # refresh from db because feature level is cached
         free = Profile.objects.get(pk=free.pk)
 
-        # if in free plan and org plan, take the larger one
+        # if in free entitlement and org entitlement, take the larger one
         eq_(free.feature_level, 2)
 
     def test_is_advanced(self):
         """Test whether the users are marked as advanced."""
         pro = ProfileFactory(
-            user__membership__organization__plan=ProfessionalPlanFactory()
+            user__membership__organization__entitlement=
+            ProfessionalEntitlementFactory()
         )
         org = ProfileFactory(
-            user__membership__organization__plan=OrganizationPlanFactory()
+            user__membership__organization__entitlement=
+            OrganizationEntitlementFactory()
         )
         free = ProfileFactory(
-            user__membership__organization__plan=FreePlanFactory()
+            user__membership__organization__entitlement=FreeEntitlementFactory()
         )
 
         assert_true(pro.is_advanced())

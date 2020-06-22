@@ -11,13 +11,13 @@ from django.core.urlresolvers import reverse
 from reversion.admin import VersionAdmin
 
 # MuckRock
-from muckrock.organization.models import Organization, Plan
+from muckrock.organization.models import Entitlement, Organization
 
 
 class OrganizationAdmin(VersionAdmin):
     """Organization Admin"""
-    list_display = ('name', 'plan', 'private', 'individual')
-    list_filter = ('plan', 'private', 'individual')
+    list_display = ('name', 'entitlement', 'private', 'individual')
+    list_filter = ('entitlement', 'private', 'individual')
     search_fields = ('name', 'users__username')
     fields = (
         'uuid',
@@ -25,7 +25,7 @@ class OrganizationAdmin(VersionAdmin):
         'slug',
         'private',
         'individual',
-        'plan',
+        'entitlement',
         'card',
         'requests_per_month',
         'monthly_requests',
@@ -38,7 +38,7 @@ class OrganizationAdmin(VersionAdmin):
         'slug',
         'private',
         'individual',
-        'plan',
+        'entitlement',
         'card',
         'requests_per_month',
         'date_update',
@@ -68,8 +68,8 @@ class OrganizationAdmin(VersionAdmin):
     user_link.short_description = 'User'
 
 
-class PlanAdmin(VersionAdmin):
-    """Plan Admin"""
+class EntitlementAdmin(VersionAdmin):
+    """Entitlement Admin"""
     list_display = (
         'name',
         'minimum_users',
@@ -80,4 +80,4 @@ class PlanAdmin(VersionAdmin):
 
 
 admin.site.register(Organization, OrganizationAdmin)
-admin.site.register(Plan, PlanAdmin)
+admin.site.register(Entitlement, EntitlementAdmin)

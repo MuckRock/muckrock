@@ -188,7 +188,7 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
         ga('create', 'UA-16635809-1', 'auto');
         // Track the account type of the current user
         {% if request.user.is_authenticated %}
-          var dimensionValue = '{{request.user.profile.organization.plan}}';
+          var dimensionValue = '{{request.user.profile.organization.entitlement}}';
         {% else %}
           var dimensionValue = 'anonymous';
         {% endif %}
@@ -237,7 +237,7 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
           mixpanel.people.track_charge({{ mp_charge }});
         {% endif %}
         mixpanel.register({
-          "Account Type": "{{ request.user.profile.organization.plan }}",
+          "Account Type": "{{ request.user.profile.organization.entitlement }}",
           "Organization": "{{ request.user.profile.organization.name }}",
           "Organization UUID": "{{ request.user.profile.organization.uuid }}",
         });
@@ -250,7 +250,7 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
                 {
                   "UUID": "{{organization.uuid}}",
                   "Name": "{{organization.name}}",
-                  "Plan": "{{organization.plan}}",
+                  "Plan": "{{organization.entitlement}}",
                 },
               {% endfor %}
             ]

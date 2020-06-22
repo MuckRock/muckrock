@@ -158,6 +158,7 @@ def mini_login(request, username, password):
     return user
 
 
-def user_plan_count(plan):
-    """Count how many users have a certain plan"""
-    User.objects.filter(organizations__plan__slug=plan).distinct().count()
+def user_entitlement_count(entitlement):
+    """Count how many users have a certain entitlement"""
+    User.objects.filter(organizations__entitlement__slug=entitlement
+                        ).distinct().count()

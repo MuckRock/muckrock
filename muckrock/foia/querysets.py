@@ -154,20 +154,20 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_public_file_count(self, limit=None):
         """Annotate the public file count"""
-        foia_qs = self
-        count_qs = (
-            self._clone().values_list('id').filter(
-                communications__files__access='public'
-            ).annotate(Count('communications__files'))
-        )
         if limit is not None:
-            foia_qs = foia_qs[:limit]
-            count_qs = count_qs[:limit]
+            foias = list(self[:limit])
+        else:
+            foias = list(self)
+
+        count_qs = self.model.objects.filter(
+            id__in=[f.pk for f in foias],
+            communications__files__access='public',
+        ).values_list('id').annotate(Count('communications__files'))
+
         counts = dict(count_qs)
-        foias = []
-        for foia in foia_qs:
+
+        for foia in foias:
             foia.public_file_count = counts.get(foia.pk, 0)
-            foias.append(foia)
         return foias
 
     def get_featured(self, user):

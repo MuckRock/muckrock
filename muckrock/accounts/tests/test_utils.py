@@ -20,6 +20,7 @@ from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import unique_username
 from muckrock.core.factories import UserFactory
 from muckrock.core.test_utils import mock_middleware, mock_squarelet
+from muckrock.organization.factories import FreeEntitlementFactory
 
 
 class TestMiniregister(TestCase):
@@ -38,6 +39,7 @@ class TestMiniregister(TestCase):
         """
 
         mock_squarelet(mock_requests)
+        FreeEntitlementFactory()
 
         request = RequestFactory()
         mixin = MiniregMixin()
