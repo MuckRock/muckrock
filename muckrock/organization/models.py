@@ -107,6 +107,8 @@ class Organization(models.Model):
     def update_data(self, data):
         """Set updated data from squarelet"""
 
+        logger.info('update data org %s %s', self.pk, data)
+
         if len(data['entitlements']) > 1:
             logger.warning(
                 'Organization %s has multiple entitlements: %s', self.pk,
