@@ -407,4 +407,5 @@ class Agency(models.Model, RequestHelper):
         permissions = (
             ("view_emails", "Can view private contact information"),
             ("merge_agency", "Can merge two agencies together"),
+            ("mass_import", "Can mass import a CSV of agencies"),
         )

@@ -206,3 +206,8 @@ class AgencyMergeForm(forms.Form):
         if good_agency and good_agency == bad_agency:
             raise forms.ValidationError("Cannot merge an agency into itself")
         return cleaned_data
+
+
+class AgencyMassImportForm(forms.Form):
+    """Import a CSV file of models"""
+    csv = forms.FileField()

@@ -23,7 +23,8 @@ from fuzzywuzzy import fuzz, process
 
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
-from muckrock.agency.forms import AgencyMergeForm
+from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
+from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.utils import initial_communication_template
 from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
@@ -420,3 +421,22 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
                 {"name": capwords(name), "jurisdiction": jurisdiction},
             )
         return create_option
+
+
+class MassImportAgency(PermissionRequiredMixin, FormView):
+    """View to do a mass import of new agencies"""
+
+    form_class = AgencyMassImportForm
+    template_name = "agency/mass_import.html"
+    permission_required = "agency.mass_import"
+
+    def form_valid(self, form):
+        reader = CSVReader(self.request.FILES["csv"])
+        importer = Importer(reader)
+        context = {"data": importer.match()}
+        return self.render_to_response(context)
+
+    def handle_no_permission(self):
+        """What to do if the user does not have permisson to view this page"""
+        messages.error(self.request, "You do not have permission to view this page")
+        return redirect("index")

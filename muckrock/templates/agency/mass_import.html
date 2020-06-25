@@ -1,0 +1,34 @@
+{% extends "forms/base_form.html" %}
+
+{% block form-title %}
+  <h1>Mass Import</h1>
+{% endblock %}
+
+{% block form-info %}
+  {% if data %}
+    <table>
+      <tr>
+        <th>agency</th>
+        <th>jurisdiction</th>
+        <th>match_agency_id</th>
+        <th>match_agency_name</th>
+        <th>match_agency_score</th>
+        <th>error</th>
+      </tr>
+      {% for datum in data %}
+        <tr>
+          <td>{{ datum.agency }}</td>
+          <td>{{ datum.jurisdiction }}</td>
+          <td>{{ datum.match_agency.id }}</td>
+          <td>
+            <a href="{{ datum.match_agency.get_absolute_url }}">
+              {{ datum.match_agency.name }}
+            </a>
+          </td>
+          <td>{{ datum.match_agency_score }}</td>
+          <td>{{ datum.error }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+{% endblock form-info %}
