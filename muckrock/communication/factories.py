@@ -43,7 +43,7 @@ class PhoneNumberFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PhoneNumber
 
-    number = factory.Faker("phone_number")
+    number = factory.Sequence(lambda n: "617-555-%04d" % n)
 
 
 class AddressFactory(factory.django.DjangoModelFactory):

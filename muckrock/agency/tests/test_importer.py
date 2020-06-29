@@ -143,23 +143,14 @@ class TestAgencyImporter(TestCase):
         eq_('missing agency', data[10]['agency_status'])
         eq_('missing jurisdiction', data[10]['jurisdiction_status'])
 
-    # update
-    #  valid data
-    #  invalid data
-    #  duplicate data
-    #  redundant data
-    # create
-    #  valid data
-    #  invalid data
-
     def test_import_update(self):
         reader = PyReader([
             {
                 'agency': 'central intelligence agency',
                 'jurisdiction': 'united states of america',
                 'email': 'foia@cia.gov',
-                'fax': '555-555-0001',
-                'phone': '555-555-0000',
+                'fax': '617-555-0001',
+                'phone': '617-555-0000',
                 'address_city': 'Washington',
                 'address_state': 'DC',
                 'address_zip': '20505',
@@ -180,10 +171,10 @@ class TestAgencyImporter(TestCase):
         eq_(self.cia.email.email, 'foia@cia.gov')
         eq_(data[0]['email_status'], 'set primary')
 
-        eq_(self.cia.fax.number, '+1 555-555-0001')
+        eq_(self.cia.fax.number, '+1 617-555-0001')
         eq_(data[0]['fax_status'], 'set primary')
 
-        ok_(self.cia.get_phones().filter(number='+1 555-555-0000').exists())
+        ok_(self.cia.get_phones().filter(number='+1 617-555-0000').exists())
         eq_(data[0]['phone_status'], 'set')
 
         eq_(self.cia.address.zip_code, '20505')
@@ -203,7 +194,34 @@ class TestAgencyImporter(TestCase):
         eq_(data[0]['website_status'], 'set')
 
     def test_import_update_invalid(self):
-        pass
+        reader = PyReader([
+            {
+                'agency': 'central intelligence agency',
+                'jurisdiction': 'united states of america',
+                'email': 'foia@cia',
+                'fax': '617-555-001',
+                'phone': 'foobar',
+                'address_city': 'Washington',
+                'address_state': 'foobar',
+                'address_zip': '0123',
+                'portal_url': 'not a url',
+                'portal_type': 'not a portal',
+                'foia_website': 'www.cia.gov/foia/',
+                'website': 'foo.bar',
+            },
+        ])
+        importer = Importer(reader)
+        data = list(importer.import_())
+
+        eq_(data[0]['agency_status'], 'exact match')
+
+        eq_(data[0]['email_status'], 'error')
+        eq_(data[0]['fax_status'], 'error')
+        eq_(data[0]['phone_status'], 'error')
+        eq_(data[0]['address_status'], 'error')
+        eq_(data[0]['portal_status'], 'error')
+        eq_(data[0]['foia_website_status'], 'error')
+        eq_(data[0]['website_status'], 'error')
 
     def test_import_update_duplicate(self):
         reader = PyReader([
@@ -218,7 +236,10 @@ class TestAgencyImporter(TestCase):
         data = list(importer.import_())
 
         eq_(data[0]['email_status'], 'already set')
-        eq_(data[0]['fax_status'], 'already set')
+        eq_(
+            data[0]['fax_status'], 'already set',
+            self.police.fax.number.as_national
+        )
 
     def test_import_update_redundant(self):
         reader = PyReader([
@@ -226,7 +247,7 @@ class TestAgencyImporter(TestCase):
                 'agency': 'Boston Police Department',
                 'jurisdiction': 'Boston, MA',
                 'email': 'other@example.com',
-                'fax': '555-555-0001',
+                'fax': '617-555-0001',
             },
         ])
         importer = Importer(reader)
@@ -235,7 +256,7 @@ class TestAgencyImporter(TestCase):
         eq_(data[0]['email_status'], 'set other')
         ok_(self.police.emails.filter(email='other@example.com').exists())
         eq_(data[0]['fax_status'], 'set other')
-        ok_(self.police.phones.filter(number='555-555-0001').exists())
+        ok_(self.police.phones.filter(number='617-555-0001').exists())
 
     def test_create(self):
         reader = PyReader([
@@ -243,8 +264,8 @@ class TestAgencyImporter(TestCase):
                 'agency': 'Foobar',
                 'jurisdiction': 'united states of america',
                 'email': 'foia@new.agency.gov',
-                'fax': '555-555-0001',
-                'phone': '555-555-0000',
+                'fax': '617-555-0001',
+                'phone': '617-555-0000',
                 'address_street': '123 Main St',
                 'address_city': 'Washington',
                 'address_state': 'DC',
@@ -265,10 +286,10 @@ class TestAgencyImporter(TestCase):
         eq_(agency.email.email, 'foia@new.agency.gov')
         eq_(data[0]['email_status'], 'set primary')
 
-        eq_(agency.fax.number, '+1 555-555-0001')
+        eq_(agency.fax.number, '+1 617-555-0001')
         eq_(data[0]['fax_status'], 'set primary')
 
-        ok_(agency.get_phones().filter(number='+1 555-555-0000').exists())
+        ok_(agency.get_phones().filter(number='+1 617-555-0000').exists())
         eq_(data[0]['phone_status'], 'set')
 
         eq_(agency.address.street, '123 Main St')
