@@ -20,6 +20,7 @@
           <th>aliases</th>
           <th>foia_website</th>
           <th>website</th>
+          <th>requires_proxy</th>
         {% endif %}
       </tr>
       {% for datum in data %}
@@ -74,6 +75,10 @@
             <td>
               {{ datum.website }}
               {% if datum.website_status %}({{ datum.website_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.requires_proxy }}
+              {% if datum.requires_proxy_status %}({{ datum.requires_proxy_status }}){% endif %}
             </td>
           {% endif %}
         </tr>

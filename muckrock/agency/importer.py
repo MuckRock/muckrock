@@ -319,6 +319,7 @@ class Importer(object):
         aliases = datum.get("aliases")
         url = datum.get("foia_website")
         website = datum.get("website")
+        requires_proxy = datum.get("requires_proxy", "").lower()
         save = False
         if aliases and not agency.aliases:
             agency.aliases = aliases
@@ -338,6 +339,12 @@ class Importer(object):
                 agency.website = website
                 datum["website_status"] = "set"
                 save = True
+        if "requires_proxy" in datum:
+            agency.requires_proxy = requires_proxy in ("t", "true", "y", "yes", "1")
+            save = True
+            datum["requires_proxy_status"] = "set {}".format(
+                str(agency.requires_proxy).lower()
+            )
         if save:
             agency.save()
 

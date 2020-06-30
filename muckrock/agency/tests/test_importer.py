@@ -290,6 +290,7 @@ class TestAgencyImporter(TestCase):
                 'portal_type': 'nextrequest',
                 'foia_website': 'https://www.new-agency.gov/foia/',
                 'website': 'https://www.new-agency.gov/',
+                'requires_proxy': 'true',
             },
         ])
         importer = Importer(reader)
@@ -323,6 +324,9 @@ class TestAgencyImporter(TestCase):
         eq_(data[0]['foia_website_status'], 'set')
         eq_(agency.website, 'https://www.new-agency.gov/')
         eq_(data[0]['website_status'], 'set')
+
+        ok_(agency.requires_proxy)
+        eq_(data[0]['requires_proxy_status'], 'set true')
 
     def test_create_minimal(self):
         """Test a creation with minimal contact information supplied"""
