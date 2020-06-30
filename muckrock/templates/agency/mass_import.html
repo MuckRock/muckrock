@@ -42,6 +42,7 @@
           {% if import %}
             <td>
               {{ datum.email }}
+              {% if datum.cc_emails %}[{{ datum.cc_emails }}]{% endif %}
               {% if datum.email_status %}({{ datum.email_status }}){% endif %}
             </td>
             <td>

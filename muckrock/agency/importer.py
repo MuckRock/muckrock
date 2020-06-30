@@ -166,15 +166,19 @@ class Importer(object):
     def _import_email(self, agency, datum):
         """Import an agency's email address"""
         email = datum.get("email")
+        cc_emails = datum.get("cc_emails", "")
         if email:
             email_address = EmailAddress.objects.fetch(email)
+            cc_email_addresses = EmailAddress.objects.fetch_many(cc_emails)
             if email_address is None:
                 # email failed validation
                 datum["email_status"] = "error"
                 return
             if datum["agency_status"] == "created":
                 # if the agency was just created, it does not have any existing emails
-                request_type, email_type = "primary", "to"
+                request_type = "primary"
+                email_type = "to"
+                cc_type = "cc"
                 status = "primary"
             else:
                 # otherwise check for existing email addresses
@@ -184,10 +188,14 @@ class Importer(object):
                     return
                 # check if it already has a primary email address
                 if agency.get_emails("primary", "to"):  # optimize
-                    request_type, email_type = "none", "none"
+                    request_type = "none"
+                    email_type = "none"
+                    cc_type = "none"
                     status = "other"
                 else:
-                    request_type, email_type = "primary", "to"
+                    request_type = "primary"
+                    email_type = "to"
+                    cc_type = "cc"
                     status = "primary"
             AgencyEmail.objects.create(
                 agency=agency,
@@ -195,6 +203,12 @@ class Importer(object):
                 request_type=request_type,
                 email_type=email_type,
             )
+            for cc_email_address in cc_email_addresses:
+                AgencyEmail.objects.get_or_create(
+                    agency=agency,
+                    email=cc_email_address,
+                    defaults={"request_type": request_type, "email_type": cc_type},
+                )
             datum["email_status"] = "set {}".format(status)
 
     def _import_phone(self, agency, datum):

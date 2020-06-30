@@ -253,6 +253,7 @@ class TestAgencyImporter(TestCase):
                 'agency': 'Boston Police Department',
                 'jurisdiction': 'Boston, MA',
                 'email': 'other@example.com',
+                'cc_emails': 'foia1@example.com, foia2@example.com',
                 'fax': '617-555-0001',
                 'address_city': 'Washington',
                 'address_state': 'DC',
@@ -266,6 +267,8 @@ class TestAgencyImporter(TestCase):
 
         eq_(data[0]['email_status'], 'set other')
         ok_(self.police.emails.filter(email='other@example.com').exists())
+        ok_(self.police.emails.filter(email='foia1@example.com').exists())
+        ok_(self.police.emails.filter(email='foia2@example.com').exists())
         eq_(data[0]['fax_status'], 'set other')
         ok_(self.police.phones.filter(number='617-555-0001').exists())
         eq_(data[0]['address_status'], 'set other')
@@ -280,6 +283,7 @@ class TestAgencyImporter(TestCase):
                 'agency': 'Foobar',
                 'jurisdiction': 'united states of america',
                 'email': 'foia@new.agency.gov',
+                'cc_emails': 'foia1@new.agency.gov, foia2@new.agency.gov',
                 'fax': '617-555-0001',
                 'phone': '617-555-0000',
                 'address_street': '123 Main St',
@@ -301,6 +305,13 @@ class TestAgencyImporter(TestCase):
         eq_(agency.name, 'Foobar')
 
         eq_(agency.email.email, 'foia@new.agency.gov')
+        eq_(
+            sorted(
+                e.email for e in
+                agency.get_emails(request_type="primary", email_type="cc")
+            ),
+            ['foia1@new.agency.gov', 'foia2@new.agency.gov'],
+        )
         eq_(data[0]['email_status'], 'set primary')
 
         eq_(agency.fax.number, '+1 617-555-0001')
