@@ -217,5 +217,12 @@ class AgencyMassImportForm(forms.Form):
             ('match', 'Match'),
             ('import', 'Import'),
         ),
+        help_text='Match will just match the jurisdiction and agency without '
+        'changing anything.  Import will create unmatched agencies and set or '
+        'update supplied contact information'
     )
-    dry_run = forms.BooleanField(required=False)
+    dry_run = forms.BooleanField(
+        required=False,
+        help_text='Checking this will run an import, but not save any of the '
+        'changes to the database'
+    )
