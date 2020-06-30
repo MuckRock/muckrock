@@ -211,3 +211,11 @@ class AgencyMergeForm(forms.Form):
 class AgencyMassImportForm(forms.Form):
     """Import a CSV file of models"""
     csv = forms.FileField()
+    match_or_import = forms.ChoiceField(
+        required=True,
+        choices=(
+            ('match', 'Match'),
+            ('import', 'Import'),
+        ),
+    )
+    dry_run = forms.BooleanField(required=False)

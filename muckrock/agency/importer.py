@@ -17,13 +17,7 @@ from fuzzywuzzy import fuzz, process
 from localflavor.us.us_states import STATE_CHOICES
 
 # MuckRock
-from muckrock.agency.models import (
-    Agency,
-    AgencyAddress,
-    AgencyEmail,
-    AgencyPhone,
-    AgencyType,
-)
+from muckrock.agency.models import Agency, AgencyAddress, AgencyEmail, AgencyPhone
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.communication.utils import validate_phone_number
 from muckrock.jurisdiction.models import Jurisdiction
@@ -34,6 +28,7 @@ PORTALS = [p[0] for p in PORTAL_TYPES]
 
 
 def valid_url(url):
+    """Return true for valid URLs"""
     try:
         URLValidator(schemes=["http", "https"])(url)
         return True
@@ -42,33 +37,34 @@ def valid_url(url):
 
 
 class CSVReader(object):
+    """Read the import data from a CSV file"""
+
     def __init__(self, file_):
         self.csv_reader = csv.reader(file_)
         self.headers = next(self.csv_reader)
 
     def read(self):
+        """Create a dictionary from each CSV row by keying by the headers"""
         for row in self.csv_reader:
             yield dict(zip(self.headers, row))
 
 
 class PyReader(object):
+    """Read the import data from a python list of dictionaries
+    Used for testing
+    """
+
     def __init__(self, data):
         self.data = data
 
     def read(self):
+        """Just iterate through the list"""
         for datum in self.data:
             yield datum
 
 
-class Writer(object):
-    pass
-
-
-class CSVWriter(Writer):
-    pass
-
-
 class Importer(object):
+    """Match and import multiple agencies at a time"""
 
     p_zip = re.compile(r"^\d{5}(?:-\d{4})?$")
 
@@ -98,9 +94,12 @@ class Importer(object):
         datum["match_jurisdiction"] = jurisdiction
         if jurisdiction is None:
             datum["jurisdiction_status"] = "no jurisdiction"
+        else:
+            datum["jurisdiction_status"] = "found"
         return jurisdiction
 
     def _match_one(self, datum):
+        """Match a single agency"""
         jurisdiction = self._match_jurisdiction(datum)
         if jurisdiction is None:
             return datum
@@ -132,6 +131,7 @@ class Importer(object):
         return datum
 
     def _validate(self, datum):
+        """Validate the agency and jurisdiction information exist"""
         error = False
         if not datum.get("agency"):
             datum["agency_status"] = "missing agency"
@@ -142,9 +142,7 @@ class Importer(object):
         return error
 
     def match(self):
-        # first match jurisdiction
-        # look for exact match
-        # look for best fuzzy match
+        """Match each datum"""
         for datum in self.data:
             error = self._validate(datum)
             if error:
@@ -153,11 +151,12 @@ class Importer(object):
                 yield self._match_one(datum)
 
     def _create_agency(self, datum, user):
+        """Create an agency when importing a new agency"""
         agency = Agency.objects.create(
             name=datum["agency"],
             slug=(slugify(datum["agency"]) or "untitled"),
             jurisdiction=datum["match_jurisdiction"],
-            status="approved",  # XXX option to make task?
+            status="approved",
             user=user,
         )
         datum["match_agency"] = agency
@@ -165,6 +164,7 @@ class Importer(object):
         return agency
 
     def _import_email(self, agency, datum):
+        """Import an agency's email address"""
         email = datum.get("email")
         if email:
             email_address = EmailAddress.objects.fetch(email)
@@ -198,6 +198,7 @@ class Importer(object):
             datum["email_status"] = "set {}".format(status)
 
     def _import_phone(self, agency, datum):
+        """Import an agency's phone number"""
         phone = datum.get("phone")
         if phone:
             phone_number = PhoneNumber.objects.fetch(phone, type_="phone")
@@ -213,6 +214,7 @@ class Importer(object):
                 datum["phone_status"] = "already set"
 
     def _import_fax(self, agency, datum):
+        """Import an agency's fax number"""
         fax = datum.get("fax")
         if fax:
             fax_number = PhoneNumber.objects.fetch(phone, type_="fax")
@@ -239,6 +241,7 @@ class Importer(object):
             datum["fax_status"] = "set {}".format(status)
 
     def _import_address(self, agency, datum):
+        """Import an agency's address"""
         address_parts = [
             "address_suite",
             "address_street",
@@ -290,6 +293,7 @@ class Importer(object):
             datum["address_status"] = "set {}".format(status)
 
     def _import_portal(self, agency, datum):
+        """Import an agency's portal"""
         portal_url = datum.get("portal_url")
         portal_type = datum.get("portal_type")
         if portal_url and portal_type:
@@ -311,6 +315,7 @@ class Importer(object):
             datum["portal_status"] = "set"
 
     def _import_other(self, agency, datum):
+        """Import an agency's other information"""
         aliases = datum.get("aliases")
         url = datum.get("foia_website")
         website = datum.get("website")
@@ -337,9 +342,13 @@ class Importer(object):
             agency.save()
 
     def _import_one(self, datum, user):
+        """Import a single agency's data"""
         agency = datum.get("match_agency")
-        if agency is None:
+        if agency is None and datum.get("match_jurisdiction") is not None:
             agency = self._create_agency(datum, user)
+        elif agency is None and datum.get("match_jurisdiction") is None:
+            # no jurisdiction, cannot create new agency
+            return datum
 
         self._import_email(agency, datum)
         self._import_phone(agency, datum)
@@ -351,6 +360,10 @@ class Importer(object):
         return datum
 
     def import_(self, user=None, dry=False):
+        """Import all agency data"""
         with transaction.atomic():
+            sid = transaction.savepoint()
             for datum in self.match():
                 yield self._import_one(datum, user)
+            if dry:
+                transaction.savepoint_rollback(sid)

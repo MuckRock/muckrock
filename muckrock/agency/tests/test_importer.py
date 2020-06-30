@@ -6,34 +6,22 @@ Tests for the agency importer
 from django.test import TestCase
 
 # Third Party
-from nose.tools import (
-    assert_greater_equal,
-    assert_in,
-    assert_is_not_none,
-    assert_not_in,
-    eq_,
-    ok_,
-)
+from nose.tools import assert_greater_equal, assert_not_in, eq_, ok_
 
 # MuckRock
 from muckrock.agency.importer import Importer, PyReader
-from muckrock.agency.models import Agency
-from muckrock.communication.factories import (
-    EmailAddressFactory,
-    PhoneNumberFactory,
-)
-from muckrock.core.factories import (
-    AgencyEmailFactory,
-    AgencyFactory,
-    AgencyPhoneFactory,
-    ProfessionalUserFactory,
-    UserFactory,
-)
+from muckrock.agency.models.communication import AgencyAddress
+from muckrock.communication.factories import AddressFactory
+from muckrock.core.factories import AgencyFactory, AgencyPhoneFactory
 from muckrock.jurisdiction.factories import LocalJurisdictionFactory
+from muckrock.portal.models import Portal
 
 
 class TestAgencyImporter(TestCase):
+    """Tests for the mass agency importer"""
+
     def setUp(self):
+        """Create some existing jurisdictions and agencies for the tests"""
         local = LocalJurisdictionFactory()
         state = local.parent
         federal = state.parent
@@ -53,6 +41,7 @@ class TestAgencyImporter(TestCase):
         )
 
     def test_match(self):
+        """Test different instances of matching existing agencies"""
         reader = PyReader([
             # case insensitive match
             {
@@ -144,6 +133,9 @@ class TestAgencyImporter(TestCase):
         eq_('missing jurisdiction', data[10]['jurisdiction_status'])
 
     def test_import_update(self):
+        """An import test where we are updating the contact information for an
+        existing agency
+        """
         reader = PyReader([
             {
                 'agency': 'central intelligence agency',
@@ -194,6 +186,7 @@ class TestAgencyImporter(TestCase):
         eq_(data[0]['website_status'], 'set')
 
     def test_import_update_invalid(self):
+        """Test import with some invalid data"""
         reader = PyReader([
             {
                 'agency': 'central intelligence agency',
@@ -224,30 +217,48 @@ class TestAgencyImporter(TestCase):
         eq_(data[0]['website_status'], 'error')
 
     def test_import_update_duplicate(self):
+        """Test an import with data already on the agency"""
+        agency_phone = AgencyPhoneFactory(agency=self.police)
         reader = PyReader([
             {
                 'agency': 'Boston Police Department',
                 'jurisdiction': 'Boston, MA',
                 'email': self.police.email.email,
                 'fax': self.police.fax.number.as_national,
+                'phone': agency_phone.phone.number.as_national,
             },
         ])
         importer = Importer(reader)
         data = list(importer.import_())
 
         eq_(data[0]['email_status'], 'already set')
-        eq_(
-            data[0]['fax_status'], 'already set',
-            self.police.fax.number.as_national
-        )
+        eq_(data[0]['fax_status'], 'already set')
+        eq_(data[0]['phone_status'], 'already set')
 
     def test_import_update_redundant(self):
+        """Test an update with data different from the data already on the agency"""
+        AgencyAddress.objects.create(
+            agency=self.police,
+            address=AddressFactory(),
+            request_type='primary',
+        )
+        self.police.portal = Portal.objects.create(
+            url='https://www.example.com',
+            name='Test Portal',
+            type='other',
+        )
+        self.police.save()
         reader = PyReader([
             {
                 'agency': 'Boston Police Department',
                 'jurisdiction': 'Boston, MA',
                 'email': 'other@example.com',
                 'fax': '617-555-0001',
+                'address_city': 'Washington',
+                'address_state': 'DC',
+                'address_zip': '01233',
+                'portal_url': 'https://www.cia.gov/portal/',
+                'portal_type': 'foiaonline',
             },
         ])
         importer = Importer(reader)
@@ -257,8 +268,13 @@ class TestAgencyImporter(TestCase):
         ok_(self.police.emails.filter(email='other@example.com').exists())
         eq_(data[0]['fax_status'], 'set other')
         ok_(self.police.phones.filter(number='617-555-0001').exists())
+        eq_(data[0]['address_status'], 'set other')
+        ok_(self.police.addresses.filter(city='Washington').exists())
+        eq_(data[0]['portal_status'], 'not set, existing')
+        eq_(self.police.portal.name, 'Test Portal')
 
     def test_create(self):
+        """Test creating a new agency"""
         reader = PyReader([
             {
                 'agency': 'Foobar',
@@ -308,5 +324,31 @@ class TestAgencyImporter(TestCase):
         eq_(agency.website, 'https://www.new-agency.gov/')
         eq_(data[0]['website_status'], 'set')
 
-    def test_create_invalid(self):
-        pass
+    def test_create_minimal(self):
+        """Test a creation with minimal contact information supplied"""
+        reader = PyReader([
+            {
+                'agency': 'Foobar',
+                'jurisdiction': 'united states of america',
+            },
+        ])
+        importer = Importer(reader)
+        data = list(importer.import_())
+
+        eq_(data[0]['agency_status'], 'created')
+        agency = data[0]['match_agency']
+        eq_(agency.name, 'Foobar')
+
+    def test_create_bad_jurisdiction(self):
+        """Test creating an agency in a bad jurisdiction"""
+        reader = PyReader([
+            {
+                'agency': 'Foobar',
+                'jurisdiction': 'Foobar',
+            },
+        ])
+        importer = Importer(reader)
+        data = list(importer.import_())
+
+        eq_(data[0]['jurisdiction_status'], 'no jurisdiction')
+        assert_not_in('agency_status', data[0])

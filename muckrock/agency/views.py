@@ -431,9 +431,16 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
     permission_required = "agency.mass_import"
 
     def form_valid(self, form):
+        """Import the data"""
         reader = CSVReader(self.request.FILES["csv"])
         importer = Importer(reader)
-        context = {"data": importer.match()}
+        if form.cleaned_data["match_or_import"] == "match":
+            context = {"data": importer.match(), "match": True}
+        elif form.cleaned_data["match_or_import"] == "import":
+            context = {
+                "data": importer.import_(dry=form.cleaned_data.get("dry_run")),
+                "import": True,
+            }
         return self.render_to_response(context)
 
     def handle_no_permission(self):
