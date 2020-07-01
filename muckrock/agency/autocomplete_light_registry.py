@@ -229,7 +229,7 @@ class AgencyComposerAutocomplete(AgencyEasySearchAutocomplete):
         return self.choices.filter(
             pk__in=[
                 x for x in self.values
-                if not isinstance(x, basestring) or re.match(r'[0-9]+', x)
+                if not isinstance(x, str) or re.match(r'[0-9]+', x)
             ]
         )
 

@@ -4,7 +4,7 @@
 # pylint: disable=unused-argument
 
 # needed for rules
-from __future__ import absolute_import
+
 
 # Third Party
 from rules import add_perm, predicate

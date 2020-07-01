@@ -22,7 +22,7 @@ from django.utils.text import slugify
 
 # Standard Library
 from datetime import timedelta
-from itertools import izip_longest
+from itertools import zip_longest
 
 # Third Party
 from taggit.managers import TaggableManager
@@ -208,7 +208,7 @@ class FOIAComposer(models.Model):
                 num_requests -= num_ret
                 ret.append(num_ret)
         ret_dict = dict(
-            izip_longest(
+            zip_longest(
                 ['regular', 'monthly', 'extra'],
                 ret,
                 fillvalue=0,

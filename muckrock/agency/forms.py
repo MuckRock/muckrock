@@ -143,7 +143,7 @@ class AgencyForm(forms.ModelForm):
                     'type':
                         portal_type,
                     'name':
-                        u'%s %s' % (
+                        '%s %s' % (
                             agency,
                             dict(PORTAL_TYPES)[portal_type],
                         )

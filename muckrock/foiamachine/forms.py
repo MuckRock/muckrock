@@ -61,7 +61,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FoiaMachineCommunicationForm, self).__init__(*args, **kwargs)
-        if 'message' in self.initial.keys():
+        if 'message' in list(self.initial.keys()):
             self.initial['message'] = self.initial['message'].replace(
                 "<div>", ""
             )

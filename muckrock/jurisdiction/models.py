@@ -114,7 +114,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def __unicode__(self):
         if self.level == 'l':
-            return u'{}, {}'.format(self.name, self.parent.abbrev)
+            return '{}, {}'.format(self.name, self.parent.abbrev)
         else:
             return self.name
 
@@ -305,7 +305,7 @@ class LawYear(models.Model):
     year = models.PositiveSmallIntegerField()
 
     def __unicode__(self):
-        return u'{} in {}'.format(self.reason, self.year)
+        return '{} in {}'.format(self.reason, self.year)
 
     class Meta:
         ordering = ['year']
@@ -349,7 +349,7 @@ class Exemption(models.Model):
     )
 
     def __unicode__(self):
-        return u'%s exemption of %s' % (self.name, self.jurisdiction)
+        return '%s exemption of %s' % (self.name, self.jurisdiction)
 
     def __repr__(self):
         return '%s' % self.slug
@@ -387,7 +387,7 @@ class InvokedExemption(models.Model):
     )
 
     def __unicode__(self):
-        return u'%s exemption of %s' % (self.exemption.name, self.request)
+        return '%s exemption of %s' % (self.exemption.name, self.request)
 
     def __repr__(self):
         return '%d' % self.pk
@@ -417,7 +417,7 @@ class ExampleAppeal(models.Model):
     )
 
     def __unicode__(self):
-        return u'%(name)s for %(exemption)s' % {
+        return '%(name)s for %(exemption)s' % {
             'name': self.title if self.title else 'Example appeal',
             'exemption': self.exemption
         }
@@ -447,7 +447,7 @@ class Appeal(models.Model):
     )
 
     def __unicode__(self):
-        return u'Appeal of %s' % self.communication.foia
+        return 'Appeal of %s' % self.communication.foia
 
     def __repr__(self):
         return '<Appeal: %d>' % self.pk

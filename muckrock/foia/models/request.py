@@ -368,7 +368,7 @@ class FOIARequest(models.Model):
 
     def get_other_emails(self):
         """Get the other emails for this request as a comma seperated string"""
-        return ', '.join(unicode(e) for e in self.cc_emails.all())
+        return ', '.join(str(e) for e in self.cc_emails.all())
 
     def get_to_user(self):
         """Who communications are to"""
@@ -582,7 +582,7 @@ class FOIARequest(models.Model):
                 agency.get_emails('appeal', 'to').first(),
             'cc_emails':
                 json.dumps([
-                    unicode(e) for e in agency.get_emails('appeal', 'cc')
+                    str(e) for e in agency.get_emails('appeal', 'cc')
                 ]),
             'fax':
                 agency.get_faxes('appeal').first(),
@@ -1120,8 +1120,8 @@ class FOIARequest(models.Model):
                 'link': '?zip_download=1',
                 'title': 'Download as Zip',
                 'desc':
-                    u'Download all communications and '
-                    u'files as a zip archive',
+                    'Download all communications and '
+                    'files as a zip archive',
                 'class_name': 'primary',
             },
             {
@@ -1129,8 +1129,8 @@ class FOIARequest(models.Model):
                 'title': 'Get Help',
                 'action': 'flag',
                 'desc':
-                    u'Something broken, buggy, or off?  '
-                    u'Let us know and we\'ll fix it',
+                    'Something broken, buggy, or off?  '
+                    'Let us know and we\'ll fix it',
                 'class_name': 'failure',
                 'modal': True,
                 'form': FOIAFlagForm(),
@@ -1140,8 +1140,8 @@ class FOIARequest(models.Model):
                 'title': 'Delete Request',
                 'action': 'delete',
                 'desc':
-                    u'Wipe all data from this request.  WARNING: This cannot be '
-                    u'undone.',
+                    'Wipe all data from this request.  WARNING: This cannot be '
+                    'undone.',
                 'class_name': 'failure',
                 'modal': True,
                 'form': FOIASoftDeleteForm(foia=self),
@@ -1150,7 +1150,7 @@ class FOIARequest(models.Model):
                 'test': is_admin,
                 'title': 'Contact User',
                 'action': 'contact_user',
-                'desc': u'Send this request\'s owner an email',
+                'desc': 'Send this request\'s owner an email',
                 'modal': True,
                 'form': FOIAContactUserForm(),
             },
@@ -1383,7 +1383,7 @@ class FOIARequest(models.Model):
         data = {
             'Title': self.title,
             'Agency': self.agency.name,
-            'Jurisdiction': unicode(self.agency.jurisdiction),
+            'Jurisdiction': str(self.agency.jurisdiction),
             'Embargo': self.embargo,
             'Permanent Embargo': self.permanent_embargo,
             'Created At': self.composer.datetime_created.isoformat(),

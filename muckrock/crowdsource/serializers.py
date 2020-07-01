@@ -48,7 +48,7 @@ class CrowdsourceResponseBaseSerializer(serializers.ModelSerializer):
                 field.gallery or self.show_all
             ) and field.type not in STATIC_FIELDS:
                 field_values[field.pk] = []
-                field_labels[field.pk] = unicode(field)
+                field_labels[field.pk] = str(field)
         for value in values:
             if value.value and value.field_id in field_values:
                 field_values[value.field_id].append(value.value)

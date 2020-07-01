@@ -61,9 +61,9 @@ class GenericPhoneNumberAutocomplete(
         """Remove parentheses and convert spaces to dashes before searching"""
         query = self.request.GET.get('q', '')
         query = query.translate({
-            ord(u'('): None,
-            ord(u')'): None,
-            ord(u' '): u'-',
+            ord('('): None,
+            ord(')'): None,
+            ord(' '): '-',
         })
         choices = self.choices.filter(number__contains=query,)
         return self.order_choices(choices)[0:self.limit_choices]
@@ -110,7 +110,7 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
             )[:10]
         )
         combined = (emails + phones)[:10]
-        return [unicode(i) for i in combined]
+        return [str(i) for i in combined]
 
 
 autocomplete_light.register(

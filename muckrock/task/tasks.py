@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Standard Library
-from cStringIO import StringIO
+from io import StringIO
 from random import randint
 
 # Third Party

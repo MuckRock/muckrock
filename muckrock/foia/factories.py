@@ -65,7 +65,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     )
     mail_id = factory.Sequence(
         lambda n: '{}-{}'.
-        format(n, ''.join(random.choice(digits) for _ in xrange(8)))
+        format(n, ''.join(random.choice(digits) for _ in range(8)))
     )
 
     @factory.post_generation

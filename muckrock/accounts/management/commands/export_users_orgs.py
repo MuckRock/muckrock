@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
     def export_users(self):
         """Export users"""
-        print 'Begin User Export - {}'.format(timezone.now())
+        print('Begin User Export - {}'.format(timezone.now()))
         key = self.bucket.new_key('squarelet_export/users.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 .prefetch_related('receipt_emails')
             ):
                 if i % 1000 == 0:
-                    print 'User {} / {} - {}'.format(i, total, timezone.now())
+                    print('User {} / {} - {}'.format(i, total, timezone.now()))
                 writer.writerow([
                     user.profile.uuid,
                     user.username,
@@ -94,12 +94,12 @@ class Command(BaseCommand):
                     user.profile.use_autologin,
                     'muckrock',
                 ])
-        print 'End User Export - {}'.format(timezone.now())
+        print('End User Export - {}'.format(timezone.now()))
 
     def export_orgs(self):
         """Export organizations"""
         # pylint: disable=protected-access
-        print 'Begin Organization Export - {}'.format(timezone.now())
+        print('Begin Organization Export - {}'.format(timezone.now()))
         key = self.bucket.new_key('squarelet_export/orgs.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
@@ -128,9 +128,9 @@ class Command(BaseCommand):
                 )
             ):
                 if i % 1000 == 0:
-                    print 'Organization {} / {} - {}'.format(
+                    print('Organization {} / {} - {}'.format(
                         i, total, timezone.now()
-                    )
+                    ))
                 if (
                     len(org.owner.organization_set.all()) <= 1
                     or not org.individual
@@ -154,11 +154,11 @@ class Command(BaseCommand):
                     ','.join(r.email for r in org.owner.receipt_emails.all()),
                     org.owner.profile.avatar.name if org.individual else '',
                 ])
-        print 'End Organization Export - {}'.format(timezone.now())
+        print('End Organization Export - {}'.format(timezone.now()))
 
     def export_members(self):
         """Export memberships"""
-        print 'Begin Membership Export - {}'.format(timezone.now())
+        print('Begin Membership Export - {}'.format(timezone.now()))
         key = self.bucket.new_key('squarelet_export/members.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
@@ -176,7 +176,7 @@ class Command(BaseCommand):
                 )
             ):
                 if i % 1000 == 0:
-                    print 'Member {} / {} - {}'.format(i, total, timezone.now())
+                    print('Member {} / {} - {}'.format(i, total, timezone.now()))
                 writer.writerow([
                     member.user.profile.uuid,
                     member.organization.uuid,
@@ -184,11 +184,11 @@ class Command(BaseCommand):
                     member.organization.name,
                     member.organization.owner == member.user,
                 ])
-        print 'End Membership Export - {}'.format(timezone.now())
+        print('End Membership Export - {}'.format(timezone.now()))
 
     def export_date_joined(self):
         """Export date joined data"""
-        print 'Begin Date Joined Export - {}'.format(timezone.now())
+        print('Begin Date Joined Export - {}'.format(timezone.now()))
         key = self.bucket.new_key('squarelet_export/date_joined.csv')
         with smart_open(key, 'wb') as out_file:
             writer = csv.writer(out_file)
@@ -199,9 +199,9 @@ class Command(BaseCommand):
             total = User.objects.count()
             for i, user in enumerate(User.objects.select_related('profile')):
                 if i % 1000 == 0:
-                    print 'User {} / {} - {}'.format(i, total, timezone.now())
+                    print('User {} / {} - {}'.format(i, total, timezone.now()))
                 writer.writerow([
                     user.profile.uuid,
                     user.date_joined.isoformat(),
                 ])
-        print 'End Date Joined Export - {}'.format(timezone.now())
+        print('End Date Joined Export - {}'.format(timezone.now()))

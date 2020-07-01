@@ -16,10 +16,10 @@ from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.task.models import ProjectReviewTask
 
-test_title = u'Private Prisons'
-test_summary = u'The private prison project is fanstastic.'
+test_title = 'Private Prisons'
+test_summary = 'The private prison project is fanstastic.'
 test_description = (
-    u'The prison industry is growing at an alarming rate. '
+    'The prison industry is growing at an alarming rate. '
     'Even more alarming? The conditions inside prisions '
     'are growing worse while their tax-dollar derived '
     'profits are growing larger.'
@@ -140,7 +140,7 @@ class TestProject(TestCase):
         But projects should not recommend requests that they already contain.
         """
         # set up data
-        tags = u'a'
+        tags = 'a'
         user = UserFactory()
         self.project.contributors.add(user)
         self.project.tags.add(tags)
@@ -160,7 +160,7 @@ class TestProject(TestCase):
         But projects should not recommend articles that they already contain.
         """
         # set up data
-        tags = u'a'
+        tags = 'a'
         user = UserFactory()
         self.project.contributors.add(user)
         self.project.tags.add(tags)
@@ -183,28 +183,28 @@ class TestProjectTagging(TestCase):
     def test_add_tags(self):
         """Projects should keep a list of relevant tags."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        self.project.tags.add('prison', 'privatization', 'corrections')
         eq_(len(self.project.tags.all()), 3)
 
     def test_add_existing_tags(self):
         """Projects should not contain duplicate tags."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add(u'prison', u'privatization', u'corrections')
-        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        self.project.tags.add('prison', 'privatization', 'corrections')
+        self.project.tags.add('prison', 'privatization', 'corrections')
         eq_(len(self.project.tags.all()), 3)
 
     def test_remove_existing_tag(self):
         """Tags should be easily removed from projects."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        self.project.tags.add('prison', 'privatization', 'corrections')
         eq_(len(self.project.tags.all()), 3)
-        self.project.tags.remove(u'prison')
+        self.project.tags.remove('prison')
         eq_(len(self.project.tags.all()), 2)
 
     def test_remove_nonexisting_tag(self):
         """Nonexisting tags cannot be removed from a project."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add(u'prison', u'privatization', u'corrections')
+        self.project.tags.add('prison', 'privatization', 'corrections')
         eq_(len(self.project.tags.all()), 3)
-        self.project.tags.remove(u'spongebob')
+        self.project.tags.remove('spongebob')
         eq_(len(self.project.tags.all()), 3)

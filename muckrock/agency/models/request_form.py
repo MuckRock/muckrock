@@ -10,7 +10,7 @@ from django.db import models
 
 # Standard Library
 import inspect
-from cStringIO import StringIO
+from io import StringIO
 from datetime import date
 
 # Third Party
@@ -37,7 +37,7 @@ class AgencyRequestForm(models.Model):
             data = self._get_data(comm)
             overlay = self._create_overlay(data)
             form = self._merge_overlay(overlay)
-            name = u'{}.pdf'.format(self.name)
+            name = '{}.pdf'.format(self.name)
             comm.attach_file(content=form.read(), name=name, source='MuckRock')
             return False
         else:
@@ -105,7 +105,7 @@ class AgencyRequestForm(models.Model):
     def _date(self, comm):
         """Today's date"""
         # pylint: disable=unused-argument
-        return unicode(date.today())
+        return str(date.today())
 
     _date.value_choice = True
 
@@ -145,8 +145,8 @@ class AgencyRequestForm(models.Model):
     def _agency_address(self, comm):
         """Agency address"""
         address = comm.foia.agency.get_addresses('primary').first()
-        address = address if address is not None else u''
-        return unicode(address)
+        address = address if address is not None else ''
+        return str(address)
 
     _agency_address.value_choice = True
 
@@ -206,7 +206,7 @@ class AgencyRequestFormMapper(models.Model):
     )
 
     def __unicode__(self):
-        return u'{} - {} - {}'.format(
+        return '{} - {} - {}'.format(
             self.form,
             self.field,
             self.value,

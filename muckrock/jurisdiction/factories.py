@@ -23,7 +23,7 @@ class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
-    name = u'United States of America'
+    name = 'United States of America'
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     level = 'f'
     law = factory.RelatedFactory(
@@ -37,8 +37,8 @@ class StateJurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
-    name = u'Massachusetts'
-    abbrev = u'MA'
+    name = 'Massachusetts'
+    abbrev = 'MA'
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     level = 's'
     parent = factory.SubFactory(FederalJurisdictionFactory)
@@ -53,7 +53,7 @@ class LocalJurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
-    name = u'Boston'
+    name = 'Boston'
     slug = factory.LazyAttribute(
         lambda obj: slugify(obj.name) + '-' + slugify(obj.parent.abbrev)
     )
@@ -68,9 +68,9 @@ class LawFactory(factory.django.DjangoModelFactory):
         model = Law
 
     jurisdiction = factory.SubFactory(StateJurisdictionFactory, law=None)
-    name = u'Massachusetts Public Records Law'
-    citation = u'Massachusetts General Laws, Part 1, Title X, Chapter 66'
-    url = u'https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66'
+    name = 'Massachusetts Public Records Law'
+    citation = 'Massachusetts General Laws, Part 1, Title X, Chapter 66'
+    url = 'https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66'
     days = 20
 
 
@@ -83,7 +83,7 @@ class ExemptionFactory(factory.django.DjangoModelFactory):
     name = 'Public Employment Applications'
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     jurisdiction = factory.SubFactory(
-        StateJurisdictionFactory, name=u'Washington', abbrev=u'WA'
+        StateJurisdictionFactory, name='Washington', abbrev='WA'
     )
     basis = factory.Faker('paragraph')
 

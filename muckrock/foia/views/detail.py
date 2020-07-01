@@ -226,7 +226,7 @@ class Detail(DetailView):
         context['crowdfund_form'] = CrowdfundForm(
             initial={
                 'name':
-                    u'Crowdfund Request: %s' % unicode(foia),
+                    'Crowdfund Request: %s' % str(foia),
                 'description':
                     'Help cover the request fees needed to free these docs!',
                 'payment_required':
@@ -286,7 +286,7 @@ class Detail(DetailView):
         context['admin_fix_form'] = self.admin_fix_form
         context['resend_form'] = self.resend_form
         context['cc_emails'] = json.dumps([
-            unicode(e) for e in foia.cc_emails.all()
+            str(e) for e in foia.cc_emails.all()
         ])
         notes = [(n.datetime, 'note', n)
                  for n in foia.notes.select_related('author').all()]
@@ -887,7 +887,7 @@ class Detail(DetailView):
                         self.request, 'Payment Error: {}'.format(
                             '\n'.join(
                                 '{}: {}'.format(k, v)
-                                for k, v in exc.response.json().iteritems()
+                                for k, v in exc.response.json().items()
                             )
                         )
                     )
@@ -1076,7 +1076,7 @@ class ComposerDetail(DetailView):
                 # if no tasks are scheduled, something has gone wrong
                 messages.error(request, 'This request could not be sent')
                 return redirect(composer)
-            for tasks in scheduled.itervalues():
+            for tasks in scheduled.values():
                 for task in tasks:
                     if task['request']['id'] == composer.delayed_id:
                         current_app.control.revoke(composer.delayed_id)

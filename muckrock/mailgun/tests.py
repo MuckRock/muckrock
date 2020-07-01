@@ -15,7 +15,7 @@ import hmac
 import os
 import time
 from datetime import date, datetime
-from StringIO import StringIO
+from io import StringIO
 
 # Third Party
 import nose.tools

@@ -47,7 +47,7 @@ class ProfileQuerySet(models.QuerySet):
         }
         user_data = {
             user_map[k]: data.get(k, user_defaults[k])
-            for k in user_map.iterkeys()
+            for k in user_map.keys()
         }
         if user_data['email'] is None:
             # the mail should only be null for agency users
@@ -78,7 +78,7 @@ class ProfileQuerySet(models.QuerySet):
         # leave it unchanged, do not include it in profile_data
         profile_data = {
             profile_map[k]: data.get(k, profile_defaults.get(k))
-            for k in profile_map.iterkeys()
+            for k in profile_map.keys()
             if k in data or k in profile_defaults
         }
         profile_data['user'] = user
@@ -144,12 +144,12 @@ class ProfileQuerySet(models.QuerySet):
 
         # update cache after updating orgs
         cache.set(
-            u'sb:{}:user_org'.format(user.username),
+            'sb:{}:user_org'.format(user.username),
             profile.organization,
             settings.DEFAULT_CACHE_TIMEOUT,
         )
         cache.set(
-            u'sb:{}:user_orgs'.format(user.username),
+            'sb:{}:user_orgs'.format(user.username),
             user.organizations.get_cache(),
             settings.DEFAULT_CACHE_TIMEOUT,
         )

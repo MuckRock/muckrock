@@ -22,7 +22,7 @@ class TemplateEmail(EmailMultiAlternatives):
     user = None
     text_template = None
     html_template = None
-    summary = u''
+    summary = ''
 
     def __init__(self, user=None, **kwargs):
         """Sets the universal attributes for all our email."""
@@ -41,7 +41,7 @@ class TemplateEmail(EmailMultiAlternatives):
             else:
                 raise TypeError('"user" argument expects a User type')
         if summary:
-            if isinstance(summary, basestring):
+            if isinstance(summary, str):
                 self.summary = summary
             else:
                 raise TypeError('"summary" argument must be a string')

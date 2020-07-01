@@ -80,7 +80,7 @@ class Organization(models.Model):
 
     def __unicode__(self):
         if self.individual:
-            return u"{} (Individual)".format(self.name)
+            return "{} (Individual)".format(self.name)
         else:
             return self.name
 
@@ -88,7 +88,7 @@ class Organization(models.Model):
     def display_name(self):
         """Display 'Personal Account' for individual organizations"""
         if self.individual:
-            return u'Personal Account'
+            return 'Personal Account'
         else:
             return self.name
 
@@ -239,7 +239,7 @@ class Membership(models.Model):
         unique_together = ("user", "organization")
 
     def __unicode__(self):
-        return u"{} in {}".format(self.user, self.organization)
+        return "{} in {}".format(self.user, self.organization)
 
 
 # remove, convert to entitlement
@@ -295,7 +295,7 @@ class Entitlement(models.Model):
 
 
 # dynamically create properties for all defined resource fields
-for field_, default in Entitlement.resource_fields.iteritems():
+for field_, default in Entitlement.resource_fields.items():
     setattr(
         Entitlement,
         field_,

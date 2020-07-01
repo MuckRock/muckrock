@@ -52,9 +52,9 @@ class CompareNumberWidget(NumberWidget):
         delta = value - previous
         if self.percent and previous != 0:
             delta = (100 * delta) / previous
-            delta = u'{}%'.format(delta)
+            delta = '{}%'.format(delta)
         else:
-            delta = u'{:,}'.format(delta)
+            delta = '{:,}'.format(delta)
         comp = cmp(value, previous)
         if comp == 0:
             color = BLUE
@@ -71,7 +71,7 @@ class CompareNumberWidget(NumberWidget):
             icon = ''
 
         return {
-            'value': u'{:,}'.format(value),
+            'value': '{:,}'.format(value),
             'detail': delta,
             'color': color,
             'icon': icon,
@@ -160,7 +160,7 @@ class OldestProcessingWidget(ListWidget):
         return [{
             'label':
                 r['title']
-                if len(r['title']) < 28 else u'{}...'.format(r['title'][:28]),
+                if len(r['title']) < 28 else '{}...'.format(r['title'][:28]),
             'value':
                 r['days'],
         } for r in requests]
@@ -223,7 +223,7 @@ class OldestFlagWidget(ListWidget):
         return [{
             'label':
                 t['text']
-                if len(t['text']) < 28 else u'{}...'.format(t['text'][:28]),
+                if len(t['text']) < 28 else '{}...'.format(t['text'][:28]),
             'value':
                 t['days'],
         } for t in tasks]

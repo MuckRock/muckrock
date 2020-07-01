@@ -51,7 +51,7 @@ class TestFoiaMachineRequest(TestCase):
     def test_unicode(self):
         """Requests should use their titles when converted to unicode."""
         eq_(
-            unicode(self.foi), self.foi.title,
+            str(self.foi), self.foi.title,
             'The Unicode representation should be the title.'
         )
 
@@ -149,7 +149,7 @@ class TestFoiaMachineCommunication(TestCase):
         """A request, sender, and message should be required to create a request."""
         comm = models.FoiaMachineCommunication(
             request=self.foi,
-            sender=unicode(self.foi.user),
+            sender=str(self.foi.user),
             message='Lorem ipsum dolor su amit.'
         )
         ok_(comm)
@@ -157,7 +157,7 @@ class TestFoiaMachineCommunication(TestCase):
     def test_unicode(self):
         """The string representation of a communication includes sender and receiver info."""
         eq_(
-            unicode(self.comm), 'Communication from %s to %s' %
+            str(self.comm), 'Communication from %s to %s' %
             (self.comm.sender, self.comm.receiver)
         )
 
@@ -180,4 +180,4 @@ class TestFoiaMachineFile(TestCase):
 
     def test_unicode(self):
         """The string representation of a file should be its name."""
-        eq_(unicode(self.file), u'%s' % self.file.name)
+        eq_(str(self.file), '%s' % self.file.name)

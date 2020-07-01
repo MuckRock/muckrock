@@ -11,7 +11,7 @@ from django.utils.text import slugify
 # Standard Library
 import re
 import uuid
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 # Third Party
 from mock import MagicMock
@@ -57,7 +57,7 @@ def mock_squarelet(mock_requests, requests_json=None):
         """Call back to generate json response for user creation"""
         data = parse_qs(request.body)
         username = re.sub(r'[^\w\-.]', '', data['preferred_username'][0])
-        uuid_ = unicode(uuid.uuid4())
+        uuid_ = str(uuid.uuid4())
         return {
             'uuid':
                 uuid_,

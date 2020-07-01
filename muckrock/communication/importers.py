@@ -53,15 +53,15 @@ def import_addresses(file_name):
         next(reader)
         for i, row in enumerate(reader):
             if i % 1000 == 0:
-                print i
+                print(i)
             if row[STATE] and row[STATE] not in STATES:
-                print u'Illegal State "{}"'.format(row[STATE])
+                print('Illegal State "{}"'.format(row[STATE]))
             if row[ZIP] and not p_zip.match(row[ZIP]):
-                print u'Illegal Zip "{}"'.format(row[ZIP])
+                print('Illegal Zip "{}"'.format(row[ZIP]))
             try:
                 address = Address.objects.get(pk=row[ADDRESS_PK])
             except Address.DoesNotExist:
-                print 'Address {} does not exist'.format(row[ADDRESS_PK])
+                print('Address {} does not exist'.format(row[ADDRESS_PK]))
             else:
                 address.street = row[STREET].strip()
                 address.suite = row[SUITE].strip()
@@ -77,5 +77,5 @@ def import_addresses(file_name):
                 try:
                     address.save()
                 except Exception as exc:
-                    print 'Data Error', exc, row[ADDRESS_PK]
-                    print row
+                    print('Data Error', exc, row[ADDRESS_PK])
+                    print(row)

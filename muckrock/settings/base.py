@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 
 # Standard Library
 import os
-import urlparse
+import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
@@ -18,7 +18,7 @@ import djcelery
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
-    if isinstance(setting, basestring):
+    if isinstance(setting, str):
         return setting.lower() in ("yes", "true", "t", "1")
     else:
         return bool(setting)
@@ -284,7 +284,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
-urlparse.uses_netloc.append('redis')
+urllib.parse.uses_netloc.append('redis')
 
 REDIS_URL = os.environ.get(
     'REDISTOGO_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
@@ -479,9 +479,9 @@ PUBLICATION_NAME = 'MuckRock'
 PUBLICATION_TIME_ZONE = '-05:00'
 
 # Register database schemes in URLs.
-urlparse.uses_netloc.append('postgres')
+urllib.parse.uses_netloc.append('postgres')
 
-url = urlparse.urlparse(
+url = urllib.parse.urlparse(
     os.environ.get('DATABASE_URL', 'postgres://vagrant@localhost/muckrock')
 )
 

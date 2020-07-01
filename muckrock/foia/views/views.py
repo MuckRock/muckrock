@@ -39,7 +39,7 @@ def acronyms(request):
     """A page with all the acronyms explained"""
     status_dict = dict(STATUS)
     codes = [(acro, name, status_dict.get(status, ''), desc) for acro,
-             (name, status, desc) in CODES.iteritems()]
+             (name, status, desc) in CODES.items()]
     codes.sort()
     return render(
         request,

@@ -49,8 +49,8 @@ class XlsCreator(object):
 
     def get_rows(self):
         """Return an iterator of the datasets row values"""
-        for i in xrange(1, self.sheet.nrows):
-            yield [unicode(v) for v in self.sheet.row_values(i)]
+        for i in range(1, self.sheet.nrows):
+            yield [str(v) for v in self.sheet.row_values(i)]
 
 
 class CrowdsourceCreator(object):

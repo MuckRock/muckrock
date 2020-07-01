@@ -230,7 +230,7 @@ class TestCrowdfundView(TestCase):
         self.data['show'] = True
         response = self.post(self.data, ajax=True)
         data = json.loads(response.content)
-        print data
+        print(data)
         eq_(data['authenticated'], True)
         eq_(data['registered'], True)
 

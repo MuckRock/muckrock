@@ -86,7 +86,7 @@ def notify_flagged(sender, instance, created, **kwargs):
                         base_url +
                         flagged_task.flagged_object().get_absolute_url(),
                     'name':
-                        unicode(flagged_task.flagged_object())
+                        str(flagged_task.flagged_object())
                 },
             'short':
                 True

@@ -49,7 +49,7 @@ def initial_communication_template(
         if len(agencies) == 1:
             tags.append(('{ agency name }', agencies[0].name))
         for tag, replace in tags:
-            requested_docs = requested_docs.replace(tag, unicode(replace))
+            requested_docs = requested_docs.replace(tag, str(replace))
         return requested_docs
     elif kwargs.get('edited_boilerplate'):
         return requested_docs

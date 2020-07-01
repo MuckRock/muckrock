@@ -55,15 +55,15 @@ def _parse_params(get, name, fields):
     # find all parameters of this type and convert them into a list
     # of dictionaries.  On any sort of error, just return an empty list
     pattern = re.compile(r'{}\[([0-9]+)\]\[(\w+)\]'.format(name))
-    params = {k: v for k, v in get.iteritems() if k.startswith(name)}
+    params = {k: v for k, v in get.items() if k.startswith(name)}
     length = len(params) / len(fields)
     # their should be one of each field for each param
     # if it doesn't divide evenly, something went wrong
     if len(params) % len(fields) != 0:
         return []
     # initialize each dict
-    dicts = [{} for _ in xrange(length)]
-    for key, value in params.iteritems():
+    dicts = [{} for _ in range(length)]
+    for key, value in params.items():
         match = pattern.match(key)
         if not match:
             # a parameter was in the wrong format

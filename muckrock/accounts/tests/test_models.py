@@ -33,8 +33,8 @@ class TestProfileUnit(TestCase):
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""
-        expected = "%s's Profile" % unicode(self.profile.user).capitalize()
-        eq_(unicode(self.profile), expected)
+        expected = "%s's Profile" % str(self.profile.user).capitalize()
+        eq_(str(self.profile), expected)
 
     def test_feature_level(self):
         """Test getting a users max feature level from their entitlements"""

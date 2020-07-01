@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -46,7 +46,7 @@ def convert_tasks(apps, schema_editor):
                         resolved_by=gcft.resolved_by,
                         )
             except ObjectDoesNotExist as e:
-                print '***error', gcft.pk, e
+                print('***error', gcft.pk, e)
         elif ct.model == 'crowdfundproject':
             try:
                 cfp = CrowdfundProject.objects.get(pk=gcft.object_id)
@@ -67,7 +67,7 @@ def convert_tasks(apps, schema_editor):
                         resolved_by=gcft.resolved_by,
                         )
             except ObjectDoesNotExist as e:
-                print '***error', gcft.pk, e
+                print('***error', gcft.pk, e)
         else:
             assert False, ct.model
 

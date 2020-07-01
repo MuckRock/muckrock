@@ -31,8 +31,8 @@ class ViewsTest(TestCase):
         self.data = {
             'type': 'user',
             'uuids': [
-                unicode(uuid.uuid4()),
-                unicode(uuid.uuid4()),
+                str(uuid.uuid4()),
+                str(uuid.uuid4()),
             ],
             'timestamp': int(time.time()),
         }

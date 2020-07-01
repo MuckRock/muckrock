@@ -78,7 +78,7 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
     # models
     def test_foia_model_unicode(self):
         """Test FOIA Request model's __unicode__ method"""
-        nose.tools.eq_(unicode(self.foia), 'Test 1')
+        nose.tools.eq_(str(self.foia), 'Test 1')
 
     def test_foia_model_url(self):
         """Test FOIA Request model's get_absolute_url method"""

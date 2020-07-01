@@ -229,7 +229,7 @@ class ActivityDigest(Digest):
                 action__verb__icontains=classifier[1]
             )
         activity_count = 0
-        for _, classified_stream in classified.iteritems():
+        for _, classified_stream in classified.items():
             activity_count += len(classified_stream)
         classified['count'] = activity_count
         return classified
@@ -495,7 +495,7 @@ class StaffDigest(Digest):
         )
         context['stale_tasks'] = self.get_stale_tasks()
         context['stale_tasks_show'] = any(
-            i for i in context['stale_tasks'].itervalues()
+            i for i in context['stale_tasks'].values()
         )
         context['crowdfunds'] = self.get_crowdfunds()
         context['projects'] = self.get_projects()

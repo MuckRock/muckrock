@@ -71,7 +71,7 @@ class EmailAddressQuerySet(models.QuerySet):
     def _normalize_email(email):
         """Username is case sensitive, domain is not"""
         # strip invisible spaces
-        email = email.replace(u'\u200b', '')
+        email = email.replace('\u200b', '')
         validate_email(email)
         username, domain = email.rsplit('@', 1)
         return '%s@%s' % (username, domain.lower())
@@ -91,11 +91,11 @@ class EmailAddress(models.Model):
 
     def __unicode__(self):
         if self.name:
-            val = u'"%s" <%s>' % (self.name, self.email)
+            val = '"%s" <%s>' % (self.name, self.email)
         else:
             val = self.email
         if self.status == 'error':
-            val += u' (error)'
+            val += ' (error)'
         return val
 
     def get_absolute_url(self):
@@ -168,7 +168,7 @@ class PhoneNumber(models.Model):
 
     def __unicode__(self):
         if self.status == 'error':
-            return u'%s (%s)' % (self.number.as_national, self.status)
+            return '%s (%s)' % (self.number.as_national, self.status)
         else:
             return self.number.as_national
 
@@ -210,7 +210,7 @@ class Address(models.Model):
 
     def __unicode__(self):
         if self.zip_code:
-            address = u'{}, {} {}'.format(
+            address = '{}, {} {}'.format(
                 self.city,
                 self.state,
                 self.zip_code,
@@ -222,7 +222,7 @@ class Address(models.Model):
                 self.suite,
                 address,
             ]
-            address = u', '.join(p for p in parts if p)
+            address = ', '.join(p for p in parts if p)
             return address
         else:
             return self.address
@@ -246,11 +246,11 @@ class Address(models.Model):
             address.append(self.attn_override)
         else:
             if appeal:
-                office = u'Appeal'
+                office = 'Appeal'
             else:
-                office = u'Office'
+                office = 'Office'
             address.append(
-                u'{} {}'.format(
+                '{} {}'.format(
                     agency.jurisdiction.get_law_name(abbrev=True),
                     office,
                 )
@@ -260,7 +260,7 @@ class Address(models.Model):
         if self.street:
             address.append(self.street)
         address.append(
-            u'{}, {} {}'.format(
+            '{}, {} {}'.format(
                 self.city,
                 self.state,
                 self.zip_code,
@@ -278,7 +278,7 @@ class Address(models.Model):
         if self.attn_override:
             lob['company'] = self.attn_override
         else:
-            lob['company'] = u'{} Office'.format(
+            lob['company'] = '{} Office'.format(
                 agency.jurisdiction.get_law_name(abbrev=True)
             )
         if self.street:
@@ -326,9 +326,9 @@ class EmailCommunication(models.Model):
     delivered = 'email'
 
     def __unicode__(self):
-        value = u'Email Communication'
+        value = 'Email Communication'
         if self.from_email:
-            value += u' From: "%s"' % self.from_email
+            value += ' From: "%s"' % self.from_email
         return value
 
     def set_raw_email(self, msg):
@@ -365,7 +365,7 @@ class FaxCommunication(models.Model):
     delivered = 'fax'
 
     def __unicode__(self):
-        return u'Fax Communication To %s' % self.to_number
+        return 'Fax Communication To %s' % self.to_number
 
     def sent_to(self):
         """Who was this fax sent to?"""
@@ -409,7 +409,7 @@ class MailCommunication(models.Model):
     delivered = 'mail'
 
     def __unicode__(self):
-        return u'Mail Communication To %s' % self.to_address
+        return 'Mail Communication To %s' % self.to_address
 
     def sent_to(self):
         """Who was this mail sent to?"""
@@ -431,7 +431,7 @@ class WebCommunication(models.Model):
     delivered = 'web'
 
     def __unicode__(self):
-        return u'Web Communication'
+        return 'Web Communication'
 
     def sent_to(self):
         """Who was web comm sent to?"""
@@ -464,7 +464,7 @@ class PortalCommunication(models.Model):
     delivered = 'portal'
 
     def __unicode__(self):
-        return u'Portal Communication'
+        return 'Portal Communication'
 
     def sent_to(self):
         """Who was portal comm sent to?"""
@@ -502,7 +502,7 @@ class EmailError(models.Model):
     reason = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return u'Email Error: %s - %s' % (self.email.pk, self.datetime)
+        return 'Email Error: %s - %s' % (self.email.pk, self.datetime)
 
     class Meta:
         ordering = ['datetime']
@@ -525,7 +525,7 @@ class FaxError(models.Model):
     error_id = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __unicode__(self):
-        return u'Fax Error: %s - %s' % (self.fax.pk, self.datetime)
+        return 'Fax Error: %s - %s' % (self.fax.pk, self.datetime)
 
     class Meta:
         ordering = ['datetime']
@@ -559,7 +559,7 @@ class EmailOpen(models.Model):
     ip_address = models.CharField(max_length=45, verbose_name='IP Address')
 
     def __unicode__(self):
-        return u'EmailOpen: %s - %s' % (self.email.pk, self.datetime)
+        return 'EmailOpen: %s - %s' % (self.email.pk, self.datetime)
 
     class Meta:
         ordering = ['datetime']
@@ -574,7 +574,7 @@ class MailEvent(models.Model):
     event = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return u'MailEvent: {} -{} - {}'.format(
+        return 'MailEvent: {} -{} - {}'.format(
             self.mail.pk, self.datetime, self.event
         )
 
@@ -604,7 +604,7 @@ class Check(models.Model):
         ordering = ['created_datetime']
 
     def __unicode__(self):
-        return u"Check #{}".format(self.number)
+        return "Check #{}".format(self.number)
 
     def send_email(self):
         """Send an email record of this check"""

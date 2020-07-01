@@ -25,7 +25,7 @@ from django.views.generic import FormView, ListView, RedirectView, TemplateView
 import json
 import logging
 import sys
-from urllib import urlencode
+from urllib.parse import urlencode
 
 # Third Party
 import stripe

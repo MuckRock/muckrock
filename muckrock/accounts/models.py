@@ -15,7 +15,7 @@ from django.utils import timezone
 
 # Standard Library
 import logging
-from urllib import urlencode
+from urllib.parse import urlencode
 from uuid import uuid4
 
 # Third Party
@@ -202,7 +202,7 @@ class Profile(models.Model):
     )
 
     def __unicode__(self):
-        return u"%s's Profile" % unicode(self.user).capitalize()
+        return "%s's Profile" % str(self.user).capitalize()
 
     def get_absolute_url(self):
         """The url for this object"""
@@ -256,25 +256,25 @@ class Profile(models.Model):
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
 
-        link = u'{}?{}'.format(link, urlencode(extra))
+        link = '{}?{}'.format(link, urlencode(extra))
 
         if not self.use_autologin:
-            return u'{}{}'.format(settings.MUCKROCK_URL, link)
+            return '{}{}'.format(settings.MUCKROCK_URL, link)
 
         url_auth_token = self.get_url_auth_token()
         if not url_auth_token:
             # if there was an error getting the auth token from squarelet,
             # just send the email without the autologin links
-            return u'{}{}'.format(settings.MUCKROCK_URL, link)
+            return '{}{}'.format(settings.MUCKROCK_URL, link)
 
-        muckrock_url = u'{}{}?{}'.format(
+        muckrock_url = '{}{}?{}'.format(
             settings.MUCKROCK_URL, reverse('acct-login'),
             urlencode({
                 'next': link
             })
         )
         params = {'next': muckrock_url, 'url_auth_token': url_auth_token}
-        return u'{}/accounts/login/?{}'.format(
+        return '{}/accounts/login/?{}'.format(
             settings.SQUARELET_URL, urlencode(params)
         )
 
@@ -316,7 +316,7 @@ class ReceiptEmail(models.Model):
     email = models.EmailField()
 
     def __unicode__(self):
-        return u'Receipt Email: <%s>' % self.email
+        return 'Receipt Email: <%s>' % self.email
 
 
 class RecurringDonation(models.Model):
@@ -341,7 +341,7 @@ class RecurringDonation(models.Model):
     deactivated_datetime = models.DateTimeField(blank=True, null=True)
 
     def __unicode__(self):
-        return u'Donation: ${}/Month by {}'.format(
+        return 'Donation: ${}/Month by {}'.format(
             self.amount,
             self.email,
         )
@@ -405,7 +405,7 @@ class Notification(models.Model):
     objects = NotificationQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'<Notification for %s>' % unicode(self.user.username
+        return '<Notification for %s>' % str(self.user.username
                                                   ).capitalize()
 
     def mark_read(self):

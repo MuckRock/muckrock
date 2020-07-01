@@ -45,7 +45,7 @@ class ExceptionLoggingMiddleware(object):
         # pylint: disable=unused-argument
         """printe the exception traceback"""
         import traceback
-        print traceback.format_exc()
+        print(traceback.format_exc())
 
 
 DEBUG_TOOLBAR_CONFIG = {

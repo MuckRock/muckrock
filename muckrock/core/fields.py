@@ -46,7 +46,7 @@ def filefield_maxlength_validator(value):
             # it also doesn't appear to be saved to S3 yet,
             # so no need to delete
             pass
-        raise forms.ValidationError(_(u'File name too long.'))
+        raise forms.ValidationError(_('File name too long.'))
     return value
 
 
@@ -69,7 +69,7 @@ class EmailsListField(CharField):
 
         if not emails:
             raise forms.ValidationError(
-                _(u'Enter at least one e-mail address.')
+                _('Enter at least one e-mail address.')
             )
 
         for email in emails:

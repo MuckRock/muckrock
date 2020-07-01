@@ -22,7 +22,7 @@ class LineItem(object):
     """A line item for a receipt"""
 
     def __init__(self, name, price):
-        if not isinstance(name, basestring):
+        if not isinstance(name, str):
             raise TypeError('Item name should be a string type')
         if not isinstance(price, int):
             # We basically want the cent representation of all our prices
@@ -97,7 +97,7 @@ class Receipt(TemplateEmail):
 
 def generic_receipt(user, charge):
     """Generates a very basic receipt. Should be used as a fallback."""
-    subject = u'Receipt'
+    subject = 'Receipt'
     text = 'message/receipt/base.txt'
     html = 'message/receipt/base.html'
     item = LineItem('Payment', charge.amount)
@@ -113,7 +113,7 @@ def generic_receipt(user, charge):
 
 def crowdfund_payment_receipt(user, charge):
     """Generates a receipt for a payment on a crowdfund."""
-    subject = u'Crowdfund Payment Receipt'
+    subject = 'Crowdfund Payment Receipt'
     text = 'message/receipt/crowdfund.txt'
     html = 'message/receipt/crowdfund.html'
     item = LineItem('Crowdfund Payment', charge.amount)
@@ -139,7 +139,7 @@ def crowdfund_payment_receipt(user, charge):
 
 def donation_receipt(user, charge):
     """Generates a receipt for a donation."""
-    subject = u'Donation Receipt'
+    subject = 'Donation Receipt'
     text = 'message/receipt/donation.txt'
     html = 'message/receipt/donation.html'
     item = LineItem('Tax Deductible Donation', charge.amount)

@@ -213,7 +213,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             allowed.append('embargo')
         if has_embargo_perm:
             allowed.append('permanent_embargo')
-        for field in self.fields.keys():
+        for field in list(self.fields.keys()):
             if field not in allowed:
                 self.fields.pop(field)
 

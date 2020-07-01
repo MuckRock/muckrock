@@ -47,7 +47,7 @@ class MiniregMixin(object):
             except JSONDecodeError:
                 form.add_error(None, generic_error)
             else:
-                for field, errors in error_json.iteritems():
+                for field, errors in error_json.items():
                     for error in errors:
                         form.add_error(self.field_map.get(field, field), error)
             finally:
@@ -120,7 +120,7 @@ class BuyRequestsMixin(object):
                     self.request, 'Payment Error: {}'.format(
                         '\n'.join(
                             '{}: {}'.format(k, v)
-                            for k, v in exc.response.json().iteritems()
+                            for k, v in exc.response.json().items()
                         )
                     )
                 )

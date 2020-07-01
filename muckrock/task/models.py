@@ -83,7 +83,7 @@ class Task(models.Model):
         ordering = ['date_created']
 
     def __unicode__(self):
-        return u'Task'
+        return 'Task'
 
     def resolve(self, user=None, form_data=None):
         """Resolve the task"""
@@ -114,11 +114,11 @@ class OrphanTask(Task):
     template_name = 'task/orphan.html'
 
     def __unicode__(self):
-        return u'Orphan Task'
+        return 'Orphan Task'
 
     def display(self):
         """Display something useful and identifing"""
-        return u'{}: {}'.format(
+        return '{}: {}'.format(
             self.get_reason_display(),
             self.address,
         )
@@ -168,7 +168,7 @@ class PaymentInfoTask(Task):
     objects = PaymentInfoTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Payment Info Task'
+        return 'Payment Info Task'
 
 
 class SnailMailTask(Task):
@@ -210,11 +210,11 @@ class SnailMailTask(Task):
     objects = SnailMailTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Snail Mail Task'
+        return 'Snail Mail Task'
 
     def display(self):
         """Display something useful and identifing"""
-        return u'{}: {}'.format(
+        return '{}: {}'.format(
             self.get_category_display(),
             self.communication.foia.title,
         )
@@ -258,7 +258,7 @@ class ReviewAgencyTask(Task):
     objects = ReviewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Review Agency Task'
+        return 'Review Agency Task'
 
     def get_absolute_url(self):
         return reverse('review-agency-task', kwargs={'pk': self.pk})
@@ -397,7 +397,7 @@ class ReviewAgencyTask(Task):
                         addresses_open[addr.pk].last_open
                         if email_or_fax == 'email' else None,
                     'checkbox_name':
-                        u'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
+                        'foias-%d-%s-%d' % (self.pk, email_or_fax, addr.pk),
                     'email_or_fax':
                         email_or_fax,
                 })
@@ -448,9 +448,9 @@ class ReviewAgencyTask(Task):
         )
         if foias:
             review_data.append({
-                'address': u'Snail Mail',
+                'address': 'Snail Mail',
                 'foias': foias,
-                'checkbox_name': u'%d-snail' % self.pk,
+                'checkbox_name': '%d-snail' % self.pk,
                 'unacknowledged': any(f.status == 'ack' for f in foias),
             })
 
@@ -548,7 +548,7 @@ class FlaggedTask(Task):
     objects = FlaggedTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Flagged Task'
+        return 'Flagged Task'
 
     def display(self):
         """Display something useful and identifing"""
@@ -588,7 +588,7 @@ class FlaggedTask(Task):
                 return ''
             else:
                 return (
-                    u'<p><a href="{}{}" target="_blank">{}</a></p>'.format(
+                    '<p><a href="{}{}" target="_blank">{}</a></p>'.format(
                         settings.MUCKROCK_URL,
                         obj.get_absolute_url(),
                         obj,
@@ -599,7 +599,7 @@ class FlaggedTask(Task):
         if contact_id is None:
             return None
         description = bleach.clean(self.text)
-        subject = description[:50] or u'-No Subject-'
+        subject = description[:50] or '-No Subject-'
         description = linebreaks(urlize(description))
 
         description += make_url(self.foia)
@@ -719,7 +719,7 @@ class ProjectReviewTask(Task):
     objects = ProjectReviewTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Project Review Task'
+        return 'Project Review Task'
 
     def get_absolute_url(self):
         return reverse('projectreview-task', kwargs={'pk': self.pk})
@@ -734,7 +734,7 @@ class ProjectReviewTask(Task):
             extra_context={'action': action,
                            'message': text,
                            'task': self},
-            subject=u'%s %s' % (self.project, action),
+            subject='%s %s' % (self.project, action),
             text_template='message/project/%s.txt' % action,
             html_template='message/project/%s.html' % action
         )
@@ -764,7 +764,7 @@ class NewAgencyTask(Task):
     objects = NewAgencyTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'New Agency Task'
+        return 'New Agency Task'
 
     def display(self):
         """Display something useful and identifing"""
@@ -790,11 +790,11 @@ class NewAgencyTask(Task):
             )
             if foias:
                 # only send an email if they submitted a request with it
-                subject = u'We need your help with your request, "{}"'.format(
+                subject = 'We need your help with your request, "{}"'.format(
                     foias[0].title
                 )
                 if len(foias) > 1:
-                    subject += u', and others'
+                    subject += ', and others'
                 TemplateEmail(
                     subject=subject,
                     from_email='info@muckrock.com',
@@ -885,7 +885,7 @@ class ResponseTask(Task):
     objects = ResponseTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Response Task'
+        return 'Response Task'
 
     def get_absolute_url(self):
         return reverse('response-task', kwargs={'pk': self.pk})
@@ -907,7 +907,7 @@ class StatusChangeTask(Task):
     objects = StatusChangeTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Status Change Task'
+        return 'Status Change Task'
 
     def get_absolute_url(self):
         return reverse('status-change-task', kwargs={'pk': self.pk})
@@ -921,7 +921,7 @@ class CrowdfundTask(Task):
     objects = CrowdfundTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Crowdfund Task'
+        return 'Crowdfund Task'
 
     def get_absolute_url(self):
         return reverse('crowdfund-task', kwargs={'pk': self.pk})
@@ -937,7 +937,7 @@ class MultiRequestTask(Task):
     objects = MultiRequestTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Multi-Request Task'
+        return 'Multi-Request Task'
 
     def get_absolute_url(self):
         return reverse('multirequest-task', kwargs={'pk': self.pk})
@@ -979,7 +979,7 @@ class PortalTask(Task):
     objects = PortalTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Portal Task'
+        return 'Portal Task'
 
     def display(self):
         """Display something useful and identifing"""
@@ -1011,7 +1011,7 @@ class NewPortalTask(Task):
     objects = NewPortalTaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'New Portal Task'
+        return 'New Portal Task'
 
     def display(self):
         """Display something useful and identifing"""
@@ -1031,7 +1031,7 @@ class GenericTask(Task):
     objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Generic Task'
+        return 'Generic Task'
 
 
 class FailedFaxTask(Task):
@@ -1044,7 +1044,7 @@ class FailedFaxTask(Task):
     objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Failed Fax Task'
+        return 'Failed Fax Task'
 
     def get_absolute_url(self):
         return reverse('failed-fax-task', kwargs={'pk': self.pk})
@@ -1064,7 +1064,7 @@ class RejectedEmailTask(Task):
     objects = TaskQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Rejected Email Task'
+        return 'Rejected Email Task'
 
     def get_absolute_url(self):
         return reverse('rejected-email-task', kwargs={'pk': self.pk})
@@ -1078,7 +1078,7 @@ class StaleAgencyTask(Task):
     agency = models.ForeignKey('agency.Agency')
 
     def __unicode__(self):
-        return u'Stale Agency Task'
+        return 'Stale Agency Task'
 
     def get_absolute_url(self):
         return reverse('stale-agency-task', kwargs={'pk': self.pk})
@@ -1095,7 +1095,7 @@ class NewExemptionTask(Task):
     user = models.ForeignKey(User)
 
     def __unicode__(self):
-        return u'New Exemption Task'
+        return 'New Exemption Task'
 
     def display(self):
         """Display something useful and identifing"""

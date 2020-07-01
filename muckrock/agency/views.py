@@ -205,22 +205,22 @@ def contact_info(request, idx):
             } if agency.portal else None,
             'emails': [{
                 'value': e.pk,
-                'display': unicode(e)
+                'display': str(e)
             } for e in agency.emails.filter(status='good')
                        .exclude(email__endswith='muckrock.com')],
             'faxes': [{
                 'value': f.pk,
-                'display': unicode(f)
+                'display': str(f)
             } for f in agency.phones.filter(status='good', type='fax')],
             'email':
-                unicode(agency.email)
+                str(agency.email)
                 if agency.email and agency.email.status == 'good' else None,
-            'cc_emails': [unicode(e) for e in agency.other_emails],
+            'cc_emails': [str(e) for e in agency.other_emails],
             'fax':
-                unicode(agency.fax)
+                str(agency.fax)
                 if agency.fax and agency.fax.status == 'good' else None,
             'address':
-                unicode(agency.address) if agency.address else None,
+                str(agency.address) if agency.address else None,
         })
 
 

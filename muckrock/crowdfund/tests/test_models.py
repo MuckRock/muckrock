@@ -66,7 +66,7 @@ class TestCrowdfund(TestCase):
 
     def test_unicode_characters(self):
         """The unicode method should support unicode characters"""
-        self.crowdfund.name = u'Test¢s Crowdfund'
+        self.crowdfund.name = 'Test¢s Crowdfund'
         ok_('%s' % self.crowdfund)
 
     def test_get_crowdfund_object(self):

@@ -238,7 +238,7 @@ def _handle_request(request, mail_id):
                     subject='Request Withdrawn: {}'.format(subject),
                     body=render_to_string('text/foia/deleted_autoreply.txt'),
                     from_email=foia.get_request_email(),
-                    to=[unicode(from_email)],
+                    to=[str(from_email)],
                     bcc=['diagnostics@muckrock.com'],
                 ).send(fail_silently=False)
             return HttpResponse('WARNING')
@@ -662,7 +662,7 @@ def _forward(post, files, title='', extra_content='', info=False):
     if info:
         to_addresses.append('info@muckrock.com')
     email = EmailMessage(subject, body, post.get('From'), to_addresses)
-    for file_ in files.itervalues():
+    for file_ in files.values():
         email.attach(file_.name, file_.read(), file_.content_type)
 
     email.send(fail_silently=False)
@@ -671,9 +671,9 @@ def _forward(post, files, title='', extra_content='', info=False):
 def _log_mail(request):
     """Log a request"""
     body = []
-    for key, value in request.POST.iteritems():
+    for key, value in request.POST.items():
         body.append('\n{}:'.format(key))
-        body.append(unicode(value))
+        body.append(str(value))
     email = EmailMessage(
         '[NEXTREQUEST LOG]',
         '\n'.join(body),

@@ -33,7 +33,7 @@ class TestNewsUnit(TestCase):
     # models
     def test_article_model_unicode(self):
         """Test the Article model's __unicode__ method"""
-        ok_(unicode(self.article))
+        ok_(str(self.article))
 
     def test_article_model_url(self):
         """Test the Article model's get_absolute_url method"""

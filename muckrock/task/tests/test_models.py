@@ -60,7 +60,7 @@ class TaskTests(TestCase):
 
     def test_unicode(self):
         eq_(
-            unicode(self.task), u'Task',
+            str(self.task), 'Task',
             'Unicode string should return the classname of the task'
         )
 
@@ -369,7 +369,7 @@ class SnailMailTaskTests(TestCase):
     def test_pdf_emoji(self):
         """Strip emojis to prevent PDF generation from crashing"""
         comm = FOIACommunicationFactory(
-            communication=u'Thank you\U0001f60a\n\n'
+            communication='Thank you\U0001f60a\n\n'
         )
         pdf = SnailMailPDF(comm, 'n', switch=False)
         pdf.generate()
@@ -509,7 +509,7 @@ class ResponseTaskTests(TestCase):
         )
 
     def test_set_tracking_id(self):
-        new_tracking = u'dogs-r-cool'
+        new_tracking = 'dogs-r-cool'
         self.form.set_tracking_id(new_tracking, [self.task.communication])
         self.task.refresh_from_db()
         eq_(

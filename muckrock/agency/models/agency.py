@@ -407,8 +407,8 @@ class Agency(models.Model, RequestHelper):
             Concat(
                 F('notes'),
                 Value(
-                    u'\n\nThis agency was merged into agency '
-                    u'"{}" (#{}) by {} on {}'.format(
+                    '\n\nThis agency was merged into agency '
+                    '"{}" (#{}) by {} on {}'.format(
                         self.name,
                         self.pk,
                         user.username,
@@ -423,8 +423,8 @@ class Agency(models.Model, RequestHelper):
             Concat(
                 F('notes'),
                 Value(
-                    u'\n\nAgency "{}" (#{}) was merged into this agency '
-                    u'by {} on {}'.format(
+                    '\n\nAgency "{}" (#{}) was merged into this agency '
+                    'by {} on {}'.format(
                         agency.name,
                         agency.pk,
                         user.username,

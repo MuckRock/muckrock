@@ -11,7 +11,7 @@ from django.test import RequestFactory, TestCase
 
 # Standard Library
 import random
-from cStringIO import StringIO
+from io import StringIO
 
 # Third Party
 from nose.tools import assert_false, assert_true, eq_
@@ -215,13 +215,13 @@ class TestDataSetFields(TestCase):
         random.seed(42)
         good = [
             random.randint(1, fields.ChoiceField.max_choices - 1)
-            for _ in xrange(20)
+            for _ in range(20)
         ]
         assert_true(fields.ChoiceField.validate_all(good))
 
         bad = [
             random.randint(0, 10 * fields.ChoiceField.max_choices)
-            for _ in xrange(20)
+            for _ in range(20)
         ]
         assert_false(fields.ChoiceField.validate_all(bad))
 

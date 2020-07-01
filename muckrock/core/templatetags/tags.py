@@ -47,7 +47,7 @@ def autologin(url, user):
 @register.simple_tag
 def active(request, pattern):
     """Check url against pattern to determine active css attribute"""
-    pattern = pattern.replace('{{user}}', unicode(request.user))
+    pattern = pattern.replace('{{user}}', str(request.user))
     if re.search(pattern, request.path):
         return 'current-tab'
     return ''
@@ -277,16 +277,16 @@ def markdown_filter(text, _safe=None):
     markdown_text = markdown.markdown(text, extensions=extensions)
     # Next bleach the markdown
     allowed_tags = bleach.ALLOWED_TAGS + [
-        u'h1',
-        u'h2',
-        u'h3',
-        u'h4',
-        u'h5',
-        u'h6',
-        u'p',
-        u'img',
-        u'iframe',
-        u'a',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'p',
+        'img',
+        'iframe',
+        'a',
     ]
     allowed_attributes = bleach.ALLOWED_ATTRIBUTES.copy()
     allowed_attributes.update({

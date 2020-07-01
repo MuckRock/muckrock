@@ -20,8 +20,8 @@ class TestTagModel(test.TestCase):
 
     def test_convert_to_lowercase(self):
         """The tag should be entirely lowercase"""
-        dirty_string = u'HELLO'
-        expected_clean_string = u'hello'
+        dirty_string = 'HELLO'
+        expected_clean_string = 'hello'
         clean_string = normalize(dirty_string)
         eq_(
             clean_string, expected_clean_string,
@@ -30,8 +30,8 @@ class TestTagModel(test.TestCase):
 
     def test_strip_whitespace(self):
         """The tag should strip extra whitespace from the beginning and end of the name."""
-        dirty_string = u' hello '
-        expected_clean_string = u'hello'
+        dirty_string = ' hello '
+        expected_clean_string = 'hello'
         clean_string = normalize(dirty_string)
         eq_(
             clean_string, expected_clean_string,
@@ -40,8 +40,8 @@ class TestTagModel(test.TestCase):
 
     def test_collapse_whitespace(self):
         """The tag should remove extra whitespace from between words."""
-        dirty_string = u'hello    world'
-        expected_clean_string = u'hello world'
+        dirty_string = 'hello    world'
+        expected_clean_string = 'hello world'
         clean_string = normalize(dirty_string)
         eq_(
             clean_string, expected_clean_string,
@@ -58,9 +58,9 @@ class TestTagListView(test.TestCase):
 
     def setUp(self):
         self.client = test.Client()
-        self.tag_foo = Tag.objects.create(name=u'foo')
-        self.tag_bar = Tag.objects.create(name=u'bar')
-        self.tag_baz = Tag.objects.create(name=u'baz')
+        self.tag_foo = Tag.objects.create(name='foo')
+        self.tag_bar = Tag.objects.create(name='bar')
+        self.tag_baz = Tag.objects.create(name='baz')
 
     def test_resolve_url(self):
         """The tag list url should resolve."""
@@ -85,7 +85,7 @@ class TestTagDetailView(test.TestCase):
 
     def setUp(self):
         self.client = test.Client()
-        self.tag_foo = Tag.objects.create(name=u'foo')
+        self.tag_foo = Tag.objects.create(name='foo')
 
     def test_resolve_url(self):
         """The tag detail url should resolve."""

@@ -61,8 +61,8 @@ def import_schools(file_name):
     with open('/tmp/tmp.csv') as tmp_file:
         reader = csv.reader(tmp_file)
         for row in reader:
-            print '~~~'
-            print row[DISTRICT]
+            print('~~~')
+            print(row[DISTRICT])
             try:
                 parent = Jurisdiction.objects.get(abbrev=row[STATE])
                 county = Jurisdiction.objects.get(
@@ -74,11 +74,11 @@ def import_schools(file_name):
                 Jurisdiction.DoesNotExist,
                 Jurisdiction.MultipleObjectsReturned,
             ) as exc:
-                print '****'
-                print 'Jurisdiction error'
-                print row
-                print exc
-                print '****'
+                print('****')
+                print('Jurisdiction error')
+                print(row)
+                print(exc)
+                print('****')
             else:
                 agency, created = Agency.objects.get_or_create(
                     name=row[DISTRICT],
@@ -91,8 +91,8 @@ def import_schools(file_name):
                     )
                 )
                 if not created:
-                    print 'agency already existed'
-                print agency.pk
+                    print('agency already existed')
+                print(agency.pk)
                 agency.types.add(school_district)
                 address, _ = Address.objects.get_or_create(
                     address='{name}\n{street}\n{city}, {state} {zip}'.format(

@@ -180,7 +180,7 @@ class TestAgencyUnit(TestCase):
         )
 
         assert_in(good_agency.name, bad_agency.notes)
-        assert_in(unicode(good_agency.pk), bad_agency.notes)
+        assert_in(str(good_agency.pk), bad_agency.notes)
         assert_in(user.username, bad_agency.notes)
 
 
@@ -309,7 +309,7 @@ class TestAgencyViews(TestCase):
         response = contact_info(request, agency.pk)
         eq_(response.status_code, 200)
         data = json.loads(response.content)
-        eq_(data['email'], unicode(agency.email))
+        eq_(data['email'], str(agency.email))
 
 
 class TestAgencyForm(TestCase):

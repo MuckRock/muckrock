@@ -34,8 +34,8 @@ def plaid_checks():
         environment=settings.PLAID_ENV,
         api_version='2019-05-29'
     )
-    start_date = unicode(date.today() - timedelta(14))
-    end_date = unicode(date.today())
+    start_date = str(date.today() - timedelta(14))
+    end_date = str(date.today())
     try:
         transactions_response = client.Transactions.get(
             settings.PLAID_ACCESS_TOKEN, start_date, end_date

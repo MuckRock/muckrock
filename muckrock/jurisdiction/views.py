@@ -99,9 +99,9 @@ class JurisdictionExploreView(TemplateView):
             .annotate(exemption_count=Count('exemptions'))
         }
         state_map = []
-        for j in xrange(9):
+        for j in range(9):
             state_map.append([])
-            for i in xrange(11):
+            for i in range(11):
                 state_map[-1].append(states.get(self.map_positions.get((i, j))))
         context['state_map'] = state_map
         return context
@@ -253,7 +253,7 @@ def redirect_flag(request, **kwargs):
     """Redirect flag urls to base agency"""
     # pylint: disable=unused-argument
     # filter None from kwargs
-    kwargs = {k: v for k, v in kwargs.iteritems() if v is not None}
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
     return redirect('jurisdiction-detail', **kwargs)
 
 

@@ -313,7 +313,7 @@ class ReviewAgencyTaskList(TaskList):
             if form.is_valid():
                 email_or_fax = form.cleaned_data['email_or_fax']
                 foia_keys = [
-                    k for k in request.POST.keys() if k.startswith('foias-')
+                    k for k in list(request.POST.keys()) if k.startswith('foias-')
                 ]
                 foia_pks = []
                 for key in foia_keys:
@@ -419,9 +419,9 @@ class NewAgencyTaskList(TaskList):
             form_data = new_agency_form.cleaned_data
             # phone numbers must be strings not phone number objects to serialize
             if form_data.get('phone'):
-                form_data['phone'] = unicode(form_data['phone'])
+                form_data['phone'] = str(form_data['phone'])
             if form_data.get('fax'):
-                form_data['fax'] = unicode(form_data['fax'])
+                form_data['fax'] = str(form_data['fax'])
             if form_data.get('jurisdiction'):
                 form_data['jurisdiction'] = form_data['jurisdiction'].pk
             form_data.update({'approve': True})

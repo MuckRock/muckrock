@@ -32,9 +32,9 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
-test_title = u'Private Prisons'
+test_title = 'Private Prisons'
 test_description = (
-    u'The prison industry is growing at an alarming rate. '
+    'The prison industry is growing at an alarming rate. '
     'Even more alarming? The conditions inside prisions '
     'are growing worse while their tax-dollar derived '
     'profits are growing larger.'

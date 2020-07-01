@@ -335,7 +335,7 @@ class ReviewAgencyTaskNode(TaskNode):
             and e.email.status == 'good'
         ]
         if email:
-            initial = unicode(email[0])
+            initial = str(email[0])
         else:
             fax = [
                 p.phone
@@ -344,15 +344,15 @@ class ReviewAgencyTaskNode(TaskNode):
                 and p.phone.status == 'good'
             ]
             if fax:
-                initial = unicode(fax[0])
+                initial = str(fax[0])
             else:
-                initial = u''
+                initial = ''
         followup_text = (
-            u'To Whom It May Concern:\n'
-            u'I wanted to follow up on the following request, copied below. '
-            u'Please let me know when I can expect to receive a response.\n'
-            u'Thanks for your help, and let me know if further '
-            u'clarification is needed.'
+            'To Whom It May Concern:\n'
+            'I wanted to follow up on the following request, copied below. '
+            'Please let me know when I can expect to receive a response.\n'
+            'Thanks for your help, and let me know if further '
+            'clarification is needed.'
         )
         extra_context['form'] = task.forms.ReviewAgencyTaskForm(
             initial={

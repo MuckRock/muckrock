@@ -808,7 +808,7 @@ class ResponseTaskListViewTests(TestCase):
         # next try resolving the task with a tracking number set
         data = {
             'resolve': 'true',
-            'tracking_number': u'12345',
+            'tracking_number': '12345',
             'task': self.task.pk
         }
         http_post_response(self.url, self.view, data, self.user)

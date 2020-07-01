@@ -285,7 +285,7 @@ class CrowdfundPayment(models.Model):
 
     def __unicode__(self):
         return (
-            u'Payment of $%.2f by %s on %s for %s' % (
+            'Payment of $%.2f by %s on %s for %s' % (
                 self.amount, self.user, self.date.date(),
                 self.crowdfund.get_crowdfund_object()
             )
@@ -316,7 +316,7 @@ class RecurringCrowdfundPayment(models.Model):
     deactivated_datetime = models.DateTimeField(blank=True, null=True)
 
     def __unicode__(self):
-        return u'Recurring Crowdfund Payment: {} - ${}/Month by {}'.format(
+        return 'Recurring Crowdfund Payment: {} - ${}/Month by {}'.format(
             self.crowdfund.name,
             self.amount,
             self.email,

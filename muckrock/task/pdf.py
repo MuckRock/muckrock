@@ -10,7 +10,7 @@ from django.utils import timezone
 
 # Standard Library
 import os.path
-from cStringIO import StringIO
+from io import StringIO
 from datetime import date
 from itertools import groupby
 
@@ -82,7 +82,7 @@ class MailPDF(PDF):
         self._extra_generate()
         if self.appeal:
             law_name = self.comm.foia.jurisdiction.get_law_name(abbrev=True)
-            self._extra_header(u'{} APPEAL'.format(law_name))
+            self._extra_header('{} APPEAL'.format(law_name))
         self.set_font('DejaVu', '', 10)
         msg_body = self.comm.foia.render_msg_body(
             self.comm,
@@ -92,7 +92,7 @@ class MailPDF(PDF):
             payment=self.amount > 0,
         )
         # remove emoji's, as they break pdf rendering
-        msg_body = emoji.get_emoji_regexp().sub(u'', msg_body)
+        msg_body = emoji.get_emoji_regexp().sub('', msg_body)
         self.multi_cell(0, 13, msg_body.rstrip(), 0, 'L')
 
     def _extra_header(self, text):
@@ -168,7 +168,7 @@ class SnailMailPDF(MailPDF):
 
         # Check notification
         if self.amount:
-            self._extra_header(u'Check Enclosed for ${}'.format(self.amount))
+            self._extra_header('Check Enclosed for ${}'.format(self.amount))
 
 
 class LobPDF(MailPDF):
@@ -216,11 +216,11 @@ class CoverPDF(PDF):
             self.info,
             lambda x: x[0].communication.foia.agency,
         )
-        tab = u' ' * 8
+        tab = ' ' * 8
         for agency, info in grouped_info:
             info = list(info)
             lines.append(
-                u'\nAgency: {} - {} requests'.format(
+                '\nAgency: {} - {} requests'.format(
                     agency.name,
                     len(info),
                 )
@@ -228,7 +228,7 @@ class CoverPDF(PDF):
             for snail, pages, files in info:
                 if pages is None:
                     lines.append(
-                        u'\n{}□ Error: MR #{} - "{}" by {}'.format(
+                        '\n{}□ Error: MR #{} - "{}" by {}'.format(
                             tab,
                             snail.communication.foia.pk,
                             snail.communication.foia.title,
@@ -241,7 +241,7 @@ class CoverPDF(PDF):
                     else:
                         warning = 'Warning - No Address: '
                     lines.append(
-                        u'\n{}□ {}MR #{} - "{}" by {} - {} pages'.format(
+                        '\n{}□ {}MR #{} - "{}" by {} - {} pages'.format(
                             tab,
                             warning,
                             snail.communication.foia.pk,
@@ -252,7 +252,7 @@ class CoverPDF(PDF):
                     )
                 if snail.category == 'p':
                     lines.append(
-                        u'{}□ Write a {}check for ${:.2f}'.format(
+                        '{}□ Write a {}check for ${:.2f}'.format(
                             2 * tab,
                             'CERTIFIED '
                             if snail.amount >= settings.CHECK_LIMIT else '',
@@ -262,7 +262,7 @@ class CoverPDF(PDF):
                 for file_, status, pages in files:
                     if status == 'attached':
                         lines.append(
-                            u'{}▣ Attached: {} - {} pages'.format(
+                            '{}▣ Attached: {} - {} pages'.format(
                                 2 * tab,
                                 file_.name(),
                                 pages,
@@ -270,15 +270,15 @@ class CoverPDF(PDF):
                         )
                     elif status == 'skipped':
                         lines.append(
-                            u'{}□ Print separately: {}'.format(
+                            '{}□ Print separately: {}'.format(
                                 2 * tab, file_.name()
                             )
                         )
                     else:  # status == 'error'
                         lines.append(
-                            u'{}□ Print separately (error): {}'.format(
+                            '{}□ Print separately (error): {}'.format(
                                 2 * tab, file_.name()
                             )
                         )
-        text = u'\n'.join(lines)
+        text = '\n'.join(lines)
         self.multi_cell(0, 13, text, 0, 'L')

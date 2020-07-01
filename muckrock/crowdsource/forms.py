@@ -124,7 +124,7 @@ class CrowdsourceDataCsvForm(forms.Form):
             reader = csv.reader(data_csv)
             headers = [h.lower() for h in next(reader)]
             for line in reader:
-                data = dict(zip(headers, line))
+                data = dict(list(zip(headers, line)))
                 url = data.pop('url', '')
                 doc_match = DOCUMENT_URL_RE.match(url)
                 proj_match = PROJECT_URL_RE.match(url)

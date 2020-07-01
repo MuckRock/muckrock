@@ -35,9 +35,9 @@ class TestJurisdictionUnit(TestCase):
 
     def test_unicode(self):
         """Test Jurisdiction model's __unicode__ method"""
-        eq_(unicode(self.federal), u'United States of America')
-        eq_(unicode(self.state), u'Massachusetts')
-        eq_(unicode(self.local), u'Boston, MA')
+        eq_(str(self.federal), 'United States of America')
+        eq_(str(self.state), 'Massachusetts')
+        eq_(str(self.local), 'Boston, MA')
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
@@ -202,7 +202,7 @@ class TestLawModel(TestCase):
     def test_unicode(self):
         """The text representation of the law should be the name of the law."""
         eq_(
-            unicode(self.law), self.law.name,
+            str(self.law), self.law.name,
             'The text representation of the law should match the name of the law.'
         )
 
@@ -227,7 +227,7 @@ class TestExemptionModel(TestCase):
     def test_unicode(self):
         """The text representation should be the name of the exemption and its jurisdiction."""
         eq_(
-            unicode(self.exemption), u'%s exemption of %s' %
+            str(self.exemption), '%s exemption of %s' %
             (self.exemption.name, self.exemption.jurisdiction),
             'Should include the name of the exemption and the name of the jurisdiction.'
         )
@@ -259,8 +259,8 @@ class TestInvokedExemptionModel(TestCase):
 
     def test_unicode(self):
         """The text representation should be the names of the exemption and the request."""
-        actual = unicode(self.invoked_exemption)
-        expected = u'%s exemption of %s' % (
+        actual = str(self.invoked_exemption)
+        expected = '%s exemption of %s' % (
             self.invoked_exemption.exemption.name,
             self.invoked_exemption.request,
         )
@@ -302,8 +302,8 @@ class TestExampleAppealModel(TestCase):
 
     def test_unicode(self):
         """The text representation should be the appeal's context and exemption."""
-        actual = unicode(self.example_appeal)
-        expected = u'%s for %s' % (
+        actual = str(self.example_appeal)
+        expected = '%s for %s' % (
             self.example_appeal.title, self.example_appeal.exemption
         )
         eq_(
@@ -346,8 +346,8 @@ class TestAppealModel(TestCase):
 
     def test_unicode(self):
         """The text representation should say which request the appeal is of."""
-        actual = unicode(self.appeal)
-        expected = u'Appeal of %s' % self.appeal.communication.foia
+        actual = str(self.appeal)
+        expected = 'Appeal of %s' % self.appeal.communication.foia
         eq_(actual, expected)
 
     def test_absolute_url(self):

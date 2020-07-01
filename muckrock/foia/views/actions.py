@@ -201,7 +201,7 @@ def crowdfund_request(request, idx, **kwargs):
         date_due = timezone.now() + timedelta(default_crowdfund_duration)
         initial = {
             'name':
-                u'Crowdfund Request: %s' % unicode(foia),
+                'Crowdfund Request: %s' % str(foia),
             'description':
                 'Help cover the request fees needed to free these docs!',
             'payment_required':

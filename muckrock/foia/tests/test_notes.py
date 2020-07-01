@@ -26,7 +26,7 @@ class TestFOIANotes(TestCase):
         self.foia.add_viewer(self.viewer)
         self.data = {
             'action': 'add_note',
-            'note': u'Lorem ipsum dolor su ament.'
+            'note': 'Lorem ipsum dolor su ament.'
         }
         self.url = self.foia.get_absolute_url()
         self.view = Detail.as_view()

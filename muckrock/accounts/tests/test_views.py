@@ -154,7 +154,7 @@ class TestAccountFunctional(TestCase):
         all_data.update(profile_data)
         all_data.update(email_data)
         all_data.pop('action')
-        for key, val in all_data.iteritems():
+        for key, val in all_data.items():
             eq_(val, getattr(profile, key))
 
 

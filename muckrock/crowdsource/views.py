@@ -29,7 +29,7 @@ from django.views.generic import (
 from django.views.generic.detail import BaseDetailView
 
 # Standard Library
-from itertools import izip_longest
+from itertools import zip_longest
 
 # Third Party
 import requests
@@ -469,7 +469,7 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
         # remove non-assignment field fields
         form.cleaned_data.pop('data_id', None)
         form.cleaned_data.pop('public', None)
-        for field_id, new_value in form.cleaned_data.iteritems():
+        for field_id, new_value in form.cleaned_data.items():
             field = CrowdsourceField.objects.filter(pk=field_id).first()
             if field and field.field.multiple_values:
                 # for multi valued fields, collect all old and new values together
@@ -481,7 +481,7 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
                     flat=True,
                 )
                 response.values.filter(field_id=field_id).delete()
-                for orig, new in izip_longest(
+                for orig, new in zip_longest(
                     original_value, new_value, fillvalue=''
                 ):
                     response.values.create(
@@ -672,7 +672,7 @@ class CrowdsourceUpdateView(UpdateView):
                 crowdsource.get_form_json(),
             'submission_emails':
                 ', '
-                .join(unicode(e) for e in crowdsource.submission_emails.all()),
+                .join(str(e) for e in crowdsource.submission_emails.all()),
         }
 
     def get_context_data(self, **kwargs):

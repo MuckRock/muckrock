@@ -38,7 +38,7 @@ class TestDailyTask(TestCase):
         NotificationFactory(user=self.user)
         tasks.daily_digest()
         mock_send.assert_called_with(
-            self.user, u'Daily Digest', relativedelta(days=1)
+            self.user, 'Daily Digest', relativedelta(days=1)
         )
 
     @mock.patch('muckrock.message.tasks.send_activity_digest.delay')

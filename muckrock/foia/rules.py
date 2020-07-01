@@ -4,7 +4,7 @@
 # pylint: disable=unused-argument
 
 # needed for rules
-from __future__ import absolute_import
+
 
 # Django
 from django.contrib.auth import load_backend

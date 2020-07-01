@@ -160,7 +160,7 @@ class FoiaMachineRequestCreateView(LoginRequiredMixin, CreateView):
         receiver_string = ''
         if not agency:
             return receiver_string
-        receiver_string += unicode(agency)
+        receiver_string += str(agency)
         agency_email = agency.get_emails().first()
         if agency_email:
             receiver_string += ' <%s>' % agency_email.email
@@ -173,7 +173,7 @@ class FoiaMachineRequestCreateView(LoginRequiredMixin, CreateView):
         foi.save()
         FoiaMachineCommunication.objects.create(
             request=foi,
-            sender=(unicode(foi.user) + ' <' + foi.user.email + '>'),
+            sender=(str(foi.user) + ' <' + foi.user.email + '>'),
             receiver=self.get_receiver(foi.agency),
             message=foi.generate_letter()
         )
@@ -387,7 +387,7 @@ def jurisdiction_detail(request, **kwargs):
     """Redirect to muckrock jurisdiction detail page"""
     # pylint: disable=unused-argument
     # remove kwargs that were not filled in
-    kwargs = {k: v for k, v in kwargs.iteritems() if v is not None}
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
     return redirect(
         reverse(
             'jurisdiction-detail',

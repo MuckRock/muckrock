@@ -212,7 +212,7 @@ class ResponseTaskForm(forms.Form):
 
     def set_tracking_id(self, tracking_id, comms):
         """Sets the tracking ID of the communication's request"""
-        if not isinstance(tracking_id, unicode):
+        if not isinstance(tracking_id, str):
             raise ValueError('Tracking ID should be a unicode string.')
         for comm in comms:
             if not comm.foia:

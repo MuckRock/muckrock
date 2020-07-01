@@ -1,6 +1,6 @@
 """App configuration for the squarelet app"""
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 # Django
 from django.apps import AppConfig

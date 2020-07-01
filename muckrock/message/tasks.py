@@ -73,7 +73,7 @@ def send_digests(preference, subject, interval):
 )
 def hourly_digest():
     """Send out hourly digest"""
-    send_digests('hourly', u'Hourly Digest', relativedelta(hours=1))
+    send_digests('hourly', 'Hourly Digest', relativedelta(hours=1))
 
 
 # every day at 10am
@@ -83,7 +83,7 @@ def hourly_digest():
 )
 def daily_digest():
     """Send out daily digest"""
-    send_digests('daily', u'Daily Digest', relativedelta(days=1))
+    send_digests('daily', 'Daily Digest', relativedelta(days=1))
 
 
 # every Monday at 10am
@@ -93,7 +93,7 @@ def daily_digest():
 )
 def weekly_digest():
     """Send out weekly digest"""
-    send_digests('weekly', u'Weekly Digest', relativedelta(weeks=1))
+    send_digests('weekly', 'Weekly Digest', relativedelta(weeks=1))
 
 
 # first day of every month at 10am
@@ -103,7 +103,7 @@ def weekly_digest():
 )
 def monthly_digest():
     """Send out monthly digest"""
-    send_digests('monthly', u'Monthly Digest', relativedelta(months=1))
+    send_digests('monthly', 'Monthly Digest', relativedelta(months=1))
 
 
 # every day at 9:30am
@@ -116,7 +116,7 @@ def staff_digest():
     staff_users = User.objects.filter(is_staff=True).distinct()
     for staff_user in staff_users:
         email = digests.StaffDigest(
-            user=staff_user, subject=u'Daily Staff Digest'
+            user=staff_user, subject='Daily Staff Digest'
         )
         email.send()
 
@@ -272,7 +272,7 @@ def failed_payment(invoice_id):
     else:
         # squarelet handles other types
         return
-    subject = u'Your payment has failed'
+    subject = 'Your payment has failed'
     context = {
         'attempt': attempt,
         'type': subscription_type,
@@ -289,7 +289,7 @@ def failed_payment(invoice_id):
         logger.info(
             '%s subscription has been cancelled due to failed payment', user
         )
-        subject = u'Your %s subscription has been cancelled' % subscription_type
+        subject = 'Your %s subscription has been cancelled' % subscription_type
         context['attempt'] = 'final'
     else:
         logger.info('Failed payment by %s, attempt %s', user, attempt)
@@ -313,7 +313,7 @@ def support(user, message, _task):
         extra_context=context,
         text_template='message/notification/support.txt',
         html_template='message/notification/support.html',
-        subject=u'Support #%d' % _task.id
+        subject='Support #%d' % _task.id
     )
     notification.send(fail_silently=False)
 
@@ -327,7 +327,7 @@ def notify_project_contributor(user, project, added_by):
         extra_context=context,
         text_template='message/notification/project.txt',
         html_template='message/notification/project.html',
-        subject=u'Added to a project'
+        subject='Added to a project'
     )
     notification.send(fail_silently=False)
 
@@ -355,6 +355,6 @@ def gift(to_user, from_user, gift_description):
         extra_context=context,
         text_template='message/notification/gift.txt',
         html_template='message/notification/gift.html',
-        subject=u'You got a gift!'
+        subject='You got a gift!'
     )
     notification.send(fail_silently=False)

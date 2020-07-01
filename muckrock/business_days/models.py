@@ -11,8 +11,8 @@ from datetime import timedelta
 # Third Party
 from pascha import computus, traditions
 
-JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = range(1, 13)
-MON, TUES, WEDS, THURS, FRI, SAT, SUN = range(0, 7)
+JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = list(range(1, 13))
+MON, TUES, WEDS, THURS, FRI, SAT, SUN = list(range(0, 7))
 
 
 class Holiday(models.Model):
@@ -62,7 +62,7 @@ class Holiday(models.Model):
     )
     # date
     day = models.PositiveSmallIntegerField(
-        choices=zip(range(1, 32), range(1, 32)),
+        choices=list(zip(list(range(1, 32)), list(range(1, 32)))),
         null=True,
         blank=True,
         help_text='Only used for date holidays'

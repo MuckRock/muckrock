@@ -2,7 +2,7 @@
 Models for FOIA Machine
 """
 
-from __future__ import unicode_literals
+
 
 # Django
 from django.contrib.auth.models import User
@@ -58,7 +58,7 @@ class FoiaMachineRequest(models.Model):
         super(FoiaMachineRequest, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return unicode(self.title)
+        return str(self.title)
 
     def get_absolute_url(self):
         """Returns the request detail url."""
@@ -152,7 +152,7 @@ class FoiaMachineCommunication(models.Model):
     received = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return u'Communication from %s to %s' % (self.sender, self.receiver)
+        return 'Communication from %s to %s' % (self.sender, self.receiver)
 
     def get_absolute_url(self):
         """Returns the communication detail url."""
@@ -185,4 +185,4 @@ class FoiaMachineFile(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return u'%s' % self.name
+        return '%s' % self.name

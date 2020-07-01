@@ -101,7 +101,7 @@ class FOIACommunication(models.Model):
     objects = FOIACommunicationQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'%s - %s' % (self.datetime, self.subject)
+        return '%s - %s' % (self.datetime, self.subject)
 
     def get_absolute_url(self):
         """The url for this object"""
@@ -113,10 +113,10 @@ class FOIACommunication(models.Model):
     def save(self, *args, **kwargs):
         """Remove controls characters from text before saving"""
         remove_control = dict.fromkeys(
-            range(0, 9) + range(11, 13) + range(14, 32)
+            list(range(0, 9)) + list(range(11, 13)) + list(range(14, 32))
         )
         self.communication = (
-            unicode(self.communication).translate(remove_control)
+            str(self.communication).translate(remove_control)
         )
         # limit communication length to 150k
         self.communication = self.communication[:150000]
@@ -301,7 +301,7 @@ class FOIACommunication(models.Model):
 
         ignore_types = [('application/x-pkcs7-signature', 'p7s')]
 
-        for file_ in files.itervalues():
+        for file_ in files.values():
             if not any(
                 file_.content_type == t or file_.name.endswith(s)
                 for t, s in ignore_types
@@ -507,7 +507,7 @@ class CommunicationError(models.Model):
     reason = models.CharField(max_length=255)
 
     def __unicode__(self):
-        return u'CommunicationError: %s - %s' % (
+        return 'CommunicationError: %s - %s' % (
             self.communication.pk, self.date
         )
 
@@ -539,7 +539,7 @@ class CommunicationOpen(models.Model):
     ip_address = models.CharField(max_length=15, verbose_name='IP Address')
 
     def __unicode__(self):
-        return u'CommunicationOpen: %s - %s' % (
+        return 'CommunicationOpen: %s - %s' % (
             self.communication.pk, self.date
         )
 
@@ -561,10 +561,10 @@ class CommunicationMoveLog(models.Model):
 
     def __unicode__(self):
         if self.foia:
-            foia = u'FOIA {}'.format(self.foia.pk)
+            foia = 'FOIA {}'.format(self.foia.pk)
         else:
-            foia = u'orphan'
-        return u'Comm {} moved from {} by {} on {}'.format(
+            foia = 'orphan'
+        return 'Comm {} moved from {} by {} on {}'.format(
             self.communication.pk,
             foia,
             self.user.username,

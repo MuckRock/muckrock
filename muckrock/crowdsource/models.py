@@ -19,7 +19,7 @@ from django.utils.safestring import mark_safe
 
 # Standard Library
 import json
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from random import choice
 
 # Third Party
@@ -198,7 +198,7 @@ class Crowdsource(models.Model):
         while new_label in seen_labels:
             i += 1
             postfix = str(i)
-            new_label = u'{}-{}'.format(label[:254 - len(postfix)], postfix)
+            new_label = '{}-{}'.format(label[:254 - len(postfix)], postfix)
         seen_labels.add(new_label)
         return new_label
 
@@ -237,7 +237,7 @@ class Crowdsource(models.Model):
         """Get the metadata keys for this crowdsource's data"""
         datum = self.data.first()
         if datum:
-            return datum.metadata.keys()
+            return list(datum.metadata.keys())
         else:
             return []
 
@@ -323,7 +323,7 @@ class CrowdsourceData(models.Model):
     objects = CrowdsourceDataQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Crowdsource Data: {}'.format(self.url)
+        return 'Crowdsource Data: {}'.format(self.url)
 
     def embed(self):
         """Get the html to embed into the crowdsource"""
@@ -489,12 +489,12 @@ class CrowdsourceResponse(models.Model):
 
     def __unicode__(self):
         if self.user:
-            from_ = unicode(self.user)
+            from_ = str(self.user)
         elif self.ip_address:
-            from_ = unicode(self.ip_address)
+            from_ = str(self.ip_address)
         else:
-            from_ = u'Anonymous'
-        return u'Response by {} on {}'.format(
+            from_ = 'Anonymous'
+        return 'Response by {} on {}'.format(
             from_,
             self.datetime,
         )
@@ -554,7 +554,7 @@ class CrowdsourceResponse(models.Model):
         # values created for them
         for key in ['data_id', 'full_name', 'email', 'newsletter', 'public']:
             data.pop(key, None)
-        for pk, value in data.iteritems():
+        for pk, value in data.items():
             value = value if value is not None else ''
             if not isinstance(value, list):
                 value = [value]
@@ -575,18 +575,18 @@ class CrowdsourceResponse(models.Model):
     def send_email(self, email):
         """Send an email of this response"""
         metadata = self.crowdsource.get_metadata_keys()
-        text = u'\n'.join(
-            u'{}: {}'.format(k, v) for k, v in zip(
+        text = '\n'.join(
+            '{}: {}'.format(k, v) for k, v in zip(
                 self.crowdsource.get_header_values(metadata),
                 self.get_values(metadata),
             )
         )
-        text += u'\n{}{}#assignment-responses'.format(
+        text += '\n{}{}#assignment-responses'.format(
             settings.MUCKROCK_URL,
             self.crowdsource.get_absolute_url(),
         )
         EmailMessage(
-            subject=u'[Assignment Response] {} by {}'.format(
+            subject='[Assignment Response] {} by {}'.format(
                 self.crowdsource.title,
                 self.user.username if self.user else 'Anonymous',
             ),

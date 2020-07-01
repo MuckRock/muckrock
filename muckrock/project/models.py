@@ -162,7 +162,7 @@ class Project(models.Model):
     date_approved = models.DateField(blank=True, null=True)
 
     def __unicode__(self):
-        return unicode(self.title)
+        return str(self.title)
 
     def save(self, *args, **kwargs):
         """Autogenerates the slug based on the title"""

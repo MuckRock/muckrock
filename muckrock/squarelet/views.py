@@ -1,7 +1,7 @@
 """Views for the squarelet app"""
 
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 # Django
 from django.conf import settings
@@ -36,8 +36,8 @@ def webhook(request):
         digestmod=hashlib.sha256,
     ).hexdigest()
     match = hmac.compare_digest(
-        unicode(signature),
-        unicode(hmac_digest),
+        str(signature),
+        str(hmac_digest),
     )
     try:
         timestamp_current = int(timestamp) + 300 > time.time()

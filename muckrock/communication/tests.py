@@ -90,6 +90,6 @@ class TestEmailAddress(TestCase):
         """Test the __unicode__ method"""
         email = '"John Doe" <john@doe.com>'
         eq_(
-            unicode(EmailAddress.objects.fetch(email)),
+            str(EmailAddress.objects.fetch(email)),
             email,
         )

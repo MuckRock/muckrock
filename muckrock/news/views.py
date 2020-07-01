@@ -190,11 +190,10 @@ class NewsListView(MRSearchFilterListView):
         articles_by_date = self.queryset.order_by('pub_date')
         if not articles_by_date.exists():
             raise Http404
-        years = range(
+        years = list(range(
             articles_by_date.first().pub_date.year,
             articles_by_date.last().pub_date.year +
-            1,  # the range function stops at n - 1
-        )
+            1,))
         years.reverse()
         context['years'] = years
         return context

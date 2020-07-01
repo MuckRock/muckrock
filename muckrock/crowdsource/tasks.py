@@ -8,7 +8,7 @@ from django.conf import settings
 
 # Standard Library
 import logging
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
 # Third Party
 import requests
@@ -29,8 +29,8 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
 
     doc_id = quote_plus(doc_id.encode('utf-8'))
     resp = requests.get(
-        u'https://www.documentcloud.org'
-        u'/api/documents/{}.json'.format(
+        'https://www.documentcloud.org'
+        '/api/documents/{}.json'.format(
             doc_id,
         )
     )
@@ -45,10 +45,10 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
             exc=exc,
         )
     pages = resp_json['document']['pages']
-    for i in xrange(1, pages + 1):
+    for i in range(1, pages + 1):
         url = (
-            u'https://www.documentcloud.org/documents/'
-            u'{}/pages/{}.html'.format(doc_id, i)
+            'https://www.documentcloud.org/documents/'
+            '{}/pages/{}.html'.format(doc_id, i)
         )
         crowdsource.data.create(
             url=url,

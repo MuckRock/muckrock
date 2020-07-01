@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 import logging
 import sys
 from collections import defaultdict
-from itertools import izip_longest
+from itertools import zip_longest
 
 # MuckRock
 from muckrock.dataset.creators import CrowdsourceCreator, CsvCreator, XlsCreator
@@ -74,7 +74,7 @@ class DataSetQuerySet(models.QuerySet):
                 )
             for i, row in enumerate(creator.get_rows()):
                 dataset.rows.create(
-                    data=dict(izip_longest(
+                    data=dict(zip_longest(
                         slug_headers,
                         row,
                         fillvalue='',
@@ -294,7 +294,7 @@ class DataRow(models.Model):
     objects = DataRowQuerySet.as_manager()
 
     def __unicode__(self):
-        return u'Row #{}'.format(self.row_number)
+        return 'Row #{}'.format(self.row_number)
 
     class Meta:
         ordering = ('row_number',)

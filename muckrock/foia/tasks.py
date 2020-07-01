@@ -27,10 +27,10 @@ import os
 import os.path
 import re
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from datetime import date, datetime, time, timedelta
 from random import randint
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
 # Third Party
 import dill as pickle
@@ -146,8 +146,8 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         params['file'] = doc.ffile.url.replace('https', 'http', 1)
         url = '/upload.json'
 
-    opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
-    request = urllib2.Request(
+    opener = urllib.request.build_opener(MultipartPostHandler.MultipartPostHandler)
+    request = urllib.request.Request(
         'https://www.documentcloud.org/api/%s' % url, params
     )
     request = authenticate_documentcloud(request)
@@ -159,7 +159,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             doc.doc_id = info['id']
             doc.save()
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
-    except (urllib2.URLError, urllib2.HTTPError) as exc:
+    except (urllib.error.URLError, urllib.error.HTTPError) as exc:
         logger.warn('Upload Doc Cloud error: %s %s', url, doc.pk)
         countdown = ((2 ** upload_document_cloud.request.retries) * 300 +
                      randint(0, 300))
@@ -188,18 +188,18 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         # already has pages set or not a doc cloud, just return
         return
 
-    request = urllib2.Request(
-        u'https://www.documentcloud.org/api/documents/%s.json' %
+    request = urllib.request.Request(
+        'https://www.documentcloud.org/api/documents/%s.json' %
         quote_plus(doc.doc_id.encode('utf-8'))
     )
     request = authenticate_documentcloud(request)
 
     try:
-        ret = urllib2.urlopen(request).read()
+        ret = urllib.request.urlopen(request).read()
         info = json.loads(ret)
         doc.pages = info['document']['pages']
         doc.save()
-    except urllib2.HTTPError, exc:
+    except urllib.error.HTTPError as exc:
         if exc.code == 404:
             # if 404, this doc id is not on document cloud
             # delete the doc_id which will cause it to get reuploaded by retry_stuck_documents
@@ -209,7 +209,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
             set_document_cloud_pages.retry(
                 args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
             )
-    except urllib2.URLError, exc:
+    except urllib.error.URLError as exc:
         set_document_cloud_pages.retry(
             args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
         )
@@ -225,7 +225,7 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
     # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
     logger.info(
-        u'Starting composer_create_foias: (%s, %s, %s)',
+        'Starting composer_create_foias: (%s, %s, %s)',
         composer_pk,
         contact_info,
         composer.agencies.count(),
@@ -236,7 +236,7 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
             'jurisdiction__parent__law',
         ).iterator():
             logger.info(
-                u'Creating the foia for agency (%s, %s)', agency.pk, agency.name
+                'Creating the foia for agency (%s, %s)', agency.pk, agency.name
             )
             FOIARequest.objects.create_new(
                 composer=composer,
@@ -257,7 +257,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     # pylint: disable=unused-argument
     logger.info(
-        u'Starting composer_delayed_submit: (%s, %s, %s, %s)',
+        'Starting composer_delayed_submit: (%s, %s, %s, %s)',
         composer_pk,
         approve,
         contact_info,
@@ -290,16 +290,16 @@ def classify_status(task_pk, **kwargs):
 
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
-        doc_cloud_url = u'http://www.documentcloud.org/api/documents/%s.json'
+        doc_cloud_url = 'http://www.documentcloud.org/api/documents/%s.json'
         resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode('utf-8')))
         try:
             doc_cloud_json = resp.json()
         except ValueError:
-            logger.warn(u'Doc Cloud error for %s: %s', doc_id, resp.content)
+            logger.warn('Doc Cloud error for %s: %s', doc_id, resp.content)
             return ''
         if 'error' in doc_cloud_json:
             logger.warn(
-                u'Doc Cloud error for %s: %s', doc_id, doc_cloud_json['error']
+                'Doc Cloud error for %s: %s', doc_id, doc_cloud_json['error']
             )
             return ''
         text_url = doc_cloud_json['document']['resources']['text']
@@ -340,7 +340,7 @@ def classify_status(task_pk, **kwargs):
 
     try:
         resp_task = ResponseTask.objects.get(pk=task_pk)
-    except ResponseTask.DoesNotExist, exc:
+    except ResponseTask.DoesNotExist as exc:
         classify_status.retry(
             countdown=60 * 30, args=[task_pk], kwargs=kwargs, exc=exc
         )
@@ -510,7 +510,7 @@ def embargo_warn():
         embargo=True, permanent_embargo=False, date_embargo=date.today()
     ):
         EmailMessage(
-            subject=u'[MuckRock] Embargo about to expire for FOI Request "{}"'.
+            subject='[MuckRock] Embargo about to expire for FOI Request "{}"'.
             format(foia.title),
             body=render_to_string(
                 'text/foia/embargo_will_expire.txt', {
@@ -535,7 +535,7 @@ def embargo_expire():
         foia.embargo = False
         foia.save(comment='embargo expired')
         EmailMessage(
-            subject=u'[MuckRock] Embargo expired for FOI Request "{}"'.format(
+            subject='[MuckRock] Embargo expired for FOI Request "{}"'.format(
                 foia.title
             ),
             body=render_to_string(
@@ -727,7 +727,7 @@ def autoimport():
             except ValueError as exc:
                 s3_copy(bucket, key, 'review/%s' % file_name)
                 s3_delete(bucket, key)
-                log.append(unicode(exc))
+                log.append(str(exc))
                 continue
 
             for foia_pk in foia_pks:

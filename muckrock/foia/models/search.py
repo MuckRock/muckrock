@@ -69,7 +69,7 @@ class FOIASavedSearch(models.Model):
         params.setlist('tags', self.tags.values_list('pk', flat=True))
         params.setlist(
             'jurisdiction',
-            [unicode(j) for j in self.searchjurisdiction_set.all()],
+            [str(j) for j in self.searchjurisdiction_set.all()],
         )
         return params.urlencode()
 

@@ -41,7 +41,7 @@ def get_organization(user):
     """Gets a users active organization"""
 
     return cache_get_or_set(
-        u'sb:%s:user_org' % user.username, lambda: user.profile.organization,
+        'sb:%s:user_org' % user.username, lambda: user.profile.organization,
         settings.DEFAULT_CACHE_TIMEOUT
     )
 
@@ -50,7 +50,7 @@ def get_organizations(user):
     """Gets all of the users organizations"""
 
     return cache_get_or_set(
-        u'sb:%s:user_orgs' % user.username,
+        'sb:%s:user_orgs' % user.username,
         user.organizations.get_cache,
         settings.DEFAULT_CACHE_TIMEOUT,
     )

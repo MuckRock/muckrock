@@ -107,7 +107,7 @@ class Article(models.Model):
     def save(self, *args, **kwargs):
         """Save the news article"""
         # epiceditor likes to stick non breaking spaces in here for some reason
-        self.body = self.body.replace(u'\xa0', ' ')
+        self.body = self.body.replace('\xa0', ' ')
         # invalidate the template cache for the page on a save
         self.clear_cache()
         super(Article, self).save(*args, **kwargs)
@@ -127,9 +127,9 @@ class Article(models.Model):
         )
         if not authors:
             return ''
-        names = u', '.join(a for a in authors[:-1])
+        names = ', '.join(a for a in authors[:-1])
         if names:
-            names = u'{} & {}'.format(names, authors[-1])
+            names = '{} & {}'.format(names, authors[-1])
         else:
             names = authors[-1]
         return names

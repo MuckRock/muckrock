@@ -33,7 +33,7 @@ class TestCommunication(test.TestCase):
         self.comm = FOIACommunicationFactory(
             foia=self.foia,
             email__from_email=EmailAddress.objects.
-            fetch(u'Test Email <test@email.com>'),
+            fetch('Test Email <test@email.com>'),
         )
         self.file = FOIAFileFactory(comm=self.comm)
         eq_(self.comm.files.count(), 1)
