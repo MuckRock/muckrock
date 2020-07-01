@@ -845,12 +845,12 @@ def clean_export_csv():
     """Clean up exported CSVs and request zips that are more than 5 days old"""
 
     p_csv = re.compile(
-        r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results)\.(?:csv|zip)"
+        r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results|agencies)\.(?:csv|zip)"
     )
     conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     older_than = date.today() - timedelta(5)
-    for prefix in ["exported_csv/", "zip_request/"]:
+    for prefix in ["exported_csv/", "zip_request/", "agency_mass_import/"]:
         for key in bucket.list(prefix=prefix):
             file_name = key.name[len(prefix) :]
             m_csv = p_csv.match(file_name)

@@ -221,6 +221,11 @@ class AgencyMassImportForm(forms.Form):
         'changing anything.  Import will create unmatched agencies and set or '
         'update supplied contact information'
     )
+    email = forms.BooleanField(
+        required=False,
+        help_text='Checking this will run the import in the background and '
+        'email you the results when finished.  This will allow for large imports.'
+    )
     dry_run = forms.BooleanField(
         required=False,
         help_text='Checking this will run an import, but not save any of the '

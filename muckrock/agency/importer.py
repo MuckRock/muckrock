@@ -3,23 +3,23 @@ Mass importer and matcher for agency uploads
 """
 
 # Django
+from django.conf import settings
 from django.core.validators import URLValidator, ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils.text import slugify
 
 # Standard Library
+import csv
 import re
 
 # Third Party
-import unicodecsv as csv
 from fuzzywuzzy import fuzz, process
 from localflavor.us.us_states import STATE_CHOICES
 
 # MuckRock
 from muckrock.agency.models import Agency, AgencyAddress, AgencyEmail, AgencyPhone
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
-from muckrock.communication.utils import validate_phone_number
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES, Portal
 
@@ -36,7 +36,7 @@ def valid_url(url):
         return False
 
 
-class CSVReader(object):
+class CSVReader:
     """Read the import data from a CSV file"""
 
     def __init__(self, file_):
@@ -49,7 +49,7 @@ class CSVReader(object):
             yield dict(zip(self.headers, row))
 
 
-class PyReader(object):
+class PyReader:
     """Read the import data from a python list of dictionaries
     Used for testing
     """
@@ -63,7 +63,7 @@ class PyReader(object):
             yield datum
 
 
-class Importer(object):
+class Importer:
     """Match and import multiple agencies at a time"""
 
     p_zip = re.compile(r"^\d{5}(?:-\d{4})?$")
@@ -98,6 +98,16 @@ class Importer(object):
             datum["jurisdiction_status"] = "found"
         return jurisdiction
 
+    def _set_match_agency(self, datum, agency, status, score=None):
+        """Set match agency and related attributes for easy access"""
+        datum["match_agency"] = agency
+        datum["match_agency_url"] = settings.MUCKROCK_URL + agency.get_absolute_url()
+        datum["match_agency_id"] = agency.pk
+        datum["match_agency_name"] = agency.name
+        datum["agency_status"] = status
+        if score is not None:
+            datum["match_agency_score"] = score
+
     def _match_one(self, datum):
         """Match a single agency"""
         jurisdiction = self._match_jurisdiction(datum)
@@ -108,8 +118,7 @@ class Importer(object):
 
         try:
             agency = agencies.get(name__iexact=datum["agency"])
-            datum["match_agency"] = agency
-            datum["agency_status"] = "exact match"
+            self._set_match_agency(datum, agency, "exact match")
             return datum
         except Agency.DoesNotExist:
             pass
@@ -122,9 +131,7 @@ class Importer(object):
         )
         if match:
             _agency_name, score, agency = match
-            datum["match_agency"] = agency
-            datum["match_agency_score"] = score
-            datum["agency_status"] = "fuzzy match"
+            self._set_match_agency(datum, agency, "fuzzy match", score)
         else:
             datum["agency_status"] = "no agency"
 
@@ -159,8 +166,7 @@ class Importer(object):
             status="approved",
             user=user,
         )
-        datum["match_agency"] = agency
-        datum["agency_status"] = "created"
+        self._set_match_agency(datum, agency, "created")
         return agency
 
     def _import_email(self, agency, datum):
@@ -231,7 +237,7 @@ class Importer(object):
         """Import an agency's fax number"""
         fax = datum.get("fax")
         if fax:
-            fax_number = PhoneNumber.objects.fetch(phone, type_="fax")
+            fax_number = PhoneNumber.objects.fetch(fax, type_="fax")
             if fax_number is None:
                 datum["fax_status"] = "error"
                 return
