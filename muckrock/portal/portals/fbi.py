@@ -75,7 +75,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
                 )
                 return
             comm.attach_file(
-                content=reply.content,
+                content=reply.text,
                 name=name,
                 source=self.portal.name,
             )
