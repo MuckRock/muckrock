@@ -76,8 +76,8 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         UserFactory(username='MuckrockStaff')
 
     # models
-    def test_foia_model_unicode(self):
-        """Test FOIA Request model's __unicode__ method"""
+    def test_foia_model_str(self):
+        """Test FOIA Request model's __str__ method"""
         nose.tools.eq_(str(self.foia), 'Test 1')
 
     def test_foia_model_url(self):

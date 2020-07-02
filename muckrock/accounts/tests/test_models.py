@@ -31,8 +31,8 @@ class TestProfileUnit(TestCase):
     def setUp(self):
         self.profile = ProfileFactory()
 
-    def test_unicode(self):
-        """Test profile model's __unicode__ method"""
+    def test_str(self):
+        """Test profile model's str method"""
         expected = "%s's Profile" % str(self.profile.user).capitalize()
         eq_(str(self.profile), expected)
 

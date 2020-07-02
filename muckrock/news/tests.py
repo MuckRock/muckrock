@@ -31,8 +31,8 @@ class TestNewsUnit(TestCase):
         self.article = ArticleFactory()
 
     # models
-    def test_article_model_unicode(self):
-        """Test the Article model's __unicode__ method"""
+    def test_article_model_str(self):
+        """Test the Article model's __str__ method"""
         ok_(str(self.article))
 
     def test_article_model_url(self):

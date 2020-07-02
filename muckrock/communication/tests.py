@@ -86,8 +86,8 @@ class TestEmailAddress(TestCase):
             'weird.com'
         )
 
-    def test_unicode(self):
-        """Test the __unicode__ method"""
+    def test_str(self):
+        """Test the __str__ method"""
         email = '"John Doe" <john@doe.com>'
         eq_(
             str(EmailAddress.objects.fetch(email)),

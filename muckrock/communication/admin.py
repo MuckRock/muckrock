@@ -191,7 +191,7 @@ class EmailAddressAdmin(VersionAdmin):
 class PhoneNumberAdmin(VersionAdmin):
     """Phone number admin"""
     search_fields = ['number']
-    list_display = ['__unicode__', 'type']
+    list_display = ['__str__', 'type']
     list_filter = ['type', 'status']
 
 

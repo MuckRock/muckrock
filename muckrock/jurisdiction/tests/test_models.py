@@ -33,8 +33,8 @@ class TestJurisdictionUnit(TestCase):
         self.state = factories.StateJurisdictionFactory(parent=self.federal)
         self.local = factories.LocalJurisdictionFactory(parent=self.state)
 
-    def test_unicode(self):
-        """Test Jurisdiction model's __unicode__ method"""
+    def test_str(self):
+        """Test Jurisdiction model's __str__ method"""
         eq_(str(self.federal), 'United States of America')
         eq_(str(self.state), 'Massachusetts')
         eq_(str(self.local), 'Boston, MA')
