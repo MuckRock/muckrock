@@ -10,8 +10,8 @@ from django.utils import timezone
 
 # Standard Library
 import os.path
-from io import StringIO
 from datetime import date
+from io import StringIO
 from itertools import groupby
 
 # Third Party
@@ -89,7 +89,7 @@ class MailPDF(PDF):
             appeal=self.appeal,
             switch=self.switch,
             include_address=self.include_address,
-            payment=self.amount > 0,
+            payment=self.amount is not None and self.amount > 0,
         )
         # remove emoji's, as they break pdf rendering
         msg_body = emoji.get_emoji_regexp().sub('', msg_body)
