@@ -145,7 +145,9 @@ class GenericComposer(BuyRequestsMixin):
                 self.request, 'Total attachment size must be less than 20MB'
             )
             return
-        if form.cleaned_data.get('num_requests', 0) > 0:
+        num_requests = form.cleaned_data.get('num_requests', 0)
+        num_requests = 0 if num_requests is None else num_requests
+        if num_requests > 0:
             active, payer = self._get_organizations(self.request.user)
             self.buy_requests(form, active, payer)
         if (

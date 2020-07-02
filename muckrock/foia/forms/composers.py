@@ -231,6 +231,7 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     def _clean_card_required(self, data):
         action = data.get('action')
         num_requests = data.get('num_requests', 0)
+        num_requests = 0 if num_requests is None else num_requests
 
         require_payment = action == 'submit' and num_requests > 0
         card_on_file = 'use_card_on_file' in self.fields
