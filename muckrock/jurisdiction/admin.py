@@ -15,8 +15,6 @@ import logging
 import sys
 
 # Third Party
-from adaptor.fields import CharField, DjangoModelField
-from adaptor.model import CsvModel
 from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
@@ -104,54 +102,6 @@ class JurisdictionAdmin(VersionAdmin):
     )
     formats = ['xls', 'csv']
 
-    def get_urls(self):
-        """Add custom URLs here"""
-        urls = super(JurisdictionAdmin, self).get_urls()
-        my_urls = [
-            url(
-                r'^import/$',
-                self.admin_site.admin_view(self.csv_import),
-                name='jurisdiction-admin-import',
-            )
-        ]
-        return my_urls + urls
-
-    def csv_import(self, request):
-        """Import a CSV file of jurisdictions"""
-        # pylint: disable=broad-except
-
-        if request.method == 'POST':
-            form = CSVImportForm(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    jurisdictions = JurisdictionCsvModel.import_data(
-                        data=request.FILES['csv_file']
-                    )
-                    msg = 'CSV - %d jurisdictions imported' % len(jurisdictions)
-                    messages.success(request, msg)
-                except Exception as exc:
-                    messages.error(request, 'ERROR: %s' % str(exc))
-                    logger.error(
-                        'Import error: %s', exc, exc_info=sys.exc_info()
-                    )
-                else:
-                    for jurisdiction in jurisdictions:
-                        jobj = jurisdiction.object
-                        if not jobj.slug:
-                            jobj.slug = slugify(jobj.name)
-                            jobj.save()
-                return redirect('admin:jurisdiction_jurisdiction_changelist')
-        else:
-            form = CSVImportForm()
-
-        fields = ['name', 'slug', 'full_name', 'level', 'parent']
-        return render(
-            request,
-            'admin/agency/import.html',
-            {'form': form,
-             'fields': fields},
-        )
-
 
 class ExemptionAdminForm(forms.ModelForm):
     """Form to include a jurisdiction and contributor autocomplete"""
@@ -179,17 +129,3 @@ class ExemptionAdmin(VersionAdmin):
 
 admin.site.register(Exemption, ExemptionAdmin)
 admin.site.register(Jurisdiction, JurisdictionAdmin)
-
-
-class JurisdictionCsvModel(CsvModel):
-    """CSV import model for jurisdictions"""
-
-    name = CharField()
-    slug = CharField()
-    level = CharField(transform=lambda x: x.lower()[0])
-    parent = DjangoModelField(Jurisdiction, pk='name')
-
-    class Meta:
-        dbModel = Jurisdiction
-        delimiter = ','
-        update = {'keys': ['slug', 'parent']}

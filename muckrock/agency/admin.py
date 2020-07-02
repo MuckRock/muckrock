@@ -16,8 +16,6 @@ import logging
 import sys
 
 # Third Party
-from adaptor.fields import CharField, DjangoModelField
-from adaptor.model import CsvModel
 from autocomplete_light import shortcuts as autocomplete_light
 from pdfrw import PdfReader
 from reversion.admin import VersionAdmin
@@ -232,66 +230,6 @@ class AgencyAdmin(VersionAdmin):
 
     get_types.short_description = 'Types'
 
-    def get_urls(self):
-        """Add custom URLs here"""
-        urls = super(AgencyAdmin, self).get_urls()
-        my_urls = [
-            url(
-                r'^import/$',
-                self.admin_site.admin_view(self.csv_import),
-                name='agency-admin-import',
-            )
-        ]
-        return my_urls + urls
-
-    def csv_import(self, request):
-        """Import a CSV file of agencies"""
-        # pylint: disable=broad-except
-
-        if request.method == 'POST':
-            form = CSVImportForm(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    agencies = AgencyCsvModel.import_data(
-                        data=request.FILES['csv_file'], extra_fields=['True']
-                    )
-                    messages.success(
-                        request, 'CSV - %d agencies imported' % len(agencies)
-                    )
-                except Exception as exc:
-                    messages.error(request, 'ERROR: %s' % str(exc))
-                    logger.error(
-                        'Import error: %s', exc, exc_info=sys.exc_info()
-                    )
-                else:
-                    if form.cleaned_data['type_']:
-                        for agency in agencies:
-                            agency.object.types.add(form.cleaned_data['type_'])
-                    for agency in agencies:
-                        aobj = agency.object
-                        if not aobj.slug:
-                            aobj.slug = slugify(aobj.name)
-                            aobj.save()
-                return redirect('admin:agency_agency_changelist')
-        else:
-            form = CSVImportForm()
-
-        fields = [
-            'name',
-            'slug',
-            'jurisdiction ("Boston, MA")',
-            'contact first name',
-            'contact last name',
-            'contact_title',
-            'url',
-        ]
-        return render(
-            request,
-            'admin/agency/import.html',
-            {'form': form,
-             'fields': fields},
-        )
-
 
 class AgencyRequestFormMapperInline(admin.TabularInline):
     """Inline for Agency Request Form mapper"""
@@ -352,21 +290,3 @@ class EmailValidator(object):
         # validate email will throw a validation error on failure
         validate_email(value)
         return True
-
-
-class AgencyCsvModel(CsvModel):
-    """CSV import model for agency"""
-
-    name = CharField()
-    slug = CharField()
-    jurisdiction = DjangoModelField(Jurisdiction, prepare=get_jurisdiction)
-    contact_first_name = CharField()
-    contact_last_name = CharField()
-    contact_title = CharField()
-    url = CharField()
-    status = CharField()
-
-    class Meta:
-        dbModel = Agency
-        delimiter = ','
-        update = {'keys': ['name', 'jurisdiction']}

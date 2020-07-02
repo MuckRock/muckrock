@@ -12,9 +12,6 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
-# Third Party
-import djcelery
-
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -212,7 +209,6 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'django_premailer',
     'djangosecure',
-    'djcelery',
     'djcelery_email',
     'easy_thumbnails',
     'sorl.thumbnail',
@@ -292,9 +288,7 @@ REDIS_URL = os.environ.get(
 BROKER_URL = REDIS_URL
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 25 * 60 * 60}
 
-djcelery.setup_loader()
-
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True

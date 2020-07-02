@@ -39,12 +39,13 @@ Further Example:
 """
 
 # Standard Library
-import mimetools
+import email
 import mimetypes
 import os
 import stat
-import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
+import urllib.error
+import urllib.parse
+import urllib.request
 
 
 class Callable:
@@ -73,7 +74,9 @@ class MultipartPostHandler(urllib.request.BaseHandler):
                         v_vars.append((key, value))
             except TypeError:
                 systype, value, traceback = sys.exc_info()
-                raise TypeError("not a valid non-string sequence or mapping object").with_traceback(traceback)
+                raise TypeError(
+                    "not a valid non-string sequence or mapping object"
+                ).with_traceback(traceback)
 
             if len(v_files) == 0:
                 data = urllib.parse.urlencode(v_vars, doseq)
@@ -85,10 +88,12 @@ class MultipartPostHandler(urllib.request.BaseHandler):
                     and request.get_header('Content-Type'
                                            ).find('multipart/form-data') != 0
                 ):
-                    print("Replacing %s with %s" % (
-                        request.get_header('content-type'),
-                        'multipart/form-data'
-                    ))
+                    print(
+                        "Replacing %s with %s" % (
+                            request.get_header('content-type'),
+                            'multipart/form-data'
+                        )
+                    )
                 request.add_unredirected_header('Content-Type', contenttype)
 
             request.add_data(data)
@@ -96,7 +101,7 @@ class MultipartPostHandler(urllib.request.BaseHandler):
 
     def multipart_encode(vars, files, boundary=None, buffer=None):
         if boundary is None:
-            boundary = mimetools.choose_boundary()
+            boundary = email.generator._make_boundary()
         if buffer is None:
             buffer = ''
         for (key, value) in vars:
