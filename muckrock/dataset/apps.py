@@ -3,7 +3,6 @@
 App config for datasets
 """
 
-
 # Django
 from django.apps import AppConfig
 

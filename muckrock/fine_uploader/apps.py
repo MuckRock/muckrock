@@ -1,6 +1,5 @@
 """App config for fine uploader"""
 
-
 # Django
 from django.apps import AppConfig
 

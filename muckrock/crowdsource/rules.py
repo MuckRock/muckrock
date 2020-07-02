@@ -5,7 +5,6 @@
 
 # needed for rules
 
-
 # Third Party
 from rules import add_perm, always_deny, is_staff, predicate
 

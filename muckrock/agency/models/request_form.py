@@ -10,8 +10,8 @@ from django.db import models
 
 # Standard Library
 import inspect
-from io import StringIO
 from datetime import date
+from io import StringIO
 
 # Third Party
 from pdfrw import PageMerge, PdfReader, PdfWriter

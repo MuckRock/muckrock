@@ -5,7 +5,6 @@
 
 # needed for rules
 
-
 # Django
 from django.contrib.auth import load_backend
 

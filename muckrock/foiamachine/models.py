@@ -2,8 +2,6 @@
 Models for FOIA Machine
 """
 
-
-
 # Django
 from django.contrib.auth.models import User
 from django.db import models
@@ -19,8 +17,8 @@ from django_hosts.resolvers import reverse
 
 # MuckRock
 from muckrock.core.utils import generate_key
-from muckrock.foia.models import STATUS as MR_STATUS
 from muckrock.foia.models import END_STATUS
+from muckrock.foia.models import STATUS as MR_STATUS
 
 STATUS = [('started', 'Draft')] + MR_STATUS
 

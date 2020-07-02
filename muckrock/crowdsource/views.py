@@ -671,8 +671,7 @@ class CrowdsourceUpdateView(UpdateView):
             'form_json':
                 crowdsource.get_form_json(),
             'submission_emails':
-                ', '
-                .join(str(e) for e in crowdsource.submission_emails.all()),
+                ', '.join(str(e) for e in crowdsource.submission_emails.all()),
         }
 
     def get_context_data(self, **kwargs):

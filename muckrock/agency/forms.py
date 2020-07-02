@@ -140,13 +140,11 @@ class AgencyForm(forms.ModelForm):
             portal, _ = Portal.objects.get_or_create(
                 url=self.cleaned_data['portal_url'],
                 defaults={
-                    'type':
-                        portal_type,
-                    'name':
-                        '%s %s' % (
-                            agency,
-                            dict(PORTAL_TYPES)[portal_type],
-                        )
+                    'type': portal_type,
+                    'name': '%s %s' % (
+                        agency,
+                        dict(PORTAL_TYPES)[portal_type],
+                    )
                 },
             )
             agency.portal = portal

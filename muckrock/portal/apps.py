@@ -3,7 +3,6 @@
 App config for portal
 """
 
-
 # Django
 from django.apps import AppConfig
 

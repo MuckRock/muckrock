@@ -68,9 +68,7 @@ class EmailsListField(CharField):
         emails = email_separator_re.split(value)
 
         if not emails:
-            raise forms.ValidationError(
-                _('Enter at least one e-mail address.')
-            )
+            raise forms.ValidationError(_('Enter at least one e-mail address.'))
 
         for email in emails:
             validate_email(email)

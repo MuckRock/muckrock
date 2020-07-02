@@ -5,7 +5,6 @@
 
 # needed for rules
 
-
 # Third Party
 from rules import add_perm, predicate
 

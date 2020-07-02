@@ -368,9 +368,7 @@ class SnailMailTaskTests(TestCase):
 
     def test_pdf_emoji(self):
         """Strip emojis to prevent PDF generation from crashing"""
-        comm = FOIACommunicationFactory(
-            communication='Thank you\U0001f60a\n\n'
-        )
+        comm = FOIACommunicationFactory(communication='Thank you\U0001f60a\n\n')
         pdf = SnailMailPDF(comm, 'n', switch=False)
         pdf.generate()
         pdf.output(dest='S')

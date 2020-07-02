@@ -313,7 +313,8 @@ class ReviewAgencyTaskList(TaskList):
             if form.is_valid():
                 email_or_fax = form.cleaned_data['email_or_fax']
                 foia_keys = [
-                    k for k in list(request.POST.keys()) if k.startswith('foias-')
+                    k for k in list(request.POST.keys())
+                    if k.startswith('foias-')
                 ]
                 foia_pks = []
                 for key in foia_keys:

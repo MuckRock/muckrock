@@ -3,7 +3,6 @@
 App loader for core app
 """
 
-
 # Django
 from django.apps import AppConfig
 

@@ -405,8 +405,7 @@ class Notification(models.Model):
     objects = NotificationQuerySet.as_manager()
 
     def __str__(self):
-        return '<Notification for %s>' % str(self.user.username
-                                                  ).capitalize()
+        return '<Notification for %s>' % str(self.user.username).capitalize()
 
     def mark_read(self):
         """Marks notification as read."""
