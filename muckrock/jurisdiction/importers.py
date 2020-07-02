@@ -4,8 +4,10 @@ Custom importer for jurisdiction laws
 # Django
 from django.conf import settings
 
+# Standard Library
+import csv
+
 # Third Party
-import unicodecsv as csv
 from boto.s3.connection import S3Connection
 from smart_open import smart_open
 

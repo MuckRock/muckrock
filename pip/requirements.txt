@@ -148,7 +148,6 @@ sqlparse==0.2.4           # via django-debug-toolbar
 stripe==1.75.0
 threadpoolctl==2.1.0      # via scikit-learn
 traitlets==4.3.2          # via ipython
-unicodecsv==0.14.1
 unidecode==0.4.19
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.24.2           # via requests

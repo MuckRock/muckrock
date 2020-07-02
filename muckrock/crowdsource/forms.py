@@ -6,10 +6,10 @@ from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 
 # Standard Library
+import csv
 import json
 
 # Third Party
-import unicodecsv as csv
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock

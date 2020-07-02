@@ -82,7 +82,6 @@ smartypants # Used for typographically-correct quotes
 social-auth-app-django # for oauth client
 sorl-thumbnail # used for squarlet avatars
 stripe # Stripe payment processor integration
-unicodecsv # Unicode compatible replacement for CSV module
 unidecode # Used for unicode decoding
 xlrd # Used to read excel files
 zenpy # library for zendesk API

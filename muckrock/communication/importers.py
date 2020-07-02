@@ -6,10 +6,10 @@ Custom importers for addresses
 from django.conf import settings
 
 # Standard Library
+import csv
 import re
 
 # Third Party
-import unicodecsv as csv
 from boto.s3.connection import S3Connection
 from localflavor.us.us_states import STATE_CHOICES
 

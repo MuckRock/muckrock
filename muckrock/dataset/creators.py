@@ -2,8 +2,10 @@
 Creator objects for creating data sets
 """
 
+# Standard Library
+import csv
+
 # Third Party
-import unicodecsv as csv
 import xlrd
 
 

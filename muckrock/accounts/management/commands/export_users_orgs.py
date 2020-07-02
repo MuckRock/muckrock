@@ -8,8 +8,10 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
+# Standard Library
+import csv
+
 # Third Party
-import unicodecsv as csv
 from boto.s3.connection import S3Connection
 from smart_open.smart_open_lib import smart_open
 
@@ -128,9 +130,11 @@ class Command(BaseCommand):
                 )
             ):
                 if i % 1000 == 0:
-                    print('Organization {} / {} - {}'.format(
-                        i, total, timezone.now()
-                    ))
+                    print(
+                        'Organization {} / {} - {}'.format(
+                            i, total, timezone.now()
+                        )
+                    )
                 if (
                     len(org.owner.organization_set.all()) <= 1
                     or not org.individual
@@ -176,7 +180,9 @@ class Command(BaseCommand):
                 )
             ):
                 if i % 1000 == 0:
-                    print('Member {} / {} - {}'.format(i, total, timezone.now()))
+                    print(
+                        'Member {} / {} - {}'.format(i, total, timezone.now())
+                    )
                 writer.writerow([
                     member.user.profile.uuid,
                     member.organization.uuid,

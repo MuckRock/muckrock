@@ -21,13 +21,16 @@ from django.utils import timezone
 
 # Standard Library
 import base64
+import csv
 import json
 import logging
 import os
 import os.path
 import re
 import sys
-import urllib.request, urllib.error, urllib.parse
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import date, datetime, time, timedelta
 from random import randint
 from urllib.parse import quote_plus
@@ -37,7 +40,6 @@ import dill as pickle
 import lob
 import numpy as np
 import requests
-import unicodecsv as csv
 from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError
@@ -146,7 +148,9 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         params['file'] = doc.ffile.url.replace('https', 'http', 1)
         url = '/upload.json'
 
-    opener = urllib.request.build_opener(MultipartPostHandler.MultipartPostHandler)
+    opener = urllib.request.build_opener(
+        MultipartPostHandler.MultipartPostHandler
+    )
     request = urllib.request.Request(
         'https://www.documentcloud.org/api/%s' % url, params
     )
