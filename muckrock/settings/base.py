@@ -303,7 +303,9 @@ CELERY_IMPORTS = (
     'muckrock.squarelet.tasks',
     'muckrock.task.tasks',
 )
-CELERY_WORKER_MAX_TASKS_PER_CHILD = os.environ.get('CELERY_WORKER_MAX_TASKS_PER_CHILD', 100)
+CELERY_WORKER_MAX_TASKS_PER_CHILD = os.environ.get(
+    'CELERY_WORKER_MAX_TASKS_PER_CHILD', 100
+)
 CELERY_TASK_TIME_LIMIT = os.environ.get('CELERY_TASK_TIME_LIMIT', 5 * 60)
 CELERY_TASK_ROUTES = {
     'muckrock.foia.tasks.send_fax': {
