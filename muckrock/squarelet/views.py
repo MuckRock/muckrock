@@ -2,7 +2,6 @@
 
 # -*- coding: utf-8 -*-
 
-
 # Django
 from django.conf import settings
 from django.http.response import HttpResponse, HttpResponseForbidden
@@ -31,8 +30,8 @@ def webhook(request):
 
     # verify signature
     hmac_digest = hmac.new(
-        key=settings.SQUARELET_SECRET,
-        msg='{}{}{}'.format(timestamp, type_, ''.join(uuids)),
+        key=settings.SQUARELET_SECRET.encode('utf8'),
+        msg='{}{}{}'.format(timestamp, type_, ''.join(uuids)).encode('utf8'),
         digestmod=hashlib.sha256,
     ).hexdigest()
     match = hmac.compare_digest(

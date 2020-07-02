@@ -45,8 +45,12 @@ class ViewsTest(TestCase):
     def _calc_signature(self, timestamp, type_, uuids):
         """Calculate the webhook signature"""
         return hmac.new(
-            key=settings.SQUARELET_SECRET,
-            msg='{}{}{}'.format(timestamp, type_, ''.join(uuids)),
+            key=settings.SQUARELET_SECRET.encode('utf8'),
+            msg='{}{}{}'.format(
+                timestamp,
+                type_,
+                ''.join(uuids),
+            ).encode('utf8'),
             digestmod=hashlib.sha256,
         ).hexdigest()
 

@@ -636,8 +636,8 @@ def _verify(post):
     timestamp = post.get('timestamp', '')
     signature = post.get('signature', '')
     signature_ = hmac.new(
-        key=settings.MAILGUN_ACCESS_KEY,
-        msg='%s%s' % (timestamp, token),
+        key=settings.MAILGUN_ACCESS_KEY.encode('utf8'),
+        msg='{}{}'.format(timestamp, token).encode('utf8'),
         digestmod=hashlib.sha256,
     ).hexdigest()
     return signature == signature_ and int(timestamp) + 300 > time.time()
