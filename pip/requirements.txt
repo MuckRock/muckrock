@@ -4,7 +4,6 @@
 #
 #    pip-compile pip/requirements.in
 #
--e git+git://github.com/MuckRock/django-autocomplete-light.git@muckrock#egg=django_autocomplete_light
 -e git+git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun
 -e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@be138fc8481ae999b052efe215d52ef5733506f4#egg=django_news_sitemaps
 -e git+git://github.com/jazzband/django-queued-storage@541faad8f5d03e7e066d02b2a2d5b89d45b77819#egg=django_queued_storage
@@ -29,6 +28,7 @@ defusedxml==0.7.0rc1      # via python3-openid, social-auth-core
 dill==0.2.5
 django-activity-stream==0.6.4
 django-appconf==1.0.2     # via django-celery-email, django-compressor
+django-autocomplete-light==2.3.6
 django-celery-email==1.1.5
 django-choices==1.6.1
 django-compat==1.0.14     # via django-hijack
@@ -51,7 +51,7 @@ django-picklefield==1.0.0  # via django-constance
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-querycount==0.4.1
-django-redis==4.9.0       # via python-redis-lock
+django-redis==4.10.0      # via python-redis-lock
 django-reversion==1.10.2
 django-robots==2.0
 django-secure==1.0.1
@@ -94,7 +94,6 @@ oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 olefile==0.44             # via pillow
 orderedmultidict==0.7.11  # via furl
 packaging==16.8
-pascha==0.5
 pdfrw==0.4
 pexpect==4.6.0            # via ipython
 phonenumberslite==8.8.2
@@ -127,7 +126,7 @@ pytz==2020.1              # via babel, celery, django, zenpy
 pyyaml==5.1               # via pyimagediet
 raven==6.10.0
 rcssmin==1.0.6            # via django-compressor
-redis==2.10.5
+redis==3.5.3
 reportlab==3.4.0
 requests-oauthlib==1.0.0  # via social-auth-core
 requests==2.21.0

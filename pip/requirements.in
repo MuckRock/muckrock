@@ -1,5 +1,4 @@
 -e git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun # Mail backend used directly (on production)
--e git://github.com/MuckRock/django-autocomplete-light.git@muckrock#egg=django_autocomplete_light # Autocomplete drop down inputs
 -e git://github.com/jazzband/django-queued-storage@541faad8f5d03e7e066d02b2a2d5b89d45b77819#egg=django_queued_storage # For delayed uploading of files
 -e git://github.com/mitchelljkotler/django-news-sitemaps.git@be138fc8481ae999b052efe215d52ef5733506f4#egg=django_news_sitemaps # For generating news sitemaps
 beautifulsoup4 # used for parsing html
@@ -8,8 +7,8 @@ boto # Used to access AWS
 celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
-django<2.0 # Django is kinda important...
 django-activity-stream # Used for notifications
+django-autocomplete-light<3 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
 django-compressor # Compress all JS and CSS assets into a single file
@@ -38,6 +37,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader==0.3.0 # Used for loading Webpack bundles
+django<2.0 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF
@@ -56,7 +56,6 @@ markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
 newrelic # Interface to newrelic service
 numpy # Used by machine learning
-pascha # Used by business days to calculate th date of Easter
 pdfrw # Used for reading/writing PDFs for form filling in
 phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
