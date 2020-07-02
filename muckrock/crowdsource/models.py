@@ -121,7 +121,7 @@ class Crowdsource(models.Model):
 
     objects = CrowdsourceQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def get_absolute_url(self):
@@ -322,7 +322,7 @@ class CrowdsourceData(models.Model):
 
     objects = CrowdsourceDataQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Crowdsource Data: {}'.format(self.url)
 
     def embed(self):
@@ -379,7 +379,7 @@ class CrowdsourceField(models.Model):
     order = models.PositiveSmallIntegerField(blank=True, null=True)
     deleted = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.deleted:
             return "{} (Deleted)".format(self.label)
         else:
@@ -432,7 +432,7 @@ class CrowdsourceChoice(models.Model):
     value = models.CharField(max_length=255)
     order = models.PositiveSmallIntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.choice
 
     class Meta:
@@ -487,7 +487,7 @@ class CrowdsourceResponse(models.Model):
     objects = CrowdsourceResponseQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.user:
             from_ = str(self.user)
         elif self.ip_address:
@@ -608,7 +608,7 @@ class CrowdsourceValue(models.Model):
     value = models.CharField(max_length=2000, blank=True)
     original_value = models.CharField(max_length=2000, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.value
 
     class Meta:

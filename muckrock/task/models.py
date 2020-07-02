@@ -82,7 +82,7 @@ class Task(models.Model):
     class Meta:
         ordering = ['date_created']
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Task'
 
     def resolve(self, user=None, form_data=None):
@@ -113,7 +113,7 @@ class OrphanTask(Task):
     objects = OrphanTaskQuerySet.as_manager()
     template_name = 'task/orphan.html'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Orphan Task'
 
     def display(self):
@@ -167,7 +167,7 @@ class PaymentInfoTask(Task):
 
     objects = PaymentInfoTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Payment Info Task'
 
 
@@ -209,7 +209,7 @@ class SnailMailTask(Task):
 
     objects = SnailMailTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Snail Mail Task'
 
     def display(self):
@@ -257,7 +257,7 @@ class ReviewAgencyTask(Task):
 
     objects = ReviewAgencyTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Review Agency Task'
 
     def get_absolute_url(self):
@@ -547,7 +547,7 @@ class FlaggedTask(Task):
 
     objects = FlaggedTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Flagged Task'
 
     def display(self):
@@ -718,7 +718,7 @@ class ProjectReviewTask(Task):
 
     objects = ProjectReviewTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Project Review Task'
 
     def get_absolute_url(self):
@@ -763,7 +763,7 @@ class NewAgencyTask(Task):
 
     objects = NewAgencyTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'New Agency Task'
 
     def display(self):
@@ -884,7 +884,7 @@ class ResponseTask(Task):
 
     objects = ResponseTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Response Task'
 
     def get_absolute_url(self):
@@ -906,7 +906,7 @@ class StatusChangeTask(Task):
 
     objects = StatusChangeTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Status Change Task'
 
     def get_absolute_url(self):
@@ -920,7 +920,7 @@ class CrowdfundTask(Task):
 
     objects = CrowdfundTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Crowdfund Task'
 
     def get_absolute_url(self):
@@ -936,7 +936,7 @@ class MultiRequestTask(Task):
 
     objects = MultiRequestTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Multi-Request Task'
 
     def get_absolute_url(self):
@@ -978,7 +978,7 @@ class PortalTask(Task):
 
     objects = PortalTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Portal Task'
 
     def display(self):
@@ -1010,7 +1010,7 @@ class NewPortalTask(Task):
 
     objects = NewPortalTaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'New Portal Task'
 
     def display(self):
@@ -1030,7 +1030,7 @@ class GenericTask(Task):
     body = models.TextField(blank=True)
     objects = TaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Generic Task'
 
 
@@ -1043,7 +1043,7 @@ class FailedFaxTask(Task):
     reason = models.CharField(max_length=255, blank=True, default='')
     objects = TaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Failed Fax Task'
 
     def get_absolute_url(self):
@@ -1063,7 +1063,7 @@ class RejectedEmailTask(Task):
     error = models.TextField(blank=True)
     objects = TaskQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Rejected Email Task'
 
     def get_absolute_url(self):
@@ -1077,7 +1077,7 @@ class StaleAgencyTask(Task):
     type = 'StaleAgencyTask'
     agency = models.ForeignKey('agency.Agency')
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Stale Agency Task'
 
     def get_absolute_url(self):
@@ -1094,7 +1094,7 @@ class NewExemptionTask(Task):
     language = models.TextField()
     user = models.ForeignKey(User)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'New Exemption Task'
 
     def display(self):
@@ -1110,7 +1110,7 @@ class BlacklistDomain(models.Model):
     """A domain to be blacklisted from sending us emails"""
     domain = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.domain
 
     def resolve_matches(self):

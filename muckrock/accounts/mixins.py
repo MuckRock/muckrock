@@ -41,7 +41,7 @@ class MiniregMixin(object):
         except requests.exceptions.RequestException:
             form.add_error(None, generic_error)
             raise
-        if resp.status_code / 100 != 2:
+        if resp.status_code // 100 != 2:
             try:
                 error_json = resp.json()
             except JSONDecodeError:
@@ -115,7 +115,7 @@ class BuyRequestsMixin(object):
             organization.add_requests(num_requests)
         except requests.exceptions.RequestException as exc:
             logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
-            if exc.response.status_code / 100 == 4:
+            if exc.response.status_code // 100 == 4:
                 messages.error(
                     self.request, 'Payment Error: {}'.format(
                         '\n'.join(

@@ -10,5 +10,5 @@ class WhitelistDomain(models.Model):
     """A domain to be whitelisted and always accept emails from them"""
     domain = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.domain

@@ -63,7 +63,7 @@ class FOIAMultiRequest(models.Model):
 
     foia_type = 'multi'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def get_absolute_url(self):

@@ -62,7 +62,7 @@ class Crowdfund(models.Model):
     )
     closed = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -283,7 +283,7 @@ class CrowdfundPayment(models.Model):
         null=True,
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return (
             'Payment of $%.2f by %s on %s for %s' % (
                 self.amount, self.user, self.date.date(),
@@ -315,7 +315,7 @@ class RecurringCrowdfundPayment(models.Model):
     created_datetime = models.DateTimeField(auto_now_add=True)
     deactivated_datetime = models.DateTimeField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Recurring Crowdfund Payment: {} - ${}/Month by {}'.format(
             self.crowdfund.name,
             self.amount,

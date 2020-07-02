@@ -28,7 +28,7 @@ class AgencyRequestForm(models.Model):
     form = models.FileField(upload_to='agency_forms/%Y/%m/%d', max_length=255)
     datetime_stamp = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def fill(self, comm):
@@ -205,7 +205,7 @@ class AgencyRequestFormMapper(models.Model):
         choices=VALUE_CHOICES,
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} - {} - {}'.format(
             self.form,
             self.field,

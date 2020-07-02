@@ -90,7 +90,7 @@ class Article(models.Model):
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def get_absolute_url(self):
@@ -149,5 +149,5 @@ class Photo(models.Model):
         storage=get_image_storage(),
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.image.name

@@ -36,7 +36,7 @@ class AttachmentBase(models.Model):
     date_time_stamp = models.DateTimeField()
     sent = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Attachment: %s by %s for %s %d' % (
             self.ffile.name,
             self.user.username,

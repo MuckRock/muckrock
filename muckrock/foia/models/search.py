@@ -36,7 +36,7 @@ class FOIASavedSearch(models.Model):
     min_date = models.DateField(blank=True, null=True)
     max_date = models.DateField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def urlencode(self):
@@ -84,5 +84,5 @@ class SearchJurisdiction(models.Model):
     jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
     include_local = models.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}-{}'.format(self.jurisdiction_id, self.include_local)

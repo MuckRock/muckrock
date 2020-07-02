@@ -123,7 +123,7 @@ class DataSet(models.Model):
 
     objects = DataSetQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -194,7 +194,7 @@ class DataField(models.Model):
 
     objects = DataFieldQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
@@ -293,7 +293,7 @@ class DataRow(models.Model):
 
     objects = DataRowQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Row #{}'.format(self.row_number)
 
     class Meta:

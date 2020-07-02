@@ -39,7 +39,7 @@ class AgencyAddress(models.Model):
         default='none',
     )
 
-    def __unicode__(self):
+    def __str__(self):
         val = str(self.address)
         if self.request_type != 'none':
             val = '%s\n(%s)' % (val, self.request_type)
@@ -62,7 +62,7 @@ class AgencyEmail(models.Model):
         default='none',
     )
 
-    def __unicode__(self):
+    def __str__(self):
         val = str(self.email)
         if self.request_type != 'none' and self.email_type != 'none':
             val = '%s (%s - %s)' % (val, self.request_type, self.email_type)
@@ -80,7 +80,7 @@ class AgencyPhone(models.Model):
         default='none',
     )
 
-    def __unicode__(self):
+    def __str__(self):
         val = str(self.phone)
         if self.request_type != 'none':
             val = '%s (%s)' % (val, self.request_type)

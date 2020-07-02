@@ -112,7 +112,7 @@ class Jurisdiction(models.Model, RequestHelper):
     )
     holidays = models.ManyToManyField(Holiday, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.level == 'l':
             return '{}, {}'.format(self.name, self.parent.abbrev)
         else:
@@ -283,7 +283,7 @@ class Law(models.Model):
     cover_legislative = models.BooleanField(default=False)
     cover_executive = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -304,7 +304,7 @@ class LawYear(models.Model):
     )
     year = models.PositiveSmallIntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} in {}'.format(self.reason, self.year)
 
     class Meta:
@@ -348,7 +348,7 @@ class Exemption(models.Model):
         'Significant references to the exemption in caselaw or previous appeals.'
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s exemption of %s' % (self.name, self.jurisdiction)
 
     def __repr__(self):
@@ -386,7 +386,7 @@ class InvokedExemption(models.Model):
         help_text='Did the agency properly invoke the exemption to the request?'
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s exemption of %s' % (self.exemption.name, self.request)
 
     def __repr__(self):
@@ -416,7 +416,7 @@ class ExampleAppeal(models.Model):
         'Under what circumstances is this appeal language most effective?'
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return '%(name)s for %(exemption)s' % {
             'name': self.title if self.title else 'Example appeal',
             'exemption': self.exemption
@@ -446,7 +446,7 @@ class Appeal(models.Model):
         ExampleAppeal, related_name='appeals', blank=True
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Appeal of %s' % self.communication.foia
 
     def __repr__(self):

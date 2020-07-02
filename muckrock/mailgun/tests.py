@@ -38,7 +38,7 @@ class TestMailgunViews(TestCase):
         token = 'token'
         timestamp = int(time.time())
         signature = hmac.new(
-            key=settings.MAILGUN_ACCESS_KEY,
+            key=settings.MAILGUN_ACCESS_KEY.encode('utf8'),
             msg='%s%s' % (timestamp, token),
             digestmod=hashlib.sha256
         ).hexdigest()

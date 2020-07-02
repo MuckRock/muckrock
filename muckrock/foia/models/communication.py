@@ -100,7 +100,7 @@ class FOIACommunication(models.Model):
 
     objects = FOIACommunicationQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s - %s' % (self.datetime, self.subject)
 
     def get_absolute_url(self):
@@ -459,7 +459,7 @@ class RawEmail(models.Model):
     email = models.OneToOneField('communication.EmailCommunication', null=True)
     raw_email = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Raw Email: %d' % self.pk
 
     class Meta:
@@ -477,7 +477,7 @@ class FOIANote(models.Model):
     datetime = models.DateTimeField(auto_now_add=True)
     note = models.TextField()
 
-    def __unicode__(self):
+    def __str__(self):
         # pylint: disable=redefined-variable-type
         if self.author:
             user = self.author
@@ -506,7 +506,7 @@ class CommunicationError(models.Model):
     event = models.CharField(max_length=10)
     reason = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'CommunicationError: %s - %s' % (
             self.communication.pk, self.date
         )
@@ -538,7 +538,7 @@ class CommunicationOpen(models.Model):
     user_agent = models.CharField(max_length=255)
     ip_address = models.CharField(max_length=15, verbose_name='IP Address')
 
-    def __unicode__(self):
+    def __str__(self):
         return 'CommunicationOpen: %s - %s' % (
             self.communication.pk, self.date
         )
@@ -559,7 +559,7 @@ class CommunicationMoveLog(models.Model):
     user = models.ForeignKey('auth.User')
     datetime = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.foia:
             foia = 'FOIA {}'.format(self.foia.pk)
         else:

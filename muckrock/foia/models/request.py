@@ -196,7 +196,7 @@ class FOIARequest(models.Model):
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def get_absolute_url(self):
@@ -1448,7 +1448,7 @@ class TrackingNumber(models.Model):
         ),
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.tracking_id
 
     class Meta:

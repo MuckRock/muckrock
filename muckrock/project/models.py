@@ -161,7 +161,7 @@ class Project(models.Model):
     )
     date_approved = models.DateField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.title)
 
     def save(self, *args, **kwargs):

@@ -49,7 +49,7 @@ class FOIAFile(models.Model):
     doc_id = models.SlugField(max_length=80, blank=True, editable=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def name(self):

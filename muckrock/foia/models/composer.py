@@ -95,7 +95,7 @@ class FOIAComposer(models.Model):
         verbose_name = 'FOIA Composer'
         permissions = (('view_foiacomposer', 'Can view this composer'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):

@@ -33,7 +33,7 @@ class Question(models.Model):
     answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
@@ -87,7 +87,7 @@ class Answer(models.Model):
 
     reindex_related = ('question',)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Answer to %s" % self.question.title
 
     def get_absolute_url(self):

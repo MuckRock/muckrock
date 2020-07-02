@@ -89,7 +89,7 @@ class EmailAddress(models.Model):
 
     objects = EmailAddressQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name:
             val = '"%s" <%s>' % (self.name, self.email)
         else:
@@ -166,7 +166,7 @@ class PhoneNumber(models.Model):
         default='good',
     )
 
-    def __unicode__(self):
+    def __str__(self):
         if self.status == 'error':
             return '%s (%s)' % (self.number.as_national, self.status)
         else:
@@ -208,7 +208,7 @@ class Address(models.Model):
     # This will become the override field for non-conforming addresses
     address = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.zip_code:
             address = '{}, {} {}'.format(
                 self.city,
@@ -325,7 +325,7 @@ class EmailCommunication(models.Model):
 
     delivered = 'email'
 
-    def __unicode__(self):
+    def __str__(self):
         value = 'Email Communication'
         if self.from_email:
             value += ' From: "%s"' % self.from_email
@@ -364,7 +364,7 @@ class FaxCommunication(models.Model):
 
     delivered = 'fax'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Fax Communication To %s' % self.to_number
 
     def sent_to(self):
@@ -408,7 +408,7 @@ class MailCommunication(models.Model):
 
     delivered = 'mail'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Mail Communication To %s' % self.to_address
 
     def sent_to(self):
@@ -430,7 +430,7 @@ class WebCommunication(models.Model):
 
     delivered = 'web'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Web Communication'
 
     def sent_to(self):
@@ -463,7 +463,7 @@ class PortalCommunication(models.Model):
 
     delivered = 'portal'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Portal Communication'
 
     def sent_to(self):
@@ -501,7 +501,7 @@ class EmailError(models.Model):
     event = models.CharField(max_length=10)
     reason = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Email Error: %s - %s' % (self.email.pk, self.datetime)
 
     class Meta:
@@ -524,7 +524,7 @@ class FaxError(models.Model):
     error_code = models.CharField(blank=True, max_length=255)
     error_id = models.PositiveSmallIntegerField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Fax Error: %s - %s' % (self.fax.pk, self.datetime)
 
     class Meta:
@@ -558,7 +558,7 @@ class EmailOpen(models.Model):
     user_agent = models.CharField(max_length=255)
     ip_address = models.CharField(max_length=45, verbose_name='IP Address')
 
-    def __unicode__(self):
+    def __str__(self):
         return 'EmailOpen: %s - %s' % (self.email.pk, self.datetime)
 
     class Meta:
@@ -573,7 +573,7 @@ class MailEvent(models.Model):
     datetime = models.DateTimeField()
     event = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'MailEvent: {} -{} - {}'.format(
             self.mail.pk, self.datetime, self.event
         )
@@ -603,7 +603,7 @@ class Check(models.Model):
     class Meta:
         ordering = ['created_datetime']
 
-    def __unicode__(self):
+    def __str__(self):
         return "Check #{}".format(self.number)
 
     def send_email(self):

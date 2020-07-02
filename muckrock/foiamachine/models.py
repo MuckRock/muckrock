@@ -57,7 +57,7 @@ class FoiaMachineRequest(models.Model):
             self.slug = slugify(self.title)
         super(FoiaMachineRequest, self).save(*args, **kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.title)
 
     def get_absolute_url(self):
@@ -151,7 +151,7 @@ class FoiaMachineCommunication(models.Model):
     date = models.DateTimeField(default=timezone.now)
     received = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Communication from %s to %s' % (self.sender, self.receiver)
 
     def get_absolute_url(self):
@@ -184,5 +184,5 @@ class FoiaMachineFile(models.Model):
     comment = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s' % self.name

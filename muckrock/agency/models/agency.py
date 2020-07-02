@@ -33,7 +33,7 @@ class AgencyType(models.Model):
 
     name = models.CharField(max_length=60)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -206,7 +206,7 @@ class Agency(models.Model, RequestHelper):
 
     objects = AgencyQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):

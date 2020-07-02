@@ -78,7 +78,7 @@ class Organization(models.Model):
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.individual:
             return "{} (Individual)".format(self.name)
         else:
@@ -238,7 +238,7 @@ class Membership(models.Model):
     class Meta:
         unique_together = ("user", "organization")
 
-    def __unicode__(self):
+    def __str__(self):
         return "{} in {}".format(self.user, self.organization)
 
 
@@ -254,7 +254,7 @@ class Plan(models.Model):
     requests_per_user = models.PositiveSmallIntegerField(default=0)
     feature_level = models.PositiveSmallIntegerField(default=0)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def requests_per_month(self, users):
@@ -282,7 +282,7 @@ class Entitlement(models.Model):
         'proxy': False,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def requests_per_month(self, users):

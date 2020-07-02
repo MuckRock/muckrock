@@ -201,7 +201,7 @@ class Profile(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s's Profile" % str(self.user).capitalize()
 
     def get_absolute_url(self):
@@ -315,7 +315,7 @@ class ReceiptEmail(models.Model):
     )
     email = models.EmailField()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Receipt Email: <%s>' % self.email
 
 
@@ -340,7 +340,7 @@ class RecurringDonation(models.Model):
     created_datetime = models.DateTimeField(auto_now_add=True)
     deactivated_datetime = models.DateTimeField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Donation: ${}/Month by {}'.format(
             self.amount,
             self.email,
@@ -404,7 +404,7 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
     objects = NotificationQuerySet.as_manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '<Notification for %s>' % str(self.user.username
                                                   ).capitalize()
 
@@ -675,7 +675,7 @@ class Statistics(models.Model):
         blank=True,
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Stats for %s' % self.date
 
     class Meta:
