@@ -173,7 +173,7 @@ class TestFoiaMachineFile(TestCase):
         """A communication, a file, and a filename should be required to create a new file."""
         _file = models.FoiaMachineFile(
             communication=self.comm,
-            file=SimpleUploadedFile('filename.txt', 'Test file contents'),
+            file=SimpleUploadedFile('filename.txt', b'Test file contents'),
             name='filename.txt'
         )
         ok_(_file)
