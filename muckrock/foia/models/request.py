@@ -346,8 +346,10 @@ class FOIARequest(models.Model):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # use raw sql here in order to avoid race conditions
         uid = int(
-            md5(self.title.encode('utf8') + timezone.now().isoformat())
-            .hexdigest(), 16
+            md5(
+                self.title.encode('utf8') +
+                timezone.now().isoformat().encode('utf8')
+            ).hexdigest(), 16
         ) % 10 ** 8
         mail_id = '%s-%08d' % (self.pk, uid)
         cursor = connection.cursor()
@@ -581,9 +583,7 @@ class FOIARequest(models.Model):
             'email':
                 agency.get_emails('appeal', 'to').first(),
             'cc_emails':
-                json.dumps([
-                    str(e) for e in agency.get_emails('appeal', 'cc')
-                ]),
+                json.dumps([str(e) for e in agency.get_emails('appeal', 'cc')]),
             'fax':
                 agency.get_faxes('appeal').first(),
             'address':
