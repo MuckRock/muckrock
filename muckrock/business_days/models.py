@@ -9,7 +9,7 @@ from calendar import monthrange
 from datetime import timedelta
 
 # Third Party
-from pascha import computus, traditions
+from dateutil.easter import easter
 
 JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = list(range(1, 13))
 MON, TUES, WEDS, THURS, FRI, SAT, SUN = list(range(0, 7))
@@ -82,7 +82,7 @@ class Holiday(models.Model):
 
     # easter and election day do not need any additional info
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def match(self, date_, observe_sat):
@@ -113,16 +113,19 @@ class Holiday(models.Model):
 
         if date_.month == self.month and date_.weekday() == self.weekday:
             if self.num > 0:
-                return (date_.day - 1) / 7 + 1 == self.num
+                return (date_.day - 1) // 7 + 1 == self.num
             elif self.num < 0:
                 # get number of days in the month
                 days = monthrange(date_.year, date_.month)[1]
-                return (days - date_.day) / 7 + 1 == -self.num
+                return (days - date_.day) // 7 + 1 == -self.num
 
     def _match_easter(self, date_, _):
         """match for easter based dates"""
-        return date_ == traditions.Western.offset[self.name] + \
-            computus.western(None, year=date_.year).date()
+        offset = {
+            'Good Friday': timedelta(-2),
+            'Easter': timedelta(0),
+        }
+        return date_ == easter(date_.year) + offset[self.name]
 
     def _match_election(self, date_, _):
         """match for election day"""
