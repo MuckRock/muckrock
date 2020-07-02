@@ -56,7 +56,7 @@ def _parse_params(get, name, fields):
     # of dictionaries.  On any sort of error, just return an empty list
     pattern = re.compile(r'{}\[([0-9]+)\]\[(\w+)\]'.format(name))
     params = {k: v for k, v in get.items() if k.startswith(name)}
-    length = len(params) / len(fields)
+    length = len(params) // len(fields)
     # their should be one of each field for each param
     # if it doesn't divide evenly, something went wrong
     if len(params) % len(fields) != 0:
