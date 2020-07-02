@@ -61,7 +61,7 @@ class ViewsTest(TestCase):
         response = self.view(request)
 
         eq_(response.status_code, 200)
-        eq_(response.content, 'OK')
+        eq_(response.content, b'OK')
         for uuid_ in self.data['uuids']:
             mock.assert_any_call(self.data['type'], uuid_)
 
