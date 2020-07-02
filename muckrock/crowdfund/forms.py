@@ -107,10 +107,10 @@ class CrowdfundPaymentForm(forms.Form):
     def clean_stripe_amount(self):
         """Ensure the amount of the payment is greater than zero"""
         amount = self.cleaned_data['stripe_amount']
-        if not amount > 0:
-            raise forms.ValidationError('Cannot contribute zero dollars')
         try:
             amount = Decimal(amount) / 100
         except InvalidOperation:
             raise forms.ValidationError('Invalid amount')
+        if not amount > 0:
+            raise forms.ValidationError('Cannot contribute zero dollars')
         return amount
