@@ -46,19 +46,22 @@ class TestCommunication(test.TestCase):
 
     def test_attach_file_with_file(self):
         """Test attaching a file with an actual file"""
-        comm = FOIACommunicationFactory()
-        file_ = open('tmp.txt', 'w')
-        file_.write('The file contents')
-        file_.close()
-        file_ = open('tmp.txt', 'r')
-        comm.attach_file(file_=file_)
-        file_.close()
-        os.remove('tmp.txt')
-        eq_(comm.files.count(), 1)
-        foia_file = comm.files.first()
-        eq_(foia_file.title, 'tmp')
-        eq_(foia_file.ffile.file.name, 'tmp.txt')
-        eq_(foia_file.ffile.read(), 'The file contents')
+        try:
+            comm = FOIACommunicationFactory()
+            with open('tmp.txt', 'w') as file_:
+                file_.write('The file contents')
+            with open('tmp.txt', 'r') as file_:
+                comm.attach_file(file_=file_)
+            eq_(comm.files.count(), 1)
+            foia_file = comm.files.first()
+            eq_(foia_file.title, 'tmp')
+            eq_(foia_file.ffile.file.name, 'tmp.txt')
+            eq_(foia_file.ffile.read(), 'The file contents')
+        finally:
+            try:
+                os.remove('tmp.txt')
+            except OSError:
+                pass
 
     def test_attach_file_with_content(self):
         """Test attaching a file with n memory content"""
