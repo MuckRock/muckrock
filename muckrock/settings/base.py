@@ -285,13 +285,13 @@ urllib.parse.uses_netloc.append('redis')
 REDIS_URL = os.environ.get(
     'REDISTOGO_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 )
-BROKER_URL = REDIS_URL
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 25 * 60 * 60}
+CELERY_BROKER_URL = REDIS_URL
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 25 * 60 * 60}
 
-# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# CELERY_BEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
-CELERY_IGNORE_RESULTS = True
+CELERY_TASK_IGNORE_RESULTS = True
 CELERY_IMPORTS = (
     'muckrock.accounts.tasks',
     'muckrock.agency.tasks',
@@ -303,14 +303,14 @@ CELERY_IMPORTS = (
     'muckrock.squarelet.tasks',
     'muckrock.task.tasks',
 )
-CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
-CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
-CELERY_ROUTES = {
+CELERY_WORKER_MAX_TASKS_PER_CHILD = os.environ.get('CELERY_WORKER_MAX_TASKS_PER_CHILD', 100)
+CELERY_TASK_TIME_LIMIT = os.environ.get('CELERY_TASK_TIME_LIMIT', 5 * 60)
+CELERY_TASK_ROUTES = {
     'muckrock.foia.tasks.send_fax': {
         'queue': 'phaxio'
     },
 }
-CELERYD_CONCURRENCY = os.environ.get('CELERYD_CONCURRENCY')
+CELERY_WORKER_CONCURRENCY = os.environ.get('CELERY_WORKER_CONCURRENCY')
 CELERY_REDIS_MAX_CONNECTIONS = os.environ.get('CELERY_REDIS_MAX_CONNECTIONS')
 if CELERY_REDIS_MAX_CONNECTIONS is not None:
     CELERY_REDIS_MAX_CONNECTIONS = int(CELERY_REDIS_MAX_CONNECTIONS)
