@@ -59,7 +59,7 @@ class TestProject(TestCase):
 
     def test_project_unicode(self):
         """Projects should default to printing their title."""
-        eq_(self.project.__unicode__(), test_title)
+        eq_(str(self.project), test_title)
 
     def test_contributors(self):
         """

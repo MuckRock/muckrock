@@ -115,9 +115,7 @@ class FOIACommunication(models.Model):
         remove_control = dict.fromkeys(
             list(range(0, 9)) + list(range(11, 13)) + list(range(14, 32))
         )
-        self.communication = (
-            str(self.communication).translate(remove_control)
-        )
+        self.communication = (str(self.communication).translate(remove_control))
         # limit communication length to 150k
         self.communication = self.communication[:150000]
         # special handling for certain agencies
@@ -341,7 +339,7 @@ class FOIACommunication(models.Model):
                 source=source[:70],
                 access=access,
             )
-            name = name[:233].encode('ascii', 'ignore')
+            name = name[:233].encode('ascii', 'ignore').decode()
             foia_file.ffile.save(name, file_)
             if self.foia:
                 transaction.on_commit(
@@ -539,9 +537,7 @@ class CommunicationOpen(models.Model):
     ip_address = models.CharField(max_length=15, verbose_name='IP Address')
 
     def __str__(self):
-        return 'CommunicationOpen: %s - %s' % (
-            self.communication.pk, self.date
-        )
+        return 'CommunicationOpen: %s - %s' % (self.communication.pk, self.date)
 
     class Meta:
         ordering = ['date']
