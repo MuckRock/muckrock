@@ -4,4 +4,4 @@ set -o errexit
 set -o nounset
 
 
-python manage.py celery worker -Q celery,phaxio -l DEBUG
+celery worker -Q celery,phaxio -l DEBUG
