@@ -1064,7 +1064,6 @@ class ComposerDetail(DetailView):
         composer_delayed_submit task, revoke it, and then call it immediately with the
         correct args
         """
-        # pylint: disable=eval-used
         # pylint: disable=unused-argument
         composer = self.get_object()
         if (
@@ -1080,9 +1079,7 @@ class ComposerDetail(DetailView):
                 for task in tasks:
                     if task['request']['id'] == composer.delayed_id:
                         current_app.control.revoke(composer.delayed_id)
-                        composer_delayed_submit.delay(
-                            *eval(task['request']['args'])
-                        )
+                        composer_delayed_submit.delay(*task['request']['args'])
                         return redirect(composer)
             # if we don't return from the for loop, we could not find the task
             # something has gone wrong
