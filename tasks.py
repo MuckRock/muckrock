@@ -227,7 +227,7 @@ def pip_compile(c, upgrade=False, package=None):
 @task
 def build(c):
     """Build the docker images"""
-    c.run("docker-compose build")
+    c.run("COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build")
 
 
 # Database populating
