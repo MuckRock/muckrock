@@ -225,15 +225,18 @@ def _is_valid_policy(user, policy_document):
 def _sign_policy_document(policy_document):
     """Sign and return the policy doucument for a simple upload.
     http://aws.amazon.com/articles/1434/#signyours3postform"""
-    policy = base64.b64encode(json.dumps(policy_document))
+    policy = base64.b64encode(json.dumps(policy_document).encode('utf8'))
     signature = base64.b64encode(
         hmac.new(
-            settings.AWS_SECRET_ACCESS_KEY,
+            settings.AWS_SECRET_ACCESS_KEY.encode('utf8'),
             policy,
             hashlib.sha1,
         ).digest()
     )
-    return {'policy': policy, 'signature': signature}
+    return {
+        'policy': policy.decode('utf8'),
+        'signature': signature.decode('utf8'),
+    }
 
 
 def _sign_headers(headers):
@@ -242,11 +245,11 @@ def _sign_headers(headers):
         'signature':
             base64.b64encode(
                 hmac.new(
-                    settings.AWS_SECRET_ACCESS_KEY,
-                    headers,
+                    settings.AWS_SECRET_ACCESS_KEY.encode('utf8'),
+                    headers.encode('utf8'),
                     hashlib.sha1,
                 ).digest()
-            )
+            ).decode('utf8')
     }
 
 
