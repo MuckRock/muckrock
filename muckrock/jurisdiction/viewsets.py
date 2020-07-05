@@ -64,7 +64,7 @@ class JurisdictionViewSet(ModelViewSet):
         """API view to get the template language for a jurisdiction"""
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
         template = get_template('text/foia/request.txt')
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             user_name = request.user.profile.full_name
         else:
             user_name = 'Anonymous User'
@@ -84,7 +84,7 @@ class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
 
     def has_permission(self, request, view):
         """Allow authenticated users to submit exemptions."""
-        if request.user.is_authenticated() and request.method in ['POST']:
+        if request.user.is_authenticated and request.method in ['POST']:
             return True
         return super(ExemptionPermissions, self).has_permission(request, view)
 

@@ -40,7 +40,7 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
 
     def has_permission(self, request, view):
         """Allow authenticated users to submit requests and update their own requests"""
-        if request.user.is_authenticated() and request.method in [
+        if request.user.is_authenticated and request.method in [
             'POST', 'PATCH'
         ]:
             return True

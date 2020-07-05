@@ -31,7 +31,7 @@ def get_actionable_requests(user):
 
 def get_unread_notifications(user):
     """Gets unread notifiations for user, if they're logged in."""
-    if user.is_authenticated():
+    if user.is_authenticated:
         return user.notifications.get_unread()
     else:
         return None
@@ -67,7 +67,7 @@ def sidebar_info(request):
         'dropdown_recent_articles': get_recent_articles(),
         'login_form': AuthenticationForm()
     }
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # content for logged in users
         sidebar_info_dict.update({
             'unread_notifications':

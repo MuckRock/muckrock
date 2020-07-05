@@ -70,7 +70,7 @@ class ProjectListView(MRSearchFilterListView):
         """Only returns projects that are visible to the current user."""
         queryset = super(ProjectListView, self).get_queryset()
         user = self.request.user
-        if user.is_anonymous():
+        if user.is_anonymous:
             queryset = queryset.get_public()
         else:
             queryset = queryset.get_visible(user)
@@ -173,7 +173,7 @@ class ProjectDetailView(DetailView):
         context['followers'] = followers(project)
         context['contributors'] = project.contributors.select_related('profile')
         context['user_is_experimental'
-                ] = user.is_authenticated() and user.profile.experimental
+                ] = user.is_authenticated and user.profile.experimental
         context['newsletter_label'] = (
             'Subscribe to the project newsletter'
             if not project.newsletter_label else project.newsletter_label

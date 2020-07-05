@@ -1077,12 +1077,12 @@ class FOIARequest(models.Model):
         )
         is_owner = self.created_by(user)
         is_agency_user = (
-            user.is_authenticated() and user.profile.is_agency_user
+            user.is_authenticated and user.profile.is_agency_user
         )
         can_follow = (
-            user.is_authenticated() and not is_owner and not is_agency_user
+            user.is_authenticated and not is_owner and not is_agency_user
         )
-        is_following = user.is_authenticated() and user in followers(self)
+        is_following = user.is_authenticated and user in followers(self)
         is_admin = user.is_staff
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,

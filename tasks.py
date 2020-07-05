@@ -40,16 +40,16 @@ def staging(c):
 
 
 @task
-def test(c, test_path="", reuse="0", capture=False):
+def test(c, test_path="", reuse="0", capture=False, warning=False):
     """Run all tests, or a specific subset of tests"""
     cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
         opt="-e REUSE_DB={reuse}".format(reuse=reuse),
         service="muckrock_django",
-        cmd=
-        "./manage.py test {test_path} {capture} --settings=muckrock.settings.test".
-        format(
+        cmd="python {warn} manage.py test {test_path} {capture} "
+        "--settings=muckrock.settings.test".format(
+            warn="-Wd" if warning else "",
             test_path=test_path,
-            capture="--nologcapture" if not capture else ""
+            capture="--nologcapture" if not capture else "",
         ),
     )
     c.run(cmd)
@@ -251,8 +251,8 @@ def populate_db(c, db_name="muckrock"):
             cmd='sh -c "dropdb {db_name} && '
             "heroku pg:pull DATABASE {db_name} --app muckrock "
             '--exclude-table-data=\\"public.reversion_version;public.foia_rawemail\\""'.
-            format(db_name=db_name),
-        ),
+            format(db_name=db_name)
+        )
     )
 
 
@@ -284,8 +284,8 @@ def sync_aws(c):
     ]
     for folder in folders:
         c.run(
-            "aws s3 sync s3://muckrock/{folder} ./muckrock/static/media/{folder}"
-            .format(folder=folder)
+            "aws s3 sync s3://muckrock/{folder} ./muckrock/static/media/{folder}".
+            format(folder=folder)
         )
 
 

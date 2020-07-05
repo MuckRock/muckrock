@@ -276,7 +276,7 @@ class Detail(DetailView):
         )
         context['is_thankable'] = foia.has_perm(self.request.user, 'thank')
         context['files'] = foia.get_files()[:50]
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             context['foia_cache_timeout'] = 0
         else:
             context['foia_cache_timeout'] = settings.DEFAULT_CACHE_TIMEOUT
@@ -316,7 +316,7 @@ class Detail(DetailView):
         """Mark any unread notifications for this object as read."""
         user = request.user
         foia = self.get_object()
-        if user.is_authenticated():
+        if user.is_authenticated:
             notifications = Notification.objects.for_user(user).for_object(
                 foia
             ).get_unread()

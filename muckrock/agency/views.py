@@ -76,7 +76,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
         action = request.POST.get('action')
         form = FlagForm(request.POST)
         if action == 'flag':
-            if form.is_valid() and request.user.is_authenticated():
+            if form.is_valid() and request.user.is_authenticated:
                 FlaggedTask.objects.create(
                     user=request.user,
                     text=form.cleaned_data.get('reason'),

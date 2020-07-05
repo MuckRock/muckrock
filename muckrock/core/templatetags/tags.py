@@ -220,7 +220,7 @@ def newsletter(context, list_id=None, label=None, cta=None):
     is_default = list_id == settings.MAILCHIMP_LIST_DEFAULT
     request = context['request']
     initial_data = {'list': list_id}
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         initial_data['email'] = request.user.email
     newsletter_form = NewsletterSignupForm(initial=initial_data)
     return {

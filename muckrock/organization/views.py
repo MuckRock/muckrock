@@ -52,7 +52,7 @@ class OrganizationDetailView(DetailView):
         """Get the org"""
         org = super(OrganizationDetailView, self).get_object(queryset=queryset)
         user = self.request.user
-        is_member = user.is_authenticated() and org.has_member(user)
+        is_member = user.is_authenticated and org.has_member(user)
         if org.private and not is_member and not user.is_staff:
             raise Http404
         return org
@@ -63,7 +63,7 @@ class OrganizationDetailView(DetailView):
         organization = context['organization']
         user = self.request.user
         context['is_staff'] = user.is_staff
-        if user.is_authenticated():
+        if user.is_authenticated:
             context['is_admin'] = organization.has_admin(user)
             context['is_member'] = organization.has_member(user)
         else:

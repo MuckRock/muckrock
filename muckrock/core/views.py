@@ -409,7 +409,7 @@ class DonationFormView(StripeFormMixin, FormView):
         """Adds the user's email to the form if they're logged in."""
         user = self.request.user
         email = ''
-        if user.is_authenticated():
+        if user.is_authenticated:
             email = user.email
         return {
             'stripe_email': email,

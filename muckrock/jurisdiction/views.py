@@ -190,7 +190,7 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     if request.method == 'POST':
         form = FlagForm(request.POST)
-        if form.is_valid() and request.user.is_authenticated():
+        if form.is_valid() and request.user.is_authenticated:
             FlaggedTask.objects.create(
                 user=request.user,
                 text=form.cleaned_data.get('reason'),

@@ -98,7 +98,7 @@ class Detail(DetailView):
     def get(self, request, *args, **kwargs):
         """Mark any unread notifications for this object as read."""
         user = request.user
-        if user.is_authenticated():
+        if user.is_authenticated:
             question = self.get_object()
             notifications = Notification.objects.for_user(user).for_object(
                 question

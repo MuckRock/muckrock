@@ -500,7 +500,7 @@ def agency_redirect_login(
             messages.error(request, 'Invalid email')
         return redirect(foia)
 
-    authed = request.user.is_authenticated()
+    authed = request.user.is_authenticated
     agency_user = authed and request.user.profile.is_agency_user
     agency_match = agency_user and request.user.profile.agency == agency
     email = request.GET.get('email', '')

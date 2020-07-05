@@ -48,7 +48,7 @@ class TestMiniregister(TestCase):
         user = mixin.miniregister(form, self.full_name, self.email)
         ok_(isinstance(user, User), 'A user should be created and returned.')
         ok_(user.profile, 'A profile should be created for the user.')
-        ok_(user.is_authenticated(), 'The user should be logged in.')
+        ok_(user.is_authenticated, 'The user should be logged in.')
         eq_(user.profile.full_name, 'Lou Reed')
         eq_(
             user.username, 'LouReed',

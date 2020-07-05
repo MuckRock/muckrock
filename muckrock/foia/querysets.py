@@ -82,7 +82,7 @@ class FOIARequestQuerySet(models.QuerySet):
         if user.is_staff:
             return self.all()
 
-        if user.is_authenticated():
+        if user.is_authenticated:
             # Requests are visible if you own them, have view or edit permissions,
             # or if they are not embargoed
             query = (
@@ -263,7 +263,7 @@ class FOIAComposerQuerySet(models.QuerySet):
         if user.is_staff:
             return self.all()
 
-        if user.is_authenticated():
+        if user.is_authenticated:
             # you can view if
             # * you are the owner
             # * you are a read or edit collaborator on at least one foia
@@ -334,7 +334,7 @@ class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
         if user.is_staff:
             return self.all()
 
-        if user.is_authenticated():
+        if user.is_authenticated:
             # Requests are visible if you own them, have view or edit permissions,
             # or if they are not embargoed
             query = (

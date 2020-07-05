@@ -45,7 +45,7 @@ class LoginRequiredMixin(object):
 
     def dispatch(self, *args, **kwargs):
         """If the user is unauthenticated, redirect them to the login view."""
-        if self.request.user.is_anonymous():
+        if self.request.user.is_anonymous:
             messages.warning(self.request, 'You will need to log in first.')
             return redirect(
                 reverse('login', host='foiamachine') + '?next=//' +
@@ -89,7 +89,7 @@ class Homepage(TemplateView):
 
     def dispatch(self, *args, **kwargs):
         """If the user is authenticated, redirect to their profile."""
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             return redirect(reverse('profile', host='foiamachine'))
         return super(Homepage, self).dispatch(*args, **kwargs)
 

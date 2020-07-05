@@ -49,7 +49,7 @@ class CrowdfundListView(ListView):
         queryset = queryset.exclude(closed=True
                                     ).exclude(date_due__lt=date.today())
         user = self.request.user
-        if not user.is_staff and user.is_authenticated():
+        if not user.is_staff and user.is_authenticated:
             queryset = (
                 queryset.filter(
                     Q(foia__embargo=False) | Q(foia__composer__user=user)
@@ -166,10 +166,8 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
                 )
             if request.is_ajax():
                 data = {
-                    'authenticated':
-                        user.is_authenticated() if user else False,
-                    'registered':
-                        registered,
+                    'authenticated': user.is_authenticated if user else False,
+                    'registered': registered,
                 }
                 return JsonResponse(data, status=200)
             else:

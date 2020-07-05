@@ -41,7 +41,7 @@ class ProjectQuerySet(models.QuerySet):
     def get_visible(self, user):
         """Only return projects which the user is permitted to see"""
         projects = self.all()
-        if not user.is_authenticated():
+        if not user.is_authenticated:
             # show public projects only
             projects = projects.get_public()
         elif not user.is_staff:

@@ -42,12 +42,12 @@ def user_authenticated(func):
 
         @wraps(func)
         def inner(user, foia):
-            return user.is_authenticated() and func(user, foia)
+            return user.is_authenticated and func(user, foia)
     elif len(argspec.args) == 1:
 
         @wraps(func)
         def inner(user):
-            return user.is_authenticated() and func(user)
+            return user.is_authenticated and func(user)
 
     return inner
 
@@ -76,7 +76,7 @@ def no_foia(user, foia):
 @skip_if_not_obj
 def is_editor(user, foia):
     return (
-        user.is_authenticated()
+        user.is_authenticated
         and foia.edit_collaborators.filter(pk=user.pk).exists()
     )
 
@@ -85,7 +85,7 @@ def is_editor(user, foia):
 @skip_if_not_obj
 def is_read_collaborator(user, foia):
     return (
-        user.is_authenticated()
+        user.is_authenticated
         and foia.read_collaborators.filter(pk=user.pk).exists()
     )
 

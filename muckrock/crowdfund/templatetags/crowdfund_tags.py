@@ -59,7 +59,7 @@ def crowdfund_form(crowdfund):
 
 def crowdfund_user(context):
     """Returns a tuple of user information"""
-    logged_in = context['user'].is_authenticated()
+    logged_in = context['user'].is_authenticated
     user_email = context['user'].email if logged_in else ''
     return (logged_in, user_email)
 

@@ -17,7 +17,7 @@ class QuestionPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
 
     def has_permission(self, request, view):
         """Allow authenticated users to submit rquestions"""
-        if request.user.is_authenticated() and request.method == 'POST':
+        if request.user.is_authenticated and request.method == 'POST':
             return True
         return super(QuestionPermissions, self).has_permission(request, view)
 
