@@ -69,8 +69,7 @@ class RequestOwnerRequiredMixin(LoginRequiredMixin):
     def dispatch(self, *args, **kwargs):
         """Checks if the user is the owner"""
         self.foi = self.get_foi(**kwargs)
-        if self.request.user.is_authenticated(
-        ) and self.request.user != self.foi.user:
+        if self.request.user.is_authenticated and self.request.user != self.foi.user:
             messages.error(
                 self.request, 'You do not have permission to do that.'
             )

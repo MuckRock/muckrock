@@ -379,7 +379,7 @@ class Detail(DetailView):
             for proj in itertools.chain(foia.projects.all(), projects):
                 # clear cache for old and new projects
                 proj.clear_cache()
-            foia.projects = projects
+            foia.projects.set(projects)
         return redirect(foia.get_absolute_url() + '#')
 
     def _status(self, request, foia):

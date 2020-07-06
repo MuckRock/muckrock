@@ -19,7 +19,7 @@ from django.utils.safestring import mark_safe
 
 # Standard Library
 import json
-from html.parser import HTMLParser
+from html import unescape
 from random import choice
 
 # Third Party
@@ -148,13 +148,12 @@ class Crowdsource(models.Model):
         form_data = json.loads(form_json)
         seen_labels = set()
         cleaner = Cleaner(tags=[], attributes={}, styles=[], strip=True)
-        htmlparser = HTMLParser()
         # reset the order for all fields to avoid violating the unique constraint
         # it also allows for detection of deleted fields
         self.fields.update(order=None)
         for order, field_data in enumerate(form_data):
             label = cleaner.clean(field_data['label'])[:255]
-            label = htmlparser.unescape(label)
+            label = unescape(label)
             label = self._uniqify_label_name(seen_labels, label)
             description = cleaner.clean(field_data.get('description', ''))[:255]
             kwargs = {

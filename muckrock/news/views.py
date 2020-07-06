@@ -102,7 +102,7 @@ class NewsDetail(DateDetailView):
             form = ProjectManagerForm(request.POST, user=request.user)
             if form.is_valid():
                 projects = form.cleaned_data['projects']
-                article.projects = projects
+                article.projects.set(projects)
                 clear_cache = True
         tags = request.POST.get('tags')
         if tags:

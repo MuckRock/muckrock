@@ -4,7 +4,7 @@ Django settings for muckrock project
 
 # Django
 from celery.concurrency import asynpool
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Standard Library
 import os
