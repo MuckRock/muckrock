@@ -89,8 +89,8 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd='yapf -i -r --style config/style.yapf -e "*/migrations/*" '
-            "-p muckrock && isort -sp config -rc muckrock"
+            cmd="black muckrock --exclude migrations &&"
+            "isort -sp config -rc muckrock"
         )
     )
 

@@ -8,4 +8,4 @@ from rules import add_perm
 # MuckRock
 from muckrock.foia.rules import has_feature_level
 
-add_perm('agency.view_emails', has_feature_level(1))
+add_perm("agency.view_emails", has_feature_level(1))

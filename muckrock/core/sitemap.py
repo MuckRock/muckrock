@@ -12,5 +12,5 @@ class FlatPageSitemap(Sitemap):
 
     def items(self):
         """Return all flatpages"""
-        site = Site.objects.get(domain='www.muckrock.com')
+        site = Site.objects.get(domain="www.muckrock.com")
         return site.flatpage_set.filter(registration_required=False)

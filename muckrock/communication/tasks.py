@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @periodic_task(
     run_every=crontab(hour=1, minute=30),
-    name='muckrock.communication.tasks.plaid_checks',
+    name="muckrock.communication.tasks.plaid_checks",
 )
 def plaid_checks():
     """Get transaction information from Plaid to record deposited checks"""
@@ -32,7 +32,7 @@ def plaid_checks():
         secret=settings.PLAID_SECRET,
         public_key=settings.PLAID_PUBLIC_KEY,
         environment=settings.PLAID_ENV,
-        api_version='2019-05-29'
+        api_version="2019-05-29",
     )
     start_date = str(date.today() - timedelta(14))
     end_date = str(date.today())
@@ -43,13 +43,13 @@ def plaid_checks():
     except plaid.errors.PlaidError as exc:
         logger.error(exc, exc_info=sys.exc_info())
 
-    p_check_number = re.compile(r'^Check ([0-9]+)$')
-    for transaction in transactions_response['transactions']:
-        m_check_number = p_check_number.match(transaction['name'])
+    p_check_number = re.compile(r"^Check ([0-9]+)$")
+    for transaction in transactions_response["transactions"]:
+        m_check_number = p_check_number.match(transaction["name"])
         if m_check_number:
             check_number = m_check_number.group(1)
-            deposit_date = datetime.strptime(transaction['date'], '%Y-%m-%d')
-            amount = transaction['amount']
+            deposit_date = datetime.strptime(transaction["date"], "%Y-%m-%d")
+            amount = transaction["amount"]
             try:
                 check = Check.objects.get(number=check_number)
             except Check.DoesNotExist:

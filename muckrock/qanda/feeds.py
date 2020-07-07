@@ -13,13 +13,14 @@ from muckrock.qanda.models import Question
 
 class LatestQuestions(Feed):
     """An RSS Feed for Questions"""
-    title = 'MuckRock Questions'
-    link = '/questions/'
-    description = 'Latest community questions about FOI topics on MuckRock'
+
+    title = "MuckRock Questions"
+    link = "/questions/"
+    description = "Latest community questions about FOI topics on MuckRock"
 
     def items(self):
         """Return the items for the rss feed"""
-        return Question.objects.all().order_by('-date')[:25]
+        return Question.objects.all().order_by("-date")[:25]
 
     def item_description(self, item):
         """The description of each rss item"""

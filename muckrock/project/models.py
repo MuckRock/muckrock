@@ -47,8 +47,7 @@ class ProjectQuerySet(models.QuerySet):
         elif not user.is_staff:
             # show public projects and projects the user is a contributor to
             projects = projects.filter(
-                models.Q(private=False, approved=True)
-                | models.Q(contributors=user)
+                models.Q(private=False, approved=True) | models.Q(contributors=user)
             ).distinct()
         return projects
 
@@ -66,15 +65,14 @@ class ProjectQuerySet(models.QuerySet):
     def optimize(self):
         """Annotate, select, and prefetch data."""
         return (
-            self.annotate(
-                request_count=models.Count('requests', distinct=True)
-            ).annotate(article_count=models.Count('articles', distinct=True))
+            self.annotate(request_count=models.Count("requests", distinct=True))
+            .annotate(article_count=models.Count("articles", distinct=True))
             .prefetch_related(
                 models.Prefetch(
-                    'crowdfunds',
-                    queryset=Crowdfund.objects.order_by('-date_due').annotate(
-                        contributors_count=models.Count('payments')
-                    )
+                    "crowdfunds",
+                    queryset=Crowdfund.objects.order_by("-date_due").annotate(
+                        contributors_count=models.Count("payments")
+                    ),
                 )
             )
         )
@@ -82,76 +80,62 @@ class ProjectQuerySet(models.QuerySet):
 
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
+
     objects = ProjectQuerySet.as_manager()
     title = models.CharField(
-        unique=True,
-        max_length=100,
-        help_text='Titles are limited to 100 characters.'
+        unique=True, max_length=100, help_text="Titles are limited to 100 characters."
     )
     slug = models.SlugField(
         unique=False,
         max_length=255,
-        help_text='The slug is automatically generated based on the title.'
+        help_text="The slug is automatically generated based on the title.",
     )
     summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(
-        upload_to='project_images/%Y/%m/%d',
+        upload_to="project_images/%Y/%m/%d",
         blank=True,
         null=True,
         storage=get_image_storage(),
     )
     private = models.BooleanField(
         default=True,
-        help_text=
-        'If a project is private, it is only visible to its contributors.'
+        help_text="If a project is private, it is only visible to its contributors.",
     )
     approved = models.BooleanField(
-        default=False,
-        help_text='If a project is approved, is is visible to everyone.'
+        default=False, help_text="If a project is approved, is is visible to everyone."
     )
     featured = models.BooleanField(
-        default=False,
-        help_text='Featured projects will appear on the homepage.'
+        default=False, help_text="Featured projects will appear on the homepage."
     )
     contributors = models.ManyToManyField(
-        'auth.User',
-        related_name='projects',
-        blank=True,
+        "auth.User", related_name="projects", blank=True,
     )
     articles = models.ManyToManyField(
-        'news.Article',
-        related_name='projects',
-        blank=True,
+        "news.Article", related_name="projects", blank=True,
     )
     requests = models.ManyToManyField(
-        'foia.FOIARequest',
-        related_name='projects',
-        blank=True,
+        "foia.FOIARequest", related_name="projects", blank=True,
     )
     crowdfunds = models.ManyToManyField(
-        'crowdfund.Crowdfund',
-        through='ProjectCrowdfunds',
-        related_name='projects'
+        "crowdfund.Crowdfund", through="ProjectCrowdfunds", related_name="projects"
     )
 
-    tags = taggit.managers.TaggableManager(
-        through='tags.TaggedItemBase', blank=True
-    )
+    tags = taggit.managers.TaggableManager(through="tags.TaggedItemBase", blank=True)
     newsletter = models.CharField(
-        max_length=255, blank=True, help_text='The MailChimp list id.'
+        max_length=255, blank=True, help_text="The MailChimp list id."
     )
     newsletter_label = models.CharField(
         max_length=100,
         blank=True,
-        verbose_name='Newsletter Name',
-        help_text='Should describe the newsletter.'
+        verbose_name="Newsletter Name",
+        help_text="Should describe the newsletter.",
     )
     newsletter_cta = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name='Newsletter Description',
-        help_text='Should encourage readers to subscribe.'
+        verbose_name="Newsletter Description",
+        help_text="Should encourage readers to subscribe.",
     )
     date_created = models.DateField(
         # Only allow null's since this wasn't on here to begin with
@@ -166,17 +150,12 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         """Autogenerates the slug based on the title"""
-        self.slug = slugify(self.title) or 'project'
+        self.slug = slugify(self.title) or "project"
         super(Project, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         """Returns the project URL as a string"""
-        return reverse(
-            'project-detail', kwargs={
-                'pk': self.pk,
-                'slug': self.slug
-            }
-        )
+        return reverse("project-detail", kwargs={"pk": self.pk, "slug": self.slug})
 
     def make_private(self):
         """Sets a project to be private."""
@@ -207,7 +186,7 @@ class Project(models.Model):
         requests = list(
             FOIARequest.objects.filter(
                 composer__user__in=self.contributors.all(),
-                tags__name__in=self.tags.names()
+                tags__name__in=self.tags.names(),
             ).exclude(projects=self)
         )
         return requests
@@ -216,8 +195,7 @@ class Project(models.Model):
         """Returns a list of articles that may be related to this project."""
         articles = list(
             Article.objects.filter(
-                authors__in=self.contributors.all(),
-                tags__name__in=self.tags.names(),
+                authors__in=self.contributors.all(), tags__name__in=self.tags.names(),
             ).exclude(projects=self)
         )
         return articles
@@ -229,15 +207,13 @@ class Project(models.Model):
 
     def clear_cache(self):
         """Clear the template cache for this project"""
-        key = make_template_fragment_key(
-            'project_detail_objects',
-            [self.pk],
-        )
+        key = make_template_fragment_key("project_detail_objects", [self.pk],)
         cache.delete(key)
 
 
 class ProjectCrowdfunds(models.Model):
     """Project to Crowdfund through model"""
+
     # pylint: disable=model-missing-unicode
     project = models.ForeignKey(Project)
-    crowdfund = models.OneToOneField('crowdfund.Crowdfund')
+    crowdfund = models.OneToOneField("crowdfund.Crowdfund")

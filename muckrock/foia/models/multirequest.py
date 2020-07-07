@@ -20,14 +20,15 @@ from muckrock.tags.models import TaggedItemBase
 logger = logging.getLogger(__name__)
 
 STATUS = [
-    ('started', 'Draft'),
-    ('submitted', 'Processing'),
-    ('filed', 'Filed'),
+    ("started", "Draft"),
+    ("submitted", "Processing"),
+    ("filed", "Filed"),
 ]
 
 
 class FOIAMultiRequest(models.Model):
     """A Freedom of Information Act request"""
+
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
@@ -38,47 +39,34 @@ class FOIAMultiRequest(models.Model):
     embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(
-        'agency.Agency',
-        related_name='multirequests',
-        blank=True,
+        "agency.Agency", related_name="multirequests", blank=True,
     )
     num_org_requests = models.PositiveSmallIntegerField(default=0)
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
     parent = models.ForeignKey(
-        'self',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
+        "self", blank=True, null=True, on_delete=models.SET_NULL,
     )
     # only used during data migration
     composer = models.OneToOneField(
-        'foia.FOIAComposer',
-        related_name='multi',
-        blank=True,
-        null=True,
+        "foia.FOIAComposer", related_name="multi", blank=True, null=True,
     )
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
-    foia_type = 'multi'
+    foia_type = "multi"
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         """The url for this object"""
-        return reverse(
-            'foia-multi-detail', kwargs={
-                'slug': self.slug,
-                'pk': self.pk
-            }
-        )
+        return reverse("foia-multi-detail", kwargs={"slug": self.slug, "pk": self.pk})
 
     class Meta:
-        ordering = ['title']
-        verbose_name = 'FOIA Multi-Request'
-        app_label = 'foia'
-        permissions = ((
-            'file_multirequest', 'Can submit requests to multiple agencies'
-        ),)
+        ordering = ["title"]
+        verbose_name = "FOIA Multi-Request"
+        app_label = "foia"
+        permissions = (
+            ("file_multirequest", "Can submit requests to multiple agencies"),
+        )

@@ -22,10 +22,10 @@ class ProfileQuerySet(models.QuerySet):
     def squarelet_update_or_create(self, uuid, data):
         """Update or create records based on data from squarelet"""
 
-        required_fields = {'preferred_username', 'organizations'}
+        required_fields = {"preferred_username", "organizations"}
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
-            raise ValueError('Missing required fields: {}'.format(missing))
+            raise ValueError("Missing required fields: {}".format(missing))
 
         user, created = self._squarelet_update_or_create_user(uuid, data)
 
@@ -38,41 +38,38 @@ class ProfileQuerySet(models.QuerySet):
     def _squarelet_update_or_create_user(self, uuid, data):
         """Format user data and update or create the user"""
         user_map = {
-            'preferred_username': 'username',
-            'email': 'email',
+            "preferred_username": "username",
+            "email": "email",
         }
         user_defaults = {
-            'preferred_username': '',
-            'email': '',
+            "preferred_username": "",
+            "email": "",
         }
         user_data = {
-            user_map[k]: data.get(k, user_defaults[k])
-            for k in user_map.keys()
+            user_map[k]: data.get(k, user_defaults[k]) for k in user_map.keys()
         }
-        if user_data['email'] is None:
+        if user_data["email"] is None:
             # the mail should only be null for agency users
             # on MuckRock that must be stored as a blank string
-            user_data['email'] = ''
-        return User.objects.update_or_create(
-            profile__uuid=uuid, defaults=user_data
-        )
+            user_data["email"] = ""
+        return User.objects.update_or_create(profile__uuid=uuid, defaults=user_data)
 
     def _squarelet_update_or_create_profile(self, uuid, data, user):
         """Format user data and update or create the user"""
         profile_map = {
-            'name': 'full_name',
-            'picture': 'avatar_url',
-            'email_failed': 'email_failed',
-            'email_verified': 'email_confirmed',
-            'use_autologin': 'use_autologin',
-            'agency': 'agency',
+            "name": "full_name",
+            "picture": "avatar_url",
+            "email_failed": "email_failed",
+            "email_verified": "email_confirmed",
+            "use_autologin": "use_autologin",
+            "agency": "agency",
         }
         profile_defaults = {
-            'name': '',
-            'picture': '',
-            'email_failed': False,
-            'email_verified': False,
-            'use_autologin': True,
+            "name": "",
+            "picture": "",
+            "email_failed": False,
+            "email_verified": False,
+            "use_autologin": True,
         }
         # if key is not present in profile_defaults, the default is to
         # leave it unchanged, do not include it in profile_data
@@ -81,7 +78,7 @@ class ProfileQuerySet(models.QuerySet):
             for k in profile_map.keys()
             if k in data or k in profile_defaults
         }
-        profile_data['user'] = user
+        profile_data["user"] = user
         profile, _ = self.update_or_create(uuid=uuid, defaults=profile_data)
         return profile
 
@@ -92,18 +89,17 @@ class ProfileQuerySet(models.QuerySet):
         active = True
 
         # process each organization
-        for org_data in data.get('organizations', []):
+        for org_data in data.get("organizations", []):
             organization, _ = Organization.objects.squarelet_update_or_create(
-                uuid=org_data['uuid'],
-                data=org_data,
+                uuid=org_data["uuid"], data=org_data,
             )
             if organization in current_organizations:
                 # remove organizations from our set as we see them
                 # any that are left will need to be removed
                 current_organizations.remove(organization)
-                user.memberships.filter(
-                    organization=organization,
-                ).update(admin=org_data['admin'])
+                user.memberships.filter(organization=organization,).update(
+                    admin=org_data["admin"]
+                )
             else:
                 # if not currently a member, create the new membership
                 # automatically activate new organizations (only first one)
@@ -112,7 +108,7 @@ class ProfileQuerySet(models.QuerySet):
                         user=user,
                         organization=organization,
                         active=active,
-                        admin=org_data['admin'],
+                        admin=org_data["admin"],
                     )
                 )
                 active = False
@@ -126,30 +122,24 @@ class ProfileQuerySet(models.QuerySet):
         # user must have an active organization, if the current
         # active one is removed, we will activate the user's individual organization
         if profile.organization in current_organizations:
-            user.memberships.filter(
-                organization__individual=True,
-            ).update(active=True)
+            user.memberships.filter(organization__individual=True,).update(active=True)
 
         # never remove the user's individual organization
-        individual_organization = user.memberships.get(
-            organization__individual=True
-        )
+        individual_organization = user.memberships.get(organization__individual=True)
         if individual_organization in current_organizations:
-            logger.error(
-                'Trying to remove a user\'s individual organization: %s', user
-            )
+            logger.error("Trying to remove a user's individual organization: %s", user)
             current_organizations.remove(individual_organization)
 
         user.memberships.filter(organization__in=current_organizations).delete()
 
         # update cache after updating orgs
         cache.set(
-            'sb:{}:user_org'.format(user.username),
+            "sb:{}:user_org".format(user.username),
             profile.organization,
             settings.DEFAULT_CACHE_TIMEOUT,
         )
         cache.set(
-            'sb:{}:user_orgs'.format(user.username),
+            "sb:{}:user_orgs".format(user.username),
             user.organizations.get_cache(),
             settings.DEFAULT_CACHE_TIMEOUT,
         )

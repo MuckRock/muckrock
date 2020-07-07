@@ -1,1 +1,1 @@
-default_app_config = 'muckrock.project.apps.ProjectConfig'
+default_app_config = "muckrock.project.apps.ProjectConfig"

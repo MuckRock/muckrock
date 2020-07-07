@@ -24,19 +24,16 @@ class TestFOIANotes(TestCase):
         self.viewer = UserFactory()
         self.foia.add_editor(self.editor)
         self.foia.add_viewer(self.viewer)
-        self.data = {
-            'action': 'add_note',
-            'note': 'Lorem ipsum dolor su ament.'
-        }
+        self.data = {"action": "add_note", "note": "Lorem ipsum dolor su ament."}
         self.url = self.foia.get_absolute_url()
         self.view = Detail.as_view()
         self.kwargs = {
-            'jurisdiction': self.foia.jurisdiction.slug,
-            'jidx': self.foia.jurisdiction.id,
-            'slug': self.foia.slug,
-            'idx': self.foia.id
+            "jurisdiction": self.foia.jurisdiction.slug,
+            "jidx": self.foia.jurisdiction.id,
+            "slug": self.foia.slug,
+            "idx": self.foia.id,
         }
-        UserFactory(username='MuckrockStaff')
+        UserFactory(username="MuckrockStaff")
 
     def test_add_note(self):
         """User with edit permission should be able to create a note."""

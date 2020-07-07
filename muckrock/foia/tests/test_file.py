@@ -24,24 +24,22 @@ class TestRequestFilesView(TestCase):
         self.file = FOIAFileFactory()
         self.foia = self.file.comm.foia
         self.kwargs = {
-            'idx': self.foia.pk,
-            'slug': self.foia.slug,
-            'jidx': self.foia.jurisdiction.pk,
-            'jurisdiction': self.foia.jurisdiction.slug
+            "idx": self.foia.pk,
+            "slug": self.foia.slug,
+            "jidx": self.foia.jurisdiction.pk,
+            "jurisdiction": self.foia.jurisdiction.slug,
         }
-        self.url = reverse('foia-files', kwargs=self.kwargs)
+        self.url = reverse("foia-files", kwargs=self.kwargs)
         self.view = FOIAFileListView.as_view()
 
     def test_get_ok(self):
         """The view should return 200 if the foia is viewable to the user."""
         ok_(
-            self.foia.has_perm(self.foia.user, 'view'),
-            'The user should be able to view the request'
+            self.foia.has_perm(self.foia.user, "view"),
+            "The user should be able to view the request",
         )
-        response = http_get_response(
-            self.url, self.view, self.foia.user, **self.kwargs
-        )
-        eq_(response.status_code, 200, 'The view should return 200.')
+        response = http_get_response(self.url, self.view, self.foia.user, **self.kwargs)
+        eq_(response.status_code, 200, "The view should return 200.")
 
     @raises(Http404)
     def test_get_404(self):
@@ -49,5 +47,5 @@ class TestRequestFilesView(TestCase):
         self.foia.embargo = True
         self.foia.save()
         user = UserFactory()
-        ok_(not self.foia.has_perm(user, 'view'))
+        ok_(not self.foia.has_perm(user, "view"))
         http_get_response(self.url, self.view, user, **self.kwargs)

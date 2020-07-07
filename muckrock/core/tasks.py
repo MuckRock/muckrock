@@ -31,32 +31,24 @@ class AsyncFileDownloadTask(object):
 
     def __init__(self, user_pk, hash_key):
         self.user = User.objects.get(pk=user_pk)
-        conn = S3Connection(
-            settings.AWS_ACCESS_KEY_ID,
-            settings.AWS_SECRET_ACCESS_KEY,
-        )
+        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,)
         self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         today = date.today()
-        self.file_key = '{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}'.format(
+        self.file_key = "{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}".format(
             dir_name=self.dir_name,
             file_name=self.file_name,
             y=today.year,
             m=today.month,
             d=today.day,
             md5=md5(
-                '{}{}{}{}'.format(
-                    int(time()),
-                    settings.SECRET_KEY,
-                    user_pk,
-                    hash_key,
-                )
+                "{}{}{}{}".format(int(time()), settings.SECRET_KEY, user_pk, hash_key,)
             ).hexdigest(),
         )
         self.key = self.bucket.new_key(self.file_key)
 
     def get_context(self):
         """Get context for the notification email"""
-        return {'file': self.file_key}
+        return {"file": self.file_key}
 
     def send_notification(self):
         """Send the user the link to their file"""
@@ -72,12 +64,12 @@ class AsyncFileDownloadTask(object):
     def run(self):
         """Task entry point"""
         with smart_open(
-            self.key, 'wb', s3_min_part_size=settings.AWS_S3_MIN_PART_SIZE
+            self.key, "wb", s3_min_part_size=settings.AWS_S3_MIN_PART_SIZE
         ) as out_file:
             self.generate_file(out_file)
-        self.key.set_acl('public-read')
+        self.key.set_acl("public-read")
         self.send_notification()
 
     def generate_file(self, out_file):
         """Abstract method"""
-        raise NotImplementedError('Subclass must override generate_file')
+        raise NotImplementedError("Subclass must override generate_file")

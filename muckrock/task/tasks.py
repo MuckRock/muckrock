@@ -28,12 +28,12 @@ from muckrock.task.models import FlaggedTask, SnailMailTask
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
 
 
-@task(ignore_result=True, name='muckrock.task.tasks.submit_review_update')
+@task(ignore_result=True, name="muckrock.task.tasks.submit_review_update")
 def submit_review_update(foia_pks, reply_text, **kwargs):
     """Submit all the follow ups after updating agency contact information"""
     # pylint: disable=unused-argument
     foias = FOIARequest.objects.filter(pk__in=foia_pks)
-    muckrock_staff = User.objects.get(username='MuckrockStaff')
+    muckrock_staff = User.objects.get(username="MuckrockStaff")
     for foia in foias:
         FOIACommunication.objects.create(
             foia=foia,
@@ -49,7 +49,7 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
 @task(
     ignore_result=True,
     time_limit=900,
-    name='muckrock.task.tasks.snail_mail_bulk_pdf_task',
+    name="muckrock.task.tasks.snail_mail_bulk_pdf_task",
 )
 def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     """Save a PDF file for all open snail mail tasks"""
@@ -61,15 +61,14 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 
     snails = SnailMailTaskFilterSet(
         get,
-        queryset=SnailMailTask.objects.filter(resolved=False).order_by(
-            '-amount',
-            'communication__foia__agency',
-        ).preload_pdf(),
+        queryset=SnailMailTask.objects.filter(resolved=False)
+        .order_by("-amount", "communication__foia__agency")
+        .preload_pdf(),
     ).qs[:100]
 
     blank_pdf = FPDF()
     blank_pdf.add_page()
-    blank = StringIO(blank_pdf.output(dest='S'))
+    blank = StringIO(blank_pdf.output(dest="S"))
     for snail in snails.iterator():
         # generate the pdf and merge all pdf attachments
         pdf = SnailMailPDF(
@@ -91,25 +90,21 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     cover_pdf.generate()
     if cover_pdf.page % 2 == 1:
         cover_pdf.add_page()
-    bulk_merger.merge(0, StringIO(cover_pdf.output(dest='S')))
+    bulk_merger.merge(0, StringIO(cover_pdf.output(dest="S")))
 
     bulk_pdf = StringIO()
     bulk_merger.write(bulk_pdf)
     bulk_pdf.seek(0)
 
-    conn = S3Connection(
-        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
-    )
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     key = Key(bucket)
     key.key = pdf_name
     key.set_contents_from_file(bulk_pdf)
-    key.set_canned_acl('public-read')
+    key.set_canned_acl("public-read")
 
 
-@task(
-    ignore_result=True, max_retries=5, name='muckrock.task.tasks.create_ticket'
-)
+@task(ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_ticket")
 def create_ticket(flag_pk, **kwargs):
     """Create a ticket from a flag"""
     flag = FlaggedTask.objects.get(pk=flag_pk)
@@ -125,8 +120,7 @@ def create_ticket(flag_pk, **kwargs):
             flag.resolve(form_data={"zoho_id": zoho_id})
     except (RequestException, ZenpyException, APIException) as exc:
         raise create_ticket.retry(
-            countdown=(2 ** create_ticket.request.retries) * 300 +
-            randint(0, 300),
+            countdown=(2 ** create_ticket.request.retries) * 300 + randint(0, 300),
             args=[flag_pk],
             kwargs=kwargs,
             exc=exc,
@@ -134,8 +128,7 @@ def create_ticket(flag_pk, **kwargs):
 
 
 @periodic_task(
-    run_every=crontab(hour=4, minute=0),
-    name='muckrock.task.tasks.cleanup_flags'
+    run_every=crontab(hour=4, minute=0), name="muckrock.task.tasks.cleanup_flags"
 )
 def cleanup_flags():
     """Find any flags that failed to make it to zoho/zendesk and try again"""

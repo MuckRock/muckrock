@@ -25,8 +25,8 @@ class TestFoiaMachineRequest(TestCase):
 
     def setUp(self):
         self.user = UserFactory()
-        self.title = 'Test Request'
-        self.request_language = 'Lorem ipsum'
+        self.title = "Test Request"
+        self.request_language = "Lorem ipsum"
         self.agency = AgencyFactory()
         self.jurisdiction = self.agency.jurisdiction
         self.foi = factories.FoiaMachineRequestFactory(
@@ -45,33 +45,34 @@ class TestFoiaMachineRequest(TestCase):
             request_language=self.request_language,
             jurisdiction=self.jurisdiction,
         )
-        ok_(foi, 'The request should be created.')
-        ok_(foi.slug, 'The slug should be created automatically.')
+        ok_(foi, "The request should be created.")
+        ok_(foi.slug, "The slug should be created automatically.")
 
     def test_unicode(self):
         """Requests should use their titles when converted to unicode."""
         eq_(
-            str(self.foi), self.foi.title,
-            'The Unicode representation should be the title.'
+            str(self.foi),
+            self.foi.title,
+            "The Unicode representation should be the title.",
         )
 
     def test_get_absolute_url(self):
         """Request urls should include their slug and their id."""
         kwargs = {
-            'slug': self.foi.slug,
-            'pk': self.foi.pk,
+            "slug": self.foi.slug,
+            "pk": self.foi.pk,
         }
         actual_url = self.foi.get_absolute_url()
-        expected_url = reverse('foi-detail', host='foiamachine', kwargs=kwargs)
+        expected_url = reverse("foi-detail", host="foiamachine", kwargs=kwargs)
         eq_(actual_url, expected_url)
 
     def test_generate_letter(self):
         """Using default information, the request should be able to generate a letter."""
-        template = 'text/foia/request.txt'
+        template = "text/foia/request.txt"
         context = {
-            'jurisdiction': self.foi.jurisdiction,
-            'document_request': self.foi.request_language,
-            'user_name': self.foi.user.profile.full_name,
+            "jurisdiction": self.foi.jurisdiction,
+            "document_request": self.foi.request_language,
+            "user_name": self.foi.user.profile.full_name,
         }
         expected_letter = render_to_string(template, context=context).strip()
         actual_letter = self.foi.generate_letter()
@@ -114,9 +115,7 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_is_overdue(self):
         """The request should be overdue if days_until_due is negative."""
-        overdue_date = (
-            timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
-        )
+        overdue_date = timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
         comm = factories.FoiaMachineCommunicationFactory(
             request=self.foi, date=overdue_date
         )
@@ -128,12 +127,8 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_days_overdue(self):
         """Days overdue should just be the inverse of days_until_due."""
-        overdue_date = (
-            timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
-        )
-        factories.FoiaMachineCommunicationFactory(
-            request=self.foi, date=overdue_date
-        )
+        overdue_date = timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
+        factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
         eq_(self.foi.days_overdue, self.foi.days_until_due * -1)
 
 
@@ -150,15 +145,15 @@ class TestFoiaMachineCommunication(TestCase):
         comm = models.FoiaMachineCommunication(
             request=self.foi,
             sender=str(self.foi.user),
-            message='Lorem ipsum dolor su amit.'
+            message="Lorem ipsum dolor su amit.",
         )
         ok_(comm)
 
     def test_unicode(self):
         """The string representation of a communication includes sender and receiver info."""
         eq_(
-            str(self.comm), 'Communication from %s to %s' %
-            (self.comm.sender, self.comm.receiver)
+            str(self.comm),
+            "Communication from %s to %s" % (self.comm.sender, self.comm.receiver),
         )
 
 
@@ -173,11 +168,11 @@ class TestFoiaMachineFile(TestCase):
         """A communication, a file, and a filename should be required to create a new file."""
         _file = models.FoiaMachineFile(
             communication=self.comm,
-            file=SimpleUploadedFile('filename.txt', b'Test file contents'),
-            name='filename.txt'
+            file=SimpleUploadedFile("filename.txt", b"Test file contents"),
+            name="filename.txt",
         )
         ok_(_file)
 
     def test_unicode(self):
         """The string representation of a file should be its name."""
-        eq_(str(self.file), '%s' % self.file.name)
+        eq_(str(self.file), "%s" % self.file.name)

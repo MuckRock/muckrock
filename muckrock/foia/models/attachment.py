@@ -14,7 +14,7 @@ import os
 
 def attachment_path(instance, filename):
     """Generate path for attachment file"""
-    return 'outbound_%s_attachments/%s/%d/%s' % (
+    return "outbound_%s_attachments/%s/%d/%s" % (
         instance.type,
         instance.user.username,
         instance.attached_to.pk,
@@ -24,20 +24,16 @@ def attachment_path(instance, filename):
 
 class AttachmentBase(models.Model):
     """Abstract base model for attachments"""
-    user = models.ForeignKey(
-        'auth.User',
-        related_name='pending_%(class)s',
-    )
+
+    user = models.ForeignKey("auth.User", related_name="pending_%(class)s",)
     ffile = models.FileField(
-        upload_to=attachment_path,
-        verbose_name='file',
-        max_length=255,
+        upload_to=attachment_path, verbose_name="file", max_length=255,
     )
     date_time_stamp = models.DateTimeField()
     sent = models.BooleanField(default=False)
 
     def __str__(self):
-        return 'Attachment: %s by %s for %s %d' % (
+        return "Attachment: %s by %s for %s %d" % (
             self.ffile.name,
             self.user.username,
             self.type,
@@ -55,12 +51,9 @@ class AttachmentBase(models.Model):
 class OutboundRequestAttachment(AttachmentBase):
     """An uploaded file waiting to be sent out with a request"""
 
-    foia = models.ForeignKey(
-        'FOIARequest',
-        related_name='pending_attachments',
-    )
+    foia = models.ForeignKey("FOIARequest", related_name="pending_attachments",)
 
-    type = 'request'
+    type = "request"
 
     @property
     def attached_to(self):
@@ -71,12 +64,9 @@ class OutboundRequestAttachment(AttachmentBase):
 class OutboundComposerAttachment(AttachmentBase):
     """An uploaded file waiting to be sent out"""
 
-    composer = models.ForeignKey(
-        'FOIAComposer',
-        related_name='pending_attachments',
-    )
+    composer = models.ForeignKey("FOIAComposer", related_name="pending_attachments",)
 
-    type = 'composer'
+    type = "composer"
 
     @property
     def attached_to(self):

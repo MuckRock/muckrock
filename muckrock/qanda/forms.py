@@ -12,27 +12,27 @@ from muckrock.qanda.models import Answer, Question
 
 class QuestionForm(forms.ModelForm):
     """A form for a Question"""
+
     foia = forms.ModelChoiceField(
         queryset=None, required=False, widget=forms.HiddenInput()
     )
 
     def __init__(self, user=None, *args, **kwargs):
         super(QuestionForm, self).__init__(*args, **kwargs)
-        self.fields['foia'].queryset = FOIARequest.objects.get_viewable(user)
+        self.fields["foia"].queryset = FOIARequest.objects.get_viewable(user)
 
     class Meta:
         model = Question
-        fields = ['title', 'question', 'foia']
+        fields = ["title", "question", "foia"]
         widgets = {
-            'question':
-                forms.Textarea(
-                    attrs={
-                        'placeholder': 'Write your question here',
-                        'class': 'prose-editor'
-                    }
-                )
+            "question": forms.Textarea(
+                attrs={
+                    "placeholder": "Write your question here",
+                    "class": "prose-editor",
+                }
+            )
         }
-        help_texts = {'question': 'Markdown syntax supported'}
+        help_texts = {"question": "Markdown syntax supported"}
 
 
 class AnswerForm(forms.ModelForm):
@@ -40,14 +40,10 @@ class AnswerForm(forms.ModelForm):
 
     class Meta:
         model = Answer
-        fields = ['answer']
+        fields = ["answer"]
         widgets = {
-            'answer':
-                forms.Textarea(
-                    attrs={
-                        'placeholder': 'Write an answer here',
-                        'class': 'prose-editor'
-                    }
-                )
+            "answer": forms.Textarea(
+                attrs={"placeholder": "Write an answer here", "class": "prose-editor"}
+            )
         }
-        help_texts = {'answer': 'Markdown syntax supported'}
+        help_texts = {"answer": "Markdown syntax supported"}

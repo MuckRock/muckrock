@@ -26,52 +26,62 @@ from muckrock.task.models import (
 
 class OrphanTaskAdmin(VersionAdmin):
     """Orphan Task Admin"""
-    readonly_fields = ['communication']
+
+    readonly_fields = ["communication"]
 
 
 class SnailMailTaskAdmin(VersionAdmin):
     """Snail Mail Task Admin"""
-    readonly_fields = ['communication', 'amount']
+
+    readonly_fields = ["communication", "amount"]
 
 
 class RejectedEmailTaskAdmin(VersionAdmin):
     """Rejected Email Task Admin"""
-    readonly_fields = ['foia']
+
+    readonly_fields = ["foia"]
 
 
 class FlaggedTaskAdmin(VersionAdmin):
     """Flagged Task Admin"""
-    readonly_fields = ['user', 'foia', 'jurisdiction', 'agency']
+
+    readonly_fields = ["user", "foia", "jurisdiction", "agency"]
 
 
 class ProjectReviewTaskAdmin(VersionAdmin):
     """Flagged Task Admin"""
-    readonly_fields = ['notes', 'project']
+
+    readonly_fields = ["notes", "project"]
 
 
 class NewAgencyTaskAdmin(VersionAdmin):
     """New Agency Task Admin"""
-    readonly_fields = ['user', 'agency']
+
+    readonly_fields = ["user", "agency"]
 
 
 class ResponseTaskAdmin(VersionAdmin):
     """Response Task Admin"""
-    readonly_fields = ['communication']
+
+    readonly_fields = ["communication"]
 
 
 class CrowdfundTaskAdmin(VersionAdmin):
     """Crowdfund Task Admin"""
-    readonly_fields = ['crowdfund']
+
+    readonly_fields = ["crowdfund"]
 
 
 class MultiRequestTaskAdmin(VersionAdmin):
     """MultiRequest Task Admin"""
-    readonly_fields = ['composer', 'assigned', 'resolved_by']
+
+    readonly_fields = ["composer", "assigned", "resolved_by"]
 
 
 class PortalTaskAdmin(VersionAdmin):
     """Portal Task Admin"""
-    readonly_fields = ['communication']
+
+    readonly_fields = ["communication"]
 
 
 admin.site.register(OrphanTask, OrphanTaskAdmin)

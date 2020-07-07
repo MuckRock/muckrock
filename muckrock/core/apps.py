@@ -9,4 +9,5 @@ from django.apps import AppConfig
 
 class CoreConfig(AppConfig):
     """App config for core app"""
-    name = 'core'
+
+    name = "core"

@@ -26,40 +26,37 @@ class CrowdsourceAdminForm(forms.ModelForm):
     """Form for Crowdsource admin"""
 
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all(),
     )
     project = autocomplete_light.ModelChoiceField(
-        'ProjectAutocomplete',
-        queryset=Project.objects.all(),
-        required=False,
+        "ProjectAutocomplete", queryset=Project.objects.all(), required=False,
     )
     submission_emails = autocomplete_light.ModelMultipleChoiceField(
-        'EmailAddressAdminAutocomplete',
+        "EmailAddressAdminAutocomplete",
         queryset=EmailAddress.objects.all(),
         required=False,
     )
 
     class Meta:
         model = Crowdsource
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CrowdsourceResponseAdminForm(forms.ModelForm):
     """Form for Crowdsource response admin"""
 
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all(),
     )
 
     class Meta:
         model = CrowdsourceResponse
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CrowdsourceFieldInline(admin.TabularInline):
     """Crowdsource Field inline options"""
+
     model = CrowdsourceField
     show_change_link = True
 
@@ -67,70 +64,73 @@ class CrowdsourceFieldInline(admin.TabularInline):
 @admin.register(Crowdsource)
 class CrowdsourceAdmin(admin.ModelAdmin):
     """Crowdsource admin options"""
+
     form = CrowdsourceAdminForm
-    prepopulated_fields = {'slug': ('title',)}
+    prepopulated_fields = {"slug": ("title",)}
     inlines = (CrowdsourceFieldInline,)
-    list_display = ('title', 'user', 'datetime_created', 'status', 'featured')
-    list_filter = ['status', 'project_only', 'featured']
-    date_hierarchy = 'datetime_created'
-    search_fields = ['title', 'description']
+    list_display = ("title", "user", "datetime_created", "status", "featured")
+    list_filter = ["status", "project_only", "featured"]
+    date_hierarchy = "datetime_created"
+    search_fields = ["title", "description"]
     save_on_top = True
 
 
 class CrowdsourceChoiceInline(admin.TabularInline):
     """Crowdsource Choice inline options"""
+
     model = CrowdsourceChoice
 
 
 @admin.register(CrowdsourceField)
 class CrowdsourceFieldAdmin(admin.ModelAdmin):
     """Crowdsource field options"""
+
     inlines = (CrowdsourceChoiceInline,)
     fields = (
-        'cs_link',
-        'label',
-        'type',
-        'order',
+        "cs_link",
+        "label",
+        "type",
+        "order",
     )
-    readonly_fields = ('cs_link',)
+    readonly_fields = ("cs_link",)
 
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
         link = reverse(
-            'admin:crowdsource_crowdsource_change',
-            args=(obj.crowdsource.pk,),
+            "admin:crowdsource_crowdsource_change", args=(obj.crowdsource.pk,),
         )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
 
     cs_link.allow_tags = True
-    cs_link.short_description = 'Crowdsource'
+    cs_link.short_description = "Crowdsource"
 
 
 class CrowdsourceValueInline(admin.TabularInline):
     """Crowdsource Value inline options"""
+
     model = CrowdsourceValue
 
 
 @admin.register(CrowdsourceResponse)
 class CrowdsourceResponseAdmin(admin.ModelAdmin):
     """Crowdsource response options"""
+
     form = CrowdsourceResponseAdminForm
     inlines = (CrowdsourceValueInline,)
     fields = (
-        'cs_link',
-        'user',
-        'datetime',
-        'data',
+        "cs_link",
+        "user",
+        "datetime",
+        "data",
     )
-    readonly_fields = ('cs_link', 'data')
+    readonly_fields = ("cs_link", "data")
 
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
         link = reverse(
-            'admin:crowdsource_crowdsource_change',
-            args=(obj.crowdsource.pk,),
+            "admin:crowdsource_crowdsource_change", args=(obj.crowdsource.pk,),
         )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
 
     cs_link.allow_tags = True
-    cs_link.short_description = 'Crowdsource'
+    cs_link.short_description = "Crowdsource"

@@ -14,8 +14,7 @@ from muckrock.crowdfund.models import Crowdfund
 
 
 @periodic_task(
-    run_every=crontab(hour=0, minute=0),
-    name='muckrock.crowdfund.tasks.close_expired'
+    run_every=crontab(hour=0, minute=0), name="muckrock.crowdfund.tasks.close_expired"
 )
 def close_expired():
     """Close crowdfunds that were due yesterday"""

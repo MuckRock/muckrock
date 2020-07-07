@@ -21,7 +21,7 @@ import os
 import re
 from email.utils import parseaddr
 
-email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
+email_separator_re = re.compile(r"[^\w\.\-\+\&@_]+")
 
 
 # https://code.djangoproject.com/ticket/11027
@@ -29,12 +29,12 @@ email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 def filefield_maxlength_validator(value):
     """"Check if absolute file path can fit in database table"""
 
-    if not hasattr(value, 'field'):
+    if not hasattr(value, "field"):
         # images sent in via API do not have a field
         return value
 
     filename = value.field.generate_filename(value.instance, value.name)
-    bytes_filename = len(filename.encode('utf-8'))  # filename length in bytes
+    bytes_filename = len(filename.encode("utf-8"))  # filename length in bytes
 
     # File path length should fit in table cell
     if bytes_filename > value.field.max_length:
@@ -46,7 +46,7 @@ def filefield_maxlength_validator(value):
             # it also doesn't appear to be saved to S3 yet,
             # so no need to delete
             pass
-        raise forms.ValidationError(_('File name too long.'))
+        raise forms.ValidationError(_("File name too long."))
     return value
 
 
@@ -57,6 +57,7 @@ FileField.default_validators = FileField.default_validators[:] + [
 
 class EmailsListField(CharField):
     """Multi email field"""
+
     # pylint: disable=too-many-public-methods
 
     widget = forms.Textarea
@@ -68,7 +69,7 @@ class EmailsListField(CharField):
         emails = email_separator_re.split(value)
 
         if not emails:
-            raise forms.ValidationError(_('Enter at least one e-mail address.'))
+            raise forms.ValidationError(_("Enter at least one e-mail address."))
 
         for email in emails:
             validate_email(email)
@@ -79,7 +80,7 @@ class EmailsListField(CharField):
 class FullEmailValidator(EmailValidator):
     """Validate email addresses with full names"""
 
-    #http://djangosnippets.org/snippets/2635/
+    # http://djangosnippets.org/snippets/2635/
 
     def __call__(self, value):
         # pylint: disable=unused-variable
@@ -96,6 +97,7 @@ validate_full_email = FullEmailValidator()
 
 class FullEmailField(forms.EmailField):
     """Email field that accepts full name format"""
+
     default_validators = [validate_full_email]
 
     def clean(self, value):
@@ -120,4 +122,5 @@ class EmptyLastModelChoiceIterator(ModelChoiceIterator):
 
 class EmptyLastModelChoiceField(ModelChoiceField):
     """Model Choice Field that puts the empty choice last"""
+
     iterator = EmptyLastModelChoiceIterator

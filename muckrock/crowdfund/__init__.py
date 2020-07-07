@@ -1,1 +1,1 @@
-default_app_config = 'muckrock.crowdfund.apps.CrowdfundConfig'
+default_app_config = "muckrock.crowdfund.apps.CrowdfundConfig"

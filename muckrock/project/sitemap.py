@@ -13,9 +13,9 @@ class ProjectSitemap(Sitemap):
     """Sitemap for Projects"""
 
     priority = 0.7
-    changefreq = 'weekly'
+    changefreq = "weekly"
     limit = 500
 
     def items(self):
         """Return all projects"""
-        return Project.objects.order_by('id').get_public()
+        return Project.objects.order_by("id").get_public()

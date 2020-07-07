@@ -9,4 +9,5 @@ from django.apps import AppConfig
 
 class PortalConfig(AppConfig):
     """Configure Portal"""
-    name = 'portal'
+
+    name = "portal"

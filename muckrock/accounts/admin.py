@@ -21,113 +21,119 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class StatisticsAdmin(VersionAdmin):
     """Statistics admin options"""
+
     list_display = (
-        'date', 'total_requests', 'total_requests_success',
-        'total_requests_denied', 'total_pages', 'total_users', 'total_agencies',
-        'total_fees'
+        "date",
+        "total_requests",
+        "total_requests_success",
+        "total_requests_denied",
+        "total_pages",
+        "total_users",
+        "total_agencies",
+        "total_fees",
     )
-    formats = ['xls', 'csv']
+    formats = ["xls", "csv"]
 
 
 class ProfileAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     location = autocomplete_light.ModelChoiceField(
-        'JurisdictionAdminAutocomplete',
+        "JurisdictionAdminAutocomplete",
         queryset=Jurisdiction.objects.all(),
         required=False,
     )
     agency = autocomplete_light.ModelChoiceField(
-        'AgencyAdminAutocomplete',
-        queryset=Agency.objects.filter(status='approved'),
+        "AgencyAdminAutocomplete",
+        queryset=Agency.objects.filter(status="approved"),
         required=False,
     )
 
     class Meta:
         model = Profile
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""
+
     model = Profile
-    search_fields = ('user__username', 'full_name')
+    search_fields = ("user__username", "full_name")
     form = ProfileAdminForm
     extra = 0
     max_num = 1
     fields = (
-        'org_link',
-        'uuid',
-        'full_name',
-        'email_confirmed',
-        'email_pref',
-        'source',
-        'location',
-        'avatar_url',
-        'experimental',
-        'use_autologin',
-        'email_failed',
-        'new_question_notifications',
-        'org_share',
-        'state',
-        'preferred_proxy',
-        'agency',
+        "org_link",
+        "uuid",
+        "full_name",
+        "email_confirmed",
+        "email_pref",
+        "source",
+        "location",
+        "avatar_url",
+        "experimental",
+        "use_autologin",
+        "email_failed",
+        "new_question_notifications",
+        "org_share",
+        "state",
+        "preferred_proxy",
+        "agency",
     )
     readonly_fields = (
-        'org_link',
-        'uuid',
-        'full_name',
-        'email_confirmed',
-        'avatar_url',
+        "org_link",
+        "uuid",
+        "full_name",
+        "email_confirmed",
+        "avatar_url",
     )
 
     def org_link(self, obj):
         """Link to the individual org"""
         link = reverse(
-            'admin:organization_organization_change',
-            args=(obj.individual_organization.pk,)
+            "admin:organization_organization_change",
+            args=(obj.individual_organization.pk,),
         )
         return '<a href="%s">%s</a>' % (link, obj.individual_organization.name)
 
     org_link.allow_tags = True
-    org_link.short_description = 'Individual Organization'
+    org_link.short_description = "Individual Organization"
 
 
 class MRUserAdmin(UserAdmin):
     """User admin options"""
+
     list_display = (
-        'username',
-        'date_joined',
-        'email',
-        'full_name',
-        'is_staff',
-        'is_superuser',
+        "username",
+        "date_joined",
+        "email",
+        "full_name",
+        "is_staff",
+        "is_superuser",
     )
     list_filter = UserAdmin.list_filter
-    list_select_related = ('profile',)
+    list_select_related = ("profile",)
     inlines = [ProfileInline]
     fieldsets = (
-        (None, {
-            'fields': ('username', 'password')
-        }),
-        ('Personal info', {
-            'fields': ('email',)
-        }),
+        (None, {"fields": ("username", "password")}),
+        ("Personal info", {"fields": ("email",)}),
         (
-            'Permissions', {
-                'fields': (
-                    'is_active', 'is_staff', 'is_superuser', 'groups',
-                    'user_permissions'
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
                 )
-            }
+            },
         ),
-        ('Important dates', {
-            'fields': ('last_login', 'date_joined')
-        }),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
     readonly_fields = (
-        'username',
-        'email',
+        "username",
+        "email",
     )
 
     def full_name(self, obj):
@@ -139,14 +145,12 @@ class RecurringDonationAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
-        required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False,
     )
 
     class Meta:
         model = RecurringDonation
-        fields = '__all__'
+        fields = "__all__"
 
 
 # this move to squarelet in the future
@@ -154,27 +158,28 @@ class RecurringDonationAdminForm(forms.ModelForm):
 
 class RecurringDonationAdmin(VersionAdmin):
     """Recurring donation admin options"""
+
     model = RecurringDonation
     list_display = (
-        'email',
-        'user',
-        'amount',
-        'payment_failed',
-        'active',
-        'created_datetime',
+        "email",
+        "user",
+        "amount",
+        "payment_failed",
+        "active",
+        "created_datetime",
     )
-    list_select_related = ('user',)
-    search_fields = ('email', 'user__username')
+    list_select_related = ("user",)
+    search_fields = ("email", "user__username")
     form = RecurringDonationAdminForm
-    date_hierarchy = 'created_datetime'
-    list_filter = ('active', 'payment_failed')
+    date_hierarchy = "created_datetime"
+    list_filter = ("active", "payment_failed")
     readonly_fields = (
-        'email',
-        'created_datetime',
-        'amount',
-        'customer_id',
-        'subscription_id',
-        'deactivated_datetime',
+        "email",
+        "created_datetime",
+        "amount",
+        "customer_id",
+        "subscription_id",
+        "deactivated_datetime",
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -182,14 +187,15 @@ class RecurringDonationAdmin(VersionAdmin):
         if obj.active:
             return self.readonly_fields
         else:
-            return self.readonly_fields + ('active',)
+            return self.readonly_fields + ("active",)
 
     def save_model(self, request, obj, form, change):
         """Cancel the subscription if manually deactivated"""
         if not obj.active:
             obj.cancel()
-        return super(RecurringDonationAdmin,
-                     self).save_model(request, obj, form, change)
+        return super(RecurringDonationAdmin, self).save_model(
+            request, obj, form, change
+        )
 
 
 admin.site.register(Statistics, StatisticsAdmin)

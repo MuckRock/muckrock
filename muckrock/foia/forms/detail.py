@@ -25,49 +25,44 @@ from muckrock.task.constants import PUBLIC_FLAG_CATEGORIES
 
 class FOIAEstimatedCompletionDateForm(forms.ModelForm):
     """Form to change an estimaged completion date."""
+
     date_estimate = forms.DateField(
-        label='Estimated completion date',
-        help_text='The est. completion date is declared by the agency.',
-        widget=forms.DateInput(
-            format='%m/%d/%Y', attrs={
-                'placeholder': 'mm/dd/yyyy'
-            }
-        ),
+        label="Estimated completion date",
+        help_text="The est. completion date is declared by the agency.",
+        widget=forms.DateInput(format="%m/%d/%Y", attrs={"placeholder": "mm/dd/yyyy"}),
     )
 
     class Meta:
         model = FOIARequest
-        fields = ['date_estimate']
+        fields = ["date_estimate"]
 
 
 class FOIAEmbargoForm(forms.Form):
     """Form to configure an embargo on a request"""
+
     permanent_embargo = forms.BooleanField(
         required=False,
-        label='Make permanent',
-        help_text='A permanent embargo will never expire.',
-        widget=forms.CheckboxInput()
+        label="Make permanent",
+        help_text="A permanent embargo will never expire.",
+        widget=forms.CheckboxInput(),
     )
 
     date_embargo = forms.DateField(
         required=False,
-        label='Expiration date',
-        help_text='Embargo duration are limited to a maximum of 30 days.',
+        label="Expiration date",
+        help_text="Embargo duration are limited to a maximum of 30 days.",
         widget=forms.DateInput(
-            attrs={
-                'class': 'datepicker',
-                'placeholder': 'Pick a date'
-            }
-        )
+            attrs={"class": "datepicker", "placeholder": "Pick a date"}
+        ),
     )
 
     def clean_date_embargo(self):
         """Checks if date embargo is within 30 days"""
-        date_embargo = self.cleaned_data['date_embargo']
+        date_embargo = self.cleaned_data["date_embargo"]
         max_duration = date.today() + timedelta(30)
         if date_embargo and date_embargo > max_duration:
-            error_msg = 'Embargo expiration date must be within 30 days of today'
-            self._errors['date_embargo'] = self.error_class([error_msg])
+            error_msg = "Embargo expiration date must be within 30 days of today"
+            self._errors["date_embargo"] = self.error_class([error_msg])
         return date_embargo
 
 
@@ -76,28 +71,30 @@ class FOIANoteForm(forms.ModelForm):
 
     class Meta:
         model = FOIANote
-        fields = ['note']
-        widgets = {'note': forms.Textarea(attrs={'class': 'prose-editor'})}
+        fields = ["note"]
+        widgets = {"note": forms.Textarea(attrs={"class": "prose-editor"})}
 
 
 class FOIAAccessForm(forms.Form):
     """Form to add editors or viewers to a request."""
+
     users = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
-        widget=autocomplete_light.
-        MultipleChoiceWidget('UserRequestSharingAutocomplete')
+        widget=autocomplete_light.MultipleChoiceWidget(
+            "UserRequestSharingAutocomplete"
+        ),
     )
     access_choices = [
-        ('edit', 'Can Edit'),
-        ('view', 'Can View'),
+        ("edit", "Can Edit"),
+        ("view", "Can View"),
     ]
     access = forms.ChoiceField(choices=access_choices)
 
     def __init__(self, *args, **kwargs):
-        required = kwargs.pop('required', True)
+        required = kwargs.pop("required", True)
         super(FOIAAccessForm, self).__init__(*args, **kwargs)
-        self.fields['users'].required = required
-        self.fields['access'].required = required
+        self.fields["users"].required = required
+        self.fields["access"].required = required
 
 
 class TrackingNumberForm(forms.ModelForm):
@@ -105,16 +102,17 @@ class TrackingNumberForm(forms.ModelForm):
 
     class Meta:
         model = TrackingNumber
-        fields = ['tracking_id', 'reason']
+        fields = ["tracking_id", "reason"]
 
 
 class FOIAFlagForm(forms.Form):
     """Form for flagging a request"""
-    prefix = 'flag'
+
+    prefix = "flag"
 
     category = forms.ChoiceField(
-        choices=[('', '-- Choose a category if one is relevant')] +
-        PUBLIC_FLAG_CATEGORIES,
+        choices=[("", "-- Choose a category if one is relevant")]
+        + PUBLIC_FLAG_CATEGORIES,
         required=False,
     )
     text = forms.CharField(widget=forms.Textarea, required=False)
@@ -122,15 +120,14 @@ class FOIAFlagForm(forms.Form):
     def clean(self):
         """Must fill in one of the fields"""
         cleaned_data = super(FOIAFlagForm, self).clean()
-        if not cleaned_data.get('category') and not cleaned_data.get('text'):
-            raise forms.ValidationError(
-                'Must select a category or provide text'
-            )
+        if not cleaned_data.get("category") and not cleaned_data.get("text"):
+            raise forms.ValidationError("Must select a category or provide text")
 
 
 class FOIAContactUserForm(forms.Form):
     """Form for contacting the owner of a request"""
-    prefix = 'contact'
+
+    prefix = "contact"
 
     text = forms.CharField(widget=forms.Textarea)
 
@@ -140,38 +137,35 @@ class FOIASoftDeleteForm(forms.Form):
 
     final_message = forms.CharField(
         widget=forms.Textarea,
-        help_text=
-        'A final communication to the agency, explaining that the request is '
-        'being withdrawn',
+        help_text="A final communication to the agency, explaining that the request is "
+        "being withdrawn",
     )
     note = forms.CharField(
         widget=forms.Textarea,
-        help_text='An internal note explaining why the request is being deleted',
+        help_text="An internal note explaining why the request is being deleted",
     )
 
     def __init__(self, *args, **kwargs):
-        foia = kwargs.pop('foia')
+        foia = kwargs.pop("foia")
         super(FOIASoftDeleteForm, self).__init__(*args, **kwargs)
         if foia.status in END_STATUS:
-            self.fields.pop('final_message')
+            self.fields.pop("final_message")
 
 
 class RequestFeeForm(StripeForm):
     """A form to pay request fees"""
+
     amount = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            'class': 'currency-field'
-        }),
+        widget=forms.NumberInput(attrs={"class": "currency-field"}),
         min_value=0,
-        help_text=
-        'We will add a 5% fee to this amount to cover our transaction fees.',
+        help_text="We will add a 5% fee to this amount to cover our transaction fees.",
     )
 
     field_order = [
-        'stripe_token',
-        'stripe_pk',
-        'amount',
-        'organization',
-        'use_card_on_file',
-        'save_card',
+        "stripe_token",
+        "stripe_pk",
+        "amount",
+        "organization",
+        "use_card_on_file",
+        "save_card",
     ]

@@ -13,11 +13,11 @@ class JurisdictionSitemap(Sitemap):
     """Sitemap for Jurisdiction Requests"""
 
     priority = 0.7
-    changefreq = 'monthly'
+    changefreq = "monthly"
     limit = 500
 
     def items(self):
         """Return all non hidden Jurisdictions"""
-        return Jurisdiction.objects.select_related('parent__parent').filter(
+        return Jurisdiction.objects.select_related("parent__parent").filter(
             hidden=False
         )

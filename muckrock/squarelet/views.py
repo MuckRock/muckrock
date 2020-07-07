@@ -23,21 +23,18 @@ logger = logging.getLogger(__name__)
 def webhook(request):
     """Receive a cache invalidation webhook from squarelet"""
 
-    type_ = request.POST.get('type', '')
-    uuids = request.POST.getlist('uuids', '')
-    timestamp = request.POST.get('timestamp', '')
-    signature = request.POST.get('signature', '')
+    type_ = request.POST.get("type", "")
+    uuids = request.POST.getlist("uuids", "")
+    timestamp = request.POST.get("timestamp", "")
+    signature = request.POST.get("signature", "")
 
     # verify signature
     hmac_digest = hmac.new(
-        key=settings.SQUARELET_SECRET.encode('utf8'),
-        msg='{}{}{}'.format(timestamp, type_, ''.join(uuids)).encode('utf8'),
+        key=settings.SQUARELET_SECRET.encode("utf8"),
+        msg="{}{}{}".format(timestamp, type_, "".join(uuids)).encode("utf8"),
         digestmod=hashlib.sha256,
     ).hexdigest()
-    match = hmac.compare_digest(
-        str(signature),
-        str(hmac_digest),
-    )
+    match = hmac.compare_digest(str(signature), str(hmac_digest),)
     try:
         timestamp_current = int(timestamp) + 300 > time.time()
     except ValueError:
@@ -48,4 +45,4 @@ def webhook(request):
     # pull the new data asynchrnously
     for uuid in uuids:
         pull_data.delay(type_, uuid)
-    return HttpResponse('OK')
+    return HttpResponse("OK")

@@ -63,7 +63,7 @@ def get_allowed(client, url, redirect=None):
 
     if redirect:
         nose.tools.eq_(
-            response.redirect_chain, [('https://testserver:80' + redirect, 302)]
+            response.redirect_chain, [("https://testserver:80" + redirect, 302)]
         )
 
     return response
@@ -81,21 +81,20 @@ def post_allowed(client, url, data, redirect):
 def post_allowed_bad(client, url, templates, data=None):
     """Test an allowed post with bad data"""
     if data is None:
-        data = {'bad': 'data'}
+        data = {"bad": "data"}
     response = client.post(url, data, **kwargs)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
-    nose.tools.eq_([t.name for t in response.templates][:3],
-                   templates + ['base.html'])
+    nose.tools.eq_([t.name for t in response.templates][:3], templates + ["base.html"])
 
 
 def get_post_unallowed(client, url):
     """Test an unauthenticated get and post on a url that is allowed
     to be viewed only by authenticated users"""
-    redirect = '/accounts/login/?next=' + url
+    redirect = "/accounts/login/?next=" + url
     response = client.get(url, **kwargs)
     nose.tools.eq_(response.status_code, 302)
-    nose.tools.eq_(response['Location'], redirect)
+    nose.tools.eq_(response["Location"], redirect)
 
 
 def get_404(client, url):
@@ -109,7 +108,7 @@ def get_404(client, url):
 class TestFunctional(TestCase):
     """Functional tests for top level"""
 
-    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
+    @mock.patch("muckrock.task.tasks.create_ticket.delay", mock.Mock())
     def setUp(self):
         AgencyFactory()
         ArticleFactory()
@@ -130,44 +129,44 @@ class TestFunctional(TestCase):
         # should move all fixtures to factories
 
         AnswerFactory()
-        Site.objects.create(domain='www.muckrock.com')
+        Site.objects.create(domain="www.muckrock.com")
 
-        get_allowed(self.client, reverse('index'))
-        get_allowed(self.client, '/sitemap.xml')
-        get_allowed(self.client, '/sitemap-News.xml')
-        get_allowed(self.client, '/sitemap-Jurisdiction.xml')
-        get_allowed(self.client, '/sitemap-Agency.xml')
-        get_allowed(self.client, '/sitemap-Question.xml')
-        get_allowed(self.client, '/sitemap-FOIA.xml')
-        get_allowed(self.client, '/news-sitemaps/index.xml')
-        get_allowed(self.client, '/news-sitemaps/articles.xml')
-        get_allowed(self.client, '/search/')
+        get_allowed(self.client, reverse("index"))
+        get_allowed(self.client, "/sitemap.xml")
+        get_allowed(self.client, "/sitemap-News.xml")
+        get_allowed(self.client, "/sitemap-Jurisdiction.xml")
+        get_allowed(self.client, "/sitemap-Agency.xml")
+        get_allowed(self.client, "/sitemap-Question.xml")
+        get_allowed(self.client, "/sitemap-FOIA.xml")
+        get_allowed(self.client, "/news-sitemaps/index.xml")
+        get_allowed(self.client, "/news-sitemaps/articles.xml")
+        get_allowed(self.client, "/search/")
 
     def test_api_views(self):
         """Test API views"""
-        user = UserFactory(username='super', is_staff=True)
+        user = UserFactory(username="super", is_staff=True)
         self.client.force_login(user)
         api_objs = [
-            'agency',
-            'communication',
-            'crowdsource-response',
-            'exemption',
-            'flaggedtask',
-            'foia',
-            'jurisdiction',
-            'newagencytask',
-            'news',
-            'orphantask',
-            'photos',
-            'question',
-            'responsetask',
-            'snailmailtask',
-            'statistics',
-            'task',
-            'user',
+            "agency",
+            "communication",
+            "crowdsource-response",
+            "exemption",
+            "flaggedtask",
+            "foia",
+            "jurisdiction",
+            "newagencytask",
+            "news",
+            "orphantask",
+            "photos",
+            "question",
+            "responsetask",
+            "snailmailtask",
+            "statistics",
+            "task",
+            "user",
         ]
         for obj in api_objs:
-            get_allowed(self.client, reverse('api-%s-list' % obj))
+            get_allowed(self.client, reverse("api-%s-list" % obj))
 
 
 class TestUnit(TestCase):
@@ -179,12 +178,12 @@ class TestUnit(TestCase):
         field = EmailsListField(max_length=255)
 
         with nose.tools.assert_raises(ValidationError):
-            field.clean('a@example.com,not.an.email', model_instance)
+            field.clean("a@example.com,not.an.email", model_instance)
 
         with nose.tools.assert_raises(ValidationError):
-            field.clean('', model_instance)
+            field.clean("", model_instance)
 
-        field.clean('a@example.com,an.email@foo.net', model_instance)
+        field.clean("a@example.com,an.email@foo.net", model_instance)
 
 
 class TestNewsletterSignupView(TestCase):
@@ -193,71 +192,62 @@ class TestNewsletterSignupView(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.view = NewsletterSignupView.as_view()
-        self.url = reverse('newsletter')
+        self.url = reverse("newsletter")
 
     def test_get_view(self):
         """GET is not allowed - POST only"""
         response = http_get_response(self.url, self.view)
         eq_(response.status_code, 405)
 
-    @patch('muckrock.core.views.mailchimp_subscribe')
+    @patch("muckrock.core.views.mailchimp_subscribe")
     def test_post_view(self, mock_subscribe):
         """Posting an email to the list should add that email to our MailChimp list."""
-        form = NewsletterSignupForm({
-            'email': 'test@muckrock.com',
-            'list': settings.MAILCHIMP_LIST_DEFAULT
-        })
-        ok_(form.is_valid(), 'The form should validate.')
+        form = NewsletterSignupForm(
+            {"email": "test@muckrock.com", "list": settings.MAILCHIMP_LIST_DEFAULT}
+        )
+        ok_(form.is_valid(), "The form should validate.")
         response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_called_with(
             ANY,
-            form.data['email'],
-            form.data['list'],
-            source='Newsletter Sign Up Form',
-            url='{}/newsletter-post/'.format(settings.MUCKROCK_URL),
+            form.data["email"],
+            form.data["list"],
+            source="Newsletter Sign Up Form",
+            url="{}/newsletter-post/".format(settings.MUCKROCK_URL),
         )
-        eq_(
-            response.status_code, 302,
-            'Should redirect upon successful submission.'
-        )
+        eq_(response.status_code, 302, "Should redirect upon successful submission.")
 
-    @patch('muckrock.core.views.mailchimp_subscribe')
+    @patch("muckrock.core.views.mailchimp_subscribe")
     def test_post_other_list(self, mock_subscribe):
         """Posting to a list other than the default should optionally subscribe to the default."""
-        form = NewsletterSignupForm({
-            'email': 'test@muckrock.com',
-            'default': True,
-            'list': 'other'
-        })
-        ok_(form.is_valid(), 'The form should validate.')
+        form = NewsletterSignupForm(
+            {"email": "test@muckrock.com", "default": True, "list": "other"}
+        )
+        ok_(form.is_valid(), "The form should validate.")
         mock_subscribe.return_value = False
         response = http_post_response(self.url, self.view, form.data)
         mock_subscribe.assert_any_call(
             ANY,
-            form.data['email'],
-            form.data['list'],
-            source='Newsletter Sign Up Form',
-            url='{}/newsletter-post/'.format(settings.MUCKROCK_URL),
+            form.data["email"],
+            form.data["list"],
+            source="Newsletter Sign Up Form",
+            url="{}/newsletter-post/".format(settings.MUCKROCK_URL),
         )
         mock_subscribe.assert_any_call(
             ANY,
-            form.data['email'],
+            form.data["email"],
             settings.MAILCHIMP_LIST_DEFAULT,
             suppress_msg=True,
-            source='Newsletter Sign Up Form',
-            url='{}/newsletter-post/'.format(settings.MUCKROCK_URL),
+            source="Newsletter Sign Up Form",
+            url="{}/newsletter-post/".format(settings.MUCKROCK_URL),
         )
-        eq_(
-            response.status_code, 302,
-            'Should redirect upon successful submission.'
-        )
+        eq_(response.status_code, 302, "Should redirect upon successful submission.")
 
     @nottest
     def test_subscribe(self):
         """Tests the method for subscribing an email to a MailChimp list.
         This test should be disabled under normal conditions because it
         is using an external API call."""
-        _email = 'test@muckrock.com'
+        _email = "test@muckrock.com"
         _list = settings.MAILCHIMP_LIST_DEFAULT
         response = NewsletterSignupView().subscribe(_email, _list)
         eq_(response.status_code, 200)
@@ -269,9 +259,9 @@ class TestNewAction(TestCase):
     def test_basic(self):
         """An action only needs an actor and a verb."""
         actor = UserFactory()
-        verb = 'acted'
+        verb = "acted"
         action = new_action(actor, verb)
-        ok_(isinstance(action, Action), 'An Action should be returned.')
+        ok_(isinstance(action, Action), "An Action should be returned.")
         eq_(action.actor, actor)
         eq_(action.verb, verb)
 
@@ -280,16 +270,16 @@ class TestNotify(TestCase):
     """The notify function will notify one or many users about an action."""
 
     def setUp(self):
-        self.action = new_action(UserFactory(), 'acted')
+        self.action = new_action(UserFactory(), "acted")
 
     def test_single_user(self):
         """Notify a single user about an action."""
         user = UserFactory()
         notifications = notify(user, self.action)
-        ok_(isinstance(notifications, list), 'A list should be returned.')
+        ok_(isinstance(notifications, list), "A list should be returned.")
         ok_(
             isinstance(notifications[0], Notification),
-            'The list should contain notification objects.'
+            "The list should contain notification objects.",
         )
 
     def test_many_users(self):
@@ -297,47 +287,46 @@ class TestNotify(TestCase):
         users = [UserFactory(), UserFactory(), UserFactory()]
         notifications = notify(users, self.action)
         eq_(
-            len(notifications), len(users),
-            'There should be a notification for every user in the list.'
+            len(notifications),
+            len(users),
+            "There should be a notification for every user in the list.",
         )
         for user in users:
             notification_for_user = any(
                 notification.user == user for notification in notifications
             )
-            ok_(
-                notification_for_user,
-                'Each user in the list should be notified.'
-            )
+            ok_(notification_for_user, "Each user in the list should be notified.")
 
 
-@patch('stripe.Charge', Mock())
+@patch("stripe.Charge", Mock())
 class TestDonations(TestCase):
     """Tests donation functionality"""
 
     def setUp(self):
-        self.url = reverse('donate')
+        self.url = reverse("donate")
         self.view = DonationFormView.as_view()
         self.form = StripeForm
 
     def test_donate(self):
         """Donations should have a token, email, and amount.
         An email receipt should be sent for the donation."""
-        token = 'test'
-        email = 'example@test.com'
+        token = "test"
+        email = "example@test.com"
         amount = 500
         data = {
-            'stripe_token': token,
-            'stripe_email': email,
-            'stripe_amount': amount,
-            'type': 'one-time',
+            "stripe_token": token,
+            "stripe_email": email,
+            "stripe_amount": amount,
+            "type": "one-time",
         }
         form = self.form(data)
         form.is_valid()
-        ok_(form.is_valid(), 'The form should validate. %s' % form.errors)
+        ok_(form.is_valid(), "The form should validate. %s" % form.errors)
         response = http_post_response(self.url, self.view, data)
         eq_(
-            response.status_code, 302,
-            'A successful donation will return a redirection.'
+            response.status_code,
+            302,
+            "A successful donation will return a redirection.",
         )
 
 
@@ -347,16 +336,14 @@ class TestTemplatetagsFunctional(TestCase):
     def test_active(self):
         """Test the active template tag"""
         mock_request = Mock()
-        mock_request.user = 'adam'
-        mock_request.path = '/test1/adam/'
+        mock_request.user = "adam"
+        mock_request.path = "/test1/adam/"
 
-        nose.tools.eq_(
-            tags.active(mock_request, '/test1/{{user}}/'), 'current-tab'
-        )
-        nose.tools.eq_(tags.active(mock_request, '/test2/{{user}}/'), '')
+        nose.tools.eq_(tags.active(mock_request, "/test1/{{user}}/"), "current-tab")
+        nose.tools.eq_(tags.active(mock_request, "/test2/{{user}}/"), "")
 
     def test_company_title(self):
         """Test the company_title template tag"""
 
-        nose.tools.eq_(tags.company_title('one\ntwo\nthree'), 'one, et al')
-        nose.tools.eq_(tags.company_title('company'), 'company')
+        nose.tools.eq_(tags.company_title("one\ntwo\nthree"), "one, et al")
+        nose.tools.eq_(tags.company_title("company"), "company")

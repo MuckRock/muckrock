@@ -16,42 +16,41 @@ from muckrock.foia.models import FOIARequest
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking users"""
-    choices = User.objects.all().select_related('profile')
-    choice_template = 'autocomplete/user.html'
-    search_fields = ['^username', 'profile__full_name']
-    attrs = {
-        'placeholder': 'Search users',
-        'data-autocomplete-minimum-characters': 2
-    }
+
+    choices = User.objects.all().select_related("profile")
+    choice_template = "autocomplete/user.html"
+    search_fields = ["^username", "profile__full_name"]
+    attrs = {"placeholder": "Search users", "data-autocomplete-minimum-characters": 2}
 
     def __init__(self, *args, **kwargs):
         super(UserAutocomplete, self).__init__(*args, **kwargs)
         if self.request and self.request.user.is_staff:
-            self.search_fields = ['^username', 'profile__full_name', '^email']
+            self.search_fields = ["^username", "profile__full_name", "^email"]
 
     def choice_label(self, choice):
         """Uses the user's full name and username as the choice label."""
-        label = choice.profile.full_name + ' (' + choice.username + ')'
+        label = choice.profile.full_name + " (" + choice.username + ")"
         return label
 
 
 class AuthorAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
+
     choices = (
-        User.objects.annotate(article_count=Count('authored_articles'))
-        .select_related('profile').exclude(article_count=0)
+        User.objects.annotate(article_count=Count("authored_articles"))
+        .select_related("profile")
+        .exclude(article_count=0)
     )
-    attrs = {
-        'placeholder': 'Search authors',
-        'data-autocomplete-minimum-characters': 1
-    }
+    attrs = {"placeholder": "Search authors", "data-autocomplete-minimum-characters": 1}
 
 
 class UserTaskAutocomplete(UserAutocomplete):
     """Limits choices to just users with more than 1 authored article."""
+
     choices = (
-        User.objects.annotate(resolved_task_count=Count('resolved_tasks'))
-        .select_related('profile').exclude(resolved_task_count=0)
+        User.objects.annotate(resolved_task_count=Count("resolved_tasks"))
+        .select_related("profile")
+        .exclude(resolved_task_count=0)
     )
 
 
@@ -60,14 +59,12 @@ class RequestSharingAutocomplete(UserAutocomplete):
 
     def choices_for_request(self):
         # get filters
-        query = self.request.GET.get('q', '')
-        foia_id = self.request.GET.get('foiaId', '')
-        exclude_pks = self.request.GET.getlist('exclude')
+        query = self.request.GET.get("q", "")
+        foia_id = self.request.GET.get("foiaId", "")
+        exclude_pks = self.request.GET.getlist("exclude")
         # get all choices
         choices = self.choices
-        conditions = self._choices_for_request_conditions(
-            query, self.search_fields
-        )
+        conditions = self._choices_for_request_conditions(query, self.search_fields)
         choices = choices.filter(conditions)
         if foia_id:
             foia = get_object_or_404(FOIARequest, pk=foia_id)
@@ -78,7 +75,7 @@ class RequestSharingAutocomplete(UserAutocomplete):
             exclude_pks.extend([viewer.pk for viewer in viewers])
         choices = choices.exclude(pk__in=exclude_pks)
         # return final list of choices
-        return self.order_choices(choices)[0:self.limit_choices]
+        return self.order_choices(choices)[0 : self.limit_choices]
 
 
 autocomplete_light.register(User, UserAutocomplete)

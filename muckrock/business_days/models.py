@@ -19,37 +19,37 @@ class Holiday(models.Model):
     """A holiday"""
 
     kinds = (
-        ('date', 'Date'),
-        ('ord_wd', 'Ordinal Weekday'),
-        ('easter', 'Easter'),
-        ('election', 'Election'),
+        ("date", "Date"),
+        ("ord_wd", "Ordinal Weekday"),
+        ("easter", "Easter"),
+        ("election", "Election"),
     )
 
     # pylint: disable=bad-whitespace
     months = (
-        (1, 'January'),
-        (2, 'February'),
-        (3, 'March'),
-        (4, 'April'),
-        (5, 'May'),
-        (6, 'June'),
-        (7, 'July'),
-        (8, 'August'),
-        (9, 'September'),
-        (10, 'October'),
-        (11, 'November'),
-        (12, 'December'),
+        (1, "January"),
+        (2, "February"),
+        (3, "March"),
+        (4, "April"),
+        (5, "May"),
+        (6, "June"),
+        (7, "July"),
+        (8, "August"),
+        (9, "September"),
+        (10, "October"),
+        (11, "November"),
+        (12, "December"),
     )
     # pylint: enable=bad-whitespace
 
     weekdays = (
-        (0, 'Monday'),
-        (1, 'Tuesday'),
-        (2, 'Wednesday'),
-        (3, 'Thursday'),
-        (4, 'Friday'),
-        (5, 'Saturday'),
-        (6, 'Sunday'),
+        (0, "Monday"),
+        (1, "Tuesday"),
+        (2, "Wednesday"),
+        (3, "Thursday"),
+        (4, "Friday"),
+        (5, "Saturday"),
+        (6, "Sunday"),
     )
 
     name = models.CharField(max_length=255)
@@ -58,26 +58,24 @@ class Holiday(models.Model):
         choices=months,
         null=True,
         blank=True,
-        help_text='Only used for date and ordinal weekday holidays'
+        help_text="Only used for date and ordinal weekday holidays",
     )
     # date
     day = models.PositiveSmallIntegerField(
         choices=list(zip(list(range(1, 32)), list(range(1, 32)))),
         null=True,
         blank=True,
-        help_text='Only used for date holidays'
+        help_text="Only used for date holidays",
     )
     # ord weekday
     weekday = models.PositiveSmallIntegerField(
         choices=weekdays,
         null=True,
         blank=True,
-        help_text='Only used for ordinal weekday holidays'
+        help_text="Only used for ordinal weekday holidays",
     )
     num = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        help_text='Only used for ordinal weekday holidays'
+        null=True, blank=True, help_text="Only used for ordinal weekday holidays"
     )
 
     # easter and election day do not need any additional info
@@ -87,7 +85,7 @@ class Holiday(models.Model):
 
     def match(self, date_, observe_sat):
         """Is the given date an instance of this Holiday?"""
-        table = dict((k, getattr(self, '_match_%s' % k)) for k, _ in self.kinds)
+        table = dict((k, getattr(self, "_match_%s" % k)) for k, _ in self.kinds)
         return table[self.kind](date_, observe_sat)
 
     def _match_date(self, date_, observe_sat):
@@ -104,9 +102,9 @@ class Holiday(models.Model):
         if weekday == FRI and not observe_sat:
             alt_date = date_ + timedelta(1)
 
-        return (date_.day == self.day and date_.month == self.month) or \
-               (alt_date and \
-                alt_date.day == self.day and alt_date.month == self.month)
+        return (date_.day == self.day and date_.month == self.month) or (
+            alt_date and alt_date.day == self.day and alt_date.month == self.month
+        )
 
     def _match_ord_wd(self, date_, _):
         """match for ord weekday type holidays"""
@@ -122,15 +120,19 @@ class Holiday(models.Model):
     def _match_easter(self, date_, _):
         """match for easter based dates"""
         offset = {
-            'Good Friday': timedelta(-2),
-            'Easter': timedelta(0),
+            "Good Friday": timedelta(-2),
+            "Easter": timedelta(0),
         }
         return date_ == easter(date_.year) + offset[self.name]
 
     def _match_election(self, date_, _):
         """match for election day"""
-        return date_.month == NOV and date_.weekday() == TUES and \
-               date_.day >= 2 and date_.day <= 8
+        return (
+            date_.month == NOV
+            and date_.weekday() == TUES
+            and date_.day >= 2
+            and date_.day <= 8
+        )
 
 
 class HolidayCalendar(object):

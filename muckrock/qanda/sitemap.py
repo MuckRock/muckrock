@@ -13,12 +13,12 @@ class QuestionSitemap(Sitemap):
     """Sitemap for Questions"""
 
     priority = 0.7
-    changefreq = 'weekly'
+    changefreq = "weekly"
     limit = 500
 
     def items(self):
         """Return all questions"""
-        return Question.objects.prefetch_related('answers').all()
+        return Question.objects.prefetch_related("answers").all()
 
     def lastmod(self, obj):
         """Last modified?"""

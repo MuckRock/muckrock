@@ -22,7 +22,7 @@ def list_to_english_string(the_list):
     # convert list items to strings and remove empty strings
     str_list = [str(each_item) for each_item in the_list if str(each_item)]
     num_str = len(str_list)
-    ret_str = ''
+    ret_str = ""
     # base case is that the list is empty
     if num_str == 0:
         return ret_str
@@ -31,10 +31,10 @@ def list_to_english_string(the_list):
     if num_str == 1:
         ret_str = last_str
     elif num_str == 2:
-        ret_str = str_list[0] + ' and ' + last_str
+        ret_str = str_list[0] + " and " + last_str
     else:
-        sans_last_str = str_list[:num_str - 1]
-        ret_str = (', ').join(sans_last_str) + ', and ' + last_str
+        sans_last_str = str_list[: num_str - 1]
+        ret_str = (", ").join(sans_last_str) + ", and " + last_str
     return ret_str
 
 
@@ -50,24 +50,24 @@ def get_initial_amount(crowdfund):
 def crowdfund_form(crowdfund):
     """Returns a form initialized with crowdfund data"""
     initial_data = {
-        'show': True,
-        'crowdfund': crowdfund.pk,
-        'stripe_amount': get_initial_amount(crowdfund)
+        "show": True,
+        "crowdfund": crowdfund.pk,
+        "stripe_amount": get_initial_amount(crowdfund),
     }
     return CrowdfundPaymentForm(initial=initial_data)
 
 
 def crowdfund_user(context):
     """Returns a tuple of user information"""
-    logged_in = context['user'].is_authenticated
-    user_email = context['user'].email if logged_in else ''
+    logged_in = context["user"].is_authenticated
+    user_email = context["user"].email if logged_in else ""
     return (logged_in, user_email)
 
 
 def contributor_summary(named_contributors, contributors_count, anonymous):
     """Returns a summary of the contributors to the project"""
     contributor_names = [x.profile.full_name for x in named_contributors]
-    unnamed_string = ''
+    unnamed_string = ""
     named_limit = 4
     num_unnamed = len(contributor_names) - named_limit
     # prevents num_unnamed from being a negative value
@@ -76,69 +76,67 @@ def contributor_summary(named_contributors, contributors_count, anonymous):
         unnamed_string = str(num_unnamed + anonymous)
         # if named and unnamed together, use 'other/others'
         if len(contributor_names) > 0:
-            unnamed_string += ' other'
+            unnamed_string += " other"
             if (anonymous + num_unnamed) > 1:
-                unnamed_string += 's'
+                unnamed_string += "s"
         # if only unnamed, use 'person/people'
         else:
             if (anonymous + num_unnamed) > 1:
-                unnamed_string += ' people'
+                unnamed_string += " people"
             else:
-                unnamed_string += ' person'
+                unnamed_string += " person"
     if contributors_count > 0:
         summary = (
-            'Backed by ' + list_to_english_string(
-                contributor_names[:named_limit] + [unnamed_string]
-            ) + '.'
+            "Backed by "
+            + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
+            + "."
         )
     else:
-        summary = 'No backers yet. Be the first!'
+        summary = "No backers yet. Be the first!"
     return summary
 
 
 def generate_crowdfund_context(crowdfund, context):
     """Generates context that's agnostic towards the object being crowdfunded."""
-    endpoint = reverse('crowdfund', kwargs={'pk': crowdfund.pk})
+    endpoint = reverse("crowdfund", kwargs={"pk": crowdfund.pk})
     payment_form = crowdfund_form(crowdfund)
     logged_in, user_email = crowdfund_user(context)
     request = context.request
-    named, contrib_count, anon_count = (
-        cache_get_or_set(
-            'cf:%s:crowdfund_widget_data' % crowdfund.pk, lambda: (
-                list(crowdfund.named_contributors()),
-                crowdfund.contributors_count(),
-                crowdfund.anonymous_contributors_count(),
-            ), settings.DEFAULT_CACHE_TIMEOUT
-        )
+    named, contrib_count, anon_count = cache_get_or_set(
+        "cf:%s:crowdfund_widget_data" % crowdfund.pk,
+        lambda: (
+            list(crowdfund.named_contributors()),
+            crowdfund.contributors_count(),
+            crowdfund.anonymous_contributors_count(),
+        ),
+        settings.DEFAULT_CACHE_TIMEOUT,
     )
     contrib_sum = contributor_summary(named, contrib_count, anon_count)
     obj_url = crowdfund.get_crowdfund_object().get_absolute_url()
     # Remove the autofocus attribute from the login form in order to not scroll down
     # to the crowdfund widget on page load
     login_form = AuthenticationForm()
-    login_form.fields['username'].widget.attrs.pop('autofocus', None)
+    login_form.fields["username"].widget.attrs.pop("autofocus", None)
     return {
-        'crowdfund': crowdfund,
-        'named_contributors': named,
-        'contributors_count': contrib_count,
-        'anon_contributors_count': anon_count,
-        'contributor_summary': contrib_sum,
-        'endpoint': endpoint,
-        'login_form': login_form,
-        'logged_in': logged_in,
-        'user_email': user_email,
-        'payment_form': payment_form,
-        'request': request,
-        'stripe_pk': settings.STRIPE_PUB_KEY,
-        'obj_url': obj_url,
-        'domain': context['domain'],
+        "crowdfund": crowdfund,
+        "named_contributors": named,
+        "contributors_count": contrib_count,
+        "anon_contributors_count": anon_count,
+        "contributor_summary": contrib_sum,
+        "endpoint": endpoint,
+        "login_form": login_form,
+        "logged_in": logged_in,
+        "user_email": user_email,
+        "payment_form": payment_form,
+        "request": request,
+        "stripe_pk": settings.STRIPE_PUB_KEY,
+        "obj_url": obj_url,
+        "domain": context["domain"],
     }
 
 
 @register.inclusion_tag(
-    'crowdfund/widget.html',
-    name='crowdfund',
-    takes_context=True,
+    "crowdfund/widget.html", name="crowdfund", takes_context=True,
 )
 def crowdfund_tag(context, crowdfund_pk=None, crowdfund=None):
     """Template tag to insert a crowdfunding widget"""

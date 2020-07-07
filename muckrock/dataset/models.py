@@ -34,7 +34,7 @@ class DataSetQuerySet(models.QuerySet):
         for header in headers:
             slug = slugify(header)
             if slug in seen:
-                slug_headers.append('{}-{}'.format(slug, seen[slug]))
+                slug_headers.append("{}-{}".format(slug, seen[slug]))
             else:
                 slug_headers.append(slug)
             seen[slug] += 1
@@ -58,67 +58,47 @@ class DataSetQuerySet(models.QuerySet):
     def _create_from(self, creator, user):
         """Create a data set from some source"""
         # pylint: disable=broad-except
-        dataset = self.create(
-            name=creator.get_name(),
-            user=user,
-            status='processing',
-        )
+        dataset = self.create(name=creator.get_name(), user=user, status="processing",)
         try:
             headers = creator.get_headers()
             slug_headers = self._unique_slugify(headers)
             for i, (name, slug) in enumerate(zip(headers, slug_headers)):
                 dataset.fields.create(
-                    name=name,
-                    slug=slug,
-                    field_number=i,
+                    name=name, slug=slug, field_number=i,
                 )
             for i, row in enumerate(creator.get_rows()):
                 dataset.rows.create(
-                    data=dict(zip_longest(
-                        slug_headers,
-                        row,
-                        fillvalue='',
-                    )),
+                    data=dict(zip_longest(slug_headers, row, fillvalue="",)),
                     row_number=i,
                 )
 
             dataset.detect_field_types()
         except Exception as exc:
             logger.error(
-                'DataSet creation: %s',
-                exc,
-                exc_info=sys.exc_info(),
+                "DataSet creation: %s", exc, exc_info=sys.exc_info(),
             )
-            dataset.status = 'error'
+            dataset.status = "error"
             dataset.save()
         else:
-            dataset.status = 'ready'
+            dataset.status = "ready"
             dataset.save()
         return dataset
 
 
 class DataSet(models.Model):
     """A set of data"""
+
     name = models.CharField(max_length=255,)
     slug = models.SlugField(max_length=255,)
-    user = models.ForeignKey(
-        'auth.User',
-        on_delete=models.PROTECT,
-    )
+    user = models.ForeignKey("auth.User", on_delete=models.PROTECT,)
     created_datetime = models.DateTimeField(auto_now_add=True)
     custom_format = models.CharField(
-        max_length=5,
-        choices=(('', '---'), ('email', 'Email Viewer')),
-        blank=True,
+        max_length=5, choices=(("", "---"), ("email", "Email Viewer")), blank=True,
     )
     status = models.CharField(
         max_length=10,
-        choices=(
-            ('processing', 'Processing'),
-            ('error', 'Error'),
-            ('ready', 'Ready'),
-        ),
-        default='ready',
+        choices=(("processing", "Processing"), ("error", "Error"), ("ready", "Ready"),),
+        default="ready",
     )
 
     objects = DataSetQuerySet.as_manager()
@@ -128,11 +108,7 @@ class DataSet(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
-        return reverse(
-            'dataset-detail',
-            kwargs={'slug': self.slug,
-                    'idx': self.pk},
-        )
+        return reverse("dataset-detail", kwargs={"slug": self.slug, "idx": self.pk},)
 
     def detect_field_types(self):
         """Auto detect column types"""
@@ -141,17 +117,12 @@ class DataSet(models.Model):
         fields = self.fields.all()
         for field in fields:
             for field_type in FIELDS:
-                has_validate_all = hasattr(field_type, 'validate_all')
-                validate_all = (
-                    has_validate_all and field_type.validate_all([
-                        row.data[field.slug] for row in rows
-                    ])
+                has_validate_all = hasattr(field_type, "validate_all")
+                validate_all = has_validate_all and field_type.validate_all(
+                    [row.data[field.slug] for row in rows]
                 )
-                all_valid = (
-                    not has_validate_all and all(
-                        field_type.validate(row.data[field.slug])
-                        for row in rows
-                    )
+                all_valid = not has_validate_all and all(
+                    field_type.validate(row.data[field.slug]) for row in rows
                 )
                 if validate_all or all_valid:
                     field.type = field_type.slug
@@ -177,19 +148,14 @@ class DataFieldQuerySet(models.QuerySet):
 
 class DataField(models.Model):
     """A column of a data set"""
+
     dataset = models.ForeignKey(
-        DataSet,
-        related_name='fields',
-        on_delete=models.CASCADE,
+        DataSet, related_name="fields", on_delete=models.CASCADE,
     )
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     field_number = models.PositiveSmallIntegerField()
-    type = models.CharField(
-        max_length=6,
-        choices=FIELD_CHOICES,
-        default='text',
-    )
+    type = models.CharField(max_length=6, choices=FIELD_CHOICES, default="text",)
     hidden = models.BooleanField(default=False)
 
     objects = DataFieldQuerySet.as_manager()
@@ -214,9 +180,10 @@ class DataField(models.Model):
     def choices(self):
         """Get all possible values for a choices field type"""
         return (
-            self.dataset.rows.annotate(choices=KeyTransform(self.slug, 'data')
-                                       ).values_list('choices', flat=True
-                                                     ).order_by().distinct()
+            self.dataset.rows.annotate(choices=KeyTransform(self.slug, "data"))
+            .values_list("choices", flat=True)
+            .order_by()
+            .distinct()
         )
 
     @property
@@ -225,21 +192,21 @@ class DataField(models.Model):
         return FIELD_DICT[self.type]
 
     class Meta:
-        ordering = ('field_number',)
+        ordering = ("field_number",)
         unique_together = [
-            ('dataset', 'slug'),
-            ('dataset', 'field_number'),
+            ("dataset", "slug"),
+            ("dataset", "field_number"),
         ]
 
 
 FILTER_TYPES = {
-    'like': 'icontains',
-    '=': 'iexact',
-    '<': 'lt',
-    '<=': 'lte',
-    '>': 'gt',
-    '>=': 'gte',
-    '!=': 'iexact',
+    "like": "icontains",
+    "=": "iexact",
+    "<": "lt",
+    "<=": "lte",
+    ">": "gt",
+    ">=": "gte",
+    "!=": "iexact",
 }
 
 
@@ -250,13 +217,13 @@ class DataRowQuerySet(models.QuerySet):
         """Sort the data given tabulator style sorter params"""
         queryset = self.all()
         for sorter in sorters:
-            if sorter['field'] not in fields:
+            if sorter["field"] not in fields:
                 continue
-            descending = sorter['dir'] == 'desc'
-            type_ = fields[sorter['field']].field.sort_type
+            descending = sorter["dir"] == "desc"
+            type_ = fields[sorter["field"]].field.sort_type
             queryset = queryset.order_by(
                 OrderBy(
-                    RawSQL('(data->>%s)::{}'.format(type_), (sorter['field'],)),
+                    RawSQL("(data->>%s)::{}".format(type_), (sorter["field"],)),
                     descending=descending,
                 )
             )
@@ -266,15 +233,14 @@ class DataRowQuerySet(models.QuerySet):
         """Filter data given tabulator style filter params"""
         queryset = self.all()
         for filter_ in filters:
-            if filter_['field'] not in fields:
+            if filter_["field"] not in fields:
                 continue
             kwargs = {
-                'data__{}__{}'.format(
-                    filter_['field'], FILTER_TYPES[filter_['type']]
-                ):
-                    filter_['value']
+                "data__{}__{}".format(
+                    filter_["field"], FILTER_TYPES[filter_["type"]]
+                ): filter_["value"]
             }
-            if filter_['type'] == '!=':
+            if filter_["type"] == "!=":
                 queryset = queryset.exclude(**kwargs)
             else:
                 queryset = queryset.filter(**kwargs)
@@ -283,19 +249,16 @@ class DataRowQuerySet(models.QuerySet):
 
 class DataRow(models.Model):
     """A row of a data set"""
-    dataset = models.ForeignKey(
-        DataSet,
-        related_name='rows',
-        on_delete=models.CASCADE,
-    )
+
+    dataset = models.ForeignKey(DataSet, related_name="rows", on_delete=models.CASCADE,)
     row_number = models.PositiveIntegerField(db_index=True)
     data = JSONField()
 
     objects = DataRowQuerySet.as_manager()
 
     def __str__(self):
-        return 'Row #{}'.format(self.row_number)
+        return "Row #{}".format(self.row_number)
 
     class Meta:
-        ordering = ('row_number',)
-        unique_together = ('dataset', 'row_number')
+        ordering = ("row_number",)
+        unique_together = ("dataset", "row_number")

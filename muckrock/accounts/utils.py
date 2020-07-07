@@ -31,12 +31,11 @@ def unique_username(name):
     """Create a globally unique username from a name and return it."""
     # username can be at most 150 characters
     # strips illegal characters from username
-    base_username = re.sub(r'[^\w\-.@]', '', name)[:141]
+    base_username = re.sub(r"[^\w\-.@]", "", name)[:141]
     username = base_username
     while User.objects.filter(username__iexact=username).exists():
-        username = '{}_{}'.format(
-            base_username,
-            ''.join(random.sample(string.ascii_letters, 8)),
+        username = "{}_{}".format(
+            base_username, "".join(random.sample(string.ascii_letters, 8)),
         )
     return username
 
@@ -69,61 +68,46 @@ def mailchimp_subscribe(
 ):
     """Adds the email to the mailing list throught the MailChimp API.
     http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/"""
-    api_url = settings.MAILCHIMP_API_ROOT + '/lists/' + list_ + '/members/'
+    api_url = settings.MAILCHIMP_API_ROOT + "/lists/" + list_ + "/members/"
     headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'apikey %s' % settings.MAILCHIMP_API_KEY
+        "Content-Type": "application/json",
+        "Authorization": "apikey %s" % settings.MAILCHIMP_API_KEY,
     }
     merge_fields = {}
-    if 'url' in kwargs:
-        merge_fields['URL'] = kwargs['url']
-    if 'source' in kwargs:
-        merge_fields['SOURCE'] = kwargs['source']
+    if "url" in kwargs:
+        merge_fields["URL"] = kwargs["url"]
+    if "source" in kwargs:
+        merge_fields["SOURCE"] = kwargs["source"]
     data = {
-        'email_address': email,
-        'status': 'subscribed',
-        'merge_fields': merge_fields,
+        "email_address": email,
+        "status": "subscribed",
+        "merge_fields": merge_fields,
     }
     response = retry_on_error(
-        requests.ConnectionError,
-        requests.post,
-        api_url,
-        json=data,
-        headers=headers,
+        requests.ConnectionError, requests.post, api_url, json=data, headers=headers,
     )
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as exception:
-        if (
-            response.status_code == 400
-            and response.json()['title'] == 'Member Exists'
-        ):
-            if not kwargs.get('suppress_msg'):
-                messages.error(
-                    request, 'Email is already a member of this list'
-                )
+        if response.status_code == 400 and response.json()["title"] == "Member Exists":
+            if not kwargs.get("suppress_msg"):
+                messages.error(request, "Email is already a member of this list")
         else:
-            if not kwargs.get('suppress_msg'):
+            if not kwargs.get("suppress_msg"):
                 messages.error(
-                    request,
-                    'Sorry, an error occurred while trying to subscribe you.',
+                    request, "Sorry, an error occurred while trying to subscribe you.",
                 )
             logger.warning(exception)
         return True
 
-    if not kwargs.get('suppress_msg'):
+    if not kwargs.get("suppress_msg"):
         messages.success(
             request,
-            'Thank you for subscribing to our newsletter. We sent a '
-            'confirmation email to your inbox.',
+            "Thank you for subscribing to our newsletter. We sent a "
+            "confirmation email to your inbox.",
         )
     mixpanel_event(
-        request,
-        'Newsletter Sign Up',
-        {
-            'Email': email,
-            'List': list_,
-        },
+        request, "Newsletter Sign Up", {"Email": email, "List": list_,},
     )
     return False
 
@@ -135,22 +119,20 @@ def mixpanel_event(request, event, props=None, **kwargs):
     # only tracking logged in users for now
     if props is None:
         props = {}
-    if 'mp_events' in request.session:
-        request.session['mp_events'].append(
-            (event, mark_safe(json.dumps(props)))
-        )
+    if "mp_events" in request.session:
+        request.session["mp_events"].append((event, mark_safe(json.dumps(props))))
     else:
-        request.session['mp_events'] = [(event, mark_safe(json.dumps(props)))]
-    if kwargs.get('signup'):
-        request.session['mp_alias'] = True
-    if kwargs.get('charge'):
-        request.session['mp_charge'] = kwargs['charge']
+        request.session["mp_events"] = [(event, mark_safe(json.dumps(props)))]
+    if kwargs.get("signup"):
+        request.session["mp_alias"] = True
+    if kwargs.get("charge"):
+        request.session["mp_charge"] = kwargs["charge"]
 
 
 def mini_login(request, username, password):
     """Provide authentication via squarelet via the password grant type"""
     strategy = load_strategy(request)
-    backend = load_backend(strategy, 'squarelet', redirect_uri=None)
+    backend = load_backend(strategy, "squarelet", redirect_uri=None)
     backend.password_grant_auth = (username, password)
     backend.STATE_PARAMETER = False
     backend.REDIRECT_STATE = False
@@ -160,5 +142,4 @@ def mini_login(request, username, password):
 
 def user_entitlement_count(entitlement):
     """Count how many users have a certain entitlement"""
-    User.objects.filter(organizations__entitlement__slug=entitlement
-                        ).distinct().count()
+    User.objects.filter(organizations__entitlement__slug=entitlement).distinct().count()

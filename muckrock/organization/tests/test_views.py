@@ -23,7 +23,7 @@ class OrganizationViewsTests(TestCase):
 
     def test_index(self):
         """The index should redirect"""
-        response = self.client.get(reverse('org-index'))
+        response = self.client.get(reverse("org-index"))
         eq_(response.status_code, 200)
 
     def test_detail(self):

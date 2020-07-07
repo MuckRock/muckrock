@@ -23,4 +23,4 @@ def is_member(user, org):
     return org.has_member(user)
 
 
-add_perm('organization.view', ~private | is_staff | is_member)
+add_perm("organization.view", ~private | is_staff | is_member)

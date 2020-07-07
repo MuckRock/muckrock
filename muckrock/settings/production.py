@@ -10,7 +10,7 @@ Imports from the heroku settings
 from muckrock.settings.heroku import *
 
 # Security
-SECURE_HSTS_SECONDS = 31536000  #one year
+SECURE_HSTS_SECONDS = 31536000  # one year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_FRAME_DENY = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -21,12 +21,12 @@ SESSION_COOKIE_SECURE = True
 
 PREPEND_WWW = False
 
-if boolcheck(os.environ.get('USE_CELERY_EMAIL', True)):
-    CELERY_EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
-    EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+if boolcheck(os.environ.get("USE_CELERY_EMAIL", True)):
+    CELERY_EMAIL_BACKEND = "django_mailgun.MailgunBackend"
+    EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
 else:
-    EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+    EMAIL_BACKEND = "django_mailgun.MailgunBackend"
 
-MUCKROCK_URL = 'https://www.muckrock.com'
-FOIAMACHINE_URL = 'https://www.foiamachine.org'
-SQUARELET_URL = 'https://accounts.muckrock.com'
+MUCKROCK_URL = "https://www.muckrock.com"
+FOIAMACHINE_URL = "https://www.foiamachine.org"
+SQUARELET_URL = "https://accounts.muckrock.com"

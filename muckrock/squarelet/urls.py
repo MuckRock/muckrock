@@ -7,5 +7,5 @@ from django.conf.urls import url
 from muckrock.squarelet import views
 
 urlpatterns = [
-    url(r'^webhook/$', views.webhook, name='squarelet-webhook'),
+    url(r"^webhook/$", views.webhook, name="squarelet-webhook"),
 ]

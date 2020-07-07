@@ -34,9 +34,9 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     uuid = factory.LazyFunction(uuid4)
 
     user = factory.SubFactory(
-        'muckrock.core.factories.UserFactory',
+        "muckrock.core.factories.UserFactory",
         profile=None,
-        uuid=factory.SelfAttribute('..uuid'),
+        uuid=factory.SelfAttribute("..uuid"),
     )
 
 
@@ -47,11 +47,11 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: "user_%d" % n)
-    email = factory.Faker('email')
-    profile = factory.RelatedFactory(ProfileFactory, 'user')
+    email = factory.Faker("email")
+    profile = factory.RelatedFactory(ProfileFactory, "user")
     membership = factory.RelatedFactory(
-        'muckrock.organization.factories.MembershipFactory',
-        'user',
+        "muckrock.organization.factories.MembershipFactory",
+        "user",
         organization__individual=True,
     )
 
@@ -77,17 +77,19 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 class ProfessionalUserFactory(UserFactory):
     """A professional user"""
+
     # pylint: disable=invalid-name
     membership__organization__entitlement = factory.SubFactory(
-        'muckrock.organization.factories.ProfessionalEntitlementFactory'
+        "muckrock.organization.factories.ProfessionalEntitlementFactory"
     )
 
 
 class OrganizationUserFactory(UserFactory):
     """An organization user"""
+
     # pylint: disable=invalid-name
     membership__organization__entitlement = factory.SubFactory(
-        'muckrock.organization.factories.OrganizationEntitlementFactory'
+        "muckrock.organization.factories.OrganizationEntitlementFactory"
     )
 
 
@@ -98,7 +100,7 @@ class NotificationFactory(factory.django.DjangoModelFactory):
         model = Notification
 
     user = factory.SubFactory(UserFactory)
-    action = factory.LazyAttribute(lambda obj: new_action(obj.user, 'acted'))
+    action = factory.LazyAttribute(lambda obj: new_action(obj.user, "acted"))
 
 
 class AgencyFactory(factory.django.DjangoModelFactory):
@@ -110,20 +112,19 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Agency %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     jurisdiction = factory.SubFactory(
-        'muckrock.jurisdiction.factories.StateJurisdictionFactory'
+        "muckrock.jurisdiction.factories.StateJurisdictionFactory"
     )
-    status = 'approved'
+    status = "approved"
     email = factory.RelatedFactory(
-        'muckrock.core.factories.AgencyEmailFactory',
-        'agency',
+        "muckrock.core.factories.AgencyEmailFactory", "agency",
     )
     fax = factory.RelatedFactory(
-        'muckrock.core.factories.AgencyPhoneFactory',
-        'agency',
-        request_type='primary',
-        phone__type='fax',
+        "muckrock.core.factories.AgencyPhoneFactory",
+        "agency",
+        request_type="primary",
+        phone__type="fax",
     )
-    profile = factory.RelatedFactory(ProfileFactory, 'agency')
+    profile = factory.RelatedFactory(ProfileFactory, "agency")
 
     @factory.post_generation
     def other_emails(self, create, extracted, **kwargs):
@@ -133,10 +134,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
             # A list of emails were passed in, use them
             for email in EmailAddress.objects.fetch_many(extracted):
                 AgencyEmailFactory(
-                    agency=self,
-                    email=email,
-                    request_type='primary',
-                    email_type='cc',
+                    agency=self, email=email, request_type="primary", email_type="cc",
                 )
 
 
@@ -146,12 +144,10 @@ class AgencyEmailFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AgencyEmail
 
-    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
-    email = factory.SubFactory(
-        'muckrock.communication.factories.EmailAddressFactory'
-    )
-    request_type = 'primary'
-    email_type = 'to'
+    agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
+    email = factory.SubFactory("muckrock.communication.factories.EmailAddressFactory")
+    request_type = "primary"
+    email_type = "to"
 
 
 class AgencyPhoneFactory(factory.django.DjangoModelFactory):
@@ -160,19 +156,16 @@ class AgencyPhoneFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AgencyPhone
 
-    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
-    phone = factory.SubFactory(
-        'muckrock.communication.factories.PhoneNumberFactory'
-    )
-    request_type = 'none'
+    agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
+    phone = factory.SubFactory("muckrock.communication.factories.PhoneNumberFactory")
+    request_type = "none"
 
 
 class AppealAgencyFactory(AgencyFactory):
     """A factory for creating an Agency that accepts email appeals."""
+
     email = factory.RelatedFactory(
-        'muckrock.core.factories.AgencyEmailFactory',
-        'agency',
-        request_type='appeal',
+        "muckrock.core.factories.AgencyEmailFactory", "agency", request_type="appeal",
     )
 
 
@@ -193,7 +186,7 @@ class CrowdfundFactory(factory.django.DjangoModelFactory):
         model = Crowdfund
 
     name = factory.Sequence(lambda n: "Crowdfund %d" % n)
-    description = factory.Faker('paragraph')
+    description = factory.Faker("paragraph")
     payment_required = 100.00
     date_due = factory.LazyAttribute(
         lambda obj: datetime.date.today() + datetime.timedelta(30)
@@ -209,7 +202,7 @@ class QuestionFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     title = factory.Sequence(lambda n: "Question %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    question = factory.Faker('paragraph')
+    question = factory.Faker("paragraph")
     date = factory.LazyAttribute(lambda obj: timezone.now())
 
 
@@ -222,7 +215,7 @@ class AnswerFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     date = factory.LazyAttribute(lambda obj: timezone.now())
     question = factory.SubFactory(QuestionFactory)
-    answer = factory.Faker('paragraph')
+    answer = factory.Faker("paragraph")
 
 
 class ArticleFactory(factory.django.DjangoModelFactory):
@@ -233,8 +226,8 @@ class ArticleFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence(lambda n: "Article %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    summary = factory.Faker('paragraph')
-    body = factory.Faker('paragraph')
+    summary = factory.Faker("paragraph")
+    body = factory.Faker("paragraph")
 
     @factory.post_generation
     def authors(self, create, extracted, **kwargs):

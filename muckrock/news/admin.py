@@ -17,14 +17,16 @@ from muckrock.news.models import Article, Photo
 
 class AuthorListFilter(admin.SimpleListFilter):
     """Filter by authors"""
-    title = 'Author'
-    parameter_name = 'author'
+
+    title = "Author"
+    parameter_name = "author"
 
     def lookups(self, request, model_admin):
         """All authors"""
         authors = (
             User.objects.exclude(authored_articles=None)
-            .select_related('profile').order_by('profile__full_name')
+            .select_related("profile")
+            .order_by("profile__full_name")
         )
         return tuple((a.pk, a.profile.full_name) for a in authors)
 
@@ -38,36 +40,36 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with autocompletes"""
 
     authors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete', queryset=User.objects.all()
+        "UserAutocomplete", queryset=User.objects.all()
     )
     editors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete', queryset=User.objects.all(), required=False
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
     foias = autocomplete_light.ModelMultipleChoiceField(
-        'FOIARequestAdminAutocomplete', required=False
+        "FOIARequestAdminAutocomplete", required=False
     )
 
     class Meta:
         model = Article
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""
+
     # pylint: disable=too-many-public-methods
     form = ArticleAdminForm
-    prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'get_authors_names', 'pub_date', 'publish')
-    list_filter = ['pub_date', AuthorListFilter]
-    date_hierarchy = 'pub_date'
-    search_fields = ['title', 'body']
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = ("title", "get_authors_names", "pub_date", "publish")
+    list_filter = ["pub_date", AuthorListFilter]
+    date_hierarchy = "pub_date"
+    search_fields = ["title", "body"]
     save_on_top = True
 
     def get_queryset(self, request):
         """Prefetch authors"""
         return (
-            super(ArticleAdmin, self).get_queryset(request)
-            .prefetch_related('authors')
+            super(ArticleAdmin, self).get_queryset(request).prefetch_related("authors")
         )
 
 

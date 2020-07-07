@@ -19,30 +19,32 @@ from muckrock.project.models import Project
 
 class ProjectAdminForm(forms.ModelForm):
     """Form to include autocomplete fields"""
+
     requests = autocomplete_light.ModelMultipleChoiceField(
-        'FOIARequestAdminAutocomplete',
+        "FOIARequestAdminAutocomplete",
         queryset=FOIARequest.objects.all(),
-        required=False
+        required=False,
     )
     contributors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete', queryset=User.objects.all(), required=False
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
     articles = autocomplete_light.ModelMultipleChoiceField(
-        'ArticleAutocomplete', queryset=Article.objects.all(), required=False
+        "ArticleAutocomplete", queryset=Article.objects.all(), required=False
     )
 
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProjectAdmin(VersionAdmin):
     """Admin interface for Project model"""
+
     form = ProjectAdminForm
-    prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'private', 'approved', 'featured')
-    list_filter = ('approved', 'private', 'featured')
-    search_fields = ('title', 'description', 'summary')
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = ("title", "private", "approved", "featured")
+    list_filter = ("approved", "private", "featured")
+    search_fields = ("title", "description", "summary")
 
 
 admin.site.register(Project, ProjectAdmin)

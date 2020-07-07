@@ -9,32 +9,32 @@ from django.conf.urls import url
 from muckrock.project import views
 
 urlpatterns = [
-    url(r'^$', views.ProjectExploreView.as_view(), name='project'),
-    url(r'^list/$', views.ProjectListView.as_view(), name='project-list'),
+    url(r"^$", views.ProjectExploreView.as_view(), name="project"),
+    url(r"^list/$", views.ProjectListView.as_view(), name="project-list"),
     url(
-        r'^contributor/(?P<username>[\w\-.@+ ]+)/$',
+        r"^contributor/(?P<username>[\w\-.@+ ]+)/$",
         views.ProjectContributorView.as_view(),
-        name='project-contributor'
+        name="project-contributor",
     ),
-    url(r'^create/$', views.ProjectCreateView.as_view(), name='project-create'),
+    url(r"^create/$", views.ProjectCreateView.as_view(), name="project-create"),
     url(
-        r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/$',
+        r"^(?P<slug>[\w-]+)-(?P<pk>\d+)/$",
         views.ProjectDetailView.as_view(),
-        name='project-detail'
+        name="project-detail",
     ),
     url(
-        r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/edit/$',
+        r"^(?P<slug>[\w-]+)-(?P<pk>\d+)/edit/$",
         views.ProjectEditView.as_view(),
-        name='project-edit'
+        name="project-edit",
     ),
     url(
-        r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/publish/$',
+        r"^(?P<slug>[\w-]+)-(?P<pk>\d+)/publish/$",
         views.ProjectPublishView.as_view(),
-        name='project-publish'
+        name="project-publish",
     ),
     url(
-        r'^(?P<slug>[\w-]+)-(?P<pk>\d+)/crowdfund/$',
+        r"^(?P<slug>[\w-]+)-(?P<pk>\d+)/crowdfund/$",
         views.ProjectCrowdfundView.as_view(),
-        name='project-crowdfund'
+        name="project-crowdfund",
     ),
 ]

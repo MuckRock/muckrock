@@ -34,11 +34,8 @@ class TestCrowdsourceDetailView(TestCase):
         """Anonymous users cannot view a crowdsource's details"""
         crowdsource = CrowdsourceFactory()
         url = reverse(
-            'crowdsource-detail',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-detail",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -50,11 +47,8 @@ class TestCrowdsourceDetailView(TestCase):
         """Authenticated users cannot view a crowdsource's details"""
         crowdsource = CrowdsourceFactory()
         url = reverse(
-            'crowdsource-detail',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-detail",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -66,11 +60,8 @@ class TestCrowdsourceDetailView(TestCase):
         """Owner can view a crowdsource's details"""
         crowdsource = CrowdsourceFactory()
         url = reverse(
-            'crowdsource-detail',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-detail",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -82,11 +73,8 @@ class TestCrowdsourceDetailView(TestCase):
         """Staff can view a crowdsource's details"""
         crowdsource = CrowdsourceFactory()
         url = reverse(
-            'crowdsource-detail',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-detail",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -99,11 +87,8 @@ class TestCrowdsourceDetailView(TestCase):
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(project_admin=True, project=project)
         url = reverse(
-            'crowdsource-detail',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-detail",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -119,11 +104,8 @@ class TestCrowdsourceDetailView(TestCase):
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(project_admin=False, project=project)
         url = reverse(
-            'crowdsource-detail',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-detail",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -142,13 +124,10 @@ class TestCrowdsourceFormView(TestCase):
 
     def test_public(self):
         """Anybody can fill out a public assignment"""
-        crowdsource = CrowdsourceFactory(status='open')
+        crowdsource = CrowdsourceFactory(status="open")
         url = reverse(
-            'crowdsource-assignment',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-assignment",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -160,16 +139,11 @@ class TestCrowdsourceFormView(TestCase):
         """Everybody cannot fill out a private assignment"""
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(
-            status='open',
-            project_only=True,
-            project=project,
+            status="open", project_only=True, project=project,
         )
         url = reverse(
-            'crowdsource-assignment',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-assignment",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -181,16 +155,11 @@ class TestCrowdsourceFormView(TestCase):
         """Project members can fill out a private assignment"""
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(
-            status='open',
-            project_only=True,
-            project=project,
+            status="open", project_only=True, project=project,
         )
         url = reverse(
-            'crowdsource-assignment',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-assignment",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -203,16 +172,11 @@ class TestCrowdsourceFormView(TestCase):
         """Crowdsource owner can fill out a private assignment"""
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(
-            status='open',
-            project_only=True,
-            project=project,
+            status="open", project_only=True, project=project,
         )
         url = reverse(
-            'crowdsource-assignment',
-            kwargs={
-                'slug': crowdsource.slug,
-                'idx': crowdsource.pk
-            }
+            "crowdsource-assignment",
+            kwargs={"slug": crowdsource.slug, "idx": crowdsource.pk},
         )
         request = self.request_factory.get(url)
         request = mock_middleware(request)
@@ -226,32 +190,25 @@ class TestCrowdsourceFormView(TestCase):
         view = CrowdsourceFormView()
         crowdsource = CrowdsourceFactory(user_limit=True)
         user = UserFactory()
-        ip_address = '127.0.0.1'
+        ip_address = "127.0.0.1"
 
         # the user hasn't replied yet, should have an assignment
         assert_true(view._has_assignment(crowdsource, user, None))
 
         # the user replied, they may not reply again
         CrowdsourceResponseFactory(
-            crowdsource=crowdsource,
-            user=user,
+            crowdsource=crowdsource, user=user,
         )
         assert_false(view._has_assignment(crowdsource, user, None))
 
         # the ip address hasn't replied yet, should have an assignment
-        assert_true(
-            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
-        )
+        assert_true(view._has_assignment(crowdsource, AnonymousUser(), ip_address))
 
         # the ip address replied, they may not reply again
         CrowdsourceResponseFactory(
-            crowdsource=crowdsource,
-            user=None,
-            ip_address=ip_address,
+            crowdsource=crowdsource, user=None, ip_address=ip_address,
         )
-        assert_false(
-            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
-        )
+        assert_false(view._has_assignment(crowdsource, AnonymousUser(), ip_address))
 
     def test_has_assignment_no_limit(self):
         """Test the has assignment method without a user limit"""
@@ -259,7 +216,7 @@ class TestCrowdsourceFormView(TestCase):
         view = CrowdsourceFormView()
         crowdsource = CrowdsourceFactory(user_limit=False)
         user = UserFactory()
-        ip_address = '127.0.0.1'
+        ip_address = "127.0.0.1"
 
         # should always return true
 
@@ -268,22 +225,15 @@ class TestCrowdsourceFormView(TestCase):
 
         # the user replied, they may reply again
         CrowdsourceResponseFactory(
-            crowdsource=crowdsource,
-            user=user,
+            crowdsource=crowdsource, user=user,
         )
         assert_true(view._has_assignment(crowdsource, user, None))
 
         # the ip address hasn't replied yet, should have an assignment
-        assert_true(
-            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
-        )
+        assert_true(view._has_assignment(crowdsource, AnonymousUser(), ip_address))
 
         # the ip address replied, they may reply again
         CrowdsourceResponseFactory(
-            crowdsource=crowdsource,
-            user=None,
-            ip_address=ip_address,
+            crowdsource=crowdsource, user=None, ip_address=ip_address,
         )
-        assert_true(
-            view._has_assignment(crowdsource, AnonymousUser(), ip_address)
-        )
+        assert_true(view._has_assignment(crowdsource, AnonymousUser(), ip_address))

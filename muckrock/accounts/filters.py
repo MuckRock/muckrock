@@ -13,12 +13,13 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class ProxyFilterSet(django_filters.FilterSet):
     """Allows proxies to be filtered by location."""
+
     location = django_filters.ModelMultipleChoiceFilter(
-        label='State',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False),
-        widget=autocomplete_light.MultipleChoiceWidget('StateAutocomplete')
+        label="State",
+        queryset=Jurisdiction.objects.filter(level="s", hidden=False),
+        widget=autocomplete_light.MultipleChoiceWidget("StateAutocomplete"),
     )
 
     class Meta:
         model = Profile
-        fields = ['location']
+        fields = ["location"]

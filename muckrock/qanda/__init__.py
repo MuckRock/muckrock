@@ -1,1 +1,1 @@
-default_app_config = 'muckrock.qanda.apps.QuestionConfig'
+default_app_config = "muckrock.qanda.apps.QuestionConfig"

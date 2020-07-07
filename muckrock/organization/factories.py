@@ -21,7 +21,7 @@ class OrganizationFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     individual = False
     entitlement = factory.SubFactory(
-        'muckrock.organization.factories.FreeEntitlementFactory'
+        "muckrock.organization.factories.FreeEntitlementFactory"
     )
 
 
@@ -31,9 +31,9 @@ class MembershipFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Membership
 
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
     organization = factory.SubFactory(
-        'muckrock.organization.factories.OrganizationFactory'
+        "muckrock.organization.factories.OrganizationFactory"
     )
     active = True
 
@@ -43,7 +43,7 @@ class EntitlementFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Entitlement
-        django_get_or_create = ('name',)
+        django_get_or_create = ("name",)
 
     name = factory.Sequence(lambda n: "Entitlement %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
@@ -51,7 +51,8 @@ class EntitlementFactory(factory.django.DjangoModelFactory):
 
 class FreeEntitlementFactory(EntitlementFactory):
     """A free entitlement factory"""
-    name = 'Free'
+
+    name = "Free"
     resources = {
         "minimum_users": 1,
         "base_requests": 0,
@@ -62,7 +63,8 @@ class FreeEntitlementFactory(EntitlementFactory):
 
 class ProfessionalEntitlementFactory(EntitlementFactory):
     """A professional entitlement factory"""
-    name = 'Professional'
+
+    name = "Professional"
     resources = {
         "minimum_users": 1,
         "base_requests": 20,
@@ -73,7 +75,8 @@ class ProfessionalEntitlementFactory(EntitlementFactory):
 
 class ProxyEntitlementFactory(EntitlementFactory):
     """A proxy entitlement factory"""
-    name = 'Proxy'
+
+    name = "Proxy"
     resources = {
         "minimum_users": 1,
         "base_requests": 20,
@@ -85,7 +88,8 @@ class ProxyEntitlementFactory(EntitlementFactory):
 
 class OrganizationEntitlementFactory(EntitlementFactory):
     """An organization entitlement factory"""
-    name = 'Organization'
+
+    name = "Organization"
     resources = {
         "minimum_users": 5,
         "base_requests": 50,

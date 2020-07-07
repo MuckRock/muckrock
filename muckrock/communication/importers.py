@@ -33,7 +33,7 @@ AGENCY_OVERRIDE = 12
 ATTN_OVERRIDE = 13
 
 STATES = {s[0] for s in STATE_CHOICES}
-p_zip = re.compile(r'^\d{5}(?:-\d{4})?$')
+p_zip = re.compile(r"^\d{5}(?:-\d{4})?$")
 
 # pylint: disable=broad-except
 
@@ -41,13 +41,11 @@ p_zip = re.compile(r'^\d{5}(?:-\d{4})?$')
 def import_addresses(file_name):
     """Import addresses from spreadsheet"""
     # pylint: disable=too-many-locals
-    conn = S3Connection(
-        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
-    )
-    bucket = conn.get_bucket('muckrock')
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    bucket = conn.get_bucket("muckrock")
     key = bucket.get_key(file_name)
-    key.get_contents_to_filename('/tmp/tmp.csv')
-    with open('/tmp/tmp.csv') as tmp_file:
+    key.get_contents_to_filename("/tmp/tmp.csv")
+    with open("/tmp/tmp.csv") as tmp_file:
         reader = csv.reader(tmp_file)
         # discard header row
         next(reader)
@@ -61,7 +59,7 @@ def import_addresses(file_name):
             try:
                 address = Address.objects.get(pk=row[ADDRESS_PK])
             except Address.DoesNotExist:
-                print('Address {} does not exist'.format(row[ADDRESS_PK]))
+                print("Address {} does not exist".format(row[ADDRESS_PK]))
             else:
                 address.street = row[STREET].strip()
                 address.suite = row[SUITE].strip()
@@ -69,13 +67,13 @@ def import_addresses(file_name):
                 address.state = row[STATE].strip()
                 address.zip_code = row[ZIP].strip()
                 address.point = {
-                    'type': 'Point',
-                    'coordinates': [row[LONG].strip(), row[LAT].strip()],
+                    "type": "Point",
+                    "coordinates": [row[LONG].strip(), row[LAT].strip()],
                 }
                 address.agency_override = row[AGENCY_OVERRIDE].strip()
                 address.attn_override = row[ATTN_OVERRIDE].strip()
                 try:
                     address.save()
                 except Exception as exc:
-                    print('Data Error', exc, row[ADDRESS_PK])
+                    print("Data Error", exc, row[ADDRESS_PK])
                     print(row)

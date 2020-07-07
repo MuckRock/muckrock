@@ -11,11 +11,12 @@ from muckrock.project.models import Project
 
 class ProjectAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an acutocomplete registry for projects."""
-    choice_template = 'autocomplete/project.html'
-    search_fields = ['title']
+
+    choice_template = "autocomplete/project.html"
+    search_fields = ["title"]
     attrs = {
-        'date-autocomplete-minimum-characters': 2,
-        'placeholder': 'Search projects'
+        "date-autocomplete-minimum-characters": 2,
+        "placeholder": "Search projects",
     }
 
     def choices_for_request(self):
@@ -30,11 +31,12 @@ class ProjectAutocomplete(autocomplete_light.AutocompleteModelBase):
 
 class ProjectManagerAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete registry for project manager components"""
-    choice_template = 'autocomplete/project.html'
-    search_fields = ['title', 'summary']
+
+    choice_template = "autocomplete/project.html"
+    search_fields = ["title", "summary"]
     attrs = {
-        'data-autocomplete-minimum-characters': 2,
-        'placeholder': 'Search your projects'
+        "data-autocomplete-minimum-characters": 2,
+        "placeholder": "Search your projects",
     }
 
     def choices_for_request(self):

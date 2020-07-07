@@ -51,19 +51,19 @@ class TestOrganization(TestCase):
 
         request_count = org.make_requests(5)
         org.refresh_from_db()
-        eq_(request_count, {'monthly': 5, 'regular': 0})
+        eq_(request_count, {"monthly": 5, "regular": 0})
         eq_(org.monthly_requests, 5)
         eq_(org.number_requests, 10)
 
         request_count = org.make_requests(10)
         org.refresh_from_db()
-        eq_(request_count, {'monthly': 5, 'regular': 5})
+        eq_(request_count, {"monthly": 5, "regular": 5})
         eq_(org.monthly_requests, 0)
         eq_(org.number_requests, 5)
 
         request_count = org.make_requests(4)
         org.refresh_from_db()
-        eq_(request_count, {'monthly': 0, 'regular': 4})
+        eq_(request_count, {"monthly": 0, "regular": 4})
         eq_(org.monthly_requests, 0)
         eq_(org.number_requests, 1)
 
@@ -92,15 +92,17 @@ class TestSquareletUpdateData(TestCase):
         """Create a new subscription"""
         ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory()
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, date(2019, 2, 21))],
-            'max_users': 5,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 2, 21))],
+                "max_users": 5,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 50)
         eq_(organization.monthly_requests, 50)
@@ -115,15 +117,17 @@ class TestSquareletUpdateData(TestCase):
             requests_per_month=50,
             monthly_requests=33,
         )
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, None)],
-            'max_users': 5,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, None)],
+                "max_users": 5,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 0)
         eq_(organization.monthly_requests, 0)
@@ -131,11 +135,7 @@ class TestSquareletUpdateData(TestCase):
     def test_upgrade_subscription(self):
         """Upgrade a subscription"""
         ent = EntitlementFactory(
-            name='Plus',
-            resources=dict(
-                minimum_users=5,
-                base_requests=100,
-            ),
+            name="Plus", resources=dict(minimum_users=5, base_requests=100,),
         )
         organization = OrganizationFactory(
             entitlement=OrganizationEntitlementFactory(),
@@ -144,15 +144,17 @@ class TestSquareletUpdateData(TestCase):
             requests_per_month=50,
             monthly_requests=33,
         )
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, date(2019, 2, 21))],
-            'max_users': 5,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 2, 21))],
+                "max_users": 5,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 100)
         eq_(organization.monthly_requests, 83)
@@ -162,11 +164,7 @@ class TestSquareletUpdateData(TestCase):
         # Downgrades only happen at monthly restore
         ent = OrganizationEntitlementFactory()
         plus = EntitlementFactory(
-            name='Plus',
-            resources=dict(
-                minimum_users=5,
-                base_requests=100,
-            ),
+            name="Plus", resources=dict(minimum_users=5, base_requests=100,),
         )
         organization = OrganizationFactory(
             entitlement=plus,
@@ -175,15 +173,17 @@ class TestSquareletUpdateData(TestCase):
             requests_per_month=100,
             monthly_requests=83,
         )
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, date(2019, 3, 21))],
-            'max_users': 5,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 3, 21))],
+                "max_users": 5,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 50)
         eq_(organization.monthly_requests, 50)
@@ -198,15 +198,17 @@ class TestSquareletUpdateData(TestCase):
             requests_per_month=50,
             monthly_requests=33,
         )
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, date(2019, 2, 21))],
-            'max_users': 9,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 2, 21))],
+                "max_users": 9,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 70)
         eq_(organization.monthly_requests, 53)
@@ -221,15 +223,17 @@ class TestSquareletUpdateData(TestCase):
             requests_per_month=75,
             monthly_requests=33,
         )
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, date(2019, 2, 21))],
-            'max_users': 7,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 2, 21))],
+                "max_users": 7,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 60)
         eq_(organization.monthly_requests, 33)
@@ -244,15 +248,17 @@ class TestSquareletUpdateData(TestCase):
             requests_per_month=50,
             monthly_requests=33,
         )
-        organization.update_data({
-            'name': organization.name,
-            'slug': organization.slug,
-            'individual': False,
-            'private': False,
-            'entitlements': [ent_json(ent, date(2019, 3, 21))],
-            'max_users': 5,
-            'card': '',
-        })
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 3, 21))],
+                "max_users": 5,
+                "card": "",
+            }
+        )
         organization.refresh_from_db()
         eq_(organization.requests_per_month, 50)
         eq_(organization.monthly_requests, 50)

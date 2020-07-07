@@ -1,1 +1,1 @@
-default_app_config = 'muckrock.agency.apps.AgencyConfig'
+default_app_config = "muckrock.agency.apps.AgencyConfig"

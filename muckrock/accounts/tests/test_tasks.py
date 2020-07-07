@@ -21,6 +21,5 @@ class TestStatisticsTask(TestCase):
         tasks.store_statistics()
         new_stat_count = models.Statistics.objects.count()
         eq_(
-            new_stat_count, stat_count + 1,
-            'A new Statistics object should be created.'
+            new_stat_count, stat_count + 1, "A new Statistics object should be created."
         )

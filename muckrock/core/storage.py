@@ -39,8 +39,8 @@ class CachedS3BotoStorage(S3BotoStorage):
         https://gist.github.com/richleland/1324335
         """
         url = super(CachedS3BotoStorage, self).url(name, **kwargs)
-        if name.endswith('/') and not url.endswith('/'):
-            url += '/'
+        if name.endswith("/") and not url.endswith("/"):
+            url += "/"
         return url
 
 
@@ -52,20 +52,16 @@ class QueuedS3DietStorage(QueuedStorage):
 
     def __init__(
         self,
-        local='storages.backends.s3boto.S3BotoStorage',
-        remote='image_diet.storage.DietStorage',
+        local="storages.backends.s3boto.S3BotoStorage",
+        remote="image_diet.storage.DietStorage",
         remote_options=None,
         *args,
         **kwargs
     ):
         if remote_options is None:
-            remote_options = {'file_overwrite': True}
+            remote_options = {"file_overwrite": True}
         super(QueuedS3DietStorage, self).__init__(
-            local=local,
-            remote=remote,
-            remote_options=remote_options,
-            *args,
-            **kwargs
+            local=local, remote=remote, remote_options=remote_options, *args, **kwargs
         )
 
     def get_storage(self, name):

@@ -37,54 +37,44 @@ class ArticleQuerySet(models.QuerySet):
     def _prefetch_users(self, field):
         """Prefetch authors or editors"""
         return self.prefetch_related(
-            Prefetch(field, queryset=User.objects.select_related('profile'))
+            Prefetch(field, queryset=User.objects.select_related("profile"))
         )
 
     def prefetch_authors(self):
         """Prefetch authors"""
-        return self._prefetch_users('authors')
+        return self._prefetch_users("authors")
 
     def prefetch_editors(self):
         """Prefetch editors"""
-        return self._prefetch_users('editors')
+        return self._prefetch_users("editors")
 
 
 class Article(models.Model):
     """A news article"""
 
-    pub_date = models.DateTimeField('Publish date', default=timezone.now)
+    pub_date = models.DateTimeField("Publish date", default=timezone.now)
     title = models.CharField(max_length=200)
     kicker = models.CharField(max_length=200, blank=True)
     slug = models.SlugField(
-        unique=True,
-        help_text='A "Slug" is a unique URL-friendly title for an object.'
+        unique=True, help_text='A "Slug" is a unique URL-friendly title for an object.'
     )
     summary = models.TextField(
-        help_text='A single paragraph summary or preview of the article.'
+        help_text="A single paragraph summary or preview of the article."
     )
-    body = models.TextField('Body text')
-    authors = models.ManyToManyField(User, related_name='authored_articles')
-    editors = models.ManyToManyField(
-        User,
-        related_name='edited_articles',
-        blank=True,
-    )
+    body = models.TextField("Body text")
+    authors = models.ManyToManyField(User, related_name="authored_articles")
+    editors = models.ManyToManyField(User, related_name="edited_articles", blank=True,)
     publish = models.BooleanField(
-        'Publish on site',
+        "Publish on site",
         default=False,
-        help_text='Articles do not appear on the site until their publish date.'
+        help_text="Articles do not appear on the site until their publish date.",
     )
-    foias = models.ManyToManyField(
-        FOIARequest,
-        related_name='articles',
-        blank=True,
-    )
+    foias = models.ManyToManyField(FOIARequest, related_name="articles", blank=True,)
     image = ThumbnailerImageField(
-        upload_to='news_images/%Y/%m/%d',
+        upload_to="news_images/%Y/%m/%d",
         blank=True,
         null=True,
-        resize_source={'size': (1600, 1200),
-                       'crop': 'smart'},
+        resize_source={"size": (1600, 1200), "crop": "smart"},
         storage=get_image_storage(),
     )
     objects = ArticleQuerySet.as_manager()
@@ -97,17 +87,17 @@ class Article(models.Model):
         """The url for this object"""
         pub_date = timezone.localtime(self.pub_date)
         kwargs = {
-            'year': pub_date.strftime('%Y'),
-            'month': pub_date.strftime('%b').lower(),
-            'day': pub_date.strftime('%d'),
-            'slug': self.slug,
+            "year": pub_date.strftime("%Y"),
+            "month": pub_date.strftime("%b").lower(),
+            "day": pub_date.strftime("%d"),
+            "slug": self.slug,
         }
-        return reverse('news-detail', kwargs=kwargs)
+        return reverse("news-detail", kwargs=kwargs)
 
     def save(self, *args, **kwargs):
         """Save the news article"""
         # epiceditor likes to stick non breaking spaces in here for some reason
-        self.body = self.body.replace('\xa0', ' ')
+        self.body = self.body.replace("\xa0", " ")
         # invalidate the template cache for the page on a save
         self.clear_cache()
         super(Article, self).save(*args, **kwargs)
@@ -115,38 +105,32 @@ class Article(models.Model):
     def clear_cache(self):
         """Clear the template cache"""
         if self.pk:
-            cache.delete(
-                make_template_fragment_key('article_detail_1',
-                                           [self.pk])
-            )
+            cache.delete(make_template_fragment_key("article_detail_1", [self.pk]))
 
     def get_authors_names(self):
         """Get all authors names for a byline"""
-        authors = list(
-            self.authors.values_list('profile__full_name', flat=True)
-        )
+        authors = list(self.authors.values_list("profile__full_name", flat=True))
         if not authors:
-            return ''
-        names = ', '.join(a for a in authors[:-1])
+            return ""
+        names = ", ".join(a for a in authors[:-1])
         if names:
-            names = '{} & {}'.format(names, authors[-1])
+            names = "{} & {}".format(names, authors[-1])
         else:
             names = authors[-1]
         return names
 
-    get_authors_names.short_description = 'Authors'
+    get_authors_names.short_description = "Authors"
 
     class Meta:
-        ordering = ['-pub_date']
-        get_latest_by = 'pub_date'
+        ordering = ["-pub_date"]
+        get_latest_by = "pub_date"
 
 
 class Photo(models.Model):
     """A photograph to embed in a news article"""
 
     image = models.ImageField(
-        upload_to='news_photos/%Y/%m/%d',
-        storage=get_image_storage(),
+        upload_to="news_photos/%Y/%m/%d", storage=get_image_storage(),
     )
 
     def __str__(self):

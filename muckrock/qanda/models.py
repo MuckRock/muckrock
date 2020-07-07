@@ -41,39 +41,31 @@ class Question(models.Model):
         is_new = True if self.pk is None else False
         super(Question, self).save(*args, **kwargs)
         if is_new:
-            action = new_action(self.user, 'asked', target=self)
+            action = new_action(self.user, "asked", target=self)
             # Notify users who subscribe to new question notifications
             new_question_subscribers = Profile.objects.filter(
                 new_question_notifications=True
             )
-            users_to_notify = [
-                profile.user for profile in new_question_subscribers
-            ]
+            users_to_notify = [profile.user for profile in new_question_subscribers]
             notify(users_to_notify, action)
 
     def get_absolute_url(self):
         """The url for this object"""
-        return reverse(
-            'question-detail', kwargs={
-                'slug': self.slug,
-                'pk': self.pk
-            }
-        )
+        return reverse("question-detail", kwargs={"slug": self.slug, "pk": self.pk})
 
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
         return (
-            User.objects.filter(
-                answer__question=self,
-                is_active=True,
-            ).distinct().select_related('profile')
+            User.objects.filter(answer__question=self, is_active=True,)
+            .distinct()
+            .select_related("profile")
         )
 
     class Meta:
-        ordering = ['-date']
+        ordering = ["-date"]
         permissions = (
-            ('post', 'Can post questions and answers'),
-            ('block', 'Can block other users'),
+            ("post", "Can post questions and answers"),
+            ("block", "Can block other users"),
         )
 
 
@@ -82,17 +74,17 @@ class Answer(models.Model):
 
     user = models.ForeignKey(User)
     date = models.DateTimeField()
-    question = models.ForeignKey(Question, related_name='answers')
+    question = models.ForeignKey(Question, related_name="answers")
     answer = models.TextField()
 
-    reindex_related = ('question',)
+    reindex_related = ("question",)
 
     def __str__(self):
         return "Answer to %s" % self.question.title
 
     def get_absolute_url(self):
         """The url for this object"""
-        return '%s#answer-%s' % (self.question.get_absolute_url(), self.pk)
+        return "%s#answer-%s" % (self.question.get_absolute_url(), self.pk)
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
@@ -102,11 +94,11 @@ class Answer(models.Model):
         self.question.save()
         if is_new:
             action = new_action(
-                self.user, 'answered', action_object=self, target=self.question
+                self.user, "answered", action_object=self, target=self.question
             )
             # Notify the question's owner and its followers about the new answer
             notify(self.question.user, action)
             notify(followers(self.question), action)
 
     class Meta:
-        ordering = ['date']
+        ordering = ["date"]

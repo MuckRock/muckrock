@@ -27,9 +27,7 @@ class FoiaMachineRequestFactory(factory.django.DjangoModelFactory):
     title = factory.Sequence(lambda n: "FOIA Machine Request %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(muckrock_factories.UserFactory)
-    jurisdiction = factory.SubFactory(
-        jurisdiction_factories.StateJurisdictionFactory
-    )
+    jurisdiction = factory.SubFactory(jurisdiction_factories.StateJurisdictionFactory)
     agency = factory.SubFactory(muckrock_factories.AgencyFactory)
 
 
@@ -40,9 +38,9 @@ class FoiaMachineCommunicationFactory(factory.django.DjangoModelFactory):
         model = FoiaMachineCommunication
 
     request = factory.SubFactory(FoiaMachineRequestFactory)
-    sender = factory.Faker('email')
-    receiver = factory.Faker('email')
-    message = factory.Faker('paragraph')
+    sender = factory.Faker("email")
+    receiver = factory.Faker("email")
+    message = factory.Faker("paragraph")
 
 
 class FoiaMachineFileFactory(factory.django.DjangoModelFactory):
@@ -52,5 +50,5 @@ class FoiaMachineFileFactory(factory.django.DjangoModelFactory):
         model = FoiaMachineFile
 
     communication = factory.SubFactory(FoiaMachineCommunicationFactory)
-    file = factory.django.FileField(filename='test_file.txt')
-    name = 'test_file.txt'
+    file = factory.django.FileField(filename="test_file.txt")
+    name = "test_file.txt"

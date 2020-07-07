@@ -23,101 +23,87 @@ def CountWhen(output_field=None, **kwargs):
     # pylint: disable=invalid-name
     if output_field is None:
         output_field = IntegerField()
-    return Sum(
-        Case(
-            When(then=1, **kwargs),
-            default=0,
-        ),
-        output_field=output_field,
-    )
+    return Sum(Case(When(then=1, **kwargs), default=0,), output_field=output_field,)
 
 
 class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
+
     # pylint: disable=too-many-public-methods
     queryset = (
-        Agency.objects.order_by('id').select_related(
-            'jurisdiction', 'parent', 'appeal_agency'
-        ).prefetch_related(
+        Agency.objects.order_by("id")
+        .select_related("jurisdiction", "parent", "appeal_agency")
+        .prefetch_related(
             Prefetch(
-                'emails',
+                "emails",
                 queryset=EmailAddress.objects.filter(
-                    status='good',
-                    agencyemail__request_type='primary',
-                    agencyemail__email_type='to',
+                    status="good",
+                    agencyemail__request_type="primary",
+                    agencyemail__email_type="to",
                 ),
-                to_attr='primary_emails',
+                to_attr="primary_emails",
             ),
             Prefetch(
-                'phones',
+                "phones",
                 queryset=PhoneNumber.objects.filter(
-                    type='fax',
-                    status='good',
-                    agencyphone__request_type='primary',
+                    type="fax", status="good", agencyphone__request_type="primary",
                 ),
-                to_attr='primary_faxes',
+                to_attr="primary_faxes",
             ),
             Prefetch(
-                'addresses',
-                queryset=Address.objects.filter(
-                    agencyaddress__request_type='primary',
-                ),
-                to_attr='primary_addresses',
+                "addresses",
+                queryset=Address.objects.filter(agencyaddress__request_type="primary",),
+                to_attr="primary_addresses",
             ),
-            'types',
-        ).annotate(
+            "types",
+        )
+        .annotate(
             average_response_time_=Coalesce(
                 ExtractDay(
                     Avg(
-                        F('foiarequest__datetime_done') -
-                        F('foiarequest__composer__datetime_submitted')
+                        F("foiarequest__datetime_done")
+                        - F("foiarequest__composer__datetime_submitted")
                     )
-                ), Value(0)
+                ),
+                Value(0),
             ),
             fee_rate_=Coalesce(
-                100 * CountWhen(
-                    foiarequest__price__gt=0, output_field=FloatField()
-                ) / NullIf(
-                    Count('foiarequest'),
-                    Value(0),
-                    output_field=FloatField(),
-                ), Value(0)
+                100
+                * CountWhen(foiarequest__price__gt=0, output_field=FloatField())
+                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField(),),
+                Value(0),
             ),
             success_rate_=Coalesce(
-                100 * CountWhen(
-                    foiarequest__status__in=['done', 'partial'],
-                    output_field=FloatField()
-                ) / NullIf(
-                    Count('foiarequest'),
-                    Value(0),
+                100
+                * CountWhen(
+                    foiarequest__status__in=["done", "partial"],
                     output_field=FloatField(),
-                ), Value(0)
+                )
+                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField(),),
+                Value(0),
             ),
-            number_requests=Count('foiarequest'),
-            number_requests_completed=CountWhen(foiarequest__status='done'),
-            number_requests_rejected=CountWhen(foiarequest__status='rejected'),
-            number_requests_no_docs=CountWhen(foiarequest__status='no_docs'),
-            number_requests_ack=CountWhen(foiarequest__status='ack'),
-            number_requests_resp=CountWhen(foiarequest__status='processed'),
-            number_requests_fix=CountWhen(foiarequest__status='fix'),
-            number_requests_appeal=CountWhen(foiarequest__status='appealing'),
-            number_requests_pay=CountWhen(foiarequest__status='payment'),
-            number_requests_partial=CountWhen(foiarequest__status='partial'),
-            number_requests_lawsuit=CountWhen(foiarequest__status='lawsuit'),
-            number_requests_withdrawn=CountWhen(
-                foiarequest__status='abandoned'
-            ),
+            number_requests=Count("foiarequest"),
+            number_requests_completed=CountWhen(foiarequest__status="done"),
+            number_requests_rejected=CountWhen(foiarequest__status="rejected"),
+            number_requests_no_docs=CountWhen(foiarequest__status="no_docs"),
+            number_requests_ack=CountWhen(foiarequest__status="ack"),
+            number_requests_resp=CountWhen(foiarequest__status="processed"),
+            number_requests_fix=CountWhen(foiarequest__status="fix"),
+            number_requests_appeal=CountWhen(foiarequest__status="appealing"),
+            number_requests_pay=CountWhen(foiarequest__status="payment"),
+            number_requests_partial=CountWhen(foiarequest__status="partial"),
+            number_requests_lawsuit=CountWhen(foiarequest__status="lawsuit"),
+            number_requests_withdrawn=CountWhen(foiarequest__status="abandoned"),
         )
     )
     serializer_class = AgencySerializer
     # don't allow ordering by computed fields
     ordering_fields = [
-        f for f in AgencySerializer.Meta.fields if f not in (
-            'absolute_url',
-            'average_response_time',
-            'fee_rate',
-            'success_rate',
-        ) and not f.startswith(('has_', 'number_'))
+        f
+        for f in AgencySerializer.Meta.fields
+        if f
+        not in ("absolute_url", "average_response_time", "fee_rate", "success_rate",)
+        and not f.startswith(("has_", "number_"))
     ]
 
     def get_queryset(self):
@@ -125,20 +111,16 @@ class AgencyViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return self.queryset
         else:
-            return self.queryset.filter(status='approved')
+            return self.queryset.filter(status="approved")
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
-        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
-        types = django_filters.CharFilter(
-            name='types__name',
-            lookup_expr='iexact',
-        )
+
+        jurisdiction = django_filters.NumberFilter(name="jurisdiction__id")
+        types = django_filters.CharFilter(name="types__name", lookup_expr="iexact",)
 
         class Meta:
             model = Agency
-            fields = (
-                'name', 'status', 'jurisdiction', 'types', 'requires_proxy'
-            )
+            fields = ("name", "status", "jurisdiction", "types", "requires_proxy")
 
     filter_class = Filter

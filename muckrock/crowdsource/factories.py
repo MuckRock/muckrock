@@ -25,10 +25,10 @@ class CrowdsourceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Crowdsource
 
-    title = factory.Sequence('Crowdsource #{}'.format)
+    title = factory.Sequence("Crowdsource #{}".format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
-    description = factory.Faker('sentence')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
+    description = factory.Faker("sentence")
 
 
 class CrowdsourceDataFactory(factory.django.DjangoModelFactory):
@@ -38,7 +38,7 @@ class CrowdsourceDataFactory(factory.django.DjangoModelFactory):
         model = CrowdsourceData
 
     crowdsource = factory.SubFactory(CrowdsourceFactory)
-    url = factory.Faker('url')
+    url = factory.Faker("url")
 
 
 class CrowdsourceFieldFactory(factory.django.DjangoModelFactory):
@@ -48,46 +48,45 @@ class CrowdsourceFieldFactory(factory.django.DjangoModelFactory):
         model = CrowdsourceField
 
     crowdsource = factory.SubFactory(CrowdsourceFactory)
-    label = factory.Sequence('Field #{}'.format)
+    label = factory.Sequence("Field #{}".format)
 
 
 class CrowdsourceTextFieldFactory(CrowdsourceFieldFactory):
     """A factory for creating a text field"""
-    type = 'text'
+
+    type = "text"
 
 
 class CrowdsourceChoiceFieldFactory(CrowdsourceFieldFactory):
     """An abstract base class factory for fields with choices"""
+
     choice0 = factory.RelatedFactory(
-        'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
-        'field',
-        order=1,
+        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=1,
     )
     choice1 = factory.RelatedFactory(
-        'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
-        'field',
-        order=2,
+        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=2,
     )
     choice2 = factory.RelatedFactory(
-        'muckrock.crowdsource.factories.CrowdsourceChoiceFactory',
-        'field',
-        order=3,
+        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=3,
     )
 
 
 class CrowdsourceSelectFieldFactory(CrowdsourceChoiceFieldFactory):
     """A factory for creating a select field"""
-    type = 'select'
+
+    type = "select"
 
 
 class CrowdsourceHeaderFieldFactory(CrowdsourceChoiceFieldFactory):
     """A factory for creating a header field"""
-    type = 'header'
+
+    type = "header"
 
 
 class CrowdsourceCheckboxGroupFieldFactory(CrowdsourceChoiceFieldFactory):
     """A factory for creating a checkbox group field"""
-    type = 'checkbox-group'
+
+    type = "checkbox-group"
 
 
 class CrowdsourceChoiceFactory(factory.django.DjangoModelFactory):
@@ -97,8 +96,8 @@ class CrowdsourceChoiceFactory(factory.django.DjangoModelFactory):
         model = CrowdsourceChoice
 
     field = factory.SubFactory(CrowdsourceSelectFieldFactory)
-    choice = factory.Sequence('Choice #{}'.format)
-    value = factory.Sequence('choice-{}'.format)
+    choice = factory.Sequence("Choice #{}".format)
+    value = factory.Sequence("choice-{}".format)
 
 
 class CrowdsourceResponseFactory(factory.django.DjangoModelFactory):
@@ -108,7 +107,7 @@ class CrowdsourceResponseFactory(factory.django.DjangoModelFactory):
         model = CrowdsourceResponse
 
     crowdsource = factory.SubFactory(CrowdsourceFactory)
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
     data = factory.SubFactory(CrowdsourceDataFactory)
 
 
@@ -120,4 +119,4 @@ class CrowdsourceValueFactory(factory.django.DjangoModelFactory):
 
     response = factory.SubFactory(CrowdsourceResponseFactory)
     field = factory.SubFactory(CrowdsourceFieldFactory)
-    value = factory.Faker('word')
+    value = factory.Faker("word")

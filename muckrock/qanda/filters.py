@@ -18,28 +18,24 @@ from muckrock.tags.models import Tag
 
 class QuestionFilterSet(django_filters.FilterSet):
     """Allows question to be filtered by user, date, or if it's unanswered."""
+
     user = django_filters.ModelChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.ChoiceWidget('UserAutocomplete')
+        widget=autocomplete_light.ChoiceWidget("UserAutocomplete"),
     )
     date = django_filters.DateFromToRangeFilter(
-        label='Date Range',
-        lookup_expr='contains',
-        widget=RangeWidget(
-            attrs={
-                'class': 'datepicker',
-                'placeholder': 'MM/DD/YYYY',
-            }
-        ),
+        label="Date Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
     )
     unanswered = django_filters.BooleanFilter(
-        method='unanswered_filter', widget=forms.CheckboxInput()
+        method="unanswered_filter", widget=forms.CheckboxInput()
     )
     tags = django_filters.ModelMultipleChoiceFilter(
-        name='tags__name',
+        name="tags__name",
         queryset=Tag.objects.all(),
-        label='Tags',
-        widget=autocomplete_light.MultipleChoiceWidget('TagAutocomplete'),
+        label="Tags",
+        widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
     )
 
     def unanswered_filter(self, queryset, name, value):
@@ -52,4 +48,4 @@ class QuestionFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = Question
-        fields = ['user', 'date']
+        fields = ["user", "date"]

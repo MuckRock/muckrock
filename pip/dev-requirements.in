@@ -13,5 +13,5 @@ pip-tools # Keeps the requirements up to date
 pylint-django # Pylint for Django integration
 requests-mock # Mock for http requests
 whoosh # Used for search backend in development
-yapf # code formatter
 yet-another-django-profiler # Profiler for django
+black # code formatter

@@ -17,31 +17,34 @@ from muckrock.qanda.models import Answer, Question
 
 class AnswerForm(forms.ModelForm):
     """Form with autocomplete for users"""
+
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete', queryset=User.objects.all()
+        "UserAutocomplete", queryset=User.objects.all()
     )
 
     class Meta:
         model = Answer
-        fields = '__all__'
+        fields = "__all__"
 
 
 class QuestionForm(forms.ModelForm):
     """Form with autocomplete for user and foia"""
+
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete', queryset=User.objects.all()
+        "UserAutocomplete", queryset=User.objects.all()
     )
     foia = autocomplete_light.ModelChoiceField(
-        'FOIARequestAdminAutocomplete', required=False
+        "FOIARequestAdminAutocomplete", required=False
     )
 
     class Meta:
         model = Question
-        fields = '__all__'
+        fields = "__all__"
 
 
 class AnswerInline(admin.TabularInline):
     """Answer Inline Admin"""
+
     model = Answer
     form = AnswerForm
     extra = 1
@@ -49,9 +52,10 @@ class AnswerInline(admin.TabularInline):
 
 class QuestionAdmin(VersionAdmin):
     """Quesiton Admin"""
-    prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'user', 'date')
-    search_fields = ('title', 'question')
+
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = ("title", "user", "date")
+    search_fields = ("title", "question")
     inlines = [AnswerInline]
     form = QuestionForm
 

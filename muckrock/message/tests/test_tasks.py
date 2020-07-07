@@ -13,11 +13,7 @@ import nose.tools
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
-from muckrock.core.factories import (
-    NotificationFactory,
-    ProjectFactory,
-    UserFactory,
-)
+from muckrock.core.factories import NotificationFactory, ProjectFactory, UserFactory
 from muckrock.message import tasks
 from muckrock.task.factories import FlaggedTaskFactory
 
@@ -32,16 +28,14 @@ class TestDailyTask(TestCase):
     def setUp(self):
         self.user = UserFactory()
 
-    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    @mock.patch("muckrock.message.tasks.send_activity_digest.delay")
     def test_when_unread(self, mock_send):
         """The send method should be called when a user has unread notifications."""
         NotificationFactory(user=self.user)
         tasks.daily_digest()
-        mock_send.assert_called_with(
-            self.user, 'Daily Digest', relativedelta(days=1)
-        )
+        mock_send.assert_called_with(self.user, "Daily Digest", relativedelta(days=1))
 
-    @mock.patch('muckrock.message.tasks.send_activity_digest.delay')
+    @mock.patch("muckrock.message.tasks.send_activity_digest.delay")
     def test_when_no_unread(self, mock_send):
         """The send method should not be called when a user does not have unread notifications."""
         tasks.daily_digest()
@@ -54,25 +48,25 @@ class TestStaffTask(TestCase):
     def setUp(self):
         self.staff_user = UserFactory(is_staff=True)
 
-    @mock.patch('muckrock.message.digests.StaffDigest.send')
+    @mock.patch("muckrock.message.digests.StaffDigest.send")
     def test_staff_digest_task(self, mock_send):
         """Make sure the send method is called with the staff user."""
         tasks.staff_digest()
         mock_send.assert_called_with()
 
 
-@mock.patch('muckrock.message.email.TemplateEmail.send')
+@mock.patch("muckrock.message.email.TemplateEmail.send")
 class TestNotificationTasks(TestCase):
     """Email notifications are sent to users upon key events."""
 
     def setUp(self):
         self.user = UserFactory()
 
-    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
+    @mock.patch("muckrock.task.tasks.create_ticket.delay", mock.Mock())
     def test_support(self, mock_send):
         """Notifies the user with a support response."""
         task = FlaggedTaskFactory()
-        tasks.support(self.user, 'Hello', task)
+        tasks.support(self.user, "Hello", task)
         mock_send.assert_called_with(fail_silently=False)
 
     def test_notify_contributor(self, mock_send):

@@ -16,20 +16,20 @@ from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.task.models import ProjectReviewTask
 
-test_title = 'Private Prisons'
-test_summary = 'The private prison project is fanstastic.'
+test_title = "Private Prisons"
+test_summary = "The private prison project is fanstastic."
 test_description = (
-    'The prison industry is growing at an alarming rate. '
-    'Even more alarming? The conditions inside prisions '
-    'are growing worse while their tax-dollar derived '
-    'profits are growing larger.'
+    "The prison industry is growing at an alarming rate. "
+    "Even more alarming? The conditions inside prisions "
+    "are growing worse while their tax-dollar derived "
+    "profits are growing larger."
 )
 test_image = SimpleUploadedFile(
-    name='foo.gif',
+    name="foo.gif",
     content=(
-        b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
-        b'\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'
-    )
+        b"GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,"
+        b"\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00"
+    ),
 )
 
 
@@ -120,16 +120,13 @@ class TestProject(TestCase):
 
     def test_publish(self):
         """Publishing a project should make it public and submit it for approval."""
-        explanation = 'Test'
+        explanation = "Test"
         task = self.project.publish(explanation)
-        eq_(self.project.private, False, 'The project should be made public.')
-        eq_(
-            self.project.approved, False,
-            'The project should be waiting approval.'
-        )
+        eq_(self.project.private, False, "The project should be made public.")
+        eq_(self.project.approved, False, "The project should be waiting approval.")
         ok_(
             isinstance(task, ProjectReviewTask),
-            'A ProjectReviewTask should be created.\n\tTask: %s' % type(task)
+            "A ProjectReviewTask should be created.\n\tTask: %s" % type(task),
         )
 
     def test_suggest_requests(self):
@@ -140,7 +137,7 @@ class TestProject(TestCase):
         But projects should not recommend requests that they already contain.
         """
         # set up data
-        tags = 'a'
+        tags = "a"
         user = UserFactory()
         self.project.contributors.add(user)
         self.project.tags.add(tags)
@@ -160,7 +157,7 @@ class TestProject(TestCase):
         But projects should not recommend articles that they already contain.
         """
         # set up data
-        tags = 'a'
+        tags = "a"
         user = UserFactory()
         self.project.contributors.add(user)
         self.project.tags.add(tags)
@@ -183,28 +180,28 @@ class TestProjectTagging(TestCase):
     def test_add_tags(self):
         """Projects should keep a list of relevant tags."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add('prison', 'privatization', 'corrections')
+        self.project.tags.add("prison", "privatization", "corrections")
         eq_(len(self.project.tags.all()), 3)
 
     def test_add_existing_tags(self):
         """Projects should not contain duplicate tags."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add('prison', 'privatization', 'corrections')
-        self.project.tags.add('prison', 'privatization', 'corrections')
+        self.project.tags.add("prison", "privatization", "corrections")
+        self.project.tags.add("prison", "privatization", "corrections")
         eq_(len(self.project.tags.all()), 3)
 
     def test_remove_existing_tag(self):
         """Tags should be easily removed from projects."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add('prison', 'privatization', 'corrections')
+        self.project.tags.add("prison", "privatization", "corrections")
         eq_(len(self.project.tags.all()), 3)
-        self.project.tags.remove('prison')
+        self.project.tags.remove("prison")
         eq_(len(self.project.tags.all()), 2)
 
     def test_remove_nonexisting_tag(self):
         """Nonexisting tags cannot be removed from a project."""
         eq_(len(self.project.tags.all()), 0)
-        self.project.tags.add('prison', 'privatization', 'corrections')
+        self.project.tags.add("prison", "privatization", "corrections")
         eq_(len(self.project.tags.all()), 3)
-        self.project.tags.remove('spongebob')
+        self.project.tags.remove("spongebob")
         eq_(len(self.project.tags.all()), 3)

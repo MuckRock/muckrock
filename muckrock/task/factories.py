@@ -15,11 +15,11 @@ class OrphanTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.OrphanTask
 
-    reason = 'bs'
+    reason = "bs"
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )
-    address = factory.Faker('email')
+    address = factory.Faker("email")
 
 
 class SnailMailTaskFactory(factory.django.DjangoModelFactory):
@@ -28,9 +28,9 @@ class SnailMailTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.SnailMailTask
 
-    category = 'a'
+    category = "a"
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )
 
 
@@ -40,8 +40,8 @@ class FlaggedTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.FlaggedTask
 
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
-    foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
+    foia = factory.SubFactory("muckrock.foia.factories.FOIARequestFactory")
 
 
 class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
@@ -50,8 +50,8 @@ class ProjectReviewTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.ProjectReviewTask
 
-    project = factory.SubFactory('muckrock.core.factories.ProjectFactory')
-    notes = factory.Faker('paragraph')
+    project = factory.SubFactory("muckrock.core.factories.ProjectFactory")
+    notes = factory.Faker("paragraph")
 
 
 class ResponseTaskFactory(factory.django.DjangoModelFactory):
@@ -61,7 +61,7 @@ class ResponseTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.ResponseTask
 
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )
 
 
@@ -71,9 +71,9 @@ class StatusChangeTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.StatusChangeTask
 
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
-    old_status = 'done'
-    foia = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
+    old_status = "done"
+    foia = factory.SubFactory("muckrock.foia.factories.FOIARequestFactory")
 
 
 class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
@@ -82,8 +82,8 @@ class NewAgencyTaskFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = task.models.NewAgencyTask
 
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
-    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
+    agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
 
 
 class NewPortalTaskFactory(factory.django.DjangoModelFactory):
@@ -93,6 +93,6 @@ class NewPortalTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.NewPortalTask
 
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )
-    portal_type = 'other'
+    portal_type = "other"

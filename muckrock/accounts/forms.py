@@ -22,28 +22,29 @@ logger = logging.getLogger(__name__)
 
 class ProfileSettingsForm(forms.ModelForm):
     """A form for updating user information"""
+
     location = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
-        widget=autocomplete_light.ChoiceWidget('JurisdictionLocalAutocomplete')
+        widget=autocomplete_light.ChoiceWidget("JurisdictionLocalAutocomplete"),
     )
 
-    class Meta():
+    class Meta:
         model = Profile
-        fields = ['twitter', 'location', 'private_profile']
+        fields = ["twitter", "location", "private_profile"]
 
     def clean_twitter(self):
         """Stripe @ from beginning of Twitter name, if it exists."""
-        twitter = self.cleaned_data['twitter']
-        return twitter.split('@')[-1]
+        twitter = self.cleaned_data["twitter"]
+        return twitter.split("@")[-1]
 
 
 class EmailSettingsForm(forms.ModelForm):
     """A form for updating user email preferences."""
 
-    class Meta():
+    class Meta:
         model = Profile
-        fields = ['email_pref', 'use_autologin']
+        fields = ["email_pref", "use_autologin"]
 
 
 class OrgPreferencesForm(forms.ModelForm):
@@ -52,37 +53,33 @@ class OrgPreferencesForm(forms.ModelForm):
     active_org = OrganizationChoiceField(
         queryset=Organization.objects.none(),
         empty_label=None,
-        label='Choose active organization',
-        help_text=
-        "You can also change your current organizational page by hovering over "
+        label="Choose active organization",
+        help_text="You can also change your current organizational page by hovering over "
         "your name (or tapping it on mobile), and then selecting the "
         "organization you'd like to use from the selection that appears.",
     )
 
     def __init__(self, *args, **kwargs):
         super(OrgPreferencesForm, self).__init__(*args, **kwargs)
-        self.fields['active_org'].queryset = (
-            self.instance.user.organizations.order_by('-individual', 'name')
+        self.fields["active_org"].queryset = self.instance.user.organizations.order_by(
+            "-individual", "name"
         )
-        self.fields['active_org'].initial = self.instance.organization
+        self.fields["active_org"].initial = self.instance.organization
 
     def save(self, *args, **kwargs):
         """Set the active organization in addition to saving the other preferences"""
         super(OrgPreferencesForm, self).save(*args, **kwargs)
-        self.instance.organization = self.cleaned_data['active_org']
+        self.instance.organization = self.cleaned_data["active_org"]
 
-    class Meta():
+    class Meta:
         model = Profile
-        fields = ['org_share']
+        fields = ["org_share"]
 
 
 class BuyRequestForm(StripeForm):
     """Form for buying more requests"""
 
-    num_requests = forms.IntegerField(
-        label='Number of requests to buy',
-        min_value=1,
-    )
+    num_requests = forms.IntegerField(label="Number of requests to buy", min_value=1,)
 
     def __init__(self, *args, **kwargs):
         super(BuyRequestForm, self).__init__(*args, **kwargs)
@@ -90,9 +87,9 @@ class BuyRequestForm(StripeForm):
             limit_val = 1
         else:
             limit_val = 4
-        self.fields['num_requests'].validators[0].limit_value = limit_val
-        self.fields['num_requests'].widget.attrs['min'] = limit_val
-        self.fields['num_requests'].initial = limit_val
+        self.fields["num_requests"].validators[0].limit_value = limit_val
+        self.fields["num_requests"].widget.attrs["min"] = limit_val
+        self.fields["num_requests"].initial = limit_val
 
 
 class ContactForm(forms.Form):

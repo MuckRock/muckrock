@@ -10,14 +10,14 @@ from muckrock.communication import views
 
 urlpatterns = [
     url(
-        r'emailaddress/(?P<idx>\d+)/$',
+        r"emailaddress/(?P<idx>\d+)/$",
         views.EmailDetailView.as_view(),
-        name='email-detail'
+        name="email-detail",
     ),
     url(
-        r'phonenumber/(?P<idx>\d+)/$',
+        r"phonenumber/(?P<idx>\d+)/$",
         views.PhoneDetailView.as_view(),
-        name='phone-detail'
+        name="phone-detail",
     ),
-    url(r'checks/$', views.CheckListView.as_view(), name='check-list'),
+    url(r"checks/$", views.CheckListView.as_view(), name="check-list"),
 ]

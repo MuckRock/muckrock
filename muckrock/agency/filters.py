@@ -13,11 +13,12 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class AgencyFilterSet(django_filters.FilterSet):
     """Allows agencies to be filtered by jurisdiction."""
+
     jurisdiction = django_filters.ModelChoiceFilter(
         queryset=Jurisdiction.objects.filter(hidden=False),
-        widget=autocomplete_light.ChoiceWidget('JurisdictionAutocomplete')
+        widget=autocomplete_light.ChoiceWidget("JurisdictionAutocomplete"),
     )
 
     class Meta:
         model = Agency
-        fields = ['jurisdiction']
+        fields = ["jurisdiction"]

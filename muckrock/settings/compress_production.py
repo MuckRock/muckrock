@@ -8,5 +8,5 @@ Settings for compressing production assets
 # MuckRock
 from muckrock.settings.base import *
 
-STATIC_URL = 'https://cdn.muckrock.com/'
+STATIC_URL = "https://cdn.muckrock.com/"
 COMPRESS_ENABLED = True

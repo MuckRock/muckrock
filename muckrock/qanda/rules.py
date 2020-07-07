@@ -20,8 +20,8 @@ def has_confirmed_email(user):
 @predicate
 @user_authenticated
 def made_request(user):
-    return user.composers.exclude(status='started').exists()
+    return user.composers.exclude(status="started").exists()
 
 
-add_perm('qanda.post', made_request | has_feature_level(1))
-add_perm('qanda.block', is_staff)
+add_perm("qanda.post", made_request | has_feature_level(1))
+add_perm("qanda.block", is_staff)

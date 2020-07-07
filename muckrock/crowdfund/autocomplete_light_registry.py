@@ -10,11 +10,11 @@ from muckrock.crowdfund.models import Crowdfund
 
 autocomplete_light.register(
     Crowdfund,
-    name='CrowdfundAutocomplete',
+    name="CrowdfundAutocomplete",
     choices=Crowdfund.objects.all(),
-    search_fields=('name',),
+    search_fields=("name",),
     attrs={
-        'placeholder': 'Search for crowdfunds',
-        'data-autocomplete-minimum-characters': 1
-    }
+        "placeholder": "Search for crowdfunds",
+        "data-autocomplete-minimum-characters": 1,
+    },
 )

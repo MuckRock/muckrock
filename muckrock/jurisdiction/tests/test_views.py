@@ -24,10 +24,9 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory()
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({
-            'slug': exemption.slug,
-            'pk': exemption.pk,
-        })
+        kwargs.update(
+            {"slug": exemption.slug, "pk": exemption.pk,}
+        )
 
         response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)
@@ -38,10 +37,9 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory()
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({
-            'slug': exemption.slug,
-            'pk': exemption.pk,
-        })
+        kwargs.update(
+            {"slug": exemption.slug, "pk": exemption.pk,}
+        )
 
         another_jurisdiction = factories.StateJurisdictionFactory(
             parent=exemption.jurisdiction.parent
@@ -57,7 +55,7 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory(jurisdiction=local)
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({'slug': exemption.slug, 'pk': exemption.pk})
+        kwargs.update({"slug": exemption.slug, "pk": exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)
 
@@ -67,7 +65,7 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory(jurisdiction=state)
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({'slug': exemption.slug, 'pk': exemption.pk})
+        kwargs.update({"slug": exemption.slug, "pk": exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)
 
@@ -77,9 +75,8 @@ class TestExemptionDetailView(TestCase):
         exemption = factories.ExemptionFactory(jurisdiction=fed)
         url = exemption.get_absolute_url()
         kwargs = exemption.jurisdiction.get_slugs()
-        kwargs.update({
-            'slug': exemption.slug,
-            'pk': exemption.pk,
-        })
+        kwargs.update(
+            {"slug": exemption.slug, "pk": exemption.pk,}
+        )
         response = http_get_response(url, self.view, **kwargs)
         eq_(response.status_code, 200)

@@ -25,50 +25,36 @@ class TestBusinessDayUnit(TestCase):
     def setUp(self):
         """Set up tests"""
         self.new_years = Holiday.objects.create(
-            name='New Year\'s Day',
-            kind='date',
-            month=1,
-            day=1,
+            name="New Year's Day", kind="date", month=1, day=1,
         )
         self.mlk_day = Holiday.objects.create(
-            name='Martin Luther King, Jr. Day',
-            kind='ord_wd',
+            name="Martin Luther King, Jr. Day",
+            kind="ord_wd",
             month=1,
             num=3,
             weekday=0,
         )
-        self.good_friday = Holiday.objects.create(
-            name='Good Friday',
-            kind='easter',
-        )
+        self.good_friday = Holiday.objects.create(name="Good Friday", kind="easter",)
         self.independence_day = Holiday.objects.create(
-            name='Independence Day',
-            kind='date',
-            month=7,
-            day=4,
+            name="Independence Day", kind="date", month=7, day=4,
         )
         self.veterans_day = Holiday.objects.create(
-            name='Veterans Day',
-            kind='date',
-            month=11,
-            day=11,
+            name="Veterans Day", kind="date", month=11, day=11,
         )
         self.thanksgiving = Holiday.objects.create(
-            name='Thanksgiving',
-            kind='ord_wd',
-            month=11,
-            num=4,
-            weekday=3,
+            name="Thanksgiving", kind="ord_wd", month=11, num=4, weekday=3,
         )
         usa = FederalJurisdictionFactory()
-        usa.holidays.set([
-            self.new_years,
-            self.mlk_day,
-            self.good_friday,
-            self.independence_day,
-            self.veterans_day,
-            self.thanksgiving,
-        ])
+        usa.holidays.set(
+            [
+                self.new_years,
+                self.mlk_day,
+                self.good_friday,
+                self.independence_day,
+                self.veterans_day,
+                self.thanksgiving,
+            ]
+        )
         self.usa_cal = usa.get_calendar()
         self.gen_cal = Calendar()
 
@@ -88,9 +74,7 @@ class TestBusinessDayUnit(TestCase):
         """Test matching for a holiday that occurs based on Easter"""
 
         nose.tools.assert_true(self.good_friday.match(date(2010, 4, 2), False))
-        nose.tools.assert_false(
-            self.good_friday.match(date(2010, 4, 18), False)
-        )
+        nose.tools.assert_false(self.good_friday.match(date(2010, 4, 18), False))
 
     def test_holiday_calendars_is_holiday(self):
         """Test is_holiday"""
@@ -110,32 +94,27 @@ class TestBusinessDayUnit(TestCase):
         """Test business_days_from"""
 
         nose.tools.eq_(
-            self.usa_cal.business_days_from(date(2010, 11, 1), 30),
-            date(2010, 12, 15)
+            self.usa_cal.business_days_from(date(2010, 11, 1), 30), date(2010, 12, 15)
         )
 
     def test_business_days_between(self):
         """Test business_days_between"""
 
         nose.tools.eq_(
-            self.usa_cal.business_days_between(
-                date(2010, 11, 1), date(2010, 12, 15)
-            ), 30
+            self.usa_cal.business_days_between(date(2010, 11, 1), date(2010, 12, 15)),
+            30,
         )
 
     def test_calendar_days_from(self):
         """Test business_days_from for calendar days"""
 
         nose.tools.eq_(
-            self.gen_cal.business_days_from(date(2010, 11, 1), 30),
-            date(2010, 12, 1)
+            self.gen_cal.business_days_from(date(2010, 11, 1), 30), date(2010, 12, 1)
         )
 
     def test_calendar_days_between(self):
         """Test business_days_between for calendar days"""
 
         nose.tools.eq_(
-            self.gen_cal.business_days_between(
-                date(2010, 11, 1), date(2010, 12, 1)
-            ), 30
+            self.gen_cal.business_days_between(date(2010, 11, 1), date(2010, 12, 1)), 30
         )

@@ -22,33 +22,29 @@ def redirect_old(request, jurisdiction, slug, idx, action):
     jurisdiction = foia.jurisdiction.slug
     jidx = foia.jurisdiction.pk
 
-    if action == 'view':
-        return redirect(
-            '/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/' % locals()
-        )
+    if action == "view":
+        return redirect("/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/" % locals())
 
-    if action == 'admin-fix':
-        action = 'admin_fix'
+    if action == "admin-fix":
+        action = "admin_fix"
 
     return redirect(
-        '/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals()
+        "/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/" % locals()
     )
 
 
 def acronyms(request):
     """A page with all the acronyms explained"""
     status_dict = dict(STATUS)
-    codes = [(acro, name, status_dict.get(status, ''), desc) for acro,
-             (name, status, desc) in CODES.items()]
+    codes = [
+        (acro, name, status_dict.get(status, ""), desc)
+        for acro, (name, status, desc) in CODES.items()
+    ]
     codes.sort()
-    return render(
-        request,
-        'staff/acronyms.html',
-        {'codes': codes},
-    )
+    return render(request, "staff/acronyms.html", {"codes": codes},)
 
 
-@permission_required('foia.view_rawemail')
+@permission_required("foia.view_rawemail")
 def raw(request, idx):
     """Get the raw email for a communication"""
     # pylint: disable=unused-argument
@@ -57,8 +53,7 @@ def raw(request, idx):
     permission = request.user.is_staff or request.user == comm.foia.user
     if raw_email and permission:
         return HttpResponse(
-            raw_email.raw_email,
-            content_type='text/plain; charset=utf-8',
+            raw_email.raw_email, content_type="text/plain; charset=utf-8",
         )
     else:
         raise Http404

@@ -23,7 +23,7 @@ from muckrock.communication.models import (
 
 # Monkey patch the faker phone number provider to not produce international numbers
 faker_phone.Provider.formats = [
-    f for f in faker_phone.Provider.formats if not f.startswith('+')
+    f for f in faker_phone.Provider.formats if not f.startswith("+")
 ]
 
 
@@ -33,8 +33,8 @@ class EmailAddressFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EmailAddress
 
-    email = factory.Faker('email')
-    name = factory.Faker('name')
+    email = factory.Faker("email")
+    name = factory.Faker("name")
 
 
 class PhoneNumberFactory(factory.django.DjangoModelFactory):
@@ -43,7 +43,7 @@ class PhoneNumberFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PhoneNumber
 
-    number = factory.Faker('phone_number')
+    number = factory.Faker("phone_number")
 
 
 class AddressFactory(factory.django.DjangoModelFactory):
@@ -52,7 +52,7 @@ class AddressFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Address
 
-    address = factory.Faker('address')
+    address = factory.Faker("address")
 
 
 class EmailCommunicationFactory(factory.django.DjangoModelFactory):
@@ -62,13 +62,12 @@ class EmailCommunicationFactory(factory.django.DjangoModelFactory):
         model = EmailCommunication
 
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )
     sent_datetime = timezone.now() - timedelta(3)
     from_email = factory.SubFactory(EmailAddressFactory)
     raw_email = factory.RelatedFactory(
-        'muckrock.foia.factories.RawEmailFactory',
-        'email',
+        "muckrock.foia.factories.RawEmailFactory", "email",
     )
 
 
@@ -79,7 +78,7 @@ class FaxCommunicationFactory(factory.django.DjangoModelFactory):
         model = FaxCommunication
 
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )
     sent_datetime = timezone.now() - timedelta(3)
     to_number = factory.SubFactory(PhoneNumberFactory)

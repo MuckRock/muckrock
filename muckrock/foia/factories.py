@@ -31,11 +31,11 @@ class FOIAComposerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FOIAComposer
 
-    user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
     organization = factory.SubFactory(
-        'muckrock.organization.factories.OrganizationFactory'
+        "muckrock.organization.factories.OrganizationFactory"
     )
-    title = factory.Sequence('FOIA Composer #{}'.format)
+    title = factory.Sequence("FOIA Composer #{}".format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
 
     @factory.post_generation
@@ -56,16 +56,13 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FOIARequest
 
-    title = factory.Sequence('FOIA Request {}'.format)
+    title = factory.Sequence("FOIA Request {}".format)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    agency = factory.SubFactory('muckrock.core.factories.AgencyFactory')
+    agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
     composer = factory.SubFactory(FOIAComposerFactory)
-    email = factory.SubFactory(
-        'muckrock.communication.factories.EmailAddressFactory',
-    )
+    email = factory.SubFactory("muckrock.communication.factories.EmailAddressFactory",)
     mail_id = factory.Sequence(
-        lambda n: '{}-{}'.
-        format(n, ''.join(random.choice(digits) for _ in range(8)))
+        lambda n: "{}-{}".format(n, "".join(random.choice(digits) for _ in range(8)))
     )
 
     @factory.post_generation
@@ -84,14 +81,13 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
         model = FOIACommunication
 
     foia = factory.SubFactory(FOIARequestFactory)
-    from_user = factory.SubFactory('muckrock.core.factories.UserFactory')
-    to_user = factory.SubFactory('muckrock.core.factories.UserFactory')
+    from_user = factory.SubFactory("muckrock.core.factories.UserFactory")
+    to_user = factory.SubFactory("muckrock.core.factories.UserFactory")
     datetime = factory.LazyAttribute(lambda obj: timezone.now())
     email = factory.RelatedFactory(
-        'muckrock.communication.factories.EmailCommunicationFactory',
-        'communication',
+        "muckrock.communication.factories.EmailCommunicationFactory", "communication",
     )
-    communication = factory.Faker('paragraph')
+    communication = factory.Faker("paragraph")
 
 
 class RawEmailFactory(factory.django.DjangoModelFactory):
@@ -101,9 +97,9 @@ class RawEmailFactory(factory.django.DjangoModelFactory):
         model = RawEmail
 
     email = factory.SubFactory(
-        'muckrock.communication.factories.EmailCommunicationFactory',
+        "muckrock.communication.factories.EmailCommunicationFactory",
     )
-    raw_email = factory.Faker('paragraph')
+    raw_email = factory.Faker("paragraph")
 
 
 class FOIAFileFactory(factory.django.DjangoModelFactory):
@@ -113,8 +109,8 @@ class FOIAFileFactory(factory.django.DjangoModelFactory):
         model = FOIAFile
 
     comm = factory.SubFactory(FOIACommunicationFactory)
-    title = factory.Faker('word')
-    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
+    title = factory.Faker("word")
+    ffile = factory.django.FileField(filename=factory.Faker("file_name"))
 
 
 class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
@@ -124,7 +120,7 @@ class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
         model = OutboundRequestAttachment
 
     foia = factory.SubFactory(FOIARequestFactory)
-    user = factory.SelfAttribute('foia.composer.user')
-    ffile = factory.django.FileField(filename=factory.Faker('file_name'))
+    user = factory.SelfAttribute("foia.composer.user")
+    ffile = factory.django.FileField(filename=factory.Faker("file_name"))
     date_time_stamp = factory.LazyAttribute(lambda obj: timezone.now())
     sent = False

@@ -9,4 +9,5 @@ from django.apps import AppConfig
 
 class DatasetConfig(AppConfig):
     """Config datasets"""
-    name = 'dataset'
+
+    name = "dataset"

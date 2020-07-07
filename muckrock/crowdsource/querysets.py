@@ -14,11 +14,12 @@ class CrowdsourceQuerySet(models.QuerySet):
             return self
         elif user.is_authenticated:
             return self.filter(
-                Q(user=user) | Q(status='open', project_only=False) |
-                Q(status='open', project_only=True, project__contributors=user)
+                Q(user=user)
+                | Q(status="open", project_only=False)
+                | Q(status="open", project_only=True, project__contributors=user)
             )
         else:
-            return self.filter(status='open', project_only=False)
+            return self.filter(status="open", project_only=False)
 
 
 class CrowdsourceDataQuerySet(models.QuerySet):
@@ -26,17 +27,15 @@ class CrowdsourceDataQuerySet(models.QuerySet):
 
     def get_choices(self, data_limit, user, ip_address):
         """Get choices for data to show"""
-        choices = (
-            self.annotate(
-                count=Sum(
-                    Case(
-                        When(responses__number=1, then=Value(1)),
-                        default=0,
-                        output_field=models.IntegerField(),
-                    )
+        choices = self.annotate(
+            count=Sum(
+                Case(
+                    When(responses__number=1, then=Value(1)),
+                    default=0,
+                    output_field=models.IntegerField(),
                 )
-            ).filter(count__lt=data_limit)
-        )
+            )
+        ).filter(count__lt=data_limit)
         if user is not None:
             choices = choices.exclude(responses__user=user)
         elif ip_address is not None:
@@ -49,4 +48,4 @@ class CrowdsourceResponseQuerySet(models.QuerySet):
 
     def get_user_count(self):
         """Get the number of distinct users who have responded"""
-        return self.aggregate(Count('user', distinct=True))['user__count']
+        return self.aggregate(Count("user", distinct=True))["user__count"]

@@ -43,28 +43,30 @@ from muckrock.project.models import Project, ProjectCrowdfunds
 
 class ProjectExploreView(TemplateView):
     """Provides a space for exploring our different projects."""
-    template_name = 'project/explore.html'
+
+    template_name = "project/explore.html"
 
     def get_context_data(self, **kwargs):
         """Gathers and returns a dictionary of context."""
         context = super(ProjectExploreView, self).get_context_data(**kwargs)
         user = self.request.user
-        featured_projects = Project.objects.get_visible(user).filter(
-            featured=True
-        ).optimize()
-        context.update({
-            'featured_projects': featured_projects,
-        })
+        featured_projects = (
+            Project.objects.get_visible(user).filter(featured=True).optimize()
+        )
+        context.update(
+            {"featured_projects": featured_projects,}
+        )
         return context
 
 
 class ProjectListView(MRSearchFilterListView):
     """List all projects"""
+
     model = Project
-    title = 'Projects'
-    template_name = 'project/list.html'
+    title = "Projects"
+    template_name = "project/list.html"
     filter_class = ProjectFilterSet
-    default_sort = 'title'
+    default_sort = "title"
 
     def get_queryset(self):
         """Only returns projects that are visible to the current user."""
@@ -79,18 +81,18 @@ class ProjectListView(MRSearchFilterListView):
 
 class ProjectContributorView(ProjectListView):
     """Provides a list of projects that have the user as a contributor."""
-    template_name = 'project/contributor.html'
+
+    template_name = "project/contributor.html"
 
     def get_contributor(self):
         """Returns the contributor for the view."""
-        return get_object_or_404(User, username=self.kwargs.get('username'))
+        return get_object_or_404(User, username=self.kwargs.get("username"))
 
     def get_queryset(self):
         """Returns all the contributor's projects that are visible to the user."""
         queryset = super(ProjectContributorView, self).get_queryset()
-        queryset = (
-            queryset.get_for_contributor(self.get_contributor())
-            .get_visible(self.request.user)
+        queryset = queryset.get_for_contributor(self.get_contributor()).get_visible(
+            self.request.user
         )
         return queryset
 
@@ -98,20 +100,23 @@ class ProjectContributorView(ProjectListView):
         """Gathers and returns the project and the contributor as context."""
         context = super(ProjectContributorView, self).get_context_data(**kwargs)
         contributor = self.get_contributor()
-        context.update({
-            'user_is_contributor': self.request.user == contributor,
-            'contributor': contributor,
-            'projects': self.get_queryset(**kwargs)
-        })
+        context.update(
+            {
+                "user_is_contributor": self.request.user == contributor,
+                "contributor": contributor,
+                "projects": self.get_queryset(**kwargs),
+            }
+        )
         return context
 
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
+
     model = Project
     form_class = ProjectCreateForm
-    initial = {'private': True}
-    template_name = 'project/create.html'
+    initial = {"private": True}
+    template_name = "project/create.html"
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -129,8 +134,9 @@ class ProjectCreateView(CreateView):
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
+
     model = Project
-    template_name = 'project/detail.html'
+    template_name = "project/detail.html"
 
     def __init__(self, *args, **kwargs):
         self._obj = None
@@ -146,43 +152,37 @@ class ProjectDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Adds visible requests and followers to project context"""
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
-        project = context['object']
+        project = context["object"]
         user = self.request.user
-        context['sidebar_admin_url'] = reverse(
-            'admin:project_project_change', args=(project.pk,)
+        context["sidebar_admin_url"] = reverse(
+            "admin:project_project_change", args=(project.pk,)
         )
-        visible_requests = (
-            project.requests.get_viewable(user).select_related(
-                'agency__jurisdiction__parent__parent',
-                'composer__user__profile',
-            )
+        visible_requests = project.requests.get_viewable(user).select_related(
+            "agency__jurisdiction__parent__parent", "composer__user__profile",
         )
-        context['visible_requests'] = visible_requests.get_public_file_count(
-            limit=6
+        context["visible_requests"] = visible_requests.get_public_file_count(limit=6)
+        context["visible_requests_count"] = visible_requests.count()
+        articles = project.articles.get_published().prefetch_related(
+            Prefetch("authors", queryset=User.objects.select_related("profile"))
         )
-        context['visible_requests_count'] = visible_requests.count()
-        articles = (
-            project.articles.get_published().prefetch_related(
-                Prefetch(
-                    'authors', queryset=User.objects.select_related('profile')
-                )
-            )
+        context["articles"] = articles[:3]
+        context["articles_count"] = articles.count()
+        context["followers"] = followers(project)
+        context["contributors"] = project.contributors.select_related("profile")
+        context["user_is_experimental"] = (
+            user.is_authenticated and user.profile.experimental
         )
-        context['articles'] = articles[:3]
-        context['articles_count'] = articles.count()
-        context['followers'] = followers(project)
-        context['contributors'] = project.contributors.select_related('profile')
-        context['user_is_experimental'
-                ] = user.is_authenticated and user.profile.experimental
-        context['newsletter_label'] = (
-            'Subscribe to the project newsletter'
-            if not project.newsletter_label else project.newsletter_label
+        context["newsletter_label"] = (
+            "Subscribe to the project newsletter"
+            if not project.newsletter_label
+            else project.newsletter_label
         )
-        context['newsletter_cta'] = (
-            'Get updates delivered to your inbox'
-            if not project.newsletter_cta else project.newsletter_cta
+        context["newsletter_cta"] = (
+            "Get updates delivered to your inbox"
+            if not project.newsletter_cta
+            else project.newsletter_cta
         )
-        context['user_can_edit'] = project.editable_by(user)
+        context["user_can_edit"] = project.editable_by(user)
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -210,7 +210,7 @@ class ProjectPermissionsMixin(object):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
-        self.object = get_object_or_404(Project, pk=kwargs.get('pk', None))
+        self.object = get_object_or_404(Project, pk=kwargs.get("pk", None))
         if not self.object.editable_by(self.request.user):
             raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
@@ -218,16 +218,17 @@ class ProjectPermissionsMixin(object):
 
 class ProjectEditView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
+
     model = Project
-    template_name = 'project/edit.html'
+    template_name = "project/edit.html"
     form_class = ProjectUpdateForm
 
     def form_valid(self, form):
         """Adds success message when form is valid."""
         existing_contributors = self.object.contributors.all()
-        new_contributors = form.cleaned_data['contributors']
+        new_contributors = form.cleaned_data["contributors"]
         self.notify_new_contributors(existing_contributors, new_contributors)
-        messages.success(self.request, 'Your edits were saved.')
+        messages.success(self.request, "Your edits were saved.")
         # clear the template cache for the project after its been edited
         self.object.clear_cache()
         return super(ProjectEditView, self).form_valid(form)
@@ -243,35 +244,34 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
 
 class ProjectPublishView(ProjectPermissionsMixin, FormView):
     """Publish a project"""
+
     model = Project
-    template_name = 'project/publish.html'
+    template_name = "project/publish.html"
     form_class = ProjectPublishForm
 
     def dispatch(self, *args, **kwargs):
         """Prevents access to the view for projects that public or pending approval."""
-        project = get_object_or_404(Project, pk=kwargs.get('pk', None))
+        project = get_object_or_404(Project, pk=kwargs.get("pk", None))
         if project.editable_by(self.request.user):
             if not project.private:
                 if project.approved:
-                    messages.warning(
-                        self.request, 'This project is already public.'
-                    )
+                    messages.warning(self.request, "This project is already public.")
                 else:
                     messages.warning(
                         self.request,
-                        'This project is already published and awaiting approval.'
+                        "This project is already published and awaiting approval.",
                     )
                 return redirect(project)
         return super(ProjectPublishView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ProjectPublishView, self).get_context_data(**kwargs)
-        context['project'] = self.object
+        context["project"] = self.object
         return context
 
     def form_valid(self, form):
         """Call the Project.publish method using the valid form data."""
-        notes = form.cleaned_data['notes']
+        notes = form.cleaned_data["notes"]
         self.object.publish(notes)
         return super(ProjectPublishView, self).form_valid(form)
 
@@ -282,20 +282,19 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
 
 class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
     """A creation view for project crowdfunding"""
+
     model = Crowdfund
     form_class = CrowdfundForm
-    template_name = 'project/crowdfund.html'
+    template_name = "project/crowdfund.html"
 
     def dispatch(self, *args, **kwargs):
         """Crowdfunds may only be started on public projects."""
-        return_value = super(ProjectCrowdfundView,
-                             self).dispatch(*args, **kwargs)
+        return_value = super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
         project = self.get_project()
         if project.editable_by(self.request.user):
             if project.private or not project.approved:
                 messages.warning(
-                    self.request,
-                    'Crowdfunds may only be started on public requests.'
+                    self.request, "Crowdfunds may only be started on public requests."
                 )
                 return redirect(project)
         return return_value
@@ -307,13 +306,9 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
     def get_initial(self):
         """Sets defaults in crowdfund project form"""
         project = self.get_project()
-        initial_name = 'Crowdfund the ' + project.title
+        initial_name = "Crowdfund the " + project.title
         initial_date = date.today() + timedelta(30)
-        return {
-            'name': initial_name,
-            'date_due': initial_date,
-            'project': project.id
-        }
+        return {"name": initial_name, "date_due": initial_date, "project": project.id}
 
     def form_valid(self, form):
         """Saves relationship and sends action before returning URL"""
@@ -325,21 +320,21 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         )
         new_action(
             self.request.user,
-            'began crowdfunding',
+            "began crowdfunding",
             action_object=relationship.crowdfund,
-            target=relationship.project
+            target=relationship.project,
         )
         crowdfund.send_intro_email(self.request.user)
         mixpanel_event(
             self.request,
-            'Launch Project Crowdfund',
+            "Launch Project Crowdfund",
             self._project_mixpanel_properties(
                 project,
                 {
-                    'Name': crowdfund.name,
-                    'Payment Capped': crowdfund.payment_capped,
-                    'Payment Required': float(crowdfund.payment_required),
-                    'Date Due': crowdfund.date_due.isoformat(),
+                    "Name": crowdfund.name,
+                    "Payment Capped": crowdfund.payment_capped,
+                    "Payment Required": float(crowdfund.payment_required),
+                    "Date Due": crowdfund.date_due.isoformat(),
                 },
             ),
         )
@@ -351,11 +346,10 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         return project.get_absolute_url()
 
     def get(self, request, *args, **kwargs):
-        response = super(ProjectCrowdfundView,
-                         self).get(request, *args, **kwargs)
+        response = super(ProjectCrowdfundView, self).get(request, *args, **kwargs)
         mixpanel_event(
             request,
-            'Start Project Crowdfund',
+            "Start Project Crowdfund",
             self._project_mixpanel_properties(self.get_project()),
         )
         return response
@@ -363,12 +357,12 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
     def _project_mixpanel_properties(self, project, extra_data=None):
         """Get properties for tracking project events in mixpanel"""
         data = {
-            'Title': project.title,
-            'ID': project.id,
-            'Private': project.private,
-            'Approved': project.approved,
-            'Featured': project.featured,
-            'Created At': project.date_created.isoformat(),
+            "Title": project.title,
+            "ID": project.id,
+            "Private": project.private,
+            "Approved": project.approved,
+            "Featured": project.featured,
+            "Created At": project.date_created.isoformat(),
         }
         if extra_data is not None:
             data.update(extra_data)

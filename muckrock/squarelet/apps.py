@@ -7,4 +7,5 @@ from django.apps import AppConfig
 
 class SquareletConfig(AppConfig):
     """Squarelet configuration"""
-    name = 'squarelet'
+
+    name = "squarelet"

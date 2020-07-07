@@ -35,48 +35,41 @@ from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.tags.models import TaggedItemBase
 
 STATUS = [
-    ('started', 'Draft'),
-    ('submitted', 'Processing'),
-    ('filed', 'Filed'),
+    ("started", "Draft"),
+    ("submitted", "Processing"),
+    ("filed", "Filed"),
 ]
 
 
 class FOIAComposer(models.Model):
     """A FOIA request composer"""
+
     # pylint: disable=too-many-instance-attributes
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT,
-        related_name='composers',
-    )
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="composers",)
     # only null for initial migration
     organization = models.ForeignKey(
-        'organization.Organization',
+        "organization.Organization",
         on_delete=models.PROTECT,
-        related_name='composers',
+        related_name="composers",
         null=True,
     )
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS, default='started')
-    agencies = models.ManyToManyField('agency.Agency', related_name='composers')
+    status = models.CharField(max_length=10, choices=STATUS, default="started")
+    agencies = models.ManyToManyField("agency.Agency", related_name="composers")
     requested_docs = models.TextField(blank=True)
     edited_boilerplate = models.BooleanField(default=False)
     datetime_created = models.DateTimeField(default=timezone.now, db_index=True)
-    datetime_submitted = models.DateTimeField(
-        blank=True,
-        null=True,
-        db_index=True,
-    )
+    datetime_submitted = models.DateTimeField(blank=True, null=True, db_index=True,)
     embargo = models.BooleanField(default=False)
     permanent_embargo = models.BooleanField(default=False)
     parent = models.ForeignKey(
-        'self',
+        "self",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        help_text='The composer this was cloned from, if cloned',
+        help_text="The composer this was cloned from, if cloned",
     )
 
     # for refunding requests if necessary
@@ -92,21 +85,21 @@ class FOIAComposer(models.Model):
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     class Meta:
-        verbose_name = 'FOIA Composer'
-        permissions = (('view_foiacomposer', 'Can view this composer'),)
+        verbose_name = "FOIA Composer"
+        permissions = (("view_foiacomposer", "Can view this composer"),)
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
         """Set title and slug on save"""
-        self.title = self.title.strip() or 'Untitled'
-        self.slug = slugify(self.title) or 'untitled'
+        self.title = self.title.strip() or "Untitled"
+        self.slug = slugify(self.title) or "untitled"
         super(FOIAComposer, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """Resolve any pending new agency tasks"""
-        for agency in self.agencies.filter(status='pending'):
+        for agency in self.agencies.filter(status="pending"):
             if agency.composers.count() == 1:
                 agency.delete()
         super(FOIAComposer, self).delete(*args, **kwargs)
@@ -114,10 +107,7 @@ class FOIAComposer(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(
-            'foia-composer-detail', kwargs={
-                'slug': self.slug,
-                'idx': self.pk,
-            }
+            "foia-composer-detail", kwargs={"slug": self.slug, "idx": self.pk,}
         )
 
     def submit(self, contact_info=None):
@@ -126,9 +116,9 @@ class FOIAComposer(models.Model):
 
         num_requests = self.agencies.count()
         request_count = self.organization.make_requests(num_requests)
-        self.num_reg_requests = request_count['regular']
-        self.num_monthly_requests = request_count['monthly']
-        self.status = 'submitted'
+        self.num_reg_requests = request_count["regular"]
+        self.num_monthly_requests = request_count["monthly"]
+        self.status = "submitted"
         self.datetime_submitted = timezone.now()
 
         if num_requests == 1:
@@ -142,8 +132,7 @@ class FOIAComposer(models.Model):
         # the request right away, other wise we create a multirequest task
         approve = num_requests < settings.MULTI_REVIEW_AMOUNT
         result = composer_delayed_submit.apply_async(
-            args=(self.pk, approve, contact_info),
-            countdown=COMPOSER_SUBMIT_DELAY,
+            args=(self.pk, approve, contact_info), countdown=COMPOSER_SUBMIT_DELAY,
         )
         self.delayed_id = result.id
         self.save()
@@ -152,20 +141,20 @@ class FOIAComposer(models.Model):
         """A pending composer is approved for sending to the agencies"""
         for foia in self.foias.all():
             foia.submit(contact_info=contact_info)
-        self.status = 'filed'
+        self.status = "filed"
         self.save()
 
     def has_perm(self, user, perm):
         """Short cut for checking a FOIA composer permission"""
-        return user.has_perm('foia.%s_foiacomposer' % perm, self)
+        return user.has_perm("foia.%s_foiacomposer" % perm, self)
 
     def return_requests(self, num_requests=None):
         """Return requests to the composer's author"""
         if num_requests is None:
             # if no num_requests passed in, refund all requests
             return_amts = {
-                'regular': self.num_reg_requests,
-                'monthly': self.num_monthly_requests,
+                "regular": self.num_reg_requests,
+                "monthly": self.num_monthly_requests,
             }
         else:
             return_amts = self._calc_return_requests(num_requests)
@@ -178,13 +167,11 @@ class FOIAComposer(models.Model):
 
         Does the actually returning
         """
-        self.num_reg_requests = (
-            F('num_reg_requests') -
-            Least(return_amts['regular'], F('num_reg_requests'))
+        self.num_reg_requests = F("num_reg_requests") - Least(
+            return_amts["regular"], F("num_reg_requests")
         )
-        self.num_monthly_requests = (
-            F('num_monthly_requests') -
-            Least(return_amts['monthly'], F('num_monthly_requests'))
+        self.num_monthly_requests = F("num_monthly_requests") - Least(
+            return_amts["monthly"], F("num_monthly_requests")
         )
         self.save()
 
@@ -207,36 +194,32 @@ class FOIAComposer(models.Model):
                 num_ret = min(num_used, num_requests)
                 num_requests -= num_ret
                 ret.append(num_ret)
-        ret_dict = dict(
-            zip_longest(
-                ['regular', 'monthly', 'extra'],
-                ret,
-                fillvalue=0,
-            )
-        )
-        ret_dict['regular'] += ret_dict.pop('extra')
+        ret_dict = dict(zip_longest(["regular", "monthly", "extra"], ret, fillvalue=0,))
+        ret_dict["regular"] += ret_dict.pop("extra")
         return ret_dict
 
     def revokable(self):
         """Is this composer revokable?"""
         return (
-            self.delayed_id != '' and self.datetime_submitted <
-            timezone.now() + timedelta(seconds=COMPOSER_EDIT_DELAY)
-            and self.status == 'submitted'
+            self.delayed_id != ""
+            and self.datetime_submitted
+            < timezone.now() + timedelta(seconds=COMPOSER_EDIT_DELAY)
+            and self.status == "submitted"
         )
 
     def revoke(self):
         """Revoke a submitted composer"""
         from muckrock.foia.signals import foia_file_delete_s3
+
         current_app.control.revoke(self.delayed_id)
-        self.status = 'started'
-        self.delayed_id = ''
+        self.status = "started"
+        self.delayed_id = ""
         self.datetime_submitted = None
         disconnect_kwargs = {
-            'signal': post_delete,
-            'receiver': foia_file_delete_s3,
-            'sender': FOIAFile,
-            'dispatch_uid': 'muckrock.foia.signals.file_delete_s3',
+            "signal": post_delete,
+            "receiver": foia_file_delete_s3,
+            "sender": FOIAFile,
+            "dispatch_uid": "muckrock.foia.signals.file_delete_s3",
         }
         with TempDisconnectSignal(**disconnect_kwargs):
             self.foias.all().delete()
@@ -247,9 +230,7 @@ class FOIAComposer(models.Model):
     def attachments_over_size_limit(self, user):
         """Are the pending attachments for this composer over the size limit?"""
         total_size = sum(
-            a.ffile.size for a in self.pending_attachments.filter(
-                user=user,
-                sent=False,
-            )
+            a.ffile.size
+            for a in self.pending_attachments.filter(user=user, sent=False,)
         )
         return total_size > settings.MAX_ATTACHMENT_TOTAL_SIZE

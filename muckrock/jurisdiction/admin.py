@@ -36,29 +36,31 @@ logger = logging.getLogger(__name__)
 
 class LawInline(admin.StackedInline):
     """Law admin options"""
+
     model = Law
     extra = 0
 
 
 class ExampleAppealInline(admin.TabularInline):
     """Example appeal inline"""
+
     model = ExampleAppeal
     extra = 0
 
 
 class InvokedExemptionAdminForm(forms.ModelForm):
     """Adds an autocomplete to the invoked exemption request field."""
-    request = autocomplete_light.ModelChoiceField(
-        'FOIARequestAdminAutocomplete'
-    )
+
+    request = autocomplete_light.ModelChoiceField("FOIARequestAdminAutocomplete")
 
     class Meta:
         model = InvokedExemption
-        fields = '__all__'
+        fields = "__all__"
 
 
 class InvokedExemptionInline(admin.StackedInline):
     """Invoked exemption options"""
+
     form = InvokedExemptionAdminForm
     model = InvokedExemption
     extra = 0
@@ -66,63 +68,62 @@ class InvokedExemptionInline(admin.StackedInline):
 
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
-    change_list_template = 'admin/jurisdiction/jurisdiction/change_list.html'
-    prepopulated_fields = {'slug': ('name',)}
-    list_display = ('name', 'parent', 'level')
-    list_filter = ['level']
-    search_fields = ['name']
+
+    change_list_template = "admin/jurisdiction/jurisdiction/change_list.html"
+    prepopulated_fields = {"slug": ("name",)}
+    list_display = ("name", "parent", "level")
+    list_filter = ["level"]
+    search_fields = ["name"]
     inlines = [LawInline]
-    filter_horizontal = ('holidays',)
+    filter_horizontal = ("holidays",)
     fieldsets = (
         (
-            None, {
-                'fields': (
-                    'name',
-                    'slug',
-                    'abbrev',
-                    'level',
-                    'parent',
-                    'hidden',
-                    'image',
-                    'image_attr_line',
-                    'public_notes',
-                    'aliases',
+            None,
+            {
+                "fields": (
+                    "name",
+                    "slug",
+                    "abbrev",
+                    "level",
+                    "parent",
+                    "hidden",
+                    "image",
+                    "image_attr_line",
+                    "public_notes",
+                    "aliases",
                 ),
-            }
+            },
         ),
         (
-            'Options for states/federal', {
-                'classes': ('collapse',),
-                'fields': (
-                    'observe_sat',
-                    'holidays',
-                ),
-            }
+            "Options for states/federal",
+            {"classes": ("collapse",), "fields": ("observe_sat", "holidays",),},
         ),
     )
-    formats = ['xls', 'csv']
+    formats = ["xls", "csv"]
 
 
 class ExemptionAdminForm(forms.ModelForm):
     """Form to include a jurisdiction and contributor autocomplete"""
+
     jurisdiction = autocomplete_light.ModelChoiceField(
-        'JurisdictionAdminAutocomplete', queryset=Jurisdiction.objects.all()
+        "JurisdictionAdminAutocomplete", queryset=Jurisdiction.objects.all()
     )
     contributors = autocomplete_light.ModelMultipleChoiceField(
-        'UserAutocomplete', queryset=User.objects.all(), required=False
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
 
     class Meta:
         model = Exemption
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ExemptionAdmin(VersionAdmin):
     """Provides a way to create and modify exemption information."""
-    prepopulated_fields = {'slug': ('name',)}
-    list_display = ('name', 'jurisdiction')
-    list_filter = ['jurisdiction__level']
-    search_fields = ['name', 'basis', 'jurisdiction__name']
+
+    prepopulated_fields = {"slug": ("name",)}
+    list_display = ("name", "jurisdiction")
+    list_filter = ["jurisdiction__level"]
+    search_fields = ["name", "basis", "jurisdiction__name"]
     inlines = [ExampleAppealInline, InvokedExemptionInline]
     form = ExemptionAdminForm
 

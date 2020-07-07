@@ -19,72 +19,70 @@ class CrowdfundPaymentAdminForm(forms.ModelForm):
     """Form for crowdfund payment inline"""
 
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        label='User',
-        queryset=User.objects.all(),
-        required=False
+        "UserAutocomplete", label="User", queryset=User.objects.all(), required=False
     )
 
     class Meta:
         model = models.CrowdfundPayment
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CrowdfundPaymentAdmin(admin.TabularInline):
     """Model Admin for crowdfund payment"""
+
     form = CrowdfundPaymentAdminForm
     model = models.CrowdfundPayment
-    readonly_fields = ('recurring',)
+    readonly_fields = ("recurring",)
     extra = 0
 
 
 class CrowdfundAdmin(VersionAdmin):
     """Model Admin for crowdfund"""
-    list_display = ('name', 'payment_required', 'payment_received', 'date_due')
-    date_hierarchy = 'date_due'
+
+    list_display = ("name", "payment_required", "payment_received", "date_due")
+    date_hierarchy = "date_due"
     inlines = [CrowdfundPaymentAdmin]
-    search_fields = ('name',)
+    search_fields = ("name",)
 
 
 class RecurringCrowdfundPaymentAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     user = autocomplete_light.ModelChoiceField(
-        'UserAutocomplete',
-        queryset=User.objects.all(),
-        required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False,
     )
 
     class Meta:
         model = models.RecurringCrowdfundPayment
-        fields = '__all__'
+        fields = "__all__"
 
 
 class RecurringCrowdfundPaymentAdmin(VersionAdmin):
     """Recurring donation admin options"""
+
     model = models.RecurringCrowdfundPayment
     list_display = (
-        'email',
-        'user',
-        'crowdfund',
-        'amount',
-        'payment_failed',
-        'active',
-        'created_datetime',
+        "email",
+        "user",
+        "crowdfund",
+        "amount",
+        "payment_failed",
+        "active",
+        "created_datetime",
     )
-    list_select_related = ('user',)
-    search_fields = ('email', 'user__username', 'crowdfund__name')
+    list_select_related = ("user",)
+    search_fields = ("email", "user__username", "crowdfund__name")
     form = RecurringCrowdfundPaymentAdminForm
-    date_hierarchy = 'created_datetime'
-    list_filter = ('active', 'payment_failed')
+    date_hierarchy = "created_datetime"
+    list_filter = ("active", "payment_failed")
     readonly_fields = (
-        'email',
-        'crowdfund',
-        'created_datetime',
-        'amount',
-        'customer_id',
-        'subscription_id',
-        'deactivated_datetime',
+        "email",
+        "crowdfund",
+        "created_datetime",
+        "amount",
+        "customer_id",
+        "subscription_id",
+        "deactivated_datetime",
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -92,18 +90,18 @@ class RecurringCrowdfundPaymentAdmin(VersionAdmin):
         if obj.active:
             return self.readonly_fields
         else:
-            return self.readonly_fields + ('active',)
+            return self.readonly_fields + ("active",)
 
     def save_model(self, request, obj, form, change):
         """Cancel the subscription if manually deactivated"""
         if not obj.active:
             obj.cancel()
-        return super(RecurringCrowdfundPaymentAdmin,
-                     self).save_model(request, obj, form, change)
+        return super(RecurringCrowdfundPaymentAdmin, self).save_model(
+            request, obj, form, change
+        )
 
 
 admin.site.register(models.Crowdfund, CrowdfundAdmin)
 admin.site.register(
-    models.RecurringCrowdfundPayment,
-    RecurringCrowdfundPaymentAdmin,
+    models.RecurringCrowdfundPayment, RecurringCrowdfundPaymentAdmin,
 )

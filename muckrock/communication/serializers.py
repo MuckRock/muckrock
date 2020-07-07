@@ -14,7 +14,7 @@ class EmailAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmailAddress
-        fields = ('email', 'name', 'status')
+        fields = ("email", "name", "status")
 
 
 class PhoneNumberSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class PhoneNumberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PhoneNumber
-        fields = ('number', 'type', 'status')
+        fields = ("number", "type", "status")
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -31,12 +31,12 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = (
-            'street',
-            'suite',
-            'city',
-            'state',
-            'zip_code',
-            'agency_override',
-            'attn_override',
-            'address',
+            "street",
+            "suite",
+            "city",
+            "state",
+            "zip_code",
+            "agency_override",
+            "attn_override",
+            "address",
         )

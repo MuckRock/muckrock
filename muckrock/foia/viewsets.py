@@ -17,9 +17,7 @@ import logging
 import actstream
 import django_filters
 import requests
-from rest_framework import decorators
-from rest_framework import status as http_status
-from rest_framework import viewsets
+from rest_framework import decorators, status as http_status, viewsets
 from rest_framework.filters import DjangoFilterBackend, SearchFilter
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
@@ -51,6 +49,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     * agency, by id
     * tags, by name
     """
+
     # pylint: disable=too-many-public-methods
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
@@ -60,77 +59,63 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
-        agency = django_filters.NumberFilter(name='agency__id')
+
+        agency = django_filters.NumberFilter(name="agency__id")
         jurisdiction = django_filters.NumberFilter(
-            name='agency__jurisdiction__id',
-            label='Jurisdiction ID',
+            name="agency__jurisdiction__id", label="Jurisdiction ID"
         )
-        user = django_filters.CharFilter(
-            name='composer__user__username',
-            label='User',
-        )
-        tags = django_filters.CharFilter(
-            name='tags__name',
-            label='Tags',
-        )
+        user = django_filters.CharFilter(name="composer__user__username", label="User")
+        tags = django_filters.CharFilter(name="tags__name", label="Tags")
         has_datetime_submitted = django_filters.BooleanFilter(
-            name='composer__datetime_submitted',
-            label='Has DateTime Submitted',
-            lookup_expr='isnull',
+            name="composer__datetime_submitted",
+            label="Has DateTime Submitted",
+            lookup_expr="isnull",
             exclude=True,
         )
         has_datetime_done = django_filters.BooleanFilter(
-            name='datetime_done',
-            label='Has DateTime Done',
-            lookup_expr='isnull',
+            name="datetime_done",
+            label="Has DateTime Done",
+            lookup_expr="isnull",
             exclude=True,
         )
 
-        order_by_field = 'ordering'
+        order_by_field = "ordering"
         ordering = django_filters.OrderingFilter(
             fields=(
-                ('composer__datetime_submitted', 'datetime_submitted'),
-                ('composer__user__username', 'user'),
-                ('agency__name', 'agency'),
-                ('datetime_done', 'datetime_done'),
-                ('title', 'title'),
-                ('status', 'status'),
+                ("composer__datetime_submitted", "datetime_submitted"),
+                ("composer__user__username", "user"),
+                ("agency__name", "agency"),
+                ("datetime_done", "datetime_done"),
+                ("title", "title"),
+                ("status", "status"),
             )
         )
 
         class Meta:
             model = FOIARequest
-            fields = (
-                'user',
-                'title',
-                'status',
-                'embargo',
-                'jurisdiction',
-                'agency',
-            )
+            fields = ("user", "title", "status", "embargo", "jurisdiction", "agency")
 
     filter_class = Filter
 
     def get_queryset(self):
         return (
-            FOIARequest.objects.get_viewable(self.request.user).select_related(
-                'composer__user',
-                'agency__jurisdiction',
-            ).prefetch_related(
-                'communications__files',
-                'communications__emails',
-                'communications__faxes',
-                'communications__mails',
-                'communications__web_comms',
-                'communications__portals',
-                'notes',
-                'tags',
-                'edit_collaborators',
-                'read_collaborators',
-                'tracking_ids',
+            FOIARequest.objects.get_viewable(self.request.user)
+            .select_related("composer__user", "agency__jurisdiction")
+            .prefetch_related(
+                "communications__files",
+                "communications__emails",
+                "communications__faxes",
+                "communications__mails",
+                "communications__web_comms",
+                "communications__portals",
+                "notes",
+                "tags",
+                "edit_collaborators",
+                "read_collaborators",
+                "tracking_ids",
                 Prefetch(
-                    'communications__responsetask_set',
-                    queryset=ResponseTask.objects.select_related('resolved_by'),
+                    "communications__responsetask_set",
+                    queryset=ResponseTask.objects.select_related("resolved_by"),
                 ),
             )
         )
@@ -138,25 +123,24 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     def _validate_create(self, user, data):
         """Do all of the data validation for request creation"""
         cleaned_data = {}
-        cleaned_data['agencies'] = self._clean_agencies(data.get('agency', []))
-        cleaned_data['embargo'], cleaned_data['permanent_embargo'] = (
-            self._clean_embargo(
-                user,
-                data.get('embargo', False),
-                data.get('permanent_embargo', False),
-            )
+        cleaned_data["agencies"] = self._clean_agencies(data.get("agency", []))
+        (
+            cleaned_data["embargo"],
+            cleaned_data["permanent_embargo"],
+        ) = self._clean_embargo(
+            user, data.get("embargo", False), data.get("permanent_embargo", False)
         )
-        cleaned_data['title'] = self._clean_title(data.get('title'))
+        cleaned_data["title"] = self._clean_title(data.get("title"))
 
-        cleaned_data['requested_docs'], cleaned_data['edited_boilerplate'] = (
-            self._clean_document_request(
-                data.get('document_request'),
-                data.get('full_text'),
-            )
+        (
+            cleaned_data["requested_docs"],
+            cleaned_data["edited_boilerplate"],
+        ) = self._clean_document_request(
+            data.get("document_request"), data.get("full_text")
         )
 
-        cleaned_data['attachments'] = self._clean_attachments(
-            data.get('attachments', [])
+        cleaned_data["attachments"] = self._clean_attachments(
+            data.get("attachments", [])
         )
         return cleaned_data
 
@@ -165,37 +149,32 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         if not isinstance(agencies, list):
             agencies = [agencies]
         try:
-            agencies = Agency.objects.filter(
-                pk__in=agencies,
-                status='approved',
-            )
+            agencies = Agency.objects.filter(pk__in=agencies, status="approved")
         except ValueError:
-            raise forms.ValidationError('Bad agency ID format')
+            raise forms.ValidationError("Bad agency ID format")
 
         if not agencies:
-            raise forms.ValidationError('At least one valid agency required')
+            raise forms.ValidationError("At least one valid agency required")
         return agencies
 
     def _clean_embargo(self, user, embargo, permanent_embargo):
         """Clean embargo and permanent embargo"""
         if permanent_embargo:
             embargo = True
-        if embargo and not user.has_perm('foia.embargo_foiarequest'):
+        if embargo and not user.has_perm("foia.embargo_foiarequest"):
             raise forms.ValidationError(
-                'You do not have permission to embargo requests'
+                "You do not have permission to embargo requests"
             )
-        if permanent_embargo and not user.has_perm(
-            'foia.embargo_perm_foiarequest'
-        ):
+        if permanent_embargo and not user.has_perm("foia.embargo_perm_foiarequest"):
             raise forms.ValidationError(
-                'You do not have permission to permanently embargo requests'
+                "You do not have permission to permanently embargo requests"
             )
         return embargo, permanent_embargo
 
     def _clean_title(self, title):
         """Clean title"""
         if not title:
-            raise forms.ValidationError('title required')
+            raise forms.ValidationError("title required")
         return title
 
     def _clean_document_request(self, document_request, full_text):
@@ -205,9 +184,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         elif document_request:
             return document_request, False
         else:
-            raise forms.ValidationError(
-                'document_request or full_text required'
-            )
+            raise forms.ValidationError("document_request or full_text required")
 
     def _clean_attachments(self, attachments):
         """Clean attachments"""
@@ -216,7 +193,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
         if not isinstance(attachments, list):
             raise forms.ValidationError(
-                'attachments should be a list of publicly available URLs'
+                "attachments should be a list of publicly available URLs"
             )
 
         total_size = 0
@@ -225,33 +202,33 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 res = requests.get(attm_path)
             except requests.exceptions.RequestException:
                 raise forms.ValidationError(
-                    'Error downloading attachment: {}'.format(attm_path)
+                    "Error downloading attachment: {}".format(attm_path)
                 )
-            mime_type = res.headers.get('Content-Type')
+            mime_type = res.headers.get("Content-Type")
             if mime_type not in settings.ALLOWED_FILE_MIMES:
                 raise forms.ValidationError(
-                    'Attachment: {} is not of a valid mime type.  Valid types '
-                    'include: {}'.format(
-                        attm_path, ', '.join(settings.ALLOWED_FILE_MIMES)
+                    "Attachment: {} is not of a valid mime type.  Valid types "
+                    "include: {}".format(
+                        attm_path, ", ".join(settings.ALLOWED_FILE_MIMES)
                     )
                 )
             if res.status_code != 200:
                 raise forms.ValidationError(
-                    'Error downloading attachment: {}, code: {}'.format(
+                    "Error downloading attachment: {}, code: {}".format(
                         attm_path, res.status_code
                     )
                 )
             len_res = len(res.content)
             if len_res > settings.MAX_ATTACHMENT_SIZE:
                 raise forms.ValidationError(
-                    'Attachment too large (5MB): {}'.format(attm_path)
+                    "Attachment too large (5MB): {}".format(attm_path)
                 )
             total_size += len_res
             if total_size > settings.MAX_ATTACHMENT_TOTAL_SIZE:
                 raise forms.ValidationError(
-                    'Total attachment size must be less than 20MB'
+                    "Total attachment size must be less than 20MB"
                 )
-            title = attm_path.rsplit('/', 1)[1]
+            title = attm_path.rsplit("/", 1)[1]
             clean_attachments.append((title, res.content))
         return clean_attachments
 
@@ -261,28 +238,24 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             data = self._validate_create(request.user, request.data)
         except forms.ValidationError as exc:
             return Response(
-                {
-                    'status': exc.args[0],
-                },
-                status=http_status.HTTP_400_BAD_REQUEST,
+                {"status": exc.args[0]}, status=http_status.HTTP_400_BAD_REQUEST
             )
 
         composer = FOIAComposer.objects.create(
             user=request.user,
             organization=request.user.profile.organization,
-            title=data['title'],
-            slug=slugify(data['title']) or 'untitled',
-            requested_docs=data['requested_docs'],
-            edited_boilerplate=data['edited_boilerplate'],
-            embargo=data['embargo'],
-            permanent_embargo=data['permanent_embargo'],
+            title=data["title"],
+            slug=slugify(data["title"]) or "untitled",
+            requested_docs=data["requested_docs"],
+            edited_boilerplate=data["edited_boilerplate"],
+            embargo=data["embargo"],
+            permanent_embargo=data["permanent_embargo"],
         )
-        composer.agencies.set(data['agencies'])
+        composer.agencies.set(data["agencies"])
 
-        for title, content in data['attachments']:
+        for title, content in data["attachments"]:
             attm = composer.pending_attachments.create(
-                user=request.user,
-                date_time_stamp=timezone.now(),
+                user=request.user, date_time_stamp=timezone.now()
             )
             attm.ffile.save(title, ContentFile(content))
 
@@ -291,17 +264,17 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         except InsufficientRequestsError:
             return Response(
                 {
-                    'status': 'Out of requests.  FOI Request has been saved.',
-                    'Location': composer.get_absolute_url()
+                    "status": "Out of requests.  FOI Request has been saved.",
+                    "Location": composer.get_absolute_url(),
                 },
                 status=http_status.HTTP_402_PAYMENT_REQUIRED,
             )
         else:
             return Response(
                 {
-                    'status': 'FOI Request submitted',
-                    'Location': composer.get_absolute_url(),
-                    'Requests': [f.pk for f in composer.foias.all()],
+                    "status": "FOI Request submitted",
+                    "Location": composer.get_absolute_url(),
+                    "Requests": [f.pk for f in composer.foias.all()],
                 },
                 status=http_status.HTTP_201_CREATED,
             )
@@ -314,35 +287,33 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             self.check_object_permissions(request, foia)
 
             foia.create_out_communication(
-                from_user=request.user,
-                text=request.DATA['text'],
+                from_user=request.user, text=request.DATA["text"]
             )
 
-            can_appeal = request.user.has_perm('foia.appeal_foiarequest', foia)
-            appeal = request.DATA.get('appeal', False) and can_appeal
+            can_appeal = request.user.has_perm("foia.appeal_foiarequest", foia)
+            appeal = request.DATA.get("appeal", False) and can_appeal
             foia.submit(appeal=appeal)
 
             if appeal:
-                status = 'Appeal submitted'
+                status = "Appeal submitted"
             else:
-                status = 'Follow up submitted'
+                status = "Follow up submitted"
 
-            return Response({'status': status}, status=http_status.HTTP_200_OK)
+            return Response({"status": status}, status=http_status.HTTP_200_OK)
 
         except FOIARequest.DoesNotExist:
-            return Response({
-                'status': 'Not Found'
-            },
-                            status=http_status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"status": "Not Found"}, status=http_status.HTTP_404_NOT_FOUND
+            )
 
         except KeyError:
-            return Response({
-                'status': 'Missing data - Please supply text for followup'
-            },
-                            status=http_status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"status": "Missing data - Please supply text for followup"},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
 
     @decorators.detail_route(
-        methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,)
+        methods=["POST", "DELETE"], permission_classes=(IsAuthenticated,)
     )
     def follow(self, request, pk=None):
         """Follow or unfollow a request"""
@@ -352,71 +323,67 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             self.check_object_permissions(request, foia)
 
             if foia.user == request.user:
-                return Response({
-                    'status': 'You may not follow your own request'
-                },
-                                status=http_status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"status": "You may not follow your own request"},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
 
-            if request.method == 'POST':
+            if request.method == "POST":
                 actstream.actions.follow(request.user, foia, actor_only=False)
-                return Response({
-                    'status': 'Following'
-                },
-                                status=http_status.HTTP_200_OK)
-            if request.method == 'DELETE':
+                return Response({"status": "Following"}, status=http_status.HTTP_200_OK)
+            if request.method == "DELETE":
                 actstream.actions.unfollow(request.user, foia)
-                return Response({
-                    'status': 'Not following'
-                },
-                                status=http_status.HTTP_200_OK)
+                return Response(
+                    {"status": "Not following"}, status=http_status.HTTP_200_OK
+                )
 
         except FOIARequest.DoesNotExist:
-            return Response({
-                'status': 'Not Found'
-            },
-                            status=http_status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"status": "Not Found"}, status=http_status.HTTP_404_NOT_FOUND
+            )
 
     def post_save(self, obj, created=False):
         """Save tags"""
-        if 'tags' in self.request.DATA:
-            obj.tags.set(*self.request.DATA['tags'])
+        if "tags" in self.request.DATA:
+            obj.tags.set(*self.request.DATA["tags"])
         return super(FOIARequestViewSet, self).post_save(obj, created=created)
 
 
 DELIVERED_CHOICES = (
-    ('email', 'Email'),
-    ('fax', 'Fax'),
-    ('mail', 'Mail'),
-    ('web', 'Web Comm'),
-    ('portal', 'Portal'),
+    ("email", "Email"),
+    ("fax", "Fax"),
+    ("mail", "Mail"),
+    ("web", "Web Comm"),
+    ("portal", "Portal"),
 )
 
 
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIACommunication"""
+
     # pylint: disable=too-many-public-methods
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
-        min_date = django_filters.DateFilter(name='datetime', lookup_expr='gte')
-        max_date = django_filters.DateFilter(name='datetime', lookup_expr='lte')
-        foia = django_filters.NumberFilter(name='foia__id')
+
+        min_date = django_filters.DateFilter(name="datetime", lookup_expr="gte")
+        max_date = django_filters.DateFilter(name="datetime", lookup_expr="lte")
+        foia = django_filters.NumberFilter(name="foia__id")
         delivered = django_filters.ChoiceFilter(
-            method='filter_delivered',
-            choices=DELIVERED_CHOICES,
+            method="filter_delivered", choices=DELIVERED_CHOICES
         )
 
         def filter_delivered(self, queryset, name, value):
             """Filter by delivered"""
             # pylint: disable=unused-argument
             dmap = {
-                'email': 'emails',
-                'fax': 'faxes',
-                'mail': 'mails',
-                'web': 'web_comms',
-                'portal': 'portals',
+                "email": "emails",
+                "fax": "faxes",
+                "mail": "mails",
+                "web": "web_comms",
+                "portal": "portals",
             }
             if value not in dmap:
                 return queryset
@@ -424,27 +391,20 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
 
         class Meta:
             model = FOIACommunication
-            fields = (
-                'max_date',
-                'min_date',
-                'foia',
-                'status',
-                'response',
-                'delivered',
-            )
+            fields = ("max_date", "min_date", "foia", "status", "response", "delivered")
 
     filter_class = Filter
 
     def get_queryset(self):
         return FOIACommunication.objects.prefetch_related(
-            'files',
-            'emails',
-            'faxes',
-            'mails',
-            'web_comms',
-            'portals',
+            "files",
+            "emails",
+            "faxes",
+            "mails",
+            "web_comms",
+            "portals",
             Prefetch(
-                'responsetask_set',
-                queryset=ResponseTask.objects.select_related('resolved_by'),
+                "responsetask_set",
+                queryset=ResponseTask.objects.select_related("resolved_by"),
             ),
         ).get_viewable(self.request.user)

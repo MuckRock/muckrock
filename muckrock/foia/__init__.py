@@ -1,1 +1,1 @@
-default_app_config = 'muckrock.foia.apps.FOIAConfig'
+default_app_config = "muckrock.foia.apps.FOIAConfig"

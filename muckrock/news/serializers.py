@@ -17,26 +17,20 @@ class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model"""
 
     authors = serializers.SlugRelatedField(
-        many=True,
-        slug_field='username',
-        queryset=User.objects.all(),
+        many=True, slug_field="username", queryset=User.objects.all(),
     )
     editors = serializers.SlugRelatedField(
-        many=True,
-        slug_field='username',
-        queryset=User.objects.all(),
+        many=True, slug_field="username", queryset=User.objects.all(),
     )
     foias = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=FOIARequest.objects.all(),
-        style={
-            'base_template': 'input.html'
-        }
+        style={"base_template": "input.html"},
     )
 
     class Meta:
         model = Article
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -44,4 +38,4 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = '__all__'
+        fields = "__all__"

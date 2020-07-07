@@ -5,33 +5,26 @@
 from django.db import models
 
 PORTAL_TYPES = [
-    ('foiaonline', 'FOIAonline'),
-    ('govqa', 'GovQA'),
-    ('nextrequest', 'NextRequest'),
-    ('foiaxpress', 'FOIAXpress'),
-    ('fbi', 'FBI eFOIPA Portal'),
-    ('justfoia', 'JustFOIA'),
-    ('foiadirect', 'FOIA Direct'),
-    ('webform', 'Web Form'),
-    ('other', 'Other'),
+    ("foiaonline", "FOIAonline"),
+    ("govqa", "GovQA"),
+    ("nextrequest", "NextRequest"),
+    ("foiaxpress", "FOIAXpress"),
+    ("fbi", "FBI eFOIPA Portal"),
+    ("justfoia", "JustFOIA"),
+    ("foiadirect", "FOIA Direct"),
+    ("webform", "Web Form"),
+    ("other", "Other"),
 ]
 
 
 class Portal(models.Model):
     """An instance of an agency portal"""
-    url = models.URLField(
-        max_length=255,
-        unique=True,
-    )
+
+    url = models.URLField(max_length=255, unique=True,)
     name = models.CharField(max_length=255)
-    type = models.CharField(
-        choices=PORTAL_TYPES,
-        max_length=11,
-    )
+    type = models.CharField(choices=PORTAL_TYPES, max_length=11,)
     status = models.CharField(
-        max_length=5,
-        choices=(('good', 'Good'), ('error', 'Error')),
-        default='good',
+        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good",
     )
     created_timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -47,16 +40,17 @@ class Portal(models.Model):
             FBIPortal,
             WebFormPortal,
         )
+
         # pylint: disable=access-member-before-definition
         # pylint: disable=attribute-defined-outside-init
         portal_classes = {
             # disabling next request integration for now,
             # as it is causing issues
-            '__nextrequest': NextRequestPortal,
-            'fbi': FBIPortal,
-            'webform': WebFormPortal,
+            "__nextrequest": NextRequestPortal,
+            "fbi": FBIPortal,
+            "webform": WebFormPortal,
         }
-        if hasattr(self, '_portal_type'):
+        if hasattr(self, "_portal_type"):
             return self._portal_type
         else:
             portal_class = portal_classes.get(self.type, ManualPortal)

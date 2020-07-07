@@ -20,7 +20,7 @@ class ArticleSitemap(Sitemap):
     """Sitemap for Articles"""
 
     priority = 0.7
-    changefreq = 'never'
+    changefreq = "never"
     limit = 500
 
     def items(self):
@@ -34,6 +34,7 @@ class ArticleSitemap(Sitemap):
 
 class ArticleNewsSitemap(NewsSitemap):
     """Article sitemap for Google News"""
+
     limit = 500
 
     def items(self):
@@ -41,7 +42,7 @@ class ArticleNewsSitemap(NewsSitemap):
         return (
             Article.objects.get_published()
             .filter(pub_date__gte=(timezone.now() - timedelta(2)))
-            .prefetch_related('tags')
+            .prefetch_related("tags")
         )
 
     def lastmod(self, obj):
@@ -50,7 +51,7 @@ class ArticleNewsSitemap(NewsSitemap):
 
     def keywords(self, obj):
         """Keywords for the article"""
-        return ','.join(t.name for t in obj.tags.all())
+        return ",".join(t.name for t in obj.tags.all())
 
 
 register(articles=ArticleNewsSitemap)

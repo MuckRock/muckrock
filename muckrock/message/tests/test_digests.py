@@ -52,20 +52,20 @@ class TestDailyDigest(TestCase):
     def test_send_no_notifications(self):
         """The email shouldn't send if there's no notifications."""
         email = self.digest(user=self.user, interval=self.interval)
-        eq_(email.activity['count'], 0, 'There should be no activity.')
-        eq_(email.send(), 0, 'The email should not send.')
+        eq_(email.activity["count"], 0, "There should be no activity.")
+        eq_(email.send(), 0, "The email should not send.")
 
     def test_send_notification(self):
         """The email should send if there are notifications."""
         # generate an action on an actor the user follows
         agency = AgencyFactory()
         foia = FOIARequestFactory(agency=agency)
-        action = new_action(agency, 'completed', target=foia)
+        action = new_action(agency, "completed", target=foia)
         notify(self.user, action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
-        eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.send(), 1, 'The email should send.')
+        eq_(email.activity["count"], 1, "There should be activity.")
+        eq_(email.send(), 1, "The email should send.")
 
     def test_digest_follow_requests(self):
         """Digests should include information on requests I follow."""
@@ -73,12 +73,12 @@ class TestDailyDigest(TestCase):
         other_user = UserFactory()
         foia = FOIARequestFactory(composer__user=other_user)
         agency = AgencyFactory()
-        action = new_action(agency, 'rejected', target=foia)
+        action = new_action(agency, "rejected", target=foia)
         notify(self.user, action)
         # generate the email, which should contain the generated action
         email = self.digest(user=self.user, interval=self.interval)
-        eq_(email.activity['count'], 1, 'There should be activity.')
-        eq_(email.send(), 1, 'The email should send.')
+        eq_(email.activity["count"], 1, "There should be activity.")
+        eq_(email.send(), 1, "The email should send.")
 
     def test_digest_user_questions(self):
         """Digests should include information on questions I asked."""
@@ -90,14 +90,13 @@ class TestDailyDigest(TestCase):
         # so let's generate the email and see what happened
         email = self.digest(user=self.user, interval=self.interval)
         eq_(
-            email.activity['count'], 1,
-            'There should be activity that is not user initiated.'
+            email.activity["count"],
+            1,
+            "There should be activity that is not user initiated.",
         )
-        eq_(
-            email.activity['questions']['mine'].first().action.actor, other_user
-        )
-        eq_(email.activity['questions']['mine'].first().action.verb, 'answered')
-        eq_(email.send(), 1, 'The email should send.')
+        eq_(email.activity["questions"]["mine"].first().action.actor, other_user)
+        eq_(email.activity["questions"]["mine"].first().action.verb, "answered")
+        eq_(email.send(), 1, "The email should send.")
 
     def test_digest_follow_questions(self):
         """Digests should include information on questions I follow."""
@@ -107,20 +106,14 @@ class TestDailyDigest(TestCase):
         other_user = UserFactory()
         answer = AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
-        eq_(email.activity['count'], 1, 'There should be activity.')
+        eq_(email.activity["count"], 1, "There should be activity.")
+        eq_(email.activity["questions"]["following"].first().action.actor, other_user)
         eq_(
-            email.activity['questions']['following'].first().action.actor,
-            other_user
+            email.activity["questions"]["following"].first().action.action_object,
+            answer,
         )
-        eq_(
-            email.activity['questions']['following'].first()
-            .action.action_object, answer
-        )
-        eq_(
-            email.activity['questions']['following'].first().action.target,
-            question
-        )
-        eq_(email.send(), 1, 'The email should send.')
+        eq_(email.activity["questions"]["following"].first().action.target, question)
+        eq_(email.send(), 1, "The email should send.")
 
 
 class TestStaffDigest(TestCase):

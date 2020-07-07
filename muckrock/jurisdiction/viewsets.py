@@ -28,33 +28,31 @@ from muckrock.task.serializers import FlaggedTaskSerializer
 
 class JurisdictionViewSet(ModelViewSet):
     """API views for Jurisdiction"""
+
     # pylint: disable=too-many-public-methods
-    queryset = (
-        Jurisdiction.objects.order_by('id').select_related('parent__parent')
-    )
+    queryset = Jurisdiction.objects.order_by("id").select_related("parent__parent")
     serializer_class = JurisdictionSerializer
     # don't allow ordering by computed fields
     ordering_fields = [
-        f for f in JurisdictionSerializer.Meta.fields if f not in (
-            'absolute_url',
-            'average_response_time',
-            'fee_rate',
-            'success_rate',
-        )
+        f
+        for f in JurisdictionSerializer.Meta.fields
+        if f
+        not in ("absolute_url", "average_response_time", "fee_rate", "success_rate",)
     ]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Jurisdictions"""
-        parent = django_filters.NumberFilter(name='parent__id')
+
+        parent = django_filters.NumberFilter(name="parent__id")
 
         class Meta:
             model = Jurisdiction
             fields = (
-                'name',
-                'abbrev',
-                'level',
-                'parent',
-                'law__requires_proxy',
+                "name",
+                "abbrev",
+                "level",
+                "parent",
+                "law__requires_proxy",
             )
 
     filter_class = Filter
@@ -63,18 +61,18 @@ class JurisdictionViewSet(ModelViewSet):
     def template(self, request, pk=None):
         """API view to get the template language for a jurisdiction"""
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
-        template = get_template('text/foia/request.txt')
+        template = get_template("text/foia/request.txt")
         if request.user.is_authenticated:
             user_name = request.user.profile.full_name
         else:
-            user_name = 'Anonymous User'
+            user_name = "Anonymous User"
         context = {
-            'document_request': '<insert requested documents here>',
-            'jurisdiction': jurisdiction,
-            'user_name': user_name,
+            "document_request": "<insert requested documents here>",
+            "jurisdiction": jurisdiction,
+            "user_name": user_name,
         }
         text = template.render(context)
-        return Response({'text': text})
+        return Response({"text": text})
 
 
 class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
@@ -84,7 +82,7 @@ class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
 
     def has_permission(self, request, view):
         """Allow authenticated users to submit exemptions."""
-        if request.user.is_authenticated and request.method in ['POST']:
+        if request.user.is_authenticated and request.method in ["POST"]:
             return True
         return super(ExemptionPermissions, self).has_permission(request, view)
 
@@ -94,23 +92,25 @@ class ExemptionViewSet(ModelViewSet):
     The Exemption model provides a list of individual exemption cases along with some
     example appeal language.
     """
+
     queryset = (
-        Exemption.objects.order_by('id')
-        .select_related('jurisdiction__parent__parent')
-        .prefetch_related('example_appeals')
+        Exemption.objects.order_by("id")
+        .select_related("jurisdiction__parent__parent")
+        .prefetch_related("example_appeals")
     )
     serializer_class = ExemptionSerializer
     permission_classes = [ExemptionPermissions]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Examptions"""
-        jurisdiction = django_filters.NumberFilter(name='jurisdiction__id')
+
+        jurisdiction = django_filters.NumberFilter(name="jurisdiction__id")
 
         class Meta:
             model = Exemption
             fields = (
-                'name',
-                'jurisdiction',
+                "name",
+                "jurisdiction",
             )
 
     filter_class = Filter
@@ -122,11 +122,12 @@ class ExemptionViewSet(ModelViewSet):
         Jurisdiction is an optional filter.
         """
         results = self.queryset
-        query = request.query_params.get('q')
-        jurisdiction = request.query_params.get('jurisdiction')
+        query = request.query_params.get("q")
+        jurisdiction = request.query_params.get("jurisdiction")
         if query:
             results = self.queryset.filter(
-                Q(name__icontains=query) | Q(aliases__icontains=query)
+                Q(name__icontains=query)
+                | Q(aliases__icontains=query)
                 | Q(example_appeals__language__icontains=query)
                 | Q(tags__name__icontains=query)
             ).distinct()
@@ -139,7 +140,7 @@ class ExemptionViewSet(ModelViewSet):
         serializer = self.get_serializer(results, many=True)
         return Response(serializer.data)
 
-    @list_route(methods=['post'])
+    @list_route(methods=["post"])
     def submit(self, request):
         """
         The exemption submission endpoint allows new exemptions to be submitted
@@ -150,12 +151,9 @@ class ExemptionViewSet(ModelViewSet):
         form = ExemptionSubmissionForm(request.data)
         if not form.is_valid():
             raise ValidationError(form.errors.as_json())
-        foia = form.cleaned_data.get('foia')
-        language = form.cleaned_data.get('language')
+        foia = form.cleaned_data.get("foia")
+        language = form.cleaned_data.get("language")
         task = FlaggedTask.objects.create(
-            foia=foia,
-            text=language,
-            user=request.user,
-            category='appeal',
+            foia=foia, text=language, user=request.user, category="appeal",
         )
         return Response(FlaggedTaskSerializer(task).data)

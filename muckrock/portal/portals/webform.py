@@ -17,4 +17,4 @@ class WebFormPortal(ManualPortal):
         """
         super(WebFormPortal, self).send_msg(comm, **kwargs)
         comm.foia.portal = None
-        comm.foia.save(comment='web form portal self removing')
+        comm.foia.save(comment="web form portal self removing")

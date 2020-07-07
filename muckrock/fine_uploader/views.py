@@ -35,22 +35,20 @@ from muckrock.foia.models import (
 def _success(request, model, attachment_model, fk_name):
     """"File has been succesfully uploaded to a FOIA/composer"""
     try:
-        foia = model.objects.get(pk=request.POST.get('id'))
+        foia = model.objects.get(pk=request.POST.get("id"))
     except model.DoesNotExist:
         return HttpResponseBadRequest()
-    if not foia.has_perm(request.user, 'upload_attachment'):
+    if not foia.has_perm(request.user, "upload_attachment"):
         return HttpResponseForbidden()
-    if 'key' not in request.POST:
+    if "key" not in request.POST:
         return HttpResponseBadRequest()
-    if len(request.POST['key']) > 255:
+    if len(request.POST["key"]) > 255:
         return HttpResponseBadRequest()
 
     attachment = attachment_model(
-        user=request.user, date_time_stamp=timezone.now(), **{
-            fk_name: foia
-        }
+        user=request.user, date_time_stamp=timezone.now(), **{fk_name: foia}
     )
-    attachment.ffile.name = request.POST['key']
+    attachment.ffile.name = request.POST["key"]
     attachment.save()
 
     return HttpResponse()
@@ -59,50 +57,38 @@ def _success(request, model, attachment_model, fk_name):
 @login_required
 def success_request(request):
     """"File has been succesfully uploaded to a FOIA"""
-    return _success(
-        request,
-        FOIARequest,
-        OutboundRequestAttachment,
-        'foia',
-    )
+    return _success(request, FOIARequest, OutboundRequestAttachment, "foia",)
 
 
 @login_required
 def success_composer(request):
     """"File has been succesfully uploaded to a composer"""
-    return _success(
-        request,
-        FOIAComposer,
-        OutboundComposerAttachment,
-        'composer',
-    )
+    return _success(request, FOIAComposer, OutboundComposerAttachment, "composer",)
 
 
 @login_required
 def success_comm(request):
     """"File has been succesfully uploaded directly to a communication"""
     try:
-        comm = FOIACommunication.objects.get(pk=request.POST.get('id'))
+        comm = FOIACommunication.objects.get(pk=request.POST.get("id"))
     except FOIACommunication.DoesNotExist:
         return HttpResponseBadRequest()
-    if not (
-        comm.foia and comm.foia.has_perm(request.user, 'upload_attachment')
-    ):
+    if not (comm.foia and comm.foia.has_perm(request.user, "upload_attachment")):
         return HttpResponseForbidden()
-    if 'key' not in request.POST:
+    if "key" not in request.POST:
         return HttpResponseBadRequest()
-    if len(request.POST['key']) > 255:
+    if len(request.POST["key"]) > 255:
         return HttpResponseBadRequest()
 
-    access = 'private' if comm.foia.embargo else 'public'
+    access = "private" if comm.foia.embargo else "public"
     file_ = FOIAFile(
         comm=comm,
-        title=os.path.basename(request.POST['key']),
+        title=os.path.basename(request.POST["key"]),
         datetime=timezone.now(),
         source=request.user.profile.full_name,
         access=access,
     )
-    file_.ffile.name = request.POST['key']
+    file_.ffile.name = request.POST["key"]
     file_.save()
 
     return HttpResponse()
@@ -111,34 +97,36 @@ def success_comm(request):
 @login_required
 def success_dataset(request):
     """"File has been succesfully uploaded for data set creation"""
-    if 'key' not in request.POST:
+    if "key" not in request.POST:
         return HttpResponseBadRequest()
-    if len(request.POST['key']) > 255:
+    if len(request.POST["key"]) > 255:
         return HttpResponseBadRequest()
 
-    process_dataset_file.delay(request.POST['key'], request.user.pk)
+    process_dataset_file.delay(request.POST["key"], request.user.pk)
     return HttpResponse()
 
 
 def _session(request, model):
     """"Get the initial file list"""
     try:
-        foia = model.objects.get(pk=request.GET.get('id'))
+        foia = model.objects.get(pk=request.GET.get("id"))
     except model.DoesNotExist:
         return HttpResponseBadRequest()
-    if not foia.has_perm(request.user, 'upload_attachment'):
+    if not foia.has_perm(request.user, "upload_attachment"):
         return HttpResponseForbidden()
 
     attms = foia.pending_attachments.filter(user=request.user, sent=False)
 
     data = []
     for attm in attms:
-        data.append({
-            'name': attm.name(),
-            'uuid': attm.pk,
-            'size': attm.ffile.size,
-            's3Key': attm.ffile.name,
-        })
+        data.append(
+            {
+                "name": attm.name(),
+                "uuid": attm.pk,
+                "size": attm.ffile.size,
+                "s3Key": attm.ffile.name,
+            }
+        )
     return JsonResponse(data, safe=False)
 
 
@@ -158,14 +146,12 @@ def _delete(request, model):
     """Delete a pending attachment"""
     try:
         attm = model.objects.get(
-            ffile=request.POST.get('key'),
-            user=request.user,
-            sent=False,
+            ffile=request.POST.get("key"), user=request.user, sent=False,
         )
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if not attm.attached_to.has_perm(request.user, 'upload_attachment'):
+    if not attm.attached_to.has_perm(request.user, "upload_attachment"):
         return HttpResponseForbidden()
 
     attm.delete()
@@ -188,12 +174,12 @@ def delete_composer(request):
 def sign(request):
     """Sign the data to upload to S3"""
     payload = json.loads(request.body)
-    if 'headers' in payload:
-        return JsonResponse(_sign_headers(payload['headers']))
+    if "headers" in payload:
+        return JsonResponse(_sign_headers(payload["headers"]))
     elif _is_valid_policy(request.user, payload):
         return JsonResponse(_sign_policy_document(payload))
     else:
-        return JsonResponse({'invalid': True}, status=400)
+        return JsonResponse({"invalid": True}, status=400)
 
 
 def _is_valid_policy(user, policy_document):
@@ -204,52 +190,45 @@ def _is_valid_policy(user, policy_document):
     bucket = None
     parsed_max_size = None
 
-    if user.has_perm('foia.unlimited_attachment_size'):
+    if user.has_perm("foia.unlimited_attachment_size"):
         max_size = None
     else:
         max_size = settings.MAX_ATTACHMENT_SIZE
 
-    for condition in policy_document['conditions']:
-        if isinstance(condition, list
-                      ) and condition[0] == 'content-length-range':
+    for condition in policy_document["conditions"]:
+        if isinstance(condition, list) and condition[0] == "content-length-range":
             parsed_max_size = int(condition[2])
-        elif 'bucket' in condition:
-            bucket = condition['bucket']
+        elif "bucket" in condition:
+            bucket = condition["bucket"]
 
-    return (
-        bucket == settings.AWS_STORAGE_BUCKET_NAME
-        and parsed_max_size == max_size
-    )
+    return bucket == settings.AWS_STORAGE_BUCKET_NAME and parsed_max_size == max_size
 
 
 def _sign_policy_document(policy_document):
     """Sign and return the policy doucument for a simple upload.
     http://aws.amazon.com/articles/1434/#signyours3postform"""
-    policy = base64.b64encode(json.dumps(policy_document).encode('utf8'))
+    policy = base64.b64encode(json.dumps(policy_document).encode("utf8"))
     signature = base64.b64encode(
         hmac.new(
-            settings.AWS_SECRET_ACCESS_KEY.encode('utf8'),
-            policy,
-            hashlib.sha1,
+            settings.AWS_SECRET_ACCESS_KEY.encode("utf8"), policy, hashlib.sha1,
         ).digest()
     )
     return {
-        'policy': policy.decode('utf8'),
-        'signature': signature.decode('utf8'),
+        "policy": policy.decode("utf8"),
+        "signature": signature.decode("utf8"),
     }
 
 
 def _sign_headers(headers):
     """Sign and return the headers for a chunked upload"""
     return {
-        'signature':
-            base64.b64encode(
-                hmac.new(
-                    settings.AWS_SECRET_ACCESS_KEY.encode('utf8'),
-                    headers.encode('utf8'),
-                    hashlib.sha1,
-                ).digest()
-            ).decode('utf8')
+        "signature": base64.b64encode(
+            hmac.new(
+                settings.AWS_SECRET_ACCESS_KEY.encode("utf8"),
+                headers.encode("utf8"),
+                hashlib.sha1,
+            ).digest()
+        ).decode("utf8")
     }
 
 
@@ -266,67 +245,59 @@ def _key_name_trim(name):
             name = name[:max_len]
         else:
             # otherwise truncate the base and put the extension back on
-            name = base[:max_len - len(ext)] + ext
+            name = base[: max_len - len(ext)] + ext
     return name
 
 
 def _key_name(request, model, id_name):
     """Generate the S3 key name from the filename"""
-    name = request.POST.get('name')
-    attached_id = request.POST.get('id')
+    name = request.POST.get("name")
+    attached_id = request.POST.get("id")
     name = _key_name_trim(name)
     attachment = model(user=request.user, **{id_name: attached_id})
-    key = attachment.ffile.field.generate_filename(
-        attachment.ffile.instance,
-        name,
-    )
+    key = attachment.ffile.field.generate_filename(attachment.ffile.instance, name,)
     key = default_storage.get_available_name(key)
-    return JsonResponse({'key': key})
+    return JsonResponse({"key": key})
 
 
 @login_required
 def key_name_request(request):
     """Generate the S3 key name for a FOIA Request"""
-    return _key_name(request, OutboundRequestAttachment, 'foia_id')
+    return _key_name(request, OutboundRequestAttachment, "foia_id")
 
 
 @login_required
 def key_name_composer(request):
     """Generate the S3 key name for a FOIA Composer"""
-    return _key_name(request, OutboundComposerAttachment, 'composer_id')
+    return _key_name(request, OutboundComposerAttachment, "composer_id")
 
 
 @login_required
 def key_name_comm(request):
     """Generate the S3 key name from the filename"""
-    name = request.POST.get('name')
+    name = request.POST.get("name")
     name = _key_name_trim(name)
     file_ = FOIAFile()
-    key = file_.ffile.field.generate_filename(
-        file_.ffile.instance,
-        name,
-    )
+    key = file_.ffile.field.generate_filename(file_.ffile.instance, name,)
     key = default_storage.get_available_name(key)
-    return JsonResponse({'key': key})
+    return JsonResponse({"key": key})
 
 
 @login_required
 def key_name_dataset(request):
     """Generate the S3 key name from the filename"""
-    name = request.POST.get('name')
+    name = request.POST.get("name")
     name = _key_name_trim(name)
     today = date.today()
-    key = (
-        'dataset_uploads/{username}/{year}/{month:02d}/{day:02d}/{name}'.format(
-            username=request.user.username,
-            year=today.year,
-            month=today.month,
-            day=today.day,
-            name=name,
-        )
+    key = "dataset_uploads/{username}/{year}/{month:02d}/{day:02d}/{name}".format(
+        username=request.user.username,
+        year=today.year,
+        month=today.month,
+        day=today.day,
+        name=name,
     )
     key = default_storage.get_available_name(key)
-    return JsonResponse({'key': key})
+    return JsonResponse({"key": key})
 
 
 @login_required

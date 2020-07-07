@@ -16,15 +16,15 @@ from mock import patch
 from muckrock.message.notifications import SlackNotification
 
 
-@override_settings(SLACK_WEBHOOK_URL='http://www.example.com')
+@override_settings(SLACK_WEBHOOK_URL="http://www.example.com")
 class TestSlackNotifications(TestCase):
     """Check that Slack notifications send to the correct endpoint."""
 
     def setUp(self):
-        payload = {'text': 'Test'}
+        payload = {"text": "Test"}
         self.slack = SlackNotification(payload)
 
-    @patch('requests.post')
+    @patch("requests.post")
     def test_send(self, mock_post):
         """Sending should post the payload to the endpoint."""
         endpoint = self.slack.endpoint

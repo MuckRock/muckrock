@@ -8,6 +8,6 @@ Settings for compressing staging assets
 # MuckRock
 from muckrock.settings.base import *
 
-BUCKET_NAME = 'muckrock-staging'
-STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+BUCKET_NAME = "muckrock-staging"
+STATIC_URL = "https://" + BUCKET_NAME + ".s3.amazonaws.com/"
 COMPRESS_ENABLED = True

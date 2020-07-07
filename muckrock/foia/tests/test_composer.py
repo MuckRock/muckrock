@@ -31,7 +31,7 @@ class TestFOIAComposer(TestCase):
         """Test return requests"""
         organization = OrganizationFactory(num_requests=100)
         composer = FOIAComposerFactory(
-            status='submitted',
+            status="submitted",
             num_org_requests=1,
             num_monthly_requests=2,
             num_reg_requests=3,
@@ -39,11 +39,9 @@ class TestFOIAComposer(TestCase):
             user__profile__monthly_requests=10,
             user__profile__organization=organization,
         )
-        composer._return_requests({
-            'regular': 2,
-            'monthly': 0,
-            'org': 1,
-        })
+        composer._return_requests(
+            {"regular": 2, "monthly": 0, "org": 1,}
+        )
         composer.user.profile.refresh_from_db()
         composer.user.profile.organization.refresh_from_db()
         eq_(composer.num_reg_requests, 1)
@@ -56,7 +54,7 @@ class TestFOIAComposer(TestCase):
     def _test_calc_return_requests(self):
         """Test calculating the return requests"""
         composer = FOIAComposerFactory(
-            status='submitted',
+            status="submitted",
             agencies=AgencyFactory.create_batch(6),
             num_org_requests=1,
             num_monthly_requests=2,
@@ -77,11 +75,7 @@ class TestFOIAComposer(TestCase):
         for total, reg, monthly, org in values:
             eq_(
                 composer._calc_return_requests(total),
-                {
-                    'regular': reg,
-                    'monthly': monthly,
-                    'org': org,
-                },
+                {"regular": reg, "monthly": monthly, "org": org,},
             )
 
 
@@ -98,8 +92,7 @@ class TestFOIAComposerQueryset(TestCase):
         """Test get viewable for a public composer"""
 
         FOIARequestFactory(
-            composer__status='filed',
-            embargo=False,
+            composer__status="filed", embargo=False,
         )
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -110,8 +103,7 @@ class TestFOIAComposerQueryset(TestCase):
         """Test get viewable for an embargoed composer"""
 
         FOIARequestFactory(
-            composer__status='filed',
-            embargo=True,
+            composer__status="filed", embargo=True,
         )
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -121,13 +113,9 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_partial_embargoed(self):
         """Test get viewable for a partially embargoed composer"""
 
-        foia = FOIARequestFactory(
-            composer__status='filed',
-            embargo=True,
-        )
+        foia = FOIARequestFactory(composer__status="filed", embargo=True,)
         FOIARequestFactory(
-            composer=foia.composer,
-            embargo=False,
+            composer=foia.composer, embargo=False,
         )
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -137,7 +125,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_draft(self):
         """Test get viewable for a draft composer"""
 
-        FOIAComposerFactory(status='started')
+        FOIAComposerFactory(status="started")
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
         assert_false(FOIAComposer.objects.get_viewable(self.user).exists())
@@ -147,9 +135,7 @@ class TestFOIAComposerQueryset(TestCase):
         """Test get viewable for the composer owner"""
 
         FOIARequestFactory(
-            composer__status='filed',
-            embargo=True,
-            composer__user=self.user,
+            composer__status="filed", embargo=True, composer__user=self.user,
         )
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -159,10 +145,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_read_collaborator(self):
         """Test get viewable for a read collaborator"""
 
-        foia = FOIARequestFactory(
-            composer__status='filed',
-            embargo=True,
-        )
+        foia = FOIARequestFactory(composer__status="filed", embargo=True,)
         foia.add_viewer(self.user)
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -172,10 +155,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_edit_collaborator(self):
         """Test get viewable for an edit collaborator"""
 
-        foia = FOIARequestFactory(
-            composer__status='filed',
-            embargo=True,
-        )
+        foia = FOIARequestFactory(composer__status="filed", embargo=True,)
         foia.add_editor(self.user)
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -192,7 +172,7 @@ class TestFOIAComposerQueryset(TestCase):
         MembershipFactory(user=org_user2, organization=org, active=False)
 
         FOIARequestFactory(
-            composer__status='filed',
+            composer__status="filed",
             embargo=True,
             composer__user=org_user1,
             composer__organization=org,
@@ -213,7 +193,7 @@ class TestFOIAComposerQueryset(TestCase):
         MembershipFactory(user=org_user2, organization=org, active=False)
 
         FOIARequestFactory(
-            composer__status='filed',
+            composer__status="filed",
             embargo=True,
             composer__user=org_user1,
             composer__organization=org,
@@ -230,16 +210,10 @@ class TestFOIAComposerForm(TestCase):
 
     def test_multi_clone(self):
         """Test cloning a multirequest"""
-        foia = FOIARequestFactory(
-            composer__status='filed',
-            embargo=False,
-        )
+        foia = FOIARequestFactory(composer__status="filed", embargo=False,)
         FOIARequestFactory(composer=foia.composer)
         form = BaseComposerForm(
-            {
-                'action': 'save',
-                'parent': foia.composer.pk,
-            },
+            {"action": "save", "parent": foia.composer.pk,},
             user=foia.composer.user,
             request=None,
         )

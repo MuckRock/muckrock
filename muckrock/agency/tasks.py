@@ -15,19 +15,18 @@ from raven.contrib.celery import register_logger_signal, register_signal
 from muckrock.foia.models import FOIARequest
 from muckrock.task.models import ReviewAgencyTask
 
-client = Client(os.environ.get('SENTRY_DSN'))
+client = Client(os.environ.get("SENTRY_DSN"))
 register_logger_signal(client)
 register_signal(client)
 
 
 @periodic_task(
-    run_every=crontab(day_of_week='sunday', hour=4, minute=0),
-    name='muckrock.agency.tasks.stale'
+    run_every=crontab(day_of_week="sunday", hour=4, minute=0),
+    name="muckrock.agency.tasks.stale",
 )
 def stale():
     """Record all stale agencies once a week"""
     for foia in FOIARequest.objects.get_stale():
         ReviewAgencyTask.objects.ensure_one_created(
-            agency=foia.agency,
-            resolved=False,
+            agency=foia.agency, resolved=False,
         )

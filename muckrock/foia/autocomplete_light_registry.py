@@ -14,28 +14,30 @@ from muckrock.foia.models import FOIAComposer, FOIARequest
 
 class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
     """Creates an autocomplete field for picking FOIA requests"""
-    choices = FOIARequest.objects.all().select_related('agency__jurisdiction')
-    choice_template = 'autocomplete/foia.html'
-    search_fields = ['title', 'pk']
+
+    choices = FOIARequest.objects.all().select_related("agency__jurisdiction")
+    choice_template = "autocomplete/foia.html"
+    search_fields = ["title", "pk"]
     attrs = {
-        'placeholder': 'Search for requests',
-        'data-autocomplete-minimum-characters': 3
+        "placeholder": "Search for requests",
+        "data-autocomplete-minimum-characters": 3,
     }
 
     def complex_condition(self, string):
         """Returns a complex set of database queries for getting requests
         by title, agency, and jurisdiction."""
         return (
-            Q(title__icontains=string) | Q(agency__name__icontains=string)
+            Q(title__icontains=string)
+            | Q(agency__name__icontains=string)
             | Q(agency__jurisdiction__name__icontains=string)
             | Q(agency__jurisdiction__abbrev__iexact=string)
             | Q(agency__jurisdiction__parent__abbrev__iexact=string)
         )
 
     def choices_for_request(self):
-        query = self.request.GET.get('q', '')
+        query = self.request.GET.get("q", "")
         split_query = query.split()
-        exclude = self.request.GET.getlist('exclude')
+        exclude = self.request.GET.getlist("exclude")
         # if query is an empty string, then split will produce an empty array
         # if query is an empty string, then do nto filter the existing choices
         if split_query:
@@ -44,7 +46,8 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelTemplate):
                 conditions &= self.complex_condition(string)
             choices = (
                 self.choices.get_viewable(self.request.user)
-                .filter(conditions).distinct()
+                .filter(conditions)
+                .distinct()
             )
         else:
             choices = self.choices
@@ -57,22 +60,22 @@ autocomplete_light.register(FOIARequest, FOIARequestAutocomplete)
 
 autocomplete_light.register(
     FOIARequest,
-    name='FOIARequestAdminAutocomplete',
+    name="FOIARequestAdminAutocomplete",
     choices=FOIARequest.objects.all(),
-    search_fields=('title',),
+    search_fields=("title",),
     attrs={
-        'placeholder': 'Search for requests',
-        'data-autocomplete-minimum-characters': 1
-    }
+        "placeholder": "Search for requests",
+        "data-autocomplete-minimum-characters": 1,
+    },
 )
 
 autocomplete_light.register(
     FOIAComposer,
-    name='FOIAComposerAdminAutocomplete',
+    name="FOIAComposerAdminAutocomplete",
     choices=FOIAComposer.objects.all(),
-    search_fields=('title',),
+    search_fields=("title",),
     attrs={
-        'placeholder': 'Search for composers',
-        'data-autocomplete-minimum-characters': 1
-    }
+        "placeholder": "Search for composers",
+        "data-autocomplete-minimum-characters": 1,
+    },
 )

@@ -18,17 +18,18 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class LatestSubmittedRequests(Feed):
     """An RSS Feed for submitted FOIA requests"""
-    title = 'Muckrock Submitted Requests'
-    link = '/foi/'
-    description = 'Recently submitted FOI requests on MuckRock'
+
+    title = "Muckrock Submitted Requests"
+    link = "/foi/"
+    description = "Recently submitted FOI requests on MuckRock"
 
     def items(self):
         """Return the items for the rss feed"""
         return (
             FOIARequest.objects.get_public()
-            .order_by('-composer__datetime_submitted')
-            .select_related('agency__jurisdiction')
-            .prefetch_related('communications')[:25]
+            .order_by("-composer__datetime_submitted")
+            .select_related("agency__jurisdiction")
+            .prefetch_related("communications")[:25]
         )
 
     def item_description(self, item):
@@ -38,16 +39,19 @@ class LatestSubmittedRequests(Feed):
 
 class LatestDoneRequests(Feed):
     """An RSS Feed for completed FOIA requests"""
-    title = 'Muckrock Completed Requests'
-    link = '/foi/'
-    description = 'Recently completed FOI requests on MuckRock'
+
+    title = "Muckrock Completed Requests"
+    link = "/foi/"
+    description = "Recently completed FOI requests on MuckRock"
 
     def items(self):
         """Return the items for the rss feed"""
         return (
-            FOIARequest.objects.get_done().get_public()
-            .order_by('-datetime_done').select_related('agency__jurisdiction')
-            .prefetch_related('communications')[:25]
+            FOIARequest.objects.get_done()
+            .get_public()
+            .order_by("-datetime_done")
+            .select_related("agency__jurisdiction")
+            .prefetch_related("communications")[:25]
         )
 
     def item_description(self, item):
@@ -68,7 +72,7 @@ class FOIAFeed(Feed):
 
     def title(self, obj):
         """The title of this feed"""
-        return 'MuckRock FOI Request: %s' % obj.title
+        return "MuckRock FOI Request: %s" % obj.title
 
     def link(self, obj):
         """The link for this feed"""
@@ -76,7 +80,7 @@ class FOIAFeed(Feed):
 
     def description(self, obj):
         """The description of this feed"""
-        return 'Updates on FOI Request %s from MuckRock' % obj.title
+        return "Updates on FOI Request %s from MuckRock" % obj.title
 
     def items(self, obj):
         """The communications are the items for this feed"""
@@ -97,7 +101,7 @@ class UserSubmittedFeed(Feed):
 
     def title(self, obj):
         """The title of this feed"""
-        return 'MuckRock user %s\'s submitted requests' % obj.username
+        return "MuckRock user %s's submitted requests" % obj.username
 
     def link(self, obj):
         """The link for this feed"""
@@ -105,18 +109,15 @@ class UserSubmittedFeed(Feed):
 
     def description(self, obj):
         """The description of this feed"""
-        return 'Newly submitted requests by %s' % obj.username
+        return "Newly submitted requests by %s" % obj.username
 
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.filter(
-                composer__user=obj,
-                embargo=False,
-            ).order_by(
-                '-composer__datetime_submitted',
-            ).select_related('agency__jurisdiction')
-            .prefetch_related('communications')[:25]
+            FOIARequest.objects.filter(composer__user=obj, embargo=False,)
+            .order_by("-composer__datetime_submitted",)
+            .select_related("agency__jurisdiction")
+            .prefetch_related("communications")[:25]
         )
 
     def item_description(self, item):
@@ -134,7 +135,7 @@ class UserDoneFeed(Feed):
 
     def title(self, obj):
         """The title of this feed"""
-        return 'MuckRock user %s\'s completed requests' % obj.username
+        return "MuckRock user %s's completed requests" % obj.username
 
     def link(self, obj):
         """The link for this feed"""
@@ -142,18 +143,16 @@ class UserDoneFeed(Feed):
 
     def description(self, obj):
         """The description of this feed"""
-        return 'Completed requests by %s' % obj.username
+        return "Completed requests by %s" % obj.username
 
     def items(self, obj):
         """The completed requests are the items for this feed"""
         return (
-            FOIARequest.objects.get_done().filter(
-                composer__user=obj,
-                embargo=False,
-            ).order_by(
-                '-composer__datetime_submitted',
-            ).select_related('agency__jurisdiction')
-            .prefetch_related('communications')[:25]
+            FOIARequest.objects.get_done()
+            .filter(composer__user=obj, embargo=False,)
+            .order_by("-composer__datetime_submitted",)
+            .select_related("agency__jurisdiction")
+            .prefetch_related("communications")[:25]
         )
 
     def item_description(self, item):
@@ -171,7 +170,7 @@ class UserUpdateFeed(Feed):
 
     def title(self, obj):
         """The title of this feed"""
-        return 'MuckRock user %s\'s request updates' % obj.username
+        return "MuckRock user %s's request updates" % obj.username
 
     def link(self, obj):
         """The link for this feed"""
@@ -179,14 +178,15 @@ class UserUpdateFeed(Feed):
 
     def description(self, obj):
         """The description of this feed"""
-        return 'All request updates by %s' % obj.username
+        return "All request updates by %s" % obj.username
 
     def items(self, obj):
         """The communications are the items for this feed"""
         communications = (
             FOIACommunication.objects.filter(foia__composer__user=obj)
             .exclude(foia__embargo=True)
-            .select_related('foia__agency__jurisdiction').order_by('-datetime')
+            .select_related("foia__agency__jurisdiction")
+            .order_by("-datetime")
         )
         return communications[:25]
 
@@ -205,7 +205,7 @@ class AgencySubmittedFeed(Feed):
 
     def title(self, obj):
         """The title of this feed"""
-        return 'MuckRock agency %s\'s submitted requests' % obj.name
+        return "MuckRock agency %s's submitted requests" % obj.name
 
     def link(self, obj):
         """The link for this feed"""
@@ -213,18 +213,15 @@ class AgencySubmittedFeed(Feed):
 
     def description(self, obj):
         """The description of this feed"""
-        return 'Newly submitted requests for %s' % obj.name
+        return "Newly submitted requests for %s" % obj.name
 
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.filter(
-                agency=obj,
-                embargo=False,
-            ).order_by(
-                '-composer__datetime_submitted',
-            ).select_related('agency__jurisdiction')
-            .prefetch_related('communications')[:25]
+            FOIARequest.objects.filter(agency=obj, embargo=False,)
+            .order_by("-composer__datetime_submitted",)
+            .select_related("agency__jurisdiction")
+            .prefetch_related("communications")[:25]
         )
 
     def item_description(self, item):
@@ -242,7 +239,7 @@ class JurisdictionSubmittedFeed(Feed):
 
     def title(self, obj):
         """The title of this feed"""
-        return 'MuckRock jurisdiction %s\'s submitted requests' % obj.name
+        return "MuckRock jurisdiction %s's submitted requests" % obj.name
 
     def link(self, obj):
         """The link for this feed"""
@@ -250,18 +247,15 @@ class JurisdictionSubmittedFeed(Feed):
 
     def description(self, obj):
         """The description of this feed"""
-        return 'Newly submitted requests for %s' % obj.name
+        return "Newly submitted requests for %s" % obj.name
 
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.filter(
-                agency__jurisdiction=obj,
-                embargo=False,
-            ).order_by(
-                '-composer__datetime_submitted',
-            ).select_related('agency__jurisdiction')
-            .prefetch_related('communications')[:25]
+            FOIARequest.objects.filter(agency__jurisdiction=obj, embargo=False,)
+            .order_by("-composer__datetime_submitted",)
+            .select_related("agency__jurisdiction")
+            .prefetch_related("communications")[:25]
         )
 
     def item_description(self, item):

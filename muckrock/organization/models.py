@@ -23,21 +23,22 @@ from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.querysets import OrganizationQuerySet
 
 logger = logging.getLogger(__name__)
-stripe.api_version = '2015-10-16'
+stripe.api_version = "2015-10-16"
 
 
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
+
     # pylint: disable=too-many-instance-attributes
 
     objects = OrganizationQuerySet.as_manager()
 
     uuid = models.UUIDField(
-        'UUID', unique=True, editable=False, default=uuid4, db_index=True
+        "UUID", unique=True, editable=False, default=uuid4, db_index=True
     )
 
     users = models.ManyToManyField(
-        User, through="organization.Membership", related_name='organizations'
+        User, through="organization.Membership", related_name="organizations"
     )
 
     name = models.CharField(max_length=255)
@@ -45,33 +46,31 @@ class Organization(models.Model):
     private = models.BooleanField(default=False)
     individual = models.BooleanField(default=True)
     entitlement = models.ForeignKey(
-        'organization.Entitlement', on_delete=models.PROTECT, null=True
+        "organization.Entitlement", on_delete=models.PROTECT, null=True
     )
     card = models.CharField(max_length=255, blank=True)
     avatar_url = models.URLField(max_length=255, blank=True)
 
     requests_per_month = models.IntegerField(
         default=0,
-        help_text='How many monthly requests this organization gets each month',
+        help_text="How many monthly requests this organization gets each month",
     )
     monthly_requests = models.IntegerField(
         default=0,
-        help_text=
-        'How many recurring monthly requests are left for this month - these do '
-        'not roll over and are just reset to `requests_per_month` on `date_update`'
+        help_text="How many recurring monthly requests are left for this month - these do "
+        "not roll over and are just reset to `requests_per_month` on `date_update`",
     )
     number_requests = models.IntegerField(
         default=0,
-        help_text=
-        'How many individually purchased requests this organization has - '
-        'these never expire and are unaffected by the monthly roll over'
+        help_text="How many individually purchased requests this organization has - "
+        "these never expire and are unaffected by the monthly roll over",
     )
     date_update = models.DateField(null=True)
 
     payment_failed = models.BooleanField(default=False)
 
     # deprecate #
-    plan = models.ForeignKey('organization.Plan', null=True)
+    plan = models.ForeignKey("organization.Plan", null=True)
     owner = models.ForeignKey(User, blank=True, null=True)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
@@ -88,13 +87,13 @@ class Organization(models.Model):
     def display_name(self):
         """Display 'Personal Account' for individual organizations"""
         if self.individual:
-            return 'Personal Account'
+            return "Personal Account"
         else:
             return self.name
 
     def get_absolute_url(self):
         """The url for this object"""
-        return reverse('org-detail', kwargs={'slug': self.slug})
+        return reverse("org-detail", kwargs={"slug": self.slug})
 
     def has_member(self, user):
         """Is the user a member of this organization?"""
@@ -107,38 +106,36 @@ class Organization(models.Model):
     def update_data(self, data):
         """Set updated data from squarelet"""
 
-        logger.info('update data org %s %s', self.pk, data)
+        logger.info("update data org %s %s", self.pk, data)
 
-        if len(data['entitlements']) > 1:
+        if len(data["entitlements"]) > 1:
             logger.warning(
-                'Organization %s has multiple entitlements: %s', self.pk,
-                ', '.join(e['slug'] for e in data['entitlements'])
+                "Organization %s has multiple entitlements: %s",
+                self.pk,
+                ", ".join(e["slug"] for e in data["entitlements"]),
             )
-        if data['entitlements']:
+        if data["entitlements"]:
             entitlement_data = max(
-                data['entitlements'],
-                key=lambda e: e['resources'].get('base_requests', 0)
+                data["entitlements"],
+                key=lambda e: e["resources"].get("base_requests", 0),
             )
             self.entitlement, _created = Entitlement.objects.update_or_create(
-                slug=entitlement_data['slug'],
+                slug=entitlement_data["slug"],
                 defaults={
-                    'name': entitlement_data['name'],
-                    'description': entitlement_data['description'],
-                    'resources': entitlement_data['resources'],
+                    "name": entitlement_data["name"],
+                    "description": entitlement_data["description"],
+                    "resources": entitlement_data["resources"],
                 },
             )
-            date_update = entitlement_data['date_update']
+            date_update = entitlement_data["date_update"]
         else:
             self.entitlement, _created = Entitlement.objects.get_or_create(
-                slug='free',
-                defaults={'name': 'Free'},
+                slug="free", defaults={"name": "Free"},
             )
             date_update = None
 
         # calc reqs/month in case it has changed
-        self.requests_per_month = self.entitlement.requests_per_month(
-            data['max_users']
-        )
+        self.requests_per_month = self.entitlement.requests_per_month(data["max_users"])
 
         # if date update has changed, then this is a monthly restore of the
         # subscription, and we should restore monthly requests.  If not, requests
@@ -147,8 +144,8 @@ class Organization(models.Model):
         # if requests per month increased
         if self.date_update == date_update:
             # add additional monthly requests immediately
-            self.monthly_requests = F('monthly_requests') + Greatest(
-                self.requests_per_month - F('requests_per_month'), 0
+            self.monthly_requests = F("monthly_requests") + Greatest(
+                self.requests_per_month - F("requests_per_month"), 0
             )
         else:
             # reset monthly requests when date_update is updated
@@ -157,13 +154,13 @@ class Organization(models.Model):
 
         # update the remaining fields
         fields = [
-            'name',
-            'slug',
-            'individual',
-            'private',
-            'card',
-            'payment_failed',
-            'avatar_url',
+            "name",
+            "slug",
+            "individual",
+            "private",
+            "card",
+            "payment_failed",
+            "avatar_url",
         ]
         for field in fields:
             if field in data:
@@ -173,64 +170,62 @@ class Organization(models.Model):
     @transaction.atomic
     def make_requests(self, amount):
         """Try to deduct requests from the organization's balance"""
-        request_count = {'monthly': 0, 'regular': 0}
+        request_count = {"monthly": 0, "regular": 0}
         organization = Organization.objects.select_for_update().get(pk=self.pk)
 
-        request_count['monthly'] = min(amount, organization.monthly_requests)
-        amount -= request_count['monthly']
+        request_count["monthly"] = min(amount, organization.monthly_requests)
+        amount -= request_count["monthly"]
 
-        request_count['regular'] = min(amount, organization.number_requests)
-        amount -= request_count['regular']
+        request_count["regular"] = min(amount, organization.number_requests)
+        amount -= request_count["regular"]
 
         if amount > 0:
             raise InsufficientRequestsError(amount)
 
-        organization.monthly_requests -= request_count['monthly']
-        organization.number_requests -= request_count['regular']
+        organization.monthly_requests -= request_count["monthly"]
+        organization.number_requests -= request_count["regular"]
         organization.save()
         return request_count
 
     def return_requests(self, amounts):
         """Return requests to the organization's balance"""
-        self.monthly_requests = F('monthly_requests') + amounts['monthly']
-        self.number_requests = F('number_requests') + amounts['regular']
+        self.monthly_requests = F("monthly_requests") + amounts["monthly"]
+        self.number_requests = F("number_requests") + amounts["regular"]
         self.save()
 
     def add_requests(self, amount):
         """Add requests"""
-        self.number_requests = F('number_requests') + amount
+        self.number_requests = F("number_requests") + amount
         self.save()
 
     def pay(self, amount, description, token, save_card, fee_amount=0):
         """Pay via Squarelet API"""
         # pylint: disable=too-many-arguments
         resp = squarelet_post(
-            '/api/charges/',
+            "/api/charges/",
             data={
-                'organization': self.uuid,
-                'amount': amount,
-                'fee_amount': fee_amount,
-                'description': description,
-                'token': token,
-                'save_card': save_card,
-            }
+                "organization": self.uuid,
+                "amount": amount,
+                "fee_amount": fee_amount,
+                "description": description,
+                "token": token,
+                "save_card": save_card,
+            },
         )
-        logger.info('Squarelet response: %s %s', resp.status_code, resp.content)
+        logger.info("Squarelet response: %s %s", resp.status_code, resp.content)
         resp.raise_for_status()
         resp_json = resp.json()
-        if 'card' in resp_json:
-            self.card = resp_json['card']
+        if "card" in resp_json:
+            self.card = resp_json["card"]
             self.save()
 
 
 class Membership(models.Model):
     """Through table for organization membership"""
 
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='memberships'
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="memberships")
     organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name='memberships'
+        Organization, on_delete=models.CASCADE, related_name="memberships"
     )
     active = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
@@ -261,8 +256,7 @@ class Plan(models.Model):
         """Calculate how many requests an organization gets per month on this plan
         for a given number of users"""
         return (
-            self.base_requests +
-            (users - self.minimum_users) * self.requests_per_user
+            self.base_requests + (users - self.minimum_users) * self.requests_per_user
         )
 
 
@@ -275,11 +269,11 @@ class Entitlement(models.Model):
 
     resources = JSONField(default=dict)
     resource_fields = {
-        'minimum_users': 1,
-        'feature_level': 0,
-        'base_requests': 0,
-        'requests_per_user': 0,
-        'proxy': False,
+        "minimum_users": 1,
+        "feature_level": 0,
+        "base_requests": 0,
+        "requests_per_user": 0,
+        "proxy": False,
     }
 
     def __str__(self):
@@ -289,8 +283,7 @@ class Entitlement(models.Model):
         """Calculate how many requests an organization gets per month on this
         entitlement for a given number of users"""
         return (
-            self.base_requests +
-            (users - self.minimum_users) * self.requests_per_user
+            self.base_requests + (users - self.minimum_users) * self.requests_per_user
         )
 
 

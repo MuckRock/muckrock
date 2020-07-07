@@ -37,7 +37,7 @@ class AgencyType(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
 
 class AgencyQuerySet(models.QuerySet):
@@ -47,23 +47,23 @@ class AgencyQuerySet(models.QuerySet):
 
     def get_approved(self):
         """Get all approved agencies"""
-        return self.filter(status='approved')
+        return self.filter(status="approved")
 
     def get_approved_and_pending(self, user):
         """Get approved and given user's pending agencies"""
         if user.is_authenticated:
-            return self.filter(
-                Q(status='approved') | Q(status='pending', user=user)
-            )
+            return self.filter(Q(status="approved") | Q(status="pending", user=user))
         else:
             return self.get_approved()
 
     def get_siblings(self, agency):
         """Get all approved agencies in the same jurisdiction as the given agency."""
-        return self.filter(jurisdiction=agency.jurisdiction)\
-                   .exclude(id=agency.id)\
-                   .filter(status='approved')\
-                   .order_by('name')
+        return (
+            self.filter(jurisdiction=agency.jurisdiction)
+            .exclude(id=agency.id)
+            .filter(status="approved")
+            .order_by("name")
+        )
 
     def create_new(self, name, jurisdiction_pk, user):
         """Create a pending agency with a NewAgency task"""
@@ -71,24 +71,20 @@ class AgencyQuerySet(models.QuerySet):
         name = name.strip()
 
         existing_agency = self.filter(
-            name=name,
-            jurisdiction_id=jurisdiction_pk,
-            user=user,
-            status='pending',
+            name=name, jurisdiction_id=jurisdiction_pk, user=user, status="pending",
         ).first()
         if existing_agency:
             return existing_agency
 
         agency = self.create(
             name=name,
-            slug=(slugify(name) or 'untitled'),
+            slug=(slugify(name) or "untitled"),
             jurisdiction_id=jurisdiction_pk,
             user=user,
-            status='pending',
+            status="pending",
         )
         NewAgencyTask.objects.create(
-            user=user,
-            agency=agency,
+            user=user, agency=agency,
         )
         return agency
 
@@ -98,60 +94,45 @@ class Agency(models.Model, RequestHelper):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
+    jurisdiction = models.ForeignKey(Jurisdiction, related_name="agencies")
     types = models.ManyToManyField(AgencyType, blank=True)
     status = models.CharField(
         choices=(
-            ('pending', 'Pending'),
-            ('approved', 'Approved'),
-            ('rejected', 'Rejected'),
+            ("pending", "Pending"),
+            ("approved", "Approved"),
+            ("rejected", "Rejected"),
         ),
         max_length=8,
-        default='pending'
+        default="pending",
     )
     user = models.ForeignKey(
-        User,
-        null=True,
-        blank=True,
-        help_text='The user who submitted this agency',
+        User, null=True, blank=True, help_text="The user who submitted this agency",
     )
     appeal_agency = models.ForeignKey(
-        'self', related_name='appeal_for', null=True, blank=True
+        "self", related_name="appeal_for", null=True, blank=True
     )
     image = ThumbnailerImageField(
-        upload_to='agency_images',
+        upload_to="agency_images",
         blank=True,
         null=True,
-        resize_source={
-            'size': (900, 600),
-            'crop': 'smart'
-        }
+        resize_source={"size": (900, 600), "crop": "smart"},
     )
     image_attr_line = models.CharField(
-        blank=True, max_length=255, help_text='May use html'
+        blank=True, max_length=255, help_text="May use html"
     )
-    public_notes = models.TextField(blank=True, help_text='May use html')
+    public_notes = models.TextField(blank=True, help_text="May use html")
 
     addresses = models.ManyToManyField(
-        'communication.Address',
-        through='AgencyAddress',
-        related_name='agencies',
+        "communication.Address", through="AgencyAddress", related_name="agencies",
     )
     emails = models.ManyToManyField(
-        'communication.EmailAddress',
-        through='AgencyEmail',
-        related_name='agencies',
+        "communication.EmailAddress", through="AgencyEmail", related_name="agencies",
     )
     phones = models.ManyToManyField(
-        'communication.PhoneNumber',
-        through='AgencyPhone',
-        related_name='agencies',
+        "communication.PhoneNumber", through="AgencyPhone", related_name="agencies",
     )
     portal = models.ForeignKey(
-        'portal.Portal',
-        related_name='agencies',
-        blank=True,
-        null=True,
+        "portal.Portal", related_name="agencies", blank=True, null=True,
     )
     contact_salutation = models.CharField(blank=True, max_length=30)
     contact_first_name = models.CharField(blank=True, max_length=100)
@@ -159,47 +140,39 @@ class Agency(models.Model, RequestHelper):
     contact_title = models.CharField(blank=True, max_length=255)
 
     form = models.ForeignKey(
-        'AgencyRequestForm',
+        "AgencyRequestForm",
         blank=True,
         null=True,
-        related_name='agencies',
+        related_name="agencies",
         on_delete=models.SET_NULL,
     )
 
     url = models.URLField(
-        blank=True,
-        verbose_name='FOIA Web Page',
-        help_text='Begin with http://'
+        blank=True, verbose_name="FOIA Web Page", help_text="Begin with http://"
     )
     notes = models.TextField(blank=True)
     aliases = models.TextField(blank=True)
-    parent = models.ForeignKey(
-        'self', null=True, blank=True, related_name='children'
-    )
+    parent = models.ForeignKey("self", null=True, blank=True, related_name="children")
 
     website = models.CharField(max_length=255, blank=True)
     twitter = models.CharField(max_length=255, blank=True)
     twitter_handles = models.TextField(blank=True)
     foia_logs = models.URLField(
-        blank=True, verbose_name='FOIA Logs', help_text='Begin with http://'
+        blank=True, verbose_name="FOIA Logs", help_text="Begin with http://"
     )
     foia_guide = models.URLField(
-        blank=True,
-        verbose_name='FOIA Processing Guide',
-        help_text='Begin with http://'
+        blank=True, verbose_name="FOIA Processing Guide", help_text="Begin with http://"
     )
     exempt = models.BooleanField(
         default=False,
-        help_text=
-        'Mark agencies as exempt from public record laws.  Use the exempt note '
-        'for further explanation'
+        help_text="Mark agencies as exempt from public record laws.  Use the exempt note "
+        "for further explanation",
     )
     uncooperative = models.BooleanField(
         default=False,
-        verbose_name='Scowfflaw',
-        help_text=
-        'Mark agencies as unwilling to process our requests.  Use the exempt '
-        'note for further explanation'
+        verbose_name="Scowfflaw",
+        help_text="Mark agencies as unwilling to process our requests.  Use the exempt "
+        "note for further explanation",
     )
     exempt_note = models.CharField(max_length=255, blank=True)
     requires_proxy = models.BooleanField(default=False)
@@ -212,13 +185,13 @@ class Agency(models.Model, RequestHelper):
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(
-            'agency-detail',
+            "agency-detail",
             kwargs={
-                'jurisdiction': self.jurisdiction.slug,
-                'jidx': self.jurisdiction.pk,
-                'slug': self.slug,
-                'idx': self.pk,
-            }
+                "jurisdiction": self.jurisdiction.slug,
+                "jidx": self.jurisdiction.pk,
+                "slug": self.slug,
+                "idx": self.pk,
+            },
         )
 
     def save(self, *args, **kwargs):
@@ -229,7 +202,7 @@ class Agency(models.Model, RequestHelper):
 
     def link_display(self):
         """Returns link if approved"""
-        if self.status == 'approved':
+        if self.status == "approved":
             return mark_safe(
                 '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
             )
@@ -239,8 +212,7 @@ class Agency(models.Model, RequestHelper):
     def count_thanks(self):
         """Count how many thanks this agency has received"""
         return (
-            self.foiarequest_set.filter(communications__thanks=True)
-            .distinct().count()
+            self.foiarequest_set.filter(communications__thanks=True).distinct().count()
         )
 
     def get_requests(self):
@@ -253,43 +225,38 @@ class Agency(models.Model, RequestHelper):
             return self.profile.user
         except Profile.DoesNotExist:
             data = {
-                'name': self.name,
-                'preferred_username': self.name,
-                'is_agency': True,
+                "name": self.name,
+                "preferred_username": self.name,
+                "is_agency": True,
             }
             # error handling?
-            resp = squarelet_post('/api/users/', data=data)
+            resp = squarelet_post("/api/users/", data=data)
             user_json = resp.json()
-            user_json['agency'] = self
+            user_json["agency"] = self
             user, _ = Profile.objects.squarelet_update_or_create(
-                user_json['uuid'], user_json
+                user_json["uuid"], user_json
             )
             return user
 
-    def get_emails(self, request_type='primary', email_type='to'):
+    def get_emails(self, request_type="primary", email_type="to"):
         """Get the specified type of email addresses for this agency"""
         return self.emails.filter(
-            status='good',
+            status="good",
             agencyemail__request_type=request_type,
             agencyemail__email_type=email_type,
         )
 
-    def get_faxes(self, request_type='primary'):
+    def get_faxes(self, request_type="primary"):
         """Get the contact fax numbers"""
         return self.phones.filter(
-            type='fax',
-            status='good',
-            agencyphone__request_type=request_type,
+            type="fax", status="good", agencyphone__request_type=request_type,
         )
 
-    def get_phones(self, request_type='none'):
+    def get_phones(self, request_type="none"):
         """Get the phone numbers"""
-        return self.phones.filter(
-            type='phone',
-            agencyphone__request_type=request_type,
-        )
+        return self.phones.filter(type="phone", agencyphone__request_type=request_type,)
 
-    def get_addresses(self, request_type='primary'):
+    def get_addresses(self, request_type="primary"):
         """Get the contact addresses"""
         return self.addresses.filter(agencyaddress__request_type=request_type)
 
@@ -299,27 +266,25 @@ class Agency(models.Model, RequestHelper):
             proxy_user = self.jurisdiction.get_proxy()
             if proxy_user is None:
                 return {
-                    'from_user': User.objects.get(username='Proxy'),
-                    'proxy': True,
-                    'missing_proxy': True,
-                    'warning':
-                        'This agency and jurisdiction requires requestors to be '
-                        'in-state citizens.  We do not currently have a citizen proxy '
-                        'requestor on file for this state, but will attempt to find '
-                        'one to submit this request on your behalf.',
+                    "from_user": User.objects.get(username="Proxy"),
+                    "proxy": True,
+                    "missing_proxy": True,
+                    "warning": "This agency and jurisdiction requires requestors to be "
+                    "in-state citizens.  We do not currently have a citizen proxy "
+                    "requestor on file for this state, but will attempt to find "
+                    "one to submit this request on your behalf.",
                 }
             else:
                 return {
-                    'from_user': proxy_user,
-                    'proxy': True,
-                    'missing_proxy': False,
-                    'warning':
-                        'This agency and jurisdiction requires requestors to be '
-                        'in-state citizens.  This request will be filed in the name '
-                        'of one of our volunteer filers for this state.',
+                    "from_user": proxy_user,
+                    "proxy": True,
+                    "missing_proxy": False,
+                    "warning": "This agency and jurisdiction requires requestors to be "
+                    "in-state citizens.  This request will be filed in the name "
+                    "of one of our volunteer filers for this state.",
                 }
         else:
-            return {'proxy': False, 'missing_proxy': False}
+            return {"proxy": False, "missing_proxy": False}
 
     def has_open_review_task(self):
         """Is there an open review agency task for this agency"""
@@ -328,49 +293,49 @@ class Agency(models.Model, RequestHelper):
     @property
     def email(self):
         """The main email"""
-        return self.get_emails('primary', 'to').first()
+        return self.get_emails("primary", "to").first()
 
     @property
     def other_emails(self):
         """The cc emails"""
-        return self.get_emails('primary', 'cc')
+        return self.get_emails("primary", "cc")
 
     @property
     def fax(self):
         """The primary fax"""
-        return self.get_faxes('primary').first()
+        return self.get_faxes("primary").first()
 
     @property
     def address(self):
         """The primary address"""
-        return self.get_addresses('primary').first()
+        return self.get_addresses("primary").first()
 
     @transaction.atomic
     def merge(self, agency, user):
         """Merge the other agency into this agency"""
         replace_relations = [
-            'foiarequest_set',
-            'foiamachinerequest_set',
-            'reviewagencytask_set',
-            'flaggedtask_set',
-            'newagencytask_set',
-            'staleagencytask_set',
+            "foiarequest_set",
+            "foiamachinerequest_set",
+            "reviewagencytask_set",
+            "flaggedtask_set",
+            "newagencytask_set",
+            "staleagencytask_set",
         ]
         for relation in replace_relations:
             getattr(agency, relation).update(agency=self)
 
         replace_self_relations = [
-            ('appeal_agency', 'appeal_for'),
-            ('parent', 'children'),
+            ("appeal_agency", "appeal_for"),
+            ("parent", "children"),
         ]
         for forward, backward in replace_self_relations:
             getattr(agency, backward).update(**{forward: self})
 
         replace_m2m = [
-            'composers',
-            'multirequests',
-            'types',
-            'foiasavedsearch_set',
+            "composers",
+            "multirequests",
+            "types",
+            "foiasavedsearch_set",
         ]
         for relation in replace_m2m:
             getattr(self, relation).add(*getattr(agency, relation).all())
@@ -380,15 +345,13 @@ class Agency(models.Model, RequestHelper):
         # with types set to 'none', if doesn't already exist
         # on new agency (with any types)
         agency.agencyemail_set.exclude(email__in=self.emails.all()).update(
-            request_type='none', email_type='none', agency=self
+            request_type="none", email_type="none", agency=self
         )
         agency.agencyphone_set.exclude(phone__in=self.phones.all()).update(
-            request_type='none', agency=self
+            request_type="none", agency=self
         )
-        agency.agencyaddress_set.exclude(
-            address__in=self.addresses.all(),
-        ).update(
-            request_type='none', agency=self
+        agency.agencyaddress_set.exclude(address__in=self.addresses.all(),).update(
+            request_type="none", agency=self
         )
 
         # just update user on comms
@@ -402,42 +365,32 @@ class Agency(models.Model, RequestHelper):
             pass
 
         # mark the old agency as rejected and leave a note that it was merged
-        agency.status = 'rejected'
-        agency.notes = (
-            Concat(
-                F('notes'),
-                Value(
-                    '\n\nThis agency was merged into agency '
-                    '"{}" (#{}) by {} on {}'.format(
-                        self.name,
-                        self.pk,
-                        user.username,
-                        timezone.now(),
-                    )
+        agency.status = "rejected"
+        agency.notes = Concat(
+            F("notes"),
+            Value(
+                "\n\nThis agency was merged into agency "
+                '"{}" (#{}) by {} on {}'.format(
+                    self.name, self.pk, user.username, timezone.now(),
                 )
-            )
+            ),
         )
         agency.save()
 
-        self.notes = (
-            Concat(
-                F('notes'),
-                Value(
-                    '\n\nAgency "{}" (#{}) was merged into this agency '
-                    'by {} on {}'.format(
-                        agency.name,
-                        agency.pk,
-                        user.username,
-                        timezone.now(),
-                    )
+        self.notes = Concat(
+            F("notes"),
+            Value(
+                '\n\nAgency "{}" (#{}) was merged into this agency '
+                "by {} on {}".format(
+                    agency.name, agency.pk, user.username, timezone.now(),
                 )
-            )
+            ),
         )
         self.save()
 
     class Meta:
-        verbose_name_plural = 'agencies'
+        verbose_name_plural = "agencies"
         permissions = (
-            ('view_emails', 'Can view private contact information'),
-            ('merge_agency', 'Can merge two agencies together'),
+            ("view_emails", "Can view private contact information"),
+            ("merge_agency", "Can merge two agencies together"),
         )

@@ -20,12 +20,14 @@ class PortalAutoReceiveMixin(object):
     based on the subject email
     """
 
-    error_msg = 'Did not know how to handle'
+    error_msg = "Did not know how to handle"
 
     def __init__(self, *args, **kwargs):
         """Initialize the router"""
-        self._router = [(re.compile(pattern), getattr(self, method))
-                        for pattern, method in self.router]
+        self._router = [
+            (re.compile(pattern), getattr(self, method))
+            for pattern, method in self.router
+        ]
         super(PortalAutoReceiveMixin, self).__init__(*args, **kwargs)
 
     def receive_msg(self, comm, **kwargs):
@@ -39,8 +41,7 @@ class PortalAutoReceiveMixin(object):
                 break
         else:
             super(PortalAutoReceiveMixin, self).receive_msg(
-                comm,
-                reason=self.error_msg,
+                comm, reason=self.error_msg,
             )
 
     def _accept_comm(self, comm, text):
@@ -55,5 +56,5 @@ class PortalAutoReceiveMixin(object):
             communication=comm,
             sent_datetime=timezone.now(),
             portal=self.portal,
-            direction='incoming',
+            direction="incoming",
         )

@@ -23,11 +23,11 @@ class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
-    name = 'United States of America'
+    name = "United States of America"
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    level = 'f'
+    level = "f"
     law = factory.RelatedFactory(
-        'muckrock.jurisdiction.factories.LawFactory', 'jurisdiction'
+        "muckrock.jurisdiction.factories.LawFactory", "jurisdiction"
     )
 
 
@@ -37,13 +37,13 @@ class StateJurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
-    name = 'Massachusetts'
-    abbrev = 'MA'
+    name = "Massachusetts"
+    abbrev = "MA"
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-    level = 's'
+    level = "s"
     parent = factory.SubFactory(FederalJurisdictionFactory)
     law = factory.RelatedFactory(
-        'muckrock.jurisdiction.factories.LawFactory', 'jurisdiction'
+        "muckrock.jurisdiction.factories.LawFactory", "jurisdiction"
     )
 
 
@@ -53,11 +53,11 @@ class LocalJurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
-    name = 'Boston'
+    name = "Boston"
     slug = factory.LazyAttribute(
-        lambda obj: slugify(obj.name) + '-' + slugify(obj.parent.abbrev)
+        lambda obj: slugify(obj.name) + "-" + slugify(obj.parent.abbrev)
     )
-    level = 'l'
+    level = "l"
     parent = factory.SubFactory(StateJurisdictionFactory)
 
 
@@ -68,9 +68,9 @@ class LawFactory(factory.django.DjangoModelFactory):
         model = Law
 
     jurisdiction = factory.SubFactory(StateJurisdictionFactory, law=None)
-    name = 'Massachusetts Public Records Law'
-    citation = 'Massachusetts General Laws, Part 1, Title X, Chapter 66'
-    url = 'https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66'
+    name = "Massachusetts Public Records Law"
+    citation = "Massachusetts General Laws, Part 1, Title X, Chapter 66"
+    url = "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66"
     days = 20
 
 
@@ -80,12 +80,12 @@ class ExemptionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Exemption
 
-    name = 'Public Employment Applications'
+    name = "Public Employment Applications"
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     jurisdiction = factory.SubFactory(
-        StateJurisdictionFactory, name='Washington', abbrev='WA'
+        StateJurisdictionFactory, name="Washington", abbrev="WA"
     )
-    basis = factory.Faker('paragraph')
+    basis = factory.Faker("paragraph")
 
 
 class InvokedExemptionFactory(factory.django.DjangoModelFactory):
@@ -95,7 +95,7 @@ class InvokedExemptionFactory(factory.django.DjangoModelFactory):
         model = InvokedExemption
 
     exemption = factory.SubFactory(ExemptionFactory)
-    request = factory.SubFactory('muckrock.foia.factories.FOIARequestFactory')
+    request = factory.SubFactory("muckrock.foia.factories.FOIARequestFactory")
 
 
 class ExampleAppealFactory(factory.django.DjangoModelFactory):
@@ -104,9 +104,9 @@ class ExampleAppealFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ExampleAppeal
 
-    title = factory.Faker('words')
-    language = factory.Faker('paragraph')
-    context = factory.Faker('paragraph')
+    title = factory.Faker("words")
+    language = factory.Faker("paragraph")
+    context = factory.Faker("paragraph")
     exemption = factory.SubFactory(ExemptionFactory)
 
 
@@ -117,5 +117,5 @@ class AppealFactory(factory.django.DjangoModelFactory):
         model = Appeal
 
     communication = factory.SubFactory(
-        'muckrock.foia.factories.FOIACommunicationFactory'
+        "muckrock.foia.factories.FOIACommunicationFactory"
     )

@@ -38,17 +38,13 @@ class CrowdsourceResponseViewSet(
     viewsets.GenericViewSet,
 ):
     """API views for CrowdsourceResponse"""
+
     queryset = (
         CrowdsourceResponse.objects.select_related(
-            'crowdsource',
-            'data',
-            'user__profile',
-            'edit_user__profile',
-        ).prefetch_related(
-            'crowdsource__fields',
-            'values',
-            'tags',
-        ).order_by('id')
+            "crowdsource", "data", "user__profile", "edit_user__profile",
+        )
+        .prefetch_related("crowdsource__fields", "values", "tags",)
+        .order_by("id")
     )
     permission_classes = (Permissions,)
 
@@ -58,14 +54,12 @@ class CrowdsourceResponseViewSet(
             return CrowdsourceResponseAdminSerializer
         try:
             crowdsource = Crowdsource.objects.get(
-                pk=self.request.GET.get('crowdsource')
+                pk=self.request.GET.get("crowdsource")
             )
         except Crowdsource.DoesNotExist:
             return CrowdsourceResponseGallerySerializer
 
-        if self.request.user.has_perm(
-            'crowdsource.change_crowdsource', crowdsource
-        ):
+        if self.request.user.has_perm("crowdsource.change_crowdsource", crowdsource):
             return CrowdsourceResponseAdminSerializer
         else:
             return CrowdsourceResponseGallerySerializer
@@ -76,27 +70,30 @@ class CrowdsourceResponseViewSet(
             return self.queryset
         elif self.request.user.is_authenticated:
             return self.queryset.filter(
-                Q(crowdsource__user=self.request.user) | Q(
+                Q(crowdsource__user=self.request.user)
+                | Q(
                     crowdsource__project_admin=True,
                     crowdsource__project__contributors=self.request.user,
-                ) | Q(gallery=True)
+                )
+                | Q(gallery=True)
             ).distinct()
         else:
             return self.queryset.filter(gallery=True)
 
     class Filter(django_filters.FilterSet):
         """API Filter for Crowdsource Responses"""
-        crowdsource = django_filters.NumberFilter(name='crowdsource__id')
+
+        crowdsource = django_filters.NumberFilter(name="crowdsource__id")
 
         class Meta:
             model = CrowdsourceResponse
             fields = (
-                'id',
-                'flag',
+                "id",
+                "flag",
             )
 
     filter_class = Filter
     search_fields = (
-        'values__value',
-        'tags__name',
+        "values__value",
+        "tags__name",
     )

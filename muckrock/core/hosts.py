@@ -16,22 +16,18 @@ def make_host(url):
     # pylint: disable=redefined-variable-type
     url = furl(url)
     if url.port not in [80, 443]:
-        host_name = '{}:{}'.format(url.host, url.port)
+        host_name = "{}:{}".format(url.host, url.port)
     else:
         host_name = url.host
     return re.escape(host_name)
 
 
 host_patterns = patterns(
-    '',
-    host(
-        make_host(settings.MUCKROCK_URL),
-        settings.ROOT_URLCONF,
-        name='default',
-    ),
+    "",
+    host(make_host(settings.MUCKROCK_URL), settings.ROOT_URLCONF, name="default",),
     host(
         make_host(settings.FOIAMACHINE_URL),
-        'muckrock.foiamachine.urls',
-        name='foiamachine',
+        "muckrock.foiamachine.urls",
+        name="foiamachine",
     ),
 )

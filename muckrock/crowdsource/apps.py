@@ -9,4 +9,5 @@ from django.apps import AppConfig
 
 class CrowdsourceConfig(AppConfig):
     """Crowdsource config"""
-    name = 'crowdsource'
+
+    name = "crowdsource"

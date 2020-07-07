@@ -9,27 +9,26 @@ from django.http.request import QueryDict
 # MuckRock
 from muckrock.foia.models.request import STATUS
 
-BLANK_STATUS = [('', '-')] + STATUS
+BLANK_STATUS = [("", "-")] + STATUS
 
 
 class FOIASavedSearch(models.Model):
     """A query and filter values for search reuse"""
 
     # for keeping track of the saved search
-    user = models.ForeignKey('auth.User')
+    user = models.ForeignKey("auth.User")
     title = models.CharField(max_length=255)
 
     # fields to search and filter on
     query = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=10, choices=BLANK_STATUS)
-    users = models.ManyToManyField('auth.User', related_name='+')
-    agencies = models.ManyToManyField('agency.Agency')
+    users = models.ManyToManyField("auth.User", related_name="+")
+    agencies = models.ManyToManyField("agency.Agency")
     jurisdictions = models.ManyToManyField(
-        'jurisdiction.Jurisdiction',
-        through='SearchJurisdiction',
+        "jurisdiction.Jurisdiction", through="SearchJurisdiction",
     )
-    projects = models.ManyToManyField('project.Project')
-    tags = models.ManyToManyField('tags.Tag')
+    projects = models.ManyToManyField("project.Project")
+    tags = models.ManyToManyField("tags.Tag")
     embargo = models.NullBooleanField(blank=True)
     exclude_crowdfund = models.NullBooleanField(blank=True)
     min_pages = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -45,44 +44,45 @@ class FOIASavedSearch(models.Model):
         def convert_date(date):
             """Get date into correct format"""
             if date is None:
-                return ''
+                return ""
             else:
-                return date.strftime('%m/%d/%Y')
+                return date.strftime("%m/%d/%Y")
 
-        params = QueryDict('', mutable=True)
-        min_pages = self.min_pages if self.min_pages is not None else ''
+        params = QueryDict("", mutable=True)
+        min_pages = self.min_pages if self.min_pages is not None else ""
         min_date = convert_date(self.min_date)
         max_date = convert_date(self.max_date)
-        params.update({
-            'q': self.query,
-            'status': self.status,
-            'has_embargo': self.embargo,
-            'has_crowdfund': self.exclude_crowdfund,
-            'minimum_pages': min_pages,
-            'date_range_0': min_date,
-            'date_range_1': max_date,
-            'search_title': self.title,
-        })
-        params.setlist('user', self.users.values_list('pk', flat=True))
-        params.setlist('agency', self.agencies.values_list('pk', flat=True))
-        params.setlist('projects', self.projects.values_list('pk', flat=True))
-        params.setlist('tags', self.tags.values_list('pk', flat=True))
+        params.update(
+            {
+                "q": self.query,
+                "status": self.status,
+                "has_embargo": self.embargo,
+                "has_crowdfund": self.exclude_crowdfund,
+                "minimum_pages": min_pages,
+                "date_range_0": min_date,
+                "date_range_1": max_date,
+                "search_title": self.title,
+            }
+        )
+        params.setlist("user", self.users.values_list("pk", flat=True))
+        params.setlist("agency", self.agencies.values_list("pk", flat=True))
+        params.setlist("projects", self.projects.values_list("pk", flat=True))
+        params.setlist("tags", self.tags.values_list("pk", flat=True))
         params.setlist(
-            'jurisdiction',
-            [str(j) for j in self.searchjurisdiction_set.all()],
+            "jurisdiction", [str(j) for j in self.searchjurisdiction_set.all()],
         )
         return params.urlencode()
 
     class Meta:
-        unique_together = ('user', 'title')
+        unique_together = ("user", "title")
 
 
 class SearchJurisdiction(models.Model):
     """Many to many through model for jurisdictions"""
 
     search = models.ForeignKey(FOIASavedSearch)
-    jurisdiction = models.ForeignKey('jurisdiction.Jurisdiction')
+    jurisdiction = models.ForeignKey("jurisdiction.Jurisdiction")
     include_local = models.BooleanField()
 
     def __str__(self):
-        return '{}-{}'.format(self.jurisdiction_id, self.include_local)
+        return "{}-{}".format(self.jurisdiction_id, self.include_local)

@@ -61,33 +61,31 @@ from muckrock.message.email import TemplateEmail
 
 class CrowdsourceExploreView(TemplateView):
     """Provides a space for exploring active assignments"""
-    template_name = 'crowdsource/explore.html'
+
+    template_name = "crowdsource/explore.html"
 
     def get_context_data(self, **kwargs):
         """Data for the explore page"""
         context = super(CrowdsourceExploreView, self).get_context_data(**kwargs)
-        context['crowdsource_users'
-                ] = CrowdsourceResponse.objects.get_user_count()
-        context['crowdsource_data'] = CrowdsourceResponse.objects.count()
-        context['crowdsource_count'] = Crowdsource.objects.exclude(
-            status='draft'
+        context["crowdsource_users"] = CrowdsourceResponse.objects.get_user_count()
+        context["crowdsource_data"] = CrowdsourceResponse.objects.count()
+        context["crowdsource_count"] = Crowdsource.objects.exclude(
+            status="draft"
         ).count()
-        context['crowdsources'] = (
+        context["crowdsources"] = (
             Crowdsource.objects.annotate(
-                user_count=Count('responses__user', distinct=True)
-            ).order_by('-datetime_created').filter(
-                status='open',
-                project_only=False,
-                featured=True,
-            ).select_related(
-                'user',
-                'project',
-            ).prefetch_related(
-                'data',
+                user_count=Count("responses__user", distinct=True)
+            )
+            .order_by("-datetime_created")
+            .filter(status="open", project_only=False, featured=True,)
+            .select_related("user", "project",)
+            .prefetch_related(
+                "data",
                 Prefetch(
-                    'responses',
-                    queryset=CrowdsourceResponse.objects.
-                    select_related('user__profile')
+                    "responses",
+                    queryset=CrowdsourceResponse.objects.select_related(
+                        "user__profile"
+                    ),
                 ),
             )[:5]
         )
@@ -96,26 +94,21 @@ class CrowdsourceExploreView(TemplateView):
 
 class CrowdsourceDetailView(DetailView):
     """A view for those with permission to view the particular crowdsource"""
-    template_name = 'crowdsource/detail.html'
-    pk_url_kwarg = 'idx'
+
+    template_name = "crowdsource/detail.html"
+    pk_url_kwarg = "idx"
     query_pk_and_slug = True
-    context_object_name = 'crowdsource'
-    queryset = (
-        Crowdsource.objects.select_related('user').prefetch_related(
-            'data', 'responses'
-        )
+    context_object_name = "crowdsource"
+    queryset = Crowdsource.objects.select_related("user").prefetch_related(
+        "data", "responses"
     )
 
     def dispatch(self, *args, **kwargs):
         """Redirect to assignment page for those without permission"""
         crowdsource = self.get_object()
-        if not self.request.user.has_perm(
-            'crowdsource.view_crowdsource', crowdsource
-        ):
+        if not self.request.user.has_perm("crowdsource.view_crowdsource", crowdsource):
             return redirect(
-                'crowdsource-assignment',
-                slug=crowdsource.slug,
-                idx=crowdsource.pk,
+                "crowdsource-assignment", slug=crowdsource.slug, idx=crowdsource.pk,
             )
         return super(CrowdsourceDetailView, self).dispatch(*args, **kwargs)
 
@@ -123,14 +116,14 @@ class CrowdsourceDetailView(DetailView):
         """Handle CSV downloads"""
         crowdsource = self.get_object()
         has_perm = self.request.user.has_perm(
-            'crowdsource.change_crowdsource', crowdsource
+            "crowdsource.change_crowdsource", crowdsource
         )
-        if self.request.GET.get('csv') and has_perm:
+        if self.request.GET.get("csv") and has_perm:
             export_csv.delay(crowdsource.pk, self.request.user.pk)
             messages.info(
                 self.request,
-                'Your CSV is being processed.  It will be emailed to you when '
-                'it is ready.'
+                "Your CSV is being processed.  It will be emailed to you when "
+                "it is ready.",
             )
         return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
 
@@ -138,24 +131,22 @@ class CrowdsourceDetailView(DetailView):
         """Handle actions on the crowdsource"""
         crowdsource = self.get_object()
         has_perm = self.request.user.has_perm(
-            'crowdsource.change_crowdsource', crowdsource
+            "crowdsource.change_crowdsource", crowdsource
         )
         if not has_perm:
             messages.error(
-                request, 'You do not have permission to edit this assignment'
+                request, "You do not have permission to edit this assignment"
             )
             return redirect(crowdsource)
-        if request.POST.get('action') == 'Close':
-            crowdsource.status = 'close'
+        if request.POST.get("action") == "Close":
+            crowdsource.status = "close"
             crowdsource.save()
-            messages.success(request, 'The assignment has been closed')
-        elif request.POST.get('action') == 'Add Data':
+            messages.success(request, "The assignment has been closed")
+        elif request.POST.get("action") == "Add Data":
             form = CrowdsourceDataCsvForm(request.POST, request.FILES)
             if form.is_valid():
                 form.process_data_csv(crowdsource)
-                messages.success(
-                    request, 'The data is being added to the assignment'
-                )
+                messages.success(request, "The data is being added to the assignment")
             else:
                 messages.error(request, form.errors)
         return redirect(crowdsource)
@@ -163,64 +154,59 @@ class CrowdsourceDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Admin link"""
         context = super(CrowdsourceDetailView, self).get_context_data(**kwargs)
-        context['sidebar_admin_url'] = reverse(
-            'admin:crowdsource_crowdsource_change',
-            args=(self.object.pk,),
+        context["sidebar_admin_url"] = reverse(
+            "admin:crowdsource_crowdsource_change", args=(self.object.pk,),
         )
-        context['message_form'] = CrowdsourceMessageResponseForm()
-        context['data_form'] = CrowdsourceDataCsvForm()
-        context['edit_access'] = self.request.user.has_perm(
-            'crowdsource.change_crowdsource', self.object
+        context["message_form"] = CrowdsourceMessageResponseForm()
+        context["data_form"] = CrowdsourceDataCsvForm()
+        context["edit_access"] = self.request.user.has_perm(
+            "crowdsource.change_crowdsource", self.object
         )
         return context
 
 
 class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     """A view for a user to fill out the crowdsource form"""
-    template_name = 'crowdsource/form.html'
+
+    template_name = "crowdsource/form.html"
     form_class = CrowdsourceAssignmentForm
-    pk_url_kwarg = 'idx'
+    pk_url_kwarg = "idx"
     query_pk_and_slug = True
-    context_object_name = 'crowdsource'
-    queryset = Crowdsource.objects.filter(status__in=['draft', 'open'])
-    minireg_source = 'Crowdsource'
+    context_object_name = "crowdsource"
+    queryset = Crowdsource.objects.filter(status__in=["draft", "open"])
+    minireg_source = "Crowdsource"
     field_map = {
-        'email': 'email',
-        'name': 'full_name',
+        "email": "email",
+        "name": "full_name",
     }
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
-        edit_perm = request.user.has_perm(
-            'crowdsource.change_crowdsource', self.object
-        )
-        form_perm = request.user.has_perm(
-            'crowdsource.form_crowdsource', self.object
-        )
-        if self.object.status == 'draft' and not edit_perm:
+        edit_perm = request.user.has_perm("crowdsource.change_crowdsource", self.object)
+        form_perm = request.user.has_perm("crowdsource.form_crowdsource", self.object)
+        if self.object.status == "draft" and not edit_perm:
             raise Http404
         if not form_perm:
-            messages.error(request, 'That crowdsource is private')
-            return redirect('crowdsource-list')
-        return super(CrowdsourceFormView,
-                     self).dispatch(request, *args, **kwargs)
+            messages.error(request, "That crowdsource is private")
+            return redirect("crowdsource-list")
+        return super(CrowdsourceFormView, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Cache the object for POST requests"""
         # pylint: disable=attribute-defined-outside-init
         crowdsource = self.get_object()
-        data_id = self.request.POST.get('data_id')
+        data_id = self.request.POST.get("data_id")
         if data_id:
             self.data = crowdsource.data.filter(pk=data_id).first()
         else:
             self.data = None
 
-        if crowdsource.status == 'draft':
-            messages.error(request, 'No submitting to draft crowdsources')
+        if crowdsource.status == "draft":
+            messages.error(request, "No submitting to draft crowdsources")
             return redirect(crowdsource)
-        if request.POST.get('submit') == 'Skip':
+        if request.POST.get("submit") == "Skip":
             return self.skip()
         return super(CrowdsourceFormView, self).post(request, args, kwargs)
 
@@ -228,19 +214,17 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
         """Check if there is a valid assignment"""
         ip_address, _ = get_client_ip(self.request)
         has_assignment = self._has_assignment(
-            self.get_object(),
-            self.request.user,
-            ip_address,
+            self.get_object(), self.request.user, ip_address,
         )
         if has_assignment:
             return super(CrowdsourceFormView, self).get(request, args, kwargs)
         else:
             messages.warning(
                 request,
-                'Sorry, there are no assignments left for you to complete '
-                'at this time for that crowdsource',
+                "Sorry, there are no assignments left for you to complete "
+                "at this time for that crowdsource",
             )
-            return redirect('crowdsource-list')
+            return redirect("crowdsource-list")
 
     def _has_assignment(self, crowdsource, user, ip_address):
         """Check if the user has a valid assignment to complete"""
@@ -254,7 +238,8 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             return self.data is not None
         else:
             return not (
-                crowdsource.user_limit and crowdsource.responses.filter(
+                crowdsource.user_limit
+                and crowdsource.responses.filter(
                     user=user, ip_address=ip_address
                 ).exists()
             )
@@ -262,34 +247,31 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     def get_form_kwargs(self):
         """Add the crowdsource object to the form"""
         kwargs = super(CrowdsourceFormView, self).get_form_kwargs()
-        kwargs.update({
-            'crowdsource': self.get_object(),
-            'user': self.request.user,
-        })
+        kwargs.update(
+            {"crowdsource": self.get_object(), "user": self.request.user,}
+        )
         return kwargs
 
     def get_context_data(self, **kwargs):
         """Get the data source to show, if there is one"""
-        if 'data' not in kwargs:
-            kwargs['data'] = self.data
-        if (
-            self.object.multiple_per_page and self.request.user.is_authenticated
-        ):
-            kwargs['number'] = (
+        if "data" not in kwargs:
+            kwargs["data"] = self.data
+        if self.object.multiple_per_page and self.request.user.is_authenticated:
+            kwargs["number"] = (
                 self.object.responses.filter(
-                    user=self.request.user,
-                    data=kwargs['data'],
-                ).count() + 1
+                    user=self.request.user, data=kwargs["data"],
+                ).count()
+                + 1
             )
         else:
-            kwargs['number'] = 1
+            kwargs["number"] = 1
         return super(CrowdsourceFormView, self).get_context_data(**kwargs)
 
     def get_initial(self):
         """Fetch the crowdsource data item to show with this form,
         if there is one"""
-        if self.request.method == 'GET' and self.data is not None:
-            return {'data_id': self.data.pk}
+        if self.request.method == "GET" and self.data is not None:
+            return {"data_id": self.data.pk}
         else:
             return {}
 
@@ -300,13 +282,13 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
         if self.request.user.is_authenticated:
             user = self.request.user
             ip_address = None
-        elif form.cleaned_data.get('email'):
+        elif form.cleaned_data.get("email"):
             try:
                 user = self.miniregister(
                     form,
-                    form.cleaned_data['full_name'],
-                    form.cleaned_data['email'],
-                    form.cleaned_data.get('newsletter'),
+                    form.cleaned_data["full_name"],
+                    form.cleaned_data["email"],
+                    form.cleaned_data.get("newsletter"),
                 )
             except requests.exceptions.RequestException:
                 return self.form_invalid(form)
@@ -317,10 +299,9 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
         if user or ip_address:
             number = (
                 self.object.responses.filter(
-                    user=user,
-                    ip_address=ip_address,
-                    data=self.data,
-                ).count() + 1
+                    user=user, ip_address=ip_address, data=self.data,
+                ).count()
+                + 1
             )
         else:
             number = 1
@@ -328,53 +309,45 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             response = CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
                 user=user,
-                public=form.cleaned_data.get('public', False),
+                public=form.cleaned_data.get("public", False),
                 ip_address=ip_address,
                 data=self.data,
                 number=number,
             )
             response.create_values(form.cleaned_data)
-            messages.success(self.request, 'Thank you!')
+            messages.success(self.request, "Thank you!")
             properties = {
-                'Crowdsource': crowdsource.title,
-                'Crowdsource ID': crowdsource.pk,
-                'Number': number,
+                "Crowdsource": crowdsource.title,
+                "Crowdsource ID": crowdsource.pk,
+                "Number": number,
             }
             if self.data:
-                properties['Data'] = self.data.url
+                properties["Data"] = self.data.url
             mixpanel_event(
-                self.request,
-                'Assignment Completed',
-                properties,
+                self.request, "Assignment Completed", properties,
             )
             for email in crowdsource.submission_emails.all():
                 response.send_email(email.email)
 
-        if self.request.POST.get('submit') == 'Submit and Add Another':
-            return self.render_to_response(
-                self.get_context_data(data=self.data),
-            )
+        if self.request.POST.get("submit") == "Submit and Add Another":
+            return self.render_to_response(self.get_context_data(data=self.data),)
 
         if has_data:
             return redirect(
-                'crowdsource-assignment',
-                slug=crowdsource.slug,
-                idx=crowdsource.pk,
+                "crowdsource-assignment", slug=crowdsource.slug, idx=crowdsource.pk,
             )
         else:
-            return redirect('crowdsource-list')
+            return redirect("crowdsource-list")
 
     def form_invalid(self, form):
         """Make sure we include the data in the context"""
-        return self.render_to_response(
-            self.get_context_data(form=form, data=self.data)
-        )
+        return self.render_to_response(self.get_context_data(form=form, data=self.data))
 
     def skip(self):
         """The user wants to skip this data"""
         crowdsource = self.get_object()
         ip_address, _ = get_client_ip(self.request)
-        can_submit_anonymous = crowdsource.registration != 'required' and ip_address
+        can_submit_anonymous = crowdsource.registration != "required" and ip_address
         if self.data is not None and self.request.user.is_authenticated:
             CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
@@ -382,7 +355,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
                 data=self.data,
                 skip=True,
             )
-            messages.info(self.request, 'Skipped!')
+            messages.info(self.request, "Skipped!")
         elif self.data is not None and can_submit_anonymous:
             CrowdsourceResponse.objects.create(
                 crowdsource=crowdsource,
@@ -390,20 +363,19 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
                 data=self.data,
                 skip=True,
             )
-            messages.info(self.request, 'Skipped!')
+            messages.info(self.request, "Skipped!")
         return redirect(
-            'crowdsource-assignment',
-            slug=crowdsource.slug,
-            idx=crowdsource.pk,
+            "crowdsource-assignment", slug=crowdsource.slug, idx=crowdsource.pk,
         )
 
 
 class CrowdsourceEditResponseView(BaseDetailView, FormView):
     """A view for an admin to edit a submitted response"""
-    template_name = 'crowdsource/form.html'
+
+    template_name = "crowdsource/form.html"
     form_class = CrowdsourceAssignmentForm
-    pk_url_kwarg = 'idx'
-    context_object_name = 'response'
+    pk_url_kwarg = "idx"
+    context_object_name = "response"
     model = CrowdsourceResponse
 
     def dispatch(self, request, *args, **kwargs):
@@ -411,34 +383,32 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
         edit_perm = request.user.has_perm(
-            'crowdsource.change_crowdsource', self.object.crowdsource
+            "crowdsource.change_crowdsource", self.object.crowdsource
         )
         if not edit_perm:
             raise Http404
-        return (
-            super(CrowdsourceEditResponseView, self)
-            .dispatch(request, *args, **kwargs)
+        return super(CrowdsourceEditResponseView, self).dispatch(
+            request, *args, **kwargs
         )
 
     def get_form_kwargs(self):
         """Add the user and crowdsource object to the form"""
         kwargs = super(CrowdsourceEditResponseView, self).get_form_kwargs()
-        kwargs.update({
-            'crowdsource': self.get_object().crowdsource,
-            'user': self.request.user,
-        })
+        kwargs.update(
+            {"crowdsource": self.get_object().crowdsource, "user": self.request.user,}
+        )
         return kwargs
 
     def get_initial(self):
         """Fetch the crowdsource data item to show with this form,
         if there is one, and the latest values"""
-        return self._get_initial('value')
+        return self._get_initial("value")
 
     def _get_initial(self, value_attr):
         """Helper function to allow overriding of the value attribute for the
         revert view"""
-        initial = {'data_id': self.object.data_id}
-        for value in self.object.values.exclude(**{value_attr: ''}):
+        initial = {"data_id": self.object.data_id}
+        for value in self.object.values.exclude(**{value_attr: ""}):
             key = str(value.field.pk)
             if key in initial:
                 # if a single field has multiple values, make a list of values
@@ -453,9 +423,7 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
     def get_context_data(self, **kwargs):
         """Set the crowdsource and data in the context"""
         return super(CrowdsourceEditResponseView, self).get_context_data(
-            crowdsource=self.object.crowdsource,
-            data=self.object.data,
-            edit=True,
+            crowdsource=self.object.crowdsource, data=self.object.data, edit=True,
         )
 
     @transaction.atomic
@@ -467,38 +435,32 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
         response.save()
 
         # remove non-assignment field fields
-        form.cleaned_data.pop('data_id', None)
-        form.cleaned_data.pop('public', None)
+        form.cleaned_data.pop("data_id", None)
+        form.cleaned_data.pop("public", None)
         for field_id, new_value in form.cleaned_data.items():
             field = CrowdsourceField.objects.filter(pk=field_id).first()
             if field and field.field.multiple_values:
                 # for multi valued fields, collect all old and new values together
                 # and recreate all values
-                original_value = response.values.filter(
-                    field_id=field_id,
-                ).exclude(original_value='').values_list(
-                    'original_value',
-                    flat=True,
+                original_value = (
+                    response.values.filter(field_id=field_id,)
+                    .exclude(original_value="")
+                    .values_list("original_value", flat=True,)
                 )
                 response.values.filter(field_id=field_id).delete()
-                for orig, new in zip_longest(
-                    original_value, new_value, fillvalue=''
-                ):
+                for orig, new in zip_longest(original_value, new_value, fillvalue=""):
                     response.values.create(
-                        field_id=field_id,
-                        value=new,
-                        original_value=orig,
+                        field_id=field_id, value=new, original_value=orig,
                     )
             else:
                 # for single valued field, just update the current value
-                new_value = new_value if new_value is not None else ''
+                new_value = new_value if new_value is not None else ""
                 response.values.update_or_create(
-                    field_id=field_id,
-                    defaults={'value': new_value},
+                    field_id=field_id, defaults={"value": new_value},
                 )
 
         return redirect(
-            'crowdsource-detail',
+            "crowdsource-detail",
             slug=response.crowdsource.slug,
             idx=response.crowdsource.pk,
         )
@@ -510,139 +472,134 @@ class CrowdsourceRevertResponseView(CrowdsourceEditResponseView):
     def get_initial(self):
         """Fetch the crowdsource data item to show with this form,
         if there is one, and the latest values"""
-        return self._get_initial('original_value')
+        return self._get_initial("original_value")
 
 
-@method_decorator(frame_deny_exempt, name='dispatch')
+@method_decorator(frame_deny_exempt, name="dispatch")
 class CrowdsourceEmbededFormView(CrowdsourceFormView):
     """A view to embed an assignment"""
-    template_name = 'crowdsource/embed.html'
+
+    template_name = "crowdsource/embed.html"
 
     def form_valid(self, form):
         """Redirect to embedded confirmation page"""
         super(CrowdsourceEmbededFormView, self).form_valid(form)
-        return redirect('crowdsource-embed-confirm')
+        return redirect("crowdsource-embed-confirm")
 
 
-@method_decorator(frame_deny_exempt, name='dispatch')
+@method_decorator(frame_deny_exempt, name="dispatch")
 class CrowdsourceEmbededConfirmView(TemplateView):
     """Embedded confirm page"""
-    template_name = 'crowdsource/embed_confirm.html'
+
+    template_name = "crowdsource/embed_confirm.html"
 
 
-@method_decorator(frame_deny_exempt, name='dispatch')
+@method_decorator(frame_deny_exempt, name="dispatch")
 class CrowdsourceEmbededGallery(DetailView):
     """Embedded gallery page"""
-    template_name = 'crowdsource/gallery.html'
-    pk_url_kwarg = 'idx'
+
+    template_name = "crowdsource/gallery.html"
+    pk_url_kwarg = "idx"
     query_pk_and_slug = True
-    queryset = Crowdsource.objects.exclude(status='draft')
+    queryset = Crowdsource.objects.exclude(status="draft")
 
     def get_context_data(self, **kwargs):
         """Get gallery fields"""
-        context = (
-            super(CrowdsourceEmbededGallery, self).get_context_data(**kwargs)
-        )
+        context = super(CrowdsourceEmbededGallery, self).get_context_data(**kwargs)
         gallery_responses = self.object.responses.filter(gallery=True)
-        context['values'] = CrowdsourceValue.objects.filter(
-            response__in=gallery_responses,
-            field__gallery=True,
-        ).values_list(
-            'value', flat=True
-        )
+        context["values"] = CrowdsourceValue.objects.filter(
+            response__in=gallery_responses, field__gallery=True,
+        ).values_list("value", flat=True)
         return context
 
 
 class CrowdsourceListView(MRFilterListView):
     """List of crowdfunds"""
+
     model = Crowdsource
-    template_name = 'crowdsource/list.html'
+    template_name = "crowdsource/list.html"
     sort_map = {
-        'title': 'title',
-        'user': 'user',
+        "title": "title",
+        "user": "user",
     }
     filter_class = CrowdsourceFilterSet
 
     def get_queryset(self):
         """Get all open crowdsources and all crowdsources you own"""
         queryset = super(CrowdsourceListView, self).get_queryset()
-        queryset = queryset.select_related(
-            'user__profile',
-            'project',
-        ).prefetch_related(
-            'data',
-            'responses',
-        ).distinct()
+        queryset = (
+            queryset.select_related("user__profile", "project",)
+            .prefetch_related("data", "responses",)
+            .distinct()
+        )
         return queryset.get_viewable(self.request.user)
 
     def get_context_data(self, **kwargs):
         """Remove filter for non-staff users"""
         context_data = super(CrowdsourceListView, self).get_context_data()
         if not self.request.user.is_staff:
-            context_data.pop('filter', None)
+            context_data.pop("filter", None)
         return context_data
 
 
 class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
     """Create a crowdsource"""
+
     model = Crowdsource
     form_class = CrowdsourceForm
-    template_name = 'crowdsource/create.html'
-    permission_required = 'crowdsource.add_crowdsource'
+    template_name = "crowdsource/create.html"
+    permission_required = "crowdsource.add_crowdsource"
 
     def get_context_data(self, **kwargs):
         """Add the data formset to the context"""
         data = super(CrowdsourceCreateView, self).get_context_data(**kwargs)
         if self.request.POST:
-            data['data_formset'] = CrowdsourceDataFormset(self.request.POST)
+            data["data_formset"] = CrowdsourceDataFormset(self.request.POST)
         else:
-            data['data_formset'] = CrowdsourceDataFormset(
-                initial=[{
-                    'url': self.request.GET.get('initial_data')
-                }]
+            data["data_formset"] = CrowdsourceDataFormset(
+                initial=[{"url": self.request.GET.get("initial_data")}]
             )
         return data
 
     def form_valid(self, form):
         """Save the crowdsource"""
-        if self.request.POST.get('submit') == 'start':
-            status = 'open'
-            msg = 'Crowdsource started'
+        if self.request.POST.get("submit") == "start":
+            status = "open"
+            msg = "Crowdsource started"
         else:
-            status = 'draft'
-            msg = 'Crowdsource created'
+            status = "draft"
+            msg = "Crowdsource created"
         context = self.get_context_data()
-        formset = context['data_formset']
+        formset = context["data_formset"]
         crowdsource = form.save(commit=False)
         crowdsource.slug = slugify(crowdsource.title)
         crowdsource.user = self.request.user
         crowdsource.status = status
         crowdsource.save()
         form.save_m2m()
-        crowdsource.create_form(form.cleaned_data['form_json'])
+        crowdsource.create_form(form.cleaned_data["form_json"])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
             formset.instance = crowdsource
-            formset.save(
-                doccloud_each_page=form.cleaned_data['doccloud_each_page']
-            )
+            formset.save(doccloud_each_page=form.cleaned_data["doccloud_each_page"])
         messages.success(self.request, msg)
         return redirect(crowdsource)
 
     def get_form_kwargs(self):
         """Add user to form kwargs"""
         kwargs = super(CrowdsourceCreateView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 @class_view_decorator(login_required)
 class CrowdsourceUpdateView(UpdateView):
     """Update a crowdsource"""
+
     model = Crowdsource
     form_class = CrowdsourceForm
-    template_name = 'crowdsource/create.html'
-    pk_url_kwarg = 'idx'
+    template_name = "crowdsource/create.html"
+    pk_url_kwarg = "idx"
     query_pk_and_slug = True
 
     def dispatch(self, request, *args, **kwargs):
@@ -650,28 +607,26 @@ class CrowdsourceUpdateView(UpdateView):
         # pylint: disable=attribute-defined-outside-init
         crowdsource = self.get_object()
         user_allowed = request.user.has_perm(
-            'crowdsource.change_crowdsource', crowdsource
+            "crowdsource.change_crowdsource", crowdsource
         )
         if not user_allowed:
-            messages.error(request, 'You may not edit this crowdsource')
+            messages.error(request, "You may not edit this crowdsource")
             return redirect(crowdsource)
         if crowdsource.status != "draft":
             export_csv.delay(crowdsource.pk, self.request.user.pk)
             messages.info(
-                self.request,
-                'A CSV of the results so far will be emailed to you'
+                self.request, "A CSV of the results so far will be emailed to you"
             )
-        return super(CrowdsourceUpdateView,
-                     self).dispatch(request, *args, **kwargs)
+        return super(CrowdsourceUpdateView, self).dispatch(request, *args, **kwargs)
 
     def get_initial(self):
         """Set the form JSON in the initial form data"""
         crowdsource = self.get_object()
         return {
-            'form_json':
-                crowdsource.get_form_json(),
-            'submission_emails':
-                ', '.join(str(e) for e in crowdsource.submission_emails.all()),
+            "form_json": crowdsource.get_form_json(),
+            "submission_emails": ", ".join(
+                str(e) for e in crowdsource.submission_emails.all()
+            ),
         }
 
     def get_context_data(self, **kwargs):
@@ -679,51 +634,46 @@ class CrowdsourceUpdateView(UpdateView):
         data = super(CrowdsourceUpdateView, self).get_context_data(**kwargs)
         CrowdsourceDataFormset.can_delete = True
         if self.request.POST:
-            data['data_formset'] = CrowdsourceDataFormset(
-                self.request.POST,
-                instance=self.get_object(),
+            data["data_formset"] = CrowdsourceDataFormset(
+                self.request.POST, instance=self.get_object(),
             )
         else:
-            data['data_formset'] = CrowdsourceDataFormset(
-                instance=self.get_object()
-            )
+            data["data_formset"] = CrowdsourceDataFormset(instance=self.get_object())
         return data
 
     def form_valid(self, form):
         """Save the crowdsource"""
-        if self.request.POST.get('submit') == 'start':
-            status = 'open'
-            msg = 'Crowdsource started'
+        if self.request.POST.get("submit") == "start":
+            status = "open"
+            msg = "Crowdsource started"
         else:
-            status = 'draft'
-            msg = 'Crowdsource updated'
+            status = "draft"
+            msg = "Crowdsource updated"
         context = self.get_context_data()
-        formset = context['data_formset']
+        formset = context["data_formset"]
         crowdsource = form.save(commit=False)
         crowdsource.slug = slugify(crowdsource.title)
         crowdsource.status = status
         crowdsource.save()
         form.save_m2m()
-        crowdsource.create_form(form.cleaned_data['form_json'])
+        crowdsource.create_form(form.cleaned_data["form_json"])
         form.process_data_csv(crowdsource)
         if formset.is_valid():
-            formset.save(
-                doccloud_each_page=form.cleaned_data['doccloud_each_page']
-            )
+            formset.save(doccloud_each_page=form.cleaned_data["doccloud_each_page"])
         messages.success(self.request, msg)
         return redirect(crowdsource)
 
     def get_form_kwargs(self):
         """Add user to form kwargs"""
         kwargs = super(CrowdsourceUpdateView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 def oembed(request):
     """AJAX view to get oembed data"""
-    if 'url' in request.GET:
-        data = CrowdsourceData(url=request.GET['url'])
+    if "url" in request.GET:
+        data = CrowdsourceData(url=request.GET["url"])
         return HttpResponse(data.embed())
     else:
         return HttpResponseBadRequest()
@@ -733,27 +683,27 @@ def message_response(request):
     """AJAX view to send an email to the user of a response"""
     form = CrowdsourceMessageResponseForm(request.POST)
     if form.is_valid():
-        response = form.cleaned_data['response']
+        response = form.cleaned_data["response"]
         if not request.user.has_perm(
-            'crowdsource.change_crowdsource', response.crowdsource
+            "crowdsource.change_crowdsource", response.crowdsource
         ):
-            return JsonResponse({'error': 'permission denied'}, status=403)
+            return JsonResponse({"error": "permission denied"}, status=403)
         if not response.user or not response.user.email:
-            return JsonResponse({'error': 'no email'}, status=400)
+            return JsonResponse({"error": "no email"}, status=400)
         msg = TemplateEmail(
-            subject=form.cleaned_data['subject'],
-            from_email='info@muckrock.com',
+            subject=form.cleaned_data["subject"],
+            from_email="info@muckrock.com",
             reply_to=[request.user.email],
             user=response.user,
-            text_template='crowdsource/email/message_user.txt',
-            html_template='crowdsource/email/message_user.html',
+            text_template="crowdsource/email/message_user.txt",
+            html_template="crowdsource/email/message_user.html",
             extra_context={
-                'body': form.cleaned_data['body'],
-                'assignment': response.crowdsource,
-                'from_user': request.user,
+                "body": form.cleaned_data["body"],
+                "assignment": response.crowdsource,
+                "from_user": request.user,
             },
         )
         msg.send()
-        return JsonResponse({'status': 'ok'})
+        return JsonResponse({"status": "ok"})
     else:
-        return JsonResponse({'error': 'form invalid'}, status=400)
+        return JsonResponse({"error": "form invalid"}, status=400)

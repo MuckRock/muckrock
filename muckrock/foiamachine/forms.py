@@ -17,11 +17,12 @@ from muckrock.foiamachine.models import (
 )
 
 MAX_UPLOAD_SIZE = 10485760  # 10mB
-ALLOWED_CONTENT_TYPES = ['application', 'image', 'video', 'text']
+ALLOWED_CONTENT_TYPES = ["application", "image", "video", "text"]
 
 
 class FoiaMachineBulkRequestForm(forms.Form):
     """This allows a basic mechanism for bulk-updating requests."""
+
     status = forms.ChoiceField(choices=STATUS, required=False)
 
 
@@ -30,25 +31,23 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = FoiaMachineRequest
-        fields = [
-            'title', 'status', 'request_language', 'jurisdiction', 'agency'
-        ]
+        fields = ["title", "status", "request_language", "jurisdiction", "agency"]
         autocomplete_names = {
-            'jurisdiction': 'JurisdictionAutocomplete',
-            'agency': 'AgencyAutocomplete',
+            "jurisdiction": "JurisdictionAutocomplete",
+            "agency": "AgencyAutocomplete",
         }
         labels = {
-            'request_language': 'Request',
+            "request_language": "Request",
         }
 
     def clean(self):
         """Ensures the agency belongs to the jurisdiction."""
         cleaned_data = super(FoiaMachineRequestForm, self).clean()
-        jurisdiction = cleaned_data.get('jurisdiction')
-        agency = cleaned_data.get('agency')
+        jurisdiction = cleaned_data.get("jurisdiction")
+        agency = cleaned_data.get("agency")
         if agency and agency.jurisdiction != jurisdiction:
             raise forms.ValidationError(
-                'This agency does not belong to the jurisdiction.'
+                "This agency does not belong to the jurisdiction."
             )
         return cleaned_data
 
@@ -61,29 +60,19 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FoiaMachineCommunicationForm, self).__init__(*args, **kwargs)
-        if 'message' in list(self.initial.keys()):
-            self.initial['message'] = self.initial['message'].replace(
-                "<div>", ""
-            )
-            self.initial['message'] = self.initial['message'].replace(
-                "</div>", "\n"
-            )
-            self.initial['message'] = self.initial['message'].replace(
-                "<br>", "\n"
-            )
-            self.initial['message'] = bleach.clean(
-                self.initial['message'], strip=True
-            )
+        if "message" in list(self.initial.keys()):
+            self.initial["message"] = self.initial["message"].replace("<div>", "")
+            self.initial["message"] = self.initial["message"].replace("</div>", "\n")
+            self.initial["message"] = self.initial["message"].replace("<br>", "\n")
+            self.initial["message"] = bleach.clean(self.initial["message"], strip=True)
 
     files = forms.FileField(
         required=False,
-        help_text='The maximum upload size is 10MB.',
-        widget=forms.ClearableFileInput(attrs={
-            'multiple': True
-        })
+        help_text="The maximum upload size is 10MB.",
+        widget=forms.ClearableFileInput(attrs={"multiple": True}),
     )
     status = forms.ChoiceField(
-        choices=STATUS, required=False, label='Update request status'
+        choices=STATUS, required=False, label="Update request status"
     )
 
     def clean_files(self):
@@ -91,35 +80,32 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
         # pylint: disable=protected-access
         if not self.files:
             return []
-        files = self.files.getlist('files')
+        files = self.files.getlist("files")
         for _file in files:
-            content_type = _file.content_type.split('/')[0]
+            content_type = _file.content_type.split("/")[0]
             if content_type in ALLOWED_CONTENT_TYPES:
                 if _file._size > MAX_UPLOAD_SIZE:
-                    raise forms.ValidationError('This file is too large.')
+                    raise forms.ValidationError("This file is too large.")
             else:
-                raise forms.ValidationError('Unsupported filetype.')
+                raise forms.ValidationError("Unsupported filetype.")
         return files
 
     class Meta:
         model = FoiaMachineCommunication
         fields = [
-            'request',
-            'date',
-            'sender',
-            'receiver',
-            'subject',
-            'message',
-            'received',
+            "request",
+            "date",
+            "sender",
+            "receiver",
+            "subject",
+            "message",
+            "received",
         ]
         widgets = {
-            'request': forms.HiddenInput(),
+            "request": forms.HiddenInput(),
         }
         help_texts = {
-            'sender':
-                'What is the name or email of who sent the message?',
-            'receiver':
-                'What is the name or email of who the message was sent to?',
-            'received':
-                'Was this message sent to you?'
+            "sender": "What is the name or email of who sent the message?",
+            "receiver": "What is the name or email of who the message was sent to?",
+            "received": "Was this message sent to you?",
         }
