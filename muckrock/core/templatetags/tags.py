@@ -7,12 +7,7 @@ from django import template
 from django.conf import settings
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
-from django.template import (
-    Library,
-    Node,
-    TemplateSyntaxError,
-    VariableDoesNotExist,
-)
+from django.template import Library, Node, TemplateSyntaxError, VariableDoesNotExist
 from django.template.defaultfilters import stringfilter
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe

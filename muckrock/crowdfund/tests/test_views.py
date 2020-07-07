@@ -18,11 +18,7 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.core.factories import (
-    CrowdfundFactory,
-    ProjectFactory,
-    UserFactory,
-)
+from muckrock.core.factories import CrowdfundFactory, ProjectFactory, UserFactory
 from muckrock.core.test_utils import mock_middleware, mock_squarelet
 from muckrock.crowdfund.forms import CrowdfundPaymentForm
 from muckrock.crowdfund.models import CrowdfundPayment

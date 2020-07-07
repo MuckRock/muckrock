@@ -14,11 +14,12 @@ from muckrock.tags.models import Tag
 
 class TagAdmin(admin.ModelAdmin):
     """Model Admin for a tag"""
+
     # pylint: disable=too-many-public-methods
 
-    prepopulated_fields = {'slug': ('name',)}
-    search_fields = ('name',)
-    list_display = ['name']
+    prepopulated_fields = {"slug": ("name",)}
+    search_fields = ("name",)
+    list_display = ["name"]
 
 
 admin.site.register(Tag, TagAdmin)

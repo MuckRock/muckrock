@@ -18,10 +18,7 @@ from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.agency.views import AgencyList, boilerplate, contact_info, detail
-from muckrock.communication.factories import (
-    EmailAddressFactory,
-    PhoneNumberFactory,
-)
+from muckrock.communication.factories import EmailAddressFactory, PhoneNumberFactory
 from muckrock.core.factories import (
     AgencyEmailFactory,
     AgencyFactory,

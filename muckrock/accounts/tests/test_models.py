@@ -10,11 +10,7 @@ from nose.tools import assert_false, assert_true, eq_, ok_
 
 # MuckRock
 from muckrock.accounts.models import Notification, Profile
-from muckrock.core.factories import (
-    NotificationFactory,
-    ProfileFactory,
-    UserFactory,
-)
+from muckrock.core.factories import NotificationFactory, ProfileFactory, UserFactory
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.organization.factories import (

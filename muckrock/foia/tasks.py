@@ -61,12 +61,7 @@ from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import read_in_chunks
 from muckrock.foia.exceptions import SizeError
-from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAComposer,
-    FOIAFile,
-    FOIARequest,
-)
+from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
 from muckrock.task.models import (
     PaymentInfoTask,
     ResponseTask,

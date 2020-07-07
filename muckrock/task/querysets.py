@@ -14,16 +14,8 @@ from datetime import date
 from muckrock import task
 from muckrock.communication.models import EmailCommunication
 from muckrock.core.models import ExtractDay
-from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAComposer,
-    FOIAFile,
-    FOIARequest,
-)
-from muckrock.foia.querysets import (
-    FOIACommunicationQuerySet,
-    PreloadFileQuerysetMixin,
-)
+from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
+from muckrock.foia.querysets import FOIACommunicationQuerySet, PreloadFileQuerysetMixin
 
 
 class TaskQuerySet(models.QuerySet):

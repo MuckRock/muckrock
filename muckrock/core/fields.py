@@ -7,11 +7,7 @@ GroupedModelChoiceField - http://djangosnippets.org/snippets/1968/
 
 # Django
 from django import forms
-from django.core.validators import (
-    EmailValidator,
-    ValidationError,
-    validate_email,
-)
+from django.core.validators import EmailValidator, ValidationError, validate_email
 from django.db.models import CharField, FileField
 from django.forms.models import ModelChoiceField, ModelChoiceIterator
 from django.utils.translation import ugettext as _

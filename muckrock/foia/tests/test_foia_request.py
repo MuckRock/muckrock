@@ -29,11 +29,7 @@ from freezegun import freeze_time
 from nose.tools import eq_, ok_
 
 # MuckRock
-from muckrock.core.factories import (
-    AgencyFactory,
-    AppealAgencyFactory,
-    UserFactory,
-)
+from muckrock.core.factories import AgencyFactory, AppealAgencyFactory, UserFactory
 from muckrock.core.test_utils import mock_squarelet
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import (

@@ -41,11 +41,7 @@ from muckrock.core.factories import (
     ProjectFactory,
     UserFactory,
 )
-from muckrock.core.test_utils import (
-    http_post_response,
-    mock_middleware,
-    mock_squarelet,
-)
+from muckrock.core.test_utils import http_post_response, mock_middleware, mock_squarelet
 from muckrock.core.tests import get_404, get_allowed
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.factories import (

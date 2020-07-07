@@ -23,11 +23,7 @@ from furl import furl
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.core.forms import TagManagerForm
-from muckrock.core.views import (
-    MRListView,
-    MRSearchFilterListView,
-    class_view_decorator,
-)
+from muckrock.core.views import MRListView, MRSearchFilterListView, class_view_decorator
 from muckrock.crowdsource.forms import CrowdsourceChoiceForm
 from muckrock.crowdsource.tasks import datum_per_page
 from muckrock.foia.filters import (
@@ -36,17 +32,8 @@ from muckrock.foia.filters import (
     MyFOIARequestFilterSet,
     ProcessingFOIARequestFilterSet,
 )
-from muckrock.foia.forms import (
-    FOIAAccessForm,
-    SaveSearchForm,
-    SaveSearchFormHandler,
-)
-from muckrock.foia.models import (
-    END_STATUS,
-    FOIAComposer,
-    FOIARequest,
-    FOIASavedSearch,
-)
+from muckrock.foia.forms import FOIAAccessForm, SaveSearchForm, SaveSearchFormHandler
+from muckrock.foia.models import END_STATUS, FOIAComposer, FOIARequest, FOIASavedSearch
 from muckrock.foia.rules import can_embargo, can_embargo_permananently
 from muckrock.foia.tasks import export_csv
 from muckrock.news.models import Article

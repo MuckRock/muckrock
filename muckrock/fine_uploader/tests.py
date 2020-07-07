@@ -15,10 +15,7 @@ from nose.tools import assert_false, eq_
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.fine_uploader import views
-from muckrock.foia.factories import (
-    FOIARequestFactory,
-    OutboundRequestAttachmentFactory,
-)
+from muckrock.foia.factories import FOIARequestFactory, OutboundRequestAttachmentFactory
 from muckrock.foia.models import OutboundRequestAttachment
 
 

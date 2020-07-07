@@ -12,12 +12,7 @@ from rest_framework import permissions, serializers
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAFile,
-    FOIANote,
-    FOIARequest,
-)
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIANote, FOIARequest
 
 
 class DateTimeField(serializers.DateTimeField):

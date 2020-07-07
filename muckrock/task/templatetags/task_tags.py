@@ -11,7 +11,6 @@ from django.core.urlresolvers import reverse
 from muckrock import agency, foia, task
 from muckrock.communication.forms import AddressForm
 from muckrock.portal.forms import PortalForm
-# imports Task model separately to patch bug in django-compressor parser
 from muckrock.task.models import Task
 
 register = template.Library()
@@ -152,7 +151,7 @@ class NewAgencyTaskNode(TaskNode):
             initial["portal_url"] = self.task.agency.portal.url
             initial["portal_type"] = self.task.agency.portal.type
         extra_context["agency_form"] = agency.forms.AgencyForm(
-            instance=self.task.agency, initial=initial,
+            instance=self.task.agency, initial=initial
         )
         extra_context["replace_form"] = task.forms.ReplaceNewAgencyForm(
             initial={"replace_jurisdiction": self.task.agency.jurisdiction}
@@ -313,7 +312,7 @@ class NewPortalTaskNode(TaskNode):
         extra_context = super(NewPortalTaskNode, self).get_extra_context()
 
         extra_context["form"] = PortalForm(
-            foia=self.task.communication.foia, initial={"type": self.task.portal_type},
+            foia=self.task.communication.foia, initial={"type": self.task.portal_type}
         )
 
         return extra_context

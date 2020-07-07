@@ -9,11 +9,7 @@
 from rules import add_perm, always_deny, is_staff, predicate
 
 # MuckRock
-from muckrock.foia.rules import (
-    has_feature_level,
-    skip_if_not_obj,
-    user_authenticated,
-)
+from muckrock.foia.rules import has_feature_level, skip_if_not_obj, user_authenticated
 
 
 @predicate

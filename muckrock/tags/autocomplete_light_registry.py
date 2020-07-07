@@ -14,14 +14,14 @@ from muckrock.tags.models import Tag
 
 class TagAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking tags"""
-    choices = (
-        Tag.objects.annotate(num=Count('tags_taggeditembase_items'))
-        .exclude(num=0)
+
+    choices = Tag.objects.annotate(num=Count("tags_taggeditembase_items")).exclude(
+        num=0
     )
-    search_fields = ['name']
+    search_fields = ["name"]
     attrs = {
-        'data-autocomplete-minimum-characters': 1,
-        'placeholder': 'Search tags',
+        "data-autocomplete-minimum-characters": 1,
+        "placeholder": "Search tags",
     }
 
 

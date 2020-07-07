@@ -11,10 +11,7 @@ from nose.tools import assert_false, assert_true, ok_
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import FOIARequestFactory
-from muckrock.organization.factories import (
-    MembershipFactory,
-    OrganizationFactory,
-)
+from muckrock.organization.factories import MembershipFactory, OrganizationFactory
 
 
 class TestRequestSharing(TestCase):

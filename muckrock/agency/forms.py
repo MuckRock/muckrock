@@ -27,7 +27,7 @@ class AgencyForm(forms.ModelForm):
     """A form for an Agency"""
 
     jurisdiction = autocomplete_light.ModelChoiceField(
-        "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all(),
+        "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all()
     )
     address_suite = forms.CharField(
         required=False,
@@ -36,16 +36,16 @@ class AgencyForm(forms.ModelForm):
         ),
     )
     address_street = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "Street"}),
+        required=False, widget=forms.TextInput(attrs={"placeholder": "Street"})
     )
     address_city = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "City"}),
+        required=False, widget=forms.TextInput(attrs={"placeholder": "City"})
     )
     address_state = forms.ChoiceField(
-        required=False, choices=(("", "---"),) + STATE_CHOICES,
+        required=False, choices=(("", "---"),) + STATE_CHOICES
     )
     address_zip = USZipCodeField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "Zip"}),
+        required=False, widget=forms.TextInput(attrs={"placeholder": "Zip"})
     )
     email = FullEmailField(required=False)
     website = forms.URLField(label="General Website", required=False)
@@ -58,7 +58,7 @@ class AgencyForm(forms.ModelForm):
         "this is what you want",
     )
 
-    portal_type = forms.ChoiceField(choices=PORTAL_TYPES, initial="other",)
+    portal_type = forms.ChoiceField(choices=PORTAL_TYPES, initial="other")
 
     def save(self, *args, **kwargs):
         """Save email, phone, fax, and address models on save"""
@@ -73,17 +73,15 @@ class AgencyForm(forms.ModelForm):
             )
         if self.cleaned_data["phone"]:
             phone_number, _ = PhoneNumber.objects.update_or_create(
-                number=self.cleaned_data["phone"], defaults={"type": "phone"},
+                number=self.cleaned_data["phone"], defaults={"type": "phone"}
             )
-            AgencyPhone.objects.create(
-                agency=agency, phone=phone_number,
-            )
+            AgencyPhone.objects.create(agency=agency, phone=phone_number)
         if self.cleaned_data["fax"]:
             fax_number, _ = PhoneNumber.objects.update_or_create(
-                number=self.cleaned_data["fax"], defaults={"type": "fax"},
+                number=self.cleaned_data["fax"], defaults={"type": "fax"}
             )
             AgencyPhone.objects.create(
-                agency=agency, phone=fax_number, request_type="primary",
+                agency=agency, phone=fax_number, request_type="primary"
             )
         if (
             self.cleaned_data["address_suite"]
@@ -103,11 +101,9 @@ class AgencyForm(forms.ModelForm):
                 address="",
             )
             # clear out any previously set primary addresses
-            AgencyAddress.objects.filter(
-                agency=agency, request_type="primary",
-            ).delete()
+            AgencyAddress.objects.filter(agency=agency, request_type="primary").delete()
             AgencyAddress.objects.create(
-                agency=agency, address=address, request_type="primary",
+                agency=agency, address=address, request_type="primary"
             )
         if self.cleaned_data["portal_url"]:
             portal_type = self.cleaned_data["portal_type"]
@@ -115,7 +111,7 @@ class AgencyForm(forms.ModelForm):
                 url=self.cleaned_data["portal_url"],
                 defaults={
                     "type": portal_type,
-                    "name": "%s %s" % (agency, dict(PORTAL_TYPES)[portal_type],),
+                    "name": "%s %s" % (agency, dict(PORTAL_TYPES)[portal_type]),
                 },
             )
             agency.portal = portal
@@ -152,10 +148,7 @@ class AgencyForm(forms.ModelForm):
             "portal_url",
             "portal_type",
         ]
-        labels = {
-            "aliases": "Alias",
-            "url": "FOIA or public information contact page",
-        }
+        labels = {"aliases": "Alias", "url": "FOIA or public information contact page"}
         help_texts = {
             "aliases": "An alternate name for the agency, "
             'e.g. "CIA" is an alias for "Central Intelligence Agency".'
@@ -173,10 +166,10 @@ class AgencyMergeForm(forms.Form):
     """A form to merge two agencies"""
 
     good_agency = autocomplete_light.ModelChoiceField(
-        "AgencyEasySearchAutocomplete", queryset=Agency.objects.get_approved(),
+        "AgencyEasySearchAutocomplete", queryset=Agency.objects.get_approved()
     )
     bad_agency = autocomplete_light.ModelChoiceField(
-        "AgencyEasySearchAutocomplete", queryset=Agency.objects.get_approved(),
+        "AgencyEasySearchAutocomplete", queryset=Agency.objects.get_approved()
     )
     confirmed = forms.BooleanField(
         initial=False, widget=forms.HiddenInput(), required=False
@@ -190,7 +183,7 @@ class AgencyMergeForm(forms.Form):
             self.fields["good_agency"].widget = forms.HiddenInput()
             self.fields["bad_agency"].widget = forms.HiddenInput()
 
-    def clean(self,):
+    def clean(self):
         cleaned_data = super(AgencyMergeForm, self).clean()
         good_agency = cleaned_data.get("good_agency")
         bad_agency = cleaned_data.get("bad_agency")

@@ -13,12 +13,7 @@ from datetime import date, timedelta
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
-from muckrock.foia.models import (
-    END_STATUS,
-    FOIANote,
-    FOIARequest,
-    TrackingNumber,
-)
+from muckrock.foia.models import END_STATUS, FOIANote, FOIARequest, TrackingNumber
 from muckrock.organization.forms import StripeForm
 from muckrock.task.constants import PUBLIC_FLAG_CATEGORIES
 

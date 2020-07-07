@@ -17,10 +17,7 @@ from muckrock.crowdsource.factories import (
     CrowdsourceFactory,
     CrowdsourceResponseFactory,
 )
-from muckrock.crowdsource.views import (
-    CrowdsourceDetailView,
-    CrowdsourceFormView,
-)
+from muckrock.crowdsource.views import CrowdsourceDetailView, CrowdsourceFormView
 
 
 class TestCrowdsourceDetailView(TestCase):

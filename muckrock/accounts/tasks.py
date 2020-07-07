@@ -31,18 +31,9 @@ from muckrock.communication.models import (
 )
 from muckrock.crowdfund.models import Crowdfund, CrowdfundPayment
 from muckrock.crowdsource.models import Crowdsource, CrowdsourceResponse
-from muckrock.foia.models import (
-    FOIACommunication,
-    FOIAComposer,
-    FOIAFile,
-    FOIARequest,
-)
+from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
 from muckrock.foiamachine.models import FoiaMachineRequest
-from muckrock.jurisdiction.models import (
-    ExampleAppeal,
-    Exemption,
-    InvokedExemption,
-)
+from muckrock.jurisdiction.models import ExampleAppeal, Exemption, InvokedExemption
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.task.models import (

@@ -9,12 +9,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 # MuckRock
-from muckrock.agency.models import (
-    Agency,
-    AgencyAddress,
-    AgencyEmail,
-    AgencyPhone,
-)
+from muckrock.agency.models import Agency, AgencyAddress, AgencyEmail, AgencyPhone
 from muckrock.communication.serializers import (
     AddressSerializer,
     EmailAddressSerializer,

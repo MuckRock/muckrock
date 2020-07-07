@@ -7,10 +7,7 @@ from django.contrib.auth.models import User
 
 # Third Party
 from rest_framework import viewsets
-from rest_framework.permissions import (
-    DjangoModelPermissionsOrAnonReadOnly,
-    IsAdminUser,
-)
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, IsAdminUser
 
 # MuckRock
 from muckrock.accounts.models import Statistics

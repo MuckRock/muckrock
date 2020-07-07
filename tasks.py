@@ -89,8 +89,7 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black muckrock --exclude migrations &&"
-            "isort -sp config -rc muckrock"
+            cmd="black muckrock --exclude migrations && isort -rc muckrock"
         )
     )
 
@@ -110,9 +109,7 @@ def runserver(c):
     """Run the development server"""
     c.run(
         DOCKER_COMPOSE_RUN_OPT.format(
-            opt="--service-ports --use-aliases",
-            service="muckrock_django",
-            cmd=""
+            opt="--service-ports --use-aliases", service="muckrock_django", cmd=""
         ),
         pty=True,
     )
@@ -142,9 +139,7 @@ def celerybeat(c):
 def shell(c, opts=""):
     """Run an interactive python shell"""
     c.run(
-        DJANGO_RUN.format(
-            cmd="python manage.py shell_plus {opts}".format(opts=opts)
-        ),
+        DJANGO_RUN.format(cmd="python manage.py shell_plus {opts}".format(opts=opts)),
         pty=True,
     )
 
@@ -164,9 +159,7 @@ def sh(c):
 def dbshell(c, opts=""):
     """Run an interactive db shell"""
     c.run(
-        DJANGO_RUN.format(
-            cmd="python manage.py dbshell {opts}".format(opts=opts)
-        ),
+        DJANGO_RUN.format(cmd="python manage.py dbshell {opts}".format(opts=opts)),
         pty=True,
     )
 
@@ -197,8 +190,7 @@ def heroku(c, staging=False):
     else:
         app = "muckrock"
     c.run(
-        "heroku run --app {app} python manage.py shell_plus".format(app=app),
-        pty=True
+        "heroku run --app {app} python manage.py shell_plus".format(app=app), pty=True
     )
 
 
@@ -218,8 +210,9 @@ def pip_compile(c, upgrade=False, package=None):
     c.run(
         DJANGO_RUN.format(
             cmd="pip-compile {upgrade_flag} pip/requirements.in &&"
-            "pip-compile {upgrade_flag} pip/dev-requirements.in".
-            format(upgrade_flag=upgrade_flag)
+            "pip-compile {upgrade_flag} pip/dev-requirements.in".format(
+                upgrade_flag=upgrade_flag
+            )
         )
     )
 
@@ -250,8 +243,9 @@ def populate_db(c, db_name="muckrock"):
         DJANGO_RUN.format(
             cmd='sh -c "dropdb {db_name} && '
             "heroku pg:pull DATABASE {db_name} --app muckrock "
-            '--exclude-table-data=\\"public.reversion_version;public.foia_rawemail\\""'.
-            format(db_name=db_name)
+            '--exclude-table-data=\\"public.reversion_version;public.foia_rawemail\\""'.format(
+                db_name=db_name
+            )
         )
     )
 
@@ -260,9 +254,7 @@ def populate_db(c, db_name="muckrock"):
 def update_staging_db(c):
     """Update the staging database"""
     c.run("heroku maintenance:on --app muckrock-staging")
-    c.run(
-        "heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging"
-    )
+    c.run("heroku pg:copy muckrock::DATABASE_URL DATABASE_URL --app muckrock-staging")
     c.run("heroku maintenance:off --app muckrock-staging")
 
 
@@ -284,8 +276,9 @@ def sync_aws(c):
     ]
     for folder in folders:
         c.run(
-            "aws s3 sync s3://muckrock/{folder} ./muckrock/static/media/{folder}".
-            format(folder=folder)
+            "aws s3 sync s3://muckrock/{folder} ./muckrock/static/media/{folder}".format(
+                folder=folder
+            )
         )
 
 
@@ -304,7 +297,5 @@ def sync_aws_staging(c):
     for folder in folders:
         c.run(
             "aws s3 sync s3://muckrock/{folder} "
-            "s3://muckrock-staging//{folder} --acl public-read".format(
-                folder=folder
-            )
+            "s3://muckrock-staging//{folder} --acl public-read".format(folder=folder)
         )

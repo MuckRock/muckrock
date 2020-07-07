@@ -76,12 +76,7 @@ from muckrock.project.forms import ProjectManagerForm
 from muckrock.qanda.forms import QuestionForm
 from muckrock.qanda.models import Question
 from muckrock.tags.models import Tag
-from muckrock.task.models import (
-    FlaggedTask,
-    ResponseTask,
-    StatusChangeTask,
-    Task,
-)
+from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask, Task
 
 logger = logging.getLogger(__name__)
 

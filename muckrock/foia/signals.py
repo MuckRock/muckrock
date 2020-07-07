@@ -6,11 +6,7 @@ from django.db.models.signals import post_delete, pre_save
 
 # MuckRock
 from muckrock.core.utils import clear_cloudfront_cache, get_s3_storage_bucket
-from muckrock.foia.models import (
-    FOIAFile,
-    FOIARequest,
-    OutboundRequestAttachment,
-)
+from muckrock.foia.models import FOIAFile, FOIARequest, OutboundRequestAttachment
 from muckrock.foia.tasks import upload_document_cloud
 
 

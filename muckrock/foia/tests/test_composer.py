@@ -17,10 +17,7 @@ from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.forms.composers import BaseComposerForm
 from muckrock.foia.models import FOIAComposer
-from muckrock.organization.factories import (
-    MembershipFactory,
-    OrganizationFactory,
-)
+from muckrock.organization.factories import MembershipFactory, OrganizationFactory
 
 
 class TestFOIAComposer(TestCase):

@@ -9,12 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count
 from django.db.models.query import Prefetch
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseBadRequest,
-    JsonResponse,
-)
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.utils.decorators import method_decorator
