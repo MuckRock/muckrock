@@ -37,7 +37,7 @@ def skip_if_not_obj(func):
 def user_authenticated(func):
     """Decorator for predicates
     Return false if user is not authenticated"""
-    argspec = inspect.getargspec(func)
+    argspec = inspect.getfullargspec(func)
     if len(argspec.args) == 2:
 
         @wraps(func)
