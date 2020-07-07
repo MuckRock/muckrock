@@ -95,7 +95,6 @@ newrelic==2.70.0.51
 numpy==1.19.0
 oauth2client==4.1.2       # via google-api-python-client
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
-olefile==0.44             # via pillow
 orderedmultidict==0.7.11  # via furl
 packaging==16.8
 parso==0.7.0              # via jedi
@@ -103,7 +102,7 @@ pdfrw==0.4
 pexpect==4.6.0            # via ipython
 phonenumberslite==8.8.2
 pickleshare==0.7.4        # via ipython
-pillow==4.2.1
+pillow==7.2.0
 plaid-python==3.4.0
 premailer==3.0.0          # via django-premailer
 prompt-toolkit==3.0.5     # via ipython
