@@ -30,18 +30,20 @@ class FoiaMachineRequest(models.Model):
     and FOIA Machine's existing Request model.
     """
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     title = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
-        max_length=10, choices=STATUS, default="started", db_index=True,
+        max_length=10, choices=STATUS, default="started", db_index=True
     )
     request_language = models.TextField()
     jurisdiction = models.ForeignKey(
-        "jurisdiction.Jurisdiction", blank=True, null=True,
+        "jurisdiction.Jurisdiction", blank=True, null=True, on_delete=models.PROTECT
     )
-    agency = models.ForeignKey("agency.Agency", blank=True, null=True)
+    agency = models.ForeignKey(
+        "agency.Agency", blank=True, null=True, on_delete=models.PROTECT
+    )
     sharing_code = models.CharField(max_length=255, blank=True)
 
     def save(self, *args, **kwargs):
@@ -57,7 +59,7 @@ class FoiaMachineRequest(models.Model):
     def get_absolute_url(self):
         """Returns the request detail url."""
         return reverse(
-            "foi-detail", host="foiamachine", kwargs={"slug": self.slug, "pk": self.pk,}
+            "foi-detail", host="foiamachine", kwargs={"slug": self.slug, "pk": self.pk}
         )
 
     def generate_letter(self):
@@ -131,7 +133,9 @@ class FoiaMachineCommunication(models.Model):
     loosely mimics the structure of an email.
     """
 
-    request = models.ForeignKey(FoiaMachineRequest, related_name="communications")
+    request = models.ForeignKey(
+        FoiaMachineRequest, related_name="communications", on_delete=models.CASCADE
+    )
     sender = models.CharField(max_length=255)
     receiver = models.CharField(max_length=255, blank=True)
     subject = models.CharField(max_length=255, blank=True)
@@ -161,9 +165,11 @@ class FoiaMachineFile(models.Model):
     Files are uploaded by users and are attached to communications, like in an email.
     """
 
-    communication = models.ForeignKey(FoiaMachineCommunication, related_name="files")
+    communication = models.ForeignKey(
+        FoiaMachineCommunication, related_name="files", on_delete=models.CASCADE
+    )
     file = models.FileField(
-        upload_to="foiamachine_files/%Y/%m/%d", verbose_name="File", max_length=255,
+        upload_to="foiamachine_files/%Y/%m/%d", verbose_name="File", max_length=255
     )
     name = models.CharField(max_length=255)
     comment = models.TextField(blank=True)

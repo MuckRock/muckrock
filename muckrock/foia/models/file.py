@@ -30,7 +30,11 @@ class FOIAFile(models.Model):
     )
 
     comm = models.ForeignKey(
-        "foia.FOIACommunication", related_name="files", blank=True, null=True,
+        "foia.FOIACommunication",
+        related_name="files",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
     )
     ffile = models.FileField(
         upload_to="foia_files/%Y/%m/%d", verbose_name="File", max_length=255
@@ -41,7 +45,7 @@ class FOIAFile(models.Model):
     description = models.TextField(blank=True)
     # for doc cloud only
     access = models.CharField(
-        max_length=12, default="public", choices=access, db_index=True,
+        max_length=12, default="public", choices=access, db_index=True
     )
     doc_id = models.SlugField(max_length=80, blank=True, editable=False)
     pages = models.PositiveIntegerField(default=0, editable=False)

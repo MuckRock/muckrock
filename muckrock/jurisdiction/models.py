@@ -64,7 +64,7 @@ class RequestHelper(object):
     def total_pages(self):
         """Total pages released"""
         requests = self.get_requests()
-        pages = requests.aggregate(pages=Sum("communications__files__pages"),)["pages"]
+        pages = requests.aggregate(pages=Sum("communications__files__pages"))["pages"]
         return pages if pages else 0
 
 
@@ -84,6 +84,7 @@ class Jurisdiction(models.Model, RequestHelper):
         blank=True,
         null=True,
         limit_choices_to=~Q(level="l"),
+        on_delete=models.PROTECT,
     )
     hidden = models.BooleanField(default=False)
     image = ThumbnailerImageField(
@@ -210,7 +211,7 @@ class Jurisdiction(models.Model, RequestHelper):
         """Get days phrase for request language"""
         if self.days:
             return "{} {} days, as the statute requires".format(
-                self.days, self.get_day_type(),
+                self.days, self.get_day_type()
             )
         else:
             return "10 business days"
@@ -224,14 +225,14 @@ class Law(models.Model):
     """A law that allows for requests for public records from a jurisdiction."""
 
     jurisdiction = models.OneToOneField(Jurisdiction, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, help_text="The common name of the law.",)
+    name = models.CharField(max_length=255, help_text="The common name of the law.")
     shortname = models.CharField(
         blank=True,
         max_length=20,
         help_text="Abbreviation or acronym, e.g. FOIA, FOIL, OPRA",
     )
     citation = models.CharField(
-        max_length=255, help_text="The legal reference for this law.",
+        max_length=255, help_text="The legal reference for this law."
     )
     url = models.URLField(help_text="The URL of the full text of the law.")
     days = models.PositiveSmallIntegerField(
@@ -273,9 +274,9 @@ class Law(models.Model):
 class LawYear(models.Model):
     """A notable year for a law"""
 
-    law = models.ForeignKey(Law, related_name="years")
+    law = models.ForeignKey(Law, related_name="years", on_delete=models.CASCADE)
     reason = models.CharField(
-        choices=(("Enacted", "Enacted"), ("Passed", "Passed"), ("Updated", "Updated"),),
+        choices=(("Enacted", "Enacted"), ("Passed", "Passed"), ("Updated", "Updated")),
         max_length=7,
     )
     year = models.PositiveSmallIntegerField()
@@ -293,7 +294,9 @@ class Exemption(models.Model):
     # Required fields
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name="exemptions")
+    jurisdiction = models.ForeignKey(
+        Jurisdiction, related_name="exemptions", on_delete=models.CASCADE
+    )
     aliases = models.TextField(blank=True)
     basis = models.TextField(
         help_text="The legal or contextual basis for the exemption."
@@ -348,8 +351,10 @@ class InvokedExemption(models.Model):
     where the exemption was invoked, i.e. there should only ever be 1 exemption
     but there can be many invocations of that exemption."""
 
-    exemption = models.ForeignKey(Exemption, related_name="invokations")
-    request = models.ForeignKey(FOIARequest)
+    exemption = models.ForeignKey(
+        Exemption, related_name="invokations", on_delete=models.CASCADE
+    )
+    request = models.ForeignKey(FOIARequest, on_delete=models.CASCADE)
     use_language = models.TextField(
         blank=True,
         help_text="What language did the aguency use to invoke the exemption?",
@@ -379,7 +384,9 @@ class ExampleAppeal(models.Model):
     the context when the language is most effective. Each ExampleAppeal instance
     should connect to an Exemption."""
 
-    exemption = models.ForeignKey(Exemption, related_name="example_appeals")
+    exemption = models.ForeignKey(
+        Exemption, related_name="example_appeals", on_delete=models.CASCADE
+    )
     title = models.TextField(default="Untitled Example")
     language = models.TextField()
     context = models.TextField(
@@ -409,7 +416,9 @@ class Appeal(models.Model):
     It should capture the communication used to appeal, as well as the base language
     used to write the appeal, if any was used."""
 
-    communication = models.ForeignKey("foia.FOIACommunication", related_name="appeals")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", related_name="appeals", on_delete=models.CASCADE
+    )
     base_language = models.ManyToManyField(
         ExampleAppeal, related_name="appeals", blank=True
     )

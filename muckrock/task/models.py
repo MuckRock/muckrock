@@ -71,10 +71,18 @@ class Task(models.Model):
     date_deferred = models.DateField(blank=True, null=True)
     resolved = models.BooleanField(default=False, db_index=True)
     assigned = models.ForeignKey(
-        User, blank=True, null=True, related_name="assigned_tasks"
+        User,
+        blank=True,
+        null=True,
+        related_name="assigned_tasks",
+        on_delete=models.PROTECT,
     )
     resolved_by = models.ForeignKey(
-        User, blank=True, null=True, related_name="resolved_tasks"
+        User,
+        blank=True,
+        null=True,
+        related_name="resolved_tasks",
+        on_delete=models.PROTECT,
     )
     form_data = JSONField(blank=True, null=True)
 
@@ -112,7 +120,9 @@ class OrphanTask(Task):
         ("ia", "Invalid Address"),
     )
     reason = models.CharField(max_length=2, choices=reasons)
-    communication = models.ForeignKey("foia.FOIACommunication")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
     address = models.CharField(max_length=255)
 
     objects = OrphanTaskQuerySet.as_manager()
@@ -123,7 +133,7 @@ class OrphanTask(Task):
 
     def display(self):
         """Display something useful and identifing"""
-        return "{}: {}".format(self.get_reason_display(), self.address,)
+        return "{}: {}".format(self.get_reason_display(), self.address)
 
     def get_absolute_url(self):
         return reverse("orphan-task", kwargs={"pk": self.pk})
@@ -165,7 +175,9 @@ class PaymentInfoTask(Task):
     """Pull who to make the payment to"""
 
     type = "PaymentInfoTask"
-    communication = models.ForeignKey("foia.FOIACommunication")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
 
     objects = PaymentInfoTaskQuerySet.as_manager()
@@ -179,8 +191,10 @@ class SnailMailTask(Task):
 
     type = "SnailMailTask"
     category = models.CharField(max_length=1, choices=SNAIL_MAIL_CATEGORIES)
-    communication = models.ForeignKey("foia.FOIACommunication")
-    user = models.ForeignKey(User, blank=True, null=True)
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
     switch = models.BooleanField(
         default=False,
@@ -217,7 +231,7 @@ class SnailMailTask(Task):
     def display(self):
         """Display something useful and identifing"""
         return "{}: {}".format(
-            self.get_category_display(), self.communication.foia.title,
+            self.get_category_display(), self.communication.foia.title
         )
 
     def get_absolute_url(self):
@@ -255,7 +269,7 @@ class ReviewAgencyTask(Task):
     and new contact information is required"""
 
     type = "ReviewAgencyTask"
-    agency = models.ForeignKey("agency.Agency")
+    agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
 
     objects = ReviewAgencyTaskQuerySet.as_manager()
 
@@ -300,7 +314,7 @@ class ReviewAgencyTask(Task):
                 .order_by("%s__status" % email_or_fax, email_or_fax)
                 .exclude(**{email_or_fax: None})
                 .select_related(
-                    "agency__jurisdiction", "composer", "email", "fax", "portal",
+                    "agency__jurisdiction", "composer", "email", "fax", "portal"
                 )
                 .annotate(
                     latest_response=ExtractDay(
@@ -347,14 +361,14 @@ class ReviewAgencyTask(Task):
             )
             addresses = addresses.in_bulk(g[0].pk for g in grouped_requests)
             addresses_confirm = address_model.objects.annotate(
-                last_confirm=Max("%s__confirmed_datetime" % confirm_rel),
+                last_confirm=Max("%s__confirmed_datetime" % confirm_rel)
             )
             addresses_confirm = addresses_confirm.in_bulk(
                 g[0].pk for g in grouped_requests
             )
             if email_or_fax == "email":
                 addresses_open = address_model.objects.annotate(
-                    last_open=Max("opens__datetime"),
+                    last_open=Max("opens__datetime")
                 )
                 addresses_open = addresses_open.in_bulk(
                     g[0].pk for g in grouped_requests
@@ -404,7 +418,7 @@ class ReviewAgencyTask(Task):
             self.agency.foiarequest_set.get_open()
             .filter(email=None, fax=None)
             .select_related(
-                "agency__jurisdiction", "composer", "email", "fax", "portal",
+                "agency__jurisdiction", "composer", "email", "fax", "portal"
             )
             .annotate(
                 latest_response=ExtractDay(
@@ -495,7 +509,7 @@ class ReviewAgencyTask(Task):
         elif is_fax:
             if update_info:
                 AgencyPhone.objects.create(
-                    phone=email_or_fax, agency=self.agency, request_type="primary",
+                    phone=email_or_fax, agency=self.agency, request_type="primary"
                 )
             for foia in foia_list:
                 foia.email = None
@@ -529,11 +543,17 @@ class FlaggedTask(Task):
 
     type = "FlaggedTask"
     text = models.TextField()
-    user = models.ForeignKey(User, blank=True, null=True)
-    foia = models.ForeignKey("foia.FOIARequest", blank=True, null=True)
-    agency = models.ForeignKey("agency.Agency", blank=True, null=True)
-    jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
-    category = models.TextField(choices=FLAG_CATEGORIES, blank=True,)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT)
+    foia = models.ForeignKey(
+        "foia.FOIARequest", blank=True, null=True, on_delete=models.PROTECT
+    )
+    agency = models.ForeignKey(
+        "agency.Agency", blank=True, null=True, on_delete=models.PROTECT
+    )
+    jurisdiction = models.ForeignKey(
+        Jurisdiction, blank=True, null=True, on_delete=models.PROTECT
+    )
+    category = models.TextField(choices=FLAG_CATEGORIES, blank=True)
 
     objects = FlaggedTaskQuerySet.as_manager()
 
@@ -578,7 +598,7 @@ class FlaggedTask(Task):
                 return ""
             else:
                 return '<p><a href="{}{}" target="_blank">{}</a></p>'.format(
-                    settings.MUCKROCK_URL, obj.get_absolute_url(), obj,
+                    settings.MUCKROCK_URL, obj.get_absolute_url(), obj
                 )
 
         contact_id = self.get_contact_id(self.user)
@@ -617,9 +637,7 @@ class FlaggedTask(Task):
         """Get a zoho contact id for the contact with the given email address"""
         if user is None or not user.email:
             user = User.objects.get(username="MuckrockStaff")
-        response = zoho_get(
-            "contacts/search", params={"limit": 1, "email": user.email,},
-        )
+        response = zoho_get("contacts/search", params={"limit": 1, "email": user.email})
         response.raise_for_status()
         if response.status_code == 200:
             contacts = response.json()
@@ -693,7 +711,7 @@ class ProjectReviewTask(Task):
     """Created when a project is published and needs approval."""
 
     type = "ProjectReviewTask"
-    project = models.ForeignKey("project.Project")
+    project = models.ForeignKey("project.Project", on_delete=models.PROTECT)
     notes = models.TextField(blank=True)
 
     objects = ProjectReviewTaskQuerySet.as_manager()
@@ -735,8 +753,8 @@ class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
 
     type = "NewAgencyTask"
-    user = models.ForeignKey(User, blank=True, null=True)
-    agency = models.ForeignKey("agency.Agency")
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT)
+    agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
 
     objects = NewAgencyTaskQuerySet.as_manager()
 
@@ -850,7 +868,9 @@ class ResponseTask(Task):
     """A response has been received and needs its status set"""
 
     type = "ResponseTask"
-    communication = models.ForeignKey("foia.FOIACommunication")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
     created_from_orphan = models.BooleanField(default=False)
     # for predicting statuses
     predicted_status = models.CharField(
@@ -879,9 +899,9 @@ class StatusChangeTask(Task):
     """A user has changed the status on a request"""
 
     type = "StatusChangeTask"
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     old_status = models.CharField(max_length=255)
-    foia = models.ForeignKey("foia.FOIARequest")
+    foia = models.ForeignKey("foia.FOIARequest", on_delete=models.PROTECT)
 
     objects = StatusChangeTaskQuerySet.as_manager()
 
@@ -896,7 +916,7 @@ class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
 
     type = "CrowdfundTask"
-    crowdfund = models.ForeignKey("crowdfund.Crowdfund")
+    crowdfund = models.ForeignKey("crowdfund.Crowdfund", on_delete=models.PROTECT)
 
     objects = CrowdfundTaskQuerySet.as_manager()
 
@@ -913,7 +933,7 @@ class MultiRequestTask(Task):
     """
 
     type = "MultiRequestTask"
-    composer = models.ForeignKey("foia.FOIAComposer")
+    composer = models.ForeignKey("foia.FOIAComposer", on_delete=models.PROTECT)
 
     objects = MultiRequestTaskQuerySet.as_manager()
 
@@ -953,8 +973,10 @@ class PortalTask(Task):
     """An admin needs to interact with a portal"""
 
     type = "PortalTask"
-    communication = models.ForeignKey("foia.FOIACommunication")
-    category = models.CharField(max_length=1, choices=PORTAL_CATEGORIES,)
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
+    category = models.CharField(max_length=1, choices=PORTAL_CATEGORIES)
     reason = models.TextField(blank=True)
 
     objects = PortalTaskQuerySet.as_manager()
@@ -983,8 +1005,10 @@ class NewPortalTask(Task):
     """A portal has been detected where we do not have one in the system"""
 
     type = "NewPortalTask"
-    communication = models.ForeignKey("foia.FOIACommunication")
-    portal_type = models.CharField(choices=PORTAL_TYPES, max_length=11,)
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
+    portal_type = models.CharField(choices=PORTAL_TYPES, max_length=11)
 
     objects = NewPortalTaskQuerySet.as_manager()
 
@@ -1019,7 +1043,9 @@ class FailedFaxTask(Task):
     A fax for this communication failed"""
 
     type = "FailedFaxTask"
-    communication = models.ForeignKey("foia.FOIACommunication")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", on_delete=models.PROTECT
+    )
     reason = models.CharField(max_length=255, blank=True, default="")
     objects = TaskQuerySet.as_manager()
 
@@ -1039,7 +1065,9 @@ class RejectedEmailTask(Task):
     type = "RejectedEmailTask"
     categories = (("b", "Bounced"), ("d", "Dropped"))
     category = models.CharField(max_length=1, choices=categories)
-    foia = models.ForeignKey("foia.FOIARequest", blank=True, null=True)
+    foia = models.ForeignKey(
+        "foia.FOIARequest", blank=True, null=True, on_delete=models.PROTECT
+    )
     email = models.EmailField(blank=True)
     error = models.TextField(blank=True)
     objects = TaskQuerySet.as_manager()
@@ -1057,7 +1085,7 @@ class StaleAgencyTask(Task):
     An agency has gone stale"""
 
     type = "StaleAgencyTask"
-    agency = models.ForeignKey("agency.Agency")
+    agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
 
     def __str__(self):
         return "Stale Agency Task"
@@ -1073,9 +1101,9 @@ class NewExemptionTask(Task):
     Created when a new exemption is submitted for our review."""
 
     type = "NewExemptionTask"
-    foia = models.ForeignKey("foia.FOIARequest")
+    foia = models.ForeignKey("foia.FOIARequest", on_delete=models.PROTECT)
     language = models.TextField()
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
         return "New Exemption Task"

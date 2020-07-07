@@ -16,7 +16,7 @@ class FOIASavedSearch(models.Model):
     """A query and filter values for search reuse"""
 
     # for keeping track of the saved search
-    user = models.ForeignKey("auth.User")
+    user = models.ForeignKey("auth.User", on_delete=models.PROTECT)
     title = models.CharField(max_length=255)
 
     # fields to search and filter on
@@ -25,7 +25,7 @@ class FOIASavedSearch(models.Model):
     users = models.ManyToManyField("auth.User", related_name="+")
     agencies = models.ManyToManyField("agency.Agency")
     jurisdictions = models.ManyToManyField(
-        "jurisdiction.Jurisdiction", through="SearchJurisdiction",
+        "jurisdiction.Jurisdiction", through="SearchJurisdiction"
     )
     projects = models.ManyToManyField("project.Project")
     tags = models.ManyToManyField("tags.Tag")
@@ -69,7 +69,7 @@ class FOIASavedSearch(models.Model):
         params.setlist("projects", self.projects.values_list("pk", flat=True))
         params.setlist("tags", self.tags.values_list("pk", flat=True))
         params.setlist(
-            "jurisdiction", [str(j) for j in self.searchjurisdiction_set.all()],
+            "jurisdiction", [str(j) for j in self.searchjurisdiction_set.all()]
         )
         return params.urlencode()
 
@@ -80,8 +80,10 @@ class FOIASavedSearch(models.Model):
 class SearchJurisdiction(models.Model):
     """Many to many through model for jurisdictions"""
 
-    search = models.ForeignKey(FOIASavedSearch)
-    jurisdiction = models.ForeignKey("jurisdiction.Jurisdiction")
+    search = models.ForeignKey(FOIASavedSearch, on_delete=models.CASCADE)
+    jurisdiction = models.ForeignKey(
+        "jurisdiction.Jurisdiction", on_delete=models.CASCADE
+    )
     include_local = models.BooleanField()
 
     def __str__(self):

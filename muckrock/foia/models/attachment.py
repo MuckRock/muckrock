@@ -25,9 +25,11 @@ def attachment_path(instance, filename):
 class AttachmentBase(models.Model):
     """Abstract base model for attachments"""
 
-    user = models.ForeignKey("auth.User", related_name="pending_%(class)s",)
+    user = models.ForeignKey(
+        "auth.User", related_name="pending_%(class)s", on_delete=models.PROTECT
+    )
     ffile = models.FileField(
-        upload_to=attachment_path, verbose_name="file", max_length=255,
+        upload_to=attachment_path, verbose_name="file", max_length=255
     )
     date_time_stamp = models.DateTimeField()
     sent = models.BooleanField(default=False)
@@ -51,7 +53,9 @@ class AttachmentBase(models.Model):
 class OutboundRequestAttachment(AttachmentBase):
     """An uploaded file waiting to be sent out with a request"""
 
-    foia = models.ForeignKey("FOIARequest", related_name="pending_attachments",)
+    foia = models.ForeignKey(
+        "FOIARequest", related_name="pending_attachments", on_delete=models.CASCADE
+    )
 
     type = "request"
 
@@ -64,7 +68,9 @@ class OutboundRequestAttachment(AttachmentBase):
 class OutboundComposerAttachment(AttachmentBase):
     """An uploaded file waiting to be sent out"""
 
-    composer = models.ForeignKey("FOIAComposer", related_name="pending_attachments",)
+    composer = models.ForeignKey(
+        "FOIAComposer", related_name="pending_attachments", on_delete=models.CASCADE
+    )
 
     type = "composer"
 

@@ -25,26 +25,33 @@ from muckrock.foia.querysets import FOIACommunicationQuerySet
 
 logger = logging.getLogger(__name__)
 
-DELIVERED = (
-    ("fax", "Fax"),
-    ("email", "Email"),
-    ("mail", "Mail"),
-    ("web", "Web"),
-)
+DELIVERED = (("fax", "Fax"), ("email", "Email"), ("mail", "Mail"), ("web", "Web"))
 
 
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
     foia = models.ForeignKey(
-        FOIARequest, related_name="communications", blank=True, null=True
+        FOIARequest,
+        related_name="communications",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
     )
 
     from_user = models.ForeignKey(
-        "auth.User", related_name="sent_communications", null=True, blank=True,
+        "auth.User",
+        related_name="sent_communications",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
     )
     to_user = models.ForeignKey(
-        "auth.User", related_name="received_communications", null=True, blank=True,
+        "auth.User",
+        related_name="received_communications",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
     )
 
     subject = models.CharField(max_length=255, blank=True)
@@ -65,7 +72,11 @@ class FOIACommunication(models.Model):
 
     # only used for orphans
     likely_foia = models.ForeignKey(
-        FOIARequest, related_name="likely_communications", blank=True, null=True
+        FOIARequest,
+        related_name="likely_communications",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     # Depreacted fields
@@ -157,7 +168,7 @@ class FOIACommunication(models.Model):
             upload_document_cloud.apply_async(args=[file_.pk, change], countdown=3)
         self.save()
         CommunicationMoveLog.objects.create(
-            communication=self, foia=old_foia, user=user,
+            communication=self, foia=old_foia, user=user
         )
         logger.info("Communication #%d moved to request #%d", self.id, self.foia.id)
         # if cloning happens, self gets overwritten. so we save it to a variable here
@@ -195,7 +206,7 @@ class FOIACommunication(models.Model):
             clone.foia = foia
             clone.save()
             CommunicationMoveLog.objects.create(
-                communication=clone, foia=self.foia, user=user,
+                communication=clone, foia=self.foia, user=user
             )
             for file_ in files:
                 file_.clone(clone)
@@ -309,7 +320,7 @@ class FOIACommunication(models.Model):
         access = "private" if not self.foia or self.foia.embargo else "public"
         with transaction.atomic():
             foia_file = self.files.create(
-                title=title, datetime=timezone.now(), source=source[:70], access=access,
+                title=title, datetime=timezone.now(), source=source[:70], access=access
             )
             name = name[:233].encode("ascii", "ignore").decode()
             foia_file.ffile.save(name, file_)
@@ -400,9 +411,7 @@ class FOIACommunication(models.Model):
         if self.foia.tracking_ids.exists():
             # do not try to extract a tracking ID if one is already set
             return
-        patterns = [
-            re.compile(r"Tracking Number:\s+([0-9a-zA-Z-]+)"),
-        ]
+        patterns = [re.compile(r"Tracking Number:\s+([0-9a-zA-Z-]+)")]
         for pattern in patterns:
             match = pattern.search(self.communication)
             if match:
@@ -428,8 +437,12 @@ class RawEmail(models.Model):
 
     # nullable during transition
     # communication is depreacted and should be removed
-    communication = models.OneToOneField(FOIACommunication, null=True)
-    email = models.OneToOneField("communication.EmailCommunication", null=True)
+    communication = models.OneToOneField(
+        FOIACommunication, null=True, on_delete=models.SET_NULL
+    )
+    email = models.OneToOneField(
+        "communication.EmailCommunication", null=True, on_delete=models.CASCADE
+    )
     raw_email = models.TextField(blank=True)
 
     def __str__(self):
@@ -443,8 +456,12 @@ class RawEmail(models.Model):
 class FOIANote(models.Model):
     """A private note on a FOIA request"""
 
-    foia = models.ForeignKey(FOIARequest, related_name="notes")
-    author = models.ForeignKey("auth.User", related_name="notes", null=True)
+    foia = models.ForeignKey(
+        FOIARequest, related_name="notes", on_delete=models.CASCADE
+    )
+    author = models.ForeignKey(
+        "auth.User", related_name="notes", null=True, on_delete=models.PROTECT
+    )
     datetime = models.DateTimeField(auto_now_add=True)
     note = models.TextField()
 
@@ -466,7 +483,9 @@ class CommunicationError(models.Model):
     """An error has occured delivering this communication"""
 
     # Depreacted
-    communication = models.ForeignKey(FOIACommunication, related_name="errors",)
+    communication = models.ForeignKey(
+        FOIACommunication, related_name="errors", on_delete=models.CASCADE
+    )
     date = models.DateTimeField()
 
     recipient = models.CharField(max_length=255)
@@ -487,7 +506,9 @@ class CommunicationOpen(models.Model):
     """A communication has been opened"""
 
     # Depreacted
-    communication = models.ForeignKey(FOIACommunication, related_name="opens",)
+    communication = models.ForeignKey(
+        FOIACommunication, related_name="opens", on_delete=models.CASCADE
+    )
     date = models.DateTimeField()
 
     recipient = models.EmailField()
@@ -514,9 +535,11 @@ class CommunicationOpen(models.Model):
 class CommunicationMoveLog(models.Model):
     """Track communications being moved to different requests"""
 
-    communication = models.ForeignKey(FOIACommunication)
-    foia = models.ForeignKey("foia.FOIARequest", blank=True, null=True,)
-    user = models.ForeignKey("auth.User")
+    communication = models.ForeignKey(FOIACommunication, on_delete=models.CASCADE)
+    foia = models.ForeignKey(
+        "foia.FOIARequest", blank=True, null=True, on_delete=models.CASCADE
+    )
+    user = models.ForeignKey("auth.User", on_delete=models.PROTECT)
     datetime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -525,5 +548,5 @@ class CommunicationMoveLog(models.Model):
         else:
             foia = "orphan"
         return "Comm {} moved from {} by {} on {}".format(
-            self.communication.pk, foia, self.user.username, self.datetime,
+            self.communication.pk, foia, self.user.username, self.datetime
         )

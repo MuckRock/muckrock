@@ -58,25 +58,21 @@ class DataSetQuerySet(models.QuerySet):
     def _create_from(self, creator, user):
         """Create a data set from some source"""
         # pylint: disable=broad-except
-        dataset = self.create(name=creator.get_name(), user=user, status="processing",)
+        dataset = self.create(name=creator.get_name(), user=user, status="processing")
         try:
             headers = creator.get_headers()
             slug_headers = self._unique_slugify(headers)
             for i, (name, slug) in enumerate(zip(headers, slug_headers)):
-                dataset.fields.create(
-                    name=name, slug=slug, field_number=i,
-                )
+                dataset.fields.create(name=name, slug=slug, field_number=i)
             for i, row in enumerate(creator.get_rows()):
                 dataset.rows.create(
-                    data=dict(zip_longest(slug_headers, row, fillvalue="",)),
+                    data=dict(zip_longest(slug_headers, row, fillvalue="")),
                     row_number=i,
                 )
 
             dataset.detect_field_types()
         except Exception as exc:
-            logger.error(
-                "DataSet creation: %s", exc, exc_info=sys.exc_info(),
-            )
+            logger.error("DataSet creation: %s", exc, exc_info=sys.exc_info())
             dataset.status = "error"
             dataset.save()
         else:
@@ -88,16 +84,16 @@ class DataSetQuerySet(models.QuerySet):
 class DataSet(models.Model):
     """A set of data"""
 
-    name = models.CharField(max_length=255,)
-    slug = models.SlugField(max_length=255,)
-    user = models.ForeignKey("auth.User", on_delete=models.PROTECT,)
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
+    user = models.ForeignKey("auth.User", on_delete=models.PROTECT)
     created_datetime = models.DateTimeField(auto_now_add=True)
     custom_format = models.CharField(
-        max_length=5, choices=(("", "---"), ("email", "Email Viewer")), blank=True,
+        max_length=5, choices=(("", "---"), ("email", "Email Viewer")), blank=True
     )
     status = models.CharField(
         max_length=10,
-        choices=(("processing", "Processing"), ("error", "Error"), ("ready", "Ready"),),
+        choices=(("processing", "Processing"), ("error", "Error"), ("ready", "Ready")),
         default="ready",
     )
 
@@ -108,7 +104,7 @@ class DataSet(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
-        return reverse("dataset-detail", kwargs={"slug": self.slug, "idx": self.pk},)
+        return reverse("dataset-detail", kwargs={"slug": self.slug, "idx": self.pk})
 
     def detect_field_types(self):
         """Auto detect column types"""
@@ -150,12 +146,12 @@ class DataField(models.Model):
     """A column of a data set"""
 
     dataset = models.ForeignKey(
-        DataSet, related_name="fields", on_delete=models.CASCADE,
+        DataSet, related_name="fields", on_delete=models.CASCADE
     )
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     field_number = models.PositiveSmallIntegerField()
-    type = models.CharField(max_length=6, choices=FIELD_CHOICES, default="text",)
+    type = models.CharField(max_length=6, choices=FIELD_CHOICES, default="text")
     hidden = models.BooleanField(default=False)
 
     objects = DataFieldQuerySet.as_manager()
@@ -193,10 +189,7 @@ class DataField(models.Model):
 
     class Meta:
         ordering = ("field_number",)
-        unique_together = [
-            ("dataset", "slug"),
-            ("dataset", "field_number"),
-        ]
+        unique_together = [("dataset", "slug"), ("dataset", "field_number")]
 
 
 FILTER_TYPES = {
@@ -250,7 +243,7 @@ class DataRowQuerySet(models.QuerySet):
 class DataRow(models.Model):
     """A row of a data set"""
 
-    dataset = models.ForeignKey(DataSet, related_name="rows", on_delete=models.CASCADE,)
+    dataset = models.ForeignKey(DataSet, related_name="rows", on_delete=models.CASCADE)
     row_number = models.PositiveIntegerField(db_index=True)
     data = JSONField()
 

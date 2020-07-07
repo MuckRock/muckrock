@@ -70,8 +70,8 @@ class Organization(models.Model):
     payment_failed = models.BooleanField(default=False)
 
     # deprecate #
-    plan = models.ForeignKey("organization.Plan", null=True)
-    owner = models.ForeignKey(User, blank=True, null=True)
+    plan = models.ForeignKey("organization.Plan", null=True, on_delete=models.SET_NULL)
+    owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
     stripe_id = models.CharField(max_length=255, blank=True)
@@ -130,7 +130,7 @@ class Organization(models.Model):
             date_update = entitlement_data["date_update"]
         else:
             self.entitlement, _created = Entitlement.objects.get_or_create(
-                slug="free", defaults={"name": "Free"},
+                slug="free", defaults={"name": "Free"}
             )
             date_update = None
 

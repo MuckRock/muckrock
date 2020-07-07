@@ -71,7 +71,7 @@ class AgencyQuerySet(models.QuerySet):
         name = name.strip()
 
         existing_agency = self.filter(
-            name=name, jurisdiction_id=jurisdiction_pk, user=user, status="pending",
+            name=name, jurisdiction_id=jurisdiction_pk, user=user, status="pending"
         ).first()
         if existing_agency:
             return existing_agency
@@ -83,9 +83,7 @@ class AgencyQuerySet(models.QuerySet):
             user=user,
             status="pending",
         )
-        NewAgencyTask.objects.create(
-            user=user, agency=agency,
-        )
+        NewAgencyTask.objects.create(user=user, agency=agency)
         return agency
 
 
@@ -94,7 +92,9 @@ class Agency(models.Model, RequestHelper):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name="agencies")
+    jurisdiction = models.ForeignKey(
+        Jurisdiction, related_name="agencies", on_delete=models.PROTECT
+    )
     types = models.ManyToManyField(AgencyType, blank=True)
     status = models.CharField(
         choices=(
@@ -106,10 +106,18 @@ class Agency(models.Model, RequestHelper):
         default="pending",
     )
     user = models.ForeignKey(
-        User, null=True, blank=True, help_text="The user who submitted this agency",
+        User,
+        null=True,
+        blank=True,
+        help_text="The user who submitted this agency",
+        on_delete=models.PROTECT,
     )
     appeal_agency = models.ForeignKey(
-        "self", related_name="appeal_for", null=True, blank=True
+        "self",
+        related_name="appeal_for",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
     )
     image = ThumbnailerImageField(
         upload_to="agency_images",
@@ -123,16 +131,20 @@ class Agency(models.Model, RequestHelper):
     public_notes = models.TextField(blank=True, help_text="May use html")
 
     addresses = models.ManyToManyField(
-        "communication.Address", through="AgencyAddress", related_name="agencies",
+        "communication.Address", through="AgencyAddress", related_name="agencies"
     )
     emails = models.ManyToManyField(
-        "communication.EmailAddress", through="AgencyEmail", related_name="agencies",
+        "communication.EmailAddress", through="AgencyEmail", related_name="agencies"
     )
     phones = models.ManyToManyField(
-        "communication.PhoneNumber", through="AgencyPhone", related_name="agencies",
+        "communication.PhoneNumber", through="AgencyPhone", related_name="agencies"
     )
     portal = models.ForeignKey(
-        "portal.Portal", related_name="agencies", blank=True, null=True,
+        "portal.Portal",
+        related_name="agencies",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
     contact_salutation = models.CharField(blank=True, max_length=30)
     contact_first_name = models.CharField(blank=True, max_length=100)
@@ -152,7 +164,13 @@ class Agency(models.Model, RequestHelper):
     )
     notes = models.TextField(blank=True)
     aliases = models.TextField(blank=True)
-    parent = models.ForeignKey("self", null=True, blank=True, related_name="children")
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        related_name="children",
+        on_delete=models.SET_NULL,
+    )
 
     website = models.CharField(max_length=255, blank=True)
     twitter = models.CharField(max_length=255, blank=True)
@@ -249,12 +267,12 @@ class Agency(models.Model, RequestHelper):
     def get_faxes(self, request_type="primary"):
         """Get the contact fax numbers"""
         return self.phones.filter(
-            type="fax", status="good", agencyphone__request_type=request_type,
+            type="fax", status="good", agencyphone__request_type=request_type
         )
 
     def get_phones(self, request_type="none"):
         """Get the phone numbers"""
-        return self.phones.filter(type="phone", agencyphone__request_type=request_type,)
+        return self.phones.filter(type="phone", agencyphone__request_type=request_type)
 
     def get_addresses(self, request_type="primary"):
         """Get the contact addresses"""
@@ -331,12 +349,7 @@ class Agency(models.Model, RequestHelper):
         for forward, backward in replace_self_relations:
             getattr(agency, backward).update(**{forward: self})
 
-        replace_m2m = [
-            "composers",
-            "multirequests",
-            "types",
-            "foiasavedsearch_set",
-        ]
+        replace_m2m = ["composers", "multirequests", "types", "foiasavedsearch_set"]
         for relation in replace_m2m:
             getattr(self, relation).add(*getattr(agency, relation).all())
             getattr(agency, relation).clear()
@@ -350,7 +363,7 @@ class Agency(models.Model, RequestHelper):
         agency.agencyphone_set.exclude(phone__in=self.phones.all()).update(
             request_type="none", agency=self
         )
-        agency.agencyaddress_set.exclude(address__in=self.addresses.all(),).update(
+        agency.agencyaddress_set.exclude(address__in=self.addresses.all()).update(
             request_type="none", agency=self
         )
 
@@ -371,7 +384,7 @@ class Agency(models.Model, RequestHelper):
             Value(
                 "\n\nThis agency was merged into agency "
                 '"{}" (#{}) by {} on {}'.format(
-                    self.name, self.pk, user.username, timezone.now(),
+                    self.name, self.pk, user.username, timezone.now()
                 )
             ),
         )
@@ -382,7 +395,7 @@ class Agency(models.Model, RequestHelper):
             Value(
                 '\n\nAgency "{}" (#{}) was merged into this agency '
                 "by {} on {}".format(
-                    agency.name, agency.pk, user.username, timezone.now(),
+                    agency.name, agency.pk, user.username, timezone.now()
                 )
             ),
         )

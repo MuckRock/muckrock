@@ -154,7 +154,7 @@ class Crowdfund(models.Model):
             },
             idempotency_key=True,
         )
-        return self.log_payment(amount, user, show, charge,)
+        return self.log_payment(amount, user, show, charge)
 
     def log_payment(self, amount, user, show, charge, recurring=None):
         """Log a payment that was made"""
@@ -177,7 +177,7 @@ class Crowdfund(models.Model):
         # pylint: disable=too-many-arguments
         plan = self._get_stripe_plan()
         customer = stripe_get_customer(
-            email, "Crowdfund {} for {}".format(self.pk, email),
+            email, "Crowdfund {} for {}".format(self.pk, email)
         )
         subscription = stripe_retry_on_error(
             customer.subscriptions.create,
@@ -201,9 +201,7 @@ class Crowdfund(models.Model):
         """Ensure there is a stripe plan created for this crowdfund"""
         plan = "crowdfund-{}".format(self.pk)
         try:
-            stripe_retry_on_error(
-                stripe.Plan.retrieve, plan,
-            )
+            stripe_retry_on_error(stripe.Plan.retrieve, plan)
         except stripe.InvalidRequestError:
             # default to $1 (100 cents) and then use the quantity
             # on the subscription to set the amount
@@ -256,25 +254,28 @@ class Crowdfund(models.Model):
     def num_donations_yesterday(self):
         """How many donations were made yesterday?"""
         return self.payments.filter(
-            date__gte=date.today() - timedelta(1), date__lt=date.today(),
+            date__gte=date.today() - timedelta(1), date__lt=date.today()
         ).count()
 
 
 class CrowdfundPayment(models.Model):
     """A payment toward a crowdfund campaign"""
 
-    user = models.ForeignKey(User, blank=True, null=True)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT)
     name = models.CharField(max_length=255, blank=True)
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=False)
     charge_id = models.CharField(max_length=255, blank=True)
-    crowdfund = models.ForeignKey(Crowdfund, related_name="payments")
+    crowdfund = models.ForeignKey(
+        Crowdfund, related_name="payments", on_delete=models.CASCADE
+    )
     recurring = models.ForeignKey(
         "crowdfund.RecurringCrowdfundPayment",
         related_name="payments",
         blank=True,
         null=True,
+        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
@@ -296,12 +297,14 @@ class RecurringCrowdfundPayment(models.Model):
         related_name="recurring_crowdfund_payments",
         on_delete=models.SET_NULL,
     )
-    crowdfund = models.ForeignKey(Crowdfund, related_name="recurring_payments")
+    crowdfund = models.ForeignKey(
+        Crowdfund, related_name="recurring_payments", on_delete=models.CASCADE
+    )
     email = models.EmailField()
     amount = models.PositiveIntegerField()
     show = models.BooleanField(default=False)
     customer_id = models.CharField(max_length=255)
-    subscription_id = models.CharField(unique=True, max_length=255,)
+    subscription_id = models.CharField(unique=True, max_length=255)
     payment_failed = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     created_datetime = models.DateTimeField(auto_now_add=True)
@@ -309,7 +312,7 @@ class RecurringCrowdfundPayment(models.Model):
 
     def __str__(self):
         return "Recurring Crowdfund Payment: {} - ${}/Month by {}".format(
-            self.crowdfund.name, self.amount, self.email,
+            self.crowdfund.name, self.amount, self.email
         )
 
     def cancel(self):
@@ -318,12 +321,12 @@ class RecurringCrowdfundPayment(models.Model):
         self.deactivated_datetime = timezone.now()
         self.save()
         subscription = stripe_retry_on_error(
-            stripe.Subscription.retrieve, self.subscription_id,
+            stripe.Subscription.retrieve, self.subscription_id
         )
         stripe_retry_on_error(subscription.delete)
 
     def log_payment(self, charge):
         """Log an instance of the recurring payment"""
         return self.crowdfund.log_payment(
-            self.amount, self.user, self.show, charge, recurring=self,
+            self.amount, self.user, self.show, charge, recurring=self
         )

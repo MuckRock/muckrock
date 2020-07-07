@@ -24,10 +24,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 # MuckRock
 from muckrock.mailgun.models import WhitelistDomain
 
-PHONE_TYPES = (
-    ("fax", "Fax"),
-    ("phone", "Phone"),
-)
+PHONE_TYPES = (("fax", "Fax"), ("phone", "Phone"))
 
 # Address models
 
@@ -42,7 +39,7 @@ class EmailAddressQuerySet(models.QuerySet):
             email = self._normalize_email(email)
         except ValidationError:
             return None
-        email_address, _ = self.update_or_create(email=email, defaults={"name": name},)
+        email_address, _ = self.update_or_create(email=email, defaults={"name": name})
         return email_address
 
     def fetch_many(self, *addresses, **kwargs):
@@ -58,7 +55,7 @@ class EmailAddressQuerySet(models.QuerySet):
                 else:
                     raise
             email_address, _ = self.update_or_create(
-                email=email, defaults={"name": name},
+                email=email, defaults={"name": name}
             )
             addresses.append(email_address)
         return addresses
@@ -79,7 +76,7 @@ class EmailAddress(models.Model):
     email = models.EmailField(unique=True)
     name = models.CharField(blank=True, max_length=255)
     status = models.CharField(
-        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good",
+        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
 
     objects = EmailAddressQuerySet.as_manager()
@@ -151,9 +148,9 @@ class PhoneNumber(models.Model):
     """A phone number"""
 
     number = PhoneNumberField(unique=True)
-    type = models.CharField(max_length=5, choices=PHONE_TYPES, default="phone",)
+    type = models.CharField(max_length=5, choices=PHONE_TYPES, default="phone")
     status = models.CharField(
-        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good",
+        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
 
     def __str__(self):
@@ -184,9 +181,7 @@ class Address(models.Model):
 
     # These are override fields for parts of the address
     agency_override = models.CharField(
-        blank=True,
-        max_length=255,
-        help_text="Override the agency this is addressed to",
+        blank=True, max_length=255, help_text="Override the agency this is addressed to"
     )
     attn_override = models.CharField(
         blank=True,
@@ -200,7 +195,7 @@ class Address(models.Model):
 
     def __str__(self):
         if self.zip_code:
-            address = "{}, {} {}".format(self.city, self.state, self.zip_code,)
+            address = "{}, {} {}".format(self.city, self.state, self.zip_code)
             parts = [
                 self.agency_override,
                 self.attn_override,
@@ -236,13 +231,13 @@ class Address(models.Model):
             else:
                 office = "Office"
             address.append(
-                "{} {}".format(agency.jurisdiction.get_law_name(abbrev=True), office,)
+                "{} {}".format(agency.jurisdiction.get_law_name(abbrev=True), office)
             )
         if self.suite:
             address.append(self.suite)
         if self.street:
             address.append(self.street)
-        address.append("{}, {} {}".format(self.city, self.state, self.zip_code,))
+        address.append("{}, {} {}".format(self.city, self.state, self.zip_code))
         return "\n".join(address)
 
     def lob_format(self, agency):
@@ -287,11 +282,17 @@ class Address(models.Model):
 class EmailCommunication(models.Model):
     """An email sent or received to deliver a communication"""
 
-    communication = models.ForeignKey("foia.FOIACommunication", related_name="emails")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", related_name="emails", on_delete=models.CASCADE
+    )
     sent_datetime = models.DateTimeField()
     confirmed_datetime = models.DateTimeField(blank=True, null=True)
     from_email = models.ForeignKey(
-        EmailAddress, blank=True, null=True, related_name="from_emails",
+        EmailAddress,
+        blank=True,
+        null=True,
+        related_name="from_emails",
+        on_delete=models.PROTECT,
     )
     to_emails = models.ManyToManyField(EmailAddress, related_name="to_emails")
     cc_emails = models.ManyToManyField(EmailAddress, related_name="cc_emails")
@@ -324,11 +325,17 @@ class EmailCommunication(models.Model):
 class FaxCommunication(models.Model):
     """A fax sent to deliver a communication"""
 
-    communication = models.ForeignKey("foia.FOIACommunication", related_name="faxes")
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", related_name="faxes", on_delete=models.CASCADE
+    )
     sent_datetime = models.DateTimeField()
     confirmed_datetime = models.DateTimeField(blank=True, null=True)
     to_number = models.ForeignKey(
-        PhoneNumber, blank=True, null=True, related_name="faxes",
+        PhoneNumber,
+        blank=True,
+        null=True,
+        related_name="faxes",
+        on_delete=models.PROTECT,
     )
     fax_id = models.CharField(max_length=10, blank=True, default="")
 
@@ -349,7 +356,9 @@ class FaxCommunication(models.Model):
 class MailCommunication(models.Model):
     """A snail mail sent or received to deliver a communication"""
 
-    communication = models.ForeignKey("foia.FOIACommunication", related_name="mails",)
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", related_name="mails", on_delete=models.CASCADE
+    )
     sent_datetime = models.DateTimeField()
     from_address = models.ForeignKey(
         Address,
@@ -392,7 +401,7 @@ class WebCommunication(models.Model):
     """A communication posted to our site directly through our web form"""
 
     communication = models.ForeignKey(
-        "foia.FOIACommunication", related_name="web_comms",
+        "foia.FOIACommunication", related_name="web_comms", on_delete=models.CASCADE
     )
     sent_datetime = models.DateTimeField()
 
@@ -413,11 +422,15 @@ class WebCommunication(models.Model):
 class PortalCommunication(models.Model):
     """A communication sent or received from a portal"""
 
-    communication = models.ForeignKey("foia.FOIACommunication", related_name="portals",)
+    communication = models.ForeignKey(
+        "foia.FOIACommunication", related_name="portals", on_delete=models.CASCADE
+    )
     sent_datetime = models.DateTimeField()
-    portal = models.ForeignKey("portal.Portal", related_name="communications",)
+    portal = models.ForeignKey(
+        "portal.Portal", related_name="communications", on_delete=models.PROTECT
+    )
     direction = models.CharField(
-        max_length=8, choices=(("incoming", "Incoming"), ("outgoing", "Outgoing"),)
+        max_length=8, choices=(("incoming", "Incoming"), ("outgoing", "Outgoing"))
     )
 
     delivered = "portal"
@@ -447,11 +460,15 @@ class EmailError(models.Model):
     """An error has occured delivering this email"""
 
     email = models.ForeignKey(
-        "communication.EmailCommunication", related_name="errors",
+        "communication.EmailCommunication",
+        related_name="errors",
+        on_delete=models.CASCADE,
     )
     datetime = models.DateTimeField()
 
-    recipient = models.ForeignKey("communication.EmailAddress", related_name="errors",)
+    recipient = models.ForeignKey(
+        "communication.EmailAddress", related_name="errors", on_delete=models.PROTECT
+    )
     code = models.CharField(max_length=10)
     error = models.TextField(blank=True)
     event = models.CharField(max_length=10)
@@ -467,10 +484,16 @@ class EmailError(models.Model):
 class FaxError(models.Model):
     """An error has occured delivering this fax"""
 
-    fax = models.ForeignKey("communication.FaxCommunication", related_name="errors",)
+    fax = models.ForeignKey(
+        "communication.FaxCommunication",
+        related_name="errors",
+        on_delete=models.CASCADE,
+    )
     datetime = models.DateTimeField()
 
-    recipient = models.ForeignKey("communication.PhoneNumber", related_name="errors",)
+    recipient = models.ForeignKey(
+        "communication.PhoneNumber", related_name="errors", on_delete=models.PROTECT
+    )
     error_type = models.CharField(blank=True, max_length=255)
     error_code = models.CharField(blank=True, max_length=255)
     error_id = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -488,10 +511,16 @@ class FaxError(models.Model):
 class EmailOpen(models.Model):
     """An email has been opened"""
 
-    email = models.ForeignKey("communication.EmailCommunication", related_name="opens",)
+    email = models.ForeignKey(
+        "communication.EmailCommunication",
+        related_name="opens",
+        on_delete=models.CASCADE,
+    )
     datetime = models.DateTimeField()
 
-    recipient = models.ForeignKey("communication.EmailAddress", related_name="opens",)
+    recipient = models.ForeignKey(
+        "communication.EmailAddress", related_name="opens", on_delete=models.PROTECT
+    )
     city = models.CharField(max_length=50)
     region = models.CharField(max_length=50)
     country = models.CharField(max_length=10)
@@ -514,7 +543,11 @@ class EmailOpen(models.Model):
 class MailEvent(models.Model):
     """A letter sent through Lob has had a tracking event occur"""
 
-    mail = models.ForeignKey("communication.MailCommunication", related_name="events")
+    mail = models.ForeignKey(
+        "communication.MailCommunication",
+        related_name="events",
+        on_delete=models.CASCADE,
+    )
     datetime = models.DateTimeField()
     event = models.CharField(max_length=255)
 
@@ -534,7 +567,7 @@ class Check(models.Model):
     )
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     communication = models.ForeignKey(
-        "foia.FOIACommunication", on_delete=models.CASCADE, related_name="checks",
+        "foia.FOIACommunication", on_delete=models.CASCADE, related_name="checks"
     )
     user = models.ForeignKey(
         "auth.User", on_delete=models.PROTECT, related_name="checks"
@@ -565,7 +598,7 @@ class Check(models.Model):
             "type": type_,
             "today": date.today(),
         }
-        body = render_to_string("text/task/check.txt", context,)
+        body = render_to_string("text/task/check.txt", context)
         msg = EmailMessage(
             subject="[CHECK MAILED] Check #{}".format(self.number),
             body=body,

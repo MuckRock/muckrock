@@ -21,7 +21,7 @@ def parse_tags(tagstring):
     """Normalize tags after parsing"""
     if not tagstring:
         return []
-    elif ',' not in tagstring and '"' not in tagstring:
+    elif "," not in tagstring and '"' not in tagstring:
         return [normalize(tagstring)]
     else:
         return [normalize(t) for t in _parse_tags(tagstring)]
@@ -29,7 +29,7 @@ def parse_tags(tagstring):
 
 def normalize(name):
     """Normalize tag name"""
-    clean_name = re.sub(r'\s+', ' ', name)
+    clean_name = re.sub(r"\s+", " ", name)
     return clean_name.strip().lower()[:100]
 
 
@@ -42,18 +42,17 @@ class Tag(TaggitTag):
         super(Tag, self).save(*args, **kwargs)
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
 
 class TaggedItemBase(GenericTaggedItemBase):
     """Custom Tagged Item Base Class"""
-    tag = models.ForeignKey(Tag, related_name="%(app_label)s_%(class)s_items")
+
+    tag = models.ForeignKey(
+        Tag, related_name="%(app_label)s_%(class)s_items", on_delete=models.CASCADE
+    )
 
 
 autocomplete_light.register(
-    Tag,
-    attrs={
-        'placeholder': 'Search tags',
-        'data-autocomplete-minimum-characters': 1
-    }
+    Tag, attrs={"placeholder": "Search tags", "data-autocomplete-minimum-characters": 1}
 )

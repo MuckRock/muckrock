@@ -19,11 +19,7 @@ from muckrock.tags.models import TaggedItemBase
 
 logger = logging.getLogger(__name__)
 
-STATUS = [
-    ("started", "Draft"),
-    ("submitted", "Processing"),
-    ("filed", "Filed"),
-]
+STATUS = [("started", "Draft"), ("submitted", "Processing"), ("filed", "Filed")]
 
 
 class FOIAMultiRequest(models.Model):
@@ -32,24 +28,26 @@ class FOIAMultiRequest(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS)
     embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(
-        "agency.Agency", related_name="multirequests", blank=True,
+        "agency.Agency", related_name="multirequests", blank=True
     )
     num_org_requests = models.PositiveSmallIntegerField(default=0)
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
-    parent = models.ForeignKey(
-        "self", blank=True, null=True, on_delete=models.SET_NULL,
-    )
+    parent = models.ForeignKey("self", blank=True, null=True, on_delete=models.SET_NULL)
     # only used during data migration
     composer = models.OneToOneField(
-        "foia.FOIAComposer", related_name="multi", blank=True, null=True,
+        "foia.FOIAComposer",
+        related_name="multi",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)

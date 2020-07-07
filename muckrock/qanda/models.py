@@ -21,10 +21,12 @@ from muckrock.tags.models import TaggedItemBase
 class Question(models.Model):
     """A question to which the community can respond"""
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    foia = models.ForeignKey(FOIARequest, blank=True, null=True)
+    foia = models.ForeignKey(
+        FOIARequest, blank=True, null=True, on_delete=models.PROTECT
+    )
     question = models.TextField()
     date = models.DateTimeField()
     # We store the date of the most recent answer on the question
@@ -56,7 +58,7 @@ class Question(models.Model):
     def answer_authors(self):
         """Returns a list of users who have answered the question."""
         return (
-            User.objects.filter(answer__question=self, is_active=True,)
+            User.objects.filter(answer__question=self, is_active=True)
             .distinct()
             .select_related("profile")
         )
@@ -72,9 +74,11 @@ class Question(models.Model):
 class Answer(models.Model):
     """An answer to a proposed question"""
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     date = models.DateTimeField()
-    question = models.ForeignKey(Question, related_name="answers")
+    question = models.ForeignKey(
+        Question, related_name="answers", on_delete=models.CASCADE
+    )
     answer = models.TextField()
 
     reindex_related = ("question",)

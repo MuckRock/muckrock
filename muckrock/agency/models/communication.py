@@ -5,11 +5,7 @@ M2M Through Models for Agency communication addresses
 # Django
 from django.db import models
 
-REQUEST_TYPES = (
-    ("primary", "Primary"),
-    ("appeal", "Appeal"),
-    ("none", "None"),
-)
+REQUEST_TYPES = (("primary", "Primary"), ("appeal", "Appeal"), ("none", "None"))
 ADDRESS_REQUEST_TYPES = (
     ("primary", "Primary"),
     ("appeal", "Appeal"),
@@ -17,11 +13,7 @@ ADDRESS_REQUEST_TYPES = (
     ("none", "None"),
 )
 
-EMAIL_TYPES = (
-    ("to", "To"),
-    ("cc", "CC"),
-    ("none", "None"),
-)
+EMAIL_TYPES = (("to", "To"), ("cc", "CC"), ("none", "None"))
 
 # pylint: disable=model-missing-unicode
 
@@ -29,10 +21,10 @@ EMAIL_TYPES = (
 class AgencyAddress(models.Model):
     """Through model for agency to address M2M"""
 
-    agency = models.ForeignKey("Agency")
+    agency = models.ForeignKey("Agency", on_delete=models.CASCADE)
     address = models.ForeignKey("communication.Address", on_delete=models.PROTECT)
     request_type = models.CharField(
-        max_length=7, choices=ADDRESS_REQUEST_TYPES, default="none",
+        max_length=7, choices=ADDRESS_REQUEST_TYPES, default="none"
     )
 
     def __str__(self):
@@ -45,12 +37,10 @@ class AgencyAddress(models.Model):
 class AgencyEmail(models.Model):
     """Through model for agency to email M2M"""
 
-    agency = models.ForeignKey("Agency")
-    email = models.ForeignKey("communication.EmailAddress")
-    request_type = models.CharField(
-        max_length=7, choices=REQUEST_TYPES, default="none",
-    )
-    email_type = models.CharField(max_length=4, choices=EMAIL_TYPES, default="none",)
+    agency = models.ForeignKey("Agency", on_delete=models.CASCADE)
+    email = models.ForeignKey("communication.EmailAddress", on_delete=models.PROTECT)
+    request_type = models.CharField(max_length=7, choices=REQUEST_TYPES, default="none")
+    email_type = models.CharField(max_length=4, choices=EMAIL_TYPES, default="none")
 
     def __str__(self):
         val = str(self.email)
@@ -62,11 +52,9 @@ class AgencyEmail(models.Model):
 class AgencyPhone(models.Model):
     """Through model for agency to phone M2M"""
 
-    agency = models.ForeignKey("Agency")
-    phone = models.ForeignKey("communication.PhoneNumber")
-    request_type = models.CharField(
-        max_length=7, choices=REQUEST_TYPES, default="none",
-    )
+    agency = models.ForeignKey("Agency", on_delete=models.CASCADE)
+    phone = models.ForeignKey("communication.PhoneNumber", on_delete=models.PROTECT)
+    request_type = models.CharField(max_length=7, choices=REQUEST_TYPES, default="none")
 
     def __str__(self):
         val = str(self.phone)

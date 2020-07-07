@@ -69,11 +69,11 @@ class Profile(models.Model):
         ("monthly", "Monthly"),
     )
 
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
     full_name = models.CharField(max_length=255, blank=True)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid4, db_index=True)
     source = models.CharField(
-        max_length=20, blank=True, choices=(("foia machine", "FOIA Machine"),),
+        max_length=20, blank=True, choices=(("foia machine", "FOIA Machine"),)
     )
 
     address1 = models.CharField(max_length=50, blank=True, verbose_name="address")
@@ -106,7 +106,9 @@ class Profile(models.Model):
 
     # extended information
     profile = models.TextField(blank=True)
-    location = models.ForeignKey("jurisdiction.Jurisdiction", blank=True, null=True)
+    location = models.ForeignKey(
+        "jurisdiction.Jurisdiction", blank=True, null=True, on_delete=models.PROTECT
+    )
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
     website = models.URLField(
@@ -184,7 +186,7 @@ class Profile(models.Model):
 
     # for agency users
     agency = models.OneToOneField(
-        "agency.Agency", blank=True, null=True, on_delete=models.SET_NULL,
+        "agency.Agency", blank=True, null=True, on_delete=models.SET_NULL
     )
 
     def __str__(self):
@@ -272,7 +274,7 @@ class Profile(models.Model):
             return resp.json().get("url_auth_token")
 
         return cache_get_or_set(
-            "url_auth_token:{}".format(self.uuid), get_url_auth_token_squarelet, 10,
+            "url_auth_token:{}".format(self.uuid), get_url_auth_token_squarelet, 10
         )
 
     def public_profile_page(self):
@@ -298,23 +300,19 @@ class RecurringDonation(models.Model):
     """Keep track of our recurring donations"""
 
     user = models.ForeignKey(
-        User,
-        blank=True,
-        null=True,
-        related_name="donations",
-        on_delete=models.SET_NULL,
+        User, blank=True, null=True, related_name="donations", on_delete=models.SET_NULL
     )
     email = models.EmailField()
     amount = models.PositiveIntegerField()
     customer_id = models.CharField(max_length=255)
-    subscription_id = models.CharField(unique=True, max_length=255,)
+    subscription_id = models.CharField(unique=True, max_length=255)
     payment_failed = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     created_datetime = models.DateTimeField(auto_now_add=True)
     deactivated_datetime = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return "Donation: ${}/Month by {}".format(self.amount, self.email,)
+        return "Donation: ${}/Month by {}".format(self.amount, self.email)
 
     def cancel(self):
         """Cancel the recurring donation"""
@@ -322,7 +320,7 @@ class RecurringDonation(models.Model):
         self.deactivated_datetime = timezone.now()
         self.save()
         subscription = stripe_retry_on_error(
-            stripe.Subscription.retrieve, self.subscription_id,
+            stripe.Subscription.retrieve, self.subscription_id
         )
         stripe_retry_on_error(subscription.delete)
 
@@ -367,8 +365,10 @@ class Notification(models.Model):
     """A notification connects an action to a user."""
 
     datetime = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, related_name="notifications")
-    action = models.ForeignKey(Action)
+    user = models.ForeignKey(
+        User, related_name="notifications", on_delete=models.PROTECT
+    )
+    action = models.ForeignKey(Action, on_delete=models.CASCADE)
     read = models.BooleanField(default=False)
     objects = NotificationQuerySet.as_manager()
 
@@ -559,38 +559,36 @@ class Statistics(models.Model):
     total_example_appeals = models.IntegerField(null=True, blank=True)
 
     # crowdsources
-    total_crowdsources = models.IntegerField(
-        "total assignments", null=True, blank=True,
-    )
+    total_crowdsources = models.IntegerField("total assignments", null=True, blank=True)
     total_draft_crowdsources = models.IntegerField(
-        "total draft assignments", null=True, blank=True,
+        "total draft assignments", null=True, blank=True
     )
     total_open_crowdsources = models.IntegerField(
-        "total open assignments", null=True, blank=True,
+        "total open assignments", null=True, blank=True
     )
     total_close_crowdsources = models.IntegerField(
-        "total close assignments", null=True, blank=True,
+        "total close assignments", null=True, blank=True
     )
     num_crowdsource_responded_users = models.IntegerField(
-        "num assignment responded users", null=True, blank=True,
+        "num assignment responded users", null=True, blank=True
     )
     total_crowdsource_responses = models.IntegerField(
-        "total assignment responses", null=True, blank=True,
+        "total assignment responses", null=True, blank=True
     )
     crowdsource_responses_pro = models.IntegerField(
-        "assignment responses pro", null=True, blank=True,
+        "assignment responses pro", null=True, blank=True
     )
     crowdsource_responses_basic = models.IntegerField(
-        "assignment responses basic", null=True, blank=True,
+        "assignment responses basic", null=True, blank=True
     )
     crowdsource_responses_beta = models.IntegerField(
-        "assignment responses beta", null=True, blank=True,
+        "assignment responses beta", null=True, blank=True
     )
     crowdsource_responses_proxy = models.IntegerField(
-        "assignment responses proxy", null=True, blank=True,
+        "assignment responses proxy", null=True, blank=True
     )
     crowdsource_responses_admin = models.IntegerField(
-        "assignment responses admin", null=True, blank=True,
+        "assignment responses admin", null=True, blank=True
     )
 
     def __str__(self):

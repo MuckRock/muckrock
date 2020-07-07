@@ -35,11 +35,7 @@ from taggit.managers import TaggableManager
 from muckrock import task
 from muckrock.accounts.models import Notification
 from muckrock.agency.utils import initial_communication_template
-from muckrock.communication.models import (
-    EmailAddress,
-    EmailCommunication,
-    PhoneNumber,
-)
+from muckrock.communication.models import EmailAddress, EmailCommunication, PhoneNumber
 from muckrock.core import utils
 from muckrock.core.utils import (
     TempDisconnectSignal,
@@ -80,13 +76,13 @@ class FOIARequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
     composer = models.ForeignKey(
-        "foia.FOIAComposer", on_delete=models.PROTECT, related_name="foias",
+        "foia.FOIAComposer", on_delete=models.PROTECT, related_name="foias"
     )
     datetime_updated = models.DateTimeField(
-        blank=True, null=True, db_index=True, help_text="Date of latest communication",
+        blank=True, null=True, db_index=True, help_text="Date of latest communication"
     )
     datetime_done = models.DateTimeField(
-        blank=True, null=True, db_index=True, verbose_name="Date response received",
+        blank=True, null=True, db_index=True, verbose_name="Date response received"
     )
     date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
@@ -113,7 +109,7 @@ class FOIARequest(models.Model):
         null=True,
     )
     portal_password = models.CharField(
-        max_length=20, blank=True, default=utils.generate_key,
+        max_length=20, blank=True, default=utils.generate_key
     )
     email = models.ForeignKey(
         "communication.EmailAddress",
@@ -123,7 +119,7 @@ class FOIARequest(models.Model):
         null=True,
     )
     cc_emails = models.ManyToManyField(
-        "communication.EmailAddress", related_name="cc_foias",
+        "communication.EmailAddress", related_name="cc_foias"
     )
     fax = models.ForeignKey(
         "communication.PhoneNumber",
@@ -154,14 +150,18 @@ class FOIARequest(models.Model):
         ),
     )
     crowdfund = models.OneToOneField(
-        "crowdfund.Crowdfund", related_name="foia", blank=True, null=True,
+        "crowdfund.Crowdfund",
+        related_name="foia",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     read_collaborators = models.ManyToManyField(
-        User, related_name="read_access", blank=True,
+        User, related_name="read_access", blank=True
     )
     edit_collaborators = models.ManyToManyField(
-        User, related_name="edit_access", blank=True,
+        User, related_name="edit_access", blank=True
     )
     access_key = models.CharField(blank=True, max_length=255)
 
@@ -420,7 +420,7 @@ class FOIARequest(models.Model):
 
         if kwargs.get("contact_info"):
             needs_review = self.update_address_from_info(
-                agency, appeal, kwargs.get("contact_info"),
+                agency, appeal, kwargs.get("contact_info")
             )
         else:
             needs_review = False
@@ -487,11 +487,11 @@ class FOIARequest(models.Model):
             return False
         elif contact_info["via"] == "fax" and contact_info["fax"]:
             self.fax, _ = PhoneNumber.objects.update_or_create(
-                number=contact_info["fax"], defaults={"type": "fax"},
+                number=contact_info["fax"], defaults={"type": "fax"}
             )
         elif contact_info["via"] == "fax":
             self.fax, _ = PhoneNumber.objects.update_or_create(
-                number=contact_info["other_fax"], defaults={"type": "fax"},
+                number=contact_info["other_fax"], defaults={"type": "fax"}
             )
             # Flag for review
             task.models.FlaggedTask.objects.create(
@@ -589,7 +589,7 @@ class FOIARequest(models.Model):
             attm_source = self.composer
         else:
             attm_source = self
-        attachments = attm_source.pending_attachments.filter(user=user, sent=False,)
+        attachments = attm_source.pending_attachments.filter(user=user, sent=False)
         comm = self.communications.last()
         access = "private" if self.embargo else "public"
         for attachment in attachments:
@@ -609,8 +609,7 @@ class FOIARequest(models.Model):
     def attachments_over_size_limit(self, user):
         """Are the pending attachments for this composer over the size limit?"""
         total_size = sum(
-            a.ffile.size
-            for a in self.pending_attachments.filter(user=user, sent=False,)
+            a.ffile.size for a in self.pending_attachments.filter(user=user, sent=False)
         )
         return total_size > settings.MAX_ATTACHMENT_TOTAL_SIZE
 
@@ -660,9 +659,7 @@ class FOIARequest(models.Model):
         communication that was generated.
         """
         # We create the payment communication and a snail mail task for it.
-        text = render_to_string(
-            "message/communication/payment.txt", {"amount": amount,}
-        )
+        text = render_to_string("message/communication/payment.txt", {"amount": amount})
 
         comm = self.create_out_communication(
             from_user=user,
@@ -690,7 +687,7 @@ class FOIARequest(models.Model):
         # self.email / self.fax / self.address should be set
         # before calling this method
 
-        comm = kwargs.pop("comm", self.communications.last(),)
+        comm = kwargs.pop("comm", self.communications.last())
         subject = comm.subject or self.default_subject()
         subject = subject[:255]
         comm.subject = subject
@@ -722,7 +719,7 @@ class FOIARequest(models.Model):
         # set status and mail id here to avoid altering the request in the
         # celery task and creating a race condition
         with transaction.atomic():
-            self.status = self.sent_status(kwargs.get("appeal"), kwargs.get("thanks"),)
+            self.status = self.sent_status(kwargs.get("appeal"), kwargs.get("thanks"))
             self.set_mail_id()
             self.save()
             comm.save()
@@ -734,7 +731,7 @@ class FOIARequest(models.Model):
         """Send the message as an email"""
 
         from_email, _ = EmailAddress.objects.get_or_create(
-            email=self.get_request_email(),
+            email=self.get_request_email()
         )
 
         body = self.render_msg_body(
@@ -745,7 +742,7 @@ class FOIARequest(models.Model):
         )
 
         email_comm = EmailCommunication.objects.create(
-            communication=comm, sent_datetime=timezone.now(), from_email=from_email,
+            communication=comm, sent_datetime=timezone.now(), from_email=from_email
         )
         email_comm.to_emails.add(self.email)
         email_comm.cc_emails.set(self.cc_emails.all())
@@ -761,7 +758,7 @@ class FOIARequest(models.Model):
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
                 bcc=["diagnostics@muckrock.com"],
-                headers={"X-Mailgun-Variables": {"email_id": email_comm.pk},},
+                headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
                 connection=email_connection,
             )
             msg.attach_alternative(linebreaks(escape(body)), "text/html")
@@ -785,7 +782,7 @@ class FOIARequest(models.Model):
             comm=comm, switch=switch, appeal=kwargs.get("appeal")
         )
 
-        self.status = self.sent_status(kwargs.get("appeal"), kwargs.get("thanks"),)
+        self.status = self.sent_status(kwargs.get("appeal"), kwargs.get("thanks"))
 
         error_count = kwargs.get("fax_error_count", 0)
         if error_count > 0:
@@ -796,7 +793,7 @@ class FOIARequest(models.Model):
             countdown = 0
 
         send_fax.apply_async(
-            args=[comm.pk, comm.subject, body, error_count], countdown=countdown,
+            args=[comm.pk, comm.subject, body, error_count], countdown=countdown
         )
 
     def _send_snail_mail(self, comm, **kwargs):
@@ -901,7 +898,7 @@ class FOIARequest(models.Model):
                     "addr": addr,
                 }
 
-        return render_to_string("text/foia/request_msg.txt", context,)
+        return render_to_string("text/foia/request_msg.txt", context)
 
     def sent_status(self, appeal, thanks):
         """After sending out the message, set the correct new status"""
@@ -1034,7 +1031,7 @@ class FOIARequest(models.Model):
             {
                 "test": not is_agency_user,
                 "link": "{}?{}".format(
-                    reverse("foia-create"), clone_params.urlencode(),
+                    reverse("foia-create"), clone_params.urlencode()
                 ),
                 "title": "Clone",
                 "desc": "Start a new request using this one as a base",
@@ -1234,9 +1231,7 @@ class FOIARequest(models.Model):
                 reason = "other"
             else:
                 reason = "initial"
-        self.tracking_ids.create(
-            tracking_id=tracking_id, reason=reason,
-        )
+        self.tracking_ids.create(tracking_id=tracking_id, reason=reason)
         self._tracking_id = tracking_id
 
     def add_contact_info_note(self, user, contact_info):
@@ -1349,9 +1344,9 @@ class TrackingNumber(models.Model):
     """A tracking number for a FOIA Request"""
 
     foia = models.ForeignKey(
-        FOIARequest, on_delete=models.CASCADE, related_name="tracking_ids",
+        FOIARequest, on_delete=models.CASCADE, related_name="tracking_ids"
     )
-    tracking_id = models.CharField(max_length=255, verbose_name="Tracking Number",)
+    tracking_id = models.CharField(max_length=255, verbose_name="Tracking Number")
     datetime = models.DateTimeField(default=timezone.now)
     reason = models.CharField(
         max_length=7,

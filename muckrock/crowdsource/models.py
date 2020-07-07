@@ -27,11 +27,7 @@ from bleach.sanitizer import Cleaner
 from pkg_resources import resource_filename
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
-from pyembed.core.discovery import (
-    AutoDiscoverer,
-    ChainingDiscoverer,
-    FileDiscoverer,
-)
+from pyembed.core.discovery import AutoDiscoverer, ChainingDiscoverer, FileDiscoverer
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -50,9 +46,15 @@ class Crowdsource(models.Model):
 
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
-    user = models.ForeignKey("auth.User", related_name="crowdsources")
+    user = models.ForeignKey(
+        "auth.User", related_name="crowdsources", on_delete=models.PROTECT
+    )
     project = models.ForeignKey(
-        "project.Project", related_name="crowdsources", blank=True, null=True,
+        "project.Project",
+        related_name="crowdsources",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
     )
     datetime_created = models.DateTimeField(default=timezone.now)
     datetime_opened = models.DateTimeField(blank=True, null=True)
@@ -60,7 +62,7 @@ class Crowdsource(models.Model):
     status = models.CharField(
         max_length=9,
         default="draft",
-        choices=(("draft", "Draft"), ("open", "Opened"), ("close", "Closed"),),
+        choices=(("draft", "Draft"), ("open", "Opened"), ("close", "Closed")),
     )
     description = models.TextField(help_text="May use markdown")
     project_only = models.BooleanField(
@@ -92,7 +94,7 @@ class Crowdsource(models.Model):
     )
     registration = models.CharField(
         max_length=8,
-        choices=(("required", "Required"), ("off", "Off"), ("optional", "Optional"),),
+        choices=(("required", "Required"), ("off", "Off"), ("optional", "Optional")),
         default="required",
         help_text="Is registration required to complete this assignment?",
     )
@@ -113,9 +115,7 @@ class Crowdsource(models.Model):
 
     def get_absolute_url(self):
         """URL"""
-        return reverse(
-            "crowdsource-detail", kwargs={"slug": self.slug, "idx": self.pk,},
-        )
+        return reverse("crowdsource-detail", kwargs={"slug": self.slug, "idx": self.pk})
 
     def get_data_to_show(self, user, ip_address):
         """Get the crowdsource data to show"""
@@ -293,7 +293,9 @@ DOCCLOUD_EMBED = """
 class CrowdsourceData(models.Model):
     """A source of data to show with the crowdsource questions"""
 
-    crowdsource = models.ForeignKey(Crowdsource, related_name="data")
+    crowdsource = models.ForeignKey(
+        Crowdsource, related_name="data", on_delete=models.CASCADE
+    )
     url = models.URLField(max_length=255, verbose_name="Data URL")
     metadata = JSONField(default=dict, blank=True)
 
@@ -331,7 +333,7 @@ class CrowdsourceData(models.Model):
             else:
                 # fall back to a simple iframe
                 return format_html(
-                    '<iframe src="{}" width="100%" height="400px"></iframe>', self.url,
+                    '<iframe src="{}" width="100%" height="400px"></iframe>', self.url
                 )
 
     class Meta:
@@ -341,9 +343,11 @@ class CrowdsourceData(models.Model):
 class CrowdsourceField(models.Model):
     """A field on a crowdsource form"""
 
-    crowdsource = models.ForeignKey(Crowdsource, related_name="fields")
+    crowdsource = models.ForeignKey(
+        Crowdsource, related_name="fields", on_delete=models.CASCADE
+    )
     label = models.CharField(max_length=255)
-    type = models.CharField(max_length=15, choices=fields.FIELD_CHOICES,)
+    type = models.CharField(max_length=15, choices=fields.FIELD_CHOICES)
     help_text = models.CharField(max_length=255, blank=True)
     min = models.PositiveSmallIntegerField(blank=True, null=True)
     max = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -390,16 +394,15 @@ class CrowdsourceField(models.Model):
     class Meta:
         verbose_name = "assignment field"
         ordering = ("order",)
-        unique_together = (
-            ("crowdsource", "label"),
-            ("crowdsource", "order"),
-        )
+        unique_together = (("crowdsource", "label"), ("crowdsource", "order"))
 
 
 class CrowdsourceChoice(models.Model):
     """A choice presented to crowdsource users"""
 
-    field = models.ForeignKey(CrowdsourceField, related_name="choices")
+    field = models.ForeignKey(
+        CrowdsourceField, related_name="choices", on_delete=models.CASCADE
+    )
     choice = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     order = models.PositiveSmallIntegerField()
@@ -410,18 +413,21 @@ class CrowdsourceChoice(models.Model):
     class Meta:
         verbose_name = "assignment choice"
         ordering = ("order",)
-        unique_together = (
-            ("field", "choice"),
-            ("field", "order"),
-        )
+        unique_together = (("field", "choice"), ("field", "order"))
 
 
 class CrowdsourceResponse(models.Model):
     """A response to a crowdsource question"""
 
-    crowdsource = models.ForeignKey(Crowdsource, related_name="responses")
+    crowdsource = models.ForeignKey(
+        Crowdsource, related_name="responses", on_delete=models.CASCADE
+    )
     user = models.ForeignKey(
-        "auth.User", related_name="crowdsource_responses", blank=True, null=True,
+        "auth.User",
+        related_name="crowdsource_responses",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
     )
     public = models.BooleanField(
         default=False,
@@ -430,7 +436,11 @@ class CrowdsourceResponse(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime = models.DateTimeField(default=timezone.now)
     data = models.ForeignKey(
-        CrowdsourceData, blank=True, null=True, related_name="responses",
+        CrowdsourceData,
+        blank=True,
+        null=True,
+        related_name="responses",
+        on_delete=models.PROTECT,
     )
     skip = models.BooleanField(default=False)
     # number is only used for multiple_per_page crowdsources,
@@ -460,7 +470,7 @@ class CrowdsourceResponse(models.Model):
             from_ = str(self.ip_address)
         else:
             from_ = "Anonymous"
-        return "Response by {} on {}".format(from_, self.datetime,)
+        return "Response by {} on {}".format(from_, self.datetime)
 
     def get_values(self, metadata_keys, include_emails=False):
         """Get the values for this response for CSV export"""
@@ -522,10 +532,10 @@ class CrowdsourceResponse(models.Model):
             for value_item in value:
                 try:
                     field = CrowdsourceField.objects.get(
-                        crowdsource=self.crowdsource, pk=pk,
+                        crowdsource=self.crowdsource, pk=pk
                     )
                     self.values.create(
-                        field=field, value=value_item, original_value=value_item,
+                        field=field, value=value_item, original_value=value_item
                     )
                 except CrowdsourceField.DoesNotExist:
                     pass
@@ -536,16 +546,15 @@ class CrowdsourceResponse(models.Model):
         text = "\n".join(
             "{}: {}".format(k, v)
             for k, v in zip(
-                self.crowdsource.get_header_values(metadata), self.get_values(metadata),
+                self.crowdsource.get_header_values(metadata), self.get_values(metadata)
             )
         )
         text += "\n{}{}#assignment-responses".format(
-            settings.MUCKROCK_URL, self.crowdsource.get_absolute_url(),
+            settings.MUCKROCK_URL, self.crowdsource.get_absolute_url()
         )
         EmailMessage(
             subject="[Assignment Response] {} by {}".format(
-                self.crowdsource.title,
-                self.user.username if self.user else "Anonymous",
+                self.crowdsource.title, self.user.username if self.user else "Anonymous"
             ),
             body=text,
             from_email="info@muckrock.com",
@@ -560,8 +569,12 @@ class CrowdsourceResponse(models.Model):
 class CrowdsourceValue(models.Model):
     """A field value for a given response"""
 
-    response = models.ForeignKey(CrowdsourceResponse, related_name="values")
-    field = models.ForeignKey(CrowdsourceField, related_name="values")
+    response = models.ForeignKey(
+        CrowdsourceResponse, related_name="values", on_delete=models.CASCADE
+    )
+    field = models.ForeignKey(
+        CrowdsourceField, related_name="values", on_delete=models.CASCADE
+    )
     value = models.CharField(max_length=2000, blank=True)
     original_value = models.CharField(max_length=2000, blank=True)
 

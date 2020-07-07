@@ -109,13 +109,13 @@ class Project(models.Model):
         default=False, help_text="Featured projects will appear on the homepage."
     )
     contributors = models.ManyToManyField(
-        "auth.User", related_name="projects", blank=True,
+        "auth.User", related_name="projects", blank=True
     )
     articles = models.ManyToManyField(
-        "news.Article", related_name="projects", blank=True,
+        "news.Article", related_name="projects", blank=True
     )
     requests = models.ManyToManyField(
-        "foia.FOIARequest", related_name="projects", blank=True,
+        "foia.FOIARequest", related_name="projects", blank=True
     )
     crowdfunds = models.ManyToManyField(
         "crowdfund.Crowdfund", through="ProjectCrowdfunds", related_name="projects"
@@ -195,7 +195,7 @@ class Project(models.Model):
         """Returns a list of articles that may be related to this project."""
         articles = list(
             Article.objects.filter(
-                authors__in=self.contributors.all(), tags__name__in=self.tags.names(),
+                authors__in=self.contributors.all(), tags__name__in=self.tags.names()
             ).exclude(projects=self)
         )
         return articles
@@ -207,7 +207,7 @@ class Project(models.Model):
 
     def clear_cache(self):
         """Clear the template cache for this project"""
-        key = make_template_fragment_key("project_detail_objects", [self.pk],)
+        key = make_template_fragment_key("project_detail_objects", [self.pk])
         cache.delete(key)
 
 
@@ -215,5 +215,5 @@ class ProjectCrowdfunds(models.Model):
     """Project to Crowdfund through model"""
 
     # pylint: disable=model-missing-unicode
-    project = models.ForeignKey(Project)
-    crowdfund = models.OneToOneField("crowdfund.Crowdfund")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    crowdfund = models.OneToOneField("crowdfund.Crowdfund", on_delete=models.CASCADE)
