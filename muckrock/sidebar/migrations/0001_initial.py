@@ -1,24 +1,40 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
             name='Sidebar',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('title', models.CharField(unique=True, max_length=255, choices=[(b'admin', b'Admin'), (b'beta', b'Beta'), (b'community', b'Community'), (b'pro', b'Professional'), (b'proxy', b'Proxy'), (b'anonymous', b'Visitor')])),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
+                (
+                    'title',
+                    models.CharField(
+                        unique=True,
+                        max_length=255,
+                        choices=[('admin', 'Admin'), ('beta', 'Beta'),
+                                 ('community',
+                                  'Community'), ('pro', 'Professional'),
+                                 ('proxy', 'Proxy'), ('anonymous', 'Visitor')]
+                    )
+                ),
                 ('text', models.TextField(blank=True)),
             ],
-            options={
-            },
+            options={},
             bases=(models.Model,),
         ),
     ]

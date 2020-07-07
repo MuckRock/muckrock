@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jurisdiction',
             name='observe_sat',
-            field=models.BooleanField(default=False, help_text=b'Are holidays observed on Saturdays? (or are they moved to Friday?)'),
+            field=models.BooleanField(
+                default=False,
+                help_text=
+                'Are holidays observed on Saturdays? (or are they moved to Friday?)'
+            ),
         ),
     ]

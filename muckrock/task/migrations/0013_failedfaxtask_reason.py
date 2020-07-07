@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='failedfaxtask',
             name='reason',
-            field=models.CharField(default=b'', max_length=255, blank=True),
+            field=models.CharField(default='', max_length=255, blank=True),
         ),
     ]

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='agency',
             name='status',
-            field=models.CharField(default=b'pending', max_length=8, choices=[(b'pending', b'Pending'), (b'approved', b'Approved'), (b'rejected', b'Rejected')]),
+            field=models.CharField(
+                default='pending',
+                max_length=8,
+                choices=[('pending', 'Pending'), ('approved', 'Approved'),
+                         ('rejected', 'Rejected')]
+            ),
         ),
     ]

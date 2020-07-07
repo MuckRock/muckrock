@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='image',
-            field=models.ImageField(null=True, upload_to=b'project_images/%Y/%m/%d', blank=True),
+            field=models.ImageField(
+                null=True, upload_to='project_images/%Y/%m/%d', blank=True
+            ),
         ),
     ]

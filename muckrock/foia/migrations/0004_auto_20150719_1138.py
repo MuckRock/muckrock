@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='foiarequest',
             name='price',
-            field=models.DecimalField(default=b'0.00', max_digits=14, decimal_places=2),
+            field=models.DecimalField(
+                default='0.00', max_digits=14, decimal_places=2
+            ),
         ),
     ]

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import migrations, models
+# Django
 from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -28,20 +28,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='snailmailtask',
             name='amount',
-            field=models.DecimalField(default=0, max_digits=8, decimal_places=2),
+            field=models.DecimalField(
+                default=0, max_digits=8, decimal_places=2
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='snailmailtask',
             name='user',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(
+                blank=True, to=settings.AUTH_USER_MODEL, null=True
+            ),
         ),
         migrations.AlterField(
             model_name='snailmailtask',
             name='category',
-            field=models.CharField(max_length=1, choices=[(b'a', b'Appeal'), (b'n', b'New'), (b'u', b'Update'), (b'f', b'Followup'), (b'p', b'Payment')]),
+            field=models.CharField(
+                max_length=1,
+                choices=[('a', 'Appeal'), ('n', 'New'), ('u', 'Update'),
+                         ('f', 'Followup'), ('p', 'Payment')]
+            ),
         ),
-        migrations.DeleteModel(
-            name='PaymentTask',
-        ),
+        migrations.DeleteModel(name='PaymentTask',),
     ]

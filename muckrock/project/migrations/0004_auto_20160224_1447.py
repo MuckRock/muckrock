@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -15,15 +15,31 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ProjectMap',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('title', models.CharField(help_text=b'Titles are limited to 100 characters.', max_length=100)),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
+                (
+                    'title',
+                    models.CharField(
+                        help_text='Titles are limited to 100 characters.',
+                        max_length=100
+                    )
+                ),
                 ('description', models.TextField(null=True, blank=True)),
             ],
         ),
         migrations.AlterField(
             model_name='project',
             name='image',
-            field=models.ImageField(null=True, upload_to=b'project_images/%Y/%m/%d', blank=True),
+            field=models.ImageField(
+                null=True, upload_to='project_images/%Y/%m/%d', blank=True
+            ),
         ),
         migrations.AddField(
             model_name='projectmap',
@@ -33,6 +49,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='projectmap',
             name='requests',
-            field=models.ManyToManyField(related_name='maps', to='foia.FOIARequest', blank=True),
+            field=models.ManyToManyField(
+                related_name='maps', to='foia.FOIARequest', blank=True
+            ),
         ),
     ]

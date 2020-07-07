@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 from django.utils import timezone
 
@@ -21,6 +21,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='broadcast',
             name='context',
-            field=models.CharField(unique=True, max_length=255, choices=[(b'admin', b'Admin'), (b'basic', b'Basic'), (b'beta', b'Beta'), (b'pro', b'Professional'), (b'proxy', b'Proxy'), (b'robot', b'Robot'), (b'anonymous', b'Visitor')]),
+            field=models.CharField(
+                unique=True,
+                max_length=255,
+                choices=[('admin', 'Admin'), ('basic', 'Basic'),
+                         ('beta', 'Beta'), ('pro',
+                                            'Professional'), ('proxy', 'Proxy'),
+                         ('robot', 'Robot'), ('anonymous', 'Visitor')]
+            ),
         ),
     ]

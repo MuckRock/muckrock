@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -14,6 +14,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='featured',
-            field=models.BooleanField(default=False, help_text=b'Featured projects will appear on the homepage.'),
+            field=models.BooleanField(
+                default=False,
+                help_text='Featured projects will appear on the homepage.'
+            ),
         ),
     ]

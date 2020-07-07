@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='foiarequest',
             name='missing_proxy',
-            field=models.BooleanField(default=False, help_text=b'This request requires a proxy to file, but no such proxy was avilable up draft creation.'),
+            field=models.BooleanField(
+                default=False,
+                help_text=
+                'This request requires a proxy to file, but no such proxy was avilable up draft creation.'
+            ),
         ),
     ]

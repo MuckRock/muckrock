@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -14,6 +14,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jurisdiction',
             name='has_appeal',
-            field=models.BooleanField(default=True, help_text=b'Does this jurisdiction have an appeals process?'),
+            field=models.BooleanField(
+                default=True,
+                help_text='Does this jurisdiction have an appeals process?'
+            ),
         ),
     ]

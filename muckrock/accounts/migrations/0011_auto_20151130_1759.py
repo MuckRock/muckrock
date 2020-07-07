@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
+# Django
 from django.db import migrations, models
 
 
@@ -19,6 +19,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profile',
             name='acct_type',
-            field=models.CharField(max_length=10, choices=[(b'admin', b'Admin'), (b'basic', b'Basic'), (b'beta', b'Beta'), (b'pro', b'Professional'), (b'proxy', b'Proxy'), (b'robot', b'Robot')]),
+            field=models.CharField(
+                max_length=10,
+                choices=[('admin', 'Admin'), ('basic', 'Basic'),
+                         ('beta', 'Beta'), ('pro', 'Professional'),
+                         ('proxy', 'Proxy'), ('robot', 'Robot')]
+            ),
         ),
     ]

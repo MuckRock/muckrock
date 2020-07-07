@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import migrations, models
+# Django
 from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -18,29 +18,84 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Crowdfund',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField(blank=True)),
                 ('payment_capped', models.BooleanField(default=False)),
-                ('payment_required', models.DecimalField(default=b'0.00', max_digits=14, decimal_places=2)),
-                ('payment_received', models.DecimalField(default=b'0.00', max_digits=14, decimal_places=2)),
+                (
+                    'payment_required',
+                    models.DecimalField(
+                        default='0.00', max_digits=14, decimal_places=2
+                    )
+                ),
+                (
+                    'payment_received',
+                    models.DecimalField(
+                        default='0.00', max_digits=14, decimal_places=2
+                    )
+                ),
                 ('date_due', models.DateField()),
                 ('closed', models.BooleanField(default=False)),
-                ('foia', models.OneToOneField(related_name='crowdfund', null=True, blank=True, to='foia.FOIARequest')),
-                ('project', models.ForeignKey(related_name='crowdfunds', blank=True, to='project.Project', null=True)),
+                (
+                    'foia',
+                    models.OneToOneField(
+                        related_name='crowdfund',
+                        null=True,
+                        blank=True,
+                        to='foia.FOIARequest'
+                    )
+                ),
+                (
+                    'project',
+                    models.ForeignKey(
+                        related_name='crowdfunds',
+                        blank=True,
+                        to='project.Project',
+                        null=True
+                    )
+                ),
             ],
         ),
         migrations.CreateModel(
             name='CrowdfundPayment',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
                 ('name', models.CharField(max_length=255, blank=True)),
-                ('amount', models.DecimalField(max_digits=14, decimal_places=2)),
+                (
+                    'amount',
+                    models.DecimalField(max_digits=14, decimal_places=2)
+                ),
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('show', models.BooleanField(default=False)),
                 ('charge_id', models.CharField(max_length=255, blank=True)),
-                ('crowdfund', models.ForeignKey(related_name='payments', to='crowdfund.Crowdfund')),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                (
+                    'crowdfund',
+                    models.ForeignKey(
+                        related_name='payments', to='crowdfund.Crowdfund'
+                    )
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True, to=settings.AUTH_USER_MODEL, null=True
+                    )
+                ),
             ],
         ),
         migrations.AlterField(

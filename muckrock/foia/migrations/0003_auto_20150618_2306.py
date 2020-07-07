@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
 from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,12 +15,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='foiacommunication',
             name='response',
-            field=models.BooleanField(default=False, help_text=b'Is this a response (or a request)?'),
+            field=models.BooleanField(
+                default=False, help_text='Is this a response (or a request)?'
+            ),
         ),
         migrations.AlterField(
             model_name='foiamultirequest',
             name='agencies',
-            field=models.ManyToManyField(related_name='agencies', to='agency.Agency', blank=True),
+            field=models.ManyToManyField(
+                related_name='agencies', to='agency.Agency', blank=True
+            ),
         ),
         migrations.AlterField(
             model_name='foiamultirequest',
@@ -30,7 +34,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='foiarequest',
             name='edit_collaborators',
-            field=models.ManyToManyField(related_name='edit_access', to=settings.AUTH_USER_MODEL, blank=True),
+            field=models.ManyToManyField(
+                related_name='edit_access',
+                to=settings.AUTH_USER_MODEL,
+                blank=True
+            ),
         ),
         migrations.AlterField(
             model_name='foiarequest',
@@ -50,7 +58,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='foiarequest',
             name='read_collaborators',
-            field=models.ManyToManyField(related_name='read_access', to=settings.AUTH_USER_MODEL, blank=True),
+            field=models.ManyToManyField(
+                related_name='read_access',
+                to=settings.AUTH_USER_MODEL,
+                blank=True
+            ),
         ),
         migrations.AlterField(
             model_name='foiarequest',

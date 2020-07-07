@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
-import localflavor.us.models
+# Django
 from django.conf import settings
+from django.db import migrations, models
+
+# Third Party
 import easy_thumbnails.fields
+import localflavor.us.models
 
 
 class Migration(migrations.Migration):
@@ -17,94 +19,348 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Profile',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('address1', models.CharField(max_length=50, verbose_name=b'address', blank=True)),
-                ('address2', models.CharField(max_length=50, verbose_name=b'address (line 2)', blank=True)),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
+                (
+                    'address1',
+                    models.CharField(
+                        max_length=50, verbose_name='address', blank=True
+                    )
+                ),
+                (
+                    'address2',
+                    models.CharField(
+                        max_length=50,
+                        verbose_name='address (line 2)',
+                        blank=True
+                    )
+                ),
                 ('city', models.CharField(max_length=60, blank=True)),
-                ('state', localflavor.us.models.USStateField(blank=True, help_text=b'Your state will be made public on this site.If you do not want this information to be public, please leave blank.', max_length=2, choices=[(b'AL', b'Alabama'), (b'AK', b'Alaska'), (b'AS', b'American Samoa'), (b'AZ', b'Arizona'), (b'AR', b'Arkansas'), (b'AA', b'Armed Forces Americas'), (b'AE', b'Armed Forces Europe'), (b'AP', b'Armed Forces Pacific'), (b'CA', b'California'), (b'CO', b'Colorado'), (b'CT', b'Connecticut'), (b'DE', b'Delaware'), (b'DC', b'District of Columbia'), (b'FL', b'Florida'), (b'GA', b'Georgia'), (b'GU', b'Guam'), (b'HI', b'Hawaii'), (b'ID', b'Idaho'), (b'IL', b'Illinois'), (b'IN', b'Indiana'), (b'IA', b'Iowa'), (b'KS', b'Kansas'), (b'KY', b'Kentucky'), (b'LA', b'Louisiana'), (b'ME', b'Maine'), (b'MD', b'Maryland'), (b'MA', b'Massachusetts'), (b'MI', b'Michigan'), (b'MN', b'Minnesota'), (b'MS', b'Mississippi'), (b'MO', b'Missouri'), (b'MT', b'Montana'), (b'NE', b'Nebraska'), (b'NV', b'Nevada'), (b'NH', b'New Hampshire'), (b'NJ', b'New Jersey'), (b'NM', b'New Mexico'), (b'NY', b'New York'), (b'NC', b'North Carolina'), (b'ND', b'North Dakota'), (b'MP', b'Northern Mariana Islands'), (b'OH', b'Ohio'), (b'OK', b'Oklahoma'), (b'OR', b'Oregon'), (b'PA', b'Pennsylvania'), (b'PR', b'Puerto Rico'), (b'RI', b'Rhode Island'), (b'SC', b'South Carolina'), (b'SD', b'South Dakota'), (b'TN', b'Tennessee'), (b'TX', b'Texas'), (b'UT', b'Utah'), (b'VT', b'Vermont'), (b'VI', b'Virgin Islands'), (b'VA', b'Virginia'), (b'WA', b'Washington'), (b'WV', b'West Virginia'), (b'WI', b'Wisconsin'), (b'WY', b'Wyoming')])),
+                (
+                    'state',
+                    localflavor.us.models.USStateField(
+                        blank=True,
+                        help_text=
+                        'Your state will be made public on this site.If you do not want this information to be public, please leave blank.',
+                        max_length=2,
+                        choices=[
+                            ('AL', 'Alabama'), ('AK', 'Alaska'),
+                            ('AS', 'American Samoa'), ('AZ', 'Arizona'),
+                            ('AR', 'Arkansas'), ('AA', 'Armed Forces Americas'),
+                            ('AE', 'Armed Forces Europe'),
+                            ('AP',
+                             'Armed Forces Pacific'), ('CA', 'California'),
+                            ('CO',
+                             'Colorado'), ('CT',
+                                           'Connecticut'), ('DE', 'Delaware'),
+                            ('DC', 'District of Columbia'), ('FL', 'Florida'),
+                            ('GA',
+                             'Georgia'), ('GU',
+                                          'Guam'), ('HI',
+                                                    'Hawaii'), ('ID', 'Idaho'),
+                            ('IL', 'Illinois'), ('IN',
+                                                 'Indiana'), ('IA', 'Iowa'),
+                            ('KS', 'Kansas'), ('KY',
+                                               'Kentucky'), ('LA', 'Louisiana'),
+                            ('ME',
+                             'Maine'), ('MD',
+                                        'Maryland'), ('MA', 'Massachusetts'),
+                            ('MI',
+                             'Michigan'), ('MN',
+                                           'Minnesota'), ('MS', 'Mississippi'),
+                            ('MO', 'Missouri'), ('MT',
+                                                 'Montana'), ('NE', 'Nebraska'),
+                            ('NV', 'Nevada'), ('NH', 'New Hampshire'),
+                            ('NJ',
+                             'New Jersey'), ('NM',
+                                             'New Mexico'), ('NY', 'New York'),
+                            ('NC', 'North Carolina'), ('ND', 'North Dakota'),
+                            ('MP', 'Northern Mariana Islands'), ('OH', 'Ohio'),
+                            ('OK',
+                             'Oklahoma'), ('OR',
+                                           'Oregon'), ('PA', 'Pennsylvania'),
+                            ('PR', 'Puerto Rico'), ('RI', 'Rhode Island'),
+                            ('SC', 'South Carolina'), ('SD', 'South Dakota'),
+                            ('TN', 'Tennessee'), ('TX',
+                                                  'Texas'), ('UT', 'Utah'),
+                            ('VT', 'Vermont'), ('VI', 'Virgin Islands'),
+                            ('VA', 'Virginia'), ('WA', 'Washington'),
+                            ('WV',
+                             'West Virginia'), ('WI',
+                                                'Wisconsin'), ('WY', 'Wyoming')
+                        ]
+                    )
+                ),
                 ('zip_code', models.CharField(max_length=10, blank=True)),
-                ('phone', localflavor.us.models.PhoneNumberField(max_length=20, blank=True)),
+                (
+                    'phone',
+                    localflavor.us.models.PhoneNumberField(
+                        max_length=20, blank=True
+                    )
+                ),
                 ('follow_questions', models.BooleanField(default=False)),
-                ('acct_type', models.CharField(max_length=10, choices=[(b'admin', b'Admin'), (b'beta', b'Beta'), (b'community', b'Community'), (b'pro', b'Professional'), (b'proxy', b'Proxy')])),
+                (
+                    'acct_type',
+                    models.CharField(
+                        max_length=10,
+                        choices=[('admin', 'Admin'), ('beta', 'Beta'),
+                                 ('community', 'Community'),
+                                 ('pro', 'Professional'), ('proxy', 'Proxy')]
+                    )
+                ),
                 ('email_confirmed', models.BooleanField(default=False)),
-                ('confirmation_key', models.CharField(max_length=24, blank=True)),
+                (
+                    'confirmation_key',
+                    models.CharField(max_length=24, blank=True)
+                ),
                 ('profile', models.TextField(blank=True)),
                 ('public_email', models.EmailField(max_length=255, blank=True)),
                 ('pgp_public_key', models.TextField(blank=True)),
-                ('website', models.URLField(help_text=b'Begin with http://', max_length=255, blank=True)),
+                (
+                    'website',
+                    models.URLField(
+                        help_text='Begin with http://',
+                        max_length=255,
+                        blank=True
+                    )
+                ),
                 ('twitter', models.CharField(max_length=255, blank=True)),
-                ('linkedin', models.URLField(help_text=b'Begin with http://', max_length=255, blank=True)),
-                ('avatar', easy_thumbnails.fields.ThumbnailerImageField(null=True, upload_to=b'account_images', blank=True)),
-                ('email_pref', models.CharField(default=b'daily', help_text=b'Receive email updates to your requests instantly or in a daily or weekly digest', max_length=10, verbose_name=b'Email Preference', choices=[(b'instant', b'Instant'), (b'daily', b'Daily'), (b'weekly', b'Weekly')])),
-                ('use_autologin', models.BooleanField(default=True, help_text=b'Links you receive in emails from us will contain a one time token to automatically log you in')),
+                (
+                    'linkedin',
+                    models.URLField(
+                        help_text='Begin with http://',
+                        max_length=255,
+                        blank=True
+                    )
+                ),
+                (
+                    'avatar',
+                    easy_thumbnails.fields.ThumbnailerImageField(
+                        null=True, upload_to='account_images', blank=True
+                    )
+                ),
+                (
+                    'email_pref',
+                    models.CharField(
+                        default='daily',
+                        help_text=
+                        'Receive email updates to your requests instantly or in a daily or weekly digest',
+                        max_length=10,
+                        verbose_name='Email Preference',
+                        choices=[('instant', 'Instant'), ('daily', 'Daily'),
+                                 ('weekly', 'Weekly')]
+                    )
+                ),
+                (
+                    'use_autologin',
+                    models.BooleanField(
+                        default=True,
+                        help_text=
+                        'Links you receive in emails from us will contain a one time token to automatically log you in'
+                    )
+                ),
                 ('num_requests', models.IntegerField(default=0)),
                 ('monthly_requests', models.IntegerField(default=0)),
                 ('date_update', models.DateField()),
                 ('stripe_id', models.CharField(max_length=255, blank=True)),
             ],
-            options={
-            },
+            options={},
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Statistics',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
                 ('date', models.DateField()),
                 ('total_requests', models.IntegerField()),
                 ('total_requests_success', models.IntegerField()),
                 ('total_requests_denied', models.IntegerField()),
-                ('total_requests_draft', models.IntegerField(null=True, blank=True)),
-                ('total_requests_submitted', models.IntegerField(null=True, blank=True)),
-                ('total_requests_awaiting_ack', models.IntegerField(null=True, blank=True)),
-                ('total_requests_awaiting_response', models.IntegerField(null=True, blank=True)),
-                ('total_requests_awaiting_appeal', models.IntegerField(null=True, blank=True)),
-                ('total_requests_fix_required', models.IntegerField(null=True, blank=True)),
-                ('total_requests_payment_required', models.IntegerField(null=True, blank=True)),
-                ('total_requests_no_docs', models.IntegerField(null=True, blank=True)),
-                ('total_requests_partial', models.IntegerField(null=True, blank=True)),
-                ('total_requests_abandoned', models.IntegerField(null=True, blank=True)),
-                ('orphaned_communications', models.IntegerField(null=True, blank=True)),
+                (
+                    'total_requests_draft',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_submitted',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_awaiting_ack',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_awaiting_response',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_awaiting_appeal',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_fix_required',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_payment_required',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_no_docs',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_partial',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_requests_abandoned',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'orphaned_communications',
+                    models.IntegerField(null=True, blank=True)
+                ),
                 ('total_agencies', models.IntegerField()),
                 ('stale_agencies', models.IntegerField(null=True, blank=True)),
-                ('unapproved_agencies', models.IntegerField(null=True, blank=True)),
+                (
+                    'unapproved_agencies',
+                    models.IntegerField(null=True, blank=True)
+                ),
                 ('total_pages', models.IntegerField()),
                 ('total_users', models.IntegerField()),
                 ('total_fees', models.IntegerField()),
                 ('pro_users', models.IntegerField(null=True, blank=True)),
                 ('pro_user_names', models.TextField(blank=True)),
-                ('total_page_views', models.IntegerField(null=True, blank=True)),
-                ('daily_requests_pro', models.IntegerField(null=True, blank=True)),
-                ('daily_requests_community', models.IntegerField(null=True, blank=True)),
-                ('daily_requests_beta', models.IntegerField(null=True, blank=True)),
+                (
+                    'total_page_views',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'daily_requests_pro',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'daily_requests_community',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'daily_requests_beta',
+                    models.IntegerField(null=True, blank=True)
+                ),
                 ('daily_articles', models.IntegerField(null=True, blank=True)),
                 ('total_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_generic_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_generic_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_orphan_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_orphan_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_snailmail_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_snailmail_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_rejected_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_rejected_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_staleagency_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_staleagency_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_flagged_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_flagged_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_newagency_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_newagency_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_response_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_response_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_faxfail_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_faxfail_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_payment_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_payment_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_crowdfundpayment_tasks', models.IntegerField(null=True, blank=True)),
-                ('total_unresolved_crowdfundpayment_tasks', models.IntegerField(null=True, blank=True)),
-                ('public_notes', models.TextField(default=b'', blank=True)),
-                ('admin_notes', models.TextField(default=b'', blank=True)),
-                ('users_today', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
+                (
+                    'total_unresolved_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_generic_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_generic_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_orphan_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_orphan_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_snailmail_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_snailmail_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_rejected_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_rejected_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_staleagency_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_staleagency_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_flagged_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_flagged_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_newagency_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_newagency_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_response_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_response_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_faxfail_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_faxfail_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_payment_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_payment_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_crowdfundpayment_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                (
+                    'total_unresolved_crowdfundpayment_tasks',
+                    models.IntegerField(null=True, blank=True)
+                ),
+                ('public_notes', models.TextField(default='', blank=True)),
+                ('admin_notes', models.TextField(default='', blank=True)),
+                (
+                    'users_today',
+                    models.ManyToManyField(to=settings.AUTH_USER_MODEL)
+                ),
             ],
             options={
                 'ordering': ['-date'],

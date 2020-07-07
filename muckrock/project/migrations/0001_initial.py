@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
 from django.conf import settings
+from django.db import migrations, models
+
+# Third Party
 import taggit.managers
 
 
@@ -19,16 +21,79 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Project',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('title', models.CharField(help_text=b'Titles are limited to 100 characters.', unique=True, max_length=100)),
-                ('slug', models.SlugField(help_text=b'The slug is automatically generated based on the title.', unique=True, max_length=255)),
+                (
+                    'id',
+                    models.AutoField(
+                        verbose_name='ID',
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True
+                    )
+                ),
+                (
+                    'title',
+                    models.CharField(
+                        help_text='Titles are limited to 100 characters.',
+                        unique=True,
+                        max_length=100
+                    )
+                ),
+                (
+                    'slug',
+                    models.SlugField(
+                        help_text=
+                        'The slug is automatically generated based on the title.',
+                        unique=True,
+                        max_length=255
+                    )
+                ),
                 ('description', models.TextField(null=True, blank=True)),
-                ('image', models.ImageField(null=True, upload_to=b'project_images', blank=True)),
-                ('private', models.BooleanField(default=False, help_text=b'If a project is private, it is only visible to its contributors.')),
-                ('articles', models.ManyToManyField(related_name='projects', to='news.Article', blank=True)),
-                ('contributors', models.ManyToManyField(related_name='projects', to=settings.AUTH_USER_MODEL, blank=True)),
-                ('requests', models.ManyToManyField(related_name='projects', to='foia.FOIARequest', blank=True)),
-                ('tags', taggit.managers.TaggableManager(to='tags.Tag', through='tags.TaggedItemBase', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+                (
+                    'image',
+                    models.ImageField(
+                        null=True, upload_to='project_images', blank=True
+                    )
+                ),
+                (
+                    'private',
+                    models.BooleanField(
+                        default=False,
+                        help_text=
+                        'If a project is private, it is only visible to its contributors.'
+                    )
+                ),
+                (
+                    'articles',
+                    models.ManyToManyField(
+                        related_name='projects', to='news.Article', blank=True
+                    )
+                ),
+                (
+                    'contributors',
+                    models.ManyToManyField(
+                        related_name='projects',
+                        to=settings.AUTH_USER_MODEL,
+                        blank=True
+                    )
+                ),
+                (
+                    'requests',
+                    models.ManyToManyField(
+                        related_name='projects',
+                        to='foia.FOIARequest',
+                        blank=True
+                    )
+                ),
+                (
+                    'tags',
+                    taggit.managers.TaggableManager(
+                        to='tags.Tag',
+                        through='tags.TaggedItemBase',
+                        blank=True,
+                        help_text='A comma-separated list of tags.',
+                        verbose_name='Tags'
+                    )
+                ),
             ],
         ),
     ]

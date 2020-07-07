@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
-from django.db import models, migrations
+# Django
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -14,6 +14,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='broadcast',
             name='context',
-            field=models.CharField(unique=True, max_length=255, choices=[(b'admin', b'Admin'), (b'beta', b'Beta'), (b'community', b'Community'), (b'pro', b'Professional'), (b'proxy', b'Proxy'), (b'robot', b'Robot'), (b'anonymous', b'Visitor')]),
+            field=models.CharField(
+                unique=True,
+                max_length=255,
+                choices=[('admin', 'Admin'), ('beta', 'Beta'),
+                         ('community', 'Community'), ('pro', 'Professional'),
+                         ('proxy',
+                          'Proxy'), ('robot',
+                                     'Robot'), ('anonymous', 'Visitor')]
+            ),
         ),
     ]
