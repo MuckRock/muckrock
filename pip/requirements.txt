@@ -138,7 +138,7 @@ requests-oauthlib==1.0.0  # via social-auth-core
 requests==2.21.0
 rjsmin==1.0.12            # via django-compressor
 rsa==3.4.2                # via oauth2client, python-jose
-rules==1.1.1
+rules==2.2
 s3transfer==0.1.13        # via boto3
 scikit-learn==0.23.1
 scipy==1.5.0
