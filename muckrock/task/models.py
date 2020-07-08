@@ -6,11 +6,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.mail import send_mail
-from django.urls import reverse
 from django.db import models, transaction
 from django.db.models import Case, Count, Max, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import linebreaks, urlize
 
@@ -1087,6 +1087,8 @@ class StaleAgencyTask(Task):
     type = "StaleAgencyTask"
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
 
+    objects = models.Manager()
+
     def __str__(self):
         return "Stale Agency Task"
 
@@ -1104,6 +1106,8 @@ class NewExemptionTask(Task):
     foia = models.ForeignKey("foia.FOIARequest", on_delete=models.PROTECT)
     language = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    objects = models.Manager()
 
     def __str__(self):
         return "New Exemption Task"
