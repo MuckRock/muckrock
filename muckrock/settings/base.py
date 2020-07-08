@@ -268,11 +268,7 @@ def show_toolbar(request):
     return False
 
 
-DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
-    "INTERCEPT_REDIRECTS": False,
-    "JQUERY_URL": "",
-}
+DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, "JQUERY_URL": ""}
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
