@@ -6,10 +6,10 @@ Views for the crowdfund application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.urls import NoReverseMatch, reverse
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.urls import NoReverseMatch, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView
 
@@ -87,7 +87,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
             crowdfund_object = self.get_object().get_crowdfund_object()
             redirect_url = crowdfund_object.get_absolute_url()
         except (AttributeError, NoReverseMatch) as exception:
-            logging.error(exception)
+            logger.error(exception)
         return redirect_url
 
     def return_error(self, request, error=None):
@@ -144,7 +144,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
                     event = "Crowdfund Payment"
                     kwargs = {"charge": float(amount)}
             except stripe.StripeError as payment_error:
-                logging.warn(payment_error)
+                logger.warning(payment_error)
                 return self.return_error(request, payment_error)
             else:
                 mixpanel_event(
