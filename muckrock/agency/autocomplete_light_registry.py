@@ -82,7 +82,7 @@ class AgencyEasySearchAutocomplete(autocomplete_light.AutocompleteModelTemplate)
     def choices_for_request(self):
         query = self.request.GET.get("q", "")
         exclude = self.request.GET.getlist("exclude")
-        conditions = self._choices_for_request_conditions(query, self.search_fields,)
+        conditions = self._choices_for_request_conditions(query, self.search_fields)
         choices = self.order_choices(
             self.choices.get_approved_and_pending(self.request.user)
             .filter(conditions)
@@ -90,7 +90,7 @@ class AgencyEasySearchAutocomplete(autocomplete_light.AutocompleteModelTemplate)
         )[0 : self.limit_choices]
 
         query, jurisdiction = self._split_jurisdiction(query)
-        fuzzy_choices = self._fuzzy_choices(query, exclude, jurisdiction, choices,)
+        fuzzy_choices = self._fuzzy_choices(query, exclude, jurisdiction, choices)
         choices = list(choices) + [c[2] for c in fuzzy_choices]
         return choices
 
@@ -130,13 +130,13 @@ class AgencyEasySearchAutocomplete(autocomplete_light.AutocompleteModelTemplate)
             name = ",".join(comma_split[:-1])
             try:
                 jurisdiction = Jurisdiction.objects.get(
-                    Q(name__iexact=state) | Q(abbrev__iexact=state), level="s",
+                    Q(name__iexact=state) | Q(abbrev__iexact=state), level="s"
                 )
                 return name, jurisdiction
             except Jurisdiction.DoesNotExist:
                 jurisdiction = (
-                    Jurisdiction.objects.filter(name__iexact=state, level="l",)
-                    .annotate(count=Count("agencies__foiarequest"),)
+                    Jurisdiction.objects.filter(name__iexact=state, level="l")
+                    .annotate(count=Count("agencies__foiarequest"))
                     .order_by("-count")
                     .first()
                 )
@@ -158,7 +158,7 @@ class AgencyComposerAutocomplete(AgencyEasySearchAutocomplete):
         # remove "new" agencies from exclude list, as they do not have
         # valid PKs to filter on
         exclude = [e for e in exclude if re.match(r"[0-9]+", e)]
-        conditions = self._choices_for_request_conditions(query, self.search_fields,)
+        conditions = self._choices_for_request_conditions(query, self.search_fields)
         choices = self.order_choices(
             self.choices.get_approved_and_pending(self.request.user)
             .filter(conditions)
@@ -166,7 +166,7 @@ class AgencyComposerAutocomplete(AgencyEasySearchAutocomplete):
         )[0 : self.limit_choices]
 
         query, jurisdiction = self._split_jurisdiction(query)
-        fuzzy_choices = self._fuzzy_choices(query, exclude, jurisdiction, choices,)
+        fuzzy_choices = self._fuzzy_choices(query, exclude, jurisdiction, choices)
         choices = list(choices) + [c[2] for c in fuzzy_choices]
         new_agency = self._create_new_agency(query, jurisdiction, choices)
         if new_agency is not None:
@@ -177,7 +177,7 @@ class AgencyComposerAutocomplete(AgencyEasySearchAutocomplete):
         """If there are no exact matches, give the option to create a new one"""
         if not query.lower() in [c.name.lower() for c in choices]:
             name = re.sub(r"\$", "", capwords(query))
-            new_agency = Agency(name=name, jurisdiction=jurisdiction, status="pending",)
+            new_agency = Agency(name=name, jurisdiction=jurisdiction, status="pending")
             return new_agency
         else:
             return None

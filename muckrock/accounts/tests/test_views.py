@@ -82,7 +82,7 @@ class TestAccountFunctional(TestCase):
         """Private URLs should redirect logged-out users to the log in page"""
         # my profile
         get, post = http_get_post(
-            reverse("acct-my-profile"), login_required(views.ProfileView.as_view()), {},
+            reverse("acct-my-profile"), login_required(views.ProfileView.as_view()), {}
         )
         eq_(
             get.status_code, 302, "My profile link reponds with 302 to logged out user."
@@ -106,7 +106,7 @@ class TestAccountFunctional(TestCase):
         )
         eq_(response.status_code, 302, "Logged in user may view their own profile.")
         response = http_get_response(
-            reverse("acct-settings"), views.ProfileSettings.as_view(), self.user,
+            reverse("acct-settings"), views.ProfileSettings.as_view(), self.user
         )
         eq_(response.status_code, 200, "Logged in user may view their own settings.")
 

@@ -50,9 +50,9 @@ class FOIAAgencyReplyForm(forms.Form):
         required=False,
     )
     price = forms.IntegerField(
-        widget=forms.NumberInput(attrs={"class": "currency-field"}), required=False,
+        widget=forms.NumberInput(attrs={"class": "currency-field"}), required=False
     )
-    reply = forms.CharField(label="Message to the requester", widget=forms.Textarea(),)
+    reply = forms.CharField(label="Message to the requester", widget=forms.Textarea())
 
     def clean(self):
         """Make price required if status is set to payment"""
@@ -78,7 +78,7 @@ class SendViaForm(forms.Form):
             ("email", "Email"),
             ("fax", "Fax"),
             ("snail", "Snail Mail"),
-        ),
+        )
     )
 
     def __init__(self, *args, **kwargs):
@@ -98,9 +98,7 @@ class SendViaForm(forms.Form):
                 if getattr(obj, addr):
                     via = addr
                     break
-        initial.update(
-            {"via": via, "email": obj and obj.email, "fax": obj and obj.fax,}
-        )
+        initial.update({"via": via, "email": obj and obj.email, "fax": obj and obj.fax})
         super(SendViaForm, self).__init__(*args, initial=initial, **kwargs)
         # remove portal choice if the agency does not use a portal
         if agency and not agency.portal:
@@ -133,10 +131,10 @@ class SendCommunicationForm(SendViaForm):
         # to the form display, but do want to use them to process incoming data
         if self.is_bound:
             self.fields["email-autocomplete"] = forms.CharField(
-                widget=forms.HiddenInput(), required=False,
+                widget=forms.HiddenInput(), required=False
             )
             self.fields["fax-autocomplete"] = forms.CharField(
-                widget=forms.HiddenInput(), required=False,
+                widget=forms.HiddenInput(), required=False
             )
 
     def clean(self):
@@ -157,13 +155,9 @@ class SendCommunicationForm(SendViaForm):
             if email:
                 cleaned_data["email"] = email
             else:
-                self.add_error(
-                    "email", "Invalid email address",
-                )
+                self.add_error("email", "Invalid email address")
         else:
-            self.add_error(
-                "email", "An email address is required if sending via email",
-            )
+            self.add_error("email", "An email address is required if sending via email")
 
     def _clean_fax(self, cleaned_data):
         """Attempt to clean the fax during full form clean"""
@@ -171,29 +165,23 @@ class SendCommunicationForm(SendViaForm):
             try:
                 number = phonenumbers.parse(cleaned_data["fax-autocomplete"], "US")
             except phonenumbers.NumberParseException:
-                self.add_error(
-                    "fax", "Invalid fax number",
-                )
+                self.add_error("fax", "Invalid fax number")
             else:
                 if phonenumbers.is_valid_number(number):
                     phone, _ = PhoneNumber.objects.update_or_create(
-                        number=number, defaults={"type": "fax"},
+                        number=number, defaults={"type": "fax"}
                     )
                     cleaned_data["fax"] = phone
                 else:
-                    self.add_error(
-                        "fax", "Invalid fax number",
-                    )
+                    self.add_error("fax", "Invalid fax number")
         else:
-            self.add_error(
-                "fax", "A fax number is required if sending via fax",
-            )
+            self.add_error("fax", "A fax number is required if sending via fax")
 
 
 class FOIAAdminFixForm(SendCommunicationForm):
     """Form with extra options for staff to follow up to requests"""
 
-    from_user = forms.ModelChoiceField(label="From", queryset=User.objects.none(),)
+    from_user = forms.ModelChoiceField(label="From", queryset=User.objects.none())
     other_emails = forms.CharField(
         label="CC",
         required=False,
@@ -219,14 +207,14 @@ class FOIAAdminFixForm(SendCommunicationForm):
         super(FOIAAdminFixForm, self).__init__(*args, **kwargs)
         muckrock_staff = User.objects.get(username="MuckrockStaff")
         self.fields["from_user"].queryset = User.objects.filter(
-            pk__in=[muckrock_staff.pk, request.user.pk, self.foia.user.pk,]
+            pk__in=[muckrock_staff.pk, request.user.pk, self.foia.user.pk]
         )
         self.fields["from_user"].initial = request.user.pk
 
     def clean_other_emails(self):
         """Validate the other_emails field"""
         return EmailAddress.objects.fetch_many(
-            self.cleaned_data["other_emails"], ignore_errors=False,
+            self.cleaned_data["other_emails"], ignore_errors=False
         )
 
 
@@ -234,7 +222,7 @@ class ResendForm(SendCommunicationForm):
     """A form for resending a communication"""
 
     communication = forms.ModelChoiceField(
-        queryset=FOIACommunication.objects.all(), widget=forms.HiddenInput(),
+        queryset=FOIACommunication.objects.all(), widget=forms.HiddenInput()
     )
 
     def __init__(self, *args, **kwargs):
@@ -258,15 +246,15 @@ class ContactInfoForm(SendViaForm):
     """A form to let advanced users control where the communication will be sent"""
 
     email = EmptyLastModelChoiceField(
-        queryset=EmailAddress.objects.none(), required=False, empty_label="Other...",
+        queryset=EmailAddress.objects.none(), required=False, empty_label="Other..."
     )
     other_email = forms.EmailField(required=False)
     fax = EmptyLastModelChoiceField(
-        queryset=PhoneNumber.objects.none(), required=False, empty_label="Other...",
+        queryset=PhoneNumber.objects.none(), required=False, empty_label="Other..."
     )
     other_fax = PhoneNumberField(required=False)
     use_contact_information = forms.BooleanField(
-        widget=forms.HiddenInput(), initial=False, required=False,
+        widget=forms.HiddenInput(), initial=False, required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -286,12 +274,12 @@ class ContactInfoForm(SendViaForm):
             agency = None
         if agency:
             self.fields["email"].queryset = (
-                agency.emails.filter(status="good",)
+                agency.emails.filter(status="good")
                 .exclude(email__endswith="muckrock.com")
                 .distinct()
             )
             self.fields["fax"].queryset = agency.phones.filter(
-                status="good", type="fax",
+                status="good", type="fax"
             ).distinct()
 
     def clean(self):
@@ -306,17 +294,13 @@ class ContactInfoForm(SendViaForm):
             and not cleaned_data.get("email")
             and not cleaned_data.get("other_email")
         ):
-            self.add_error(
-                "other_email", "Please enter an email address",
-            )
+            self.add_error("other_email", "Please enter an email address")
         if (
             cleaned_data.get("via") == "fax"
             and not cleaned_data.get("fax")
             and not cleaned_data.get("other_fax")
         ):
-            self.add_error(
-                "other_fax", "Please enter a fax number",
-            )
+            self.add_error("other_fax", "Please enter a fax number")
         return cleaned_data
 
     def clean_email(self):

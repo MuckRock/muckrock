@@ -135,9 +135,7 @@ def generate_crowdfund_context(crowdfund, context):
     }
 
 
-@register.inclusion_tag(
-    "crowdfund/widget.html", name="crowdfund", takes_context=True,
-)
+@register.inclusion_tag("crowdfund/widget.html", name="crowdfund", takes_context=True)
 def crowdfund_tag(context, crowdfund_pk=None, crowdfund=None):
     """Template tag to insert a crowdfunding widget"""
     if crowdfund is None:

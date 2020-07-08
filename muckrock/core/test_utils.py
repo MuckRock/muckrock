@@ -83,16 +83,11 @@ def mock_squarelet(mock_requests, requests_json=None):
         """Call back to generate json response for make requests"""
         data = parse_qs(request.body)
         if "amount" in data:
-            return {
-                "regular": data["amount"][0],
-                "monthly": 0,
-            }
+            return {"regular": data["amount"][0], "monthly": 0}
         else:
             return "OK"
 
-    mock_requests.post(
-        settings.SQUARELET_URL + "/api/users/", json=users_cb,
-    )
+    mock_requests.post(settings.SQUARELET_URL + "/api/users/", json=users_cb)
 
     if requests_json is None:
         requests_json = requests_cb

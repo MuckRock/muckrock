@@ -233,7 +233,7 @@ class OrphanTaskList(TaskList):
                 task.move(foia_pks, request.user)
                 task.resolve(request.user, {"move": True, "foia_pks": foia_pks})
                 messages.success(
-                    request, "The communication was moved to the specified requests.",
+                    request, "The communication was moved to the specified requests."
                 )
             except ValueError as exception:
                 messages.error(request, "Error when moving: %s" % exception)
@@ -325,7 +325,7 @@ class ReviewAgencyTaskList(TaskList):
                     if form.cleaned_data["reply"]:
                         transaction.on_commit(
                             lambda: submit_review_update.delay(
-                                foia_pks, form.cleaned_data["reply"],
+                                foia_pks, form.cleaned_data["reply"]
                             )
                         )
                 messages.success(
@@ -367,7 +367,7 @@ class FlaggedTaskList(TaskList):
                 messages.error(request, "The form is invalid")
                 return
         return super(FlaggedTaskList, self).task_post_helper(
-            request, task, form_data=form_data,
+            request, task, form_data=form_data
         )
 
 
@@ -585,9 +585,7 @@ class PortalTaskList(TaskList):
         tracking_number = request.POST.get("tracking_number")
         foia = task.communication.foia
         if len(password) > 20:
-            messages.error(
-                request, "Password cannot be longer than 20 characters",
-            )
+            messages.error(request, "Password cannot be longer than 20 characters")
             return
         if status:
             task.set_status(status)
@@ -663,7 +661,7 @@ class PaymentInfoTaskList(TaskList):
                 **form.cleaned_data
             )
             AgencyAddress.objects.create(
-                agency=agency, address=address, request_type="check",
+                agency=agency, address=address, request_type="check"
             )
             tasks = PaymentInfoTask.objects.filter(
                 resolved=False, communication__foia__agency=agency
@@ -671,7 +669,7 @@ class PaymentInfoTaskList(TaskList):
             for task in tasks:
                 # send the check
                 prepare_snail_mail.delay(
-                    task.communication.pk, "p", False, {"amount": task.amount},
+                    task.communication.pk, "p", False, {"amount": task.amount}
                 )
                 task.resolve(request.user, form.cleaned_data)
         elif request.POST.get("reject"):
@@ -699,7 +697,7 @@ class RequestTaskList(TemplateView):
         # pylint: disable=unsubscriptable-object
         self.foia_request = get_object_or_404(
             FOIARequest.objects.select_related(
-                "agency__jurisdiction__parent__parent", "composer__user__profile",
+                "agency__jurisdiction__parent__parent", "composer__user__profile"
             ),
             pk=self.kwargs["pk"],
         )
@@ -741,9 +739,7 @@ def snail_mail_pdf(request, pk):
 
     if prepared_pdf is None:
         return render(
-            request,
-            "error.html",
-            {"message": "There was an error processing this PDF"},
+            request, "error.html", {"message": "There was an error processing this PDF"}
         )
 
     # return as a response
@@ -811,8 +807,6 @@ class BulkNewAgency(FormView):
             name = form_.cleaned_data.get("name")
             jurisdiction = form_.cleaned_data.get("jurisdiction")
             if name and jurisdiction:
-                Agency.objects.create_new(
-                    name, jurisdiction.pk, self.request.user,
-                )
+                Agency.objects.create_new(name, jurisdiction.pk, self.request.user)
         messages.success(self.request, "Successfully create new agencies")
         return redirect("new-agency-task-list")

@@ -82,7 +82,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
     )
     has_embargo = django_filters.BooleanFilter(
-        name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+        name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
     )
     has_crowdfund = django_filters.BooleanFilter(
         name="crowdfund",
@@ -101,10 +101,10 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         name="communications__datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
     file_types = django_filters.CharFilter(
-        label="File Types", method="filter_file_types",
+        label="File Types", method="filter_file_types"
     )
 
     def filter_file_types(self, queryset, name, value):
@@ -136,7 +136,7 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
     )
     has_embargo = django_filters.BooleanFilter(
-        name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+        name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
     )
     has_crowdfund = django_filters.BooleanFilter(
         name="crowdfund",
@@ -155,10 +155,10 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         name="communications__datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
     file_types = django_filters.CharFilter(
-        label="File Types", method="filter_file_types",
+        label="File Types", method="filter_file_types"
     )
 
     def filter_file_types(self, queryset, name, value):
@@ -219,7 +219,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         name="communications__datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
     class Meta:

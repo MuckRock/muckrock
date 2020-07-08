@@ -22,11 +22,7 @@ def get_actionable_requests(user):
     started = FOIAComposer.objects.filter(user=user, status="started").count()
     payment = requests.filter(status="payment").count()
     fix = requests.filter(status="fix").count()
-    return {
-        "started": started,
-        "payment": payment,
-        "fix": fix,
-    }
+    return {"started": started, "payment": payment, "fix": fix}
 
 
 def get_unread_notifications(user):

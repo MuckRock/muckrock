@@ -67,7 +67,7 @@ class ProjectUpdateForm(forms.ModelForm):
             "articles": autocomplete_light.MultipleChoiceWidget("ArticleAutocomplete"),
         }
         help_texts = {
-            "title": "Changing the title will change the URL of your project.",
+            "title": "Changing the title will change the URL of your project."
         }
 
 

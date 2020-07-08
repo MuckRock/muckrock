@@ -119,10 +119,7 @@ class Holiday(models.Model):
 
     def _match_easter(self, date_, _):
         """match for easter based dates"""
-        offset = {
-            "Good Friday": timedelta(-2),
-            "Easter": timedelta(0),
-        }
+        offset = {"Good Friday": timedelta(-2), "Easter": timedelta(0)}
         return date_ == easter(date_.year) + offset[self.name]
 
     def _match_election(self, date_, _):

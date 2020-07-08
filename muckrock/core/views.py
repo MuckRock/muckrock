@@ -93,7 +93,7 @@ class ModelFilterMixin(object):
         if self.filter_class is None:
             raise AttributeError("Missing a filter class.")
         return self.filter_class(
-            self.request.GET, queryset=self.get_queryset(), request=self.request,
+            self.request.GET, queryset=self.get_queryset(), request=self.request
         )
 
     def get_context_data(self, **kwargs):
@@ -286,7 +286,7 @@ class NewsletterSignupView(View):
         path = request.GET.get("next", request.path)
         url = "{}{}".format(settings.MUCKROCK_URL, path)
         primary_error = mailchimp_subscribe(
-            request, email, list_, source="Newsletter Sign Up Form", url=url,
+            request, email, list_, source="Newsletter Sign Up Form", url=url
         )
         # Add the user to the default list if they want to be added.
         # If an error occurred with the first subscription,
@@ -337,7 +337,7 @@ class Homepage(object):
             .get_done()
             .order_by("-datetime_done", "pk")
             .select_related(
-                "agency__jurisdiction__parent__parent", "composer__user__profile",
+                "agency__jurisdiction__parent__parent", "composer__user__profile"
             )
             .only(
                 "status",
@@ -384,11 +384,7 @@ def reset_homepage_cache(request):
     """Reset the homepage cache"""
     # pylint: disable=unused-argument
 
-    template_keys = (
-        "homepage_top",
-        "homepage_bottom",
-        "dropdown_recent_articles",
-    )
+    template_keys = ("homepage_top", "homepage_bottom", "dropdown_recent_articles")
     for key in template_keys:
         cache.delete(make_template_fragment_key(key))
 
@@ -495,7 +491,7 @@ class DonationFormView(StripeFormMixin, FormView):
         """Start a subscription for recurring donations"""
         subscription = None
         quantity = amount / 100
-        customer = stripe_get_customer(email, "Donation for {}".format(email),)
+        customer = stripe_get_customer(email, "Donation for {}".format(email))
         if self.request.user.is_authenticated:
             user = self.request.user
         else:
@@ -514,8 +510,7 @@ class DonationFormView(StripeFormMixin, FormView):
         except stripe.error.StripeError as exception:
             logger.error(exception, exc_info=sys.exc_info())
             messages.error(
-                self.request,
-                "Oops, something went wrong on our end. Sorry about that!",
+                self.request, "Oops, something went wrong on our end. Sorry about that!"
             )
         else:
             RecurringDonation.objects.create(
@@ -525,9 +520,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 customer_id=customer.id,
                 subscription_id=subscription.id,
             )
-            mixpanel_event(
-                self.request, "Recurring Donation", {"Amount": quantity},
-            )
+            mixpanel_event(self.request, "Recurring Donation", {"Amount": quantity})
         return subscription
 
 

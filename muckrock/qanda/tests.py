@@ -25,23 +25,21 @@ class TestQandA(TestCase):
     def test_answer_authors(self):
         """Test answer authors returns correct users"""
         question = QuestionFactory()
-        answer1 = AnswerFactory(question=question, user__username="Alice",)
-        answer2 = AnswerFactory(question=question, user__username="Bob",)
+        answer1 = AnswerFactory(question=question, user__username="Alice")
+        answer2 = AnswerFactory(question=question, user__username="Bob")
         AnswerFactory(
-            question=question, user__username="Charlie", user__is_active=False,
+            question=question, user__username="Charlie", user__is_active=False
         )
-        AnswerFactory(
-            question=question, user=answer1.user,
-        )
+        AnswerFactory(question=question, user=answer1.user)
         nose.tools.eq_(
-            set(question.answer_authors()), set([answer1.user, answer2.user]),
+            set(question.answer_authors()), set([answer1.user, answer2.user])
         )
 
     def test_block_user(self):
         """Test blocking a user"""
         question = QuestionFactory()
         url = reverse(
-            "question-block", kwargs={"model": "question", "model_pk": question.pk,}
+            "question-block", kwargs={"model": "question", "model_pk": question.pk}
         )
         request = RequestFactory().get(url)
         request = mock_middleware(request)
@@ -57,7 +55,7 @@ class TestQandA(TestCase):
         """Test reporting spam"""
         answer = AnswerFactory()
         url = reverse(
-            "question-spam", kwargs={"model": "answer", "model_pk": answer.pk,}
+            "question-spam", kwargs={"model": "answer", "model_pk": answer.pk}
         )
         request = RequestFactory().get(url)
         request = mock_middleware(request)

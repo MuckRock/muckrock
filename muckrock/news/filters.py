@@ -36,7 +36,7 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
     pub_date = django_filters.DateFromToRangeFilter(
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name="tags__name",

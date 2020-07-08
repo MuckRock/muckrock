@@ -14,7 +14,7 @@ import muckrock.accounts.views as views
 
 urlpatterns = [
     url(r"^$", views.AccountsView.as_view(), name="accounts"),
-    url(r"^upgrade/$", views.AccountsUpgradeView.as_view(), name="accounts-upgrade",),
+    url(r"^upgrade/$", views.AccountsUpgradeView.as_view(), name="accounts-upgrade"),
     url(
         r"^signup/$",
         RedirectView.as_view(

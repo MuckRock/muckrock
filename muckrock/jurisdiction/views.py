@@ -129,7 +129,7 @@ def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
     if local_slug:
         jurisdiction = get_object_or_404(
-            Jurisdiction.objects.select_related("parent", "parent__parent",),
+            Jurisdiction.objects.select_related("parent", "parent__parent"),
             level="l",
             slug=local_slug,
             parent__slug=state_slug,
@@ -143,7 +143,7 @@ def detail(request, fed_slug, state_slug, local_slug):
             parent__slug=fed_slug,
         )
     else:
-        jurisdiction = get_object_or_404(Jurisdiction, level="f", slug=fed_slug,)
+        jurisdiction = get_object_or_404(Jurisdiction, level="f", slug=fed_slug)
 
     foia_requests = jurisdiction.get_requests()
     foia_requests = (
@@ -210,7 +210,7 @@ def detail(request, fed_slug, state_slug, local_slug):
         )
     collect_stats(jurisdiction, context)
 
-    return render(request, "jurisdiction/detail.html", context,)
+    return render(request, "jurisdiction/detail.html", context)
 
 
 class List(MRFilterListView):
@@ -221,10 +221,7 @@ class List(MRFilterListView):
     title = "Jurisdictions"
     template_name = "jurisdiction/list.html"
     default_sort = "name"
-    sort_map = {
-        "name": "name",
-        "level": "level",
-    }
+    sort_map = {"name": "name", "level": "level"}
 
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
@@ -298,6 +295,4 @@ class ExemptionListView(MRSearchFilterListView):
     template_name = "jurisdiction/exemption_list.html"
     filter_class = ExemptionFilterSet
     default_sort = "name"
-    sort_map = {
-        "name": "name",
-    }
+    sort_map = {"name": "name"}

@@ -22,13 +22,13 @@ class ManualPortal(object):
         """Send a message via the portal"""
         category, _ = comm.foia.process_manual_send(**kwargs)
         PortalTask.objects.create(
-            category=category, communication=comm, reason=kwargs.get("reason", ""),
+            category=category, communication=comm, reason=kwargs.get("reason", "")
         )
 
     def receive_msg(self, comm, **kwargs):
         """Receive a message from the portal"""
         PortalTask.objects.create(
-            category="i", communication=comm, reason=kwargs.get("reason", ""),
+            category="i", communication=comm, reason=kwargs.get("reason", "")
         )
 
     def get_new_password(self):

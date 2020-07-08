@@ -19,10 +19,7 @@ class TagAutocomplete(autocomplete_light.AutocompleteModelBase):
         num=0
     )
     search_fields = ["name"]
-    attrs = {
-        "data-autocomplete-minimum-characters": 1,
-        "placeholder": "Search tags",
-    }
+    attrs = {"data-autocomplete-minimum-characters": 1, "placeholder": "Search tags"}
 
 
 class TagSlugAutocomplete(TagAutocomplete):

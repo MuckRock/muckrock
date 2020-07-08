@@ -23,7 +23,7 @@ def get_email_or_fax(email_or_fax):
         if not phonenumbers.is_valid_number(number):
             raise ValidationError("Invalid email or fax")
         phone, _ = PhoneNumber.objects.update_or_create(
-            number=number, defaults={"type": "fax"},
+            number=number, defaults={"type": "fax"}
         )
         return phone
     except phonenumbers.NumberParseException:

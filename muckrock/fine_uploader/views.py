@@ -57,13 +57,13 @@ def _success(request, model, attachment_model, fk_name):
 @login_required
 def success_request(request):
     """"File has been succesfully uploaded to a FOIA"""
-    return _success(request, FOIARequest, OutboundRequestAttachment, "foia",)
+    return _success(request, FOIARequest, OutboundRequestAttachment, "foia")
 
 
 @login_required
 def success_composer(request):
     """"File has been succesfully uploaded to a composer"""
-    return _success(request, FOIAComposer, OutboundComposerAttachment, "composer",)
+    return _success(request, FOIAComposer, OutboundComposerAttachment, "composer")
 
 
 @login_required
@@ -146,7 +146,7 @@ def _delete(request, model):
     """Delete a pending attachment"""
     try:
         attm = model.objects.get(
-            ffile=request.POST.get("key"), user=request.user, sent=False,
+            ffile=request.POST.get("key"), user=request.user, sent=False
         )
     except model.DoesNotExist:
         return HttpResponseBadRequest()
@@ -210,13 +210,10 @@ def _sign_policy_document(policy_document):
     policy = base64.b64encode(json.dumps(policy_document).encode("utf8"))
     signature = base64.b64encode(
         hmac.new(
-            settings.AWS_SECRET_ACCESS_KEY.encode("utf8"), policy, hashlib.sha1,
+            settings.AWS_SECRET_ACCESS_KEY.encode("utf8"), policy, hashlib.sha1
         ).digest()
     )
-    return {
-        "policy": policy.decode("utf8"),
-        "signature": signature.decode("utf8"),
-    }
+    return {"policy": policy.decode("utf8"), "signature": signature.decode("utf8")}
 
 
 def _sign_headers(headers):
@@ -255,7 +252,7 @@ def _key_name(request, model, id_name):
     attached_id = request.POST.get("id")
     name = _key_name_trim(name)
     attachment = model(user=request.user, **{id_name: attached_id})
-    key = attachment.ffile.field.generate_filename(attachment.ffile.instance, name,)
+    key = attachment.ffile.field.generate_filename(attachment.ffile.instance, name)
     key = default_storage.get_available_name(key)
     return JsonResponse({"key": key})
 
@@ -278,7 +275,7 @@ def key_name_comm(request):
     name = request.POST.get("name")
     name = _key_name_trim(name)
     file_ = FOIAFile()
-    key = file_.ffile.field.generate_filename(file_.ffile.instance, name,)
+    key = file_.ffile.field.generate_filename(file_.ffile.instance, name)
     key = default_storage.get_available_name(key)
     return JsonResponse({"key": key})
 

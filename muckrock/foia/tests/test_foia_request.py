@@ -56,7 +56,7 @@ class RunCommitHooksMixin(object):
                 "validate_no_atomic_block",
                 lambda a: False,
             ):
-                transaction.get_connection(using=db_name,).run_and_clear_commit_hooks()
+                transaction.get_connection(using=db_name).run_and_clear_commit_hooks()
 
 
 class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
@@ -98,9 +98,9 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         user2 = UserFactory()
 
         foias = [
-            FOIARequestFactory(composer__user=user1, status="done", embargo=False,),
-            FOIARequestFactory(composer__user=user1, status="done", embargo=True,),
-            FOIARequestFactory(composer__user=user1, status="done", embargo=True,),
+            FOIARequestFactory(composer__user=user1, status="done", embargo=False),
+            FOIARequestFactory(composer__user=user1, status="done", embargo=True),
+            FOIARequestFactory(composer__user=user1, status="done", embargo=True),
         ]
         foias[2].add_viewer(user2)
 
@@ -142,7 +142,7 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         """Test all the viewable and embargo functions"""
         user = UserFactory()
         foia = FOIARequestFactory(
-            embargo=True, composer__organization=user.profile.organization,
+            embargo=True, composer__organization=user.profile.organization
         )
         foias = FOIARequest.objects.get_viewable(user)
         nose.tools.assert_not_in(foia, foias)
@@ -171,9 +171,7 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
             agency__jurisdiction__level="s",
             agency__jurisdiction__law__days=10,
         )
-        FOIACommunicationFactory(
-            foia=foia, response=True,
-        )
+        FOIACommunicationFactory(foia=foia, response=True)
         foia.followup()
         self.run_commit_hooks()
         nose.tools.assert_in("I can expect", mail.outbox[-1].body)
@@ -215,7 +213,7 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
             else:
                 nose.tools.assert_in(
                     foia.status,
-                    ["submitted", "processed", "fix", "rejected", "payment",],
+                    ["submitted", "processed", "fix", "rejected", "payment"],
                 )
 
     def test_soft_delete(self):
@@ -295,11 +293,11 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
 
             # make sure dates were set correctly
             nose.tools.eq_(
-                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc),
+                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc)
             )
             nose.tools.eq_(
                 foia.date_due,
-                cal.business_days_from(date(2010, 2, 1), agency.jurisdiction.days,),
+                cal.business_days_from(date(2010, 2, 1), agency.jurisdiction.days),
             )
             nose.tools.eq_(
                 foia.date_followup,
@@ -331,7 +329,7 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
 
             # make sure dates were set correctly
             nose.tools.eq_(
-                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc),
+                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc)
             )
             nose.tools.ok_(foia.date_due is None)
             nose.tools.ok_(foia.date_followup is None)
@@ -369,7 +367,7 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
 
             # make sure dates were set correctly
             nose.tools.eq_(
-                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc),
+                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc)
             )
             nose.tools.eq_(
                 foia.date_due, cal.business_days_from(date.today(), old_days_until_due)
@@ -402,7 +400,7 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
 
             # make sure dates were set correctly
             nose.tools.eq_(
-                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc),
+                foia.composer.datetime_submitted, datetime(2010, 2, 1, tzinfo=pytz.utc)
             )
             nose.tools.eq_(foia.date_due, old_date_due)
             nose.tools.ok_(foia.date_followup is None)

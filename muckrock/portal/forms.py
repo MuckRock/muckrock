@@ -14,15 +14,15 @@ class PortalChoiceField(forms.ModelChoiceField):
     """Choice field to display more information about the portal"""
 
     def label_from_instance(self, obj):
-        return "{} ({}) <{}>".format(obj.name, obj.get_type_display(), obj.url,)
+        return "{} ({}) <{}>".format(obj.name, obj.get_type_display(), obj.url)
 
 
 class PortalForm(forms.Form):
     """Add an existing or new portal to a request"""
 
-    portal = PortalChoiceField(queryset=Portal.objects.none(), required=False,)
-    url = forms.URLField(label="URL", required=False,)
-    name = forms.CharField(max_length=255, required=False,)
+    portal = PortalChoiceField(queryset=Portal.objects.none(), required=False)
+    url = forms.URLField(label="URL", required=False)
+    name = forms.CharField(max_length=255, required=False)
     type = forms.ChoiceField(choices=PORTAL_TYPES, required=False)
 
     def __init__(self, *args, **kwargs):

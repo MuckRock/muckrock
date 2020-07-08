@@ -94,9 +94,7 @@ class SearchForm(forms.Form):
 
     # pylint: disable=invalid-name
     q = forms.CharField(
-        required=False,
-        label="Search",
-        widget=forms.TextInput(attrs={"type": "search",}),
+        required=False, label="Search", widget=forms.TextInput(attrs={"type": "search"})
     )
 
 
@@ -120,6 +118,4 @@ class StripeForm(forms.Form):
         initial=True, required=False, widget=forms.HiddenInput
     )
     stripe_amount = forms.IntegerField(min_value=0)
-    type = forms.ChoiceField(
-        choices=(("one-time", "One Time"), ("monthly", "Monthly"),)
-    )
+    type = forms.ChoiceField(choices=(("one-time", "One Time"), ("monthly", "Monthly")))

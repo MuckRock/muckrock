@@ -160,7 +160,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         logger.warn("Upload Doc Cloud error: %s %s", url, doc.pk)
         countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
         upload_document_cloud.retry(
-            args=[doc.pk, change], kwargs=kwargs, exc=exc, countdown=countdown,
+            args=[doc.pk, change], kwargs=kwargs, exc=exc, countdown=countdown
         )
 
 
@@ -223,12 +223,10 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
     )
     with transaction.atomic():
         for agency in composer.agencies.select_related(
-            "jurisdiction__law", "jurisdiction__parent__law",
+            "jurisdiction__law", "jurisdiction__parent__law"
         ).iterator():
             logger.info("Creating the foia for agency (%s, %s)", agency.pk, agency.name)
-            FOIARequest.objects.create_new(
-                composer=composer, agency=agency,
-            )
+            FOIARequest.objects.create_new(composer=composer, agency=agency)
         # mark all attachments as sent here, after all requests have been sent
         composer.pending_attachments.filter(user=composer.user, sent=False).update(
             sent=True
@@ -309,9 +307,7 @@ def classify_status(task_pk, **kwargs):
             try:
                 ml_robot = User.objects.get(username="mlrobot")
                 resp_task.set_status(resp_task.predicted_status)
-                resp_task.resolve(
-                    ml_robot, {"status": resp_task.predicted_status},
-                )
+                resp_task.resolve(ml_robot, {"status": resp_task.predicted_status})
             except User.DoesNotExist:
                 logger.error("mlrobot account does not exist")
 
@@ -353,7 +349,7 @@ def classify_status(task_pk, **kwargs):
 )
 def send_fax(comm_id, subject, body, error_count, **kwargs):
     """Send a fax using the Phaxio API"""
-    api = PhaxioApi(settings.PHAXIO_KEY, settings.PHAXIO_SECRET, raise_errors=True,)
+    api = PhaxioApi(settings.PHAXIO_KEY, settings.PHAXIO_SECRET, raise_errors=True)
 
     try:
         comm = FOIACommunication.objects.get(pk=comm_id)
@@ -366,10 +362,10 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
         )
 
     files = [f.ffile for f in comm.files.all()]
-    callback_url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"),)
+    callback_url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"))
 
     fax = FaxCommunication.objects.create(
-        communication=comm, sent_datetime=timezone.now(), to_number=comm.foia.fax,
+        communication=comm, sent_datetime=timezone.now(), to_number=comm.foia.fax
     )
     try:
         results = api.send(
@@ -382,7 +378,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             batch_delay=settings.PHAXIO_BATCH_DELAY,
             batch_collision_avoidance=True,
             callback_url=callback_url,
-            **{"tag[fax_id]": fax.pk, "tag[error_count]": error_count,}
+            **{"tag[fax_id]": fax.pk, "tag[error_count]": error_count}
         )
         fax.fax_id = results["faxId"]
         fax.save()
@@ -398,18 +394,16 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             (
                 "Phone number is not formatted correctly or invalid. "
                 "Please check the number and try again."
-            ),
+            )
         }
         if exc.args[0] in fatal_errors:
             comm.foia.fax.status = "error"
             comm.foia.fax.save()
             ReviewAgencyTask.objects.ensure_one_created(
-                agency=comm.foia.agency, resolved=False,
+                agency=comm.foia.agency, resolved=False
             )
         else:
-            logger.error(
-                "Send fax error, will retry: %s", exc, exc_info=sys.exc_info(),
-            )
+            logger.error("Send fax error, will retry: %s", exc, exc_info=sys.exc_info())
             send_fax.retry(
                 countdown=300,
                 args=[comm_id, subject, body, error_count],
@@ -610,7 +604,7 @@ def autoimport():
             access=access,
         )
         full_file_name = foia_file.ffile.field.generate_filename(
-            foia_file.ffile.instance, file_name,
+            foia_file.ffile.instance, file_name
         )
         full_file_name = default_storage.get_available_name(full_file_name)
         new_key = key.copy(storage_bucket, full_file_name)
@@ -687,7 +681,7 @@ def autoimport():
                     )
                     comm.responsetask_set.create(scan=True)
                     MailCommunication.objects.create(
-                        communication=comm, sent_datetime=file_datetime,
+                        communication=comm, sent_datetime=file_datetime
                     )
 
                     if key.name.endswith("/"):
@@ -749,7 +743,7 @@ class ExportCsv(AsyncFileDownloadTask):
         (lambda f: settings.MUCKROCK_URL + f.get_absolute_url(), "URL"),
         (lambda f: f.jurisdiction.name, "Jurisdiction"),
         (lambda f: f.jurisdiction.pk, "Jurisdiction ID"),
-        (lambda f: f.jurisdiction.get_level_display(), "Jurisdiction Level",),
+        (lambda f: f.jurisdiction.get_level_display(), "Jurisdiction Level"),
         (
             lambda f: f.jurisdiction.parent.name
             if f.jurisdiction.level == "l"
@@ -779,7 +773,7 @@ class ExportCsv(AsyncFileDownloadTask):
         )
         self.foias = (
             FOIARequest.objects.filter(pk__in=foia_pks)
-            .select_related("composer__user", "agency__jurisdiction__parent",)
+            .select_related("composer__user", "agency__jurisdiction__parent")
             .only(
                 "composer__user__username",
                 "title",
@@ -817,9 +811,7 @@ class ExportCsv(AsyncFileDownloadTask):
             writer.writerow(f[0](foia) for f in self.fields)
 
 
-@task(
-    ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.export_csv",
-)
+@task(ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.export_csv")
 def export_csv(foia_pks, user_pk):
     """Export a csv of the selected FOIA requests"""
     ExportCsv(user_pk, foia_pks).run()
@@ -860,16 +852,14 @@ class ZipRequest(AsyncFileDownloadTask):
                 out_file.write(data)
 
 
-@task(
-    ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.zip_request",
-)
+@task(ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.zip_request")
 def zip_request(foia_pk, user_pk):
     """Send a user a zip download of their request"""
     ZipRequest(user_pk, foia_pk).run()
 
 
 @periodic_task(
-    run_every=crontab(hour=1, minute=0), name="muckrock.foia.tasks.clean_export_csv",
+    run_every=crontab(hour=1, minute=0), name="muckrock.foia.tasks.clean_export_csv"
 )
 def clean_export_csv():
     """Clean up exported CSVs and request zips that are more than 5 days old"""
@@ -877,7 +867,7 @@ def clean_export_csv():
     p_csv = re.compile(
         r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results)\.(?:csv|zip)"
     )
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,)
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     older_than = date.today() - timedelta(5)
     for prefix in ["exported_csv/", "zip_request/"]:
@@ -942,9 +932,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     if category == "p":
         check_address = comm.foia.agency.get_addresses("check").first()
         if check_address is None:
-            PaymentInfoTask.objects.create(
-                communication=comm, amount=extra["amount"],
-            )
+            PaymentInfoTask.objects.create(communication=comm, amount=extra["amount"])
             return
 
     for test, reason in [

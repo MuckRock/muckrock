@@ -67,7 +67,7 @@ class EmailCommunicationFactory(factory.django.DjangoModelFactory):
     sent_datetime = timezone.now() - timedelta(3)
     from_email = factory.SubFactory(EmailAddressFactory)
     raw_email = factory.RelatedFactory(
-        "muckrock.foia.factories.RawEmailFactory", "email",
+        "muckrock.foia.factories.RawEmailFactory", "email"
     )
 
 

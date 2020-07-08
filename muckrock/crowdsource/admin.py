@@ -26,10 +26,10 @@ class CrowdsourceAdminForm(forms.ModelForm):
     """Form for Crowdsource admin"""
 
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all()
     )
     project = autocomplete_light.ModelChoiceField(
-        "ProjectAutocomplete", queryset=Project.objects.all(), required=False,
+        "ProjectAutocomplete", queryset=Project.objects.all(), required=False
     )
     submission_emails = autocomplete_light.ModelMultipleChoiceField(
         "EmailAddressAdminAutocomplete",
@@ -46,7 +46,7 @@ class CrowdsourceResponseAdminForm(forms.ModelForm):
     """Form for Crowdsource response admin"""
 
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all()
     )
 
     class Meta:
@@ -86,18 +86,13 @@ class CrowdsourceFieldAdmin(admin.ModelAdmin):
     """Crowdsource field options"""
 
     inlines = (CrowdsourceChoiceInline,)
-    fields = (
-        "cs_link",
-        "label",
-        "type",
-        "order",
-    )
+    fields = ("cs_link", "label", "type", "order")
     readonly_fields = ("cs_link",)
 
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
         link = reverse(
-            "admin:crowdsource_crowdsource_change", args=(obj.crowdsource.pk,),
+            "admin:crowdsource_crowdsource_change", args=(obj.crowdsource.pk,)
         )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
 
@@ -117,18 +112,13 @@ class CrowdsourceResponseAdmin(admin.ModelAdmin):
 
     form = CrowdsourceResponseAdminForm
     inlines = (CrowdsourceValueInline,)
-    fields = (
-        "cs_link",
-        "user",
-        "datetime",
-        "data",
-    )
+    fields = ("cs_link", "user", "datetime", "data")
     readonly_fields = ("cs_link", "data")
 
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
         link = reverse(
-            "admin:crowdsource_crowdsource_change", args=(obj.crowdsource.pk,),
+            "admin:crowdsource_crowdsource_change", args=(obj.crowdsource.pk,)
         )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
 

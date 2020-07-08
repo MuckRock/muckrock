@@ -15,7 +15,7 @@ from muckrock.foia.models import FOIASavedSearch, SearchJurisdiction
 class SaveSearchForm(forms.Form):
     """A form to save search/filter params in a list view"""
 
-    search_title = forms.CharField(label="Save Search", required=False,)
+    search_title = forms.CharField(label="Save Search", required=False)
 
 
 class SaveSearchFormHandler(object):
@@ -93,7 +93,7 @@ class SaveSearchFormHandler(object):
         saved_search.searchjurisdiction_set.all().delete()
         for jid, include_local in cleaned_data.get("jurisdiction", []):
             SearchJurisdiction.objects.create(
-                search=saved_search, jurisdiction_id=jid, include_local=include_local,
+                search=saved_search, jurisdiction_id=jid, include_local=include_local
             )
 
         return saved_search

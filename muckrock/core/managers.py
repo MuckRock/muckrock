@@ -31,8 +31,8 @@ class MRActionManager(ActionManager):
         else:
             return self.public(
                 (
-                    Q(actor_content_type=ctype, actor_object_id__in=pks,)
-                    | Q(target_content_type=ctype, target_object_id__in=pks,)
+                    Q(actor_content_type=ctype, actor_object_id__in=pks)
+                    | Q(target_content_type=ctype, target_object_id__in=pks)
                     | Q(
                         action_object_content_type=ctype,
                         action_object_object_id__in=pks,

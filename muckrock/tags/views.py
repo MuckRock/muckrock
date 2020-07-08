@@ -76,7 +76,7 @@ class TagDetailView(DetailView):
             "tagged_articles",
             Article.objects.get_published()
             .filter(tags=this_tag)
-            .prefetch_related("authors", "authors__profile", "projects",),
+            .prefetch_related("authors", "authors__profile", "projects"),
         )
         self._get_and_count(
             context,

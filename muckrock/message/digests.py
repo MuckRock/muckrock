@@ -288,7 +288,7 @@ class StaffDigest(Digest):
         """Returns the trailing cost for communications over a period"""
         period = [current - relativedelta(days=duration), current]
         filters = Q(
-            communication__datetime__range=period, communication__response=False,
+            communication__datetime__range=period, communication__response=False
         )
         trailing = {
             "email": EmailCommunication.objects.filter(filters).count(),
@@ -305,18 +305,14 @@ class StaffDigest(Digest):
     def get_comms(self, start, end):
         """Returns communication data over a date range"""
         filters = Q(
-            communication__datetime__range=[start, end], communication__response=False,
+            communication__datetime__range=[start, end], communication__response=False
         )
         delivered_by = {
             "email": EmailCommunication.objects.filter(filters).count(),
             "fax": FaxCommunication.objects.filter(filters).count(),
             "mail": MailCommunication.objects.filter(filters).count(),
         }
-        cost_per = {
-            "email": 0.00,
-            "fax": 0.09,
-            "mail": 0.54,
-        }
+        cost_per = {"email": 0.00, "fax": 0.09, "mail": 0.54}
         cost = {
             "email": delivered_by["email"] * cost_per["email"],
             "fax": delivered_by["fax"] * cost_per["fax"],
@@ -348,10 +344,7 @@ class StaffDigest(Digest):
             previous_month = Statistics.objects.get(date=end - relativedelta(months=1))
         except Statistics.DoesNotExist:
             return None  # if statistics cannot be found, don't send anything
-        data = {
-            "request": [],
-            "user": [],
-        }
+        data = {"request": [], "user": []}
         stats = [
             ("request", "Requests", "total_requests", True),
             ("request", "Pages", "total_pages", True),
@@ -426,7 +419,7 @@ class StaffDigest(Digest):
         stale_tasks = OrderedDict()
         stale_tasks["Processing Requests"] = (
             FOIARequest.objects.filter(
-                status="submitted", date_processing__lt=(date.today() - timedelta(5)),
+                status="submitted", date_processing__lt=(date.today() - timedelta(5))
             )
             .order_by("date_processing")
             .annotate(days_old=ExtractDay(Now() - F("date_processing")))

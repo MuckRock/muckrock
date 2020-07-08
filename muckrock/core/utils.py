@@ -120,7 +120,7 @@ def get_stripe_token(card_number="4242424242424242"):
         "exp_year": datetime.date.today().year,
         "cvc": "123",
     }
-    token = stripe_retry_on_error(stripe.Token.create, card=card, idempotency_key=True,)
+    token = stripe_retry_on_error(stripe.Token.create, card=card, idempotency_key=True)
     # all we need for testing stripe calls is the token id
     return token.id
 
@@ -148,9 +148,7 @@ def retry_on_error(error, func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
     except error as exc:
-        logger.warn(
-            "Error, retrying #%d:\n\n%s", times, exc, exc_info=sys.exc_info(),
-        )
+        logger.warn("Error, retrying #%d:\n\n%s", times, exc, exc_info=sys.exc_info())
         return retry_on_error(error, func, times=times, *args, **kwargs)
 
 
@@ -172,12 +170,12 @@ class TempDisconnectSignal(object):
 
     def __enter__(self):
         self.signal.disconnect(
-            receiver=self.receiver, sender=self.sender, dispatch_uid=self.dispatch_uid,
+            receiver=self.receiver, sender=self.sender, dispatch_uid=self.dispatch_uid
         )
 
     def __exit__(self, type_, value, traceback):
         self.signal.connect(
-            receiver=self.receiver, sender=self.sender, dispatch_uid=self.dispatch_uid,
+            receiver=self.receiver, sender=self.sender, dispatch_uid=self.dispatch_uid
         )
 
 
@@ -248,10 +246,7 @@ def squarelet_get(path, params=None):
 def _zoho(method, path, **kwargs):
     """Helper function for zoho requests"""
     api_url = "{}{}".format(settings.ZOHO_URL, path)
-    headers = {
-        "Authorization": settings.ZOHO_TOKEN,
-        "orgId": settings.ZOHO_ORG_ID,
-    }
+    headers = {"Authorization": settings.ZOHO_TOKEN, "orgId": settings.ZOHO_ORG_ID}
     return method(api_url, headers=headers, **kwargs)
 
 
@@ -269,7 +264,7 @@ def zoho_get(path, params=None):
 
 def get_s3_storage_bucket():
     """Return the S3 storage bucket"""
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,)
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     return conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
 
@@ -279,7 +274,7 @@ def clear_cloudfront_cache(file_names):
         # invalidation fails if file names is empty
         return
     cloudfront = boto.connect_cloudfront(
-        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,
+        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
     )
     # find the current distribution
     distributions = [
@@ -289,6 +284,4 @@ def clear_cloudfront_cache(file_names):
     ]
     if distributions:
         distribution = distributions[0]
-        cloudfront.create_invalidation_request(
-            distribution.id, file_names,
-        )
+        cloudfront.create_invalidation_request(distribution.id, file_names)

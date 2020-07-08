@@ -137,7 +137,7 @@ class NewsExploreView(TemplateView):
             "hp:articles",
             lambda: (
                 Article.objects.get_published().prefetch_related(
-                    "authors", "authors__profile", "projects",
+                    "authors", "authors__profile", "projects"
                 )[:5]
             ),
             600,

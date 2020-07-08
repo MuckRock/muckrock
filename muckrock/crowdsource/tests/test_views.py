@@ -136,7 +136,7 @@ class TestCrowdsourceFormView(TestCase):
         """Everybody cannot fill out a private assignment"""
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(
-            status="open", project_only=True, project=project,
+            status="open", project_only=True, project=project
         )
         url = reverse(
             "crowdsource-assignment",
@@ -152,7 +152,7 @@ class TestCrowdsourceFormView(TestCase):
         """Project members can fill out a private assignment"""
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(
-            status="open", project_only=True, project=project,
+            status="open", project_only=True, project=project
         )
         url = reverse(
             "crowdsource-assignment",
@@ -169,7 +169,7 @@ class TestCrowdsourceFormView(TestCase):
         """Crowdsource owner can fill out a private assignment"""
         project = ProjectFactory()
         crowdsource = CrowdsourceFactory(
-            status="open", project_only=True, project=project,
+            status="open", project_only=True, project=project
         )
         url = reverse(
             "crowdsource-assignment",
@@ -193,9 +193,7 @@ class TestCrowdsourceFormView(TestCase):
         assert_true(view._has_assignment(crowdsource, user, None))
 
         # the user replied, they may not reply again
-        CrowdsourceResponseFactory(
-            crowdsource=crowdsource, user=user,
-        )
+        CrowdsourceResponseFactory(crowdsource=crowdsource, user=user)
         assert_false(view._has_assignment(crowdsource, user, None))
 
         # the ip address hasn't replied yet, should have an assignment
@@ -203,7 +201,7 @@ class TestCrowdsourceFormView(TestCase):
 
         # the ip address replied, they may not reply again
         CrowdsourceResponseFactory(
-            crowdsource=crowdsource, user=None, ip_address=ip_address,
+            crowdsource=crowdsource, user=None, ip_address=ip_address
         )
         assert_false(view._has_assignment(crowdsource, AnonymousUser(), ip_address))
 
@@ -221,9 +219,7 @@ class TestCrowdsourceFormView(TestCase):
         assert_true(view._has_assignment(crowdsource, user, None))
 
         # the user replied, they may reply again
-        CrowdsourceResponseFactory(
-            crowdsource=crowdsource, user=user,
-        )
+        CrowdsourceResponseFactory(crowdsource=crowdsource, user=user)
         assert_true(view._has_assignment(crowdsource, user, None))
 
         # the ip address hasn't replied yet, should have an assignment
@@ -231,6 +227,6 @@ class TestCrowdsourceFormView(TestCase):
 
         # the ip address replied, they may reply again
         CrowdsourceResponseFactory(
-            crowdsource=crowdsource, user=None, ip_address=ip_address,
+            crowdsource=crowdsource, user=None, ip_address=ip_address
         )
         assert_true(view._has_assignment(crowdsource, AnonymousUser(), ip_address))

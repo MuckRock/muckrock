@@ -69,7 +69,7 @@ def _make_orphan_comm(from_email, to_emails, cc_emails, subject, post, files, fo
         likely_foia=foia,
     )
     email_comm = EmailCommunication.objects.create(
-        communication=comm, sent_datetime=timezone.now(), from_email=from_email,
+        communication=comm, sent_datetime=timezone.now(), from_email=from_email
     )
     email_comm.to_emails.set(to_emails)
     email_comm.cc_emails.set(cc_emails)
@@ -134,7 +134,7 @@ def get_common_webhook_params(allow_empty_email=False):
             email_id = request.POST.get("email_id")
             timestamp = request.POST["timestamp"]
             timestamp = datetime.fromtimestamp(
-                int(timestamp), tz=timezone.get_current_timezone(),
+                int(timestamp), tz=timezone.get_current_timezone()
             )
 
             if email_id:
@@ -146,7 +146,7 @@ def get_common_webhook_params(allow_empty_email=False):
                 function(request, email_comm, timestamp)
             else:
                 logger.warning(
-                    "No email comm for %s webhook: %s", function.__name__, request.POST,
+                    "No email comm for %s webhook: %s", function.__name__, request.POST
                 )
 
             return HttpResponse("OK")
@@ -243,7 +243,7 @@ def _handle_request(request, mail_id):
         if not email_allowed or foia.block_incoming:
             logger.warning("%s: %s", msg, from_email)
             comm = _make_orphan_comm(
-                from_email, to_emails, cc_emails, subject, post, request.FILES, foia,
+                from_email, to_emails, cc_emails, subject, post, request.FILES, foia
             )
             OrphanTask.objects.create(
                 reason=reason, communication=comm, address=mail_id
@@ -252,9 +252,7 @@ def _handle_request(request, mail_id):
 
         # if this isn't a known email for this agency, add it
         if not from_email.agencies.filter(pk=foia.agency.pk).exists():
-            AgencyEmail.objects.create(
-                agency=foia.agency, email=from_email,
-            )
+            AgencyEmail.objects.create(agency=foia.agency, email=from_email)
 
         # if this request is using a portal, hide the incoming messages
         hidden = foia.portal is not None
@@ -271,7 +269,7 @@ def _handle_request(request, mail_id):
                 hidden=hidden,
             )
             email_comm = EmailCommunication.objects.create(
-                communication=comm, sent_datetime=timezone.now(), from_email=from_email,
+                communication=comm, sent_datetime=timezone.now(), from_email=from_email
             )
             email_comm.to_emails.set(to_emails)
             email_comm.cc_emails.set(cc_emails)
@@ -300,7 +298,7 @@ def _handle_request(request, mail_id):
                 category="agency new email",
                 text="We received an email from {} for a request to this "
                 "agency, but this agency does not currently have a primary "
-                "email address set".format(from_email,),
+                "email address set".format(from_email),
             )
 
         comm.extract_tracking_id()
@@ -332,7 +330,7 @@ def _handle_request(request, mail_id):
         except FOIARequest.DoesNotExist:
             foia = None
         comm = _make_orphan_comm(
-            from_email, to_emails, cc_emails, subject, post, request.FILES, foia,
+            from_email, to_emails, cc_emails, subject, post, request.FILES, foia
         )
         OrphanTask.objects.create(reason="ia", communication=comm, address=mail_id)
         return HttpResponse("WARNING")
@@ -340,10 +338,7 @@ def _handle_request(request, mail_id):
         # If anything I haven't accounted for happens, at the very least forward
         # the email to requests so it isn't lost
         logger.error(
-            "Uncaught Mailgun Exception - %s: %s",
-            mail_id,
-            exc,
-            exc_info=sys.exc_info(),
+            "Uncaught Mailgun Exception - %s: %s", mail_id, exc, exc_info=sys.exc_info()
         )
         _forward(post, request.FILES, "Uncaught Mailgun Exception", info=True)
         return HttpResponse("ERROR")
@@ -365,7 +360,7 @@ def _catch_all(request, address):
 
     if from_email.allowed():
         comm = _make_orphan_comm(
-            from_email, to_emails, cc_emails, subject, post, request.FILES, foia,
+            from_email, to_emails, cc_emails, subject, post, request.FILES, foia
         )
         OrphanTask.objects.create(reason="ia", communication=comm, address=address)
 
@@ -420,7 +415,7 @@ def bounces(request, email_comm, timestamp):
     recipient.status = "error"
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
-        agency=email_comm.communication.foia.agency, resolved=False,
+        agency=email_comm.communication.foia.agency, resolved=False
     )
 
     # ensure we don't create an infinite loop of emails
@@ -438,9 +433,7 @@ def bounces(request, email_comm, timestamp):
             foia.email,
         )
     elif not foia_email_is_error:
-        logger.warn(
-            "Bounce: foia email is not marked as error: %s", foia.email,
-        )
+        logger.warn("Bounce: foia email is not marked as error: %s", foia.email)
     elif not recipient_is_cc:
         # if the foia email matches and is not a CC, we resubmit
         # in order to fall back to fax or snail mail
@@ -482,7 +475,7 @@ def delivered(_request, email_comm, timestamp):
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
     # pylint: disable=too-many-branches
-    url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"),)
+    url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"))
     if not _validate_phaxio(
         settings.PHAXIO_CALLBACK_TOKEN,
         url,
@@ -503,13 +496,11 @@ def phaxio_callback(request):
         fax_comm = None
 
     if not fax_comm:
-        logger.warning(
-            "No fax comm for phaxio callback: %s", request.POST,
-        )
+        logger.warning("No fax comm for phaxio callback: %s", request.POST)
     else:
         if "completed_at" in fax_info:
             date = datetime.fromtimestamp(
-                int(fax_info["completed_at"]), tz=timezone.get_current_timezone(),
+                int(fax_info["completed_at"]), tz=timezone.get_current_timezone()
             )
         else:
             date = timezone.now()
@@ -519,7 +510,7 @@ def phaxio_callback(request):
         else:
             for recipient in fax_info["recipients"]:
                 number, _ = PhoneNumber.objects.get_or_create(
-                    number=recipient["number"], defaults={"type": "fax"},
+                    number=recipient["number"], defaults={"type": "fax"}
                 )
                 FaxError.objects.create(
                     fax=fax_comm,
@@ -553,7 +544,7 @@ def phaxio_callback(request):
                     number.status = "error"
                     number.save()
                     ReviewAgencyTask.objects.ensure_one_created(
-                        agency=fax_comm.communication.foia.agency, resolved=False,
+                        agency=fax_comm.communication.foia.agency, resolved=False
                     )
                     fax_comm.communication.foia.submit(switch=True)
 
@@ -574,7 +565,7 @@ def _validate_phaxio(token, url, parameters, files, signature):
         url += "{}{}".format(filename, file_hash.hexdigest())
 
     digest = hmac.new(
-        key=token.encode("utf-8"), msg=url.encode("utf-8"), digestmod=hashlib.sha1,
+        key=token.encode("utf-8"), msg=url.encode("utf-8"), digestmod=hashlib.sha1
     ).hexdigest()
     return signature == digest
 
@@ -659,10 +650,10 @@ def _detect_portal(comm, email, post):
         else:
             match = email == portal_email
         if match:
-            return NewPortalTask.objects.create(communication=comm, portal_type=type_,)
+            return NewPortalTask.objects.create(communication=comm, portal_type=type_)
 
         for type_, detector in portal_detectors:
             if detector(post):
                 return NewPortalTask.objects.create(
-                    communication=comm, portal_type=type_,
+                    communication=comm, portal_type=type_
                 )

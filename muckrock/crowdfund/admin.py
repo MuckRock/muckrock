@@ -49,7 +49,7 @@ class RecurringCrowdfundPaymentAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
 
     class Meta:
@@ -102,6 +102,4 @@ class RecurringCrowdfundPaymentAdmin(VersionAdmin):
 
 
 admin.site.register(models.Crowdfund, CrowdfundAdmin)
-admin.site.register(
-    models.RecurringCrowdfundPayment, RecurringCrowdfundPaymentAdmin,
-)
+admin.site.register(models.RecurringCrowdfundPayment, RecurringCrowdfundPaymentAdmin)

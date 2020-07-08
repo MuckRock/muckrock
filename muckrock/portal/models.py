@@ -20,11 +20,11 @@ PORTAL_TYPES = [
 class Portal(models.Model):
     """An instance of an agency portal"""
 
-    url = models.URLField(max_length=255, unique=True,)
+    url = models.URLField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
-    type = models.CharField(choices=PORTAL_TYPES, max_length=11,)
+    type = models.CharField(choices=PORTAL_TYPES, max_length=11)
     status = models.CharField(
-        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good",
+        max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
     created_timestamp = models.DateTimeField(auto_now_add=True)
 

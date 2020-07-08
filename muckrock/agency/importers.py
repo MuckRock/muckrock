@@ -64,7 +64,7 @@ def import_schools(file_name):
             try:
                 parent = Jurisdiction.objects.get(abbrev=row[STATE])
                 county = Jurisdiction.objects.get(
-                    name="%s County" % row[COUNTY], parent=parent, level="l",
+                    name="%s County" % row[COUNTY], parent=parent, level="l"
                 )
             except (
                 Jurisdiction.DoesNotExist,
@@ -100,18 +100,16 @@ def import_schools(file_name):
                     )
                 )
                 AgencyAddress.objects.get_or_create(
-                    agency=agency, address=address, request_type="primary",
+                    agency=agency, address=address, request_type="primary"
                 )
                 number = row[PHONE]
                 if number:
                     if row[EXT]:
                         number += " x%s" % row[EXT]
                     phone, _ = PhoneNumber.objects.get_or_create(
-                        number=number, type="phone",
+                        number=number, type="phone"
                     )
-                    AgencyPhone.objects.get_or_create(
-                        agency=agency, phone=phone,
-                    )
+                    AgencyPhone.objects.get_or_create(agency=agency, phone=phone)
                 if row[EMAIL]:
                     email = EmailAddress.objects.fetch(row[EMAIL])
                     AgencyEmail.objects.get_or_create(

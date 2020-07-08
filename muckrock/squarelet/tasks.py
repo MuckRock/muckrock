@@ -20,14 +20,8 @@ logger = logging.getLogger(__name__)
 @task(name="muckrock.squarelet.tasks.pull_data")
 def pull_data(type_, uuid, **kwargs):
     """Task to pull data from squarelet"""
-    types_url = {
-        "user": "users",
-        "organization": "organizations",
-    }
-    types_model = {
-        "user": Profile,
-        "organization": Organization,
-    }
+    types_url = {"user": "users", "organization": "organizations"}
+    types_model = {"user": Profile, "organization": Organization}
     if type_ not in types_url:
         logger.warn("Pull data received invalid type: %s", type_)
         return

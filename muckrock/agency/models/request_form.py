@@ -71,9 +71,7 @@ class AgencyRequestForm(models.Model):
                 bottom = min(sides_positions[1], sides_positions[3])
                 label = field.T.decode() if field.T else None
                 value = data.get(label, "")
-                overlay_canvas.drawString(
-                    x=left + 2, y=bottom + 1, text=value,
-                )
+                overlay_canvas.drawString(x=left + 2, y=bottom + 1, text=value)
             overlay_canvas.showPage()
         overlay_canvas.save()
         overlay_buffer.seek(0)
@@ -182,7 +180,7 @@ class AgencyRequestForm(models.Model):
 VALUE_CHOICES = [
     (m[0], m[1].__doc__)
     for m in inspect.getmembers(
-        AgencyRequestForm(), predicate=lambda x: getattr(x, "value_choice", ""),
+        AgencyRequestForm(), predicate=lambda x: getattr(x, "value_choice", "")
     )
 ]
 
@@ -191,10 +189,10 @@ class AgencyRequestFormMapper(models.Model):
     """Map fields to values for an agency request form"""
 
     form = models.ForeignKey(
-        "AgencyRequestForm", related_name="mappers", on_delete=models.CASCADE,
+        "AgencyRequestForm", related_name="mappers", on_delete=models.CASCADE
     )
     field = models.CharField(max_length=255)
-    value = models.CharField(max_length=255, choices=VALUE_CHOICES,)
+    value = models.CharField(max_length=255, choices=VALUE_CHOICES)
 
     def __str__(self):
-        return "{} - {} - {}".format(self.form, self.field, self.value,)
+        return "{} - {} - {}".format(self.form, self.field, self.value)

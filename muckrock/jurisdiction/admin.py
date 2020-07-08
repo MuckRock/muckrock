@@ -91,12 +91,12 @@ class JurisdictionAdmin(VersionAdmin):
                     "image_attr_line",
                     "public_notes",
                     "aliases",
-                ),
+                )
             },
         ),
         (
             "Options for states/federal",
-            {"classes": ("collapse",), "fields": ("observe_sat", "holidays",),},
+            {"classes": ("collapse",), "fields": ("observe_sat", "holidays")},
         ),
     )
     formats = ["xls", "csv"]

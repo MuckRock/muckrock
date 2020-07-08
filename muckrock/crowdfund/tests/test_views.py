@@ -88,16 +88,10 @@ class TestCrowdfundView(TestCase):
         response = self.view(request, pk=self.crowdfund.pk)
         ok_(response, "There should be a response.")
         if ajax:
-            eq_(
-                response.status_code, 200, response.content,
-            )
-            eq_(
-                response["Content-Type"], "application/json", response.content,
-            )
+            eq_(response.status_code, 200, response.content)
+            eq_(response["Content-Type"], "application/json", response.content)
         else:
-            eq_(
-                response.status_code, 302, response.content,
-            )
+            eq_(response.status_code, 302, response.content)
             eq_(
                 response.url,
                 self.crowdfund.get_crowdfund_object().get_absolute_url(),

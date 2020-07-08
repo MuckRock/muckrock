@@ -41,7 +41,7 @@ def acronyms(request):
         for acro, (name, status, desc) in CODES.items()
     ]
     codes.sort()
-    return render(request, "staff/acronyms.html", {"codes": codes},)
+    return render(request, "staff/acronyms.html", {"codes": codes})
 
 
 @permission_required("foia.view_rawemail")
@@ -53,7 +53,7 @@ def raw(request, idx):
     permission = request.user.is_staff or request.user == comm.foia.user
     if raw_email and permission:
         return HttpResponse(
-            raw_email.raw_email, content_type="text/plain; charset=utf-8",
+            raw_email.raw_email, content_type="text/plain; charset=utf-8"
         )
     else:
         raise Http404

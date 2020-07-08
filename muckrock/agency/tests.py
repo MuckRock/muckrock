@@ -41,8 +41,8 @@ class TestAgencyUnit(TestCase):
             email__email__email="test@agency1.gov",
             other_emails="other_a@agency1.gov, other_b@agency1.gov",
         )
-        self.agency2 = AgencyFactory(fax__phone__number="987.654.3210",)
-        self.agency3 = AgencyFactory(email=None,)
+        self.agency2 = AgencyFactory(fax__phone__number="987.654.3210")
+        self.agency3 = AgencyFactory(email=None)
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
@@ -174,9 +174,7 @@ class TestAgencyUnit(TestCase):
         )
         # its type is set to none when copied over
         ok_(
-            good_agency.agencyphone_set.filter(
-                phone=fax2, request_type="none",
-            ).exists()
+            good_agency.agencyphone_set.filter(phone=fax2, request_type="none").exists()
         )
 
         assert_in(good_agency.name, bad_agency.notes)
@@ -255,7 +253,7 @@ class TestAgencyViews(TestCase):
         """Test the boilerplate ajax view"""
         agencies = AgencyFactory.create_batch(2)
         request = RequestFactory().get(
-            reverse("agency-boilerplate"), {"agencies": [a.pk for a in agencies],},
+            reverse("agency-boilerplate"), {"agencies": [a.pk for a in agencies]}
         )
         request = mock_middleware(request)
         request.user = UserFactory(profile__full_name="John Doe")

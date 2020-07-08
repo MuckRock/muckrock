@@ -58,10 +58,7 @@ class TestFoiaMachineRequest(TestCase):
 
     def test_get_absolute_url(self):
         """Request urls should include their slug and their id."""
-        kwargs = {
-            "slug": self.foi.slug,
-            "pk": self.foi.pk,
-        }
+        kwargs = {"slug": self.foi.slug, "pk": self.foi.pk}
         actual_url = self.foi.get_absolute_url()
         expected_url = reverse("foi-detail", host="foiamachine", kwargs=kwargs)
         eq_(actual_url, expected_url)

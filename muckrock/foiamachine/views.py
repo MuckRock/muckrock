@@ -120,7 +120,7 @@ class Profile(LoginRequiredMixin, TemplateView):
                 foi.status = status
                 foi.save()
             success_msg = "Request status changed to %(status)s." % {
-                "status": dict(STATUS)[status],
+                "status": dict(STATUS)[status]
             }
             messages.success(self.request, success_msg)
         return super(Profile, self).get(*args, **kwargs)
@@ -135,9 +135,7 @@ class Profile(LoginRequiredMixin, TemplateView):
         )
         form = FoiaMachineBulkRequestForm()
         filter_ = FoiaMachineRequestFilter(self.request.GET, queryset=requests)
-        context.update(
-            {"requests": requests, "form": form, "filter": filter_,}
-        )
+        context.update({"requests": requests, "form": form, "filter": filter_})
         return context
 
 
@@ -184,7 +182,7 @@ class FoiaMachineRequestCreateView(LoginRequiredMixin, CreateView):
             reverse(
                 "foi-detail",
                 host="foiamachine",
-                kwargs={"slug": foi.slug, "pk": foi.pk,},
+                kwargs={"slug": foi.slug, "pk": foi.pk},
             )
         )
 
@@ -368,7 +366,7 @@ class FoiaMachineRequestShareView(RequestOwnerRequiredMixin, SingleObjectMixin, 
 def agency_detail(request, **kwargs):
     """Redirect to muckrock agency detail page"""
     # pylint: disable=unused-argument
-    return redirect(reverse("agency-detail", host="default", kwargs=kwargs,))
+    return redirect(reverse("agency-detail", host="default", kwargs=kwargs))
 
 
 def jurisdiction_detail(request, **kwargs):
@@ -376,7 +374,7 @@ def jurisdiction_detail(request, **kwargs):
     # pylint: disable=unused-argument
     # remove kwargs that were not filled in
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
-    return redirect(reverse("jurisdiction-detail", host="default", kwargs=kwargs,))
+    return redirect(reverse("jurisdiction-detail", host="default", kwargs=kwargs))
 
 
 def account_logout(request):

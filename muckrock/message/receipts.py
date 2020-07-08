@@ -77,7 +77,7 @@ class Receipt(TemplateEmail):
                 "charge": {
                     "id": self.charge.id,
                     "date": datetime.fromtimestamp(
-                        self.charge.created, tz=timezone.get_current_timezone(),
+                        self.charge.created, tz=timezone.get_current_timezone()
                     ),
                 },
             }

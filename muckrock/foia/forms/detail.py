@@ -79,10 +79,7 @@ class FOIAAccessForm(forms.Form):
             "UserRequestSharingAutocomplete"
         ),
     )
-    access_choices = [
-        ("edit", "Can Edit"),
-        ("view", "Can View"),
-    ]
+    access_choices = [("edit", "Can Edit"), ("view", "Can View")]
     access = forms.ChoiceField(choices=access_choices)
 
     def __init__(self, *args, **kwargs):

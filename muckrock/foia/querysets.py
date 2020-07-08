@@ -136,7 +136,7 @@ class FOIARequestQuerySet(models.QuerySet):
     def organization(self, organization):
         """Get requests belonging to an organization's members."""
         return (
-            self.select_related("agency__jurisdiction__parent__parent",)
+            self.select_related("agency__jurisdiction__parent__parent")
             .filter(composer__organization=organization)
             .order_by("-composer__datetime_submitted")
         )
@@ -144,7 +144,7 @@ class FOIARequestQuerySet(models.QuerySet):
     def select_related_view(self):
         """Select related models for viewing"""
         return self.select_related(
-            "agency__jurisdiction__parent__parent", "composer__user", "crowdfund",
+            "agency__jurisdiction__parent__parent", "composer__user", "crowdfund"
         )
 
     def get_public_file_count(self, limit=None):
@@ -156,7 +156,7 @@ class FOIARequestQuerySet(models.QuerySet):
 
         count_qs = (
             self.model.objects.filter(
-                id__in=[f.pk for f in foias], communications__files__access="public",
+                id__in=[f.pk for f in foias], communications__files__access="public"
             )
             .values_list("id")
             .annotate(Count("communications__files"))
@@ -208,7 +208,7 @@ class FOIARequestQuerySet(models.QuerySet):
         if agency.jurisdiction.days:
             calendar = agency.jurisdiction.get_calendar()
             date_due = calendar.business_days_from(
-                date.today(), agency.jurisdiction.days,
+                date.today(), agency.jurisdiction.days
             )
         else:
             date_due = None
@@ -226,7 +226,7 @@ class FOIARequestQuerySet(models.QuerySet):
         )
         foia.tags.set(*composer.tags.all())
         foia.create_initial_communication(
-            proxy_info.get("from_user", composer.user), proxy=proxy_info["proxy"],
+            proxy_info.get("from_user", composer.user), proxy=proxy_info["proxy"]
         )
         foia.process_attachments(composer.user, composer=True)
 
@@ -238,9 +238,7 @@ class FOIARequestQuerySet(models.QuerySet):
             self.filter(
                 communications__response=False,
                 communications__datetime__gt=Subquery(
-                    FOIACommunication.objects.filter(
-                        foia=OuterRef("pk"), response=True,
-                    )
+                    FOIACommunication.objects.filter(foia=OuterRef("pk"), response=True)
                     .order_by()
                     .values("foia")
                     .annotate(max=Max("datetime"))
@@ -279,7 +277,7 @@ class FOIAComposerQuerySet(models.QuerySet):
             )
             # organizational users may also view requests from their org
             # that are shared
-            query = query | Q(user__profile__org_share=True, organization__users=user,)
+            query = query | Q(user__profile__org_share=True, organization__users=user)
             return self.filter(query)
         else:
             # anonymous user, filter out drafts and embargoes

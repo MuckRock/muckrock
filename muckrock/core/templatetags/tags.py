@@ -179,7 +179,7 @@ def project_manager(context, mr_object):
         owner = None
     authorized = user.is_staff or user == owner
     form = ProjectManagerForm(
-        initial={"projects": [project.pk for project in projects]}, user=user,
+        initial={"projects": [project.pk for project in projects]}, user=user
     )
     has_projects = user.is_authenticated and user.projects.exists()
     return {
@@ -198,11 +198,7 @@ def social(context, title=None, url=None):
     title = context.get("title", "") if title is None else title
     url = request.path if url is None else url
     url = "https://" + request.get_host() + url
-    return {
-        "request": request,
-        "title": title,
-        "url": url,
-    }
+    return {"request": request, "title": title, "url": url}
 
 
 @register.inclusion_tag("lib/newsletter.html", takes_context=True)
@@ -303,7 +299,7 @@ def markdown_filter(text, _safe=None):
         bleached_text = markdown_text
     elif _safe == "strip":
         bleached_text = bleach.clean(
-            markdown_text, tags=allowed_tags, attributes=allowed_attributes, strip=True,
+            markdown_text, tags=allowed_tags, attributes=allowed_attributes, strip=True
         )
     else:
         bleached_text = bleach.clean(

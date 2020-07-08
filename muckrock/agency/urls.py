@@ -25,10 +25,10 @@ urlpatterns = [
         jurisdiction,
         name="agency-jurisdiction",
     ),
-    url(r"^%s/flag/$" % agency_url, views.redirect_flag, name="agency-flag",),
-    url(r"^boilerplate/$", views.boilerplate, name="agency-boilerplate",),
+    url(r"^%s/flag/$" % agency_url, views.redirect_flag, name="agency-flag"),
+    url(r"^boilerplate/$", views.boilerplate, name="agency-boilerplate"),
     url(
-        r"^contact-info/(?P<idx>\d+)/$", views.contact_info, name="agency-contact-info",
+        r"^contact-info/(?P<idx>\d+)/$", views.contact_info, name="agency-contact-info"
     ),
     url(r"^merge/$", views.MergeAgency.as_view(), name="agency-merge"),
 ]

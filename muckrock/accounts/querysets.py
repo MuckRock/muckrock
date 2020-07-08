@@ -37,14 +37,8 @@ class ProfileQuerySet(models.QuerySet):
 
     def _squarelet_update_or_create_user(self, uuid, data):
         """Format user data and update or create the user"""
-        user_map = {
-            "preferred_username": "username",
-            "email": "email",
-        }
-        user_defaults = {
-            "preferred_username": "",
-            "email": "",
-        }
+        user_map = {"preferred_username": "username", "email": "email"}
+        user_defaults = {"preferred_username": "", "email": ""}
         user_data = {
             user_map[k]: data.get(k, user_defaults[k]) for k in user_map.keys()
         }
@@ -91,13 +85,13 @@ class ProfileQuerySet(models.QuerySet):
         # process each organization
         for org_data in data.get("organizations", []):
             organization, _ = Organization.objects.squarelet_update_or_create(
-                uuid=org_data["uuid"], data=org_data,
+                uuid=org_data["uuid"], data=org_data
             )
             if organization in current_organizations:
                 # remove organizations from our set as we see them
                 # any that are left will need to be removed
                 current_organizations.remove(organization)
-                user.memberships.filter(organization=organization,).update(
+                user.memberships.filter(organization=organization).update(
                     admin=org_data["admin"]
                 )
             else:
@@ -122,7 +116,7 @@ class ProfileQuerySet(models.QuerySet):
         # user must have an active organization, if the current
         # active one is removed, we will activate the user's individual organization
         if profile.organization in current_organizations:
-            user.memberships.filter(organization__individual=True,).update(active=True)
+            user.memberships.filter(organization__individual=True).update(active=True)
 
         # never remove the user's individual organization
         individual_organization = user.memberships.get(organization__individual=True)

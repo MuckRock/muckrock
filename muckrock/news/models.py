@@ -63,13 +63,13 @@ class Article(models.Model):
     )
     body = models.TextField("Body text")
     authors = models.ManyToManyField(User, related_name="authored_articles")
-    editors = models.ManyToManyField(User, related_name="edited_articles", blank=True,)
+    editors = models.ManyToManyField(User, related_name="edited_articles", blank=True)
     publish = models.BooleanField(
         "Publish on site",
         default=False,
         help_text="Articles do not appear on the site until their publish date.",
     )
-    foias = models.ManyToManyField(FOIARequest, related_name="articles", blank=True,)
+    foias = models.ManyToManyField(FOIARequest, related_name="articles", blank=True)
     image = ThumbnailerImageField(
         upload_to="news_images/%Y/%m/%d",
         blank=True,
@@ -130,7 +130,7 @@ class Photo(models.Model):
     """A photograph to embed in a news article"""
 
     image = models.ImageField(
-        upload_to="news_photos/%Y/%m/%d", storage=get_image_storage(),
+        upload_to="news_photos/%Y/%m/%d", storage=get_image_storage()
     )
 
     def __str__(self):

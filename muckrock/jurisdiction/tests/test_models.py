@@ -124,9 +124,7 @@ class TestJurisdictionUnit(TestCase):
         State jurisdictions should include success rates of local jurisdictions.
         """
         FOIARequestFactory(
-            agency__jurisdiction=self.state,
-            status="done",
-            datetime_done=timezone.now(),
+            agency__jurisdiction=self.state, status="done", datetime_done=timezone.now()
         )
         FOIARequestFactory(agency__jurisdiction=self.local, status="ack")
         eq_(self.state.success_rate(), 50.0)

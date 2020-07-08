@@ -26,7 +26,7 @@ class QuestionFilterSet(django_filters.FilterSet):
     date = django_filters.DateFromToRangeFilter(
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
     unanswered = django_filters.BooleanFilter(
         method="unanswered_filter", widget=forms.CheckboxInput()

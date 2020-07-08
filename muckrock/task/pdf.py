@@ -37,7 +37,7 @@ class PDF(FPDF):
     def configure(self):
         """Configure common settings"""
         self.add_font(
-            "DejaVu", "", os.path.join(settings.FONT_PATH, "DejaVuSerif.ttf"), uni=True,
+            "DejaVu", "", os.path.join(settings.FONT_PATH, "DejaVuSerif.ttf"), uni=True
         )
         self.alias_nb_pages()
         self.add_page()
@@ -62,7 +62,7 @@ class MailPDF(PDF):
             "DEPT MR {pk}\n"
             "411A Highland Ave\n"
             "Somerville, MA 02144-2516\n"
-            "{email}".format(pk=self.comm.foia.pk, email=email,)
+            "{email}".format(pk=self.comm.foia.pk, email=email)
         )
         width = self.get_string_width(email)
         self.set_xy(72 / 2, (72 * 0.6))
@@ -135,9 +135,7 @@ class MailPDF(PDF):
             },
         )
         single_pdf.seek(0)
-        mail.pdf.save(
-            "{}.pdf".format(self.comm.pk), ContentFile(single_pdf.read()),
-        )
+        mail.pdf.save("{}.pdf".format(self.comm.pk), ContentFile(single_pdf.read()))
 
         # return to begining of merged pdf before returning
         single_pdf.seek(0)
@@ -204,11 +202,11 @@ class CoverPDF(PDF):
         self.ln(10)
         self.set_font("DejaVu", "", 10)
         lines = []
-        grouped_info = groupby(self.info, lambda x: x[0].communication.foia.agency,)
+        grouped_info = groupby(self.info, lambda x: x[0].communication.foia.agency)
         tab = " " * 8
         for agency, info in grouped_info:
             info = list(info)
-            lines.append("\nAgency: {} - {} requests".format(agency.name, len(info),))
+            lines.append("\nAgency: {} - {} requests".format(agency.name, len(info)))
             for snail, pages, files in info:
                 if pages is None:
                     lines.append(
@@ -248,7 +246,7 @@ class CoverPDF(PDF):
                     if status == "attached":
                         lines.append(
                             "{}▣ Attached: {} - {} pages".format(
-                                2 * tab, file_.name(), pages,
+                                2 * tab, file_.name(), pages
                             )
                         )
                     elif status == "skipped":

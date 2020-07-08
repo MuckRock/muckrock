@@ -34,16 +34,13 @@ class AgencyList(MRSearchFilterListView):
     title = "Agencies"
     template_name = "agency/list.html"
     default_sort = "name"
-    sort_map = {
-        "name": "name",
-        "jurisdiction": "jurisdiction__slug",
-    }
+    sort_map = {"name": "name", "jurisdiction": "jurisdiction__slug"}
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""
         approved = super(AgencyList, self).get_queryset().get_approved()
         approved = approved.select_related(
-            "jurisdiction", "jurisdiction__parent", "jurisdiction__parent__parent",
+            "jurisdiction", "jurisdiction__parent", "jurisdiction__parent__parent"
         )
         return approved
 
@@ -66,7 +63,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     foia_requests = (
         foia_requests.get_viewable(request.user)
         .filter(agency=agency)
-        .select_related("agency__jurisdiction__parent__parent",)
+        .select_related("agency__jurisdiction__parent__parent")
         .order_by("-composer__datetime_submitted")[:10]
     )
 
@@ -84,7 +81,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
                 return redirect(agency)
         elif action == "review" and request.user.is_staff:
             task = ReviewAgencyTask.objects.ensure_one_created(
-                agency=agency, resolved=False,
+                agency=agency, resolved=False
             )
             messages.success(request, "Agency marked for review.")
             return redirect(reverse("review-agency-task", kwargs={"pk": task.pk}))
@@ -100,7 +97,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
     collect_stats(agency, context)
 
-    return render(request, "profile/agency.html", context,)
+    return render(request, "profile/agency.html", context)
 
 
 def redirect_old(request, jurisdiction, slug, idx, action):
@@ -161,7 +158,7 @@ def boilerplate(request):
     )
     intro, outro = text.split(split_token)
     return JsonResponse(
-        {"intro": linebreaks(intro.strip()), "outro": linebreaks(outro.strip()),}
+        {"intro": linebreaks(intro.strip()), "outro": linebreaks(outro.strip())}
     )
 
 

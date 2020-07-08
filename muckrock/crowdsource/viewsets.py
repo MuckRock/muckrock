@@ -41,9 +41,9 @@ class CrowdsourceResponseViewSet(
 
     queryset = (
         CrowdsourceResponse.objects.select_related(
-            "crowdsource", "data", "user__profile", "edit_user__profile",
+            "crowdsource", "data", "user__profile", "edit_user__profile"
         )
-        .prefetch_related("crowdsource__fields", "values", "tags",)
+        .prefetch_related("crowdsource__fields", "values", "tags")
         .order_by("id")
     )
     permission_classes = (Permissions,)
@@ -87,13 +87,7 @@ class CrowdsourceResponseViewSet(
 
         class Meta:
             model = CrowdsourceResponse
-            fields = (
-                "id",
-                "flag",
-            )
+            fields = ("id", "flag")
 
     filter_class = Filter
-    search_fields = (
-        "values__value",
-        "tags__name",
-    )
+    search_fields = ("values__value", "tags__name")

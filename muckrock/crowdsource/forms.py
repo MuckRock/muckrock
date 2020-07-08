@@ -30,7 +30,7 @@ class CrowdsourceAssignmentForm(forms.Form):
     populate the form
     """
 
-    data_id = forms.IntegerField(widget=forms.HiddenInput, required=False,)
+    data_id = forms.IntegerField(widget=forms.HiddenInput, required=False)
     public = forms.BooleanField(
         label="Publicly credit you",
         help_text="When selected, we will note you contributed to the project and list "
@@ -48,7 +48,7 @@ class CrowdsourceAssignmentForm(forms.Form):
         if user.is_anonymous and crowdsource.registration != "off":
             required = crowdsource.registration == "required"
             self.fields["full_name"] = forms.CharField(
-                label="Full Name or Handle (Public)", required=required,
+                label="Full Name or Handle (Public)", required=required
             )
             self.fields["email"] = forms.EmailField(required=required)
             self.fields["newsletter"] = forms.BooleanField(
@@ -86,7 +86,7 @@ class CrowdsourceAssignmentForm(forms.Form):
 class CrowdsourceDataCsvForm(forms.Form):
     """Form for adding data to a crowdsource"""
 
-    data_csv = forms.FileField(label="Data CSV File",)
+    data_csv = forms.FileField(label="Data CSV File")
     doccloud_each_page = forms.BooleanField(
         label="Split Documents by Page",
         help_text="Each DocumentCloud URL will be split "
@@ -120,7 +120,7 @@ class CrowdsourceDataCsvForm(forms.Form):
                 proj_match = PROJECT_URL_RE.match(url)
                 if doccloud_each_page and doc_match:
                     datum_per_page.delay(
-                        crowdsource.pk, doc_match.group("doc_id"), data,
+                        crowdsource.pk, doc_match.group("doc_id"), data
                     )
                 elif proj_match:
                     import_doccloud_proj.delay(
@@ -136,9 +136,7 @@ class CrowdsourceDataCsvForm(forms.Form):
                     except forms.ValidationError:
                         pass
                     else:
-                        crowdsource.data.create(
-                            url=url, metadata=data,
-                        )
+                        crowdsource.data.create(url=url, metadata=data)
 
 
 class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
@@ -147,9 +145,9 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
     prefix = "crowdsource"
 
     project = autocomplete_light.ModelChoiceField(
-        "ProjectManagerAutocomplete", required=False,
+        "ProjectManagerAutocomplete", required=False
     )
-    form_json = forms.CharField(widget=forms.HiddenInput(), initial="[]",)
+    form_json = forms.CharField(widget=forms.HiddenInput(), initial="[]")
     submission_emails = forms.CharField(
         help_text="Comma seperated list of emails to send to on submission",
         required=False,
@@ -235,12 +233,12 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
     def clean_submission_emails(self):
         """Validate the submission emails field"""
         return EmailAddress.objects.fetch_many(
-            self.cleaned_data["submission_emails"], ignore_errors=False,
+            self.cleaned_data["submission_emails"], ignore_errors=False
         )
 
 
 CrowdsourceDataFormsetBase = forms.inlineformset_factory(
-    Crowdsource, CrowdsourceData, fields=("url",), extra=1, can_delete=False,
+    Crowdsource, CrowdsourceData, fields=("url",), extra=1, can_delete=False
 )
 
 
@@ -255,9 +253,7 @@ class CrowdsourceDataFormset(CrowdsourceDataFormsetBase):
             doc_match = DOCUMENT_URL_RE.match(instance.url)
             proj_match = PROJECT_URL_RE.match(instance.url)
             if doccloud_each_page and doc_match:
-                datum_per_page.delay(
-                    self.instance.pk, doc_match.group("doc_id"), {},
-                )
+                datum_per_page.delay(self.instance.pk, doc_match.group("doc_id"), {})
             elif proj_match:
                 import_doccloud_proj.delay(
                     self.instance.pk,
@@ -293,7 +289,7 @@ class CrowdsourceMessageResponseForm(forms.Form):
     """Form to message the author of a response"""
 
     response = forms.ModelChoiceField(
-        queryset=CrowdsourceResponse.objects.all(), widget=forms.HiddenInput(),
+        queryset=CrowdsourceResponse.objects.all(), widget=forms.HiddenInput()
     )
     subject = forms.CharField()
     body = forms.CharField(widget=forms.Textarea())

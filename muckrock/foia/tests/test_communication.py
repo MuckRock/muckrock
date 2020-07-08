@@ -127,7 +127,7 @@ class TestCommunicationMove(test.TestCase):
         # a move log should be generated
         ok_(
             CommunicationMoveLog.objects.filter(
-                communication=moved_comm, foia=self.foia1, user=self.user,
+                communication=moved_comm, foia=self.foia1, user=self.user
             ).exists()
         )
         mock_upload.assert_called()
@@ -167,7 +167,7 @@ class TestCommunicationMove(test.TestCase):
         for comm in comms:
             ok_(
                 CommunicationMoveLog.objects.filter(
-                    communication=comm, foia=self.foia1, user=self.user,
+                    communication=comm, foia=self.foia1, user=self.user
                 ).exists()
             )
         mock_upload.assert_called()
@@ -236,12 +236,12 @@ class TestCommunicationClone(test.TestCase):
         # a move log should be generated for cloned request
         ok_(
             CommunicationMoveLog.objects.filter(
-                communication=clone_comm[0], foia=self.comm.foia, user=self.user,
+                communication=clone_comm[0], foia=self.comm.foia, user=self.user
             ).exists()
         )
         # a move log should not be generated for the original request
         nose.tools.assert_false(
-            CommunicationMoveLog.objects.filter(communication=self.comm,).exists()
+            CommunicationMoveLog.objects.filter(communication=self.comm).exists()
         )
         mock_upload.assert_called()
 
@@ -252,7 +252,7 @@ class TestCommunicationClone(test.TestCase):
         second_foia = FOIARequestFactory()
         third_foia = FOIARequestFactory()
         comm_count = FOIACommunication.objects.count()
-        clones = self.comm.clone([first_foia, second_foia, third_foia], self.user,)
+        clones = self.comm.clone([first_foia, second_foia, third_foia], self.user)
         # + 3 communications
         eq_(
             FOIACommunication.objects.count(),
@@ -267,7 +267,7 @@ class TestCommunicationClone(test.TestCase):
         for clone in clones:
             ok_(
                 CommunicationMoveLog.objects.filter(
-                    communication=clone, foia=self.comm.foia, user=self.user,
+                    communication=clone, foia=self.comm.foia, user=self.user
                 ).exists()
             )
         mock_upload.assert_called()
@@ -279,7 +279,7 @@ class TestCommunicationClone(test.TestCase):
         second_foia = FOIARequestFactory()
         third_foia = FOIARequestFactory()
         file_count = self.comm.files.count()
-        clones = self.comm.clone([first_foia, second_foia, third_foia], self.user,)
+        clones = self.comm.clone([first_foia, second_foia, third_foia], self.user)
         for each_clone in clones:
             eq_(
                 each_clone.files.count(),

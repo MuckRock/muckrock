@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # pylint: disable=unused-argument
         # pylint: disable=attribute-defined-outside-init
-        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,)
+        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
         self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         if kwargs["date_joined"]:
             with transaction.atomic():
@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--date_joined", action="store_true", help="Only export date joined data",
+            "--date_joined", action="store_true", help="Only export date joined data"
         )
 
     def export_users(self):
@@ -164,7 +164,7 @@ class Command(BaseCommand):
         with smart_open(key, "wb") as out_file:
             writer = csv.writer(out_file)
             writer.writerow(
-                ["user_uuid", "org_uuid", "user_username", "org_name", "is_admin",]
+                ["user_uuid", "org_uuid", "user_username", "org_name", "is_admin"]
             )
             total = Membership.objects.count()
             for i, member in enumerate(
@@ -191,14 +191,10 @@ class Command(BaseCommand):
         key = self.bucket.new_key("squarelet_export/date_joined.csv")
         with smart_open(key, "wb") as out_file:
             writer = csv.writer(out_file)
-            writer.writerow(
-                ["uuid", "date_joined",]
-            )
+            writer.writerow(["uuid", "date_joined"])
             total = User.objects.count()
             for i, user in enumerate(User.objects.select_related("profile")):
                 if i % 1000 == 0:
                     print("User {} / {} - {}".format(i, total, timezone.now()))
-                writer.writerow(
-                    [user.profile.uuid, user.date_joined.isoformat(),]
-                )
+                writer.writerow([user.profile.uuid, user.date_joined.isoformat()])
         print("End Date Joined Export - {}".format(timezone.now()))

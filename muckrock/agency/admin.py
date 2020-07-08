@@ -52,7 +52,7 @@ class AgencyAddressAdminForm(forms.ModelForm):
     """AgencyAddress Inline admin form"""
 
     address = autocomplete_light.ModelChoiceField(
-        "AddressAdminAutocomplete", queryset=Address.objects.all(),
+        "AddressAdminAutocomplete", queryset=Address.objects.all()
     )
 
     class Meta:
@@ -73,7 +73,7 @@ class AgencyEmailAdminForm(forms.ModelForm):
     """AgencyEmail Inline admin form"""
 
     email = autocomplete_light.ModelChoiceField(
-        "EmailAddressAdminAutocomplete", queryset=EmailAddress.objects.all(),
+        "EmailAddressAdminAutocomplete", queryset=EmailAddress.objects.all()
     )
 
     class Meta:
@@ -93,7 +93,7 @@ class AgencyPhoneAdminForm(forms.ModelForm):
     """AgencyPhone Inline admin form"""
 
     phone = autocomplete_light.ModelChoiceField(
-        "PhoneNumberAdminAutocomplete", queryset=PhoneNumber.objects.all(),
+        "PhoneNumberAdminAutocomplete", queryset=PhoneNumber.objects.all()
     )
 
     class Meta:
@@ -151,11 +151,7 @@ class AgencyAdmin(VersionAdmin):
     filter_horizontal = ("types",)
     form = AgencyAdminForm
     formats = ["xls", "csv"]
-    inlines = (
-        AgencyAddressInline,
-        AgencyEmailInline,
-        AgencyPhoneInline,
-    )
+    inlines = (AgencyAddressInline, AgencyEmailInline, AgencyPhoneInline)
     save_on_top = True
     fieldsets = (
         (
@@ -170,13 +166,13 @@ class AgencyAdmin(VersionAdmin):
                     "status",
                     "user",
                     "requires_proxy",
-                ),
+                )
             },
         ),
-        ("Image", {"fields": ("image", "image_attr_line",),},),
-        ("Notes", {"fields": ("public_notes", "notes",),},),
-        ("Related Agencies", {"fields": ("appeal_agency", "parent",),},),
-        ("Exempt", {"fields": ("exempt", "uncooperative", "exempt_note",),},),
+        ("Image", {"fields": ("image", "image_attr_line")}),
+        ("Notes", {"fields": ("public_notes", "notes")}),
+        ("Related Agencies", {"fields": ("appeal_agency", "parent")}),
+        ("Exempt", {"fields": ("exempt", "uncooperative", "exempt_note")}),
         (
             "Contact Information",
             {
@@ -193,7 +189,7 @@ class AgencyAdmin(VersionAdmin):
                     "foia_guide",
                     "twitter",
                     "twitter_handles",
-                ),
+                )
             },
         ),
     )

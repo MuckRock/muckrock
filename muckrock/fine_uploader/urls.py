@@ -9,8 +9,8 @@ from django.conf.urls import url
 from muckrock.fine_uploader import views
 
 urlpatterns = [
-    url(r"^sign/$", views.sign, name="fine-uploader-sign",),
-    url(r"^blank/$", views.blank, name="fine-uploader-blank",),
+    url(r"^sign/$", views.sign, name="fine-uploader-sign"),
+    url(r"^blank/$", views.blank, name="fine-uploader-blank"),
     url(
         r"^success_request/$",
         views.success_request,
@@ -21,30 +21,26 @@ urlpatterns = [
         views.success_composer,
         name="fine-uploader-success-composer",
     ),
-    url(r"^success_comm/$", views.success_comm, name="fine-uploader-success-comm",),
+    url(r"^success_comm/$", views.success_comm, name="fine-uploader-success-comm"),
     url(
         r"^success_dataset/$",
         views.success_dataset,
         name="fine-uploader-success-dataset",
     ),
     url(
-        r"^key_request/$",
-        views.key_name_request,
-        name="fine-uploader-key-name-request",
+        r"^key_request/$", views.key_name_request, name="fine-uploader-key-name-request"
     ),
     url(
         r"^key_composer/$",
         views.key_name_composer,
         name="fine-uploader-key-name-composer",
     ),
-    url(r"^key_comm/$", views.key_name_comm, name="fine-uploader-key-name-comm",),
+    url(r"^key_comm/$", views.key_name_comm, name="fine-uploader-key-name-comm"),
     url(
-        r"^key_dataset/$",
-        views.key_name_dataset,
-        name="fine-uploader-key-name-dataset",
+        r"^key_dataset/$", views.key_name_dataset, name="fine-uploader-key-name-dataset"
     ),
     url(
-        r"^delete_request/$", views.delete_request, name="fine-uploader-delete-request",
+        r"^delete_request/$", views.delete_request, name="fine-uploader-delete-request"
     ),
     url(
         r"^delete_composer/$",

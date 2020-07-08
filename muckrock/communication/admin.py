@@ -42,7 +42,7 @@ class CommunicationLinkMixin(object):
     def comm_link(self, obj):
         """Link to the FOIA communication admin"""
         link = reverse(
-            "admin:foia_foiacommunication_change", args=(obj.communication.pk,),
+            "admin:foia_foiacommunication_change", args=(obj.communication.pk,)
         )
         return '<a href="%s">FOIA Communication</a>' % link
 
@@ -131,13 +131,7 @@ class FaxCommunicationAdmin(CommunicationLinkMixin, VersionAdmin):
     model = FaxCommunication
     inlines = [FaxErrorInline]
 
-    fields = (
-        "comm_link",
-        "sent_datetime",
-        "confirmed_datetime",
-        "to_number",
-        "fax_id",
-    )
+    fields = ("comm_link", "sent_datetime", "confirmed_datetime", "to_number", "fax_id")
     readonly_fields = fields
 
 
@@ -147,13 +141,7 @@ class FaxCommunicationInline(admin.StackedInline):
     model = FaxCommunication
     show_change_link = True
     extra = 0
-    fields = (
-        "sent_datetime",
-        "confirmed_datetime",
-        "to_number",
-        "fax_id",
-        "error",
-    )
+    fields = ("sent_datetime", "confirmed_datetime", "to_number", "fax_id", "error")
     readonly_fields = fields
 
     def error(self, instance):
@@ -221,13 +209,13 @@ class AddressAdmin(VersionAdmin):
         "attn_override",
     ]
     fieldsets = (
-        (None, {"fields": ("street", "suite", "city", "state", "zip_code",),}),
+        (None, {"fields": ("street", "suite", "city", "state", "zip_code")}),
         (
             "Override Fields",
             {
                 "classes": ("collapse",),
                 "description": "Override particular fields",
-                "fields": ("agency_override", "attn_override",),
+                "fields": ("agency_override", "attn_override"),
             },
         ),
         (

@@ -20,7 +20,7 @@ class Action(AsNode):
         """Renders actions using our own template"""
         action_instance = self.args[0].resolve(context)
         context["action"] = action_instance
-        return template.loader.render_to_string(self.template, context.flatten(),)
+        return template.loader.render_to_string(self.template, context.flatten())
 
 
 class PassiveAction(Action):

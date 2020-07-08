@@ -111,14 +111,14 @@ urlpatterns = [
         views.RequestTaskList.as_view(),
         name="request-task-list",
     ),
-    url(r"^snail-mail/pdf/$", views.snail_mail_bulk_pdf, name="snail-mail-bulk-pdf",),
-    url(r"^snail-mail/pdf/(?P<pk>\d+)/$", views.snail_mail_pdf, name="snail-mail-pdf",),
+    url(r"^snail-mail/pdf/$", views.snail_mail_bulk_pdf, name="snail-mail-bulk-pdf"),
+    url(r"^snail-mail/pdf/(?P<pk>\d+)/$", views.snail_mail_pdf, name="snail-mail-pdf"),
     url(
         r"^review-agency-ajax/(?P<pk>\d+)/$",
         views.review_agency_ajax,
         name="review-agency-ajax",
     ),
-    url(r"^assign-to/$", views.assign_to, name="task-assign",),
+    url(r"^assign-to/$", views.assign_to, name="task-assign"),
     url(
         r"^bulk-new-agency/$",
         views.BulkNewAgency.as_view(),

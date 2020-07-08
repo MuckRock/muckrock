@@ -40,9 +40,7 @@ class PortalAutoReceiveMixin(object):
                 handler(comm, **match.groupdict())
                 break
         else:
-            super(PortalAutoReceiveMixin, self).receive_msg(
-                comm, reason=self.error_msg,
-            )
+            super(PortalAutoReceiveMixin, self).receive_msg(comm, reason=self.error_msg)
 
     def _accept_comm(self, comm, text):
         """Accept a communication onto the site"""

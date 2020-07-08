@@ -79,7 +79,7 @@ class OrgPreferencesForm(forms.ModelForm):
 class BuyRequestForm(StripeForm):
     """Form for buying more requests"""
 
-    num_requests = forms.IntegerField(label="Number of requests to buy", min_value=1,)
+    num_requests = forms.IntegerField(label="Number of requests to buy", min_value=1)
 
     def __init__(self, *args, **kwargs):
         super(BuyRequestForm, self).__init__(*args, **kwargs)

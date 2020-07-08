@@ -39,13 +39,11 @@ urlpatterns = [
         views.CrowdsourceEmbededConfirmView.as_view(),
         name="crowdsource-embed-confirm",
     ),
-    url(r"^$", views.CrowdsourceExploreView.as_view(), name="crowdsource-index",),
-    url(r"^list/$", views.CrowdsourceListView.as_view(), name="crowdsource-list",),
-    url(
-        r"^create/$", views.CrowdsourceCreateView.as_view(), name="crowdsource-create",
-    ),
-    url(r"^oembed/$", views.oembed, name="crowdsource-oembed",),
-    url(r"^message/$", views.message_response, name="crowdsource-message-response",),
+    url(r"^$", views.CrowdsourceExploreView.as_view(), name="crowdsource-index"),
+    url(r"^list/$", views.CrowdsourceListView.as_view(), name="crowdsource-list"),
+    url(r"^create/$", views.CrowdsourceCreateView.as_view(), name="crowdsource-create"),
+    url(r"^oembed/$", views.oembed, name="crowdsource-oembed"),
+    url(r"^message/$", views.message_response, name="crowdsource-message-response"),
     url(
         r"^(?P<idx>\d+)/edit/$",
         views.CrowdsourceEditResponseView.as_view(),

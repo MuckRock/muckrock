@@ -17,14 +17,7 @@ class AddressAutocomplete(autocomplete_light.AutocompleteModelTemplate):
 
     choices = Address.objects.all()
     choice_template = "autocomplete/address.html"
-    search_fields = [
-        "address",
-        "street",
-        "suite",
-        "city",
-        "state",
-        "zip_code",
-    ]
+    search_fields = ["address", "street", "suite", "city", "state", "zip_code"]
     attrs = {
         "data-autocomplete-minimum-characters": 2,
         "placeholder": "Search for an address",
@@ -59,8 +52,8 @@ class GenericPhoneNumberAutocomplete(autocomplete_light.AutocompleteModelTemplat
     def choices_for_request(self):
         """Remove parentheses and convert spaces to dashes before searching"""
         query = self.request.GET.get("q", "")
-        query = query.translate({ord("("): None, ord(")"): None, ord(" "): "-",})
-        choices = self.choices.filter(number__contains=query,)
+        query = query.translate({ord("("): None, ord(")"): None, ord(" "): "-"})
+        choices = self.choices.filter(number__contains=query)
         return self.order_choices(choices)[0 : self.limit_choices]
 
 
@@ -99,7 +92,7 @@ class EmailOrFaxAutocomplete(autocomplete_light.AutocompleteBase):
         query = self.request.GET.get("q", "")
         emails = list(
             EmailAddress.objects.filter(status="good").filter(
-                Q(email__icontains=query) | Q(name__icontains=query),
+                Q(email__icontains=query) | Q(name__icontains=query)
             )[:10]
         )
         phones = list(
@@ -132,9 +125,7 @@ autocomplete_light.register(
     name="PhoneNumberAdminAutocomplete",
     add_another_url_name="admin:communication_phonenumber_add",
 )
-autocomplete_light.register(
-    PhoneNumber, FaxAutocomplete, name="FaxAutocomplete",
-)
+autocomplete_light.register(PhoneNumber, FaxAutocomplete, name="FaxAutocomplete")
 autocomplete_light.register(
     PhoneNumber,
     FaxAutocomplete,

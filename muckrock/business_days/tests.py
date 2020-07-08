@@ -25,24 +25,20 @@ class TestBusinessDayUnit(TestCase):
     def setUp(self):
         """Set up tests"""
         self.new_years = Holiday.objects.create(
-            name="New Year's Day", kind="date", month=1, day=1,
+            name="New Year's Day", kind="date", month=1, day=1
         )
         self.mlk_day = Holiday.objects.create(
-            name="Martin Luther King, Jr. Day",
-            kind="ord_wd",
-            month=1,
-            num=3,
-            weekday=0,
+            name="Martin Luther King, Jr. Day", kind="ord_wd", month=1, num=3, weekday=0
         )
-        self.good_friday = Holiday.objects.create(name="Good Friday", kind="easter",)
+        self.good_friday = Holiday.objects.create(name="Good Friday", kind="easter")
         self.independence_day = Holiday.objects.create(
-            name="Independence Day", kind="date", month=7, day=4,
+            name="Independence Day", kind="date", month=7, day=4
         )
         self.veterans_day = Holiday.objects.create(
-            name="Veterans Day", kind="date", month=11, day=11,
+            name="Veterans Day", kind="date", month=11, day=11
         )
         self.thanksgiving = Holiday.objects.create(
-            name="Thanksgiving", kind="ord_wd", month=11, num=4, weekday=3,
+            name="Thanksgiving", kind="ord_wd", month=11, num=4, weekday=3
         )
         usa = FederalJurisdictionFactory()
         usa.holidays.set(

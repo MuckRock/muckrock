@@ -15,18 +15,12 @@ class OrganizationQuerySet(models.QuerySet):
 
     def get_cache(self):
         """Return organizationsto cache for a user"""
-        return self.order_by("-individual", "name",).select_related("entitlement")
+        return self.order_by("-individual", "name").select_related("entitlement")
 
     @transaction.atomic
     def squarelet_update_or_create(self, uuid, data):
         """Update or create records based on data from squarelet"""
-        required_fields = {
-            "name",
-            "slug",
-            "entitlements",
-            "max_users",
-            "individual",
-        }
+        required_fields = {"name", "slug", "entitlements", "max_users", "individual"}
         missing = required_fields - (required_fields & set(data.keys()))
         if missing:
             raise ValueError("Missing required fields: {}".format(missing))

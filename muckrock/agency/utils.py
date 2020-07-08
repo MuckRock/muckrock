@@ -27,10 +27,7 @@ def initial_communication_template(agencies, user_name, requested_docs, **kwargs
             'or default of 10 days if no requirement">{ days }</abbr>',
         }
     else:
-        jurisdiction = {
-            "get_law_name": "{ law name }",
-            "get_days": "{ days }",
-        }
+        jurisdiction = {"get_law_name": "{ law name }", "get_days": "{ days }"}
     requested_docs = requested_docs.replace("{ name }", user_name)
 
     if num_jurisdictions == 1 and kwargs.get("edited_boilerplate"):

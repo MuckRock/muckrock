@@ -27,7 +27,7 @@ class ComposerAgencyField(forms.ModelMultipleChoiceField):
         for new_agency in new:
             name, jurisdiction_pk = new_agency.split("$")[2:4]
             new_pks.append(
-                Agency.objects.create_new(name, jurisdiction_pk, self.user,).pk
+                Agency.objects.create_new(name, jurisdiction_pk, self.user).pk
             )
         existing_agencies = super(ComposerAgencyField, self)._check_values(other)
         return existing_agencies.union(Agency.objects.filter(pk__in=new_pks))

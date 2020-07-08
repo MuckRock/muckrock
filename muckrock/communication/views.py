@@ -28,10 +28,10 @@ class EmailDetailView(DetailView):
     """Show message open and error detail for an email address"""
 
     _prefetch_queryset = EmailCommunication.objects.select_related(
-        "communication__foia__agency__jurisdiction", "from_email",
+        "communication__foia__agency__jurisdiction", "from_email"
     ).prefetch_related(
-        Prefetch("opens", queryset=EmailOpen.objects.select_related("recipient"),),
-        Prefetch("errors", queryset=EmailError.objects.select_related("recipient"),),
+        Prefetch("opens", queryset=EmailOpen.objects.select_related("recipient")),
+        Prefetch("errors", queryset=EmailError.objects.select_related("recipient")),
         "to_emails",
         "cc_emails",
     )
@@ -49,7 +49,7 @@ class EmailDetailView(DetailView):
         context = super(EmailDetailView, self).get_context_data(**kwargs)
         email_address = self.object
         context["emails"] = email_address.from_emails.union(
-            email_address.to_emails.all(), email_address.cc_emails.all(),
+            email_address.to_emails.all(), email_address.cc_emails.all()
         ).order_by("sent_datetime")
         context["sidebar_admin_url"] = reverse(
             "admin:communication_emailaddress_change", args=(email_address.pk,)
@@ -61,12 +61,12 @@ class PhoneDetailView(DetailView):
     """Show message error detail for a fax number"""
 
     _prefetch_queryset = FaxCommunication.objects.select_related(
-        "communication__foia__agency__jurisdiction", "to_number",
+        "communication__foia__agency__jurisdiction", "to_number"
     ).prefetch_related(
-        Prefetch("errors", queryset=FaxError.objects.select_related("recipient"),),
+        Prefetch("errors", queryset=FaxError.objects.select_related("recipient"))
     )
     queryset = PhoneNumber.objects.prefetch_related(
-        Prefetch("faxes", queryset=_prefetch_queryset),
+        Prefetch("faxes", queryset=_prefetch_queryset)
     )
     template_name = "communication/fax_detail.html"
     pk_url_kwarg = "idx"

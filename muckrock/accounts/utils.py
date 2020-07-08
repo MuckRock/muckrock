@@ -35,7 +35,7 @@ def unique_username(name):
     username = base_username
     while User.objects.filter(username__iexact=username).exists():
         username = "{}_{}".format(
-            base_username, "".join(random.sample(string.ascii_letters, 8)),
+            base_username, "".join(random.sample(string.ascii_letters, 8))
         )
     return username
 
@@ -84,7 +84,7 @@ def mailchimp_subscribe(
         "merge_fields": merge_fields,
     }
     response = retry_on_error(
-        requests.ConnectionError, requests.post, api_url, json=data, headers=headers,
+        requests.ConnectionError, requests.post, api_url, json=data, headers=headers
     )
     try:
         response.raise_for_status()
@@ -95,7 +95,7 @@ def mailchimp_subscribe(
         else:
             if not kwargs.get("suppress_msg"):
                 messages.error(
-                    request, "Sorry, an error occurred while trying to subscribe you.",
+                    request, "Sorry, an error occurred while trying to subscribe you."
                 )
             logger.warning(exception)
         return True
@@ -106,9 +106,7 @@ def mailchimp_subscribe(
             "Thank you for subscribing to our newsletter. We sent a "
             "confirmation email to your inbox.",
         )
-    mixpanel_event(
-        request, "Newsletter Sign Up", {"Email": email, "List": list_,},
-    )
+    mixpanel_event(request, "Newsletter Sign Up", {"Email": email, "List": list_})
     return False
 
 

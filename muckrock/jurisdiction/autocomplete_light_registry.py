@@ -76,7 +76,7 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     def _choices_for_request_conditions(self, query, search_fields):
         """Strip out commas"""
         return super(JurisdictionAutocomplete, self)._choices_for_request_conditions(
-            query.replace(",", ""), search_fields,
+            query.replace(",", ""), search_fields
         )
 
 
@@ -129,7 +129,7 @@ class JurisdictionStateInclusiveAutocomplete(
             if self.value_format.match(x)
         ]
 
-        conditions = self._choices_for_request_conditions(query, self.search_fields,)
+        conditions = self._choices_for_request_conditions(query, self.search_fields)
 
         choices = self.order_choices(
             self.choices.filter(conditions).exclude(pk__in=exclude)

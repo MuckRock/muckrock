@@ -60,7 +60,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
     composer = factory.SubFactory(FOIAComposerFactory)
-    email = factory.SubFactory("muckrock.communication.factories.EmailAddressFactory",)
+    email = factory.SubFactory("muckrock.communication.factories.EmailAddressFactory")
     mail_id = factory.Sequence(
         lambda n: "{}-{}".format(n, "".join(random.choice(digits) for _ in range(8)))
     )
@@ -85,7 +85,7 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     to_user = factory.SubFactory("muckrock.core.factories.UserFactory")
     datetime = factory.LazyAttribute(lambda obj: timezone.now())
     email = factory.RelatedFactory(
-        "muckrock.communication.factories.EmailCommunicationFactory", "communication",
+        "muckrock.communication.factories.EmailCommunicationFactory", "communication"
     )
     communication = factory.Faker("paragraph")
 
@@ -97,7 +97,7 @@ class RawEmailFactory(factory.django.DjangoModelFactory):
         model = RawEmail
 
     email = factory.SubFactory(
-        "muckrock.communication.factories.EmailCommunicationFactory",
+        "muckrock.communication.factories.EmailCommunicationFactory"
     )
     raw_email = factory.Faker("paragraph")
 

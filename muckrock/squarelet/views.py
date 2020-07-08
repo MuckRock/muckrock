@@ -34,7 +34,7 @@ def webhook(request):
         msg="{}{}{}".format(timestamp, type_, "".join(uuids)).encode("utf8"),
         digestmod=hashlib.sha256,
     ).hexdigest()
-    match = hmac.compare_digest(str(signature), str(hmac_digest),)
+    match = hmac.compare_digest(str(signature), str(hmac_digest))
     try:
         timestamp_current = int(timestamp) + 300 > time.time()
     except ValueError:

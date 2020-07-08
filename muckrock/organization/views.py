@@ -25,9 +25,7 @@ class OrganizationListView(MROrderedListView):
 
     model = Organization
     template_name = "organization/list.html"
-    sort_map = {
-        "name": "name",
-    }
+    sort_map = {"name": "name"}
 
     def get_queryset(self):
         """Filter out individual orgs and private orgs for non-staff"""
@@ -110,7 +108,7 @@ def activate(request):
 
     try:
         organization = request.user.organizations.get(
-            pk=request.POST.get("organization"),
+            pk=request.POST.get("organization")
         )
         request.user.profile.organization = organization
         # update the navbar header cache

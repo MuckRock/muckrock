@@ -43,11 +43,7 @@ class QuestionList(MRSearchFilterListView):
     template_name = "qanda/list.html"
     default_sort = "date"
     default_order = "desc"
-    sort_map = {
-        "title": "title",
-        "user": "user__profile__full_name",
-        "date": "date",
-    }
+    sort_map = {"title": "title", "user": "user__profile__full_name", "date": "date"}
 
     def get_queryset(self):
         """Hide inactive users and prefetch"""
@@ -91,10 +87,8 @@ class Detail(DetailView):
     def get_queryset(self):
         """Select related and prefetch the query set"""
         return Question.objects.select_related(
-            "foia",
-            "foia__agency__jurisdiction__parent__parent",
-            "foia__composer__user",
-        ).filter(user__is_active=True,)
+            "foia", "foia__agency__jurisdiction__parent__parent", "foia__composer__user"
+        ).filter(user__is_active=True)
 
     def get(self, request, *args, **kwargs):
         """Mark any unread notifications for this object as read."""
@@ -167,7 +161,7 @@ class Detail(DetailView):
         context["answer_form"] = AnswerForm()
         foia = self.object.foia
         if foia is not None:
-            foia.public_file_count = foia.get_files().filter(access="public",).count()
+            foia.public_file_count = foia.get_files().filter(access="public").count()
         context["foia_viewable"] = foia is not None and foia.has_perm(
             self.request.user, "view"
         )
@@ -188,7 +182,7 @@ def create_question(request):
             return redirect(question)
     else:
         form = QuestionForm(user=request.user)
-    return render(request, "forms/question.html", {"form": form},)
+    return render(request, "forms/question.html", {"form": form})
 
 
 @login_required
@@ -237,7 +231,7 @@ def create_answer(request, slug, idx):
     else:
         form = AnswerForm()
 
-    return render(request, "forms/answer.html", {"form": form, "question": question},)
+    return render(request, "forms/answer.html", {"form": form, "question": question})
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -257,10 +251,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
         class Meta:
             model = Question
-            fields = (
-                "title",
-                "foia",
-            )
+            fields = ("title", "foia")
 
     filter_class = Filter
 

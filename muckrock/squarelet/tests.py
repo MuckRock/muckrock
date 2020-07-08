@@ -30,18 +30,18 @@ class ViewsTest(TestCase):
         self.url = reverse("squarelet-webhook")
         self.data = {
             "type": "user",
-            "uuids": [str(uuid.uuid4()), str(uuid.uuid4()),],
+            "uuids": [str(uuid.uuid4()), str(uuid.uuid4())],
             "timestamp": int(time.time()),
         }
         self.data["signature"] = self._calc_signature(
-            self.data["timestamp"], self.data["type"], self.data["uuids"],
+            self.data["timestamp"], self.data["type"], self.data["uuids"]
         )
 
     def _calc_signature(self, timestamp, type_, uuids):
         """Calculate the webhook signature"""
         return hmac.new(
             key=settings.SQUARELET_SECRET.encode("utf8"),
-            msg="{}{}{}".format(timestamp, type_, "".join(uuids),).encode("utf8"),
+            msg="{}{}{}".format(timestamp, type_, "".join(uuids)).encode("utf8"),
             digestmod=hashlib.sha256,
         ).hexdigest()
 
@@ -71,7 +71,7 @@ class ViewsTest(TestCase):
         """Test a webhook with an expired timestamp"""
         self.data["timestamp"] = int(time.time()) - 3600
         self.data["signature"] = self._calc_signature(
-            self.data["timestamp"], self.data["type"], self.data["uuids"],
+            self.data["timestamp"], self.data["type"], self.data["uuids"]
         )
         request = self.request_factory.post(self.url, self.data)
         response = self.view(request)
@@ -84,7 +84,7 @@ class ViewsTest(TestCase):
         """Test a webhook with a non-numeric timestamp"""
         self.data["timestamp"] = "foobar"
         self.data["signature"] = self._calc_signature(
-            self.data["timestamp"], self.data["type"], self.data["uuids"],
+            self.data["timestamp"], self.data["type"], self.data["uuids"]
         )
         request = self.request_factory.post(self.url, self.data)
         response = self.view(request)

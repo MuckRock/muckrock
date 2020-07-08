@@ -116,7 +116,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     )
     status = "approved"
     email = factory.RelatedFactory(
-        "muckrock.core.factories.AgencyEmailFactory", "agency",
+        "muckrock.core.factories.AgencyEmailFactory", "agency"
     )
     fax = factory.RelatedFactory(
         "muckrock.core.factories.AgencyPhoneFactory",
@@ -134,7 +134,7 @@ class AgencyFactory(factory.django.DjangoModelFactory):
             # A list of emails were passed in, use them
             for email in EmailAddress.objects.fetch_many(extracted):
                 AgencyEmailFactory(
-                    agency=self, email=email, request_type="primary", email_type="cc",
+                    agency=self, email=email, request_type="primary", email_type="cc"
                 )
 
 
@@ -165,7 +165,7 @@ class AppealAgencyFactory(AgencyFactory):
     """A factory for creating an Agency that accepts email appeals."""
 
     email = factory.RelatedFactory(
-        "muckrock.core.factories.AgencyEmailFactory", "agency", request_type="appeal",
+        "muckrock.core.factories.AgencyEmailFactory", "agency", request_type="appeal"
     )
 
 

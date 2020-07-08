@@ -175,15 +175,15 @@ def store_statistics():
     kwargs["machine_requests_lawsuit"] = FoiaMachineRequest.objects.filter(
         status="lawsuit"
     ).count()
-    kwargs["total_pages"] = FOIAFile.objects.aggregate(Sum("pages"),)["pages__sum"]
+    kwargs["total_pages"] = FOIAFile.objects.aggregate(Sum("pages"))["pages__sum"]
     # user stats will now be kept on squarelet
     kwargs["total_users"] = 0
     kwargs["total_users_excluding_agencies"] = 0
     kwargs["total_users_filed"] = (
-        User.objects.annotate(num_foia=Count("composers")).exclude(num_foia=0,).count()
+        User.objects.annotate(num_foia=Count("composers")).exclude(num_foia=0).count()
     )  # this is still on muckrock since it deals with foia composers
     kwargs["total_agencies"] = Agency.objects.count()
-    kwargs["total_fees"] = FOIARequest.objects.aggregate(Sum("price"),)["price__sum"]
+    kwargs["total_fees"] = FOIARequest.objects.aggregate(Sum("price"))["price__sum"]
     kwargs["pro_users"] = 0  # squarelet
     kwargs["pro_user_names"] = ""  # squarelet
     kwargs["daily_requests_pro"] = (
@@ -220,7 +220,7 @@ def store_statistics():
     )
     kwargs["daily_requests_org"] = (
         FOIARequest.objects.filter(
-            composer__organization__entitlement__slug="organization",
+            composer__organization__entitlement__slug="organization"
         )
         .get_submitted_range(yesterday_midnight, today_midnight)
         .count()
@@ -234,23 +234,23 @@ def store_statistics():
                 "proxy",
                 "admin",
                 "organization",
-            ],
+            ]
         )
         .get_submitted_range(yesterday_midnight, today_midnight)
         .count()
     )
     kwargs["daily_articles"] = Article.objects.filter(
-        pub_date__range=(yesterday_midnight, today_midnight,)
+        pub_date__range=(yesterday_midnight, today_midnight)
     ).count()
     kwargs["orphaned_communications"] = FOIACommunication.objects.filter(
-        foia=None,
+        foia=None
     ).count()
     kwargs["stale_agencies"] = 0  # stake agencies no longer exist
-    kwargs["unapproved_agencies"] = Agency.objects.filter(status="pending",).count()
+    kwargs["unapproved_agencies"] = Agency.objects.filter(status="pending").count()
     kwargs["portal_agencies"] = Agency.objects.exclude(portal=None).count()
     kwargs["total_tasks"] = Task.objects.count()
     kwargs["total_unresolved_tasks"] = (
-        Task.objects.filter(resolved=False,).get_undeferred().count()
+        Task.objects.filter(resolved=False).get_undeferred().count()
     )
     kwargs["total_deferred_tasks"] = Task.objects.get_deferred().count()
     # we no longer use generic tasks
@@ -259,19 +259,19 @@ def store_statistics():
     kwargs["total_deferred_generic_tasks"] = 0
     kwargs["total_orphan_tasks"] = OrphanTask.objects.count()
     kwargs["total_unresolved_orphan_tasks"] = (
-        OrphanTask.objects.filter(resolved=False,).get_undeferred().count()
+        OrphanTask.objects.filter(resolved=False).get_undeferred().count()
     )
     kwargs["total_deferred_orphan_tasks"] = OrphanTask.objects.get_deferred().count()
     kwargs["total_snailmail_tasks"] = SnailMailTask.objects.count()
     kwargs["total_unresolved_snailmail_tasks"] = (
-        SnailMailTask.objects.filter(resolved=False,).get_undeferred().count()
+        SnailMailTask.objects.filter(resolved=False).get_undeferred().count()
     )
     kwargs[
         "total_deferred_snailmail_tasks"
     ] = SnailMailTask.objects.get_deferred().count()
     kwargs["total_rejected_tasks"] = RejectedEmailTask.objects.count()
     kwargs["total_unresolved_rejected_tasks"] = (
-        RejectedEmailTask.objects.filter(resolved=False,).get_undeferred().count()
+        RejectedEmailTask.objects.filter(resolved=False).get_undeferred().count()
     )
     kwargs[
         "total_deferred_rejected_tasks"
@@ -455,11 +455,11 @@ def store_statistics():
     kwargs["private_projects"] = Project.objects.filter(
         private=True, approved=True
     ).count()
-    kwargs["unapproved_projects"] = Project.objects.filter(approved=False,).count()
-    kwargs["crowdfund_projects"] = Project.objects.exclude(crowdfunds=None,).count()
+    kwargs["unapproved_projects"] = Project.objects.filter(approved=False).count()
+    kwargs["crowdfund_projects"] = Project.objects.exclude(crowdfunds=None).count()
     kwargs["project_users"] = User.objects.exclude(projects=None).count()
     kwargs["project_users_pro"] = (
-        User.objects.filter(organizations__entitlement__slug="professional",)
+        User.objects.filter(organizations__entitlement__slug="professional")
         .exclude(projects=None)
         .count()
     )

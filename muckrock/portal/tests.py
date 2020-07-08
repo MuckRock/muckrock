@@ -36,13 +36,13 @@ class TestManualPortal(TestCase):
         """Sending a message should create a portal task"""
         comm = FOIACommunicationFactory()
         self.portal.send_msg(comm)
-        ok_(PortalTask.objects.filter(category="n", communication=comm,).exists())
+        ok_(PortalTask.objects.filter(category="n", communication=comm).exists())
 
     def test_receive_msg(self):
         """Receiving a message should create a portal task"""
         comm = FOIACommunicationFactory()
         self.portal.receive_msg(comm)
-        ok_(PortalTask.objects.filter(category="i", communication=comm,).exists())
+        ok_(PortalTask.objects.filter(category="i", communication=comm).exists())
 
     def test_get_new_password(self):
         """Should generate a random password"""
@@ -56,7 +56,7 @@ class _TestNextRequestPortal(TestCase):
     def setUp(self):
         """All tests need a NextRequest portal"""
         self.portal = Portal.objects.create(
-            url="https://www.example.com", name="Test Portal", type="nextrequest",
+            url="https://www.example.com", name="Test Portal", type="nextrequest"
         )
 
     def test_confirm_open(self):
@@ -127,13 +127,13 @@ class TestFBIPortal(TestCase):
     def setUp(self):
         """All tests need a FBI portal"""
         self.portal = Portal.objects.create(
-            url="https://www.example.com", name="Test Portal", type="fbi",
+            url="https://www.example.com", name="Test Portal", type="fbi"
         )
 
     def test_confirm_open(self):
         """Test receiving a confirmation message"""
         comm = FOIACommunicationFactory(
-            subject="eFOIA Request Received", foia__status="ack",
+            subject="eFOIA Request Received", foia__status="ack"
         )
         self.portal.receive_msg(comm)
         eq_(comm.foia.status, "processed")
@@ -145,12 +145,8 @@ class TestFBIPortal(TestCase):
     def test_document_reply(self, mock_requests, mock_upload, mock_classify):
         """Test receiving a confirmation message"""
         # pylint: disable=unused-argument
-        mock_requests.get(
-            "https://www.example.com/file1.pdf", text="File 1 Content",
-        )
-        mock_requests.get(
-            "https://www.example.com/file2.pdf", text="File 2 Content",
-        )
+        mock_requests.get("https://www.example.com/file1.pdf", text="File 1 Content")
+        mock_requests.get("https://www.example.com/file2.pdf", text="File 2 Content")
         comm = FOIACommunicationFactory(
             subject="eFOIA files available",
             communication="There are eFOIA files available for you to download\n"

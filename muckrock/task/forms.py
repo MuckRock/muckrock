@@ -47,14 +47,14 @@ class ReviewAgencyTaskForm(forms.Form):
         required=False,
     )
     update_agency_info = forms.BooleanField(
-        label="Update agency's main contact info?", required=False,
+        label="Update agency's main contact info?", required=False
     )
     snail_mail = forms.BooleanField(
-        label="Make snail mail the prefered communication method", required=False,
+        label="Make snail mail the prefered communication method", required=False
     )
-    resolve = forms.BooleanField(label="Resolve after updating", required=False,)
+    resolve = forms.BooleanField(label="Resolve after updating", required=False)
     reply = forms.CharField(
-        label="Reply:", required=False, widget=forms.Textarea(attrs={"rows": 5,}),
+        label="Reply:", required=False, widget=forms.Textarea(attrs={"rows": 5})
     )
 
     def clean_email_or_fax(self):
@@ -71,9 +71,7 @@ class ReviewAgencyTaskForm(forms.Form):
         snail_mail = cleaned_data.get("snail_mail")
 
         if not email_or_fax and not snail_mail:
-            self.add_error(
-                "email_or_fax", "Required if snail mail is not checked",
-            )
+            self.add_error("email_or_fax", "Required if snail mail is not checked")
 
 
 class ResponseTaskForm(forms.Form):
@@ -293,7 +291,7 @@ class IncomingPortalForm(ResponseTaskForm):
     """Form for incoming portal tasks, based on the response task form"""
 
     keep_hidden = forms.BooleanField(required=False)
-    word_to_pass = forms.CharField(label="Password", max_length=20, required=False,)
+    word_to_pass = forms.CharField(label="Password", max_length=20, required=False)
     communication = forms.CharField(widget=forms.Textarea(), required=False)
 
     # skip checking the task for if it is a scan (only applicable to response tasks)
@@ -304,7 +302,7 @@ class ReplaceNewAgencyForm(forms.Form):
     """Form for rejecting and replacing a new agency"""
 
     replace_jurisdiction = autocomplete_light.ModelChoiceField(
-        "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all(),
+        "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all()
     )
     replace_agency = autocomplete_light.ModelChoiceField(
         "AgencyAutocomplete",
@@ -323,4 +321,4 @@ class BulkNewAgencyTaskForm(forms.Form):
     )
 
 
-BulkNewAgencyTaskFormSet = forms.formset_factory(BulkNewAgencyTaskForm, extra=10,)
+BulkNewAgencyTaskFormSet = forms.formset_factory(BulkNewAgencyTaskForm, extra=10)

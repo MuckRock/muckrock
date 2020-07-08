@@ -99,7 +99,7 @@ class TestFOIAViews(TestCase):
 
         for user in users:
             response = get_allowed(
-                self.client, reverse("foia-list-user", kwargs={"user_pk": user.pk,})
+                self.client, reverse("foia-list-user", kwargs={"user_pk": user.pk})
             )
             nose.tools.eq_(
                 set(response.context["object_list"]),
@@ -234,7 +234,7 @@ class TestRequestDetailView(TestCase):
         """Posting a collection of projects to a request should add it to those projects."""
         project = ProjectFactory()
         project.contributors.add(self.foia.user)
-        form = ProjectManagerForm({"projects": [project.pk]}, user=self.foia.user,)
+        form = ProjectManagerForm({"projects": [project.pk]}, user=self.foia.user)
         ok_(form.is_valid())
         data = {"action": "projects"}
         data.update(form.data)
@@ -344,15 +344,13 @@ class TestRequestDetailView(TestCase):
         eq_(
             len(
                 StatusChangeTask.objects.filter(
-                    foia=self.foia, user=self.foia.user, resolved=False,
+                    foia=self.foia, user=self.foia.user, resolved=False
                 )
             ),
             0,
         )
         communication = FOIACommunicationFactory(foia=self.foia)
-        response_task = ResponseTaskFactory(
-            communication=communication, resolved=False,
-        )
+        response_task = ResponseTaskFactory(communication=communication, resolved=False)
         data = {"action": "status", "status": "done"}
         http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         self.foia.refresh_from_db()
@@ -360,7 +358,7 @@ class TestRequestDetailView(TestCase):
         eq_(
             len(
                 StatusChangeTask.objects.filter(
-                    foia=self.foia, user=self.foia.user, resolved=False,
+                    foia=self.foia, user=self.foia.user, resolved=False
                 )
             ),
             1,
@@ -437,13 +435,13 @@ class TestBulkActions(TestCase):
         user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
-            composer__user=user, embargo=False, status="ack",
+            composer__user=user, embargo=False, status="ack"
         )
         embargo_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="ack",
+            composer__user=user, embargo=True, status="ack"
         )
         embargo_done_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="done", date_embargo=tomorrow,
+            composer__user=user, embargo=True, status="done", date_embargo=tomorrow
         )
 
         MyRequestList()._extend_embargo(
@@ -478,13 +476,13 @@ class TestBulkActions(TestCase):
         user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
-            composer__user=user, embargo=False, status="ack",
+            composer__user=user, embargo=False, status="ack"
         )
         embargo_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="ack",
+            composer__user=user, embargo=True, status="ack"
         )
         embargo_done_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="done", date_embargo=tomorrow,
+            composer__user=user, embargo=True, status="done", date_embargo=tomorrow
         )
 
         MyRequestList()._remove_embargo(
@@ -516,13 +514,13 @@ class TestBulkActions(TestCase):
         user = OrganizationUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
-            composer__user=user, embargo=False, status="ack",
+            composer__user=user, embargo=False, status="ack"
         )
         embargo_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="ack",
+            composer__user=user, embargo=True, status="ack"
         )
         embargo_done_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="done", date_embargo=tomorrow,
+            composer__user=user, embargo=True, status="done", date_embargo=tomorrow
         )
 
         MyRequestList()._perm_embargo(
@@ -559,7 +557,7 @@ class TestBulkActions(TestCase):
         proj.contributors.add(user)
 
         MyRequestList()._project(
-            FOIARequest.objects.filter(pk=foia.pk), user, {"projects": [proj.pk]},
+            FOIARequest.objects.filter(pk=foia.pk), user, {"projects": [proj.pk]}
         )
 
         foia.refresh_from_db()
@@ -572,7 +570,7 @@ class TestBulkActions(TestCase):
         foia = FOIARequestFactory(composer__user=user)
 
         MyRequestList()._tags(
-            FOIARequest.objects.filter(pk=foia.pk), user, {"tags": "red, blue"},
+            FOIARequest.objects.filter(pk=foia.pk), user, {"tags": "red, blue"}
         )
 
         foia.refresh_from_db()
@@ -602,11 +600,11 @@ class TestBulkActions(TestCase):
     def test_autofollowup_on(self):
         """Test bulk autofollowup enabling"""
         user = UserFactory()
-        on_foia = FOIARequestFactory(composer__user=user, disable_autofollowups=False,)
-        off_foia = FOIARequestFactory(composer__user=user, disable_autofollowups=True,)
+        on_foia = FOIARequestFactory(composer__user=user, disable_autofollowups=False)
+        off_foia = FOIARequestFactory(composer__user=user, disable_autofollowups=True)
 
         MyRequestList()._autofollowup_on(
-            FOIARequest.objects.filter(pk__in=[on_foia.pk, off_foia.pk]), user, {},
+            FOIARequest.objects.filter(pk__in=[on_foia.pk, off_foia.pk]), user, {}
         )
 
         on_foia.refresh_from_db()
@@ -622,7 +620,7 @@ class TestBulkActions(TestCase):
         off_foia = FOIARequestFactory(composer__user=user, disable_autofollowups=True)
 
         MyRequestList()._autofollowup_off(
-            FOIARequest.objects.filter(pk__in=[on_foia.pk, off_foia.pk]), user, {},
+            FOIARequest.objects.filter(pk__in=[on_foia.pk, off_foia.pk]), user, {}
         )
 
         on_foia.refresh_from_db()
@@ -1064,9 +1062,7 @@ class TestFOIAComposerViews(TestCase):
         request = mock_middleware(request)
         response = CreateComposer.as_view()(request)
         eq_(response.status_code, 200)
-        eq_(
-            response.context_data["form"].initial["title"], clone.composer.title,
-        )
+        eq_(response.context_data["form"].initial["title"], clone.composer.title)
 
     def test_get_create_composer_anonymous(self):
         """Get the create composer form as an anoynmous user"""
@@ -1121,7 +1117,7 @@ class TestFOIAComposerViews(TestCase):
     def test_get_update_composer_revoke(self):
         """Get the update composer form for a recently submitted composer"""
         composer = FOIAComposerFactory(
-            status="submitted", delayed_id="123", datetime_submitted=timezone.now(),
+            status="submitted", delayed_id="123", datetime_submitted=timezone.now()
         )
         request = self.request_factory.get(
             reverse("foia-draft", kwargs={"idx": composer.pk})
@@ -1135,7 +1131,7 @@ class TestFOIAComposerViews(TestCase):
 
     def test_post_update_composer(self):
         """Test submitting a composer"""
-        composer = FOIAComposerFactory(status="started", user__profile__num_requests=4,)
+        composer = FOIAComposerFactory(status="started", user__profile__num_requests=4)
         agency = AgencyFactory()
         data = {
             "title": "Title",
@@ -1145,7 +1141,7 @@ class TestFOIAComposerViews(TestCase):
             "stripe_pk": "STRIPE_PK",
         }
         request = self.request_factory.post(
-            reverse("foia-draft", kwargs={"idx": composer.pk}), data,
+            reverse("foia-draft", kwargs={"idx": composer.pk}), data
         )
         request.user = composer.user
         request = mock_middleware(request)
@@ -1156,12 +1152,10 @@ class TestFOIAComposerViews(TestCase):
 
     def test_post_delete_update_composer(self):
         """Test deleting a composer"""
-        composer = FOIAComposerFactory(status="started", user__profile__num_requests=4,)
-        data = {
-            "action": "delete",
-        }
+        composer = FOIAComposerFactory(status="started", user__profile__num_requests=4)
+        data = {"action": "delete"}
         request = self.request_factory.post(
-            reverse("foia-draft", kwargs={"idx": composer.pk}), data,
+            reverse("foia-draft", kwargs={"idx": composer.pk}), data
         )
         request.user = composer.user
         request = mock_middleware(request)
@@ -1174,7 +1168,7 @@ class TestFOIAComposerViews(TestCase):
         composer = FOIAComposerFactory(status="started")
         request = self.request_factory.post(
             reverse("foia-autosave", kwargs={"idx": composer.pk}),
-            {"title": "New Title", "requested_docs": "ABC",},
+            {"title": "New Title", "requested_docs": "ABC"},
         )
         request.user = composer.user
         request = mock_middleware(request)
@@ -1189,7 +1183,7 @@ class TestFOIAComposerViews(TestCase):
         composer = FOIAComposerFactory(status="started")
         request = self.request_factory.post(
             reverse("foia-autosave", kwargs={"idx": composer.pk}),
-            {"agencies": "foobar", "requested_docs": "ABC",},
+            {"agencies": "foobar", "requested_docs": "ABC"},
         )
         request.user = composer.user
         request = mock_middleware(request)
@@ -1208,7 +1202,7 @@ class TestFOIAComposerViews(TestCase):
         request.user = composer.user
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
+            request, slug=composer.slug, idx=composer.pk
         )
         eq_(response.status_code, 302)
         eq_(response.url, reverse("foia-draft", kwargs={"idx": composer.pk}))
@@ -1225,9 +1219,7 @@ class TestFOIAComposerViews(TestCase):
         )
         request.user = UserFactory()
         request = mock_middleware(request)
-        ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
-        )
+        ComposerDetail.as_view()(request, slug=composer.slug, idx=composer.pk)
 
     @raises(Http404)
     def test_composer_detail_private(self):
@@ -1246,9 +1238,7 @@ class TestFOIAComposerViews(TestCase):
         )
         request.user = UserFactory()
         request = mock_middleware(request)
-        ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
-        )
+        ComposerDetail.as_view()(request, slug=composer.slug, idx=composer.pk)
 
     def test_composer_detail_single(self):
         """Composer redirects to foia page if only a single request"""
@@ -1263,7 +1253,7 @@ class TestFOIAComposerViews(TestCase):
         request.user = UserFactory()
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
+            request, slug=composer.slug, idx=composer.pk
         )
         eq_(response.status_code, 302)
         eq_(response.url, foia.get_absolute_url())
@@ -1272,7 +1262,7 @@ class TestFOIAComposerViews(TestCase):
         """Composer redirects to foia page if only a single request even
         if it hasn't been filed yet"""
         foia = FOIARequestFactory(
-            composer__status="submitted", composer__datetime_submitted=timezone.now(),
+            composer__status="submitted", composer__datetime_submitted=timezone.now()
         )
         composer = foia.composer
         request = self.request_factory.get(
@@ -1284,7 +1274,7 @@ class TestFOIAComposerViews(TestCase):
         request.user = UserFactory()
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
+            request, slug=composer.slug, idx=composer.pk
         )
         eq_(response.status_code, 302)
         eq_(response.url, foia.get_absolute_url())
@@ -1303,7 +1293,7 @@ class TestFOIAComposerViews(TestCase):
         request.user = UserFactory()
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
+            request, slug=composer.slug, idx=composer.pk
         )
         eq_(response.status_code, 200)
         eq_(response.template_name, ["foia/foiacomposer_detail.html"])
@@ -1311,7 +1301,7 @@ class TestFOIAComposerViews(TestCase):
     def test_composer_detail_multi_submitted(self):
         """Composer shows its own page if multiple foias"""
         foia = FOIARequestFactory(
-            composer__status="submitted", composer__datetime_submitted=timezone.now(),
+            composer__status="submitted", composer__datetime_submitted=timezone.now()
         )
         FOIARequestFactory(composer=foia.composer)
         composer = foia.composer
@@ -1324,7 +1314,7 @@ class TestFOIAComposerViews(TestCase):
         request.user = UserFactory()
         request = mock_middleware(request)
         response = ComposerDetail.as_view()(
-            request, slug=composer.slug, idx=composer.pk,
+            request, slug=composer.slug, idx=composer.pk
         )
         eq_(response.status_code, 200)
         eq_(response.template_name, ["foia/foiacomposer_detail.html"])

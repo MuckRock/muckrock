@@ -114,8 +114,8 @@ class UserSubmittedFeed(Feed):
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.filter(composer__user=obj, embargo=False,)
-            .order_by("-composer__datetime_submitted",)
+            FOIARequest.objects.filter(composer__user=obj, embargo=False)
+            .order_by("-composer__datetime_submitted")
             .select_related("agency__jurisdiction")
             .prefetch_related("communications")[:25]
         )
@@ -149,8 +149,8 @@ class UserDoneFeed(Feed):
         """The completed requests are the items for this feed"""
         return (
             FOIARequest.objects.get_done()
-            .filter(composer__user=obj, embargo=False,)
-            .order_by("-composer__datetime_submitted",)
+            .filter(composer__user=obj, embargo=False)
+            .order_by("-composer__datetime_submitted")
             .select_related("agency__jurisdiction")
             .prefetch_related("communications")[:25]
         )
@@ -218,8 +218,8 @@ class AgencySubmittedFeed(Feed):
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.filter(agency=obj, embargo=False,)
-            .order_by("-composer__datetime_submitted",)
+            FOIARequest.objects.filter(agency=obj, embargo=False)
+            .order_by("-composer__datetime_submitted")
             .select_related("agency__jurisdiction")
             .prefetch_related("communications")[:25]
         )
@@ -252,8 +252,8 @@ class JurisdictionSubmittedFeed(Feed):
     def items(self, obj):
         """The submitted requests are the items for this feed"""
         return (
-            FOIARequest.objects.filter(agency__jurisdiction=obj, embargo=False,)
-            .order_by("-composer__datetime_submitted",)
+            FOIARequest.objects.filter(agency__jurisdiction=obj, embargo=False)
+            .order_by("-composer__datetime_submitted")
             .select_related("agency__jurisdiction")
             .prefetch_related("communications")[:25]
         )

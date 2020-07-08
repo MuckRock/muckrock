@@ -53,13 +53,13 @@ class AgencySerializer(serializers.ModelSerializer):
 
     types = serializers.StringRelatedField(many=True)
     appeal_agency = serializers.PrimaryKeyRelatedField(
-        queryset=Agency.objects.all(), style={"base_template": "input.html"},
+        queryset=Agency.objects.all(), style={"base_template": "input.html"}
     )
     parent = serializers.PrimaryKeyRelatedField(
-        queryset=Agency.objects.all(), style={"base_template": "input.html"},
+        queryset=Agency.objects.all(), style={"base_template": "input.html"}
     )
     jurisdiction = serializers.PrimaryKeyRelatedField(
-        queryset=Jurisdiction.objects.all(), style={"base_template": "input.html"},
+        queryset=Jurisdiction.objects.all(), style={"base_template": "input.html"}
     )
     absolute_url = serializers.SerializerMethodField()
     average_response_time = serializers.ReadOnlyField(source="average_response_time_")

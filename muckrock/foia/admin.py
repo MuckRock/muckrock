@@ -122,10 +122,10 @@ class FOIACommunicationAdminForm(forms.ModelForm):
     """Form for comm inline"""
 
     from_user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
     to_user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
 
     class Meta:
@@ -286,7 +286,7 @@ class FOIACommunicationInline(admin.StackedInline):
             super(FOIACommunicationInline, self)
             .get_queryset(request)
             .preload_files(limit=20)
-            .prefetch_related("emails", "faxes", "mails", "web_comms", "portals",)
+            .prefetch_related("emails", "faxes", "mails", "web_comms", "portals")
             .annotate(
                 files_count=Count("files"),
                 opens_count=Count("emails__opens"),
@@ -329,13 +329,13 @@ class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     agency = autocomplete_light.ModelChoiceField(
-        "AgencyAdminAutocomplete", queryset=Agency.objects.all(),
+        "AgencyAdminAutocomplete", queryset=Agency.objects.all()
     )
     read_collaborators = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
     edit_collaborators = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
     email = autocomplete_light.ModelChoiceField(
         "EmailAddressAdminAutocomplete",
@@ -348,10 +348,10 @@ class FOIARequestAdminForm(forms.ModelForm):
         required=False,
     )
     address = autocomplete_light.ModelChoiceField(
-        "AddressAdminAutocomplete", queryset=Address.objects.all(), required=False,
+        "AddressAdminAutocomplete", queryset=Address.objects.all(), required=False
     )
     portal = autocomplete_light.ModelChoiceField(
-        "PortalAutocomplete", queryset=Portal.objects.all(), required=False,
+        "PortalAutocomplete", queryset=Portal.objects.all(), required=False
     )
     cc_emails = autocomplete_light.ModelMultipleChoiceField(
         "EmailAddressAdminAutocomplete",
@@ -359,7 +359,7 @@ class FOIARequestAdminForm(forms.ModelForm):
         required=False,
     )
     crowdfund = autocomplete_light.ModelChoiceField(
-        "CrowdfundAutocomplete", queryset=Crowdfund.objects.all(), required=False,
+        "CrowdfundAutocomplete", queryset=Crowdfund.objects.all(), required=False
     )
 
     class Meta:
@@ -372,20 +372,10 @@ class FOIARequestAdmin(VersionAdmin):
 
     change_list_template = "admin/foia/foiarequest/change_list.html"
     prepopulated_fields = {"slug": ("title",)}
-    list_display = (
-        "title",
-        "get_user",
-        "status",
-        "agency",
-        "get_jurisdiction",
-    )
+    list_display = ("title", "get_user", "status", "agency", "get_jurisdiction")
     list_filter = ["status"]
     list_select_related = ("agency__jurisdiction", "composer__user")
-    search_fields = [
-        "title",
-        "tracking_ids__tracking_id",
-        "mail_id",
-    ]
+    search_fields = ["title", "tracking_ids__tracking_id", "mail_id"]
     readonly_fields = ["composer_link", "get_user", "mail_id"]
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
@@ -549,13 +539,13 @@ class FOIAComposerAdminForm(forms.ModelForm):
     """Form for the FOIA composer admin"""
 
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all()
     )
     organization = autocomplete_light.ModelChoiceField(
-        "OrganizationAutocomplete", queryset=Organization.objects.all(),
+        "OrganizationAutocomplete", queryset=Organization.objects.all()
     )
     agencies = autocomplete_light.ModelMultipleChoiceField(
-        "AgencyAdminAutocomplete", queryset=Agency.objects.all(), required=False,
+        "AgencyAdminAutocomplete", queryset=Agency.objects.all(), required=False
     )
     parent = autocomplete_light.ModelChoiceField(
         "FOIAComposerAdminAutocomplete",
@@ -582,10 +572,10 @@ class OutboundRequestAttachmentAdminForm(forms.ModelForm):
     """Form for outbound attachment admin"""
 
     foia = autocomplete_light.ModelChoiceField(
-        "FOIARequestAdminAutocomplete", queryset=FOIARequest.objects.all(),
+        "FOIARequestAdminAutocomplete", queryset=FOIARequest.objects.all()
     )
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all()
     )
 
     class Meta:
@@ -607,10 +597,10 @@ class OutboundComposerAttachmentAdminForm(forms.ModelForm):
     """Form for outbound attachment admin"""
 
     composer = autocomplete_light.ModelChoiceField(
-        "FOIAComposerAdminAutocomplete", queryset=FOIAComposer.objects.all(),
+        "FOIAComposerAdminAutocomplete", queryset=FOIAComposer.objects.all()
     )
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(),
+        "UserAutocomplete", queryset=User.objects.all()
     )
 
     class Meta:

@@ -29,7 +29,7 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
 
     doc_id = quote_plus(doc_id.encode("utf-8"))
     resp = requests.get(
-        "https://www.documentcloud.org" "/api/documents/{}.json".format(doc_id,)
+        "https://www.documentcloud.org" "/api/documents/{}.json".format(doc_id)
     )
     try:
         resp.raise_for_status()
@@ -46,9 +46,7 @@ def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
         url = "https://www.documentcloud.org/documents/" "{}/pages/{}.html".format(
             doc_id, i
         )
-        crowdsource.data.create(
-            url=url, metadata=metadata,
-        )
+        crowdsource.data.create(url=url, metadata=metadata)
 
 
 @task(name="muckrock.crowdsource.tasks.import_doccloud_proj")
@@ -79,9 +77,7 @@ def import_doccloud_proj(
             return
         for doc_id in resp_json["project"]["document_ids"]:
             if doccloud_each_page:
-                datum_per_page.delay(
-                    crowdsource.pk, doc_id, metadata,
-                )
+                datum_per_page.delay(crowdsource.pk, doc_id, metadata)
             else:
                 crowdsource.data.create(
                     url="https://www.documentcloud.org/documents/{}.html".format(

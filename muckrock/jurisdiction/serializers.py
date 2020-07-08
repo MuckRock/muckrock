@@ -16,7 +16,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
     """Serializer for Jurisidction model"""
 
     parent = serializers.PrimaryKeyRelatedField(
-        queryset=Jurisdiction.objects.order_by(), style={"base_template": "input.html"},
+        queryset=Jurisdiction.objects.order_by(), style={"base_template": "input.html"}
     )
     absolute_url = serializers.SerializerMethodField()
     average_response_time = serializers.ReadOnlyField()
@@ -50,11 +50,7 @@ class ExampleAppealSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExampleAppeal
-        fields = (
-            "id",
-            "language",
-            "context",
-        )
+        fields = ("id", "language", "context")
 
 
 class ExemptionSerializer(serializers.ModelSerializer):

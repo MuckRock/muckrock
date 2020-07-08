@@ -23,7 +23,7 @@ def CountWhen(output_field=None, **kwargs):
     # pylint: disable=invalid-name
     if output_field is None:
         output_field = IntegerField()
-    return Sum(Case(When(then=1, **kwargs), default=0,), output_field=output_field,)
+    return Sum(Case(When(then=1, **kwargs), default=0), output_field=output_field)
 
 
 class AgencyViewSet(viewsets.ModelViewSet):
@@ -46,13 +46,13 @@ class AgencyViewSet(viewsets.ModelViewSet):
             Prefetch(
                 "phones",
                 queryset=PhoneNumber.objects.filter(
-                    type="fax", status="good", agencyphone__request_type="primary",
+                    type="fax", status="good", agencyphone__request_type="primary"
                 ),
                 to_attr="primary_faxes",
             ),
             Prefetch(
                 "addresses",
-                queryset=Address.objects.filter(agencyaddress__request_type="primary",),
+                queryset=Address.objects.filter(agencyaddress__request_type="primary"),
                 to_attr="primary_addresses",
             ),
             "types",
@@ -70,7 +70,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
             fee_rate_=Coalesce(
                 100
                 * CountWhen(foiarequest__price__gt=0, output_field=FloatField())
-                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField(),),
+                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField()),
                 Value(0),
             ),
             success_rate_=Coalesce(
@@ -79,7 +79,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
                     foiarequest__status__in=["done", "partial"],
                     output_field=FloatField(),
                 )
-                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField(),),
+                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField()),
                 Value(0),
             ),
             number_requests=Count("foiarequest"),
@@ -102,7 +102,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
         f
         for f in AgencySerializer.Meta.fields
         if f
-        not in ("absolute_url", "average_response_time", "fee_rate", "success_rate",)
+        not in ("absolute_url", "average_response_time", "fee_rate", "success_rate")
         and not f.startswith(("has_", "number_"))
     ]
 
@@ -117,7 +117,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
         """API Filter for Agencies"""
 
         jurisdiction = django_filters.NumberFilter(name="jurisdiction__id")
-        types = django_filters.CharFilter(name="types__name", lookup_expr="iexact",)
+        types = django_filters.CharFilter(name="types__name", lookup_expr="iexact")
 
         class Meta:
             model = Agency

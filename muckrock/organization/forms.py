@@ -35,11 +35,9 @@ class StripeForm(forms.Form):
         coerce=lambda x: x == "True",
         initial=True,
         widget=forms.RadioSelect,
-        choices=((True, "Card on File"), (False, "New Card"),),
+        choices=((True, "Card on File"), (False, "New Card")),
     )
-    save_card = forms.BooleanField(
-        label="Save credit card information", required=False,
-    )
+    save_card = forms.BooleanField(label="Save credit card information", required=False)
 
     def __init__(self, *args, **kwargs):
         self._organization = kwargs.pop("organization", None)
@@ -61,7 +59,7 @@ class StripeForm(forms.Form):
         # if auth user no no org are given
         elif self._user.is_authenticated and self._organization is None:
             queryset = self._user.organizations.filter(
-                memberships__admin=True,
+                memberships__admin=True
             ).order_by("-individual", "name")
             if len(queryset) == 1:
                 self.fields["organization"].widget = forms.HiddenInput()

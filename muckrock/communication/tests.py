@@ -21,14 +21,12 @@ class TestEmailAddress(TestCase):
 
     def test_fetch(self):
         """Test the fetch query set method"""
-        ok_(isinstance(EmailAddress.objects.fetch("test@example.com"), EmailAddress,))
+        ok_(isinstance(EmailAddress.objects.fetch("test@example.com"), EmailAddress))
         ok_(EmailAddress.objects.fetch("foobar") is None)
 
     def test_fetch_many(self):
         """Test the fetch_many query set method"""
-        eq_(
-            len(EmailAddress.objects.fetch_many("a@a.com, b@b.com, foobar")), 2,
-        )
+        eq_(len(EmailAddress.objects.fetch_many("a@a.com, b@b.com, foobar")), 2)
         with assert_raises(ValidationError):
             EmailAddress.objects.fetch_many("a@a.comn, foobar", ignore_errors=False)
 
@@ -78,6 +76,4 @@ class TestEmailAddress(TestCase):
     def test_str(self):
         """Test the __str__ method"""
         email = '"John Doe" <john@doe.com>'
-        eq_(
-            str(EmailAddress.objects.fetch(email)), email,
-        )
+        eq_(str(EmailAddress.objects.fetch(email)), email)

@@ -49,13 +49,13 @@ def create_task_viewset(model, serializer, fields):
     filter_fields = dict(
         assigned=django_filters.CharFilter(name="assigned__username"),
         min_date_created=django_filters.DateFilter(
-            name="date_created", lookup_expr="gte",
+            name="date_created", lookup_expr="gte"
         ),
         max_date_created=django_filters.DateFilter(
-            name="date_created", lookup_expr="lte",
+            name="date_created", lookup_expr="lte"
         ),
-        min_date_done=django_filters.DateFilter(name="date_done", lookup_expr="gte",),
-        max_date_done=django_filters.DateFilter(name="date_done", lookup_expr="lte",),
+        min_date_done=django_filters.DateFilter(name="date_done", lookup_expr="gte"),
+        max_date_done=django_filters.DateFilter(name="date_done", lookup_expr="lte"),
         Meta=Meta,
     )
     relation_fields = ["user", "foia", "communication", "agency", "jurisdiction"]
@@ -76,14 +76,14 @@ def create_task_viewset(model, serializer, fields):
     )
 
 
-TaskViewSet = create_task_viewset(Task, TaskSerializer, (),)
+TaskViewSet = create_task_viewset(Task, TaskSerializer, ())
 
 OrphanTaskViewSet = create_task_viewset(
-    OrphanTask, OrphanTaskSerializer, ("reason", "communication", "address"),
+    OrphanTask, OrphanTaskSerializer, ("reason", "communication", "address")
 )
 
 SnailMailTaskViewSet = create_task_viewset(
-    SnailMailTask, SnailMailTaskSerializer, ("category", "communication"),
+    SnailMailTask, SnailMailTaskSerializer, ("category", "communication")
 )
 
 FlaggedTaskViewSet = create_task_viewset(
@@ -93,9 +93,9 @@ FlaggedTaskViewSet = create_task_viewset(
 )
 
 NewAgencyTaskViewSet = create_task_viewset(
-    NewAgencyTask, NewAgencyTaskSerializer, ("user", "agency"),
+    NewAgencyTask, NewAgencyTaskSerializer, ("user", "agency")
 )
 
 ResponseTaskViewSet = create_task_viewset(
-    ResponseTask, ResponseTaskSerializer, ("communication",),
+    ResponseTask, ResponseTaskSerializer, ("communication",)
 )

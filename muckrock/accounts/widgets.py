@@ -477,7 +477,7 @@ class PageViewsWidget(NumberWidget):
             # initalize google analytics api
             # we store the keyfile on s3
             conn = S3Connection(
-                settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,
+                settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
             )
             bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
             key = bucket.get_key("google/analytics_key.json")

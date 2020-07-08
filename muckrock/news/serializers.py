@@ -17,10 +17,10 @@ class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model"""
 
     authors = serializers.SlugRelatedField(
-        many=True, slug_field="username", queryset=User.objects.all(),
+        many=True, slug_field="username", queryset=User.objects.all()
     )
     editors = serializers.SlugRelatedField(
-        many=True, slug_field="username", queryset=User.objects.all(),
+        many=True, slug_field="username", queryset=User.objects.all()
     )
     foias = serializers.PrimaryKeyRelatedField(
         many=True,

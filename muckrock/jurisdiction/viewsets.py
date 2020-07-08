@@ -37,7 +37,7 @@ class JurisdictionViewSet(ModelViewSet):
         f
         for f in JurisdictionSerializer.Meta.fields
         if f
-        not in ("absolute_url", "average_response_time", "fee_rate", "success_rate",)
+        not in ("absolute_url", "average_response_time", "fee_rate", "success_rate")
     ]
 
     class Filter(django_filters.FilterSet):
@@ -47,13 +47,7 @@ class JurisdictionViewSet(ModelViewSet):
 
         class Meta:
             model = Jurisdiction
-            fields = (
-                "name",
-                "abbrev",
-                "level",
-                "parent",
-                "law__requires_proxy",
-            )
+            fields = ("name", "abbrev", "level", "parent", "law__requires_proxy")
 
     filter_class = Filter
 
@@ -108,10 +102,7 @@ class ExemptionViewSet(ModelViewSet):
 
         class Meta:
             model = Exemption
-            fields = (
-                "name",
-                "jurisdiction",
-            )
+            fields = ("name", "jurisdiction")
 
     filter_class = Filter
 
@@ -154,6 +145,6 @@ class ExemptionViewSet(ModelViewSet):
         foia = form.cleaned_data.get("foia")
         language = form.cleaned_data.get("language")
         task = FlaggedTask.objects.create(
-            foia=foia, text=language, user=request.user, category="appeal",
+            foia=foia, text=language, user=request.user, category="appeal"
         )
         return Response(FlaggedTaskSerializer(task).data)

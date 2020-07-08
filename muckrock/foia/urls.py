@@ -19,9 +19,9 @@ urlpatterns = [
     url(r"^list/$", views.RequestList.as_view(), name="foia-list"),
     url(r"^mylist/$", views.MyRequestList.as_view(), name="foia-mylist"),
     url(
-        r"^organization-list/$", views.MyOrgRequestList.as_view(), name="foia-org-list",
+        r"^organization-list/$", views.MyOrgRequestList.as_view(), name="foia-org-list"
     ),
-    url(r"^agency-list/$", views.AgencyRequestList.as_view(), name="foia-agency-list",),
+    url(r"^agency-list/$", views.AgencyRequestList.as_view(), name="foia-agency-list"),
     url(
         r"^list/following/$",
         views.FollowingRequestList.as_view(),
@@ -32,12 +32,12 @@ urlpatterns = [
         views.ProcessingRequestList.as_view(),
         name="foia-list-processing",
     ),
-    url(r"^mylist/drafts/$", views.ComposerList.as_view(), name="foia-mylist-drafts",),
+    url(r"^mylist/drafts/$", views.ComposerList.as_view(), name="foia-mylist-drafts"),
     # Create and Draft Views
     url(r"^create/$", views.CreateComposer.as_view(), name="foia-create"),
-    url(r"^(?P<idx>\d+)/draft/$", views.UpdateComposer.as_view(), name="foia-draft",),
-    url(r"^(?P<idx>\d+)/$", RedirectView.as_view(pattern_name="foia-draft"),),
-    url(r"^composer-autosave/(?P<idx>\d+)/$", views.autosave, name="foia-autosave",),
+    url(r"^(?P<idx>\d+)/draft/$", views.UpdateComposer.as_view(), name="foia-draft"),
+    url(r"^(?P<idx>\d+)/$", RedirectView.as_view(pattern_name="foia-draft")),
+    url(r"^composer-autosave/(?P<idx>\d+)/$", views.autosave, name="foia-autosave"),
     # Detail View
     url(
         r"^%s/$" % foia_url,
@@ -49,10 +49,8 @@ urlpatterns = [
         views.ComposerDetail.as_view(),
         name="foia-composer-detail",
     ),
-    url(r"^%s/crowdfund/$" % foia_url, views.crowdfund_request, name="foia-crowdfund",),
-    url(
-        r"^%s/files/$" % foia_url, views.FOIAFileListView.as_view(), name="foia-files",
-    ),
+    url(r"^%s/crowdfund/$" % foia_url, views.crowdfund_request, name="foia-crowdfund"),
+    url(r"^%s/files/$" % foia_url, views.FOIAFileListView.as_view(), name="foia-files"),
     url(r"^%s/follow/$" % foia_url, views.follow, name="foia-follow"),
     url(r"^%s/embargo/$" % foia_url, views.embargo, name="foia-embargo"),
     url(
@@ -103,11 +101,9 @@ urlpatterns = [
         name="foia-user-feed",
     ),
     # Files
-    url(
-        r"^file/(?P<pk>\d+)/embed/$", views.FileEmbedView.as_view(), name="file-embed",
-    ),
+    url(r"^file/(?P<pk>\d+)/embed/$", views.FileEmbedView.as_view(), name="file-embed"),
     # Webhooks
-    url(r"^lob/$", views.lob_webhook, name="lob-webhook",),
+    url(r"^lob/$", views.lob_webhook, name="lob-webhook"),
     # Old URLS
     url(r"^multi/$", RedirectView.as_view(url="/foi/create/")),
     url(

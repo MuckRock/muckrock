@@ -117,10 +117,7 @@ class TestFoiaMachineRequestDetailView(TestCase):
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
         self.view = views.FoiaMachineRequestDetailView.as_view()
-        self.kwargs = {
-            "slug": self.foi.slug,
-            "pk": self.foi.pk,
-        }
+        self.kwargs = {"slug": self.foi.slug, "pk": self.foi.pk}
         self.url = reverse("foi-detail", host="foiamachine", kwargs=self.kwargs)
 
     def test_owner_get(self):
@@ -147,10 +144,7 @@ class TestFoiaMachineRequestShareView(TestCase):
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
         self.view = views.FoiaMachineRequestShareView.as_view()
-        self.kwargs = {
-            "slug": self.foi.slug,
-            "pk": self.foi.pk,
-        }
+        self.kwargs = {"slug": self.foi.slug, "pk": self.foi.pk}
         self.url = reverse("foi-share", host="foiamachine", kwargs=self.kwargs)
 
     def test_anonymous(self):
@@ -202,10 +196,7 @@ class TestFoiaMachineRequestUpdateView(TestCase):
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
         self.view = views.FoiaMachineRequestUpdateView.as_view()
-        self.kwargs = {
-            "slug": self.foi.slug,
-            "pk": self.foi.pk,
-        }
+        self.kwargs = {"slug": self.foi.slug, "pk": self.foi.pk}
         self.url = reverse("foi-update", host="foiamachine", kwargs=self.kwargs)
 
     def test_anonymous(self):
@@ -264,10 +255,7 @@ class TestFoiaMachineRequestDeleteView(TestCase):
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
         self.view = views.FoiaMachineRequestDeleteView.as_view()
-        self.kwargs = {
-            "slug": self.foi.slug,
-            "pk": self.foi.pk,
-        }
+        self.kwargs = {"slug": self.foi.slug, "pk": self.foi.pk}
         self.url = reverse("foi-delete", host="foiamachine", kwargs=self.kwargs)
 
     def test_anonymous(self):
@@ -309,10 +297,7 @@ class TestFoiaMachineCommunicationCreateView(TestCase):
     def setUp(self):
         self.foi = factories.FoiaMachineRequestFactory()
         self.view = views.FoiaMachineCommunicationCreateView.as_view()
-        self.kwargs = {
-            "foi_slug": self.foi.slug,
-            "foi_pk": self.foi.pk,
-        }
+        self.kwargs = {"foi_slug": self.foi.slug, "foi_pk": self.foi.pk}
         self.url = reverse("comm-create", host="foiamachine", kwargs=self.kwargs)
 
     def test_anonymous(self):

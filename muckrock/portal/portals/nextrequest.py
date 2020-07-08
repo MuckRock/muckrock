@@ -42,7 +42,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             r"\[(?:ACTION REQUIRED|Action Required)\] Confirm your .* portal account",
             "confirm_account",
         ),
-        (r"\[External Message Added\]", "text_reply",),
+        (r"\[External Message Added\]", "text_reply"),
         (
             r"(?:\[Document Released to Requester\]|" r"\[Document Released\])",
             "document_reply",
@@ -52,8 +52,8 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             r"has been (?P<status>closed|published|reopened)[.]",
             "status_update",
         ),
-        (r"\[Department Changed\]", "dept_change",),
-        (r"\[Due Date Changed\]", "due_date_change",),
+        (r"\[Department Changed\]", "dept_change"),
+        (r"\[Due Date Changed\]", "due_date_change"),
     ]
 
     # sending
@@ -66,12 +66,10 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         category, extra = comm.foia.process_manual_send(**kwargs)
 
         if category == "n":
-            portal_task.delay(
-                self.portal.pk, "send_new_msg_task", [comm.pk], kwargs,
-            )
+            portal_task.delay(self.portal.pk, "send_new_msg_task", [comm.pk], kwargs)
         elif category in ("f", "u"):
             portal_task.delay(
-                self.portal.pk, "send_followup_msg_task", [comm.pk], kwargs,
+                self.portal.pk, "send_followup_msg_task", [comm.pk], kwargs
             )
         elif category == "p":
             # Payments are still always mailed
@@ -154,12 +152,9 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             session = requests.Session()
             self._login(comm, session)
             csrf_token = self._get_csrf_token(
-                session, ["requests", comm.foia.current_tracking_id()],
+                session, ["requests", comm.foia.current_tracking_id()]
             )
-            headers = {
-                "X-CSRF-Token": csrf_token,
-                "X-Requested-With": "XMLHttpRequest",
-            }
+            headers = {"X-CSRF-Token": csrf_token, "X-Requested-With": "XMLHttpRequest"}
             data = {
                 "note[note_text]": linebreaks(comm.communication),
                 "note[request_id]": request_id,
@@ -202,7 +197,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         """Send a document along with a request or followup"""
         # pylint: disable=too-many-locals
         csrf_token = self._get_csrf_token(
-            session, ["requests", comm.foia.current_tracking_id()],
+            session, ["requests", comm.foia.current_tracking_id()]
         )
         documents = []
         for file_ in comm.files.all():
@@ -237,10 +232,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             location = match.group(1).replace("%2F", "/")
             documents.append((file_.name(), location))
 
-        headers = {
-            "X-CSRF-Token": csrf_token,
-            "X-Requested-With": "XMLHttpRequest",
-        }
+        headers = {"X-CSRF-Token": csrf_token, "X-Requested-With": "XMLHttpRequest"}
         data = {"request_id": request_id}
         for i, (name, location) in enumerate(documents):
             data["documents[{}][description]".format(i)] = ""
@@ -291,7 +283,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         def on_match(match):
             """Open the confirmation page"""
             portal_task.delay(
-                self.portal.pk, "confirm_account_task", [comm.pk, match.group("link")],
+                self.portal.pk, "confirm_account_task", [comm.pk, match.group("link")]
             )
 
         self._process_msg(
@@ -330,9 +322,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                 direction="incoming",
             )
         else:
-            ManualPortal.receive_msg(
-                self, comm, reason="Confirmation link failed",
-            )
+            ManualPortal.receive_msg(self, comm, reason="Confirmation link failed")
 
     def text_reply(self, comm):
         """Handle text replies"""
@@ -356,12 +346,12 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             """Download the files"""
             if comm.foia.current_tracking_id() != match.group("tracking_id"):
                 ManualPortal.receive_msg(
-                    self, comm, reason="Tracking ID does not match",
+                    self, comm, reason="Tracking ID does not match"
                 )
             portal_task.delay(
                 self.portal.pk,
                 "document_reply_task",
-                [comm.pk, match.group("documents"), match.group("text"),],
+                [comm.pk, match.group("documents"), match.group("text")],
             )
 
         self._process_msg(
@@ -391,28 +381,24 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             for document in documents:
                 href = self._find_tag_attr(
                     soup,
-                    {"name": "a", "class": "document-link", "string": document,},
+                    {"name": "a", "class": "document-link", "string": document},
                     "href",
                     "Attempting to find the document: {}".format(document),
                 )
                 url = furl(self.portal.url).add(path=href)
                 reply = self._get(
-                    session, url, "Downloading document: {}".format(document),
+                    session, url, "Downloading document: {}".format(document)
                 )
                 comm.attach_file(
-                    content=reply.content, name=document, source=self.portal.name,
+                    content=reply.content, name=document, source=self.portal.name
                 )
             self._accept_comm(comm, text)
         except PortalError as exc:
-            ManualPortal.receive_msg(
-                self, comm, reason=exc.args[0],
-            )
+            ManualPortal.receive_msg(self, comm, reason=exc.args[0])
 
     def status_update(self, comm, status):
         """A status update message"""
-        self._accept_comm(
-            comm, "Your request has been {}.".format(status),
-        )
+        self._accept_comm(comm, "Your request has been {}.".format(status))
 
     def dept_change(self, comm):
         """Handle department change replies"""
@@ -435,15 +421,15 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             """Set the estimated completion date"""
             if comm.foia.current_tracking_id() != match.group("tracking_id"):
                 ManualPortal.receive_msg(
-                    self, comm, reason="Tracking ID does not match",
+                    self, comm, reason="Tracking ID does not match"
                 )
             try:
                 comm.foia.date_estimate = datetime.strptime(
-                    match.group("date"), "%B %d, %Y",
+                    match.group("date"), "%B %d, %Y"
                 ).date()
             except ValueError:
                 ManualPortal.receive_msg(
-                    self, comm, reason="Bad date: {}".format(match.group("date")),
+                    self, comm, reason="Bad date: {}".format(match.group("date"))
                 )
             else:
                 comm.foia.save()
@@ -465,9 +451,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         if match:
             on_match(match)
         else:
-            ManualPortal.receive_msg(
-                self, comm, reason=error_reason,
-            )
+            ManualPortal.receive_msg(self, comm, reason=error_reason)
 
     def _get_csrf_token(self, session=None, path="", reply=None):
         """Get the CSRF token from the given path or reply"""
@@ -513,7 +497,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             raise PortalError(
                 "Error fetching: {url}\n"
                 "Status code: {code}\n"
-                "{msg}".format(url=url, code=reply.status_code, msg=msg,)
+                "{msg}".format(url=url, code=reply.status_code, msg=msg)
             )
         return reply
 
@@ -532,13 +516,13 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         tag = soup.find(**find_kwargs)
         if not tag:
             raise PortalError(
-                "Error finding tag: {args}\n" "{msg}".format(args=find_kwargs, msg=msg,)
+                "Error finding tag: {args}\n" "{msg}".format(args=find_kwargs, msg=msg)
             )
         attr = tag.attrs.get(attr_name)
         if not attr:
             raise PortalError(
                 "Error finding attr: {attr}\n"
                 "Tag: {tag}\n"
-                "{msg}".format(attr=attr_name, tag=tag, msg=msg,)
+                "{msg}".format(attr=attr_name, tag=tag, msg=msg)
             )
         return attr

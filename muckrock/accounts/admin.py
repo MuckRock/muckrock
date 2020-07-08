@@ -80,13 +80,7 @@ class ProfileInline(admin.StackedInline):
         "preferred_proxy",
         "agency",
     )
-    readonly_fields = (
-        "org_link",
-        "uuid",
-        "full_name",
-        "email_confirmed",
-        "avatar_url",
-    )
+    readonly_fields = ("org_link", "uuid", "full_name", "email_confirmed", "avatar_url")
 
     def org_link(self, obj):
         """Link to the individual org"""
@@ -131,10 +125,7 @@ class MRUserAdmin(UserAdmin):
         ),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
-    readonly_fields = (
-        "username",
-        "email",
-    )
+    readonly_fields = ("username", "email")
 
     def full_name(self, obj):
         """Show full name from profile"""
@@ -145,7 +136,7 @@ class RecurringDonationAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False,
+        "UserAutocomplete", queryset=User.objects.all(), required=False
     )
 
     class Meta:

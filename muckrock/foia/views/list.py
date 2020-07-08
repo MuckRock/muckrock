@@ -73,7 +73,7 @@ class RequestExploreView(TemplateView):
                 Prefetch(
                     "foias",
                     queryset=FOIARequest.objects.select_related(
-                        "composer__user", "agency__jurisdiction__parent__parent",
+                        "composer__user", "agency__jurisdiction__parent__parent"
                     ),
                 ),
             )
@@ -86,9 +86,9 @@ class RequestExploreView(TemplateView):
                 Prefetch(
                     "requests",
                     queryset=FOIARequest.objects.select_related(
-                        "composer__user", "agency__jurisdiction__parent__parent",
+                        "composer__user", "agency__jurisdiction__parent__parent"
                     ),
-                ),
+                )
             )
         )
         context["recently_completed"] = (
@@ -128,7 +128,7 @@ class RequestList(MRSearchFilterListView):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
         objects = objects.select_related(
-            "agency__jurisdiction__parent", "composer__user__profile", "crowdfund",
+            "agency__jurisdiction__parent", "composer__user__profile", "crowdfund"
         ).only(
             "title",
             "slug",
@@ -200,7 +200,7 @@ class RequestList(MRSearchFilterListView):
 
         try:
             foias = FOIARequest.objects.filter(pk__in=request.POST.getlist("foias"))
-            msg = actions[request.POST["action"]](foias, request.user, request.POST,)
+            msg = actions[request.POST["action"]](foias, request.user, request.POST)
             if msg:
                 messages.success(request, msg)
             return redirect(request.resolver_match.view_name)
@@ -225,7 +225,7 @@ class RequestList(MRSearchFilterListView):
         """Delete a saved search"""
         try:
             search = FOIASavedSearch.objects.get(
-                pk=request.POST.get("delete"), user=request.user,
+                pk=request.POST.get("delete"), user=request.user
             )
             search.delete()
             messages.success(request, "The saved search was deleted")
@@ -241,7 +241,7 @@ class RequestList(MRSearchFilterListView):
             messages.success(request, "Search saved")
             return redirect(
                 "{}?{}".format(
-                    reverse(request.resolver_match.view_name), search.urlencode(),
+                    reverse(request.resolver_match.view_name), search.urlencode()
                 )
             )
         else:
@@ -282,9 +282,7 @@ class RequestList(MRSearchFilterListView):
                 for comm in foia.communications.all():
                     for file_ in comm.files.all():
                         if file_.doc_id and split:
-                            datum_per_page.delay(
-                                crowdsource.pk, file_.doc_id, {},
-                            )
+                            datum_per_page.delay(crowdsource.pk, file_.doc_id, {})
                         elif file_.doc_id and not split:
                             crowdsource.data.create(
                                 url="https://www.documentcloud.org/documents/{}.html".format(
@@ -298,7 +296,7 @@ class RequestList(MRSearchFilterListView):
         foias = foias.get_viewable(user)
         for foia in foias:
             ReviewAgencyTask.objects.ensure_one_created(
-                agency=foia.agency, resolved=False,
+                agency=foia.agency, resolved=False
             )
         return "Review agency tasks created"
 
@@ -307,13 +305,13 @@ class RequestList(MRSearchFilterListView):
         if "load" in request.GET and request.user.is_authenticated:
             try:
                 search = FOIASavedSearch.objects.get(
-                    title=request.GET.get("load"), user=request.user,
+                    title=request.GET.get("load"), user=request.user
                 )
             except FOIASavedSearch.DoesNotExist:
                 return super(RequestList, self).get(request, *args, **kwargs)
             return redirect(
                 "{}?{}".format(
-                    reverse(request.resolver_match.view_name), search.urlencode(),
+                    reverse(request.resolver_match.view_name), search.urlencode()
                 )
             )
         else:
@@ -366,7 +364,7 @@ class MyRequestList(RequestList):
         foias = [f.pk for f in foias if f.has_perm(user, "embargo")]
         FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
         # only set date if in end state
-        FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS,).update(
+        FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS).update(
             date_embargo=end_date
         )
         return "Embargoes extended for 30 days"
@@ -382,7 +380,7 @@ class MyRequestList(RequestList):
         foias = [f.pk for f in foias if f.has_perm(user, "embargo_perm")]
         FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
         # only set permanent
-        FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS,).update(
+        FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS).update(
             permanent_embargo=True
         )
         return "Embargoes extended permanently"
@@ -436,7 +434,7 @@ class MyRequestList(RequestList):
     def _autofollowup(self, foias, user, disable):
         """Set autofollowups"""
         foias = [f.pk for f in foias if f.has_perm(user, "change")]
-        FOIARequest.objects.filter(pk__in=foias,).update(disable_autofollowups=disable,)
+        FOIARequest.objects.filter(pk__in=foias).update(disable_autofollowups=disable)
         action = "disabled" if disable else "enabled"
         return "Autofollowups {}".format(action)
 
@@ -476,7 +474,7 @@ class AgencyRequestList(RequestList):
         queryset = super(AgencyRequestList, self).get_queryset()
         return queryset.filter(
             agency=self.request.user.profile.agency,
-            status__in=("ack", "processed", "appealing", "fix", "payment", "partial",),
+            status__in=("ack", "processed", "appealing", "fix", "payment", "partial"),
         )
 
 
@@ -530,10 +528,7 @@ class ComposerList(MRListView):
     template_name = "foia/composer_list.html"
     default_sort = "datetime_created"
     default_order = "desc"
-    sort_map = {
-        "title": "title",
-        "date_created": "datetime_created",
-    }
+    sort_map = {"title": "title", "date_created": "datetime_created"}
 
     def get_queryset(self):
         """Only show the current user's drafts"""

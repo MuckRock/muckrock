@@ -26,7 +26,7 @@ def detail(request, slug, idx):
     context = {
         "dataset": dataset,
         "sidebar_admin_url": reverse(
-            "admin:dataset_dataset_change", args=(dataset.pk,),
+            "admin:dataset_dataset_change", args=(dataset.pk,)
         ),
         "base_url": "https://www.muckrock.com",
     }
@@ -37,7 +37,7 @@ def detail(request, slug, idx):
 def embed(request, slug, idx):
     """Embed the data set"""
     dataset = get_object_or_404(DataSet, slug=slug, pk=idx)
-    return render(request, "dataset/embed.html", {"dataset": dataset},)
+    return render(request, "dataset/embed.html", {"dataset": dataset})
 
 
 def _parse_params(get, name, fields):
@@ -94,13 +94,11 @@ def data(request, slug, idx):
     total_rows = json_data.count()
     json_data = list(json_data[offset : offset + size])
     last_page = (total_rows + size - 1) / size
-    return JsonResponse({"data": json_data, "last_page": last_page,})
+    return JsonResponse({"data": json_data, "last_page": last_page})
 
 
 @user_passes_test(lambda u: u.is_staff)
 def create(request):
     """Upload a file to create a dataset from"""
-    context = {
-        "settings": settings,
-    }
+    context = {"settings": settings}
     return render(request, "dataset/create.html", context)

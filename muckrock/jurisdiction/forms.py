@@ -15,11 +15,7 @@ from muckrock.jurisdiction.models import ExampleAppeal, Jurisdiction
 class JurisdictionFilterForm(MRFilterForm):
     """Adds a level filter to MRFilterForm"""
 
-    levels = (
-        ("f", "Federal"),
-        ("s", "State"),
-        ("l", "Local"),
-    )
+    levels = (("f", "Federal"), ("s", "State"), ("l", "Local"))
     level = forms.ChoiceField(choices=levels, widget=forms.RadioSelect)
     parent = forms.ModelChoiceField(
         required=False,
@@ -52,7 +48,7 @@ class AppealForm(forms.Form):
 
     text = forms.CharField(widget=forms.Textarea())
     base_language = forms.ModelMultipleChoiceField(
-        queryset=ExampleAppeal.objects.all(), required=False,
+        queryset=ExampleAppeal.objects.all(), required=False
     )
 
 

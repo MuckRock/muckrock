@@ -26,7 +26,7 @@ class BaseComposerForm(forms.ModelForm):
 
     title = forms.CharField(
         widget=forms.TextInput(
-            attrs={"placeholder": "Add a title", "class": "submit-required",}
+            attrs={"placeholder": "Add a title", "class": "submit-required"}
         ),
         max_length=255,
         required=False,
@@ -51,7 +51,7 @@ class BaseComposerForm(forms.ModelForm):
         "Governor, Arkansas",
     )
     edited_boilerplate = forms.BooleanField(
-        required=False, label="Edit Template Language",
+        required=False, label="Edit Template Language"
     )
     embargo = forms.BooleanField(
         required=False,
@@ -72,17 +72,15 @@ class BaseComposerForm(forms.ModelForm):
         required=False,
     )
     parent = forms.ModelChoiceField(
-        queryset=FOIAComposer.objects.none(),
-        required=False,
-        widget=forms.HiddenInput(),
+        queryset=FOIAComposer.objects.none(), required=False, widget=forms.HiddenInput()
     )
     action = forms.ChoiceField(
-        choices=[("save", "Save"), ("submit", "Submit"), ("delete", "Delete"),],
+        choices=[("save", "Save"), ("submit", "Submit"), ("delete", "Delete")],
         widget=forms.HiddenInput(),
     )
 
     register_full_name = forms.CharField(
-        label="Full Name or Handle (Public)", required=False,
+        label="Full Name or Handle (Public)", required=False
     )
     register_email = forms.EmailField(label="Email", required=False)
     register_newsletter = forms.BooleanField(
@@ -174,9 +172,7 @@ class BaseComposerForm(forms.ModelForm):
         if cleaned_data.get("action") == "submit":
             for field in ["title", "requested_docs", "agencies"]:
                 if not self.cleaned_data.get(field):
-                    self.add_error(
-                        field, "This field is required when submitting",
-                    )
+                    self.add_error(field, "This field is required when submitting")
         if cleaned_data.get("permanent_embargo"):
             cleaned_data["embargo"] = True
         if not self._user.is_authenticated:
@@ -234,5 +230,5 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
 
         if require_payment and not card_on_file and not data.get("stripe_token"):
             self.add_error(
-                "stripe_token", "This field is required when making a purchase",
+                "stripe_token", "This field is required when making a purchase"
             )

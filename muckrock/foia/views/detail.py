@@ -120,7 +120,7 @@ class Detail(DetailView):
         )
         self.resend_form = ResendForm()
         self.fee_form = RequestFeeForm(
-            user=self.request.user, initial={"amount": foia.get_stripe_amount()},
+            user=self.request.user, initial={"amount": foia.get_stripe_amount()}
         )
         if request.POST:
             try:
@@ -240,7 +240,7 @@ class Detail(DetailView):
         context["portal_form"] = PortalForm(foia=foia)
         context["contact_info_form"] = ContactInfoForm(foia=foia, prefix="followup")
         context["appeal_contact_info_form"] = ContactInfoForm(
-            foia=foia, appeal=True, prefix="appeal",
+            foia=foia, appeal=True, prefix="appeal"
         )
 
         if user_can_edit or user.is_staff:
@@ -250,7 +250,7 @@ class Detail(DetailView):
             context["open_task_count"] = len(open_tasks)
             context["open_tasks"] = open_tasks
             context["asignees"] = (
-                User.objects.filter(is_staff=True,)
+                User.objects.filter(is_staff=True)
                 .select_related("profile")
                 .order_by("profile__full_name")
             )
@@ -390,7 +390,7 @@ class Detail(DetailView):
                 user=request.user, old_status=old_status, foia=foia, **kwargs
             )
             response_tasks = ResponseTask.objects.filter(
-                resolved=False, communication__foia=foia,
+                resolved=False, communication__foia=foia
             )
             for task in response_tasks:
                 task.resolve(request.user)
@@ -495,7 +495,7 @@ class Detail(DetailView):
     def _admin_follow_up(self, request, foia):
         """Handle follow ups for admins"""
         form = FOIAAdminFixForm(
-            request.POST, prefix="admin_fix", request=request, foia=foia,
+            request.POST, prefix="admin_fix", request=request, foia=foia
         )
         if form.is_valid():
             foia.update_address(
@@ -536,15 +536,13 @@ class Detail(DetailView):
             contact_info=contact_info_form.cleaned_data if use_contact_info else None,
         )
         if use_contact_info:
-            foia.add_contact_info_note(
-                request.user, contact_info_form.cleaned_data,
-            )
+            foia.add_contact_info_note(request.user, contact_info_form.cleaned_data)
         if comm_sent:
             new_action(request.user, "followed up on", target=foia)
             mixpanel_event(
                 request,
                 "Follow Up",
-                foia.mixpanel_data({"Use Contact Info": use_contact_info,}),
+                foia.mixpanel_data({"Use Contact Info": use_contact_info}),
             )
         return redirect(foia.get_absolute_url() + "#")
 
@@ -577,7 +575,7 @@ class Detail(DetailView):
         form = AppealForm(request.POST)
         has_perm = foia.has_perm(request.user, "appeal")
         contact_info_form = ContactInfoForm(
-            request.POST, foia=foia, prefix="appeal", appeal=True,
+            request.POST, foia=foia, prefix="appeal", appeal=True
         )
         has_contact_perm = request.user.has_perm("foia.set_info_foiarequest")
         contact_valid = contact_info_form.is_valid()
@@ -607,9 +605,7 @@ class Detail(DetailView):
         new_action(request.user, "appealed", target=foia)
         messages.success(request, "Your appeal has been sent.")
         if use_contact_info:
-            foia.add_contact_info_note(
-                request.user, contact_info_form.cleaned_data,
-            )
+            foia.add_contact_info_note(request.user, contact_info_form.cleaned_data)
         return redirect(foia.get_absolute_url() + "#")
 
     def _update_estimate(self, request, foia):
@@ -638,7 +634,7 @@ class Detail(DetailView):
                 messages.success(request, "Successfully added a tracking number")
             else:
                 messages.error(
-                    request, "Please fill out the tracking number and reason",
+                    request, "Please fill out the tracking number and reason"
                 )
         else:
             messages.error(request, "You do not have permission to do that")
@@ -653,7 +649,7 @@ class Detail(DetailView):
                 messages.success(request, "Successfully added a portal")
             else:
                 messages.error(
-                    request, "Choose a portal or supply information for a new one",
+                    request, "Choose a portal or supply information for a new one"
                 )
         else:
             messages.error(request, "You do not have permission to do that")
@@ -767,7 +763,7 @@ class Detail(DetailView):
                     status=form.cleaned_data["status"],
                 )
                 WebCommunication.objects.create(
-                    communication=comm, sent_datetime=timezone.now(),
+                    communication=comm, sent_datetime=timezone.now()
                 )
                 foia.date_estimate = form.cleaned_data["date_estimate"]
                 foia.add_tracking_id(form.cleaned_data["tracking_id"])
@@ -864,9 +860,7 @@ class Detail(DetailView):
                     fax=form.cleaned_data["fax"],
                 )
                 snail = form.cleaned_data["via"] == "snail"
-                foia.submit(
-                    snail=snail, comm=form.cleaned_data["communication"],
-                )
+                foia.submit(snail=snail, comm=form.cleaned_data["communication"])
                 messages.success(request, "The communication was resent")
             else:
                 comm = form.cleaned_data["communication"]
@@ -975,7 +969,7 @@ class ComposerDetail(DetailView):
         composer = context["composer"]
         context["foias"] = self.foias
         context["sidebar_admin_url"] = reverse(
-            "admin:foia_foiacomposer_change", args=(composer.pk,),
+            "admin:foia_foiacomposer_change", args=(composer.pk,)
         )
         context["processing"] = composer.status == "submitted" and (
             composer.foias.count() != composer.agencies.count()

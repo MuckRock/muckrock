@@ -31,7 +31,7 @@ class AsyncFileDownloadTask(object):
 
     def __init__(self, user_pk, hash_key):
         self.user = User.objects.get(pk=user_pk)
-        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,)
+        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
         self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         today = date.today()
         self.file_key = "{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}".format(
@@ -41,7 +41,7 @@ class AsyncFileDownloadTask(object):
             m=today.month,
             d=today.day,
             md5=md5(
-                "{}{}{}{}".format(int(time()), settings.SECRET_KEY, user_pk, hash_key,)
+                "{}{}{}{}".format(int(time()), settings.SECRET_KEY, user_pk, hash_key)
             ).hexdigest(),
         )
         self.key = self.bucket.new_key(self.file_key)

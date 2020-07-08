@@ -53,9 +53,7 @@ class ProjectExploreView(TemplateView):
         featured_projects = (
             Project.objects.get_visible(user).filter(featured=True).optimize()
         )
-        context.update(
-            {"featured_projects": featured_projects,}
-        )
+        context.update({"featured_projects": featured_projects})
         return context
 
 
@@ -158,7 +156,7 @@ class ProjectDetailView(DetailView):
             "admin:project_project_change", args=(project.pk,)
         )
         visible_requests = project.requests.get_viewable(user).select_related(
-            "agency__jurisdiction__parent__parent", "composer__user__profile",
+            "agency__jurisdiction__parent__parent", "composer__user__profile"
         )
         context["visible_requests"] = visible_requests.get_public_file_count(limit=6)
         context["visible_requests_count"] = visible_requests.count()

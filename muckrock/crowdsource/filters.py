@@ -19,7 +19,7 @@ class CrowdsourceFilterSet(django_filters.FilterSet):
     """Filtering for crowdsources for admins"""
 
     status = django_filters.ChoiceFilter(
-        choices=(("draft", "Draft"), ("open", "Open"), ("close", "Closed"),)
+        choices=(("draft", "Draft"), ("open", "Open"), ("close", "Closed"))
     )
     is_staff = django_filters.BooleanFilter(
         name="user__is_staff",

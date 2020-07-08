@@ -23,7 +23,7 @@ class CrowdsourceDraftAutocomplete(autocomplete_light.AutocompleteModelBase):
         Only show crowdsources owned by the user
         """
         self.choices = Crowdsource.objects.filter(
-            status="draft", user=self.request.user,
+            status="draft", user=self.request.user
         )
         return super(CrowdsourceDraftAutocomplete, self).choices_for_request()
 

@@ -150,7 +150,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         style={"base_template": "input.html"},
     )
     agency = serializers.PrimaryKeyRelatedField(
-        queryset=Agency.objects.all(), style={"base_template": "input.html"},
+        queryset=Agency.objects.all(), style={"base_template": "input.html"}
     )
     tags = serializers.StringRelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)

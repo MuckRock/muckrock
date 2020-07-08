@@ -30,11 +30,11 @@ class TestDataSetModels(TestCase):
         """Create a dataset for each test case"""
         self.user = UserFactory()
         self.dataset = DataSet.objects.create(
-            name="Data Set", slug="data-set", user=self.user,
+            name="Data Set", slug="data-set", user=self.user
         )
         for i, name in enumerate("abc"):
             DataField.objects.create(
-                dataset=self.dataset, name=name, slug=name, field_number=i, type="text",
+                dataset=self.dataset, name=name, slug=name, field_number=i, type="text"
             )
         data = [
             {"a": "alice", "b": "901", "c": "foo"},
@@ -42,14 +42,12 @@ class TestDataSetModels(TestCase):
             {"a": "charlie", "b": "201", "c": "baz"},
         ]
         for i, row in enumerate(data):
-            DataRow.objects.create(
-                dataset=self.dataset, row_number=i, data=row,
-            )
+            DataRow.objects.create(dataset=self.dataset, row_number=i, data=row)
 
     def test_create_from_csv(self):
         """Test creating a dataset from a csv"""
         csv = StringIO("d,e,f\n" "doug,24,foo\n" "eric,45,bar\n" "fox,62,baz\n")
-        dataset = DataSet.objects.create_from_csv("Name", self.user, csv,)
+        dataset = DataSet.objects.create_from_csv("Name", self.user, csv)
         field_names = dataset.fields.all()
         eq_(["d", "e", "f"], [f.name for f in field_names])
         eq_(["choice", "number", "choice"], [f.type for f in field_names])
@@ -61,9 +59,7 @@ class TestDataSetModels(TestCase):
     def test_create_from_csv_repeat_columns(self):
         """Duplicate column names do not crash creation"""
         csv = StringIO("name,age,name\n" "doug,24,foo\n" "eric,45,bar\n" "fox,62,baz\n")
-        DataSet.objects.create_from_csv(
-            "Name", self.user, csv,
-        )
+        DataSet.objects.create_from_csv("Name", self.user, csv)
 
     def test_detect_field_types(self):
         """Test detecting the field types"""
@@ -79,12 +75,10 @@ class TestDataSetModels(TestCase):
     def test_row_sort(self):
         """Test sorting the data"""
         field_names = {f.slug: f for f in self.dataset.fields.all()}
-        rows = list(
-            self.dataset.rows.sort(field_names, [{"field": "b", "dir": "asc"}],)
-        )
+        rows = list(self.dataset.rows.sort(field_names, [{"field": "b", "dir": "asc"}]))
         eq_(rows, sorted(rows, key=lambda x: x.data["b"]))
         rows = list(
-            self.dataset.rows.sort(field_names, [{"field": "a", "dir": "desc"}],)
+            self.dataset.rows.sort(field_names, [{"field": "a", "dir": "desc"}])
         )
         eq_(rows, sorted(rows, key=lambda x: x.data["a"], reverse=True))
 
@@ -92,7 +86,7 @@ class TestDataSetModels(TestCase):
         """Test filtering the data"""
         field_names = {f.slug: f for f in self.dataset.fields.all()}
         rows = self.dataset.rows.tabulator_filter(
-            field_names, [{"field": "a", "type": "=", "value": "alice"}],
+            field_names, [{"field": "a", "type": "=", "value": "alice"}]
         )
         eq_(len(rows), 1)
         rows = self.dataset.rows.tabulator_filter(
@@ -189,7 +183,7 @@ class TestDataSetViews(TestCase):
             "bob,45,journalist\n"
             "charlie,62,doctor\n"
         )
-        self.dataset = DataSet.objects.create_from_csv("DataSet", self.user, csv,)
+        self.dataset = DataSet.objects.create_from_csv("DataSet", self.user, csv)
 
     def test_detail(self):
         """Test the detail view"""
@@ -201,7 +195,7 @@ class TestDataSetViews(TestCase):
         )
         request = mock_middleware(request)
         request.user = self.user
-        response = views.detail(request, self.dataset.slug, self.dataset.pk,)
+        response = views.detail(request, self.dataset.slug, self.dataset.pk)
         eq_(response.status_code, 200)
 
     def test_embed(self):
@@ -214,7 +208,7 @@ class TestDataSetViews(TestCase):
         )
         request = mock_middleware(request)
         request.user = self.user
-        response = views.embed(request, self.dataset.slug, self.dataset.pk,)
+        response = views.embed(request, self.dataset.slug, self.dataset.pk)
         eq_(response.status_code, 200)
 
     def test_data(self):
@@ -227,7 +221,7 @@ class TestDataSetViews(TestCase):
         )
         request = mock_middleware(request)
         request.user = self.user
-        response = views.data(request, self.dataset.slug, self.dataset.pk,)
+        response = views.data(request, self.dataset.slug, self.dataset.pk)
         eq_(response.status_code, 200)
 
     def test_parse_params(self):
@@ -241,12 +235,12 @@ class TestDataSetViews(TestCase):
             "filters[1][type]": "like",
             "filters[1][value]": "bar",
         }
-        data = views._parse_params(params, "filters", ("field", "type", "value"),)
+        data = views._parse_params(params, "filters", ("field", "type", "value"))
         eq_(
             data,
             [
-                {"field": "a", "type": "=", "value": "foo",},
-                {"field": "b", "type": "like", "value": "bar",},
+                {"field": "a", "type": "=", "value": "foo"},
+                {"field": "b", "type": "like", "value": "bar"},
             ],
         )
 
@@ -259,7 +253,7 @@ class TestDataSetViews(TestCase):
             "filters[1][field]": "b",
             "filters[1][type]": "like",
         }
-        data = views._parse_params(params, "filters", ("field", "type", "value"),)
+        data = views._parse_params(params, "filters", ("field", "type", "value"))
         eq_(data, [])
 
         # bad format
@@ -271,7 +265,7 @@ class TestDataSetViews(TestCase):
             "filters[1][type]": "like",
             "filters[1]{value}": "bar",
         }
-        data = views._parse_params(params, "filters", ("field", "type", "value"),)
+        data = views._parse_params(params, "filters", ("field", "type", "value"))
         eq_(data, [])
 
         # bad field
@@ -283,5 +277,5 @@ class TestDataSetViews(TestCase):
             "filters[1][type]": "like",
             "filters[1][foobar]": "bar",
         }
-        data = views._parse_params(params, "filters", ("field", "type", "value"),)
+        data = views._parse_params(params, "filters", ("field", "type", "value"))
         eq_(data, [])

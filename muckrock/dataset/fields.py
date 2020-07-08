@@ -110,7 +110,7 @@ class BoolField(Field):
     formatter = "tickCross"
     editor = "selectEditor"
     sort_type = "text"
-    validator = RegexValidator(regex=r"^(?:true|1|false|0)$", flags=re.IGNORECASE,)
+    validator = RegexValidator(regex=r"^(?:true|1|false|0)$", flags=re.IGNORECASE)
 
 
 class ColorField(Field):
@@ -122,7 +122,7 @@ class ColorField(Field):
     editor = '"input"'
     sort_type = "text"
     validator = RegexValidator(
-        regex=r"^#[0-9a-f]{3}(?:[0-9a-f]{3})?$", flags=re.IGNORECASE,
+        regex=r"^#[0-9a-f]{3}(?:[0-9a-f]{3})?$", flags=re.IGNORECASE
     )
 
 
@@ -160,7 +160,7 @@ class DateField(Field):
     sort_type = "date"
     validator = RegexValidator(
         regex=r"^(?:{y}-{m}-{d}|{m} {d}, {y}|{m}/{d}/{y}|{m}-{d}-{y})$".format(
-            m=MONTH_RE, d=DAY_RE, y=YEAR_RE,
+            m=MONTH_RE, d=DAY_RE, y=YEAR_RE
         ),
         flags=re.IGNORECASE,
     )

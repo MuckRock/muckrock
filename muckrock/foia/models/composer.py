@@ -34,11 +34,7 @@ from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.tags.models import TaggedItemBase
 
-STATUS = [
-    ("started", "Draft"),
-    ("submitted", "Processing"),
-    ("filed", "Filed"),
-]
+STATUS = [("started", "Draft"), ("submitted", "Processing"), ("filed", "Filed")]
 
 
 class FOIAComposer(models.Model):
@@ -46,7 +42,7 @@ class FOIAComposer(models.Model):
 
     # pylint: disable=too-many-instance-attributes
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="composers",)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="composers")
     # only null for initial migration
     organization = models.ForeignKey(
         "organization.Organization",
@@ -61,7 +57,7 @@ class FOIAComposer(models.Model):
     requested_docs = models.TextField(blank=True)
     edited_boilerplate = models.BooleanField(default=False)
     datetime_created = models.DateTimeField(default=timezone.now, db_index=True)
-    datetime_submitted = models.DateTimeField(blank=True, null=True, db_index=True,)
+    datetime_submitted = models.DateTimeField(blank=True, null=True, db_index=True)
     embargo = models.BooleanField(default=False)
     permanent_embargo = models.BooleanField(default=False)
     parent = models.ForeignKey(
@@ -107,7 +103,7 @@ class FOIAComposer(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return reverse(
-            "foia-composer-detail", kwargs={"slug": self.slug, "idx": self.pk,}
+            "foia-composer-detail", kwargs={"slug": self.slug, "idx": self.pk}
         )
 
     def submit(self, contact_info=None):
@@ -132,7 +128,7 @@ class FOIAComposer(models.Model):
         # the request right away, other wise we create a multirequest task
         approve = num_requests < settings.MULTI_REVIEW_AMOUNT
         result = composer_delayed_submit.apply_async(
-            args=(self.pk, approve, contact_info), countdown=COMPOSER_SUBMIT_DELAY,
+            args=(self.pk, approve, contact_info), countdown=COMPOSER_SUBMIT_DELAY
         )
         self.delayed_id = result.id
         self.save()
@@ -179,10 +175,7 @@ class FOIAComposer(models.Model):
 
     def _calc_return_requests(self, num_requests):
         """Determine how many of each type of request to return"""
-        used = [
-            self.num_reg_requests,
-            self.num_monthly_requests,
-        ]
+        used = [self.num_reg_requests, self.num_monthly_requests]
         ret = []
         while num_requests:
             try:
@@ -194,7 +187,7 @@ class FOIAComposer(models.Model):
                 num_ret = min(num_used, num_requests)
                 num_requests -= num_ret
                 ret.append(num_ret)
-        ret_dict = dict(zip_longest(["regular", "monthly", "extra"], ret, fillvalue=0,))
+        ret_dict = dict(zip_longest(["regular", "monthly", "extra"], ret, fillvalue=0))
         ret_dict["regular"] += ret_dict.pop("extra")
         return ret_dict
 
@@ -230,7 +223,6 @@ class FOIAComposer(models.Model):
     def attachments_over_size_limit(self, user):
         """Are the pending attachments for this composer over the size limit?"""
         total_size = sum(
-            a.ffile.size
-            for a in self.pending_attachments.filter(user=user, sent=False,)
+            a.ffile.size for a in self.pending_attachments.filter(user=user, sent=False)
         )
         return total_size > settings.MAX_ATTACHMENT_TOTAL_SIZE

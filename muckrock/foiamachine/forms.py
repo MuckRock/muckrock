@@ -36,9 +36,7 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
             "jurisdiction": "JurisdictionAutocomplete",
             "agency": "AgencyAutocomplete",
         }
-        labels = {
-            "request_language": "Request",
-        }
+        labels = {"request_language": "Request"}
 
     def clean(self):
         """Ensures the agency belongs to the jurisdiction."""
@@ -101,9 +99,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
             "message",
             "received",
         ]
-        widgets = {
-            "request": forms.HiddenInput(),
-        }
+        widgets = {"request": forms.HiddenInput()}
         help_texts = {
             "sender": "What is the name or email of who sent the message?",
             "receiver": "What is the name or email of who the message was sent to?",

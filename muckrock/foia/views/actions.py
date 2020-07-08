@@ -108,15 +108,11 @@ def follow(request, jurisdiction, jidx, slug, idx):
     if actstream.actions.is_following(request.user, foia):
         actstream.actions.unfollow(request.user, foia)
         messages.success(request, "You are no longer following this request.")
-        mixpanel_event(
-            request, "Unfollow", foia.mixpanel_data(),
-        )
+        mixpanel_event(request, "Unfollow", foia.mixpanel_data())
     else:
         actstream.actions.follow(request.user, foia, actor_only=False)
         messages.success(request, "You are now following this request.")
-        mixpanel_event(
-            request, "Follow", foia.mixpanel_data(),
-        )
+        mixpanel_event(request, "Follow", foia.mixpanel_data())
     return redirect(foia)
 
 
@@ -199,8 +195,6 @@ def crowdfund_request(request, idx, **kwargs):
             "foia": foia,
         }
         form = CrowdfundForm(initial=initial)
-        mixpanel_event(
-            request, "Start Request Crowdfund", foia.mixpanel_data(),
-        )
+        mixpanel_event(request, "Start Request Crowdfund", foia.mixpanel_data())
 
-    return render(request, "forms/foia/crowdfund.html", {"form": form},)
+    return render(request, "forms/foia/crowdfund.html", {"form": form})

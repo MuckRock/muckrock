@@ -223,7 +223,7 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         # no communication should be created, and an autoreply sould be mailed out
         nose.tools.eq_(foia.communications.count(), 0)
         nose.tools.eq_(
-            mail.outbox[0].body, render_to_string("text/foia/deleted_autoreply.txt"),
+            mail.outbox[0].body, render_to_string("text/foia/deleted_autoreply.txt")
         )
         nose.tools.eq_(mail.outbox[0].to, [from_])
 
@@ -245,11 +245,9 @@ class TestMailgunViewCatchAll(TestMailgunViews):
         self.mailgun_route(to_=to_, text=text, signature=signature)
 
         task = OrphanTask.objects.get(
-            reason="ia", address="foobar@requests.muckrock.com",
+            reason="ia", address="foobar@requests.muckrock.com"
         )
-        nose.tools.eq_(
-            task.communication.communication, "%s\n%s" % (text, signature),
-        )
+        nose.tools.eq_(task.communication.communication, "%s\n%s" % (text, signature))
 
 
 @freeze_time("2017-01-02 12:00:00 EST", tz_offset=-5)
@@ -265,7 +263,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         recipient = "alice@example.com"
         comm = FOIACommunicationFactory(
-            foia__email=EmailAddress.objects.fetch(recipient), foia__agency__fax=None,
+            foia__email=EmailAddress.objects.fetch(recipient), foia__agency__fax=None
         )
         email = comm.emails.first()
         event = "bounced"
@@ -306,7 +304,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         recipient = "alice@example.com"
         comm = FOIACommunicationFactory(
-            foia__email=EmailAddress.objects.fetch(recipient),
+            foia__email=EmailAddress.objects.fetch(recipient)
         )
         email = comm.emails.first()
         event = "opened"
@@ -363,10 +361,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         comm = FOIACommunicationFactory()
         email = comm.emails.first()
-        data = {
-            "event": "delivered",
-            "email_id": email.pk,
-        }
+        data = {"event": "delivered", "email_id": email.pk}
         self.sign(data)
         request = self.factory.post(reverse("mailgun-delivered"), data)
         delivered(request)  # pylint: disable=no-value-for-parameter

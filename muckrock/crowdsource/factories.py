@@ -61,13 +61,13 @@ class CrowdsourceChoiceFieldFactory(CrowdsourceFieldFactory):
     """An abstract base class factory for fields with choices"""
 
     choice0 = factory.RelatedFactory(
-        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=1,
+        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=1
     )
     choice1 = factory.RelatedFactory(
-        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=2,
+        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=2
     )
     choice2 = factory.RelatedFactory(
-        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=3,
+        "muckrock.crowdsource.factories.CrowdsourceChoiceFactory", "field", order=3
     )
 
 

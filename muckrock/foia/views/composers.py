@@ -48,7 +48,7 @@ def format_org_list(organizations):
     elif len(organizations) == 1:
         return name(organizations[0])
     elif len(organizations) == 2:
-        return "{} or {}".format(name(organizations[0]), name(organizations[1]),)
+        return "{} or {}".format(name(organizations[0]), name(organizations[1]))
     elif len(organizations) > 2:
         formatted = ", ".join(name(o) for o in organizations[:-1])
         return "{}, or {}".format(formatted, name(organizations[-1]))
@@ -115,7 +115,7 @@ class GenericComposer(BuyRequestsMixin):
                 "monthly": organization.monthly_requests,
             }
             context["sidebar_admin_url"] = reverse(
-                "admin:foia_foiacomposer_change", args=(self.object.pk,),
+                "admin:foia_foiacomposer_change", args=(self.object.pk,)
             )
         else:
             foias_filed = 0
@@ -225,10 +225,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     """Create a new composer"""
 
     minireg_source = "Composer"
-    field_map = {
-        "email": "register_email",
-        "name": "register_full_name",
-    }
+    field_map = {"email": "register_email", "name": "register_full_name"}
 
     # pylint: disable=attribute-defined-outside-init
 
@@ -244,7 +241,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         agency_pks = self.request.GET.getlist("agency")
         agency_pks = [pk for pk in agency_pks if re.match("^[0-9]+$", pk)]
         if agency_pks:
-            agencies = Agency.objects.filter(pk__in=agency_pks, status="approved",)
+            agencies = Agency.objects.filter(pk__in=agency_pks, status="approved")
             data.update({"agencies": agencies})
         return data
 
@@ -267,9 +264,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         }
         self.clone = composer
         mixpanel_event(
-            self.request,
-            "Request Cloned",
-            self._composer_mixpanel_properties(composer),
+            self.request, "Request Cloned", self._composer_mixpanel_properties(composer)
         )
         return initial_data
 
@@ -374,7 +369,7 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
                 return redirect("foia-mylist-drafts")
             else:
                 messages.success(
-                    self.request, "You do not have permission to delete that draft",
+                    self.request, "You do not have permission to delete that draft"
                 )
                 return redirect("foia-mylist-drafts")
         return super(UpdateComposer, self).post(request, *args, **kwargs)
@@ -410,15 +405,13 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
 def autosave(request, idx):
     """Save the composer via AJAX"""
     composer = get_object_or_404(
-        FOIAComposer, pk=idx, status="started", user=request.user,
+        FOIAComposer, pk=idx, status="started", user=request.user
     )
     old_agencies = set(composer.agencies.all())
     data = request.POST.copy()
     # we are always just saving
     data["action"] = "save"
-    form = BaseComposerForm(
-        data, instance=composer, user=request.user, request=request,
-    )
+    form = BaseComposerForm(data, instance=composer, user=request.user, request=request)
     if form.is_valid():
         composer = form.save(update_owners=False)
         new_agencies = set(composer.agencies.all())

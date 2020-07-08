@@ -75,7 +75,7 @@ class TestNewsFunctional(TestCase):
     def setUp(self):
         """Create articles for the tests"""
         ArticleFactory.create_batch(
-            2, publish=True, pub_date=datetime(1999, 1, 1, 12, 12, tzinfo=pytz.utc),
+            2, publish=True, pub_date=datetime(1999, 1, 1, 12, 12, tzinfo=pytz.utc)
         )
         ArticleFactory(publish=True, pub_date=datetime(1999, 1, 2, 12, tzinfo=pytz.utc))
         ArticleFactory(publish=True, pub_date=datetime(1999, 2, 3, 12, tzinfo=pytz.utc))
@@ -143,13 +143,13 @@ class TestNewsFunctional(TestCase):
     def test_news_detail(self):
         """News detail should display the given article"""
         article = ArticleFactory(
-            publish=True, pub_date=datetime(1999, 1, 1, 12, tzinfo=pytz.utc),
+            publish=True, pub_date=datetime(1999, 1, 1, 12, tzinfo=pytz.utc)
         )
         response = get_allowed(
             self.client,
             reverse(
                 "news-detail",
-                kwargs={"year": 1999, "month": "jan", "day": 1, "slug": article.slug,},
+                kwargs={"year": 1999, "month": "jan", "day": 1, "slug": article.slug},
             ),
         )
         eq_(response.context["object"], article)
@@ -214,7 +214,7 @@ class TestNewsArticleViews(TestCase):
         project2 = ProjectFactory()
         staff = UserFactory(is_staff=True)
         project_form = ProjectManagerForm(
-            {"projects": [project1.pk, project2.pk]}, user=staff,
+            {"projects": [project1.pk, project2.pk]}, user=staff
         )
         ok_(project_form.is_valid(), "We want to be sure we are posting valid data.")
         data = {"action": "projects"}

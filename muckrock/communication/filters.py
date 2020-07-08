@@ -18,7 +18,7 @@ class CheckFilterSet(django_filters.FilterSet):
         name="created_datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
     minimum_amount = django_filters.NumberFilter(

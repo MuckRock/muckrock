@@ -30,7 +30,7 @@ def process_dataset_file(file_key, user_pk):
         # don't bother continuing if it is an illegal file type
         return
     user = User.objects.get(pk=user_pk)
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY,)
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     key = bucket.get_key(file_key)
     with smart_open(key) as data_file:

@@ -24,7 +24,7 @@ def make_host(url):
 
 host_patterns = patterns(
     "",
-    host(make_host(settings.MUCKROCK_URL), settings.ROOT_URLCONF, name="default",),
+    host(make_host(settings.MUCKROCK_URL), settings.ROOT_URLCONF, name="default"),
     host(
         make_host(settings.FOIAMACHINE_URL),
         "muckrock.foiamachine.urls",

@@ -117,12 +117,12 @@ class ProfileSettings(TemplateView):
             return redirect("acct-settings")
         elif action == "cancel-crowdfunds":
             self._handle_cancel_payments(
-                "recurring_crowdfund_payments", "cancel-crowdfunds",
+                "recurring_crowdfund_payments", "cancel-crowdfunds"
             )
             return redirect("acct-settings")
         elif action:
             form = settings_forms[action]
-            form = form(request.POST, request.FILES, instance=request.user.profile,)
+            form = form(request.POST, request.FILES, instance=request.user.profile)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Your settings have been updated.")
@@ -151,11 +151,11 @@ class ProfileSettings(TemplateView):
         msg = attr.replace("_", " ")
         if payments:
             messages.success(
-                self.request, "The selected {} have been cancelled.".format(msg),
+                self.request, "The selected {} have been cancelled.".format(msg)
             )
         else:
             messages.warning(
-                self.request, "No {} were selected to be cancelled.".format(msg),
+                self.request, "No {} were selected to be cancelled.".format(msg)
             )
 
     def get_context_data(self, **kwargs):
@@ -164,7 +164,7 @@ class ProfileSettings(TemplateView):
         user_profile = self.request.user.profile
         email_initial = {"email": self.request.user.email}
         profile_form = ProfileSettingsForm(instance=user_profile)
-        email_form = EmailSettingsForm(initial=email_initial, instance=user_profile,)
+        email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
         org_form = OrgPreferencesForm(instance=user_profile)
         # these move to squarelet in the future
         donations = RecurringDonation.objects.filter(user=self.request.user)
@@ -298,7 +298,7 @@ def stripe_webhook(request):
     try:
         if settings.STRIPE_WEBHOOK_SECRET:
             event = stripe.Webhook.construct_event(
-                payload, sig_header, settings.STRIPE_WEBHOOK_SECRET,
+                payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
             )
         else:
             event = json.loads(request.body)
@@ -311,9 +311,7 @@ def stripe_webhook(request):
             event_object_id = ""
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error(
-            "Stripe Webhook: Error parsing JSON: %s",
-            exception,
-            exc_info=sys.exc_info(),
+            "Stripe Webhook: Error parsing JSON: %s", exception, exc_info=sys.exc_info()
         )
         return HttpResponseBadRequest()
     except KeyError as exception:
@@ -373,7 +371,7 @@ class NotificationList(ListView):
             .order_by("-datetime")
             .select_related("action")
             .prefetch_related(
-                "action__actor", "action__target", "action__action_object",
+                "action__actor", "action__target", "action__action_object"
             )
         )
 
@@ -428,10 +426,7 @@ class ProxyList(MRFilterListView):
     title = "Proxies"
     template_name = "lists/proxy_list.html"
     default_sort = "profile__state"
-    sort_map = {
-        "name": "profile__full_name",
-        "state": "profile__state",
-    }
+    sort_map = {"name": "profile__full_name", "state": "profile__state"}
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
@@ -451,7 +446,7 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
     them their login token"""
 
     agency = get_object_or_404(Agency, slug=agency_slug, pk=agency_idx)
-    foia = get_object_or_404(FOIARequest, agency=agency, slug=foia_slug, pk=foia_idx,)
+    foia = get_object_or_404(FOIARequest, agency=agency, slug=foia_slug, pk=foia_idx)
 
     if request.method == "POST":
         email = request.POST.get("email", "")
@@ -464,7 +459,7 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
                 to=[email],
                 text_template="accounts/email/login_token.txt",
                 html_template="accounts/email/login_token.html",
-                extra_context={"reply_link": foia.get_agency_reply_link(email=email),},
+                extra_context={"reply_link": foia.get_agency_reply_link(email=email)},
             )
             msg.send(fail_silently=False)
             messages.success(
@@ -504,6 +499,4 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
 @frame_deny_exempt
 def rp_iframe(request):
     """RP iframe for OIDC sesison management"""
-    return render(
-        request, "accounts/check_session_iframe.html", {"settings": settings},
-    )
+    return render(request, "accounts/check_session_iframe.html", {"settings": settings})

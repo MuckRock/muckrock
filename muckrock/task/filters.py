@@ -52,7 +52,7 @@ class TaskFilterSet(django_filters.FilterSet):
     date_created = django_filters.DateFromToRangeFilter(
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY",}),
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
     class Meta:
@@ -96,7 +96,7 @@ class SnailMailTaskFilterSet(TaskFilterSet):
         choices=[("", "All")] + SNAIL_MAIL_CATEGORIES
     )
     has_address = django_filters.ChoiceFilter(
-        method="filter_has_address", label="Has address", choices=BOOLEAN_CHOICES,
+        method="filter_has_address", label="Has address", choices=BOOLEAN_CHOICES
     )
     has_attachments = django_filters.ChoiceFilter(
         method="filter_has_attachments",
@@ -199,11 +199,11 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
     )
 
     federal = django_filters.ChoiceFilter(
-        method="filter_federal", label="Federal Agencies", choices=BOOLEAN_CHOICES,
+        method="filter_federal", label="Federal Agencies", choices=BOOLEAN_CHOICES
     )
 
     complicated = django_filters.ChoiceFilter(
-        method="filter_complicated", label="Complicated Tasks", choices=BOOLEAN_CHOICES,
+        method="filter_complicated", label="Complicated Tasks", choices=BOOLEAN_CHOICES
     )
 
     class Meta:
@@ -244,7 +244,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         widget=autocomplete_light.MultipleChoiceWidget("AgencyAutocomplete"),
     )
     communication__foia__portal__type = django_filters.ChoiceFilter(
-        choices=PORTAL_TYPES, label="Portal Type",
+        choices=PORTAL_TYPES, label="Portal Type"
     )
     resolved = django_filters.BooleanFilter(
         label="Show Resolved", widget=forms.CheckboxInput()
