@@ -460,7 +460,7 @@ class DonationFormView(StripeFormMixin, FormView):
             )
         except stripe.error.CardError:
             # card declined
-            logger.warn("Card was declined.")
+            logger.warning("Card was declined.")
             error_msg = "Your card was declined"
         except (
             stripe.error.InvalidRequestError,
@@ -505,7 +505,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 idempotency_key=True,
             )
         except stripe.error.CardError:
-            logger.warn("Card was declined.")
+            logger.warning("Card was declined.")
             messages.error(self.request, "Your card was declined")
         except stripe.error.StripeError as exception:
             logger.error(exception, exc_info=sys.exc_info())

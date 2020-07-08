@@ -148,7 +148,7 @@ def retry_on_error(error, func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
     except error as exc:
-        logger.warn("Error, retrying #%d:\n\n%s", times, exc, exc_info=sys.exc_info())
+        logger.warning("Error, retrying #%d:\n\n%s", times, exc, exc_info=sys.exc_info())
         return retry_on_error(error, func, times=times, *args, **kwargs)
 
 

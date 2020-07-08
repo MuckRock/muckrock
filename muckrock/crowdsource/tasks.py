@@ -73,7 +73,7 @@ def import_doccloud_proj(
         )
     else:
         if "error" in resp_json:
-            logger.warn("Error importing DocCloud project: %s", proj_id)
+            logger.warning("Error importing DocCloud project: %s", proj_id)
             return
         for doc_id in resp_json["project"]["document_ids"]:
             if doccloud_each_page:

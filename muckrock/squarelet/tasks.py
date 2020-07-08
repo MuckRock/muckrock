@@ -23,13 +23,13 @@ def pull_data(type_, uuid, **kwargs):
     types_url = {"user": "users", "organization": "organizations"}
     types_model = {"user": Profile, "organization": Organization}
     if type_ not in types_url:
-        logger.warn("Pull data received invalid type: %s", type_)
+        logger.warning("Pull data received invalid type: %s", type_)
         return
     try:
         resp = squarelet_get("/api/{}/{}/".format(types_url[type_], uuid))
         resp.raise_for_status()
     except requests.exceptions.RequestException as exc:
-        logger.warn("Exception during pull data: %s", exc, exc_info=sys.exc_info())
+        logger.warning("Exception during pull data: %s", exc, exc_info=sys.exc_info())
         pull_data.retry(
             args=(type_, uuid),
             kwargs=kwargs,

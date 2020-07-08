@@ -816,7 +816,7 @@ class Detail(DetailView):
                     save_card=form.cleaned_data["save_card"],
                 )
             except requests.exceptions.RequestException as exc:
-                logger.warn("Payment error: %s", exc, exc_info=sys.exc_info())
+                logger.warning("Payment error: %s", exc, exc_info=sys.exc_info())
                 if exc.response.status_code / 100 == 4:
                     messages.error(
                         self.request,

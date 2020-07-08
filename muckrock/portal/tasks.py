@@ -59,7 +59,7 @@ def foiaonline_autologin():
 
     def create_flag(foia, msg):
         """Create a flag and log a warning for a failed autologin attempt"""
-        logger.warn("FOIAOnline autologin: request %s - %s", foia.pk, msg)
+        logger.warning("FOIAOnline autologin: request %s - %s", foia.pk, msg)
         FlaggedTask.objects.create(
             text="FOIAOnline autologin failed: {}".format(msg),
             foia=foia,

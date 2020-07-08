@@ -38,7 +38,7 @@ def lob_webhook(request):
         request.META["HTTP_LOB_SIGNATURE_TIMESTAMP"],
         request.body,
     ):
-        logger.warn("Log webhook failed verification")
+        logger.warning("Log webhook failed verification")
         return HttpResponseForbidden()
 
     try:

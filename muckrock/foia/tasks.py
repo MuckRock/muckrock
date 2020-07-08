@@ -121,7 +121,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 
     if not doc.doc_id and change:
         # if we are changing it must have an id - this should never happen but it is!
-        logger.warn("Upload Doc Cloud: Changing without a doc id: %s", doc.pk)
+        logger.warning("Upload Doc Cloud: Changing without a doc id: %s", doc.pk)
         return
 
     # these need to be encoded -> unicode to regular byte strings
@@ -157,7 +157,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             doc.save()
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
     except (urllib.error.URLError, urllib.error.HTTPError) as exc:
-        logger.warn("Upload Doc Cloud error: %s %s", url, doc.pk)
+        logger.warning("Upload Doc Cloud error: %s %s", url, doc.pk)
         countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
         upload_document_cloud.retry(
             args=[doc.pk, change], kwargs=kwargs, exc=exc, countdown=countdown
@@ -276,10 +276,10 @@ def classify_status(task_pk, **kwargs):
         try:
             doc_cloud_json = resp.json()
         except ValueError:
-            logger.warn("Doc Cloud error for %s: %s", doc_id, resp.content)
+            logger.warning("Doc Cloud error for %s: %s", doc_id, resp.content)
             return ""
         if "error" in doc_cloud_json:
-            logger.warn("Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"])
+            logger.warning("Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"])
             return ""
         text_url = doc_cloud_json["document"]["resources"]["text"]
         resp = requests.get(text_url)
@@ -437,7 +437,7 @@ def followup_requests():
                         exc_info=sys.exc_info(),
                     )
         except SoftTimeLimitExceeded:
-            logger.warn(
+            logger.warning(
                 "Follow ups did not complete in time. " "Completed %d out of %d",
                 num_requests - FOIARequest.objects.get_followup().count(),
                 num_requests,

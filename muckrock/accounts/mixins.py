@@ -106,7 +106,7 @@ class BuyRequestsMixin(object):
             )
             organization.add_requests(num_requests)
         except requests.exceptions.RequestException as exc:
-            logger.warn("Payment error: %s", exc, exc_info=sys.exc_info())
+            logger.warning("Payment error: %s", exc, exc_info=sys.exc_info())
             if exc.response.status_code // 100 == 4:
                 messages.error(
                     self.request,
