@@ -6,9 +6,9 @@ Tests accounts views
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.views import login
-from django.urls import reverse
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Third Party
 from mock import patch
@@ -50,8 +50,6 @@ class TestAccountFunctional(TestCase):
         """Test public views while not logged in"""
         # give the user a composer so they have a public profile
         FOIAComposerFactory(user=self.user, status="submitted")
-        response = http_get_response(reverse("acct-login"), login)
-        eq_(response.status_code, 200)
         # account overview page
         response = http_get_response(reverse("accounts"), views.AccountsView.as_view())
         eq_(response.status_code, 302)
@@ -66,8 +64,6 @@ class TestAccountFunctional(TestCase):
     @raises(Http404)
     def test_private_profile(self):
         """Test public views while not logged in"""
-        response = http_get_response(reverse("acct-login"), login)
-        eq_(response.status_code, 200)
         # account overview page
         response = http_get_response(reverse("accounts"), views.AccountsView.as_view())
         eq_(response.status_code, 302)
