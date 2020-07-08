@@ -3,7 +3,7 @@ Models for the Jurisdiction application
 """
 # Django
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.db.models import Avg, Count, F, Q, Sum
 from django.db.models.expressions import Value

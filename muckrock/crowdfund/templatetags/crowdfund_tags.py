@@ -6,7 +6,7 @@ Nodes and tags for rendering crowdfunds into templates
 from django import template
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404
 
 # MuckRock

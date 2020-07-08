@@ -5,7 +5,7 @@ Models for the organization application
 # Django
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models, transaction
 from django.db.models.expressions import F
 from django.db.models.functions import Greatest

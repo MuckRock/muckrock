@@ -12,7 +12,7 @@ from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMessage
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now

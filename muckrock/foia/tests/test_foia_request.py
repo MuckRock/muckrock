@@ -10,7 +10,7 @@ Tests using nose for the FOIA application
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.test import TestCase
 from django.utils import timezone

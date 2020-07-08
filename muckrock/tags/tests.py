@@ -3,7 +3,7 @@ Tests for tags
 """
 # Django
 from django import test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Third Party
 from nose.tools import eq_

@@ -3,7 +3,7 @@ Tests using nose for the news application
 """
 
 # Django
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
 

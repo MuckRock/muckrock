@@ -5,7 +5,7 @@
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light

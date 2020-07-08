@@ -6,7 +6,7 @@ Tests for data sets
 # pylint: disable=invalid-name
 
 # Django
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import RequestFactory, TestCase
 
 # Standard Library

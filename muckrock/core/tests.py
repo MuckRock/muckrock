@@ -6,7 +6,7 @@ Tests for site level functionality and helper functions for application tests
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import RequestFactory, TestCase
 
 # Standard Library

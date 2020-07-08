@@ -5,7 +5,7 @@ Nodes and tags for rendering tasks into templates
 # Django
 from django import template
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # MuckRock
 from muckrock import agency, foia, task

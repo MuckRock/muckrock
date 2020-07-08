@@ -7,10 +7,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
-from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Max
 from django.db.models.functions import Cast
+from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library

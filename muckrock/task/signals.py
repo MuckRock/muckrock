@@ -1,6 +1,6 @@
 """Signals for the task application"""
 # Django
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models.signals import post_save
 
 # Standard Library

@@ -3,7 +3,7 @@ Tests for Tasks views
 """
 # Django
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import connection, reset_queries
 from django.test import Client, RequestFactory, TestCase, tag
 

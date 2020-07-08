@@ -3,7 +3,7 @@
 
 # Django
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Third Party
 from reversion.admin import VersionAdmin
