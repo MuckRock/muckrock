@@ -68,7 +68,7 @@ djangorestframework==3.6.0
 docutils==0.14            # via botocore
 dogslow==1.2
 drf-nested-routers==0.91
-easy-thumbnails==2.4.1
+easy-thumbnails==2.7
 ecdsa==0.15               # via python-jose
 emoji==0.5.2
 fpdf==1.7.2
