@@ -89,7 +89,7 @@ jsonfield==2.0.2
 kombu==4.6.11             # via celery
 lob==4.0.1
 lxml==4.5.1               # via premailer
-markdown==2.6.7
+markdown==2.6.11
 memoize==1.0.0
 newrelic==2.70.0.51
 numpy==1.19.0
