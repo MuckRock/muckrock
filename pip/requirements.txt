@@ -62,7 +62,7 @@ django-sslify==0.2.7
 django-storages==1.5.1
 django-taggit==0.20.1
 django-watson==1.5.5
-django-webpack-loader==0.3.0
+django-webpack-loader==0.7.0
 django==1.11.20
 djangorestframework==3.6.0
 docutils==0.14            # via botocore
