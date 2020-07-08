@@ -12,7 +12,7 @@ babel==2.5.1              # via django-phonenumber-field
 backcall==0.2.0           # via ipython
 beautifulsoup4==4.6.0
 billiard==3.6.3.0         # via celery
-bleach==3.1.0
+bleach==3.1.5
 boto3==1.14.19            # via smart-open
 boto==2.42.0
 botocore==1.17.19         # via boto3, s3transfer
@@ -75,7 +75,7 @@ future==0.18.2            # via celery, pyjwkest
 fuzzywuzzy==0.14.0
 google-api-python-client==1.6.5
 gunicorn==19.6.0
-httplib2==0.10.3          # via google-api-python-client, oauth2client
+httplib2==0.18.1          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests
 image-diet2==1.0
 ipython-genutils==0.2.0   # via traitlets
@@ -94,7 +94,7 @@ numpy==1.19.0
 oauth2client==4.1.2       # via google-api-python-client
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 orderedmultidict==1.0.1   # via furl
-packaging==16.8
+packaging==16.8           # via bleach
 parso==0.7.0              # via jedi
 pdfrw==0.4
 pexpect==4.6.0            # via ipython
