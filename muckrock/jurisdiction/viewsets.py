@@ -9,7 +9,7 @@ from django.template.loader import get_template
 
 # Third Party
 import django_filters
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
@@ -51,7 +51,7 @@ class JurisdictionViewSet(ModelViewSet):
 
     filter_class = Filter
 
-    @detail_route()
+    @action(detail=True)
     def template(self, request, pk=None):
         """API view to get the template language for a jurisdiction"""
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
@@ -131,7 +131,7 @@ class ExemptionViewSet(ModelViewSet):
         serializer = self.get_serializer(results, many=True)
         return Response(serializer.data)
 
-    @list_route(methods=["post"])
+    @action(detail=False, methods=["post"])
     def submit(self, request):
         """
         The exemption submission endpoint allows new exemptions to be submitted

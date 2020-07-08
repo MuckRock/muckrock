@@ -280,7 +280,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 status=http_status.HTTP_201_CREATED,
             )
 
-    @decorators.detail_route(permission_classes=(IsOwner,))
+    @decorators.action(detail=True, permission_classes=(IsOwner,))
     def followup(self, request, pk=None):
         """Followup on a request"""
         try:
@@ -313,8 +313,8 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 status=http_status.HTTP_400_BAD_REQUEST,
             )
 
-    @decorators.detail_route(
-        methods=["POST", "DELETE"], permission_classes=(IsAuthenticated,)
+    @decorators.action(
+        detail=True, methods=["POST", "DELETE"], permission_classes=(IsAuthenticated,)
     )
     def follow(self, request, pk=None):
         """Follow or unfollow a request"""

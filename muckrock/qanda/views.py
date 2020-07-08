@@ -7,12 +7,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
-from django.urls import reverse
 from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from django.views.generic.detail import DetailView
 
@@ -20,7 +20,7 @@ from django.views.generic.detail import DetailView
 import actstream
 import django_filters
 from rest_framework import status, viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -263,7 +263,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             obj.user = self.request.user
         return super(QuestionViewSet, self).pre_save(obj)
 
-    @detail_route(permission_classes=(IsAuthenticated,))
+    @action(detail=True, permission_classes=(IsAuthenticated,))
     def answer(self, request, pk=None):
         """Answer a question"""
         try:
