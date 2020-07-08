@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import NoReverseMatch, reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, ListView
 
 # Standard Library
@@ -20,7 +21,6 @@ from datetime import date
 # Third Party
 import requests
 import stripe
-from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
@@ -170,7 +170,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
         return self.return_error(request)
 
 
-@method_decorator(frame_deny_exempt, name="dispatch")
+@method_decorator(xframe_options_exempt, name="dispatch")
 class CrowdfundEmbedView(DetailView):
     """Presents an embeddable view for a single file."""
 

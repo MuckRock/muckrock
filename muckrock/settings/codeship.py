@@ -9,7 +9,7 @@ Import from test settings
 # MuckRock
 from muckrock.settings.test import *
 
-MIDDLEWARE_CLASSES += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
 DATABASES["default"] = {
     "NAME": "test",

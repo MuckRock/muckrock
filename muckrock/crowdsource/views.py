@@ -5,15 +5,16 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.urls import reverse
 from django.db import transaction
 from django.db.models import Count
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -28,7 +29,6 @@ from itertools import zip_longest
 
 # Third Party
 import requests
-from djangosecure.decorators import frame_deny_exempt
 from ipware import get_client_ip
 
 # MuckRock
@@ -463,7 +463,7 @@ class CrowdsourceRevertResponseView(CrowdsourceEditResponseView):
         return self._get_initial("original_value")
 
 
-@method_decorator(frame_deny_exempt, name="dispatch")
+@method_decorator(xframe_options_exempt, name="dispatch")
 class CrowdsourceEmbededFormView(CrowdsourceFormView):
     """A view to embed an assignment"""
 
@@ -475,14 +475,14 @@ class CrowdsourceEmbededFormView(CrowdsourceFormView):
         return redirect("crowdsource-embed-confirm")
 
 
-@method_decorator(frame_deny_exempt, name="dispatch")
+@method_decorator(xframe_options_exempt, name="dispatch")
 class CrowdsourceEmbededConfirmView(TemplateView):
     """Embedded confirm page"""
 
     template_name = "crowdsource/embed_confirm.html"
 
 
-@method_decorator(frame_deny_exempt, name="dispatch")
+@method_decorator(xframe_options_exempt, name="dispatch")
 class CrowdsourceEmbededGallery(DetailView):
     """Embedded gallery page"""
 

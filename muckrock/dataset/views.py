@@ -6,15 +6,13 @@ Views for the dataset application
 # Django
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 # Standard Library
 import re
-
-# Third Party
-from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
 from muckrock.dataset.models import DataSet
@@ -33,7 +31,7 @@ def detail(request, slug, idx):
     return render(request, "dataset/detail.html", context)
 
 
-@frame_deny_exempt
+@xframe_options_exempt
 def embed(request, slug, idx):
     """Embed the data set"""
     dataset = get_object_or_404(DataSet, slug=slug, pk=idx)

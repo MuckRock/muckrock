@@ -24,7 +24,7 @@ SITE_ID = 1
 
 # minimal middleware for speed
 # can I disable more?
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

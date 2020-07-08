@@ -28,10 +28,8 @@ django-opensearch # Enables opensearch
 django-phonenumber-field # for storing phone numbers in the database
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
-django-querycount # Counts queries for dev
 django-reversion # Version history for models
 django-robots # Manage robots.txt file
-django-secure # Enforces security best practices
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging

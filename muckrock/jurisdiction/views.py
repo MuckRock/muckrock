@@ -5,14 +5,14 @@ Views for the Jurisdiction application
 # Django
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, TemplateView
 
 # Third Party
-from djangosecure.decorators import frame_deny_exempt
 from rest_framework import viewsets
 
 # MuckRock
@@ -103,7 +103,7 @@ class JurisdictionExploreView(TemplateView):
         return context
 
 
-@method_decorator(frame_deny_exempt, name="dispatch")
+@method_decorator(xframe_options_exempt, name="dispatch")
 class JurisdictionEmbedView(JurisdictionExploreView):
     """View for embedding the map interactive"""
 

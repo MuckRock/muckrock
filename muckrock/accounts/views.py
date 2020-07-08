@@ -8,7 +8,6 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db.models import Q
 from django.http.response import (
     Http404,
@@ -17,7 +16,9 @@ from django.http.response import (
     HttpResponseNotAllowed,
 )
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView, ListView, RedirectView, TemplateView
 
@@ -29,7 +30,6 @@ from urllib.parse import urlencode
 
 # Third Party
 import stripe
-from djangosecure.decorators import frame_deny_exempt
 from rest_framework.authtoken.models import Token
 
 # MuckRock
@@ -496,7 +496,7 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
         )
 
 
-@frame_deny_exempt
+@xframe_options_exempt
 def rp_iframe(request):
     """RP iframe for OIDC sesison management"""
     return render(request, "accounts/check_session_iframe.html", {"settings": settings})

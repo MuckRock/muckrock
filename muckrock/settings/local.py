@@ -13,11 +13,7 @@ EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
-MIDDLEWARE_CLASSES += (
-    "muckrock.settings.local.ExceptionLoggingMiddleware",
-    "yet_another_django_profiler.middleware.ProfilerMiddleware",
-    #'querycount.middleware.QueryCountMiddleware',
-)
+MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
 
 DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.versions.VersionsPanel",
@@ -36,10 +32,16 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 
-class ExceptionLoggingMiddleware(object):
+class ExceptionLoggingMiddleware:
     """Log exceptions to command line
 
     useful for debugging non html outputting views, such as stripe webhooks"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
 
     def process_exception(self, request, exception):
         # pylint: disable=unused-argument

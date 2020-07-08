@@ -68,4 +68,3 @@ urllib3==1.24.2           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
 whoosh==2.7.4
 wrapt==1.10.8             # via astroid
-yet-another-django-profiler==1.0.3

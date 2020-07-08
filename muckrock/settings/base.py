@@ -163,10 +163,10 @@ TEMPLATES = [
 
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "corsheaders.middleware.CorsMiddleware",
     "django_hosts.middleware.HostsRequestMiddleware",
-    "djangosecure.middleware.SecurityMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "dogslow.WatchdogMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -176,6 +176,7 @@ MIDDLEWARE_CLASSES = (
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "reversion.middleware.RevisionMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
 )
@@ -203,7 +204,6 @@ INSTALLED_APPS = (
     "corsheaders",
     "debug_toolbar",
     "django_premailer",
-    "djangosecure",
     "djcelery_email",
     "easy_thumbnails",
     "sorl.thumbnail",
@@ -710,3 +710,5 @@ USE_ZENDESK = boolcheck(os.environ.get("USE_ZENDESK", False))
 ZENDESK_TOKEN = os.environ.get("ZENDESK_TOKEN", "")
 ZENDESK_EMAIL = os.environ.get("ZENDESK_EMAIL", "")
 ZENDESK_SUBDOMAIN = os.environ.get("ZENDESK_SUBDOMAIN", "muckrock")
+
+X_FRAME_OPTIONS = "SAMEORIGIN"

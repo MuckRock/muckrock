@@ -4,17 +4,15 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, ListView
-
-# Third Party
-from djangosecure.decorators import frame_deny_exempt
 
 # MuckRock
 from muckrock.core.views import PaginationMixin
 from muckrock.foia.models import FOIAFile, FOIARequest
 
 
-@method_decorator(frame_deny_exempt, name="dispatch")
+@method_decorator(xframe_options_exempt, name="dispatch")
 class FileEmbedView(DetailView):
     """Presents an embeddable view for a single file."""
 
