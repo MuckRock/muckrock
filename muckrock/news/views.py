@@ -5,10 +5,11 @@ Views for the news application
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db.models import Prefetch, Q
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.views.generic.dates import (
     DateDetailView,
@@ -16,6 +17,9 @@ from django.views.generic.dates import (
     MonthArchiveView,
     YearArchiveView,
 )
+
+# Third Party
+from dal import autocomplete
 
 # MuckRock
 from muckrock.core.utils import cache_get_or_set
@@ -212,3 +216,28 @@ class NewsListView(MRSearchFilterListView):
         years.reverse()
         context["years"] = years
         return context
+
+
+class ArticleAutocomplete(autocomplete.Select2QuerySetView):
+    """Autocomplete for picking articles"""
+
+    def get_queryset(self):
+        """Get all published articles and prefetch the authors"""
+        queryset = (
+            Article.objects.get_published()
+            .prefetch_related(
+                Prefetch("authors", User.objects.select_related("profile"))
+            )
+            .distinct()
+        )
+
+        if self.q:
+            queryset = queryset.filter(
+                Q(title__icontains=self.q) | Q(tags__name__icontains=self.q)
+            )
+
+        return queryset
+
+    def get_result_label(self, item):
+        """Render the choice from an HTML template"""
+        return render_to_string("autocomplete/article.html", {"choice": item})

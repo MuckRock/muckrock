@@ -1,0 +1,1111 @@
+3.5.1
+
+    jquery.js was still loaded by the widget, fixed by @timthelion
+
+3.5.0
+
+    BACKWARD COMPATIBILITY BREAKS:
+    - jquery.js has been **removed** from widget.media, this means that you are
+      now responsible for ensuring that jquery is loaded in your page prior to
+      displaying the form (form.media).
+    - trailing dash was replaced by underscore in forward conf, ie.
+      dal-forward-conf-for-id_test becomes dal-forward-conf-for_id_test
+
+    #1115: Compatibility with Django 3.0 by Alexandr Artemyev @mogost
+    #1079: Fixed access to $.fn.select2 by David @dwasyl
+    #1118: Highlight select field with error to match Django style by @tchatow
+    #1099: django-nested-admin forwarded field fix by @akshenc
+
+    Also, tests now run fine on Travis thanks to @jorrit-wehelp
+
+3.4.1 Fix #1108: i18n path (thanks @philgyford for report)
+
+3.4.0 Python 2 and Django < 2.0 support
+
+3.3.4 re-release without dirty source
+
+3.3.3 django < 2.0 support with dal_static contributed by @andybak
+
+3.3.2 django.contrib.admin fix static files by @coredumperror
+
+3.3.1
+
+  - Fixed a bug in the way jquery.init.js was being used by @coredumperror
+  - Set select2 container CSS class to :all: @hbielenia
+  - Added missing renderer parameter to render method for django 2.1 @monim67
+  - Fix ImportError with SELECT2_TRANSLATIONS in Django 1.x @hugorodgerbrown
+  - Forward argument should always be a tuple @jihoon796
+  - Fixed exception thrown from Select2QuerySEtView when paginate_by is set
+    @coredumperror
+
+3.3.0
+
+    - use admin statics
+    - #981: create option behaviour
+    - #995: automatically generated views for generic foreign key fields
+    - Getting placeholder and minimumInputLength from dal select
+    - #1017: Initial migrations and database
+    - Turkish translation
+    - Added support for forwarded fields to Select2GenericForeignKeyModelField
+
+3.3.0-rc6
+
+    #959
+
+3.3.0-rc5
+
+    #895: Self() and JavaScript() forward features
+
+3.3.0-rc4
+
+    #843: Forward logic refactored. Specifications for types of forwarded values.
+
+3.3.0-rc3
+
+    #957 remove reference to deleted script (rebase issue introduced in
+    3.3.0-rc1)
+
+3.3.0-rc2
+
+    Revert 5b37f8661, fixes tests.
+
+3.3.0-rc1
+
+This version supports Django 2.0 and Python 3.6, perhaps more but I have not
+tested, please submit compatibility patches for older versions if needed.
+Please test them with tox -e base-py36-django20-sqlite before pushing.
+
+To install 3.3.0-rc1, use `pip install django-autocomplete-light==3.3.0-rc1`.
+
+New features:
+
+    #953: Select2 update to 3.4.0.6-rc.1 by @jpic
+    #917: django-nested-admin support by @loicteixeira
+    #815: Simplify customization of autocomplete views by @EvaSDK
+    #746: Select2 Language and dynamic Media by @luzfcb
+    #883: Allow overwriting the results by @eayin2
+
+Bug fixes:
+
+    #874: Fix Django 1.11.3 error by @ikcam
+    #933: Python 3.6 and Django 2.0 support by @jpic
+    #930: QuerySetSequence querysets order is not preserved by @melvyn-sopacua
+    #909: Prevent initilization of other selects by @loicteixeira
+    #904: Fix KeyError when id is not in attrs by @dwheaton
+    #885: Prevent rendering of empty option on multi select by @johandc
+    #892: Enable different item label for selected item by @maximpetrov
+    #926: Atomic create_object by @jpic
+    #718: Remove temp hack for select2 by @FuzzAU
+    #860: dal: widgets: use the name if we don't have the id by @xrmx
+    #849: Don't create a new option if an iexact-matching one already exists by @liwenyip
+
+Also thanks to the many documentation contributors.
+
+    #874: Fix Django 1.11.3 error by @ikcam
+    #937: Update tutorial.rst to fix XSS in the example by @hangtwenty
+    #919: Better create new object example by @davideghz
+    #928: Add note about slim jqueries by @melvyn-sopacua
+
+Test notes:
+
+    I have not tested this release with other Python and Django versions,
+    and also tests don't pass on travis despite the effort. It's working
+    on all browsers here and i've chased many seleniumish race conditions
+    but it's not enough for travis.
+    So, there's no docker image available with python and selenium that
+    looks good i'm probably going to make one at some point but it's not
+    today's priority as far as I'm concerned.
+    So, tests are run locally which means manual action, but i've left the QA
+    checks on travis as mandatory because i've fixed so many PEP8 mistakes
+    during this release ...
+
+Congratulations for this release my friends, because a lot of great work has
+been contributed by the community since last release 4 months ago.
+
+3.2.10
+
+    #877: Return proper content type for json by @mpasternak
+    #819: Fixed JS autocomplete initializer by @apinsard
+    #871: Add many translations by @dima-kov
+    #879: Add classifiers in setup.py by @ad-m
+    #868: Fix selector used to allow clearing non-required fields.
+    #861: prefer pristine jQuery to the django one by @xrmx
+
+3.2.9
+
+    HEAD is now at a44a2ed Fixed JS autocomplete initializer (#819) (#820) by
+    @apinsard
+
+3.2.8
+
+    #823: Optgroup list support with Select2GroupListView by @jsurloppe
+    #841: Allow boolean "data-html" attribute for widget on python side by @gagarski
+    #839: Support for forwarding radio buttons properly by @gagarski
+    #839: Add checkbox handling in forwards by @marekjedrzejewski
+    #833: Add functional tests for rename_forward app by @gagarski
+
+3.2.7
+
+    Remove forward.js from Select2WidgetMixin.Media by @gagarski
+    #838: Use namespaced jQuery in `get_forwards` by @ryan-copperleaf
+    #836: Queryset sequence view to display actual model name by @jsoa
+    3.2.5 and 3.2.6 were removed from PyPi but are the same.
+
+3.2.4
+
+    #813: Return 400 on invalid input by @EvaSDK
+
+3.2.3 Two seriously good community contributed bugfixes
+
+    #799: Support serializing UUIDs and add tests for models with UUIDs as PKs
+          by @blag
+    #826: Prevent rendering of empty option on multi select
+          by @beruic
+
+3.2.2 Test fixes, Django 1.10 and 1.11
+
+3.2.1
+
+    #737: TaggitSelect2: insure there's a comma when there's only one tag, or
+          tag "Multi word" would end up as "Multi" and "word" by
+          @Ixxy-Open-Source
+    #743: Fix placeholder not working when URL is not given to autocomplete
+          widget (#743) by @thauk-copperleaf
+    #756: Forward Capabilities Outside Admin by @gagarski
+
+3.2.0
+
+    #745: Add list autocomplete by @dmosberger, @jpic and @thecardcheat
+    #754: dal_queryset_sequence documentation update by @chubz
+    #734: Move create_option functionality into it's own method @andybak
+    #741: Fix initial value not set when selected choices aren't strings
+          @thauk-copperleaf
+    #733: Advanced forward features @gagarski
+    #752: Add doc test to CI by @jpic
+    #730: Resolve SystemCheckError fields.E304 @thecardcheat
+    #721: Note about placement of DAL before grappelli by @chubz
+    #748: Update docs example about loading jquery outside the admin @jpic
+
+    Mid version number bumped as a tribute to the new major features that were
+    added, however, there is no know backward compatibility break from 3.1 to
+    3.2.
+
+3.1.8 #727 Add missing static files
+
+3.1.7
+
+    #714: Update select2 by @meesterguyman
+    #705: Improve compat with dj1.9 by @9nix00
+    #706: Fix extra require by @blueyed
+    #710: Added note for static files not checked by @geekashu
+    #708: Provide path with dal_select2.E001 by @blueyed
+    #700: Enable HTML markup in select2 item labels by @njoyard
+
+3.1.6
+
+    #671: Create_field support with querysetsequence
+    #679: Allow create message translation by @maisim
+    #682: Extend 'forward' attribute to creating objects as well by @toudi
+    #666: Improved missing 'created_field' error by @guettli
+    #670: Javascript loading documentation
+    #678: Added example to update autocompletes in JS
+
+3.1.5
+
+    #661: Field forwarding: support form prefix, and formsets at the same time.
+    #628: Improve option rename hook used until the patch is merged upstream in
+          select2.
+    #656: Use http.JsonResponse() to return json by @guettli
+    #638: System check for dal_select2 to raise an error if select2 is not
+          available.
+    #662: Examples for setting placeholder and minimum input length options in
+          select2.
+    #619: From django-sbo-selenium to pytest+splinter.
+
+3.1.4 #646: Released way too much node_modules in select2, sorry !
+
+3.1.3 #640: Bugfix: Taggit select2 widget in invalid forms
+
+3.1.2
+
+    - #634: Select2 Upgrade
+    - #628: Do not rely on ids to fix container text
+    - #631: Initializing GFKs with values from forms
+    - #623: Fix setup.py extras by @ticosax
+    - #610: Cancel out Django's style on lists
+
+3.1.1 Forgot vendor files in 3.1.0
+
+3.1.0
+
+    - ! BC BREAK ! CreateModelField is gone, it didn't work when another field
+      of the form didn't validate. There isn't a really sane way to create the
+      option in the form field field. Instead, this is done in the view, like
+      in DAL v2.
+    - ! BC BREAK ! dal_tagulous was removed in favor of django-tagging, because
+      tagulous already provides its implementation of a select2 widget.
+    - #610 Fixed a rendering issue with multiple selects. Upstream patch
+      proposed but not merged yet: select2/select2#4226
+
+    For details about the current status and plan, please consult the
+    announcement:
+
+    http://blog.yourlabs.org/post/140477620808/django-autocomplete-light-v3-whats-going-on
+
+3.0.4 #586 Prune select2 docs by @eraldo
+
+3.0.3 #586 Include all in MANIFEST by @eraldo
+
+3.0.2 #575 Prevent Django admin from setting up jQuery with noConflict
+
+3.0.1 #573 Updated MANIFEST to include static files.
+
+3.0.0 Rewrite: easier to use, test, maintain and support.
+
+2.3.3
+
+    - #563 Don't disable multiplechoicewidgets if select is [multiple]
+    - Don't import anything in __init__ anymore if on django 1.9
+    - test_project fixes, for the above.
+
+2.3.2 JAL#20 Don't disable multiplechoicewidgets by @JaHicks
+
+2.3.1 Forgot the static files in 2.3.0.
+
+2.3.0
+
+    - #555 Django 1.4, 1.5 and 1.6 deprecation
+    - #497 Enable registration by model-name by @luzfcb
+    - #536 #551 Support proxy models by @onrik
+    - #553 improved jQuery integration by @blueyed
+    - #516 Corrected french transation by @apinsard
+    - #541 Use error_messages on FieldBase to allow overrides by @dsanders11
+    - #505 Ordering alias clash fix by @sandroden
+    - #515 Polish translation update by @mpasternak
+    - #543 ModelChoiceField requires the queryset argument
+    - #494 ModelChoiceField Watch changes to 'queryset' by @jonashaag
+    - #514 Fixed deprecation warning on Django 1.8 by @spookylukey
+    - #498 #548 improved i18n support
+    - #547 prevents loading genericm2m if not in INSTALLED_APPS
+    - JAL#18 Fix: Get value.length while value is null by @hongquan
+    - JAL#19 Clarify license by @stevellis, all MIT
+    - JAL#17 Disable the widget input when it is not in use @dsanders11
+    - JAL#15 Support openning results in new tab @thebao
+    - JAL#14 Don't autohilight first choice by default @pandabuilder
+    - JAL#13 Add option for box aligning with right edge of input @dsanders11
+
+IMPORTANT
+
+#536 At this point, proxy model support is untested, this is because I intend
+to refactor the test suite and documentation during the 2.3.x serie.
+
+#494 Updating the queryset from outside the autocomplete class may lead to a
+security problem, ie. if you don't replicate filters you apply manually on the
+autocomplete object choices into choices_for_request() then a malicious user
+could see choices which they shouldn't by querying the autocomplete directly.
+3.0.0 will have automatic widget and / or field (in cases like gfk/gm2m)
+registration to the view like in django-select2 using queryset.query caching
+which would resolve that use-case.
+
+It's a pretty big release and I waited a while because I wanted all
+contributors to benefit from it and work on the same codebase instead of
+privileging one to another, not sure if it was the best way, let me know !
+
+2.2.9, 2.2.10
+
+    [JAL] #12: Use exisiting input value for initial autocomplete query
+    #503: Fix Django 1.9 import error.
+    2.2.9 release has not the updated AUTHORS and lacks note about #503 in
+    CHANGELOG, re-uploading as 2.2.10.
+
+2.2.8
+
+    #478, #472: "change related button" isn't clickable when it shouldn't.
+
+2.2.7
+
+    yourlabs/jquery-autocomplete-light#11: jqXHR.abort considered harmful,
+    @dsanders11 fixes BrokenPipe.
+    yourlabs/jquery-autocomplete-light#10: consistency fix: use $ instead
+    of jQuery for new functions by @dsanders11
+    yourlabs/jquery-autocomplete-light#9: New parameter to disable
+    auto-hilighting on first choice #9 by @superzazu, should fix #495 too.
+    #477: Widget's render should use attrs even when created wthing __init__ by
+    @sandroden.
+
+2.2.6
+
+    jquery-autocomplete-light/#8: Positionning bug fix by @marianobianchi,
+    jquery-autocomplete-light/#6: Bugfix: Firefox won't hide input after
+    reload
+    when option was selected by @marianobianchi,
+    #483: German translation by Mounir Messelmeni
+    #476, #474, #482, documentation improvements by Mounir, Visgean Skeloru and
+    Florentin Hennecker.
+
+2.2.5
+
+    #452 Fix the case where there is a cap in the pg table or column name
+    #454: AutocompleteModel.order_by being a list would crash.
+
+2.2.4
+
+    #463 Update jquery-autocomplete-light which contains IE8 fixes.
+    yourlabs/jquery-autocomplete-light#4 by @RaphaelKimmig.
+
+2.2.3
+
+    #447: Ambiguous column names strikes again. This time we're using the
+    .column field attribute and covered a couple of cases including model
+    inheritance.
+    yourlabs/jquery-autocomplete-light#4 fixed clearInputOnSelectChoice
+    behaviour by @RaphaelKimmig:
+
+    - by clearing autocomplete.value as well as input.val we make sure that
+      subsequent clicks will not open the autocomplete filtered by a value that
+      is no longer visible to the user
+    - by clearing the input before triggering the focus we make sure the
+      minimumCharacters settings is honored
+
+2.2.2
+
+    #422: Ambiguous column names in AutocompleteModelBase.
+    Also removed a generic exception expect/pass.
+
+2.2.1
+
+    Django 1.8 admin support hacks broke create_choices_on_the_fly example and
+    probably some other wicked JS things in user projects.
+
+    Note that we have also extracted django admin specific hooks from widget.js
+    into django_admin.js. So if you have custom JS loading in the admin instead
+    of `{% include 'autocomplete_light/static.html' %}` then you should update
+    it to include django_admin.js in django admin.
+
+2.2.0
+
+    - #318: Remove extra spaces rendered in choices.
+    - #438: Hide autocomplete on scroll in Firefox because it bugs (temp fix).
+    - #432: New bootstrap_modal test_app by @lucky-user.
+    - #118: Extracted JS into a standalone jquery-plugin:
+            https://github.com/yourlabs/jquery-autocomplete-light
+
+2.2.0rc8
+
+    - #408: Django admin's new edit link was implemented in such a way that
+      it's unable to generate itself properly server-side on initial rendering.
+
+2.2.0rc7
+
+    - call fixPosition() on window resize if the autocomplete box is shown.
+
+2.2.0rc6
+
+    - #431 strikes again, default to body when it can't find a relevant
+      container.
+
+2.2.0rc5
+
+    - Reduce default latency because hardware is better.
+    - #431: Dynamic evaluation of the autocomp box container.
+
+2.2.0rc4
+
+    @lucky-user contributed Opera/Chromium improved support.
+
+2.2.0rc3
+
+    - #429: handle required=True in form fields again, regression introduced
+      in rc1's python BC break.
+    - #426: handle z-index since we're absolutely-positioning in 2.2.x
+
+Thanks a lot to the rc tester community
+
+2.2.0rc2
+
+    - #425: fixed blunt JS errors.
+    - Do not add pip debug log (~/.cache/pip/log/debug.log) to Travis cache.
+    - Just install 'pip>7', potentially using an updated version on Travis.
+    - Use travis_retry with "pip install", and also for `npm install`.
+
+2.2.0rc1
+
+    PENDING BREAK WARNING, Django >= 1.9.
+
+    The good old ``import autocomplete_light`` API support will be dropped with
+    Django 1.9. All imports have moved to ``autocomplete_light.shortcuts`` and
+    importing ``autocomplete_light`` will work until the project is used with
+    Django 1.9.
+
+    To be forward compatible with Django master (>=1.9) support, replace::
+
+        import autocomplete_light
+
+    By:
+
+        from autocomplete_light import shortcuts as al
+
+    This will also make your scripts a lot shorter.
+
+    CSS BREAK
+
+    We've moved back to pre-1.1.10 CSS positioning. This means appending the
+    autocomplete box to an arbitrary DOM element (body by default) and using
+    calculating the ``top`` and ``bottom`` attribute in javascript with
+    ``yourlabs.Autocomplete.fixPosition()`` pretty much like Django admin's
+    calendar widget does. While blunt, this change should help the widget being
+    more compatible across Django admin themes.
+
+    While this positioning system has been used since around 2005 in Django
+    when Adrian Holovaty open sourced admin media in commit dd5320d, it has
+    never been documented that's it's a good system that works well and there's
+    no reason to break backward compatibility in Django admin for that
+    - note to Django admin template customizers.
+
+    JS BREAK
+
+    Javascript ``yourlabs.Autocomplete`` object does not bind to the same
+    events as it used too. Event handling has been backported from twitter
+    typeahead and tested on firefox and android (#411).
+
+    PYTHON BREAK
+
+    The form field doesn't call ``super().validate()`` anymore and now
+    completely relies on ``AutocompleteInterface.validate_values()``. This was
+    how ``django-autocomplete-light`` was initially designed for, kudos to
+    @zhiyajun11 for pointing it out ! This optimises code which was doing
+    validation twice and gives the flexibility it was initially designed for
+    from within the Autocomplete class (#410).
+
+    SQL BREAK
+
+    Model Autocompletes now generate custom SQL be able to save the order in
+    which users have filled an autocomplete field. This actually comes from the
+    last 2.x version.
+
+    CHANGES
+
+    Most users won't notice the break except maybe the CSS ones and of course
+    also for Django 1.9 users.
+
+    - #419: ANSI SQL compliance (@sbaum)
+    - #413: Exception when using models having primary key names different from
+      id.
+    - #412: Support models with a pk different than "id" and non-numeric.
+      (@mhuailin)
+    - #411: Android compatibility (js bind changes).
+    - #410: Removed double validation by not calling suport of ``Field.validate()``.
+    - #408: Support Django 1.8 change-link.
+    - #409: Compatibility with non-autocomplete inputs present in the widget
+      (@SebCorbin)
+
+    CONTRIBUTING CHANGES
+
+    Pip wheel has been temporarely disabled because django-autoslug broke it,
+    any help here is welcome, I did my best in the various fix/*wheel*
+    branches but Travis won xD
+    There's a  mission to extract the JS part and package it as a standalone
+    jQuery library to get more pull requests on the JS / CSS part. It sounds
+    like a pretty good start in the JS / UI testing and packaging world. Any
+    help there is welcome.
+    CI now has tests against MySQL and PostgreSQL since we're generating custom
+    SQL.
+
+    Again welcome to new contributors @mhuailin and @SebCorbin and thanks all
+    for reporting issues on GitHub with all needed details and forks which make
+    it easy to reproduce.
+
+    And thanks to @blueyed who helped sinking this year's backlog like crazy.
+
+2.1.1 Not sure how the 2.1.0 release got on PyPi, marked "hidden", bumping and
+      uploading a new version rather than removing it as it might have already
+      been deployed somewhere.
+
+2.1.0 Final release.
+
+2.1.0rc4
+
+    - #331: Fixed reverse order of items in deck, by @smcoll.
+
+2.1.0rc3
+
+    - PEP396: autocomplete_light.__version__.
+    - #401: Easy to subclass FieldBase for custom ModelChoiceField (@smcoll),
+    - #397: Support defining Meta in a ModelForm's parent.
+    - #394: Add comment about keyCode issue with Webkit; check for charCode==0
+
+2.1.0rc2: Maintain BC again in autocomplete_light ns until dj19
+
+2.1.0rc1: Friendship release
+
+    BACKWARD COMPATIBILITY BREAK
+
+    There was a bug which caused registering an autocomplete with a model
+    attribute to be renamed by the registry to prefix the autocomplete name
+    with the model name. This should not be the case anymore, but some
+    autocomplete names might have changed in your project if you've been
+    working around that bug by using the buggy name rather than forcing name=
+    uppon registration. Example:
+
+    class Foo(YourBaseAutocomplete):
+        model = Bar
+    autocomplete_light.register(Foo)
+
+    The above example Would cause 'FooBar' to be registered, but now it's just
+    'Foo' as expected. So if you're using 'FooBar' instead of 'Foo' anywhere it
+    should break. See #323 / 255263e61 for gory details.
+
+    DEPRECATION WARNING
+
+    Because Django 1.9 is so sharp on import, ``import autocomplete_light``
+    should become ``import autocomplete_light.shortcuts as autocomplete_light``
+    in your projects. Backward compatibility will be maintained, but you don't
+    get all the shortcuts from ``import autocomplete_light`` anymore starting
+    Django 1.9.
+
+    - Django 1.8, 1.9 support: fixed warnings, use pytest-django
+    - #383: Support ModelForms without Meta.model
+    - #313: Model not acquired from AutocompleteModelBase
+    - #323: Only derivate the autocomplete name if both model and autocomplete
+      are passed
+    - #378: Be friendly with special html chars in values (David Aurelio)
+    - #381: The "open parentheses" (shift+9) cannot be typed on autocomplete
+      field.
+    - #380: PyPy support: PyPy2 tests passes without genericm2m and without
+      taggit.  PyPy3 tests won't run because lxml won't install. (Piet Delport)
+    - #374: Update clear-fix with latest version,
+    - Also Daniel Hahler made an outstanding job in the test area, builds are a
+      lot faster, using tox, pytest-django.
+    - Daniel Hahler is the second owner of YourLabs org, way to go !
+
+    So we got 7 bugs fixed, PyPy support, Django 1.8 and Django 1.9 support (we
+    support 1.4 to 1.9 now).
+
+    Thanks a lot to Daniel Hahler for having couch-hosted me the last 7 days in
+    Berlin, we've been hacking like crazy, it was really awesome, I went there
+    for some hacking and now I know I have a friend for life.
+
+    See you for the next django-autocomplete-light sprint ;) Who's hosting BTW
+    ?
+
+2.0.9:
+
+    - #257: Got rid of RemovedInDjango18Warning deprecation warnings.
+    - #371: Skip unuseable virtualfields, like VoteManager for django-vote.
+    - #372: New PEP8 E731 support.
+
+2.0.7:
+
+    - Removed unused module (autocomplete_light.generic),
+    - choices_for_request: assert that search_fields is not a string
+    - #354: Choices=[] should not crash.
+    - also: cleaned 2.x, code coverage increase
+    - also: stable/2.x.x deprecated in favor of master
+    - also: tests against django (1.8) master enabled but allowed to fail
+    - also: promoted @blueyed to core-dev, rock'on B)
+
+2.0.6: #282: add-another in admin too (see message for 02a555cef3d)
+
+2.0.5: Code removal
+
+2.0.4: #347: Django 1.7 AppConfig support
+
+2.0.3: #337: Fixed error in text_widget.js
+
+2.0.2
+
+    - #334: Fixed display of autocomplete with clearfix (by @madEng84)
+    - #336: Added compiled po files
+    - #335: Removed debug statement
+
+2.0.1: Initial stable release
+
+2.0.0a18: #292: Enable clear-ing nullable GFKs with the form.
+
+2.0.0a17: #280: Do not depend on django on install.
+
+2.0.0a16:
+
+    - #252: Not all INSTALLED_APPS are modules (Django 1.7),
+    - #270: SelectMultipleHelpTextRemovalMixin multiple language support,
+    - #267: Delegate add-another url generation to Autocomplete class,
+    - #269: make build_widget_attrs thread-safe,
+    - #250: Fix ChoiceField.get_choices(),
+    - #192: Auto-load local jquery if not loaded already,
+    - Django 1.7b2 support.
+
+2.0.0a15:
+
+    - Honor Meta.widgets,
+    - Added .modern-style class for autocomplete widget,
+
+2.0.0a14: Added missing extensions to MANIFEST
+
+2.0.0a13: Fix #244: Added ajax loading in input.autocomplete.
+
+2.0.0a12: !! BC BREAK !! Renamed input_attrs to attrs to be consistent
+                         with django.
+
+2.0.0a11:
+
+    - #241 IE11 compatibility fix on text autocomplete contributed by Jonathan
+      Wiklund (@MaZZly)
+
+
+2.0.0a10:
+
+    - Implemented autocomplete_names support to override the default
+      Autocomplete class used for a given model form field,
+    - Make the first Autocomplete class the default autocomplete (for generic
+      and model).
+    - Implemented lazy autocompletes: you can refer to an autocomplete class
+      before it is discovered.
+    - Import TaggitField and TaggitWidget in autocomplete_light.
+
+2.0.0a9:
+
+    - Fix #219: autocompletes now convert None value to an empty list, as
+      Autocomplete promises that values is a list. (Fixed gfk in inlines)
+    - Fix #226: improved css/js positioning.
+    - Fix #231: widget.js was re-initializing widgets.
+    - Fixed taggit support
+    - Fix: label was not set for gmtm and gfk in inlines.
+
+2.0.0a8:
+
+    - Updated pt_BR translation contributed by Fábio C. Barrionuevo da Luz (@luzfcb).
+
+2.0.0a7:
+
+    - Removed a layer of complexity by trading autocomplete_js_attributes and
+      widget_js_attributes for attrs (for input/autocomplete object) and widget_attrs
+      (for widget container/widget js object).
+    - Fixed naming conventions issues:
+        - #124: css class .choiceDetail should be .choice-detail, same for
+          .choiceUpdate
+        - #97: rename .div css class to .block,
+    - Fixed #84: data-autocomplete-placeholder is gone in favor of the
+      placeholder attribute.
+    - Fixed #82: data-* is not parsed anymore by yourlabs.Widget, data-widget-*
+      is parsed for options instead.
+    - Fixed #81: js Autocomplete object now parses data-autocomplete-* for
+      options,
+    - Fixed #80: js maxValues is now maximumValues.
+    - Fixed #27: refactored selenium tests to be able to test any example app.
+    - Bugfix: get_autocomplete_from_arg returned wrong autocomplete in two cases
+
+2.0.0a6:
+
+    - Simplified widget template selection.
+
+2.0.0a5:
+
+    - Support for Django 1.6's ModelForm.Meta.fields = '__all__', generic fk
+      and generic m2m autocomplete fields were not created.
+
+2.0.0a4:
+
+    - Fix #204: Restore AutocompleteModelBase as default,
+    - Fix #205: Support Python3 in views,
+    - Fixed 404 response in AutocompleteView.
+
+2.0.0a3:
+
+    - Do not interfere with non-autocomplete-enabled form fields,
+    - Ported taggit support to Python3,
+    - Renamed TaggitTagField to TaggitField and integrated TaggitField into
+      autocomplete_light.ModelForm,
+
+2.0.0a2:
+
+    - Make AutocompleteModelTemplate the default autocomplete base for models.
+    - Added ChoiceField and MultipleChoiceField.
+    - Renamed .div class to .block, backward compatibility is preserved.
+    - BC Break: Restyled autocomplete widget to look more modern. If you want
+      the old style back, include autocomplete_light/old_style.css.
+
+2.0.0a1:
+
+    - Fix #168: ensure that autocompletion inputs behaves like django
+      when it comes to values that were removed from the queryset.
+
+2.0.0pre:
+
+    There are minor backward compatibility breaks due to the
+    reorganization of form classes. The best way to upgrade is to
+    inherit from autocomplete_light.ModelForm.
+
+    - autocomplete_light.FixedModelForm was renamed to
+      autocomplete_light.SelectMultipleHelpTextRemovalMixin and is now
+      a mixin for ModelForm. Inherit from both that and
+      django.forms.ModelForm to get the same.
+    - GenericModelForm was renamed to
+      GenericM2MRelatedObjectDescriptorHandlingMixin and is now a mixin
+      for ModelForm. Inherit from both that and django.forms.ModelForm
+      to get the same.
+    - get_widgets_dict is gone, because we now favor using form fields
+      which do validation where it's due: on POST.
+    - using widgets should still work, but using the new form fields is
+      better because it enables DRY validation: you don't have to
+      hardcode the queryset on the form field definition anymore.
+
+    To fix those, just inherit from autocomplete_light.ModelForm if
+    possible, else check the form API details in the source or
+    generated API documentation:
+
+    - https://django-autocomplete-light.readthedocs.io/en/v2/form.html#module-autocomplete_light.forms
+
+    New features:
+
+    - Added form fields, which are now in charge of validation,
+    - Added ModelForm which includes all features previously provided as
+      separated tools (generic m2m support, django issue #9321, etc, etc ...)
+      and overrides django's form field generator to automatically use
+      autocomplete fields when possible, even for generic relations.
+    - Python3 support.
+    - Tests rely on apps provided in the autocomplete_light.tests.apps
+      submodule instead of those provided by test_project. This make tests
+      potentially runnable on a user project (except that the user project
+      still needs to add those apps in INSTALLED_APPS).
+
+1.4.9: Fix #193: IE8 support hacks.
+
+1.4.8: Fix #195: RegistryView got broken on recent Django versions.
+
+1.4.7:
+
+    - Fix #190: Remove Django 1.6 Depreciation Warning,
+    - Fix #189: Fixed support for USE_THOUSAND_SEPARATOR.
+
+1.4.6:
+
+    - Fix #188: Added debouncing in autocomplete.js,
+    - Fix #173: load static from staticfiles.
+
+1.4.5:
+
+    - Fix #180: Support HTTPS in remote.js,
+    - Fix #184: Mouse support upgrade in focus management,
+    - Fix #182: Removed hard-coded class="" attribute.
+
+1.4.4: Improved IE7 and IE8 support, thanks @rhunwicks
+
+1.4.3:
+
+    - Fix Added option clearInputOnSelectChoice, patch by @vosi
+    - Fix uninitialized js key, patch by @vosi
+    - Escape choices before putting them in html, patch by @voidus
+    - Added Simon Kohlmeyer to AUTHORS (Volodymyr was there already).
+
+1.4.2 Fix #164: Support iterables in AutocompleteModel.order_by.
+
+1.4.1
+
+    - Fix #163: Use ._default_manager instead of .objects. Thanks @kakulukia
+
+1.4.0
+
+    - BC Break: Default split_words to False again, to **not** match behaviour
+      from django.contrib.admin which is definitively too naive. (Thanks
+      kezabelle for helping in this decision). This means that the default
+      behaviour is like pre-1.3.0 again.
+    - Enable split_words='or' to use "OR" conditions on splitted words.
+    - Set order_by=None by default in AutocompleteModel.
+    - Added missing docstrings.
+    - Made it easier to spot failing tests.
+    - Covered all combinations with tests.
+
+1.3.1
+
+    - Support django 1.5 RelatedFieldWidgetWrapper in
+      FixedModelForm,
+    - Support django-responsive-admin theme (and probably many
+      other customisations) by adding a div with clear:both after
+      the widget.
+
+1.3.0
+
+    - BC Break: Default split_words to True, to match behaviour from
+      django.contrib.admin.
+    - Added split_words and improved search_fields support for
+      AutocompleteGeneric.
+    - Fix #161: Avoid focusing on next field on widget initialization.
+
+1.2.6 Fixed wrong docstring.
+
+1.2.5 Raise AutocompleteNotRegistered instead of KeyError in
+      Registry.__getitem__.
+
+1.2.4 @g1itch: Support hyphens in generic autocomplete object pks.
+
+1.2.3 @mislavcimpersak: Croatian i18n
+
+1.2.2 @g1itch: Rusisan i18n
+
+1.2.1 @jojax: Fix innefective test on is popup, in autocomplete CreateView
+
+1.2.0
+
+- Fix #132: removed dead line of code, and restored compatibility with
+  autocomplete-light <1.1.29,
+- Implement #136: AutocompleteModel.split_words
+- Auto-hilight the first choice.
+- Fix #135: AutocompleteModel is not compatible with Django 1.3
+
+1.1.31 Fix #129: Firefox support in JS positioning code.
+
+1.1.30 Polish translation contributed by Michał Pasternak.
+
+1.1.29 Fix #126: support .clone(true) with values.
+
+WARNING: This version broke cloning widgets in some cases. This was reported in
+#132 and fixed in 1.2.0.
+
+1.1.28 Regression fix: hide choiceDetail and choiceUpdate from the autocomplete
+       box.
+
+This fixes the default model template, see in test_project:
+
+    http://localhost:8000/admin/default_template_autocomplete/testmodel/add/
+
+The test_project now includes demos created by Michał Pasternak. Thankssss !
+
+1.1.27 Fix #117: django-grappelli support.
+
+Contributed by Michał Pasternak.
+
+1.1.26
+
+- Fixed #114: Use widget_template attr only when set.
+- Fixed #111: Support jQuery's clone(true).
+
+1.1.25 Fixed #108: generic inline support.
+
+1.1.24
+
+- Allow to override the default AutocompleteModelBase class used by register()
+- Implemented django-hvad support
+
+1.1.23: Removed django from install_requires, fixes pip install -U
+
+1.1.22: Fixed DeprecationWarning for Django 1.5.
+
+1.1.21 Bugfix: box was not re-shown after inputing twice the same string
+of minimumCharacters length.
+
+1.1.20 Click on modal overlay closes the popup windo
+
+1.1.19 Make add-another popup a modality
+
+1.1.18 Center add-another popup on screen
+
+1.1.17 Update fr locale
+
+1.1.16 Django 1.5 compatibility. Credit: Patrick Taylor
+
+1.1.15 Fix #99: choices kwarg was ignored
+
+1.1.14 Bugfix: fetchComplete now ready for textStatus == 'abort'
+
+1.1.13
+
+- Enhancement #78: search_fields more like admin,
+- Bugfix: closed brackets in style.css (thanks papalagichen)
+
+1.1.12 Enabled CSRF.
+
+1.1.11 Fixed dynamic initialisation (ie. inlines).
+
+Bug was caused by a wrong attempt at migrating from jq17 live() to jq19 on().
+
+1.1.10
+
+- Partial autocomplete.js rewrite using ideas from bootstrap-typeahead.js,
+- Use of $.proxy() which allowed to get rid of many scope hacks like: var
+  autocomplete = this;
+- When the maximum number of choices has been selected and the input goes,
+  automatically focus on next visible field,
+- Do not show autocomplete if input has below minCharacters,
+- CSS rewrite/debloat (~-50% SLOCs),
+- Backported typeahead CSS,
+- Backported typeahead autocomplete box placement strategy, hoping to fix IE10
+  mobile support,
+- jQuery 1.9 support (thanks Nicolas Seinlet for the heads up).
+
+1.1.9
+
+- Use explicit check for None value instead of trueness, allowing pk=0 (thanks
+  @ekohl).
+- Widget requires proper url setup (thanks @emesik).
+- Rewrote keypress handler using recent contributions.
+
+Also credits to @ekohl and @emesik for working on keypress handling (added to
+AUTHORS).
+
+1.1.8 (was not released on PyPi)
+
+- Alias autocomplete_light.FixedModelForm to autocomplete_light.ModelForm.
+
+1.1.7 Reset default hideAfter to 500, or click support is half broken.
+
+1.1.6
+
+- Fix #77: autocomplete.js "was not as good as bootstrap typeahea",
+- Fix #72: use prototypes in JS to make code faster
+
+Credit to Gennady (@geaden) for having the guts to criticize autocomplete.js.
+
+1.1.5
+
+- Added blocks in autocomplete_light/widget.html which makes it easier to
+  extend - without boilerplate.
+- Refactor CreateView to make it easier to extend.
+- Added widget.extra_context to make it easier to add context to the widget
+  template.
+
+1.1.4 Enter submits the form is there is no selected choice.
+
+Added to AUTHORS: Ewoud Kohl van Wijngaarden
+
+1.1.3 Fix #71: Refactor HTML generation parts in widget.js
+
+1.1.2
+
+- Fix #68: bug when using TextInput with a custom class,
+- Fix #30: exclude already selected items from model autocomplete,
+- Fix #60: got rid of updateWidgets(),
+- Fix #63: default template for AutocompleteModelTemplate,
+
+1.1.1
+
+- Added option to disable watch of autocompletes hidden selects,
+- Performance improvement on inlines,
+- Provide: autocomplete_light.FixedModelForm,
+- Allow override of form kwarg in modelform_factory,
+- taggit support: warn that commit=False is not supported by TagField,
+- Optimize updateWidgets with the help of DOMNodeInserted,
+- Avoid ImproperlyConfigured when using CreateView directly for popups only,
+- Mentioned python 2.6 support,
+- Django 1.5 support in test project
+
+1.1.0 BC break in templates.
+
+- Fix #51, replaced <div> tags by <span class="div">, this
+  enables rendering the widget in inline tags such as with {{
+  form.as_p }}, and also makes it valid HTML.
+- Fix #58, remove restrictions in choices_for_values.
+- Added to AUTHORS: Marc Hörsken.
+
+1.0.26 Fix #25: Prevent accidental inclusion of autocomplete_light/static.html
+
+1.0.25 Added support for django-taggit in django.contrib.taggit_fields.
+
+1.0.24 Added pt_BR translation, thanks Fábio C. Barrionuevo da Luz.
+
+1.0.23 Added FixedModelForm, workaround django issue #9321.
+
+1.0.22 Fix #46: $.data striped leading zeros from data-value
+
+1.0.21 Added addanother.js, allowing to 'add another' even outside the admin.
+
+1.0.20 Added AutocompleteBase.empty_html_format and spanish translation.
+
+1.0.19 Locale/UX improvements suggested by vibragiel.
+
+1.0.18 CSS Improvements by Michal Pasternak
+
+1.0.17 Fixed a bug with cache concerning keyboard navigation and dependent
+       autocompletes.
+
+1.0.16 Added CharField autocompletion for comma separated values.
+
+1.0.15 Holliday release
+
+       - Fix #31: Workaround firefox form tempering attitude on reload
+       - Fix #33: Rename LICENSE.txt to LICENSE
+       - Fix #34: STATIC_PREFIX changed to {% static %} in templates
+       - Fix #34: Added readme in russian
+       - Fix #36: Removed old javascript-placeholder code from widget.js
+       - Fix #38: Invalid CSS background property
+       - Added to AUTHORS: @balmaster, @vosi, Brant Young (I hope i didn't
+         forget anyone, if so please let me know)
+
+       Note that except for #31, fixes were provided by the community, thanks a
+       lot !
+
+1.0.14 Added support for custom javascript initialization on autocomplete
+       creation, ie. inlines.
+
+       It is backward compatible, but you should migrate your custom javascript
+       to:
+
+       0) Use $(document).bind('yourlabsWidgetReady', ...) instead of
+          $(document).ready(...) to initialize autocomplete widgets
+       1) Use
+          $('.autocomplete-light-widget[data-bootstrap=...]').live('initialize', ...)
+          to instanciate autocomplete widgets instead of
+          $('.autocomplete-light-widget[data-bootstrap=...]').each(...)
+
+       See docs or remote.js for an example.
+
+1.0.13 Use HTML5 placeholder, javascript API support for cloned widgets.
+
+1.0.12 Fixed a crash when yourlabsAutocomplete was called on no element, fixed
+       div id and removed debug statement.
+
+1.0.11 Fugbix AutocompleteRestModel could not rely only on uniques, so it
+       relies on get_or_create_by in that case
+
+1.0.10 Fugbix models with a non numerical pk where not accepted anymore by a
+       spec, the spec was removed from tests and this case is fixed.
+
+1.0.9 Bugfix in remote autocomplete
+
+1.0.8 Fixed keyboard navigation, 1.0.7 broke tests
+
+1.0.7 Tested support for autocompletes that depend on each other.
+
+1.0.6 Enhancement: set class 'autocomplete-light-widget' to autocomplete outer
+                   containers created by widget.js
+
+1.0.5 Enhancement: made rest model local object fetcher less harsh when trying
+                   to find a local object
+
+1.0.4 Bugfix: registering a generic autocomplete with a custom name did not
+              use the custom name
+
+1.0.3 Default search_names to 'name' if the model has a name field
+
+1.0.2 Bugfix & refactor django admin + popup
+
+1.0.1 Slight ergonomy improvement
+
+1.0.0 (Almost) full rewrite
+
+    - "Channel" is gone in favor of "Autocomplete"
+    - More unit tests and new selenium tests
+    - Javascript rewrite, for consistency and documentation
+    - New view on /autocomplete_light/ allows admins to view the registry
+
+0.6 No pity for insane bloat removal
+
+    Backward compatibility break: {% autocomplete_light_static %} was removed.
+    Instead, use {% include 'autocomplete_light/static.html' %} as demonstrated
+    in the "Quick start" documentation.
+
+    Note that autocomplete_light/static.html does not include
+    cities_light/autocomplete.js, so you have to load it yourself now.
+
+0.5
+
+    No backward compatibility break.
+
+    - Bugfix in generic channel example: demonstrate how to query_filter on
+      multiple queryset types.
+    - Bugfix in GenericForeignKeyField: allow none value.
+    - Enhancement: autocomplete_light.contrib.generic_m2m supports generic many
+      to many relations.
+    - Enhancement: allow registration of model with custom channel attributes,
+      this allows to register a model with another "search_name" than "name"
+      without subclassing.
+    - Documentation improvements.

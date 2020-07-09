@@ -1,0 +1,9 @@
+#!/bin/bash
+set -x
+
+source ${OPENSHIFT_HOMEDIR}app-root/runtime/dependencies/python/virtenv/bin/activate
+
+pushd ${OPENSHIFT_REPO_DIR}test_project
+rm -rf db.sqlite
+./manage.py migrate --noinput
+popd
