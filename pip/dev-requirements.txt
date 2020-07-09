@@ -59,7 +59,7 @@ pytz==2020.1              # via django
 regex==2020.6.8           # via black
 requests-mock==1.3.0
 requests==2.21.0          # via requests-mock
-six==1.10.0               # via astroid, bcrypt, cryptography, dj-inmemorystorage, fake-factory, freezegun, mock, pip-tools, pylint, pynacl, python-dateutil, requests-mock, traitlets
+six==1.15.0               # via astroid, bcrypt, cryptography, dj-inmemorystorage, fake-factory, freezegun, mock, pip-tools, pylint, pynacl, python-dateutil, requests-mock, traitlets
 sqlparse==0.2.4           # via django-debug-toolbar
 toml==0.10.1              # via black
 traitlets==4.3.2          # via ipython
