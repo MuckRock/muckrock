@@ -39,4 +39,9 @@ urlpatterns = [
         name="news-archive-year",
     ),
     url(r"^feeds/$", LatestEntries(), name="news-feed"),
+    url(
+        r"^article-autocomplete/$",
+        views.ArticleAutocomplete.as_view(),
+        name="article-autocomplete",
+    ),
 ]

@@ -8,6 +8,7 @@ from django import forms
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
+from dal import autocomplete
 
 # MuckRock
 from muckrock.project.models import Project
@@ -64,7 +65,13 @@ class ProjectUpdateForm(forms.ModelForm):
             "requests": autocomplete_light.MultipleChoiceWidget(
                 "FOIARequestAutocomplete"
             ),
-            "articles": autocomplete_light.MultipleChoiceWidget("ArticleAutocomplete"),
+            "articles": autocomplete.ModelSelect2(
+                url="article-autocomplete",
+                attrs={
+                    "data-placeholder": "Search for articles",
+                    "data-minimum-input-length": 1,
+                },
+            ),
         }
         help_texts = {
             "title": "Changing the title will change the URL of your project."
