@@ -9,13 +9,13 @@ Models for the FOIA application
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.mail import EmailMultiAlternatives, get_connection
-from django.urls import reverse
 from django.db import connection, models, transaction
 from django.db.models import Sum
 from django.db.models.signals import post_delete
 from django.http.request import QueryDict
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library

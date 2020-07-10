@@ -3,8 +3,8 @@ Tests using nose for the news application
 """
 
 # Django
-from django.urls import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library

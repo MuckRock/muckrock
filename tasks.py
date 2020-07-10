@@ -89,7 +89,7 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black muckrock --exclude migrations && isort -rc muckrock"
+            cmd="black muckrock --exclude migrations\\|vendor && isort -rc muckrock"
         )
     )
 

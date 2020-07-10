@@ -3,8 +3,8 @@ Tests for fine uploader integration
 """
 
 # Django
-from django.urls import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Standard Library
 import json

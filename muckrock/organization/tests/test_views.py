@@ -3,8 +3,8 @@ Test organization views
 """
 
 # Django
-from django.urls import reverse
 from django.test import Client, TestCase
+from django.urls import reverse
 
 # Third Party
 from nose.tools import eq_

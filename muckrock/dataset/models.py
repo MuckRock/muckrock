@@ -6,10 +6,10 @@ Models for the data set application
 # Django
 from django.contrib.postgres.fields import JSONField
 from django.contrib.postgres.fields.jsonb import KeyTransform
-from django.urls import reverse
 from django.db import models
 from django.db.models.expressions import OrderBy, RawSQL
 from django.template.defaultfilters import slugify
+from django.urls import reverse
 
 # Standard Library
 import logging

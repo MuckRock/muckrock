@@ -7,9 +7,9 @@ Tests for the FOIA views
 
 # Django
 from django.contrib.auth.models import AnonymousUser, User
-from django.urls import resolve, reverse
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
+from django.urls import resolve, reverse
 from django.utils import timezone
 
 # Standard Library

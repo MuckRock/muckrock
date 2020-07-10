@@ -5,8 +5,8 @@ Models for the FOIA application
 
 # Django
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db import models
+from django.urls import reverse
 
 # Standard Library
 import logging

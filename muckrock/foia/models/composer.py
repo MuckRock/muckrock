@@ -12,11 +12,11 @@ upgrades, such as recurring requests.
 from celery import current_app
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db import models, transaction
 from django.db.models import F
 from django.db.models.functions import Least
 from django.db.models.signals import post_delete
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 

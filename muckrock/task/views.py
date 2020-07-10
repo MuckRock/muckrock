@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
-from django.urls import resolve
 from django.db import transaction
 from django.db.models import Count
 from django.http import (
@@ -18,6 +17,7 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import resolve
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, TemplateView

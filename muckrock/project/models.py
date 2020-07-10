@@ -5,8 +5,8 @@ Models for the project application.
 # Django
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.urls import reverse
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 # Standard Library

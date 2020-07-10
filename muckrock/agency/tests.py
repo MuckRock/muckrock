@@ -4,9 +4,9 @@ Tests for Agency application
 
 # Django
 from django.contrib.auth.models import AnonymousUser
-from django.urls import reverse
 from django.http import Http404
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Standard Library
 import json

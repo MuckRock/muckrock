@@ -2,8 +2,8 @@
 Test the API viewsets for the Jurisdiction application.
 """
 # Django
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 # Third Party
 import mock

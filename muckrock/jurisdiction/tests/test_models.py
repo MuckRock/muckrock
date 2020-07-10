@@ -3,8 +3,8 @@ Tests for Jurisdiction application
 """
 
 # Django
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library

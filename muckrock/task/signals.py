@@ -1,7 +1,7 @@
 """Signals for the task application"""
 # Django
-from django.urls import reverse
 from django.db.models.signals import post_save
+from django.urls import reverse
 
 # Standard Library
 import logging

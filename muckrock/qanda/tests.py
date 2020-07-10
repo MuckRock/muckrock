@@ -4,8 +4,8 @@ Tests for Q&A
 
 # Django
 from django.core import mail
-from django.urls import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Third Party
 import nose.tools

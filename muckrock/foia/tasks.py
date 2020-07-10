@@ -12,11 +12,11 @@ from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMessage
-from django.urls import reverse
 from django.db import transaction
 from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
@@ -279,7 +279,9 @@ def classify_status(task_pk, **kwargs):
             logger.warning("Doc Cloud error for %s: %s", doc_id, resp.content)
             return ""
         if "error" in doc_cloud_json:
-            logger.warning("Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"])
+            logger.warning(
+                "Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"]
+            )
             return ""
         text_url = doc_cloud_json["document"]["resources"]["text"]
         resp = requests.get(text_url)

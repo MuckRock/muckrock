@@ -4,8 +4,8 @@
 
 # Django
 from django.contrib.auth.models import AnonymousUser
-from django.urls import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Third Party
 from nose.tools import assert_false, assert_true, eq_

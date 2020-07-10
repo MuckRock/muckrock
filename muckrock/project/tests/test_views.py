@@ -7,9 +7,9 @@ deeper, sustained involvement with our work on those topics.
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
 from django.http import Http404
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Standard Library
 from datetime import date, timedelta

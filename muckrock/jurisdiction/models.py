@@ -3,12 +3,12 @@ Models for the Jurisdiction application
 """
 # Django
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.db import models
 from django.db.models import Avg, Count, F, Q, Sum
 from django.db.models.expressions import Value
 from django.db.models.functions.base import Coalesce
 from django.template.defaultfilters import slugify
+from django.urls import reverse
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField

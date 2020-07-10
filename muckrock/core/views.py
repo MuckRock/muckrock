@@ -7,9 +7,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.urls import reverse
 from django.db.models import F, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.views.generic import FormView, ListView, TemplateView, View

@@ -6,13 +6,13 @@ from django.conf import settings
 from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.postgres.fields import JSONField
 from django.core.mail.message import EmailMessage
-from django.urls import reverse
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models.aggregates import Count
 from django.db.models.expressions import Case, Value, When
 from django.db.models.functions.base import Concat
 from django.db.models.functions.datetime import TruncDay
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe

@@ -3,9 +3,9 @@ Files should be added to communications
 """
 
 # Django
-from django.urls import reverse
 from django.http import Http404
 from django.test import TestCase
+from django.urls import reverse
 
 # Third Party
 from nose.tools import eq_, ok_, raises

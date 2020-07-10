@@ -4,9 +4,9 @@ Views for the communication app
 
 # Django
 from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse
 from django.db.models.aggregates import Sum
 from django.db.models.query import Prefetch
+from django.urls import reverse
 from django.views.generic.detail import DetailView
 
 # MuckRock

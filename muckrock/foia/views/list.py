@@ -6,10 +6,10 @@ Views to display lists of FOIA requests
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.urls import reverse
 from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.views.generic import TemplateView
 
 # Standard Library

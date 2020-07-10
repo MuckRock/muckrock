@@ -4,8 +4,8 @@ Tests the accounts utility methods
 
 # Django
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 # Standard Library
 import re

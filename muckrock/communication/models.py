@@ -6,11 +6,11 @@ Models for keeping track of how we send and receive communications
 # Django
 from django.conf import settings
 from django.core.mail.message import EmailMessage
-from django.urls import reverse
 from django.core.validators import validate_email
 from django.db import models
 from django.forms import ValidationError
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 # Standard Library
 from datetime import date
