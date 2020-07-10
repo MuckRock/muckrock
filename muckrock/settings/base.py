@@ -8,7 +8,6 @@ from django.urls import reverse
 
 # Standard Library
 import os
-import sys
 import urllib.parse
 from collections import OrderedDict
 from datetime import date
@@ -31,9 +30,6 @@ THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
-
-# XXX remove me when autocomplete ported
-sys.path.append(os.path.join(SITE_ROOT, "vendor", "dal", "src"))
 
 SESSION_COOKIE_HTTPONLY = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -130,7 +126,6 @@ STATICFILES_FINDERS = (
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
-AWS_S3_FILE_OVERWRITE = False
 AWS_HEADERS = {
     "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
     "Cache-Control": "max-age=94608000",

@@ -7,41 +7,7 @@ from django.core.files.storage import get_storage_class
 
 # Third Party
 from queued_storage.backends import QueuedStorage
-from storages.backends.s3boto import S3BotoStorage
-
-
-# pylint: disable=abstract-method
-class CachedS3BotoStorage(S3BotoStorage):
-    """
-    S3 storage backend that saves the files locally, too.
-    via http://django-compressor.readthedocs.org/en/latest/remote-storages/#using-staticfiles
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(CachedS3BotoStorage, self).__init__(*args, **kwargs)
-        self.local_storage = get_storage_class(
-            "compressor.storage.CompressorFileStorage"
-        )()
-
-    # pylint: disable=protected-access
-    def save(self, name, content, max_length=None):
-        non_gzipped_file_content = content.file
-        name = super(CachedS3BotoStorage, self).save(name, content, max_length)
-        content.file = non_gzipped_file_content
-        self.local_storage._save(name, content)
-        return name
-
-    def url(self, name, **kwargs):
-        """
-        S3 storage backend that sets trailing slash properly
-        See:
-        http://code.larlet.fr/django-storages/issue/121/s3boto-admin-prefix-issue-with-django-14
-        https://gist.github.com/richleland/1324335
-        """
-        url = super(CachedS3BotoStorage, self).url(name, **kwargs)
-        if name.endswith("/") and not url.endswith("/"):
-            url += "/"
-        return url
+from storages.backends.s3boto3 import S3Boto3Storage
 
 
 class QueuedS3DietStorage(QueuedStorage):
@@ -67,3 +33,26 @@ class QueuedS3DietStorage(QueuedStorage):
     def get_storage(self, name):
         """No need to check cache, just always return local"""
         return self.local
+
+
+class CachedS3Boto3Storage(S3Boto3Storage):
+    """
+    S3 storage backend that saves the files locally, too.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(CachedS3Boto3Storage, self).__init__(*args, **kwargs)
+        self.local_storage = get_storage_class(
+            "compressor.storage.CompressorFileStorage"
+        )()
+
+    def save(self, name, content):
+        # pylint: disable=protected-access, arguments-differ
+        self.local_storage._save(name, content)
+        super(CachedS3Boto3Storage, self).save(name, self.local_storage._open(name))
+        return name
+
+
+class MediaRootS3BotoStorage(S3Boto3Storage):
+    location = "media"
+    file_overwrite = False
