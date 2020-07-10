@@ -8,6 +8,7 @@ from django.urls import reverse
 
 # Standard Library
 import os
+import sys
 import urllib.parse
 from collections import OrderedDict
 from datetime import date
@@ -30,6 +31,9 @@ THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
+
+# XXX remove me when autocomplete ported
+sys.path.append(os.path.join(SITE_ROOT, "vendor", "dal", "src"))
 
 SESSION_COOKIE_HTTPONLY = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
