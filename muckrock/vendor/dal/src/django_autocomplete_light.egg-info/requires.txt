@@ -1,0 +1,13 @@
+six
+
+[genericm2m]
+django-generic-m2m
+
+[gfk]
+django-querysetsequence>=0.11
+
+[nested]
+django-nested-admin>=3.0.21
+
+[tags]
+django-taggit

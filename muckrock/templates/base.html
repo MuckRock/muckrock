@@ -60,6 +60,9 @@
       </style>
       <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
       <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
+      <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+      <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
+      <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
       {% render_bundle 'main' 'css' %}
     {% endcompress %}
     {% block styles %}
@@ -268,6 +271,13 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
       <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
       <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
       <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
+
+  <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
+  <script type="text/javascript" src="{% static 'vendor/select2/dist/js/select2.full.js' %}"></script>
+  <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
+  <script type="text/javascript" src="{% static 'autocomplete_light/forward.js' %}"></script>
+  <script type="text/javascript" src="{% static 'autocomplete_light/select2.js' %}"></script>
+  <script type="text/javascript" src="{% static 'autocomplete_light/jquery.post-setup.js' %}"></script>
     {% endcompress %}
     {% block scripts %}
     {% endblock scripts %}

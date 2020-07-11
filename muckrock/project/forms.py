@@ -65,11 +65,14 @@ class ProjectUpdateForm(forms.ModelForm):
             "requests": autocomplete_light.MultipleChoiceWidget(
                 "FOIARequestAutocomplete"
             ),
-            "articles": autocomplete.ModelSelect2(
+            "articles": autocomplete.ModelSelect2Multiple(
                 url="article-autocomplete",
                 attrs={
                     "data-placeholder": "Search for articles",
-                    "data-minimum-input-length": 1,
+                    "data-minimum-input-length": 0,
+                    "data-html": True,
+                    "data-dropdown-css-class": "select2-dropdown",
+                    "data-width": "100%",
                 },
             ),
         }

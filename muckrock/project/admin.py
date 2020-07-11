@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 from reversion.admin import VersionAdmin
 
 # MuckRock
@@ -28,8 +29,17 @@ class ProjectAdminForm(forms.ModelForm):
     contributors = autocomplete_light.ModelMultipleChoiceField(
         "UserAutocomplete", queryset=User.objects.all(), required=False
     )
-    articles = autocomplete_light.ModelMultipleChoiceField(
-        "ArticleAutocomplete", queryset=Article.objects.all(), required=False
+    articles = forms.ModelMultipleChoiceField(
+        queryset=Article.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="article-autocomplete",
+            attrs={
+                "data-placeholder": "Search for articles",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+            },
+        ),
     )
 
     class Meta:
