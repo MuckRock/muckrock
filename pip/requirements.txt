@@ -19,6 +19,7 @@ boto3==1.7.82             # via smart-open
 boto==2.42.0
 botocore==1.10.82         # via boto3, s3transfer
 bz2file==0.98             # via smart-open
+cachetools==3.1.1         # via zenpy
 celery==3.1.23
 certifi==2017.4.17        # via requests
 chardet==3.0.3
@@ -122,12 +123,12 @@ pymdown-extensions==1.2
 pyparsing==2.3.1          # via packaging
 pypdf2==1.26.0
 pyphaxio==0.11
-python-dateutil==2.5.3
+python-dateutil==2.8.1
 python-levenshtein==0.12.0
 python-magic==0.4.15      # via pyimagediet
 python-openid==2.2.5      # via social-auth-core
 python-redis-lock[django]==3.2.0
-pytz==2017.2              # via babel, celery, django
+pytz==2020.1              # via babel, celery, django, zenpy
 pyyaml==5.1               # via pyimagediet
 raven==5.27.1
 rcssmin==1.0.6            # via django-compressor
@@ -144,7 +145,7 @@ scikit-learn==0.16.1
 scipy==0.14.0
 simplegeneric==0.8.1      # via ipython
 simplejson==3.16.0
-six==1.10.0               # via bleach, django-compat, django-extensions, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pathlib2, prompt-toolkit, pyjwkest, python-dateutil, social-auth-app-django, social-auth-core, traitlets
+six==1.15.0               # via bleach, django-compat, django-extensions, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pathlib2, prompt-toolkit, pyjwkest, python-dateutil, social-auth-app-django, social-auth-core, traitlets, zenpy
 smart-open==1.6.0
 smartypants==1.8.6
 social-auth-app-django==2.1.0
@@ -161,4 +162,5 @@ urllib3==1.24.2           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via bleach
 xlrd==1.1.0
+zenpy==2.0.20
 zipstream==1.1.4

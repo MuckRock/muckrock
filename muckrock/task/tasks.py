@@ -19,6 +19,7 @@ from boto.s3.key import Key
 from fpdf import FPDF
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from requests.exceptions import RequestException
+from zenpy.lib.exception import APIException, ZenpyException
 
 # MuckRock
 from muckrock.foia.models import FOIACommunication, FOIARequest
@@ -107,34 +108,36 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 
 
 @task(
-    ignore_result=True,
-    max_retries=5,
-    name='muckrock.task.tasks.create_zoho_ticket'
+    ignore_result=True, max_retries=5, name='muckrock.task.tasks.create_ticket'
 )
-def create_zoho_ticket(flag_pk, **kwargs):
-    """Create a zoho ticket from a flag"""
+def create_ticket(flag_pk, **kwargs):
+    """Create a ticket from a flag"""
     flag = FlaggedTask.objects.get(pk=flag_pk)
     if flag.resolved:
         return
+
     try:
-        zoho_id = flag.create_zoho_ticket()
-    except RequestException as exc:
-        raise create_zoho_ticket.retry(
-            countdown=(2 ** create_zoho_ticket.request.retries) * 300 +
+        if settings.USE_ZENDESK:
+            zen_id = flag.create_zendesk_ticket()
+            flag.resolve(form_data={"zen_id": zen_id})
+        else:
+            zoho_id = flag.create_zoho_ticket()
+            flag.resolve(form_data={"zoho_id": zoho_id})
+    except (RequestException, ZenpyException, APIException) as exc:
+        raise create_ticket.retry(
+            countdown=(2 ** create_ticket.request.retries) * 300 +
             randint(0, 300),
             args=[flag_pk],
             kwargs=kwargs,
             exc=exc,
         )
-    else:
-        flag.resolve(form_data={'zoho_id': zoho_id})
 
 
 @periodic_task(
     run_every=crontab(hour=4, minute=0),
-    name='muckrock.task.tasks.cleanup_zoho_flags',
+    name='muckrock.task.tasks.cleanup_flags'
 )
-def cleanup_zoho_flags():
-    """Find any flags that failed to make it to zoho and try again"""
+def cleanup_flags():
+    """Find any flags that failed to make it to zoho/zendesk and try again"""
     for flag in FlaggedTask.objects.filter(resolved=False):
-        create_zoho_ticket.delay(flag.pk)
+        create_ticket.delay(flag.pk)

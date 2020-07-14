@@ -68,7 +68,7 @@ class TestNotificationTasks(TestCase):
     def setUp(self):
         self.user = UserFactory()
 
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def test_support(self, mock_send):
         """Notifies the user with a support response."""
         task = FlaggedTaskFactory()

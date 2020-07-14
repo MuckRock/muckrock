@@ -21,6 +21,9 @@ from itertools import groupby
 
 # Third Party
 import bleach
+from zenpy import Zenpy
+from zenpy.lib.api_objects import Comment, Request
+from zenpy.lib.api_objects import User as ZenUser
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
@@ -657,6 +660,33 @@ class FlaggedTask(Task):
         response.raise_for_status()
         if response.status_code == 200:
             return response.json()['id']
+
+    def create_zendesk_ticket(self):
+        client = Zenpy(
+            email=settings.ZENDESK_EMAIL,
+            subdomain=settings.ZENDESK_SUBDOMAIN,
+            token=settings.ZENDESK_TOKEN,
+        )
+
+        description = self.text
+        for obj in [self.foia, self.agency, self.jurisdiction]:
+            if obj:
+                description += '\n{}'.format(obj.get_absolute_url())
+
+        request = {
+            'subject': description[:50],
+            'comment': Comment(body=description)
+        }
+        requester = {}
+        if self.user and self.user.profile.full_name:
+            requester['name'] = self.user.profile.full_name
+        if self.user and self.user.email:
+            requester['email'] = self.user.email
+        if not requester:
+            requester = {'name': 'Anonymous User'}
+        request['requester'] = ZenUser(**requester)
+        request = client.requests.create(Request(**request))
+        return request.id
 
 
 class ProjectReviewTask(Task):
