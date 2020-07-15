@@ -132,5 +132,6 @@ input.autocomplete.xhr-pending { background-image: none; }
 
 .select2-selection__choice {
   width: 100%;
-  background: $color-white;
+  background: $color-white-pure !important;
+  white-space: normal;
 }

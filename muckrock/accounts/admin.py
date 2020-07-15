@@ -11,6 +11,7 @@ from django.urls import reverse
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 from reversion.admin import VersionAdmin
 
 # MuckRock
@@ -43,10 +44,19 @@ class ProfileAdminForm(forms.ModelForm):
         queryset=Jurisdiction.objects.all(),
         required=False,
     )
-    agency = autocomplete_light.ModelChoiceField(
-        "AgencyAdminAutocomplete",
+    agency = forms.ModelChoiceField(
         queryset=Agency.objects.filter(status="approved"),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Agency?",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
 
     class Meta:

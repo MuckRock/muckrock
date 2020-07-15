@@ -5,14 +5,19 @@ Views for the Agency application
 # Django
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import linebreaks
 from django.views.generic.edit import FormView
 
 # Standard Library
 import re
+
+# Third Party
+from dal import autocomplete
 
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
@@ -247,3 +252,52 @@ class MergeAgency(PermissionRequiredMixin, FormView):
         """What to do if the user does not have permisson to view this page"""
         messages.error(self.request, "You do not have permission to view this page")
         return redirect("index")
+
+
+class AgencyAutocomplete(autocomplete.Select2QuerySetView):
+    """Autocomplete for picking agencies"""
+
+    def get_queryset(self):
+        """Get approved agencies"""
+        queryset = Agency.objects.filter(status="approved").select_related(
+            "jurisdiction"
+        )
+
+        # Filter by jurisdiction
+        jurisdiction = self.forwarded.get("jurisdiction")
+        appeal = self.forwarded.get("appeal", False)
+        if appeal and jurisdiction:
+            jurisdiction = Jurisdiction.objects.get(pk=jurisdiction[0])
+            if jurisdiction.level == "l":
+                # For local jurisdictions, appeal agencies may come from the
+                # parent level
+                queryset = queryset.filter(
+                    jurisdiction_id__in=(jurisdiction.pk, jurisdiction.parent_id)
+                )
+            else:
+                queryset = queryset.filter(jurisdiction=jurisdiction)
+        elif not appeal and jurisdiction:
+            queryset = queryset.filter(jurisdiction=jurisdiction[0])
+
+        # find all words in the query in at least one of the search fields
+        if self.q:
+            conditions = Q()
+            for word in self.q.strip().split():
+                conditions &= (
+                    Q(name__icontains=word)
+                    | Q(aliases__icontains=word)
+                    | Q(jurisdiction__name__icontains=word)
+                    | Q(jurisdiction__abbrev__iexact=word)
+                    | Q(jurisdiction__parent__abbrev__iexact=word)
+                )
+
+            queryset = queryset.filter(conditions)
+
+        return queryset
+
+    def get_result_label(self, item):
+        """Render the choice from an HTML template"""
+        return render_to_string("autocomplete/agency.html", {"choice": item})
+
+    def get_selected_result_label(self, item):
+        return str(item)

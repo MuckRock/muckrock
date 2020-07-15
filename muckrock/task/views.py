@@ -405,7 +405,9 @@ class NewAgencyTaskList(TaskList):
     def task_post_helper(self, request, task, form_data=None):
         """Special post handlers exclusive to NewAgencyTasks"""
         if request.POST.get("approve"):
-            new_agency_form = AgencyForm(request.POST, instance=task.agency)
+            new_agency_form = AgencyForm(
+                request.POST, instance=task.agency, prefix=request.POST.get("task", "")
+            )
             if new_agency_form.is_valid():
                 new_agency_form.save()
             else:
@@ -422,7 +424,9 @@ class NewAgencyTaskList(TaskList):
             form_data.update({"approve": True})
             task.resolve(request.user, form_data)
         elif request.POST.get("replace"):
-            form = ReplaceNewAgencyForm(request.POST)
+            form = ReplaceNewAgencyForm(
+                request.POST, prefix=request.POST.get("task", "")
+            )
             if form.is_valid():
                 replace_agency = form.cleaned_data["replace_agency"]
                 task.reject(replace_agency)

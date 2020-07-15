@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -195,7 +196,16 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
     agency = django_filters.ModelMultipleChoiceFilter(
         name="agency",
         queryset=Agency.objects.exclude(reviewagencytask=None),
-        widget=autocomplete_light.MultipleChoiceWidget("AgencyAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
 
     federal = django_filters.ChoiceFilter(
@@ -241,7 +251,16 @@ class PortalTaskFilterSet(TaskFilterSet):
         name="communication__foia__agency",
         label="Agency",
         queryset=Agency.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("AgencyAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     communication__foia__portal__type = django_filters.ChoiceFilter(
         choices=PORTAL_TYPES, label="Portal Type"

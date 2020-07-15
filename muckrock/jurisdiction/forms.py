@@ -7,23 +7,8 @@ from django import forms
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
-from muckrock.core.forms import MRFilterForm
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import ExampleAppeal, Jurisdiction
-
-
-class JurisdictionFilterForm(MRFilterForm):
-    """Adds a level filter to MRFilterForm"""
-
-    levels = (("f", "Federal"), ("s", "State"), ("l", "Local"))
-    level = forms.ChoiceField(choices=levels, widget=forms.RadioSelect)
-    parent = forms.ModelChoiceField(
-        required=False,
-        queryset=Jurisdiction.objects.all(),
-        widget=autocomplete_light.ChoiceWidget(
-            "StateAutocomplete", attrs={"placeholder": "All States"}
-        ),
-    )
 
 
 class ExemptionSubmissionForm(forms.Form):

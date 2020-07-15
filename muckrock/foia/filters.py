@@ -13,6 +13,7 @@ import re
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -68,7 +69,16 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
     )
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.MultipleChoiceWidget("AgencyAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     projects = AutocompleteModelMultipleChoiceFilter(
         name="projects",
@@ -127,7 +137,16 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.MultipleChoiceWidget("AgencyAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name="tags__name",
@@ -186,7 +205,16 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
     )
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.MultipleChoiceWidget("AgencyAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name="tags__name",

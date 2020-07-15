@@ -31,4 +31,9 @@ urlpatterns = [
         r"^contact-info/(?P<idx>\d+)/$", views.contact_info, name="agency-contact-info"
     ),
     url(r"^merge/$", views.MergeAgency.as_view(), name="agency-merge"),
+    url(
+        r"^agency-autocomplete/$",
+        views.AgencyAutocomplete.as_view(),
+        name="agency-autocomplete",
+    ),
 ]

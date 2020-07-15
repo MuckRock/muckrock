@@ -17,6 +17,7 @@ import sys
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete, forward
 from pdfrw import PdfReader
 from reversion.admin import VersionAdmin
 
@@ -118,11 +119,35 @@ class AgencyAdminForm(forms.ModelForm):
     jurisdiction = autocomplete_light.ModelChoiceField(
         "JurisdictionAdminAutocomplete", queryset=Jurisdiction.objects.all()
     )
-    appeal_agency = autocomplete_light.ModelChoiceField(
-        "AgencyAppealAdminAutocomplete", queryset=Agency.objects.all(), required=False
+    appeal_agency = forms.ModelChoiceField(
+        queryset=Agency.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            forward=("jurisdiction", forward.Const(True, "appeal"),),
+            attrs={
+                "data-placeholder": "Agency?",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
-    parent = autocomplete_light.ModelChoiceField(
-        "AgencyAdminAutocomplete", queryset=Agency.objects.all(), required=False
+    parent = forms.ModelChoiceField(
+        queryset=Agency.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            forward=("jurisdiction",),
+            attrs={
+                "data-placeholder": "Agency?",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     portal = autocomplete_light.ModelChoiceField(
         "PortalAutocomplete", queryset=Portal.objects.all(), required=False
@@ -136,7 +161,6 @@ class AgencyAdminForm(forms.ModelForm):
 class AgencyAdmin(VersionAdmin):
     """Agency admin options"""
 
-    change_list_template = "admin/agency/agency/change_list.html"
     prepopulated_fields = {"slug": ("name",)}
     list_display = (
         "name",

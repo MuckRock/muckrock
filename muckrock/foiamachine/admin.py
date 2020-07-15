@@ -8,9 +8,11 @@ from django.contrib import admin
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.agency.models import Agency
 from muckrock.foiamachine import models
 
 
@@ -18,7 +20,20 @@ class FoiaMachineRequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     jurisdiction = autocomplete_light.ModelChoiceField("JurisdictionAdminAutocomplete")
-    agency = autocomplete_light.ModelChoiceField("AgencyAdminAutocomplete")
+    agency = forms.ModelChoiceField(
+        queryset=Agency.objects.filter(status="approved"),
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            forward=("jurisdiction",),
+            attrs={
+                "data-placeholder": "Agency?",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
+    )
     user = autocomplete_light.ModelChoiceField("UserAutocomplete")
 
     class Meta:

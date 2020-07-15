@@ -18,6 +18,7 @@ from datetime import date, timedelta
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 from reversion.admin import VersionAdmin
 
 # MuckRock
@@ -328,8 +329,18 @@ class TrackingNumberInline(admin.TabularInline):
 class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
-    agency = autocomplete_light.ModelChoiceField(
-        "AgencyAdminAutocomplete", queryset=Agency.objects.all()
+    agency = forms.ModelChoiceField(
+        queryset=Agency.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Agency?",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     read_collaborators = autocomplete_light.ModelMultipleChoiceField(
         "UserAutocomplete", queryset=User.objects.all(), required=False
@@ -544,8 +555,19 @@ class FOIAComposerAdminForm(forms.ModelForm):
     organization = autocomplete_light.ModelChoiceField(
         "OrganizationAutocomplete", queryset=Organization.objects.all()
     )
-    agencies = autocomplete_light.ModelMultipleChoiceField(
-        "AgencyAdminAutocomplete", queryset=Agency.objects.all(), required=False
+    agencies = forms.ModelMultipleChoiceField(
+        queryset=Agency.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Agency?",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
     parent = autocomplete_light.ModelChoiceField(
         "FOIAComposerAdminAutocomplete",

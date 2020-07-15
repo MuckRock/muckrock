@@ -8,6 +8,7 @@ from django import forms
 # Third Party
 import bleach
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 
 # MuckRock
 from muckrock.foiamachine.models import (
@@ -32,9 +33,18 @@ class FoiaMachineRequestForm(autocomplete_light.ModelForm):
     class Meta:
         model = FoiaMachineRequest
         fields = ["title", "status", "request_language", "jurisdiction", "agency"]
-        autocomplete_names = {
-            "jurisdiction": "JurisdictionAutocomplete",
-            "agency": "AgencyAutocomplete",
+        autocomplete_names = {"jurisdiction": "JurisdictionAutocomplete"}
+        widgets = {
+            "agency": autocomplete.ModelSelect2(
+                url="agency-autocomplete",
+                attrs={
+                    "data-placeholder": "Search agencies",
+                    "data-minimum-input-length": 0,
+                    "data-html": True,
+                    "data-dropdown-css-class": "select2-dropdown",
+                    "data-width": "100%",
+                },
+            )
         }
         labels = {"request_language": "Request"}
 

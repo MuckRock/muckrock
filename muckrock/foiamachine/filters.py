@@ -5,6 +5,7 @@ QuerySet filters for FOIA Machine models
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -21,7 +22,16 @@ class FoiaMachineRequestFilter(django_filters.FilterSet):
     )
     agency = django_filters.ModelChoiceFilter(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.ChoiceWidget("AgencyAutocomplete"),
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
 
     class Meta:

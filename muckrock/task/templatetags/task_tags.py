@@ -151,10 +151,13 @@ class NewAgencyTaskNode(TaskNode):
             initial["portal_url"] = self.task.agency.portal.url
             initial["portal_type"] = self.task.agency.portal.type
         extra_context["agency_form"] = agency.forms.AgencyForm(
-            instance=self.task.agency, initial=initial
+            instance=self.task.agency,
+            initial=initial,
+            prefix=str(self.task.pk)
         )
         extra_context["replace_form"] = task.forms.ReplaceNewAgencyForm(
-            initial={"replace_jurisdiction": self.task.agency.jurisdiction}
+            initial={"replace_jurisdiction": self.task.agency.jurisdiction},
+            prefix=str(self.task.pk),
         )
         extra_context["pending_drafts"] = self.task.agency.pending_drafts
 

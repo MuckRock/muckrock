@@ -10,6 +10,7 @@ import logging
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import autocomplete, forward
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -304,10 +305,20 @@ class ReplaceNewAgencyForm(forms.Form):
     replace_jurisdiction = autocomplete_light.ModelChoiceField(
         "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all()
     )
-    replace_agency = autocomplete_light.ModelChoiceField(
-        "AgencyAutocomplete",
+    replace_agency = forms.ModelChoiceField(
         label="Move this agency's requests to:",
         queryset=Agency.objects.filter(status="approved"),
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            forward=(forward.Field('replace_jurisdiction', 'jurisdiction'),),
+            attrs={
+                "data-placeholder": "Search agencies",
+                "data-minimum-input-length": 0,
+                "data-html": True,
+                "data-dropdown-css-class": "select2-dropdown",
+                "data-width": "100%",
+            },
+        ),
     )
 
 
