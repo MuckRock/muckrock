@@ -141,13 +141,13 @@ class BuyRequestsMixin(object):
         )
         if organization.individual:
             msg = (
-                'Purchase successful.  {} requests have been added to your '
-                'account.'.format(num_requests)
+                u'Purchase successful.  {} requests have been added to your '
+                u'account.'.format(num_requests)
             )
         else:
             msg = (
-                'Purchase successful.  {} requests have been added to '
-                '{}\'s account.'.format(num_requests, organization.name)
+                u'Purchase successful.  {} requests have been added to '
+                u'{}\'s account.'.format(num_requests, organization.name)
             )
         messages.success(self.request, msg)
 
