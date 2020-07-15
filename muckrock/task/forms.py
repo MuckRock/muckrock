@@ -310,7 +310,7 @@ class ReplaceNewAgencyForm(forms.Form):
         queryset=Agency.objects.filter(status="approved"),
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
-            forward=(forward.Field('replace_jurisdiction', 'jurisdiction'),),
+            forward=(forward.Field("replace_jurisdiction", "jurisdiction"),),
             attrs={
                 "data-placeholder": "Search agencies",
                 "data-minimum-input-length": 0,
