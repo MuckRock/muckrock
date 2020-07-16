@@ -4,11 +4,14 @@ Views for muckrock project
 # Django
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.utils import lookup_needs_distinct
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
-from django.db.models import F, Sum
+from django.core.exceptions import ImproperlyConfigured
+from django.db.models import F, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
@@ -16,10 +19,13 @@ from django.views.generic import FormView, ListView, TemplateView, View
 
 # Standard Library
 import logging
+import operator
 import sys
+from functools import reduce
 
 # Third Party
 import stripe
+from dal import autocomplete
 from watson import search as watson
 from watson.views import SearchMixin
 
@@ -571,3 +577,81 @@ def class_view_decorator(function_decorator):
         return view
 
     return simple_decorator
+
+
+class MRAutocompleteView(autocomplete.Select2QuerySetView):
+    """Autocomplete view customized for our use"""
+
+    search_fields = []
+    split_words = None
+    template = None
+
+    def get_queryset(self):
+        """Get the queryset"""
+        if self.queryset is not None:
+            queryset = self.queryset.all()
+        elif self.model is not None:
+            queryset = self.model._default_manager.all()
+        else:
+            raise ImproperlyConfigured
+
+        queryset = self.get_search_results(queryset, self.q)
+
+        return queryset
+
+    def get_search_fields(self):
+        """The fields to search over"""
+        return self.search_fields
+
+    def get_search_results(self, queryset, search_term):
+        """
+        Return a tuple containing a queryset to implement the search
+        and a boolean indicating if the results may contain duplicates.
+        """
+
+        def construct_search(field_name):
+            """Apply keyword searches"""
+            if field_name.startswith("^"):
+                return "{}__istartswith".format(field_name[1:])
+            elif field_name.startswith("="):
+                return "{}__iexact".format(field_name[1:])
+            elif field_name.startswith("@"):
+                return "{}__search".format(field_name[1:])
+            else:
+                return "{}__icontains".format(field_name)
+
+        search_fields = self.get_search_fields()
+        if search_fields and search_term:
+            orm_lookups = [
+                construct_search(str(search_field)) for search_field in search_fields
+            ]
+            if self.split_words is not None:
+                word_conditions = []
+                for word in search_term.split():
+                    or_queries = [Q(**{orm_lookup: word}) for orm_lookup in orm_lookups]
+                    word_conditions.append(reduce(operator.or_, or_queries))
+                op_ = operator.or_ if self.split_words == "or" else operator.and_
+                queryset = queryset.filter(reduce(op_, word_conditions))
+            else:
+                or_queries = [
+                    Q(**{orm_lookup: search_term}) for orm_lookup in orm_lookups
+                ]
+                queryset = queryset.filter(reduce(operator.or_, or_queries))
+
+            for search_spec in orm_lookups:
+                if lookup_needs_distinct(queryset.model._meta, search_spec):
+                    queryset = queryset.distinct()
+                    break
+
+        return queryset
+
+    def get_result_label(self, item):
+        """Render the choice from an optional HTML template"""
+        if self.template:
+            return render_to_string(self.template, {"choice": item})
+        else:
+            return str(item)
+
+    def get_selected_result_label(self, item):
+        """Do not use HTML template for selected label"""
+        return str(item)

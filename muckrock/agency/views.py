@@ -24,7 +24,7 @@ from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.forms import AgencyMergeForm
 from muckrock.agency.models import Agency
 from muckrock.agency.utils import initial_communication_template
-from muckrock.core.views import MRSearchFilterListView
+from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -254,20 +254,31 @@ class MergeAgency(PermissionRequiredMixin, FormView):
         return redirect("index")
 
 
-class AgencyAutocomplete(autocomplete.Select2QuerySetView):
+class AgencyAutocomplete(MRAutocompleteView):
     """Autocomplete for picking agencies"""
 
+    queryset = Agency.objects.filter(status="approved").select_related("jurisdiction")
+    search_fields = [
+        "name",
+        "aliases",
+        "jurisdiction__name",
+        "=jurisdiction__abbrev",
+        "=jurisdiction__parent__abbrev",
+    ]
+    split_words = "and"
+    template = "autocomplete/agency.html"
+
     def get_queryset(self):
-        """Get approved agencies"""
-        queryset = Agency.objects.filter(status="approved").select_related(
-            "jurisdiction"
-        )
+        """Filter by jurisdiction"""
+
+        queryset = super().get_queryset()
 
         # Filter by jurisdiction
-        jurisdiction = self.forwarded.get("jurisdiction")
+        # jurisdiction is forwarded as a list, so grab first element
+        jurisdiction_id = self.forwarded.get("jurisdiction", [None])[0]
         appeal = self.forwarded.get("appeal", False)
-        if appeal and jurisdiction:
-            jurisdiction = Jurisdiction.objects.get(pk=jurisdiction[0])
+        if appeal and jurisdiction_id:
+            jurisdiction = Jurisdiction.objects.get(pk=jurisdiction_id)
             if jurisdiction.level == "l":
                 # For local jurisdictions, appeal agencies may come from the
                 # parent level
@@ -276,28 +287,7 @@ class AgencyAutocomplete(autocomplete.Select2QuerySetView):
                 )
             else:
                 queryset = queryset.filter(jurisdiction=jurisdiction)
-        elif not appeal and jurisdiction:
-            queryset = queryset.filter(jurisdiction=jurisdiction[0])
-
-        # find all words in the query in at least one of the search fields
-        if self.q:
-            conditions = Q()
-            for word in self.q.strip().split():
-                conditions &= (
-                    Q(name__icontains=word)
-                    | Q(aliases__icontains=word)
-                    | Q(jurisdiction__name__icontains=word)
-                    | Q(jurisdiction__abbrev__iexact=word)
-                    | Q(jurisdiction__parent__abbrev__iexact=word)
-                )
-
-            queryset = queryset.filter(conditions)
+        elif not appeal and jurisdiction_id:
+            queryset = queryset.filter(jurisdiction=jurisdiction_id)
 
         return queryset
-
-    def get_result_label(self, item):
-        """Render the choice from an HTML template"""
-        return render_to_string("autocomplete/agency.html", {"choice": item})
-
-    def get_selected_result_label(self, item):
-        return str(item)

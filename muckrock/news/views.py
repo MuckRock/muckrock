@@ -23,7 +23,11 @@ from dal import autocomplete
 
 # MuckRock
 from muckrock.core.utils import cache_get_or_set
-from muckrock.core.views import MRSearchFilterListView, PaginationMixin
+from muckrock.core.views import (
+    MRAutocompleteView,
+    MRSearchFilterListView,
+    PaginationMixin,
+)
 from muckrock.news.filters import ArticleDateRangeFilterSet
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
@@ -218,26 +222,15 @@ class NewsListView(MRSearchFilterListView):
         return context
 
 
-class ArticleAutocomplete(autocomplete.Select2QuerySetView):
+class ArticleAutocomplete(MRAutocompleteView):
     """Autocomplete for picking articles"""
 
-    def get_queryset(self):
-        """Get all published articles and prefetch the authors"""
-        queryset = (
-            Article.objects.get_published()
-            .prefetch_related(
-                Prefetch("authors", User.objects.select_related("profile"))
-            )
-            .distinct()
+    queryset = (
+        Article.objects.get_published()
+        .prefetch_related(
+            Prefetch("authors", User.objects.select_related("profile"))
         )
-
-        if self.q:
-            queryset = queryset.filter(
-                Q(title__icontains=self.q) | Q(tags__name__icontains=self.q)
-            )
-
-        return queryset
-
-    def get_result_label(self, item):
-        """Render the choice from an HTML template"""
-        return render_to_string("autocomplete/article.html", {"choice": item})
+        .distinct()
+    )
+    search_fields = ["title", "tags__name"]
+    template = "autocomplete/article.html"
