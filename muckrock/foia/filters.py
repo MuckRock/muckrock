@@ -13,10 +13,10 @@ import re
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.core import autocomplete
 from muckrock.core.filters import (
     BLANK_STATUS,
     NULL_BOOLEAN_CHOICES,
@@ -65,19 +65,14 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         name="composer__user",
         label="User",
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Search agencies",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
     projects = AutocompleteModelMultipleChoiceFilter(
@@ -138,14 +133,7 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Search agencies",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
@@ -201,19 +189,14 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
         name="composer__user",
         label="User",
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.get_approved(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Search agencies",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
@@ -235,7 +218,9 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         name="composer__user",
         label="User",
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name="tags__name",

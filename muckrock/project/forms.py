@@ -8,9 +8,9 @@ from django import forms
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
-from dal import autocomplete
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.project.models import Project
 
 
@@ -61,19 +61,15 @@ class ProjectUpdateForm(forms.ModelForm):
         ]
         widgets = {
             "description": forms.Textarea(attrs={"class": "prose-editor"}),
-            "contributors": autocomplete_light.MultipleChoiceWidget("UserAutocomplete"),
+            "contributors": autocomplete.ModelSelect2Multiple(
+                url="user-autocomplete", attrs={"data-placeholder": "Search for users"}
+            ),
             "requests": autocomplete_light.MultipleChoiceWidget(
                 "FOIARequestAutocomplete"
             ),
             "articles": autocomplete.ModelSelect2Multiple(
                 url="article-autocomplete",
-                attrs={
-                    "data-placeholder": "Search for articles",
-                    "data-minimum-input-length": 0,
-                    "data-html": True,
-                    "data-dropdown-css-class": "select2-dropdown",
-                    "data-width": "100%",
-                },
+                attrs={"data-placeholder": "Search for articles"},
             ),
         }
         help_texts = {

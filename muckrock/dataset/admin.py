@@ -13,6 +13,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.dataset.models import DataField, DataSet
 
 
@@ -27,8 +28,11 @@ class DataFieldInline(admin.TabularInline):
 class DataSetForm(forms.ModelForm):
     """Form with autocomplete for user"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:

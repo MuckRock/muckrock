@@ -9,6 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.db.models.aggregates import Count
 from django.http.response import (
     Http404,
     HttpResponse,
@@ -46,7 +47,7 @@ from muckrock.accounts.models import Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress
-from muckrock.core.views import MRFilterListView
+from muckrock.core.views import MRAutocompleteView, MRFilterListView
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.message.email import TemplateEmail
@@ -500,3 +501,38 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
 def rp_iframe(request):
     """RP iframe for OIDC sesison management"""
     return render(request, "accounts/check_session_iframe.html", {"settings": settings})
+
+
+class UserAutocomplete(MRAutocompleteView):
+    """Autocomplete for picking users"""
+
+    queryset = User.objects.filter(is_active=True).select_related("profile")
+    search_fields = ["^username", "profile__full_name"]
+    template = "autocomplete/user.html"
+
+    def get_search_fields(self):
+        search_fields = super().get_search_fields()
+        if self.request.user.is_staff:
+            search_fields += ["^email"]
+        return search_fields
+
+    def get_queryset(self):
+        """Filter by jurisdiction"""
+
+        queryset = super().get_queryset()
+
+        if "authors" in self.forwarded:
+            queryset = queryset.annotate(
+                article_count=Count("authored_articles")
+            ).exclude(article_count=0)
+
+        if "tasks" in self.forwarded:
+            queryset = queryset.annotate(task_count=Count("resolved_tasks")).exclude(
+                task_count=0
+            )
+
+        return queryset
+
+    def get_selected_result_label(self, item):
+        """Do not use HTML template for selected label"""
+        return f"{item.profile.full_name} ({item.username})"

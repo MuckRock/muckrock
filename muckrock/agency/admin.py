@@ -17,7 +17,7 @@ import sys
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete, forward
+from dal import forward
 from pdfrw import PdfReader
 from reversion.admin import VersionAdmin
 
@@ -33,6 +33,7 @@ from muckrock.agency.models import (
     AgencyType,
 )
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
+from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import Portal
 
@@ -113,8 +114,12 @@ class AgencyPhoneInline(admin.TabularInline):
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     jurisdiction = autocomplete_light.ModelChoiceField(
         "JurisdictionAdminAutocomplete", queryset=Jurisdiction.objects.all()
@@ -124,14 +129,8 @@ class AgencyAdminForm(forms.ModelForm):
         required=False,
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
-            forward=("jurisdiction", forward.Const(True, "appeal"),),
-            attrs={
-                "data-placeholder": "Agency?",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            forward=("jurisdiction", forward.Const(True, "appeal")),
+            attrs={"data-placeholder": "Agency?"},
         ),
     )
     parent = forms.ModelChoiceField(
@@ -140,13 +139,7 @@ class AgencyAdminForm(forms.ModelForm):
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
             forward=("jurisdiction",),
-            attrs={
-                "data-placeholder": "Agency?",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            attrs={"data-placeholder": "Agency?"},
         ),
     )
     portal = autocomplete_light.ModelChoiceField(

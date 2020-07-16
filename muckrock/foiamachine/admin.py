@@ -8,11 +8,11 @@ from django.contrib import admin
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete
 from reversion.admin import VersionAdmin
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.core import autocomplete
 from muckrock.foiamachine import models
 
 
@@ -25,16 +25,14 @@ class FoiaMachineRequestAdminForm(forms.ModelForm):
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
             forward=("jurisdiction",),
-            attrs={
-                "data-placeholder": "Agency?",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            attrs={"data-placeholder": "Agency?"},
         ),
     )
-    user = autocomplete_light.ModelChoiceField("UserAutocomplete")
+    user = forms.ModelChoiceField(
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        )
+    )
 
     class Meta:
         model = models.FoiaMachineRequest

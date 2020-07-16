@@ -11,6 +11,7 @@ import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.core.filters import RangeWidget
 from muckrock.qanda.models import Question
 from muckrock.tags.models import Tag
@@ -21,7 +22,9 @@ class QuestionFilterSet(django_filters.FilterSet):
 
     user = django_filters.ModelChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.ChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
     date = django_filters.DateFromToRangeFilter(
         label="Date Range",

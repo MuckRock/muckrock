@@ -9,11 +9,12 @@ from django.contrib.auth.models import User
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete
+from dal import forward
 
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.agency.viewsets import CountWhen
+from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
@@ -177,7 +178,9 @@ class FlaggedTaskFilterSet(TaskFilterSet):
 
     user = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
     category = django_filters.ChoiceFilter(choices=FLAG_CATEGORIES)
 
@@ -197,14 +200,7 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
         name="agency",
         queryset=Agency.objects.exclude(reviewagencytask=None),
         widget=autocomplete.ModelSelect2Multiple(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Search agencies",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
 
@@ -252,14 +248,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         label="Agency",
         queryset=Agency.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Search agencies",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
     communication__foia__portal__type = django_filters.ChoiceFilter(
@@ -270,7 +259,11 @@ class PortalTaskFilterSet(TaskFilterSet):
     )
     resolved_by = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserTaskAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users"},
+            forward=(forward.Constant(True, "tasks"),),
+        ),
     )
 
     class Meta:

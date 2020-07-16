@@ -66,4 +66,9 @@ urlpatterns = [
     ),
     url(r"^rp_iframe/$", views.rp_iframe, name="acct-rp-iframe"),
     url(r"^", include("social_django.urls", namespace="social")),
+    url(
+        r"^user-autocomplete/$",
+        views.UserAutocomplete.as_view(),
+        name="user-autocomplete",
+    ),
 ]

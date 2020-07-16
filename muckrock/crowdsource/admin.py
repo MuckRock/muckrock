@@ -12,6 +12,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
+from muckrock.core import autocomplete
 from muckrock.crowdsource.models import (
     Crowdsource,
     CrowdsourceChoice,
@@ -25,8 +26,11 @@ from muckrock.project.models import Project
 class CrowdsourceAdminForm(forms.ModelForm):
     """Form for Crowdsource admin"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     project = autocomplete_light.ModelChoiceField(
         "ProjectAutocomplete", queryset=Project.objects.all(), required=False
@@ -45,8 +49,11 @@ class CrowdsourceAdminForm(forms.ModelForm):
 class CrowdsourceResponseAdminForm(forms.ModelForm):
     """Form for Crowdsource response admin"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:

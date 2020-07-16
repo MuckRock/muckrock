@@ -19,6 +19,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.jurisdiction.forms import CSVImportForm
 from muckrock.jurisdiction.models import (
     ExampleAppeal,
@@ -108,8 +109,12 @@ class ExemptionAdminForm(forms.ModelForm):
     jurisdiction = autocomplete_light.ModelChoiceField(
         "JurisdictionAdminAutocomplete", queryset=Jurisdiction.objects.all()
     )
-    contributors = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    contributors = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:

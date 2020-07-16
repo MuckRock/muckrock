@@ -12,6 +12,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.news.models import Article, Photo
 
 
@@ -40,10 +41,17 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with autocompletes"""
 
     authors = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     editors = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     foias = autocomplete_light.ModelMultipleChoiceField(
         "FOIARequestAdminAutocomplete", required=False

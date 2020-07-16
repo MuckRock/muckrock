@@ -9,8 +9,10 @@ from django.db.models import Count
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import forward
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.core.filters import RangeWidget
 from muckrock.news.models import Article
 from muckrock.project.models import Project
@@ -31,7 +33,11 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
                 article_count__gt=0
             )
         ),
-        widget=autocomplete_light.MultipleChoiceWidget("UserAuthorAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search authors"},
+            forward=(forward.Constant(True, "authors"),),
+        ),
     )
     pub_date = django_filters.DateFromToRangeFilter(
         label="Date Range",

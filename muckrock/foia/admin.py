@@ -18,7 +18,6 @@ from datetime import date, timedelta
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete
 from reversion.admin import VersionAdmin
 
 # MuckRock
@@ -31,6 +30,7 @@ from muckrock.communication.admin import (
     WebCommunicationInline,
 )
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
+from muckrock.core import autocomplete
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
     CommunicationMoveLog,
@@ -122,11 +122,19 @@ class CommunicationMoveLogInline(admin.TabularInline):
 class FOIACommunicationAdminForm(forms.ModelForm):
     """Form for comm inline"""
 
-    from_user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    from_user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
-    to_user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    to_user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:
@@ -302,8 +310,12 @@ class FOIACommunicationInline(admin.StackedInline):
 class FOIANoteAdminForm(forms.ModelForm):
     """Form for note inline"""
 
-    author = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", label="Author", queryset=User.objects.all()
+    author = forms.ModelChoiceField(
+        label="Author",
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:
@@ -332,21 +344,22 @@ class FOIARequestAdminForm(forms.ModelForm):
     agency = forms.ModelChoiceField(
         queryset=Agency.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Agency?",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Agency?"}
         ),
     )
-    read_collaborators = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    read_collaborators = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
-    edit_collaborators = autocomplete_light.ModelMultipleChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    edit_collaborators = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     email = autocomplete_light.ModelChoiceField(
         "EmailAddressAdminAutocomplete",
@@ -549,8 +562,11 @@ class FOIARequestInline(admin.TabularInline):
 class FOIAComposerAdminForm(forms.ModelForm):
     """Form for the FOIA composer admin"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     organization = autocomplete_light.ModelChoiceField(
         "OrganizationAutocomplete", queryset=Organization.objects.all()
@@ -559,14 +575,7 @@ class FOIAComposerAdminForm(forms.ModelForm):
         queryset=Agency.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="agency-autocomplete",
-            attrs={
-                "data-placeholder": "Agency?",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            url="agency-autocomplete", attrs={"data-placeholder": "Agency?"}
         ),
     )
     parent = autocomplete_light.ModelChoiceField(
@@ -596,8 +605,11 @@ class OutboundRequestAttachmentAdminForm(forms.ModelForm):
     foia = autocomplete_light.ModelChoiceField(
         "FOIARequestAdminAutocomplete", queryset=FOIARequest.objects.all()
     )
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:
@@ -621,8 +633,11 @@ class OutboundComposerAttachmentAdminForm(forms.ModelForm):
     composer = autocomplete_light.ModelChoiceField(
         "FOIAComposerAdminAutocomplete", queryset=FOIAComposer.objects.all()
     )
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:

@@ -10,6 +10,7 @@ import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 
@@ -19,13 +20,15 @@ class ProjectFilterSet(django_filters.FilterSet):
 
     contributors = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
-        widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
+        autocomplete=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
     )
 
     class Meta:

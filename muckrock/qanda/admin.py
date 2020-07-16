@@ -12,14 +12,18 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.qanda.models import Answer, Question
 
 
 class AnswerForm(forms.ModelForm):
     """Form with autocomplete for users"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:
@@ -30,8 +34,11 @@ class AnswerForm(forms.ModelForm):
 class QuestionForm(forms.ModelForm):
     """Form with autocomplete for user and foia"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all()
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
     foia = autocomplete_light.ModelChoiceField(
         "FOIARequestAdminAutocomplete", required=False

@@ -12,14 +12,20 @@ from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.crowdfund import models
 
 
 class CrowdfundPaymentAdminForm(forms.ModelForm):
     """Form for crowdfund payment inline"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", label="User", queryset=User.objects.all(), required=False
+    user = forms.ModelChoiceField(
+        label="User",
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:
@@ -48,8 +54,12 @@ class CrowdfundAdmin(VersionAdmin):
 class RecurringCrowdfundPaymentAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
-    user = autocomplete_light.ModelChoiceField(
-        "UserAutocomplete", queryset=User.objects.all(), required=False
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
     )
 
     class Meta:
