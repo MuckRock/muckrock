@@ -145,9 +145,6 @@ class AgencyAdminForm(forms.ModelForm):
             attrs={"data-placeholder": "Agency?"},
         ),
     )
-    portal = autocomplete_light.ModelChoiceField(
-        "PortalAutocomplete", queryset=Portal.objects.all(), required=False
-    )
 
     class Meta:
         model = Agency
@@ -173,6 +170,7 @@ class AgencyAdmin(VersionAdmin):
     formats = ["xls", "csv"]
     inlines = (AgencyAddressInline, AgencyEmailInline, AgencyPhoneInline)
     save_on_top = True
+    # autocomplete_fields = ["portal"]
     fieldsets = (
         (
             None,

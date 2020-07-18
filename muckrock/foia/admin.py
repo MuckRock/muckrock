@@ -374,16 +374,10 @@ class FOIARequestAdminForm(forms.ModelForm):
     address = autocomplete_light.ModelChoiceField(
         "AddressAdminAutocomplete", queryset=Address.objects.all(), required=False
     )
-    portal = autocomplete_light.ModelChoiceField(
-        "PortalAutocomplete", queryset=Portal.objects.all(), required=False
-    )
     cc_emails = autocomplete_light.ModelMultipleChoiceField(
         "EmailAddressAdminAutocomplete",
         queryset=EmailAddress.objects.all(),
         required=False,
-    )
-    crowdfund = autocomplete_light.ModelChoiceField(
-        "CrowdfundAutocomplete", queryset=Crowdfund.objects.all(), required=False
     )
 
     class Meta:
@@ -405,6 +399,7 @@ class FOIARequestAdmin(VersionAdmin):
     save_on_top = True
     form = FOIARequestAdminForm
     exclude = ["composer"]
+    # autocomplete_fields = ["crowdfund", "portal"]
 
     def get_user(self, obj):
         """Get the user"""
@@ -568,9 +563,6 @@ class FOIAComposerAdminForm(forms.ModelForm):
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
         ),
     )
-    organization = autocomplete_light.ModelChoiceField(
-        "OrganizationAutocomplete", queryset=Organization.objects.all()
-    )
     agencies = forms.ModelMultipleChoiceField(
         queryset=Agency.objects.all(),
         required=False,
@@ -595,6 +587,7 @@ class FOIAComposerAdmin(VersionAdmin):
     prepopulated_fields = {"slug": ("title",)}
     list_display = ("title", "user", "status")
     search_fields = ["title", "requested_docs"]
+    # autocomplete_fields = ["organization"]
     form = FOIAComposerAdminForm
     inlines = [FOIARequestInline]
 
