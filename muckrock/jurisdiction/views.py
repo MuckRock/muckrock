@@ -17,7 +17,11 @@ from rest_framework import viewsets
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.core.views import MRFilterListView, MRSearchFilterListView
+from muckrock.core.views import (
+    MRAutocompleteView,
+    MRFilterListView,
+    MRSearchFilterListView,
+)
 from muckrock.crowdsource.models import Crowdsource
 from muckrock.jurisdiction.filters import ExemptionFilterSet, JurisdictionFilterSet
 from muckrock.jurisdiction.forms import FlagForm
@@ -296,3 +300,26 @@ class ExemptionListView(MRSearchFilterListView):
     filter_class = ExemptionFilterSet
     default_sort = "name"
     sort_map = {"name": "name"}
+
+
+class JurisdictionAutocomplete(MRAutocompleteView):
+    """Autocomplete for jurisdictions"""
+
+    queryset = Jurisdiction.objects.filter(hidden=False).order_by("-level", "name")
+    search_fields = ["name", "abbrev", "parent__abbrev", "aliases"]
+    split_words = "and"
+
+    def get_queryset(self):
+        """Extra filters"""
+        # pylint: disable=attribute-defined-outside-init
+
+        # treat commas as whitespace for splitting
+        self.q = self.q.replace(",", " ")
+
+        queryset = super().get_queryset()
+
+        levels = self.forwarded.get("levels")
+        if levels:
+            queryset = queryset.filter(level__in=levels)
+
+        return queryset

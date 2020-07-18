@@ -36,7 +36,7 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2Multiple(
             url="user-autocomplete",
             attrs={"data-placeholder": "Search authors"},
-            forward=(forward.Constant(True, "authors"),),
+            forward=(forward.Const(True, "authors"),),
         ),
     )
     pub_date = django_filters.DateFromToRangeFilter(

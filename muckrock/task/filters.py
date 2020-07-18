@@ -262,7 +262,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         widget=autocomplete.ModelSelect2Multiple(
             url="user-autocomplete",
             attrs={"data-placeholder": "Search users"},
-            forward=(forward.Constant(True, "tasks"),),
+            forward=(forward.Const(True, "tasks"),),
         ),
     )
 

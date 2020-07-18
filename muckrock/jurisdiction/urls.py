@@ -23,6 +23,11 @@ urlpatterns = [
         name="exemption-detail",
     ),
     url(r"^exemptions/$", views.ExemptionListView.as_view(), name="exemption-list"),
+    url(
+        r"^jurisdiction-autocomplete/$",
+        views.JurisdictionAutocomplete.as_view(),
+        name="jurisdiction-autocomplete",
+    ),
     url(r"^%s/$" % jur_url, views.detail, name="jurisdiction-detail"),
 ]
 

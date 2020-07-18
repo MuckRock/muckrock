@@ -10,9 +10,11 @@ import logging
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import forward
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.forms import OrganizationChoiceField, StripeForm
 from muckrock.organization.models import Organization
@@ -25,8 +27,12 @@ class ProfileSettingsForm(forms.ModelForm):
 
     location = forms.ModelChoiceField(
         required=False,
-        queryset=Jurisdiction.objects.all(),
-        widget=autocomplete_light.ChoiceWidget("JurisdictionLocalAutocomplete"),
+        queryset=Jurisdiction.objects.filter(level="l"),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Search for city or county"},
+            forward=(forward.Const(["l"], "levels"),),
+        ),
     )
 
     class Meta:

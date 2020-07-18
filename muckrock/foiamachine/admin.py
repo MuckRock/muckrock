@@ -5,6 +5,7 @@ Admin display for FOIAMachine models
 # Django
 from django import forms
 from django.contrib import admin
+from django.contrib.auth.models import User
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
@@ -14,12 +15,18 @@ from reversion.admin import VersionAdmin
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
 from muckrock.foiamachine import models
+from muckrock.jurisdiction.models import Jurisdiction
 
 
 class FoiaMachineRequestAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
-    jurisdiction = autocomplete_light.ModelChoiceField("JurisdictionAdminAutocomplete")
+    jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+        ),
+    )
     agency = forms.ModelChoiceField(
         queryset=Agency.objects.filter(status="approved"),
         widget=autocomplete.ModelSelect2(
@@ -29,9 +36,10 @@ class FoiaMachineRequestAdminForm(forms.ModelForm):
         ),
     )
     user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
-        )
+        ),
     )
 
     class Meta:

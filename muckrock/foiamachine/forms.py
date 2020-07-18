@@ -8,9 +8,9 @@ from django import forms
 # Third Party
 import bleach
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.foiamachine.models import (
     STATUS,
     FoiaMachineCommunication,
@@ -27,24 +27,21 @@ class FoiaMachineBulkRequestForm(forms.Form):
     status = forms.ChoiceField(choices=STATUS, required=False)
 
 
-class FoiaMachineRequestForm(autocomplete_light.ModelForm):
-    """The FOIA Machine Request form provides a basis for creating and updating requests."""
+class FoiaMachineRequestForm(forms.ModelForm):
+    """The FOIA Machine Request form provides a basis for creating and
+    updating requests."""
 
     class Meta:
         model = FoiaMachineRequest
         fields = ["title", "status", "request_language", "jurisdiction", "agency"]
-        autocomplete_names = {"jurisdiction": "JurisdictionAutocomplete"}
         widgets = {
             "agency": autocomplete.ModelSelect2(
-                url="agency-autocomplete",
-                attrs={
-                    "data-placeholder": "Search agencies",
-                    "data-minimum-input-length": 0,
-                    "data-html": True,
-                    "data-dropdown-css-class": "select2-dropdown",
-                    "data-width": "100%",
-                },
-            )
+                url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
+            ),
+            "jurisdiction": autocomplete.ModelSelect2(
+                url="jurisdiction-autocomplete",
+                attrs={"data-placeholder": "Search jurisdictions"},
+            ),
         }
         labels = {"request_language": "Request"}
 

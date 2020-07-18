@@ -106,8 +106,11 @@ class JurisdictionAdmin(VersionAdmin):
 class ExemptionAdminForm(forms.ModelForm):
     """Form to include a jurisdiction and contributor autocomplete"""
 
-    jurisdiction = autocomplete_light.ModelChoiceField(
-        "JurisdictionAdminAutocomplete", queryset=Jurisdiction.objects.all()
+    jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+        ),
     )
     contributors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),

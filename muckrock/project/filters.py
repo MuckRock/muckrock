@@ -28,7 +28,7 @@ class ProjectFilterSet(django_filters.FilterSet):
         name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
-        autocomplete=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
+        widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
     )
 
     class Meta:

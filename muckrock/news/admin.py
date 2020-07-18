@@ -40,13 +40,13 @@ class AuthorListFilter(admin.SimpleListFilter):
 class ArticleAdminForm(forms.ModelForm):
     """Form with autocompletes"""
 
-    authors = autocomplete_light.ModelMultipleChoiceField(
+    authors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
         ),
     )
-    editors = autocomplete_light.ModelMultipleChoiceField(
+    editors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(

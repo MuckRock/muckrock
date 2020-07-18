@@ -39,10 +39,12 @@ class StatisticsAdmin(VersionAdmin):
 class ProfileAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
-    location = autocomplete_light.ModelChoiceField(
-        "JurisdictionAdminAutocomplete",
-        queryset=Jurisdiction.objects.all(),
+    location = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+        ),
     )
     agency = forms.ModelChoiceField(
         queryset=Agency.objects.filter(status="approved"),

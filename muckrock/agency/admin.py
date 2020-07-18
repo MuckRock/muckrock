@@ -121,8 +121,11 @@ class AgencyAdminForm(forms.ModelForm):
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
         ),
     )
-    jurisdiction = autocomplete_light.ModelChoiceField(
-        "JurisdictionAdminAutocomplete", queryset=Jurisdiction.objects.all()
+    jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+        ),
     )
     appeal_agency = forms.ModelChoiceField(
         queryset=Agency.objects.all(),

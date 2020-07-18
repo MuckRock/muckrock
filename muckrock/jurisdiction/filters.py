@@ -5,8 +5,10 @@ Filters for jurisdiction Views
 # Third Party
 import django_filters
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import forward
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Exemption, Jurisdiction
 
 LEVELS = (("", "All"), ("f", "Federal"), ("s", "State"), ("l", "Local"))
@@ -19,7 +21,11 @@ class JurisdictionFilterSet(django_filters.FilterSet):
     parent = django_filters.ModelChoiceFilter(
         label="State",
         queryset=Jurisdiction.objects.filter(level="s", hidden=False),
-        widget=autocomplete_light.ChoiceWidget("StateAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Search for state"},
+            forward=(forward.Const(["s"], "levels"),),
+        ),
     )
 
     class Meta:
@@ -33,7 +39,11 @@ class ExemptionFilterSet(django_filters.FilterSet):
     jurisdiction = django_filters.ModelChoiceFilter(
         label="Jurisdiction",
         queryset=Jurisdiction.objects.filter(level__in=("s", "f"), hidden=False),
-        widget=autocomplete_light.ChoiceWidget("FederalStateAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Search for jurisdiction"},
+            forward=(forward.Const(["s", "f"], "levels"),),
+        ),
     )
 
     class Meta:

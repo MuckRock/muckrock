@@ -508,15 +508,17 @@ class NewAgencyTaskViewTests(TestCase):
 
     def test_post_accept(self):
         contact_data = {
-            "name": "Test Agency",
-            "address_street": "1234 Whatever Street",
-            "email": "who.cares@whatever.com",
-            "portal_type": "other",
-            "phone": "",
-            "fax": "",
-            "jurisdiction": self.task.agency.jurisdiction.pk,
+            f"{self.task.pk}-name": "Test Agency",
+            f"{self.task.pk}-address_street": "1234 Whatever Street",
+            f"{self.task.pk}-email": "who.cares@whatever.com",
+            f"{self.task.pk}-portal_type": "other",
+            f"{self.task.pk}-phone": "",
+            f"{self.task.pk}-fax": "",
+            f"{self.task.pk}-jurisdiction": self.task.agency.jurisdiction.pk,
         }
-        form = AgencyForm(contact_data, instance=self.task.agency)
+        form = AgencyForm(
+            contact_data, instance=self.task.agency, prefix=str(self.task.pk)
+        )
         ok_(form.is_valid())
         contact_data.update({"approve": True, "task": self.task.pk})
         self.client.post(self.url, contact_data)
@@ -530,10 +532,10 @@ class NewAgencyTaskViewTests(TestCase):
         self.client.post(
             self.url,
             {
-                "replace": True,
-                "task": self.task.pk,
-                "replace_agency": replacement.pk,
-                "replace_jurisdiction": replacement.jurisdiction.pk,
+                f"replace": True,
+                f"task": self.task.pk,
+                f"{self.task.pk}-replace_agency": replacement.pk,
+                f"{self.task.pk}-replace_jurisdiction": replacement.jurisdiction.pk,
             },
         )
         updated_task = NewAgencyTask.objects.get(pk=self.task.pk)

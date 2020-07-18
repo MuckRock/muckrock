@@ -10,12 +10,13 @@ import logging
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
-from dal import autocomplete, forward
+from dal import forward
 
 # MuckRock
 from muckrock.accounts.models import Notification
 from muckrock.agency.models import Agency
 from muckrock.communication.utils import get_email_or_fax
+from muckrock.core import autocomplete
 from muckrock.core.utils import generate_status_action
 from muckrock.foia.codes import CODE_CHOICES, CODES
 from muckrock.foia.models import STATUS
@@ -302,8 +303,12 @@ class IncomingPortalForm(ResponseTaskForm):
 class ReplaceNewAgencyForm(forms.Form):
     """Form for rejecting and replacing a new agency"""
 
-    replace_jurisdiction = autocomplete_light.ModelChoiceField(
-        "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all()
+    replace_jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Search for jurisdiction"},
+        ),
     )
     replace_agency = forms.ModelChoiceField(
         label="Move this agency's requests to:",
@@ -311,13 +316,7 @@ class ReplaceNewAgencyForm(forms.Form):
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
             forward=(forward.Field("replace_jurisdiction", "jurisdiction"),),
-            attrs={
-                "data-placeholder": "Search agencies",
-                "data-minimum-input-length": 0,
-                "data-html": True,
-                "data-dropdown-css-class": "select2-dropdown",
-                "data-width": "100%",
-            },
+            attrs={"data-placeholder": "Search agencies"},
         ),
     )
 
@@ -327,8 +326,11 @@ class BulkNewAgencyTaskForm(forms.Form):
 
     name = forms.CharField(max_length=255)
     jurisdiction = forms.ModelChoiceField(
-        widget=autocomplete_light.ChoiceWidget("JurisdictionAutocomplete"),
-        queryset=Jurisdiction.objects.all(),
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Search for jurisdiction"},
+        ),
     )
 
 

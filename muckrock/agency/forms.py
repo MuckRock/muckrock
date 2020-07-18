@@ -18,6 +18,7 @@ from muckrock.agency.models import (
     AgencyType,
 )
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
+from muckrock.core import autocomplete
 from muckrock.core.fields import FullEmailField
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES, Portal
@@ -26,8 +27,12 @@ from muckrock.portal.models import PORTAL_TYPES, Portal
 class AgencyForm(forms.ModelForm):
     """A form for an Agency"""
 
-    jurisdiction = autocomplete_light.ModelChoiceField(
-        "JurisdictionAutocomplete", queryset=Jurisdiction.objects.all()
+    jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Search for jurisdiction"},
+        ),
     )
     address_suite = forms.CharField(
         required=False,
