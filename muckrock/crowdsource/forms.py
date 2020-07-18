@@ -14,6 +14,7 @@ from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
+from muckrock.core import autocomplete
 from muckrock.crowdsource.constants import DOCUMENT_URL_RE, PROJECT_URL_RE
 from muckrock.crowdsource.fields import FIELD_DICT
 from muckrock.crowdsource.models import (
@@ -271,10 +272,13 @@ class CrowdsourceDataFormset(CrowdsourceDataFormsetBase):
 class CrowdsourceChoiceForm(forms.Form):
     """Form to choose a crowdsource"""
 
-    crowdsource = autocomplete_light.ModelChoiceField(
-        "CrowdsourceDraftAutocomplete",
+    crowdsource = forms.ModelChoiceField(
         queryset=Crowdsource.objects.none(),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="crowdsource-autocomplete",
+            attrs={"data-placeholder": "Choose an unstarted crowdsource"},
+        ),
     )
 
     def __init__(self, *args, **kwargs):

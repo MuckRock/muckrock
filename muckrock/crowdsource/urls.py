@@ -54,4 +54,9 @@ urlpatterns = [
         views.CrowdsourceRevertResponseView.as_view(),
         name="crowdsource-revert-response",
     ),
+    url(
+        r"^crowdsource-autocomplete/$",
+        views.CrowdsourceAutocomplete.as_view(),
+        name="crowdsource-autocomplete",
+    ),
 ]

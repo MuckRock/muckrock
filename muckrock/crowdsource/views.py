@@ -34,7 +34,11 @@ from ipware import get_client_ip
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
-from muckrock.core.views import MRFilterListView, class_view_decorator
+from muckrock.core.views import (
+    MRAutocompleteView,
+    MRFilterListView,
+    class_view_decorator,
+)
 from muckrock.crowdsource.filters import CrowdsourceFilterSet
 from muckrock.crowdsource.forms import (
     CrowdsourceAssignmentForm,
@@ -692,3 +696,13 @@ def message_response(request):
         return JsonResponse({"status": "ok"})
     else:
         return JsonResponse({"error": "form invalid"}, status=400)
+
+
+class CrowdsourceAutocomplete(MRAutocompleteView):
+    """Autocomplete for assignments"""
+
+    search_fields = ["title", "description"]
+
+    def get_queryset(self):
+        """Extra filters"""
+        return Crowdsource.objects.filter(status="draft", user=self.request.user)
