@@ -37,4 +37,9 @@ urlpatterns = [
         views.ProjectCrowdfundView.as_view(),
         name="project-crowdfund",
     ),
+    url(
+        r"^project-autocomplete/$",
+        views.ProjectAutocomplete.as_view(),
+        name="project-autocomplete",
+    ),
 ]

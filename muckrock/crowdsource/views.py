@@ -701,8 +701,10 @@ def message_response(request):
 class CrowdsourceAutocomplete(MRAutocompleteView):
     """Autocomplete for assignments"""
 
+    model = Crowdsource
     search_fields = ["title", "description"]
 
     def get_queryset(self):
-        """Extra filters"""
-        return Crowdsource.objects.filter(status="draft", user=self.request.user)
+        """Only show drafts by the current user"""
+        queryset = super().get_queryset()
+        return queryset.filter(status="draft", user=self.request.user)

@@ -75,10 +75,12 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
             url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
-    projects = AutocompleteModelMultipleChoiceFilter(
+    projects = django_filters.ModelMultipleChoiceFilter(
         name="projects",
         queryset=lambda request: Project.objects.get_visible(request.user),
-        autocomplete="ProjectAutocomplete",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="project-autocomplete", attrs={"data-placeholder": "Search projects"}
+        ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         name="tags__name",

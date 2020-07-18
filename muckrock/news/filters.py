@@ -20,12 +20,15 @@ from muckrock.tags.models import Tag
 
 
 class ArticleDateRangeFilterSet(django_filters.FilterSet):
-    """Allows a list of news items to be filtered by a date range, an author, or many tags."""
+    """Allows a list of news items to be filtered by a date range, an author, or many
+    tags."""
 
     projects = django_filters.ModelMultipleChoiceFilter(
         name="projects",
-        queryset=Project.objects.get_public(),
-        widget=autocomplete_light.MultipleChoiceWidget("ProjectAutocomplete"),
+        queryset=lambda request: Project.objects.get_visible(request.user),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="project-autocomplete", attrs={"data-placeholder": "Search projects"}
+        ),
     )
     authors = django_filters.ModelMultipleChoiceFilter(
         queryset=(

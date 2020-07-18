@@ -8,6 +8,7 @@ from django import forms
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
+from dal import forward
 
 # MuckRock
 from muckrock.core import autocomplete
@@ -89,8 +90,10 @@ class ProjectManagerForm(forms.Form):
     projects = forms.ModelMultipleChoiceField(
         required=False,
         queryset=Project.objects.none(),
-        widget=autocomplete_light.MultipleChoiceWidget(
-            "ProjectManagerAutocomplete", attrs={"placeholder": "Search for a project"}
+        widget=autocomplete.ModelSelect2Multiple(
+            url="project-autocomplete",
+            attrs={"placeholder": "Search for a project"},
+            forward=(forward.Const(True, "manager"),),
         ),
     )
 

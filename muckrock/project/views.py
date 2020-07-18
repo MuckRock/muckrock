@@ -28,7 +28,7 @@ from actstream.models import followers
 # MuckRock
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.core.utils import new_action
-from muckrock.core.views import MRSearchFilterListView
+from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
 from muckrock.crowdfund.forms import CrowdfundForm
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.message.tasks import notify_project_contributor
@@ -365,3 +365,23 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         if extra_data is not None:
             data.update(extra_data)
         return data
+
+
+class ProjectAutocomplete(MRAutocompleteView):
+    """Autocomplete for projects"""
+
+    model = Project
+    search_fields = ["title", "summary"]
+    template = "autocomplete/project.html"
+
+    def get_queryset(self):
+
+        queryset = super().get_queryset()
+
+        manager = self.forwarded.get("manager")
+        if manager:
+            queryset = queryset.get_manager(self.request.user)
+        else:
+            queryset = queryset.get_visible(self.request.user)
+
+        return queryset

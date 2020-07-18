@@ -32,8 +32,12 @@ class CrowdsourceAdminForm(forms.ModelForm):
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
         ),
     )
-    project = autocomplete_light.ModelChoiceField(
-        "ProjectAutocomplete", queryset=Project.objects.all(), required=False
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="project-autocomplete", attrs={"data-placeholder": "Project?"}
+        ),
     )
     submission_emails = autocomplete_light.ModelMultipleChoiceField(
         "EmailAddressAdminAutocomplete",

@@ -11,6 +11,7 @@ import json
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
+from dal import forward
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
@@ -23,6 +24,7 @@ from muckrock.crowdsource.models import (
     CrowdsourceResponse,
 )
 from muckrock.crowdsource.tasks import datum_per_page, import_doccloud_proj
+from muckrock.project.models import Project
 
 
 class CrowdsourceAssignmentForm(forms.Form):
@@ -145,8 +147,14 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
 
     prefix = "crowdsource"
 
-    project = autocomplete_light.ModelChoiceField(
-        "ProjectManagerAutocomplete", required=False
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.none(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="project-autocomplete",
+            attrs={"data-placeholder": "Search projects"},
+            forward=(forward.Const(True, "manager"),),
+        ),
     )
     form_json = forms.CharField(widget=forms.HiddenInput(), initial="[]")
     submission_emails = forms.CharField(
@@ -179,6 +187,7 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
         self.fields["data_csv"].required = False
         if not user.profile.is_advanced:
             del self.fields["registration"]
+        self.fields["project"].queryset = Project.objects.get_manager(user)
 
     def clean_form_json(self):
         """Ensure the form JSON is in the correct format"""
