@@ -7,18 +7,18 @@ from django.db.models import Count
 from django.views.generic import DetailView, TemplateView
 
 # MuckRock
+from muckrock.core.views import MRAutocompleteView
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.qanda.models import Question
 from muckrock.tags.forms import TagForm
-
-from . import models
+from muckrock.tags.models import Tag
 
 
 def list_all_tags():
     """Should list all tags that exist and that have at least one object"""
-    tags = models.Tag.objects.all()
+    tags = Tag.objects.all()
     tags = tags.annotate(num_times=Count("tags_taggeditembase_items"))
     tags = tags.exclude(num_times=0)
     return tags
@@ -41,7 +41,7 @@ class TagListView(TemplateView):
 class TagDetailView(DetailView):
     """Presents the details of a tag"""
 
-    model = models.Tag
+    model = Tag
     template_name = "tags/tag_list.html"
     max_per_type = 5
 
@@ -84,3 +84,12 @@ class TagDetailView(DetailView):
             Question.objects.filter(tags__name__in=[this_tag]),
         )
         return context
+
+
+class TagAutocomplete(MRAutocompleteView):
+    """Autocomplete for jurisdictions"""
+
+    queryset = Tag.objects.annotate(num=Count("tags_taggeditembase_items")).exclude(
+        num=0
+    )
+    search_fields = ["name"]

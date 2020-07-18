@@ -86,7 +86,9 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
-        widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
+        ),
     )
     has_embargo = django_filters.BooleanFilter(
         name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
