@@ -1,7 +1,13 @@
 """Customized autocomplete widgets"""
 
+# Standard Library
+import re
+
 # Third Party
 from dal import autocomplete
+
+# MuckRock
+from muckrock.jurisdiction.models import Jurisdiction
 
 
 class MRSelect2Mixin:
@@ -23,3 +29,22 @@ class ModelSelect2(MRSelect2Mixin, autocomplete.ModelSelect2):
 
 class ModelSelect2Multiple(MRSelect2Mixin, autocomplete.ModelSelect2Multiple):
     """MuckRock Model Select2"""
+
+
+class Select2MultipleSI(MRSelect2Mixin, autocomplete.Select2Multiple):
+    """MuckRock Select2 for state inclusive jurisdiction autocomplete"""
+
+    value_format = re.compile(r"\d+-(True|False)")
+
+    def filter_choices_to_render(self, selected_choices):
+        """Replace self.choices with selected_choices."""
+        self.choices = []
+        for choice in selected_choices:
+            if not self.value_format.match(choice):
+                continue
+            pk, include_local = choice.split("-")
+            jurisdiction = Jurisdiction.objects.get(pk=pk)
+            label = str(jurisdiction)
+            if include_local == "True":
+                label += " (include local)"
+            self.choices.append((choice, label))

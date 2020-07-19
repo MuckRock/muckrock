@@ -32,8 +32,9 @@ class JurisdictionFilterSet(django_filters.FilterSet):
     """Mix in for including state inclusive jurisdiction filter"""
 
     jurisdiction = django_filters.CharFilter(
-        widget=autocomplete_light.MultipleChoiceWidget(
-            "JurisdictionStateInclusiveAutocomplete"
+        widget=autocomplete.Select2MultipleSI(
+            url="jurisdiction-state-inclusive-autocomplete",
+            attrs={"data-placeholder": "Search jurisdictions", "data-html": True},
         ),
         method="filter_jurisdiction",
         label="Jurisdiction",
@@ -41,7 +42,7 @@ class JurisdictionFilterSet(django_filters.FilterSet):
     value_format = re.compile(r"\d+-(True|False)")
     jurisdiction_field = "agency__jurisdiction"
 
-    def filter_jurisdiction(self, queryset, name, value):
+    def filter_jurisdiction(self, queryset, name, _value):
         """Filter jurisdction, allowing for state inclusive searches"""
         # pylint: disable=unused-argument
         values = self.request.GET.getlist("jurisdiction")

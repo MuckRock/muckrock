@@ -6,6 +6,8 @@ Views for the Jurisdiction application
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Count, Q, Sum
+from django.db.models.expressions import Value
+from django.db.models.fields import BooleanField
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -323,3 +325,37 @@ class JurisdictionAutocomplete(MRAutocompleteView):
             queryset = queryset.filter(level__in=levels)
 
         return queryset
+
+
+class JurisdictionStateInclusiveAutocomplete(JurisdictionAutocomplete):
+    """Autocomplete containing state selections which include their localities"""
+
+    template = "autocomplete/jurisdiction_inclusive.html"
+
+    def get_result_value(self, result):
+        """Value also must indicate if we are including localaties"""
+        return f"{result.pk}-{result.include_local}"
+
+    def get_queryset(self):
+        """Union in state options with include local set to True"""
+
+        queryset = super().get_queryset()
+
+        queryset = (
+            queryset.annotate(include_local=Value(False, output_field=BooleanField()))
+            .union(
+                queryset.filter(level="s").annotate(
+                    include_local=Value(True, output_field=BooleanField())
+                )
+            )
+            .order_by("-level", "name")
+        )
+
+        return queryset
+
+    def get_selected_result_label(self, result):
+        """Just text for selected result"""
+        label = str(result)
+        if result.include_local:
+            label += " (include local)"
+        return label

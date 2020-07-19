@@ -28,6 +28,11 @@ urlpatterns = [
         views.JurisdictionAutocomplete.as_view(),
         name="jurisdiction-autocomplete",
     ),
+    url(
+        r"^jurisdiction-state-inclusive-autocomplete/$",
+        views.JurisdictionStateInclusiveAutocomplete.as_view(),
+        name="jurisdiction-state-inclusive-autocomplete",
+    ),
     url(r"^%s/$" % jur_url, views.detail, name="jurisdiction-detail"),
 ]
 
