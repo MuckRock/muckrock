@@ -570,11 +570,6 @@ class FOIAComposerAdminForm(forms.ModelForm):
             url="agency-autocomplete", attrs={"data-placeholder": "Agency?"}
         ),
     )
-    parent = autocomplete_light.ModelChoiceField(
-        "FOIAComposerAdminAutocomplete",
-        queryset=FOIAComposer.objects.all(),
-        required=False,
-    )
 
     class Meta:
         model = FOIAComposer
@@ -587,7 +582,7 @@ class FOIAComposerAdmin(VersionAdmin):
     prepopulated_fields = {"slug": ("title",)}
     list_display = ("title", "user", "status")
     search_fields = ["title", "requested_docs"]
-    # autocomplete_fields = ["organization"]
+    # autocomplete_fields = ["organization", "parent"]
     form = FOIAComposerAdminForm
     inlines = [FOIARequestInline]
 
@@ -595,8 +590,11 @@ class FOIAComposerAdmin(VersionAdmin):
 class OutboundRequestAttachmentAdminForm(forms.ModelForm):
     """Form for outbound attachment admin"""
 
-    foia = autocomplete_light.ModelChoiceField(
-        "FOIARequestAdminAutocomplete", queryset=FOIARequest.objects.all()
+    foia = forms.ModelChoiceField(
+        queryset=FOIARequest.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+        ),
     )
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
@@ -623,9 +621,6 @@ class OutboundRequestAttachmentAdmin(VersionAdmin):
 class OutboundComposerAttachmentAdminForm(forms.ModelForm):
     """Form for outbound attachment admin"""
 
-    composer = autocomplete_light.ModelChoiceField(
-        "FOIAComposerAdminAutocomplete", queryset=FOIAComposer.objects.all()
-    )
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
@@ -645,6 +640,7 @@ class OutboundComposerAttachmentAdmin(VersionAdmin):
     list_display = ("composer", "user", "ffile", "date_time_stamp")
     list_select_related = ("composer", "user")
     date_hierarchy = "date_time_stamp"
+    # autocomplete_fields = ["composer"]
     form = OutboundComposerAttachmentAdminForm
 
 

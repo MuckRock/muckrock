@@ -13,6 +13,7 @@ from reversion.admin import VersionAdmin
 
 # MuckRock
 from muckrock.core import autocomplete
+from muckrock.foia.models import FOIARequest
 from muckrock.qanda.models import Answer, Question
 
 
@@ -40,8 +41,12 @@ class QuestionForm(forms.ModelForm):
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
         ),
     )
-    foia = autocomplete_light.ModelChoiceField(
-        "FOIARequestAdminAutocomplete", required=False
+    foia = forms.ModelChoiceField(
+        queryset=FOIARequest.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+        ),
     )
 
     class Meta:

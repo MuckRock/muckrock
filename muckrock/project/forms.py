@@ -65,8 +65,9 @@ class ProjectUpdateForm(forms.ModelForm):
             "contributors": autocomplete.ModelSelect2Multiple(
                 url="user-autocomplete", attrs={"data-placeholder": "Search for users"}
             ),
-            "requests": autocomplete_light.MultipleChoiceWidget(
-                "FOIARequestAutocomplete"
+            "requests": autocomplete.ModelSelect2Multiple(
+                url="foia-request-autocomplete",
+                attrs={"data-placeholder": "Search for requests"},
             ),
             "articles": autocomplete.ModelSelect2Multiple(
                 url="article-autocomplete",

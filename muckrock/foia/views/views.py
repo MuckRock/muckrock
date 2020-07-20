@@ -8,6 +8,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 # MuckRock
+from muckrock.core.views import MRAutocompleteView
 from muckrock.foia.codes import CODES
 from muckrock.foia.models import STATUS, FOIACommunication, FOIARequest
 
@@ -57,3 +58,26 @@ def raw(request, idx):
         )
     else:
         raise Http404
+
+
+class FOIARequestAutocomplete(MRAutocompleteView):
+    """Autocomplete for FOIA requests"""
+
+    queryset = FOIARequest.objects.select_related("agency__jurisdiction")
+    search_fields = [
+        "title",
+        "pk",
+        "agency__jurisdiction__name",
+        "=agency__jurisdiction__abbrev",
+        "=agency__jurisdiction__parent__abbrev",
+    ]
+    template = "autocomplete/foia.html"
+    split_words = "and"
+
+    def get_queryset(self):
+        """Only show users requests they are allowed to see"""
+
+        queryset = super().get_queryset()
+        queryset = queryset.get_viewable(self.request.user)
+
+        return queryset

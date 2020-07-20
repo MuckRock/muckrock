@@ -20,6 +20,7 @@ from reversion.admin import VersionAdmin
 
 # MuckRock
 from muckrock.core import autocomplete
+from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import CSVImportForm
 from muckrock.jurisdiction.models import (
     ExampleAppeal,
@@ -52,7 +53,12 @@ class ExampleAppealInline(admin.TabularInline):
 class InvokedExemptionAdminForm(forms.ModelForm):
     """Adds an autocomplete to the invoked exemption request field."""
 
-    request = autocomplete_light.ModelChoiceField("FOIARequestAdminAutocomplete")
+    request = forms.ModelChoiceField(
+        queryset=FOIARequest.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+        ),
+    )
 
     class Meta:
         model = InvokedExemption

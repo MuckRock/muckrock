@@ -67,6 +67,11 @@ urlpatterns = [
     # Misc Views
     url(r"^acronyms/$", views.acronyms, name="foia-acronyms"),
     url(r"^raw_email/(?P<idx>\d+)/$", views.raw, name="foia-raw"),
+    url(
+        r"^foiarequest-autocomplete/$",
+        views.FOIARequestAutocomplete.as_view(),
+        name="foia-request-autocomplete",
+    ),
     # Feeds
     url(
         r"^feeds/submitted/$",

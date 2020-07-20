@@ -21,10 +21,12 @@ from muckrock.project.models import Project
 class ProjectAdminForm(forms.ModelForm):
     """Form to include autocomplete fields"""
 
-    requests = autocomplete_light.ModelMultipleChoiceField(
-        "FOIARequestAdminAutocomplete",
+    requests = forms.ModelMultipleChoiceField(
         queryset=FOIARequest.objects.all(),
         required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+        ),
     )
     contributors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
