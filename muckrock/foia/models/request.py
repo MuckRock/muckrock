@@ -43,7 +43,7 @@ from muckrock.core.utils import (
     get_s3_storage_bucket,
 )
 from muckrock.foia.querysets import FOIARequestQuerySet
-from muckrock.tags.models import Tag, TaggedItemBase, parse_tags
+from muckrock.tags.models import Tag, TaggedItemBase, normalize
 
 logger = logging.getLogger(__name__)
 
@@ -1000,8 +1000,8 @@ class FOIARequest(models.Model):
     def update_tags(self, tags):
         """Update the requests tags"""
         tag_set = set()
-        for tag in parse_tags(tags):
-            new_tag, _ = Tag.objects.get_or_create(name=tag)
+        for tag in tags:
+            new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 

@@ -32,7 +32,7 @@ class TagListView(TemplateView):
     def get_context_data(self, **kwargs):
         """Adds all tags to context data"""
         context = super(TagListView, self).get_context_data(**kwargs)
-        context["tags"] = list_all_tags()
+        context["tags_length"] = list_all_tags().count()
         context["popular_tags"] = list_all_tags().order_by("-num_times")[:10]
         context["form"] = TagForm()
         return context
@@ -54,7 +54,7 @@ class TagDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """Adds all tags to context data"""
         context = super(TagDetailView, self).get_context_data(**kwargs)
-        context["tags"] = list_all_tags()
+        context["tags_length"] = list_all_tags().count()
         context["form"] = TagForm()
         user = self.request.user
         this_tag = self.get_object()
@@ -93,3 +93,10 @@ class TagAutocomplete(MRAutocompleteView):
         num=0
     )
     search_fields = ["name"]
+
+    def get_result_value(self, result):
+        """Optionally use the slug as the value"""
+        if "slug" in self.forwarded:
+            return result.slug
+        else:
+            return result.pk

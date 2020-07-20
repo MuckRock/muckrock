@@ -352,7 +352,7 @@ class Detail(DetailView):
     def _tags(self, request, foia):
         """Handle updating tags"""
         if foia.has_perm(request.user, "change"):
-            foia.update_tags(request.POST.get("tags"))
+            foia.update_tags(request.POST.getlist("tags"))
         return redirect(foia.get_absolute_url() + "#")
 
     def _projects(self, request, foia):

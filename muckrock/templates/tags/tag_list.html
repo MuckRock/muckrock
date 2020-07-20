@@ -7,7 +7,7 @@
 {% cache cache_timeout tag_detail tag.pk request.user.pk %}
 <div class="tag-list master-detail">
     <section class="master">
-        <h1>{{ tags|length }} Tag{{ tags|length|pluralize }}</h1>
+        <h1>{{ tags_length }} Tag{{ tags_length|pluralize }}</h1>
         <div id="tags">
             <form>
                 {% include 'lib/pattern/form.html' %}

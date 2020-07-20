@@ -9,6 +9,8 @@ from django import forms
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from dal import forward
+from dal.autocomplete import TaggitSelect2
+from taggit.forms import TagField
 
 # MuckRock
 from muckrock.core import autocomplete
@@ -18,13 +20,10 @@ from muckrock.project.models import Project
 class ProjectCreateForm(forms.ModelForm):
     """Form for the basic fields of a project."""
 
-    tags = TaggitField(
-        widget=TaggitWidget(
-            "TagAutocomplete",
-            attrs={
-                "placeholder": "Search tags",
-                "data-autocomplete-minimum-characters": 1,
-            },
+    tags = TagField(
+        widget=TaggitSelect2(
+            url="tag-autocomplete",
+            attrs={"data-placeholder": "Search tags", "data-width": "100%"},
         ),
         help_text="Separate tags with commas.",
         required=False,
@@ -42,8 +41,11 @@ class ProjectCreateForm(forms.ModelForm):
 class ProjectUpdateForm(forms.ModelForm):
     """Form for updating a project instance"""
 
-    tags = TaggitField(
-        widget=TaggitWidget("TagAutocomplete", attrs={"placeholder": "Search tags"}),
+    tags = TagField(
+        widget=TaggitSelect2(
+            url="tag-autocomplete",
+            attrs={"data-placeholder": "Search tags", "data-width": "100%"},
+        ),
         help_text="Separate tags with commas.",
         required=False,
     )

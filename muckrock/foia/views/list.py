@@ -399,9 +399,9 @@ class MyRequestList(RequestList):
         """Add tags to the selected requests"""
         foias = [f for f in foias if f.has_perm(user, "change")]
         tags = [
-            Tag.objects.get_or_create(name=t) for t in parse_tags(post.get("tags", ""))
+            Tag.objects.get_or_create(name=normalize(t)) for t in post.getlist("tags")
         ]
-        tags = [t for t, _ in tags]
+        tags = set([t for t, _ in tags])
         for foia in foias:
             foia.tags.add(*tags)
         return "Tags added to requests"

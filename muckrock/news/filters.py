@@ -51,7 +51,9 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
         name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
-        widget=autocomplete_light.MultipleChoiceWidget("TagAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
+        ),
     )
 
     class Meta:

@@ -6,12 +6,23 @@ Forms for Tag application
 from django import forms
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
+from dal import forward
+
+# MuckRock
+from muckrock.core import autocomplete
+from muckrock.tags.models import Tag
 
 
 class TagForm(forms.Form):
     """This form allows the selection of a tag"""
 
-    tag_select = autocomplete_light.ModelChoiceField(
-        "TagSlugAutocomplete", label=" ", required=False
+    tag_select = forms.ModelChoiceField(
+        queryset=Tag.objects.all(),
+        label=" ",
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="tag-autocomplete",
+            attrs={"data-placeholder": "Search tags"},
+            forward=(forward.Const(True, "slug"),),
+        ),
     )

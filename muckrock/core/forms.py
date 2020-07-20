@@ -12,7 +12,8 @@ import six
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
 from autocomplete_light.widgets import TextWidget
-from dal import autocomplete
+from dal.autocomplete import TaggitSelect2
+from taggit.forms import TagField
 from taggit.utils import edit_string_for_tags
 
 # MuckRock
@@ -32,11 +33,8 @@ class TaggitWidget(TextWidget):
 class TagManagerForm(forms.Form):
     """A form with an autocomplete input for tags"""
 
-    tags = TaggitField(
-        widget=TaggitWidget(
-            "TagAutocomplete",
-            attrs={"placeholder": "Tags", "data-autocomplete-minimum-characters": 1},
-        )
+    tags = TagField(
+        widget=TaggitSelect2(url="tag-autocomplete", attrs={"data-placeholder": "Tags"})
     )
 
     def __init__(self, *args, **kwargs):

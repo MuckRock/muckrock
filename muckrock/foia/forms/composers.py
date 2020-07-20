@@ -9,7 +9,9 @@ from django.contrib.auth.models import User
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
+from dal.autocomplete import TaggitSelect2
 from requests.exceptions import HTTPError
+from taggit.forms import TagField
 
 # MuckRock
 from muckrock.accounts.forms import BuyRequestForm
@@ -60,13 +62,10 @@ class BaseComposerForm(forms.ModelForm):
         "You may change this whenever you want.",
     )
     permanent_embargo = forms.BooleanField(required=False)
-    tags = TaggitField(
-        widget=TaggitWidget(
-            "TagAutocomplete",
-            attrs={
-                "placeholder": "Search tags",
-                "data-autocomplete-minimum-characters": 1,
-            },
+    tags = TagField(
+        widget=TaggitSelect2(
+            url="tag-autocomplete",
+            attrs={"data-placeholder": "Search tags", "data-width": "100%"},
         ),
         help_text="Separate tags with commas.",
         required=False,
