@@ -630,8 +630,8 @@ Sincerely,
                   <form class="modify-access" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="user" value="{{ user.id }}" />
-                    <button class="small basic button" type="submit" name="action" value="demote">Demote</button>
-                    <button class="small basic red button" type="submit" name="action" value="revoke_access">Revoke</button>
+                    <button class="button" type="submit" name="action" value="demote">Demote</button>
+                    <button class="red button" type="submit" name="action" value="revoke_access">Revoke</button>
                   </form>
                 </td>
               </tr>
