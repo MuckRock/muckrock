@@ -371,9 +371,6 @@ class FOIARequestAdminForm(forms.ModelForm):
         queryset=PhoneNumber.objects.filter(type="fax"),
         required=False,
     )
-    address = autocomplete_light.ModelChoiceField(
-        "AddressAdminAutocomplete", queryset=Address.objects.all(), required=False
-    )
     cc_emails = autocomplete_light.ModelMultipleChoiceField(
         "EmailAddressAdminAutocomplete",
         queryset=EmailAddress.objects.all(),
@@ -398,6 +395,7 @@ class FOIARequestAdmin(VersionAdmin):
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
+    # autocomplete_fields = ["address"]
     exclude = ["composer"]
     # autocomplete_fields = ["crowdfund", "portal"]
 

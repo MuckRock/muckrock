@@ -50,24 +50,12 @@ class AgencyTypeAdmin(VersionAdmin):
     search_fields = ["name"]
 
 
-class AgencyAddressAdminForm(forms.ModelForm):
-    """AgencyAddress Inline admin form"""
-
-    address = autocomplete_light.ModelChoiceField(
-        "AddressAdminAutocomplete", queryset=Address.objects.all()
-    )
-
-    class Meta:
-        model = AgencyAddress
-        fields = "__all__"
-
-
 class AgencyAddressInline(admin.TabularInline):
     """Inline for agency's addresses"""
 
     model = AgencyAddress
-    form = AgencyAddressAdminForm
     show_change_link = True
+    # autocomplete_fields = ["address"]
     extra = 1
 
 
