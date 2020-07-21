@@ -13,6 +13,7 @@ from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, PhoneNumber
+from muckrock.core import autocomplete
 from muckrock.core.fields import EmptyLastModelChoiceField
 from muckrock.core.forms import TaggitWidget
 from muckrock.foia.models import FOIACommunication
@@ -112,10 +113,16 @@ class SendViaForm(forms.Form):
 class SendCommunicationForm(SendViaForm):
     """Form for sending individual communications"""
 
-    email = autocomplete_light.ModelChoiceField(
-        "EmailAddressAutocomplete",
+    email = forms.ModelChoiceField(
         queryset=EmailAddress.objects.filter(status="good"),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="email-autocomplete",
+            attrs={
+                "data-placeholder": "Search for an email address",
+                "data-html": False,
+            },
+        ),
     )
     fax = autocomplete_light.ModelChoiceField(
         "FaxAutocomplete",
@@ -143,21 +150,10 @@ class SendCommunicationForm(SendViaForm):
 
         cleaned_data = super(SendCommunicationForm, self).clean()
         if cleaned_data.get("via") == "email" and not cleaned_data.get("email"):
-            self._clean_email(cleaned_data)
+            self.add_error("email", "An email address is required if sending via email")
         elif cleaned_data.get("via") == "fax" and not cleaned_data.get("fax"):
             self._clean_fax(cleaned_data)
         return cleaned_data
-
-    def _clean_email(self, cleaned_data):
-        """Attempt to clean the email during full form clean"""
-        if cleaned_data["email-autocomplete"]:
-            email = EmailAddress.objects.fetch(cleaned_data["email-autocomplete"])
-            if email:
-                cleaned_data["email"] = email
-            else:
-                self.add_error("email", "Invalid email address")
-        else:
-            self.add_error("email", "An email address is required if sending via email")
 
     def _clean_fax(self, cleaned_data):
         """Attempt to clean the fax during full form clean"""
@@ -182,11 +178,17 @@ class FOIAAdminFixForm(SendCommunicationForm):
     """Form with extra options for staff to follow up to requests"""
 
     from_user = forms.ModelChoiceField(label="From", queryset=User.objects.none())
-    other_emails = forms.CharField(
+    other_emails = forms.ModelMultipleChoiceField(
         label="CC",
+        queryset=EmailAddress.objects.filter(status="good"),
         required=False,
-        help_text="Comma seperated",
-        widget=TaggitWidget("EmailAddressAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="email-autocomplete",
+            attrs={
+                "data-placeholder": "Search for an email address",
+                "data-html": False,
+            },
+        ),
     )
     subject = forms.CharField(max_length=255)
     comm = forms.CharField(label="Body", widget=forms.Textarea())
@@ -210,12 +212,6 @@ class FOIAAdminFixForm(SendCommunicationForm):
             pk__in=[muckrock_staff.pk, request.user.pk, self.foia.user.pk]
         )
         self.fields["from_user"].initial = request.user.pk
-
-    def clean_other_emails(self):
-        """Validate the other_emails field"""
-        return EmailAddress.objects.fetch_many(
-            self.cleaned_data["other_emails"], ignore_errors=False
-        )
 
 
 class ResendForm(SendCommunicationForm):

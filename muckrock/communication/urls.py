@@ -20,4 +20,9 @@ urlpatterns = [
         name="phone-detail",
     ),
     url(r"checks/$", views.CheckListView.as_view(), name="check-list"),
+    url(
+        r"^email-autocomplete/$",
+        views.EmailAutocomplete.as_view(),
+        name="email-autocomplete",
+    ),
 ]

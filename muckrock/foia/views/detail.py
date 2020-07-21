@@ -115,7 +115,7 @@ class Detail(DetailView):
             foia=self.get_object(),
             initial={
                 "subject": foia.default_subject(),
-                "other_emails": foia.get_other_emails(),
+                "other_emails": foia.cc_emails.all(),
             },
         )
         self.resend_form = ResendForm()

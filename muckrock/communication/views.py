@@ -3,7 +3,9 @@ Views for the communication app
 """
 
 # Django
+from django import http
 from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models.aggregates import Sum
 from django.db.models.query import Prefetch
 from django.urls import reverse
@@ -21,7 +23,11 @@ from muckrock.communication.models import (
     FaxError,
     PhoneNumber,
 )
-from muckrock.core.views import MRFilterListView, class_view_decorator
+from muckrock.core.views import (
+    MRAutocompleteView,
+    MRFilterListView,
+    class_view_decorator,
+)
 
 
 class EmailDetailView(DetailView):
@@ -101,3 +107,47 @@ class CheckListView(MRFilterListView):
             total=Sum("amount")
         )["total"]
         return context
+
+
+class EmailAutocomplete(MRAutocompleteView):
+    """Autocomplete for emails"""
+
+    queryset = EmailAddress.objects.filter(status="good").order_by("email")
+    search_fields = ["email", "name"]
+    create_field = "email"
+
+    def has_add_permission(self, request):
+        """Staff only"""
+        return request.user.is_staff
+
+    def create_object(self, text):
+        """Use email address fetch to create the object"""
+        return EmailAddress.objects.fetch(text)
+
+    def post(self, request):
+        """Create an object given a text after checking permissions.
+
+        This is mostly the same as the parent class, but needs to be overriden
+        to handle the case that the creation fails.
+        """
+        if not self.has_add_permission(request):
+            return http.HttpResponseForbidden()
+
+        if not self.create_field:
+            raise ImproperlyConfigured('Missing "create_field"')
+
+        text = request.POST.get("text", None)
+
+        if text is None:
+            return http.HttpResponseBadRequest()
+
+        result = self.create_object(text)
+
+        if result is None:
+            return http.JsonResponse(
+                {"id": -1, "text": f'"{text}" is not a valid email'}
+            )
+
+        return http.JsonResponse(
+            {"id": result.pk, "text": self.get_result_label(result)}
+        )

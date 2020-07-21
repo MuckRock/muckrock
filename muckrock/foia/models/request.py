@@ -349,10 +349,6 @@ class FOIARequest(models.Model):
             self.set_mail_id()
         return "%s@%s" % (self.mail_id, settings.MAILGUN_SERVER_NAME)
 
-    def get_other_emails(self):
-        """Get the other emails for this request as a comma seperated string"""
-        return ", ".join(str(e) for e in self.cc_emails.all())
-
     def get_to_user(self):
         """Who communications are to"""
         return self.agency.get_user()
