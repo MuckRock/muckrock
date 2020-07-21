@@ -344,37 +344,54 @@ class FOIARequestAdminForm(forms.ModelForm):
     agency = forms.ModelChoiceField(
         queryset=Agency.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="agency-autocomplete", attrs={"data-placeholder": "Agency?"}
+            url="agency-autocomplete",
+            attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
     read_collaborators = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     edit_collaborators = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
-    email = autocomplete_light.ModelChoiceField(
-        "EmailAddressAdminAutocomplete",
+    email = forms.ModelChoiceField(
         queryset=EmailAddress.objects.all(),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="email-autocomplete",
+            attrs={
+                "data-placeholder": "Email?",
+                "data-width": None,
+                "data-html": False,
+            },
+        ),
     )
     fax = autocomplete_light.ModelChoiceField(
         "FaxAdminAutocomplete",
         queryset=PhoneNumber.objects.filter(type="fax"),
         required=False,
     )
-    cc_emails = autocomplete_light.ModelMultipleChoiceField(
-        "EmailAddressAdminAutocomplete",
+    cc_emails = forms.ModelMultipleChoiceField(
         queryset=EmailAddress.objects.all(),
         required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="email-autocomplete",
+            attrs={
+                "data-placeholder": "Emails?",
+                "data-width": None,
+                "data-html": False,
+            },
+        ),
     )
 
     class Meta:

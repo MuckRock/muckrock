@@ -39,10 +39,17 @@ class CrowdsourceAdminForm(forms.ModelForm):
             url="project-autocomplete", attrs={"data-placeholder": "Project?"}
         ),
     )
-    submission_emails = autocomplete_light.ModelMultipleChoiceField(
-        "EmailAddressAdminAutocomplete",
+    submission_emails = forms.ModelMultipleChoiceField(
         queryset=EmailAddress.objects.all(),
         required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="email-autocomplete",
+            attrs={
+                "data-placeholder": "Emails?",
+                "data-width": None,
+                "data-html": False,
+            },
+        ),
     )
 
     class Meta:

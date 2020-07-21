@@ -62,8 +62,16 @@ class AgencyAddressInline(admin.TabularInline):
 class AgencyEmailAdminForm(forms.ModelForm):
     """AgencyEmail Inline admin form"""
 
-    email = autocomplete_light.ModelChoiceField(
-        "EmailAddressAdminAutocomplete", queryset=EmailAddress.objects.all()
+    email = forms.ModelChoiceField(
+        queryset=EmailAddress.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="email-autocomplete",
+            attrs={
+                "data-placeholder": "Email?",
+                "data-width": None,
+                "data-html": False,
+            },
+        ),
     )
 
     class Meta:
