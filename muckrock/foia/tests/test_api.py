@@ -82,6 +82,8 @@ class TestFOIAViewsetCreate(TestCase):
         if status:
             eq_(response.json()['status'], status)
 
+        return response
+
     def test_foia_create(self):
         """Test creating a FOIA through the API"""
         attachment_url = 'http://www.example.com/attachment.txt'
@@ -111,6 +113,7 @@ class TestFOIAViewsetCreate(TestCase):
             **headers
         )
         eq_(response.status_code, 201, response)
+        eq_(len(response.json()["Requests"]), 1)
 
     def test_simple(self):
         """Test with bare minimum data supplied"""
@@ -120,6 +123,7 @@ class TestFOIAViewsetCreate(TestCase):
         """Test with multiple agencies"""
         agencies = AgencyFactory.create_batch(3)
         self.api_call({'agency': [a.pk for a in agencies]})
+        eq_(len(response.json()["Requests"]), 3)
 
     def test_bad_agency_id_format(self):
         """Test with a bad agency ID format"""
