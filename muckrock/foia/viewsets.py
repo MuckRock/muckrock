@@ -300,6 +300,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 {
                     'status': 'FOI Request submitted',
                     'Location': composer.get_absolute_url()
+                    'Requests': [f.pk for f in composer.foias.all()],
                 },
                 status=http_status.HTTP_201_CREATED,
             )
