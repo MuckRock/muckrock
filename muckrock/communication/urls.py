@@ -25,4 +25,7 @@ urlpatterns = [
         views.EmailAutocomplete.as_view(),
         name="email-autocomplete",
     ),
+    url(
+        r"^fax-autocomplete/$", views.FaxAutocomplete.as_view(), name="fax-autocomplete"
+    ),
 ]

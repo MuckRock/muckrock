@@ -118,7 +118,9 @@ class Detail(DetailView):
                 "other_emails": foia.cc_emails.all(),
             },
         )
-        self.resend_form = ResendForm()
+        self.resend_forms = {
+            c.pk: ResendForm(prefix=str(c.pk)) for c in foia.communications.all()
+        }
         self.fee_form = RequestFeeForm(
             user=self.request.user, initial={"amount": foia.get_stripe_amount()}
         )
@@ -268,7 +270,7 @@ class Detail(DetailView):
         context["agency_status_choices"] = AGENCY_STATUS
         context["agency_reply_form"] = self.agency_reply_form
         context["admin_fix_form"] = self.admin_fix_form
-        context["resend_form"] = self.resend_form
+        context["resend_forms"] = self.resend_forms
         context["cc_emails"] = json.dumps([str(e) for e in foia.cc_emails.all()])
         notes = [
             (n.datetime, "note", n) for n in foia.notes.select_related("author").all()
@@ -852,7 +854,9 @@ class Detail(DetailView):
     def _resend_comm(self, request, foia):
         """Resend a communication"""
         if request.user.is_staff:
-            form = ResendForm(request.POST)
+            form = ResendForm(
+                request.POST, prefix=request.POST.get("communication", "")
+            )
             if form.is_valid():
                 foia.update_address(
                     form.cleaned_data["via"],
@@ -863,9 +867,9 @@ class Detail(DetailView):
                 foia.submit(snail=snail, comm=form.cleaned_data["communication"])
                 messages.success(request, "The communication was resent")
             else:
-                comm = form.cleaned_data["communication"]
+                comm = form.cleaned_data.get("communication")
                 if comm:
-                    self.resend_form = form
+                    self.resend_forms[comm.id] = form
                 raise FoiaFormError
         return redirect(foia.get_absolute_url() + "#")
 

@@ -116,13 +116,14 @@
         <form method="post" class="resend-communication communication-action" id="resend-{{communication.pk}}-form">
           {% csrf_token %}
           <label>Resend Communication</label>
-          {% with form=resend_form %}
+          {% with form=resend_forms|get_item:communication.pk %}
             {% for field in form %}
               {% if field.errors %}
                 <span class="error field">{{field.errors}}</span>
               {% endif %}
               {% if field.name == "communication" %}
-                <input type="hidden" id="id_communication" name="communication" value="{{ communication.pk }}">
+                <input type="hidden" id="id_{{ communication.pk }}-communication" name="{{ communication.pk }}-communication" value="{{ communication.pk }}">
+                <input type="hidden" name="communication" value="{{ communication.pk }}">
               {% else %}
                 {{ field }}
               {% endif %}

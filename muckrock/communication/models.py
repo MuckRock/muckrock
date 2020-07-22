@@ -17,6 +17,7 @@ from datetime import date
 from email.utils import getaddresses, parseaddr
 
 # Third Party
+import phonenumbers
 from localflavor.us.models import USStateField, USZipCodeField
 from localflavor.us.us_states import STATE_CHOICES
 from phonenumber_field.modelfields import PhoneNumberField
@@ -144,6 +145,21 @@ class EmailAddress(models.Model):
         verbose_name_plural = "email addresses"
 
 
+class PhoneNumberQuerySet(models.QuerySet):
+    """QuerySet for PhoneNumner"""
+
+    def fetch(self, number, type_="fax"):
+        """Fetch a number from the database, or create it if it doesn't exist"""
+        try:
+            number = phonenumbers.parse(number, "US")
+            if not phonenumbers.is_valid_number(number):
+                return None
+            phone, _ = self.update_or_create(number=number, defaults={"type": type_})
+            return phone
+        except phonenumbers.NumberParseException:
+            return None
+
+
 class PhoneNumber(models.Model):
     """A phone number"""
 
@@ -152,6 +168,8 @@ class PhoneNumber(models.Model):
     status = models.CharField(
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
+
+    objects = PhoneNumberQuerySet.as_manager()
 
     def __str__(self):
         if self.status == "error":

@@ -124,10 +124,13 @@ class SendCommunicationForm(SendViaForm):
             },
         ),
     )
-    fax = autocomplete_light.ModelChoiceField(
-        "FaxAutocomplete",
+    fax = forms.ModelChoiceField(
         queryset=PhoneNumber.objects.filter(status="good", type="fax"),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="fax-autocomplete",
+            attrs={"data-placeholder": "Search for a fax number", "data-html": False},
+        ),
     )
 
     def __init__(self, *args, **kwargs):
@@ -152,26 +155,8 @@ class SendCommunicationForm(SendViaForm):
         if cleaned_data.get("via") == "email" and not cleaned_data.get("email"):
             self.add_error("email", "An email address is required if sending via email")
         elif cleaned_data.get("via") == "fax" and not cleaned_data.get("fax"):
-            self._clean_fax(cleaned_data)
-        return cleaned_data
-
-    def _clean_fax(self, cleaned_data):
-        """Attempt to clean the fax during full form clean"""
-        if cleaned_data["fax-autocomplete"]:
-            try:
-                number = phonenumbers.parse(cleaned_data["fax-autocomplete"], "US")
-            except phonenumbers.NumberParseException:
-                self.add_error("fax", "Invalid fax number")
-            else:
-                if phonenumbers.is_valid_number(number):
-                    phone, _ = PhoneNumber.objects.update_or_create(
-                        number=number, defaults={"type": "fax"}
-                    )
-                    cleaned_data["fax"] = phone
-                else:
-                    self.add_error("fax", "Invalid fax number")
-        else:
             self.add_error("fax", "A fax number is required if sending via fax")
+        return cleaned_data
 
 
 class FOIAAdminFixForm(SendCommunicationForm):
@@ -231,10 +216,14 @@ class ResendForm(SendCommunicationForm):
         initial = kwargs.pop("initial", {})
         initial.update({"communication": comm})
         super(ResendForm, self).__init__(*args, initial=initial, **kwargs)
+        self.fields["via"].widget.attrs.update({"class": "resend-via"})
+        self.fields["email"].widget.attrs.update({"class": "resend-email"})
+        self.fields["fax"].widget.attrs.update({"class": "resend-fax"})
 
     def clean(self):
         """Set self.foia during cleaning"""
-        self.foia = self.cleaned_data["communication"].foia
+        if "communication" in self.cleaned_data:
+            self.foia = self.cleaned_data["communication"].foia
         return super(ResendForm, self).clean()
 
 

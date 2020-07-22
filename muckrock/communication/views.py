@@ -109,20 +109,13 @@ class CheckListView(MRFilterListView):
         return context
 
 
-class EmailAutocomplete(MRAutocompleteView):
-    """Autocomplete for emails"""
-
-    queryset = EmailAddress.objects.filter(status="good").order_by("email")
-    search_fields = ["email", "name"]
-    create_field = "email"
+class CommunicationAutocomplete(MRAutocompleteView):
+    """Base class for shared functionality between email and phone number autocompletes
+    """
 
     def has_add_permission(self, request):
         """Staff only"""
         return request.user.is_staff
-
-    def create_object(self, text):
-        """Use email address fetch to create the object"""
-        return EmailAddress.objects.fetch(text)
 
     def post(self, request):
         """Create an object given a text after checking permissions.
@@ -145,9 +138,59 @@ class EmailAutocomplete(MRAutocompleteView):
 
         if result is None:
             return http.JsonResponse(
-                {"id": -1, "text": f'"{text}" is not a valid email'}
+                {"id": -1, "text": self.create_error.format(text=text)}
             )
 
         return http.JsonResponse(
             {"id": result.pk, "text": self.get_result_label(result)}
         )
+
+
+class EmailAutocomplete(CommunicationAutocomplete):
+    """Autocomplete for emails"""
+
+    queryset = EmailAddress.objects.filter(status="good").order_by("email")
+    search_fields = ["email", "name"]
+    create_field = "email"
+    create_error = '"{text}" is not a valid email'
+
+    def create_object(self, text):
+        """Use email address fetch to create the object"""
+        return EmailAddress.objects.fetch(text)
+
+
+class PhoneNumberAutocomplete(CommunicationAutocomplete):
+    """Autocomplete for phone numbers"""
+
+    queryset = PhoneNumber.objects.order_by("number")
+    search_fields = ["number"]
+
+    def get_queryset(self):
+        """Pre process the query"""
+        # pylint: disable=attribute-defined-outside-init
+
+        # phone number is stored as ###-###-#### in the database
+        # remove parens and convert spaces to dashes so that the user
+        # can enter numbers in (###) ###-#### format as well
+        self.q = self.q.translate({ord("("): None, ord(")"): None, ord(" "): "-"})
+        return super().get_queryset()
+
+    def get_result_label(self, item):
+        """Show number type"""
+        return f"{item.number} ({item.type})"
+
+
+class FaxAutocomplete(PhoneNumberAutocomplete):
+    """Autocomplete for fax numbers"""
+
+    queryset = PhoneNumber.objects.filter(status="good", type="fax").order_by("number")
+    create_field = "number"
+    create_error = '"{text}" is not a valid fax number'
+
+    def create_object(self, text):
+        """Use phone number fetch to create the object"""
+        return PhoneNumber.objects.fetch(text)
+
+    def get_result_label(self, item):
+        """Do not show number type"""
+        return str(item)
