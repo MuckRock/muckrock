@@ -122,7 +122,7 @@ class TestFOIAViewsetCreate(TestCase):
     def test_multi_agency(self):
         """Test with multiple agencies"""
         agencies = AgencyFactory.create_batch(3)
-        self.api_call({'agency': [a.pk for a in agencies]})
+        response = self.api_call({'agency': [a.pk for a in agencies]})
         eq_(len(response.json()["Requests"]), 3)
 
     def test_bad_agency_id_format(self):
