@@ -6,6 +6,7 @@ Views for the Agency application
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
+from django.db.models.aggregates import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -18,6 +19,7 @@ import re
 
 # Third Party
 from dal import autocomplete
+from fuzzywuzzy import fuzz, process
 
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
@@ -272,22 +274,123 @@ class AgencyAutocomplete(MRAutocompleteView):
         """Filter by jurisdiction"""
 
         queryset = super().get_queryset()
+        queryset = self._filter_by_jurisdiction(queryset)
 
-        # Filter by jurisdiction
+        return queryset
+
+    def _filter_by_jurisdiction(self, queryset):
+        """If a jurisdiction is forwarded, filter by it"""
+        if "jurisdiction" not in self.forwarded:
+            return queryset
+
         # jurisdiction is forwarded as a list, so grab first element
-        jurisdiction_id = self.forwarded.get("jurisdiction", [None])[0]
+        try:
+            jurisdiction_id = self.forwarded["jurisdiction"][0]
+        except (TypeError, IndexError):
+            # if jurisdiction is not a single element list, something went wrong
+            # do not filter
+            return queryset
+
         appeal = self.forwarded.get("appeal", False)
-        if appeal and jurisdiction_id:
+        if appeal:
             jurisdiction = Jurisdiction.objects.get(pk=jurisdiction_id)
             if jurisdiction.level == "l":
                 # For local jurisdictions, appeal agencies may come from the
                 # parent level
-                queryset = queryset.filter(
+                return queryset.filter(
                     jurisdiction_id__in=(jurisdiction.pk, jurisdiction.parent_id)
                 )
-            else:
-                queryset = queryset.filter(jurisdiction=jurisdiction)
-        elif not appeal and jurisdiction_id:
-            queryset = queryset.filter(jurisdiction=jurisdiction_id)
 
-        return queryset
+        # otherwise just get agencies from the given jurisdiction
+        return queryset.filter(jurisdiction=jurisdiction_id)
+
+
+class AgencyComposerAutocomplete(AgencyAutocomplete):
+    """Autocomplete for picking agencies with fuzzy matching and new agency creation"""
+
+    queryset = Agency.objects.select_related("jurisdiction__parent").only(
+        "name",
+        "exempt",
+        "exempt_note",
+        "requires_proxy",
+        "uncooperative",
+        "status",
+        "jurisdiction__name",
+        "jurisdiction__level",
+        "jurisdiction__parent__abbrev",
+    )
+
+    def get_queryset(self):
+        """Filter by jurisdiction"""
+
+        queryset = super().get_queryset()
+        queryset = (
+            queryset.get_approved_and_pending(self.request.user)
+            .annotate(count=Count("foiarequest"))
+            .order_by("-count")[:10]
+        )
+
+        query, jurisdiction = self._split_jurisdiction(self.q)
+        fuzzy_choices = self._fuzzy_choices(query, jurisdiction)
+
+        return (
+            self.queryset.filter(
+                pk__in=[a.pk for a in queryset] + [a[2].pk for a in fuzzy_choices]
+            )
+            .annotate(count=Count("foiarequest"))
+            .order_by("-count")
+        )
+
+    def _split_jurisdiction(self, query):
+        """Try to pull a jurisdiction out of an unmatched query"""
+        comma_split = query.split(",")
+        if len(comma_split) > 2:
+            # at least 2 commas, assume last 2 parts are locality, state
+            locality, state = [w.strip() for w in comma_split[-2:]]
+            name = ",".join(comma_split[:-2])
+            try:
+                jurisdiction = Jurisdiction.objects.get(
+                    Q(parent__name__iexact=state) | Q(parent__abbrev__iexact=state),
+                    name__iexact=locality,
+                    level="l",
+                )
+                return name, jurisdiction
+            except Jurisdiction.DoesNotExist:
+                pass
+        if len(comma_split) > 1:
+            # at least 1 commas, assume the last part is a jurisdiction
+            state = comma_split[-1].strip()
+            name = ",".join(comma_split[:-1])
+            try:
+                # first see if it matches a state
+                jurisdiction = Jurisdiction.objects.get(
+                    Q(name__iexact=state) | Q(abbrev__iexact=state), level="s"
+                )
+                return name, jurisdiction
+            except Jurisdiction.DoesNotExist:
+                # if not, try matching a locality
+                # order them by popularity
+                jurisdiction = (
+                    Jurisdiction.objects.filter(name__iexact=state, level="l")
+                    .annotate(count=Count("agencies__foiarequest"))
+                    .order_by("-count")
+                    .first()
+                )
+                if jurisdiction is not None:
+                    return name, jurisdiction
+
+        # if all else fails, assume they want a federal agency
+        return query, Jurisdiction.objects.get(level="f")
+
+    def _fuzzy_choices(self, query, jurisdiction):
+        """Do fuzzy matching for additional choices"""
+        choices = self.queryset.get_approved_and_pending(self.request.user).filter(
+            jurisdiction=jurisdiction
+        )
+        return process.extractBests(
+            query,
+            {a: a.name for a in choices},
+            scorer=fuzz.partial_ratio,
+            score_cutoff=83,
+            limit=10,
+        )

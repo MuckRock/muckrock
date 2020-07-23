@@ -36,4 +36,9 @@ urlpatterns = [
         views.AgencyAutocomplete.as_view(),
         name="agency-autocomplete",
     ),
+    url(
+        r"^agency-composer-autocomplete/$",
+        views.AgencyComposerAutocomplete.as_view(),
+        name="agency-composer-autocomplete",
+    ),
 ]

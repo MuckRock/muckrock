@@ -170,11 +170,19 @@ class CSVImportForm(forms.Form):
 class AgencyMergeForm(forms.Form):
     """A form to merge two agencies"""
 
-    good_agency = autocomplete_light.ModelChoiceField(
-        "AgencyEasySearchAutocomplete", queryset=Agency.objects.get_approved()
+    good_agency = forms.ModelChoiceField(
+        queryset=Agency.objects.get_approved(),
+        widget=autocomplete.ModelSelect2(
+            url="agency-composer-autocomplete",
+            attrs={"data-placeholder": "Search for agency"},
+        ),
     )
-    bad_agency = autocomplete_light.ModelChoiceField(
-        "AgencyEasySearchAutocomplete", queryset=Agency.objects.get_approved()
+    bad_agency = forms.ModelChoiceField(
+        queryset=Agency.objects.get_approved(),
+        widget=autocomplete.ModelSelect2(
+            url="agency-composer-autocomplete",
+            attrs={"data-placeholder": "Search for agency"},
+        ),
     )
     confirmed = forms.BooleanField(
         initial=False, widget=forms.HiddenInput(), required=False
