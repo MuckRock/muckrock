@@ -5,11 +5,15 @@ Views for the communication app
 # Django
 from django import http
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.db.models import F, Q
 from django.db.models.aggregates import Sum
 from django.db.models.query import Prefetch
 from django.urls import reverse
 from django.views.generic.detail import DetailView
+
+# Third Party
+from dal_select2.views import Select2ListView
 
 # MuckRock
 from muckrock.communication.filters import CheckFilterSet
@@ -23,6 +27,7 @@ from muckrock.communication.models import (
     FaxError,
     PhoneNumber,
 )
+from muckrock.communication.utils import get_email_or_fax
 from muckrock.core.views import (
     MRAutocompleteView,
     MRFilterListView,
@@ -179,6 +184,10 @@ class PhoneNumberAutocomplete(CommunicationAutocomplete):
         """Show number type"""
         return f"{item.number} ({item.type})"
 
+    def get_selected_result_label(self, item):
+        """Show number type"""
+        return self.get_result_label(item)
+
 
 class FaxAutocomplete(PhoneNumberAutocomplete):
     """Autocomplete for fax numbers"""
@@ -194,3 +203,38 @@ class FaxAutocomplete(PhoneNumberAutocomplete):
     def get_result_label(self, item):
         """Do not show number type"""
         return str(item)
+
+
+class EmailOrFaxAutocomplete(Select2ListView):
+    """Autocomplete for an email or fax"""
+
+    def autocomplete_results(self, results):
+        """Get emails and faxes"""
+
+        query = self.q
+        emails = (
+            EmailAddress.objects.filter(
+                Q(email__icontains=query) | Q(name__icontains=query), status="good"
+            )
+            .order_by("email")
+            .annotate(label=F("email"))
+            .values("label")
+        )
+
+        phone_query = query.translate({ord("("): None, ord(")"): None, ord(" "): "-"})
+        phones = (
+            PhoneNumber.objects.filter(
+                number__icontains=phone_query, type="fax", status="good"
+            )
+            .order_by("number")
+            .annotate(label=F("number"))
+            .values("label")
+        )
+
+        return list(emails.union(phones).values_list("label", flat=True)[:10])
+
+    def create(self, text):
+        try:
+            return str(get_email_or_fax(text))
+        except ValidationError:
+            return None

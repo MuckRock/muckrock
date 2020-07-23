@@ -11,6 +11,7 @@ import logging
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from dal import forward
+from dal_select2.widgets import ListSelect2
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -45,8 +46,11 @@ class ReviewAgencyTaskForm(forms.Form):
 
     email_or_fax = forms.CharField(
         label="Update email or fax on checked requests:",
-        widget=autocomplete_light.TextWidget("EmailOrFaxAutocomplete"),
         required=False,
+        widget=ListSelect2(
+            url="email-fax-autocomplete",
+            attrs={"data-placeholder": "Search for an email address or fax number"},
+        ),
     )
     update_agency_info = forms.BooleanField(
         label="Update agency's main contact info?", required=False

@@ -28,4 +28,14 @@ urlpatterns = [
     url(
         r"^fax-autocomplete/$", views.FaxAutocomplete.as_view(), name="fax-autocomplete"
     ),
+    url(
+        r"^phone-autocomplete/$",
+        views.PhoneNumberAutocomplete.as_view(),
+        name="phone-autocomplete",
+    ),
+    url(
+        r"^email-fax-autocomplete/$",
+        views.EmailOrFaxAutocomplete.as_view(),
+        name="email-fax-autocomplete",
+    ),
 ]

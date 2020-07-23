@@ -90,8 +90,12 @@ class AgencyEmailInline(admin.TabularInline):
 class AgencyPhoneAdminForm(forms.ModelForm):
     """AgencyPhone Inline admin form"""
 
-    phone = autocomplete_light.ModelChoiceField(
-        "PhoneNumberAdminAutocomplete", queryset=PhoneNumber.objects.all()
+    phone = forms.ModelChoiceField(
+        queryset=PhoneNumber.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="phone-autocomplete",
+            attrs={"data-placeholder": "Phone Number?", "data-width": None},
+        ),
     )
 
     class Meta:

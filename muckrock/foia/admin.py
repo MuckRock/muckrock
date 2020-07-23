@@ -376,10 +376,17 @@ class FOIARequestAdminForm(forms.ModelForm):
             },
         ),
     )
-    fax = autocomplete_light.ModelChoiceField(
-        "FaxAdminAutocomplete",
+    fax = forms.ModelChoiceField(
         queryset=PhoneNumber.objects.filter(type="fax"),
         required=False,
+        widget=autocomplete.ModelSelect2(
+            url="fax-autocomplete",
+            attrs={
+                "data-placeholder": "Fax Number?",
+                "data-width": None,
+                "data-html": False,
+            },
+        ),
     )
     cc_emails = forms.ModelMultipleChoiceField(
         queryset=EmailAddress.objects.all(),
