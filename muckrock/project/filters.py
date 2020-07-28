@@ -21,7 +21,8 @@ class ProjectFilterSet(django_filters.FilterSet):
     contributors = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(

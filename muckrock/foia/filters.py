@@ -67,7 +67,8 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         label="User",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
         ),
     )
     agency = django_filters.ModelMultipleChoiceFilter(
@@ -197,7 +198,8 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
         label="User",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
         ),
     )
     agency = django_filters.ModelMultipleChoiceFilter(
@@ -228,7 +230,8 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         label="User",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(

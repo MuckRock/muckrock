@@ -65,7 +65,11 @@ class ProjectUpdateForm(forms.ModelForm):
         widgets = {
             "description": forms.Textarea(attrs={"class": "prose-editor"}),
             "contributors": autocomplete.ModelSelect2Multiple(
-                url="user-autocomplete", attrs={"data-placeholder": "Search for users"}
+                url="user-autocomplete",
+                attrs={
+                    "data-placeholder": "Search for users",
+                    "data-minimum-input-length": 2,
+                },
             ),
             "requests": autocomplete.ModelSelect2Multiple(
                 url="foia-request-autocomplete",

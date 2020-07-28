@@ -179,7 +179,8 @@ class FlaggedTaskFilterSet(TaskFilterSet):
     user = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
         ),
     )
     category = django_filters.ChoiceFilter(choices=FLAG_CATEGORIES)
@@ -261,7 +262,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
             url="user-autocomplete",
-            attrs={"data-placeholder": "Search users"},
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
             forward=(forward.Const(True, "tasks"),),
         ),
     )

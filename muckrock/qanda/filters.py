@@ -23,7 +23,8 @@ class QuestionFilterSet(django_filters.FilterSet):
     user = django_filters.ModelChoiceFilter(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
         ),
     )
     date = django_filters.DateFromToRangeFilter(
