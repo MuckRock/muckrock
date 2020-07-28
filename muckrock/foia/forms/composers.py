@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
 from autocomplete_light.contrib.taggit_field import TaggitField
+from dal import forward
 from dal.autocomplete import TaggitSelect2
 from requests.exceptions import HTTPError
 from taggit.forms import TagField
@@ -17,8 +18,8 @@ from taggit.forms import TagField
 from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
+from muckrock.core import autocomplete
 from muckrock.core.forms import TaggitWidget
-from muckrock.foia.fields import ComposerAgencyField
 from muckrock.foia.forms.comms import ContactInfoForm
 from muckrock.foia.models import FOIAComposer
 
@@ -45,9 +46,17 @@ class BaseComposerForm(forms.ModelForm):
         ),
         required=False,
     )
-    agencies = ComposerAgencyField(
+    agencies = forms.ModelMultipleChoiceField(
         queryset=Agency.objects.get_approved(),
-        widget=autocomplete_light.MultipleChoiceWidget("AgencyComposerAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-composer-autocomplete",
+            attrs={
+                "data-placeholder": "Agency's name, followed by location",
+                "data-minimum-input-length": 2,
+                "data-allow-clear": False,
+            },
+            forward=(forward.Self(),),
+        ),
         required=False,
         help_text="i.e., Police Department, Austin, TX or Office of the "
         "Governor, Arkansas",

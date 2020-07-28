@@ -16,6 +16,7 @@ from django.views.generic.edit import FormView
 
 # Standard Library
 import re
+from string import capwords
 
 # Third Party
 from dal import autocomplete
@@ -319,19 +320,22 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         "jurisdiction__level",
         "jurisdiction__parent__abbrev",
     )
+    create_field = "name"
 
     def get_queryset(self):
         """Filter by jurisdiction"""
 
         queryset = super().get_queryset()
+        exclude = self.forwarded.get("self", [])
         queryset = (
             queryset.get_approved_and_pending(self.request.user)
+            .exclude(pk__in=exclude)
             .annotate(count=Count("foiarequest"))
             .order_by("-count")[:10]
         )
 
         query, jurisdiction = self._split_jurisdiction(self.q)
-        fuzzy_choices = self._fuzzy_choices(query, jurisdiction)
+        fuzzy_choices = self._fuzzy_choices(query, jurisdiction, exclude)
 
         return (
             self.queryset.filter(
@@ -382,10 +386,12 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         # if all else fails, assume they want a federal agency
         return query, Jurisdiction.objects.get(level="f")
 
-    def _fuzzy_choices(self, query, jurisdiction):
+    def _fuzzy_choices(self, query, jurisdiction, exclude):
         """Do fuzzy matching for additional choices"""
-        choices = self.queryset.get_approved_and_pending(self.request.user).filter(
-            jurisdiction=jurisdiction
+        choices = (
+            self.queryset.get_approved_and_pending(self.request.user)
+            .filter(jurisdiction=jurisdiction)
+            .exclude(pk__in=exclude)
         )
         return process.extractBests(
             query,
@@ -394,3 +400,29 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
             score_cutoff=83,
             limit=10,
         )
+
+    def has_add_permission(self, request):
+        """Everyone may add a new agency during """
+        return True
+
+    def create_object(self, text):
+        name, jurisdiction = self._split_jurisdiction(text)
+        return Agency.objects.create_new(
+            name=capwords(name), jurisdiction=jurisdiction, user=self.request.user
+        )
+
+    def get_selected_result_label(self, item):
+        """Show full template for selected label"""
+        return self.get_result_label(item)
+
+    def get_create_option(self, context, query):
+        create_option = super().get_create_option(context, query)
+        if not query:
+            return create_option
+        name, jurisdiction = self._split_jurisdiction(query)
+        if create_option:
+            create_option[0]["text"] = render_to_string(
+                "autocomplete/create-agency.html",
+                {"name": capwords(name), "jurisdiction": jurisdiction},
+            )
+        return create_option

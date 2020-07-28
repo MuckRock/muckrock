@@ -24,3 +24,13 @@ $(projectRequestAutocomplete).change(function() {
         exclude: getDeckElements(this)
     };
 });
+
+$('.select2').on('select2:unselect', function() {
+  console.log("here");
+	var $el = $(this);
+  console.log($el);
+	setTimeout(function() {
+		$('.select2-search__field', $el.closest('.form-group'))
+			.val('');
+	}, 0);
+});

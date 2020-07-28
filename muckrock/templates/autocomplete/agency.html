@@ -1,5 +1,5 @@
-<span class="choice" data-value="{% if choice.pk %}{{ choice.pk }}{% else %}$new${{ choice.name }}${{ choice.jurisdiction_id }}${% endif %}">
-  <div class="choice__text {% if not choice.pk %}selected-option{% endif %}">
+<span class="choice" data-value="{{ choice.pk }}">
+  <div class="choice__text">
     <p class="nomargin">
       {{ choice.name }}
       {% if choice.exempt %}

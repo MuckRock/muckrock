@@ -811,6 +811,6 @@ class BulkNewAgency(FormView):
             name = form_.cleaned_data.get("name")
             jurisdiction = form_.cleaned_data.get("jurisdiction")
             if name and jurisdiction:
-                Agency.objects.create_new(name, jurisdiction.pk, self.request.user)
+                Agency.objects.create_new(name, jurisdiction, self.request.user)
         messages.success(self.request, "Successfully create new agencies")
         return redirect("new-agency-task-list")

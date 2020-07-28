@@ -12,7 +12,7 @@ $(document).ready(function(){
 
   var agencyField = $('fieldset.agencies');
   var agencyInput = agencyField.find('input');
-  var agencyWidget = agencyField.find('.autocomplete-light-widget');
+  var agencyWidget = $("#id_agencies");
 
   function updateRequestCount(num) {
     var requestsLeft = $(".requests-left"),
@@ -104,14 +104,12 @@ $(document).ready(function(){
   });
   $("#id_num_requests").trigger("change");
 
-  agencyWidget.on("widgetSelectChoice widgetDeselectChoice", function(){
+  agencyWidget.on("change.select2", function(){
     // get boilerplate language for selected agencies
     $.ajax({
       url: "/agency/boilerplate/",
       data: {
-        agencies: agencyField.find(".deck > .choice").map(function(){
-          return $(this).data("value");
-        }).get()
+        agencies: agencyWidget.val()
       },
       type: "get",
       success: function(data) {
@@ -137,7 +135,7 @@ $(document).ready(function(){
     });
 
     // update the request count
-    var requestCount = agencyField.find(".deck > .choice").length;
+    var requestCount = agencyWidget.val().length;
     var exemptCount = agencyField.find(".exempt").length;
     var uncoopCount = agencyField.find(".uncooperative").length;
     var allowedCount = requestCount - exemptCount - uncoopCount;
@@ -170,7 +168,7 @@ $(document).ready(function(){
 
     // handle contact info
     if (requestCount === 1) {
-      var agencyId = agencyField.find(".deck > .choice").data("value");
+      var agencyId = agencyWidget.val()[0];
       if (!isNaN(parseInt(agencyId))) {
         $.ajax({
           url: "/agency/contact-info/" + agencyId + "/",
@@ -210,19 +208,23 @@ $(document).ready(function(){
     }
 
     if (requestCount === 0) {
-      $("#id_agencies-autocomplete").attr(
-        "placeholder",
-        "Agency's name, followed by location"
-      );
+      setTimeout(function() {
+        $(".agencies .select2-search__field").attr(
+          "placeholder",
+          "Agency's name, followed by location"
+        );
+      });
     } else {
-      $("#id_agencies-autocomplete").attr(
-        "placeholder",
-        "Optionally add another agency - the request will be sent to all of them"
-      );
+      setTimeout(function() {
+        $(".agencies .select2-search__field").attr(
+          "placeholder",
+          "Optionally add another agency - the request will be sent to all of them"
+        );
+      });
     }
 
   });
-  agencyWidget.trigger("widgetSelectChoice");
+  agencyWidget.trigger("change.select2");
 
   $("form.create-request").submit(function(e){
     var email_regex = /\w+@\w+.\w+/;
@@ -255,7 +257,7 @@ $(document).ready(function(){
     $("input[name='action']").val("submit");
 
     $(".submit-required").attr("required", "required");
-    if (agencyField.find(".deck > .choice").length === 0) {
+    if (agencyWidget.vals().length === 0) {
       // no agency choices
       agencyInput.attr("required", "required");
     } else {
@@ -387,7 +389,7 @@ $(document).ready(function(){
   if (composerPk) {
     $("form.create-request input, form.create-request textarea").on(
       "input propertychange change", changeHandler);
-    agencyWidget.on("widgetSelectChoice widgetDeselectChoice", changeHandler);
+    agencyWidget.on("change.select2", changeHandler);
   }
 
   function saveToDB() {

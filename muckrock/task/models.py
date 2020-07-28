@@ -754,7 +754,7 @@ class NewAgencyTask(Task):
 
     type = "NewAgencyTask"
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT)
-    agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
+    agency = models.ForeignKey("agency.Agency", on_delete=models.CASCADE)
 
     objects = NewAgencyTaskQuerySet.as_manager()
 
