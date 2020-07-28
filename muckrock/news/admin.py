@@ -44,21 +44,24 @@ class ArticleAdminForm(forms.ModelForm):
     authors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     editors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     foias = forms.ModelMultipleChoiceField(
         queryset=FOIARequest.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
         ),
     )
 

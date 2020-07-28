@@ -126,14 +126,16 @@ class FOIACommunicationAdminForm(forms.ModelForm):
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     to_user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
@@ -314,7 +316,8 @@ class FOIANoteAdminForm(forms.ModelForm):
         label="Author",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
@@ -582,14 +585,16 @@ class FOIAComposerAdminForm(forms.ModelForm):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     agencies = forms.ModelMultipleChoiceField(
         queryset=Agency.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="agency-autocomplete", attrs={"data-placeholder": "Agency?"}
+            url="agency-autocomplete",
+            attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
 
@@ -615,13 +620,15 @@ class OutboundRequestAttachmentAdminForm(forms.ModelForm):
     foia = forms.ModelChoiceField(
         queryset=FOIARequest.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
         ),
     )
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
@@ -646,7 +653,8 @@ class OutboundComposerAttachmentAdminForm(forms.ModelForm):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 

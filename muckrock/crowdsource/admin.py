@@ -29,14 +29,16 @@ class CrowdsourceAdminForm(forms.ModelForm):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     project = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="project-autocomplete", attrs={"data-placeholder": "Project?"}
+            url="project-autocomplete",
+            attrs={"data-placeholder": "Project?", "data-width": None},
         ),
     )
     submission_emails = forms.ModelMultipleChoiceField(
@@ -63,7 +65,8 @@ class CrowdsourceResponseAdminForm(forms.ModelForm):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 

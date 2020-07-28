@@ -23,7 +23,8 @@ class AnswerForm(forms.ModelForm):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
@@ -38,14 +39,16 @@ class QuestionForm(forms.ModelForm):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     foia = forms.ModelChoiceField(
         queryset=FOIARequest.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
         ),
     )
 

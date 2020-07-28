@@ -24,7 +24,8 @@ class CrowdfundPaymentAdminForm(forms.ModelForm):
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
@@ -58,7 +59,8 @@ class RecurringCrowdfundPaymentAdminForm(forms.ModelForm):
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 

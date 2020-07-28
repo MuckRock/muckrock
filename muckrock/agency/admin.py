@@ -118,13 +118,15 @@ class AgencyAdminForm(forms.ModelForm):
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     jurisdiction = forms.ModelChoiceField(
         queryset=Jurisdiction.objects.filter(hidden=False),
         widget=autocomplete.ModelSelect2(
-            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Jurisdiction?", "data-width": None},
         ),
     )
     appeal_agency = forms.ModelChoiceField(
@@ -133,7 +135,7 @@ class AgencyAdminForm(forms.ModelForm):
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
             forward=("jurisdiction", forward.Const(True, "appeal")),
-            attrs={"data-placeholder": "Agency?"},
+            attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
     parent = forms.ModelChoiceField(
@@ -142,7 +144,7 @@ class AgencyAdminForm(forms.ModelForm):
         widget=autocomplete.ModelSelect2(
             url="agency-autocomplete",
             forward=("jurisdiction",),
-            attrs={"data-placeholder": "Agency?"},
+            attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
 

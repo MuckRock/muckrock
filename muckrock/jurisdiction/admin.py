@@ -56,7 +56,8 @@ class InvokedExemptionAdminForm(forms.ModelForm):
     request = forms.ModelChoiceField(
         queryset=FOIARequest.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
         ),
     )
 
@@ -115,14 +116,16 @@ class ExemptionAdminForm(forms.ModelForm):
     jurisdiction = forms.ModelChoiceField(
         queryset=Jurisdiction.objects.filter(hidden=False),
         widget=autocomplete.ModelSelect2(
-            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Jurisdiction?", "data-width": None},
         ),
     )
     contributors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 

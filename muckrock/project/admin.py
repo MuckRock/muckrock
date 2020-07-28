@@ -25,21 +25,24 @@ class ProjectAdminForm(forms.ModelForm):
         queryset=FOIARequest.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="foia-request-autocomplete", attrs={"data-placeholder": "FOIA?"}
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
         ),
     )
     contributors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
     articles = forms.ModelMultipleChoiceField(
         queryset=Article.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
-            url="article-autocomplete", attrs={"data-placeholder": "Article?"}
+            url="article-autocomplete",
+            attrs={"data-placeholder": "Article?", "data-width": None},
         ),
     )
 

@@ -43,14 +43,16 @@ class ProfileAdminForm(forms.ModelForm):
         queryset=Jurisdiction.objects.filter(hidden=False),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="jurisdiction-autocomplete", attrs={"data-placeholder": "Jurisdiction?"}
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Jurisdiction?", "data-width": None},
         ),
     )
     agency = forms.ModelChoiceField(
         queryset=Agency.objects.filter(status="approved"),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="agency-autocomplete", attrs={"data-placeholder": "Agency?"}
+            url="agency-autocomplete",
+            attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
 
@@ -144,7 +146,8 @@ class RecurringDonationAdminForm(forms.ModelForm):
         queryset=User.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
