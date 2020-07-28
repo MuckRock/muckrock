@@ -189,32 +189,4 @@ $('document').ready(function(){
     $('#filter-form [name=csrfmiddlewaretoken]').removeAttr('name');
   });
 
-  // https://github.com/yourlabs/django-autocomplete-light/issues/498#issuecomment-164601975
-  // This code resolves on issue with having an autocomplete field be required
-  $(document).bind('selectChoice', function(e, choice, autocomplete){
-    if(autocomplete.input.attr('required') !== undefined){
-      autocomplete.input.removeAttr('required');
-      autocomplete.input.attr('data-required', 'required');
-    }
-  });
-
-  $(document).bind('widgetDeselectChoice', function(e, choice, autocomplete){
-    // onlt re-enable if all selections have been removed
-    if(autocomplete.input.attr('data-required') !== undefined &&
-        autocomplete.deck[0].children.length == 0){
-      autocomplete.input.removeAttr('data-required');
-      autocomplete.input.attr('required', 'required');
-    }
-  });
-
-  // remove required if autocomplete has an initial value
-  $(".autocomplete-light-widget").each(function() {
-    var deck = $(this).children(".deck");
-    var input = $(this).children("input");
-    if(deck.children().length > 0 && input.attr('required') !== undefined) {
-      input.removeAttr('required');
-      input.attr('data-required', 'required');
-    }
-  });
-
 });
