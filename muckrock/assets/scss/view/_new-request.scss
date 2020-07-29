@@ -184,29 +184,6 @@ $color-advanced-container: lighten($color-agency, 40%);
       display: none;
     }
 
-    .autocomplete-light-widget {
-        display: block;
-        width: 100%;
-        span.deck > span {
-            display: block;
-            width: 100%;
-            margin: 0;
-            color: $color-white;
-            background: transparent;
-            border: none;
-            font-size: $size-4;
-            span.remove {
-                font-size: 0;
-                float: right;
-                height: 24px !important;
-                width: 24px !important;
-                background-size: 90%;
-                background-position: center center !important;
-                &:hover { background-position: center center !important; }
-            }
-        }
-    }
-
     .select2 {
         display: block;
         width: 100%;

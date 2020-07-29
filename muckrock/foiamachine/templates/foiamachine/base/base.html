@@ -15,7 +15,9 @@
         <title>{% block title %}FOIA Machine{% endblock %}</title>
         {% compress css %}
             {% block styles %}
-                <link rel="stylesheet" type="text/css" href="{% static 'autocomplete_light/style.css' %}" />
+                <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+                <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
+                <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
                 {% render_bundle 'foiamachine' 'css' %}
             {% endblock %}
         {% endcompress %}
@@ -84,9 +86,12 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
         {% compress js %}
             {% block scripts %}
                 {% render_bundle 'foiamachine' 'js' %}
-                <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
-                <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
-                <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
+                <script type="text/javascript" src="{% static 'vendor/select2/dist/js/select2.full.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/forward.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/select2.js' %}"></script>
+                <script type="text/javascript" src="{% static 'autocomplete_light/jquery.post-setup.js' %}"></script>
             {% endblock %}
         {% endcompress %}
         {% if request.session.session_state %}

@@ -46,13 +46,6 @@
             line-height: $lh;
         }
     }
-    .autocomplete-light-widget, .requests .deck, .articles .deck {
-        @include display(flex);
-        @include flex-direction(column-reverse);
-        input {
-            margin-bottom: $vr;
-        }
-    }
 }
 
 .project.detail {

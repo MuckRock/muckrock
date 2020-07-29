@@ -333,7 +333,7 @@ class BulkNewAgencyTaskForm(forms.Form):
         queryset=Jurisdiction.objects.filter(hidden=False),
         widget=autocomplete.ModelSelect2(
             url="jurisdiction-autocomplete",
-            attrs={"data-placeholder": "Search for jurisdiction"},
+            attrs={"data-placeholder": "Search for jurisdiction", "data-width": "30%"},
         ),
     )
 

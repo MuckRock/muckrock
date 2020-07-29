@@ -15,8 +15,10 @@ import debug_toolbar
 # MuckRock
 from muckrock.accounts import views as account_views
 from muckrock.agency.urls import agency_url
+from muckrock.agency.views import AgencyAutocomplete
 from muckrock.foiamachine import views
 from muckrock.jurisdiction.urls import jur_url
+from muckrock.jurisdiction.views import JurisdictionAutocomplete
 
 
 def handler404(request, exception):
@@ -87,7 +89,16 @@ urlpatterns = [
         views.jurisdiction_detail,
         name="jurisdiction-detail",
     ),
-    url(r"^autocomplete/", include("autocomplete_light.urls")),
+    url(
+        r"^agency-autocomplete/$",
+        AgencyAutocomplete.as_view(),
+        name="agency-autocomplete",
+    ),
+    url(
+        r"^jurisdiction-autocomplete/$",
+        JurisdictionAutocomplete.as_view(),
+        name="jurisdiction-autocomplete",
+    ),
     url(r"^__debug__/", include(debug_toolbar.urls)),
     url(r"^accounts/", include("social_django.urls", namespace="social")),
     url(r"^rp_iframe/$", account_views.rp_iframe, name="acct-rp-iframe"),
