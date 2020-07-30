@@ -87,7 +87,7 @@ class TestExemptionList(TestCase):
         )
 
 
-@mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+@mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
 class TestExemptionCreation(TestCase):
     """
     The exemption creation view allows new exemptions to be submitted for staff

@@ -109,7 +109,7 @@ def get_404(client, url):
 class TestFunctional(TestCase):
     """Functional tests for top level"""
 
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def setUp(self):
         AgencyFactory()
         ArticleFactory()

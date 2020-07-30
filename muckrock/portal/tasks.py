@@ -5,6 +5,7 @@ Celery tasks for the portal application
 # Django
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from django.conf import settings
 from django.db.models import F
 
 # Standard Library
@@ -13,6 +14,7 @@ from datetime import date
 
 # Third Party
 import requests
+from zenpy import Zenpy
 
 # MuckRock
 from muckrock.core.utils import zoho_get
@@ -70,8 +72,8 @@ def foiaonline_autologin():
             category='foiaonline',
         )
 
-    for foia in foias:
-        # check if there is an open ticket
+    def check_zoho_ticket(foia):
+        """Check if an open zoho ticket exists for this FOIA"""
         response = zoho_get(
             'tickets/search', {
                 'limit': 1,
@@ -82,10 +84,37 @@ def foiaonline_autologin():
                 '_all': '{}-{}'.format(foia.slug, foia.pk),
             }
         )
-        if response.status_code == requests.codes.ok:
+        return response.status_code == requests.codes.ok
+
+    def check_zendesk_ticket(foia):
+        """Check if an open zendesk ticket exists for this FOIA"""
+        client = Zenpy(
+            email=settings.ZENDESK_EMAIL,
+            subdomain=settings.ZENDESK_SUBDOMAIN,
+            token=settings.ZENDESK_TOKEN,
+        )
+        response = client.search(
+            "{}-{}".format(foia.slug, foia.pk),
+            type="ticket",
+            via="api",
+            subject="FOIAOnline",
+            status="open",
+        )
+        return len(list(response)) > 0
+
+    def check_open_ticket(foia):
+        """Check if an open ticket exists for this FOIA"""
+        if settings.USE_ZENDESK:
+            return check_zendesk_ticket(foia)
+        else:
+            return check_zoho_ticket(foia)
+
+    for foia in foias:
+        # check if there is an open ticket
+        if check_open_ticket(foia):
             # found an existing open ticket
             logger.info(
-                'FOIAOnline autologin: request %s has an open zoho ticket, not logging in',
+                'FOIAOnline autologin: request %s has an open ticket, not logging in',
                 foia.pk
             )
             continue

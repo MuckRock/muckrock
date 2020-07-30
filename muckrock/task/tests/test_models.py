@@ -6,6 +6,7 @@ Tests for Tasks models
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import timezone
 
 # Standard Library
@@ -181,7 +182,7 @@ class FlaggedTaskTests(TestCase):
     def setUp(self):
         self.task = FlaggedTask
 
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def test_get_absolute_url(self):
         text = 'Lorem ipsum'
         user = UserFactory()
@@ -190,7 +191,7 @@ class FlaggedTaskTests(TestCase):
         _url = reverse('flagged-task', kwargs={'pk': flagged_task.pk})
         eq_(flagged_task.get_absolute_url(), _url)
 
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def test_flagged_object(self):
         """A flagged task should be able to return its object."""
         text = 'Lorem ipsum'
@@ -212,7 +213,7 @@ class FlaggedTaskTests(TestCase):
         eq_(flagged_jurisdiction_task.flagged_object(), jurisdiction)
 
     @raises(AttributeError)
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def test_no_flagged_object(self):
         """Should raise an error if no flagged object"""
         text = 'Lorem ipsum'
@@ -221,7 +222,7 @@ class FlaggedTaskTests(TestCase):
         flagged_task.flagged_object()
 
     @mock.patch('muckrock.message.tasks.support.delay')
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def test_reply(self, mock_support):
         """Given a message, a support notification should be sent to the task's user."""
         flagged_task = FlaggedTaskFactory()
@@ -250,6 +251,24 @@ class FlaggedTaskTests(TestCase):
         flagged_task.refresh_from_db()
         ok_(flagged_task.resolved)
         eq_(flagged_task.form_data, {'zoho_id': 'ticket_id'})
+
+    @override_settings(USE_ZENDESK=True)
+    @requests_mock.Mocker()
+    def test_create_zend_ticket(self, mock_requests):
+        """Test the creation of a zendesk help ticket when a flag is created"""
+        mock_requests.post(
+            'https://muckrock.zendesk.com/api/v2/requests.json',
+            json={'request': {
+                'id': 'ticket_id'
+            }},
+        )
+        flagged_task = FlaggedTaskFactory(
+            user__email='flag@example.com',
+            text='Example flag text',
+        )
+        flagged_task.refresh_from_db()
+        ok_(flagged_task.resolved)
+        eq_(flagged_task.form_data, {'zen_id': 'ticket_id'})
 
 
 @mock.patch('muckrock.message.notifications.SlackNotification.send', mock_send)
@@ -603,7 +622,7 @@ class TestTaskManager(TestCase):
     @mock.patch(
         'muckrock.message.notifications.SlackNotification.send', mock_send
     )
-    @mock.patch('muckrock.task.tasks.create_zoho_ticket.delay', mock.Mock())
+    @mock.patch('muckrock.task.tasks.create_ticket.delay', mock.Mock())
     def setUp(self):
         user = UserFactory()
         agency = AgencyFactory(status='pending')

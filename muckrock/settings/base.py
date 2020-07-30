@@ -784,3 +784,9 @@ PLAID_SECRET = os.environ.get('PLAID_SECRET')
 PLAID_PUBLIC_KEY = os.environ.get('PLAID_PUBLIC_KEY')
 PLAID_ENV = os.environ.get('PLAID_ENV', 'development')
 PLAID_ACCESS_TOKEN = os.environ.get('PLAID_ACCESS_TOKEN')
+
+# ZenDesk
+USE_ZENDESK = boolcheck(os.environ.get('USE_ZENDESK', False))
+ZENDESK_TOKEN = os.environ.get('ZENDESK_TOKEN', '')
+ZENDESK_EMAIL = os.environ.get('ZENDESK_EMAIL', '')
+ZENDESK_SUBDOMAIN = os.environ.get('ZENDESK_SUBDOMAIN', 'muckrock')
