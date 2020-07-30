@@ -669,13 +669,32 @@ class FlaggedTask(Task):
         )
 
         description = self.text
-        for obj in [self.foia, self.agency, self.jurisdiction]:
+        tags = ['flag', self.category.replace(' ', '_')]
+
+        for obj_name in ["foia", "agency", "jurisdiction"]:
+            obj = getattr(self, obj_name)
             if obj:
-                description += '\n{}'.format(obj.get_absolute_url())
+                description += '\n{}{}'.format(
+                    settings.MUCKROCK_URL,
+                    obj.get_absolute_url(),
+                )
+                tags.append('{}_flag'.format(obj_name))
+
+        if self.user:
+            entitlements = self.user.organizations.values_list(
+                'entitlement__slug', flat=True
+            ).distinct()
+            if 'free' in entitlements and len(entitlements) > 1:
+                entitlements.remove('free')
+            tags.extend(entitlements)
 
         request = {
-            'subject': description[:50],
-            'comment': Comment(body=description)
+            'subject': self.get_category_display(),
+            'comment': Comment(body=description),
+            'type': 'task',
+            'priority': 'normal',
+            'status': 'new',
+            'tags': tags,
         }
         requester = {}
         if self.user and self.user.profile.full_name:

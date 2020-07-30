@@ -12,8 +12,8 @@ import re
 
 # Third Party
 from autocomplete_light import shortcuts as autocomplete_light
-from taggit.models import Tag as TaggitTag
 from taggit.models import GenericTaggedItemBase
+from taggit.models import Tag as TaggitTag
 from taggit.utils import _parse_tags
 
 
