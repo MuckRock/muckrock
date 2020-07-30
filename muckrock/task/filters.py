@@ -42,11 +42,19 @@ class TaskFilterSet(django_filters.FilterSet):
     )
     resolved_by = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserTaskAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users"},
+            forward=(forward.Const(True, "tasks"),),
+        ),
     )
     assigned = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserTaskAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users"},
+            forward=(forward.Const(True, "tasks"),),
+        ),
     )
     deferred = django_filters.BooleanFilter(
         label="Deferred", method="filter_deferred", widget=forms.CheckboxInput()
@@ -120,7 +128,11 @@ class SnailMailTaskFilterSet(TaskFilterSet):
     )
     resolved_by = django_filters.ModelMultipleChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget("UserTaskAutocomplete"),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "Search users"},
+            forward=(forward.Const(True, "tasks"),),
+        ),
     )
 
     def blank_choice(self, queryset, name, value):
@@ -262,7 +274,7 @@ class PortalTaskFilterSet(TaskFilterSet):
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
             url="user-autocomplete",
-            attrs={"data-placeholder": "Search users", "data-minimum-input-length": 2},
+            attrs={"data-placeholder": "Search users"},
             forward=(forward.Const(True, "tasks"),),
         ),
     )

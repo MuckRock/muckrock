@@ -19,38 +19,15 @@
     When the jurisdiction selection is removed, we want to clear and disable the agency input.
     */
 
-    // Functions for modifying the agency input
-
-    function disableAgencyAutocomplete(disabled) {
-        $('#id_agency-autocomplete').attr('disabled', disabled);
-        $('#id_agency').attr('disabled', disabled);
-        var agencyField = $('#id_agency').closest('.field');
-        if (disabled) {
-            agencyField.addClass('disabled');
-        } else {
-            agencyField.removeClass('disabled');
-        }
-    }
-    function updateAgencyAutocompleteJurisdiction(id) {
-        $('#id_agency-autocomplete').yourlabsAutocomplete().data = {
-            jurisdiction_id: id
-        }
-    }
-    function clearAgencyAutocomplete() {
-        var widget = $('#id_agency-wrapper').yourlabsWidget()
-        widget.freeDeck();
-    }
-
     // Functions for responding to changes on the jurisdiction input
 
     function agencyInput(jurisdictionInput) {
+        $('#id_agency').val(null).trigger('change');
         var jurisdiction = $(jurisdictionInput).val();
         if (jurisdiction && jurisdiction.length > 0) {
-            disableAgencyAutocomplete(false);
-            updateAgencyAutocompleteJurisdiction(jurisdiction[0]);
+            $("#id_agency").attr('disabled', false);
         } else {
-            clearAgencyAutocomplete();
-            disableAgencyAutocomplete(true);
+            $("#id_agency").attr('disabled', true);
         }
     }
 

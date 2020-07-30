@@ -20,7 +20,7 @@ class FoiaMachineRequestFilter(django_filters.FilterSet):
         queryset=Jurisdiction.objects.filter(hidden=False),
         widget=autocomplete.ModelSelect2(
             url="jurisdiction-autocomplete",
-            attrs={"data-placeholder": "Search for jurisdictions"},
+            attrs={"data-placeholder": "Search jurisdictions"},
         ),
     )
     agency = django_filters.ModelChoiceFilter(

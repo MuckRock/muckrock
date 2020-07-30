@@ -517,31 +517,6 @@ input[type="file"] {
     color: #6666ff;
 }
 
-/* Autocomplete widget */
-
-.autocomplete-light-widget {
-    width: 100%;
-}
-.autocomplete-light-widget.yourlabs-autocomplete {
-    width: auto;
-    max-height: 20em;
-    overflow: hidden;
-    overflow-y: scroll;
-    padding: 0;
-    left: 0;
-}
-.autocomplete-light-widget .deck > span {
-    display: block;
-    width: 100%;
-    padding: .25em;
-    border: 1px solid $light-grey;
-    background: $pure-white;
-}
-.autocomplete-light-widget .remove {
-    vertical-align: middle;
-    margin-right: .25em;
-}
-
 /* Exemption Browser */
 
 .exemptionBrowser label {

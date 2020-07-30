@@ -284,9 +284,8 @@ class AgencyAutocomplete(MRAutocompleteView):
         if "jurisdiction" not in self.forwarded:
             return queryset
 
-        # jurisdiction is forwarded as a list, so grab first element
         try:
-            jurisdiction_id = self.forwarded["jurisdiction"][0]
+            jurisdiction_id = self.forwarded["jurisdiction"]
         except (TypeError, IndexError):
             # if jurisdiction is not a single element list, something went wrong
             # do not filter
@@ -303,7 +302,7 @@ class AgencyAutocomplete(MRAutocompleteView):
                 )
 
         # otherwise just get agencies from the given jurisdiction
-        return queryset.filter(jurisdiction=jurisdiction_id)
+        return queryset.filter(jurisdiction_id=jurisdiction_id)
 
 
 class AgencyComposerAutocomplete(AgencyAutocomplete):
