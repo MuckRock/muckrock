@@ -17,9 +17,8 @@ import logging
 import actstream
 import django_filters
 import requests
-from rest_framework import decorators
 from rest_framework import status as http_status
-from rest_framework import viewsets
+from rest_framework import decorators, viewsets
 from rest_framework.filters import DjangoFilterBackend, SearchFilter
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
