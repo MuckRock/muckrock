@@ -22,8 +22,8 @@ from itertools import groupby
 # Third Party
 import bleach
 from zenpy import Zenpy
-from zenpy.lib.api_objects import Comment, Request
 from zenpy.lib.api_objects import User as ZenUser
+from zenpy.lib.api_objects import Comment, Request
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
