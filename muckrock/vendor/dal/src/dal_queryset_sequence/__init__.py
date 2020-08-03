@@ -1,1 +1,0 @@
-"""QuerySetSequence support for DAL."""
