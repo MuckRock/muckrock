@@ -9,7 +9,7 @@ import csv
 import xlrd
 
 
-class CsvCreator(object):
+class CsvCreator:
     """Create a dataset from a csv"""
 
     def __init__(self, name, file_):
@@ -32,7 +32,7 @@ class CsvCreator(object):
             yield row[:header_len]
 
 
-class XlsCreator(object):
+class XlsCreator:
     """Create a dataset from a csv"""
 
     def __init__(self, name, file_):
@@ -55,7 +55,7 @@ class XlsCreator(object):
             yield [str(v) for v in self.sheet.row_values(i)]
 
 
-class CrowdsourceCreator(object):
+class CrowdsourceCreator:
     """Create a dataset from a crowdsource's responses"""
 
     def __init__(self, crowdsource):

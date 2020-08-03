@@ -18,7 +18,7 @@ class SaveSearchForm(forms.Form):
     search_title = forms.CharField(label="Save Search", required=False)
 
 
-class SaveSearchFormHandler(object):
+class SaveSearchFormHandler:
     """Help process the combined data from the save search form and the
     filter form
     """

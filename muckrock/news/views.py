@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from django.db.models import Prefetch, Q
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import redirect
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.views.generic.dates import (
@@ -17,9 +16,6 @@ from django.views.generic.dates import (
     MonthArchiveView,
     YearArchiveView,
 )
-
-# Third Party
-from dal import autocomplete
 
 # MuckRock
 from muckrock.core.utils import cache_get_or_set
@@ -227,9 +223,7 @@ class ArticleAutocomplete(MRAutocompleteView):
 
     queryset = (
         Article.objects.get_published()
-        .prefetch_related(
-            Prefetch("authors", User.objects.select_related("profile"))
-        )
+        .prefetch_related(Prefetch("authors", User.objects.select_related("profile")))
         .distinct()
     )
     search_fields = ["title", "tags__name"]

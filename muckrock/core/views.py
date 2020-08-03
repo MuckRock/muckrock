@@ -47,7 +47,7 @@ from muckrock.project.models import Project
 logger = logging.getLogger(__name__)
 
 
-class OrderedSortMixin(object):
+class OrderedSortMixin:
     """Sorts and orders a queryset given some inputs."""
 
     default_sort = "id"
@@ -83,7 +83,7 @@ class OrderedSortMixin(object):
         return context
 
 
-class ModelFilterMixin(object):
+class ModelFilterMixin:
     """
     The ModelFilterMixin gives the ability to filter a list
     of objects with the help of the django_filters library.
@@ -143,7 +143,7 @@ class ModelFilterMixin(object):
         return context
 
 
-class PaginationMixin(object):
+class PaginationMixin:
     """
     The PaginationMixin provides pagination support on a generic ListView,
     but also allows the per_page value to be adjusted with URL arguments.
@@ -169,7 +169,7 @@ class PaginationMixin(object):
         return context
 
 
-class ModelSearchMixin(object):
+class ModelSearchMixin:
     """
     The ModelSearchMixin allows a queryset provided by a list view to be
     searched, using the watson library.
@@ -316,7 +316,7 @@ class LandingView(TemplateView):
     template_name = "flatpages/landing.html"
 
 
-class Homepage(object):
+class Homepage:
     """Control caching for the homepage"""
 
     def get_cached_values(self):
@@ -397,7 +397,7 @@ def reset_homepage_cache(request):
     return redirect("index")
 
 
-class StripeFormMixin(object):
+class StripeFormMixin:
     """Prefills the StripeForm values."""
 
     def get_initial(self):

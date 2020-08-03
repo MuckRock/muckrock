@@ -194,7 +194,7 @@ class ProjectDetailView(DetailView):
         return super(ProjectDetailView, self).dispatch(*args, **kwargs)
 
 
-class ProjectPermissionsMixin(object):
+class ProjectPermissionsMixin:
     """
     This mixin provides a test to see if the current user is either
     a staff member or a project contributor. If they are, they are

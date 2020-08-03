@@ -11,7 +11,7 @@ import calendar
 import re
 
 
-class Field(object):
+class Field:
     """A dataset field"""
 
     @classmethod

@@ -5,7 +5,7 @@ from django import forms
 
 # MuckRock
 from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.models import ExampleAppeal, Jurisdiction
+from muckrock.jurisdiction.models import ExampleAppeal
 
 
 class ExemptionSubmissionForm(forms.Form):
@@ -32,9 +32,3 @@ class AppealForm(forms.Form):
     base_language = forms.ModelMultipleChoiceField(
         queryset=ExampleAppeal.objects.all(), required=False
     )
-
-
-class CSVImportForm(forms.Form):
-    """Import a CSV file of models"""
-
-    csv_file = forms.FileField()

@@ -62,7 +62,7 @@ class Digest(TemplateEmail):
         if interval:
             # we use relativedelta in addition to timedelta because it gives us a greater
             # flexibility in the kinds of intervals we can define, e.g. weeks and months
-            if isinstance(interval, relativedelta) or isinstance(interval, timedelta):
+            if isinstance(interval, (relativedelta, timedelta)):
                 self.interval = interval
             else:
                 raise TypeError("Interval must be relativedelta or timedelta")

@@ -25,7 +25,7 @@ from muckrock.communication.models import (
 )
 
 
-class ReadOnlyMixin(object):
+class ReadOnlyMixin:
     """Admin mixin to make all fields read-only"""
 
     def get_readonly_fields(self, request, obj=None):
@@ -36,7 +36,7 @@ class ReadOnlyMixin(object):
         ]
 
 
-class CommunicationLinkMixin(object):
+class CommunicationLinkMixin:
     """Admin mixin to show FOIA Communication link"""
 
     def comm_link(self, obj):

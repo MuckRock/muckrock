@@ -5,7 +5,7 @@
 from django import forms
 
 
-class Field(object):
+class Field:
     """Base field for crowdsource form"""
 
     accepts_choices = False

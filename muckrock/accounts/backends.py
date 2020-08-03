@@ -51,6 +51,6 @@ class SquareletBackend(OpenIdConnectAuth):
 
     def remove_nonce(self, nonce_id):
         if hasattr(self, "password_grant_auth") and self.password_grant_auth:
-            return
+            return None
         else:
             return super(SquareletBackend, self).remove_nonce(nonce_id)

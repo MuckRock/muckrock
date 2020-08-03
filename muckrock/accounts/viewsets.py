@@ -19,7 +19,7 @@ class UserViewSet(viewsets.ModelViewSet):
     This is used by squarelet to push changes to MuckRock
     """
 
-    # XXX
+    # XXX remove
     queryset = User.objects.order_by("id").prefetch_related("profile", "groups")
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)

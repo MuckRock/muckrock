@@ -42,7 +42,7 @@ from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.task.models import PaymentInfoTask, SnailMailTask
 
 
-class RunCommitHooksMixin(object):
+class RunCommitHooksMixin:
     """Mixin to include run commit hooks for test cases"""
 
     def run_commit_hooks(self):

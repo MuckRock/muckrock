@@ -37,7 +37,7 @@ from muckrock.foiamachine.models import (
 )
 
 
-class LoginRequiredMixin(object):
+class LoginRequiredMixin:
     """
     Requires the user to login before continuing.
     We can't use the existing decorator because of django_hosts.

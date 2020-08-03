@@ -18,7 +18,7 @@ from smart_open.smart_open_lib import smart_open
 from muckrock.message.email import TemplateEmail
 
 
-class AsyncFileDownloadTask(object):
+class AsyncFileDownloadTask:
     """Base behavior for asynchrnously generating large files for downloading
 
     Subclasses should set:

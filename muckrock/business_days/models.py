@@ -116,6 +116,8 @@ class Holiday(models.Model):
                 # get number of days in the month
                 days = monthrange(date_.year, date_.month)[1]
                 return (days - date_.day) // 7 + 1 == -self.num
+        else:
+            return False
 
     def _match_easter(self, date_, _):
         """match for easter based dates"""
@@ -132,7 +134,7 @@ class Holiday(models.Model):
         )
 
 
-class HolidayCalendar(object):
+class HolidayCalendar:
     """A set of holidays"""
 
     def __init__(self, holidays, observe_sat):
@@ -151,7 +153,7 @@ class HolidayCalendar(object):
         """Is the given date a business day?"""
 
         weekday = date_.weekday()
-        if weekday == SAT or weekday == SUN:
+        if weekday in (SAT, SUN):
             return False
 
         return not self.is_holiday(date_)
@@ -186,7 +188,7 @@ class HolidayCalendar(object):
         return num * sign
 
 
-class Calendar(object):
+class Calendar:
     """A set of holidays"""
 
     def is_holiday(self, _):

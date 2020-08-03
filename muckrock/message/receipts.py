@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # move receipts to squarelet once crowdfunds and donations are moved over
 
 
-class LineItem(object):
+class LineItem:
     """A line item for a receipt"""
 
     def __init__(self, name, price):

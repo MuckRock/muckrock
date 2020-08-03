@@ -14,7 +14,7 @@ from muckrock.foia.tasks import classify_status
 from muckrock.task.models import ResponseTask
 
 
-class PortalAutoReceiveMixin(object):
+class PortalAutoReceiveMixin:
     """
     A mixin for handling receiving email messages and routing them to handlers
     based on the subject email

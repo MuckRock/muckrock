@@ -4,15 +4,11 @@ Admin registration for Jurisdiction models
 
 # Django
 from django import forms
-from django.conf.urls import url
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.auth.models import User
-from django.shortcuts import redirect, render
-from django.template.defaultfilters import slugify
 
 # Standard Library
 import logging
-import sys
 
 # Third Party
 from reversion.admin import VersionAdmin
@@ -20,7 +16,6 @@ from reversion.admin import VersionAdmin
 # MuckRock
 from muckrock.core import autocomplete
 from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.forms import CSVImportForm
 from muckrock.jurisdiction.models import (
     ExampleAppeal,
     Exemption,

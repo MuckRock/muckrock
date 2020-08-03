@@ -13,7 +13,6 @@ from furl import furl
 
 def make_host(url):
     """Strip the scheme from the URL, and append the port only if it is non-standard"""
-    # pylint: disable=redefined-variable-type
     url = furl(url)
     if url.port not in [80, 443]:
         host_name = "{}:{}".format(url.host, url.port)

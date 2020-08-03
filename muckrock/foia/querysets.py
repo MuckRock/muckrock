@@ -17,7 +17,7 @@ from itertools import groupby
 from muckrock.agency.constants import STALE_REPLIES
 
 
-class PreloadFileQuerysetMixin(object):
+class PreloadFileQuerysetMixin:
     """Mixin for preloading related files"""
 
     files_path = "files"

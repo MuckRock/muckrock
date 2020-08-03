@@ -234,6 +234,7 @@ class EmailOrFaxAutocomplete(Select2ListView):
         return list(emails.union(phones).values_list("label", flat=True)[:10])
 
     def create(self, text):
+        """Create the email or fax from the given text"""
         try:
             return str(get_email_or_fax(text))
         except ValidationError:

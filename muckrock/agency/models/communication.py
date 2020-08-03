@@ -15,8 +15,6 @@ ADDRESS_REQUEST_TYPES = (
 
 EMAIL_TYPES = (("to", "To"), ("cc", "CC"), ("none", "None"))
 
-# pylint: disable=model-missing-unicode
-
 
 class AgencyAddress(models.Model):
     """Through model for agency to address M2M"""

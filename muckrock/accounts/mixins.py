@@ -23,7 +23,7 @@ from muckrock.core.utils import squarelet_post
 logger = logging.getLogger(__name__)
 
 
-class MiniregMixin(object):
+class MiniregMixin:
     """A mixin to expose miniregister functionality to a view"""
 
     minireg_source = "Default"
@@ -88,7 +88,7 @@ class MiniregMixin(object):
         return user
 
 
-class BuyRequestsMixin(object):
+class BuyRequestsMixin:
     """Buy requests functionality"""
 
     def buy_requests(self, form, organization=None, payer=None):

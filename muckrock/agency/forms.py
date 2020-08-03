@@ -159,13 +159,6 @@ class AgencyForm(forms.ModelForm):
         }
 
 
-class CSVImportForm(forms.Form):
-    """Import a CSV file of models"""
-
-    csv_file = forms.FileField()
-    type_ = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
-
-
 class AgencyMergeForm(forms.Form):
     """A form to merge two agencies"""
 

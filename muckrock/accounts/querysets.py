@@ -39,9 +39,7 @@ class ProfileQuerySet(models.QuerySet):
         """Format user data and update or create the user"""
         user_map = {"preferred_username": "username", "email": "email"}
         user_defaults = {"preferred_username": "", "email": ""}
-        user_data = {
-            user_map[k]: data.get(k, user_defaults[k]) for k in user_map.keys()
-        }
+        user_data = {user_map[k]: data.get(k, user_defaults[k]) for k in user_map}
         if user_data["email"] is None:
             # the mail should only be null for agency users
             # on MuckRock that must be stored as a blank string
@@ -69,7 +67,7 @@ class ProfileQuerySet(models.QuerySet):
         # leave it unchanged, do not include it in profile_data
         profile_data = {
             profile_map[k]: data.get(k, profile_defaults.get(k))
-            for k in profile_map.keys()
+            for k in profile_map
             if k in data or k in profile_defaults
         }
         profile_data["user"] = user

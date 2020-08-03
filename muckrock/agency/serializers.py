@@ -95,7 +95,6 @@ class AgencySerializer(serializers.ModelSerializer):
         """After initializing the serializer,
         check that the current user has permission
         to view agency email data."""
-        # pylint: disable=super-on-old-class
         super(AgencySerializer, self).__init__(*args, **kwargs)
         request = self.context.get("request", None)
         if not (

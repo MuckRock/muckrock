@@ -161,7 +161,7 @@ def stripe_retry_on_error(func, *args, **kwargs):
     return retry_on_error(stripe.error.APIConnectionError, func, *args, **kwargs)
 
 
-class TempDisconnectSignal(object):
+class TempDisconnectSignal:
     """Context manager to remporarily disable a signal"""
 
     def __init__(self, signal, receiver, sender, dispatch_uid=None):

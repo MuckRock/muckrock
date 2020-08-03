@@ -12,7 +12,7 @@ import json
 import requests
 
 
-class SlackNotification(object):
+class SlackNotification:
     """
     Sends a Slack notification, conforming to the platform's specification.
     Slack notifications should be initialized with a payload that contains the notification.

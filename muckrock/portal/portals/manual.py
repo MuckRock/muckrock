@@ -12,7 +12,7 @@ from muckrock.core.utils import generate_key
 from muckrock.task.models import PortalTask
 
 
-class ManualPortal(object):
+class ManualPortal:
     """A fall-back type to manually handle portals we cannot automate yet"""
 
     def __init__(self, portal):

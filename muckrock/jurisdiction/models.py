@@ -21,7 +21,7 @@ from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
 
-class RequestHelper(object):
+class RequestHelper:
     """Helper methods for classes that have a get_requests() method"""
 
     def average_response_time(self):

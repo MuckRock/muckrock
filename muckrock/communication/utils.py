@@ -5,9 +5,6 @@ Utility functions for communication app
 # Django
 from django.core.validators import ValidationError
 
-# Third Party
-import phonenumbers
-
 # MuckRock
 from muckrock.communication.models import EmailAddress, PhoneNumber
 

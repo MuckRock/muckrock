@@ -4,16 +4,12 @@ Admin registration for Agency models
 
 # Django
 from django import forms
-from django.conf.urls import url
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
-from django.shortcuts import redirect, render
-from django.template.defaultfilters import slugify
 
 # Standard Library
 import logging
-import sys
 
 # Third Party
 from dal import forward
@@ -21,7 +17,6 @@ from pdfrw import PdfReader
 from reversion.admin import VersionAdmin
 
 # MuckRock
-from muckrock.agency.forms import CSVImportForm
 from muckrock.agency.models import (
     Agency,
     AgencyAddress,
@@ -31,10 +26,9 @@ from muckrock.agency.models import (
     AgencyRequestFormMapper,
     AgencyType,
 )
-from muckrock.communication.models import Address, EmailAddress, PhoneNumber
+from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.portal.models import Portal
 
 logger = logging.getLogger(__name__)
 
@@ -271,7 +265,7 @@ def get_jurisdiction(full_name):
         return Jurisdiction.objects.exclude(level="l").get(name=full_name).pk
 
 
-class EmailValidator(object):
+class EmailValidator:
     """Class to validate emails"""
 
     def validate(self, value):

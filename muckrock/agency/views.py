@@ -19,7 +19,6 @@ import re
 from string import capwords
 
 # Third Party
-from dal import autocomplete
 from fuzzywuzzy import fuzz, process
 
 # MuckRock
@@ -110,22 +109,16 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
-    # pylint: disable=unused-variable
     # pylint: disable=unused-argument
-
     # some jurisdiction slugs changed, just ignore the jurisdiction slug passed in
     agency = get_object_or_404(Agency, pk=idx)
     jurisdiction = agency.jurisdiction.slug
     jidx = agency.jurisdiction.pk
 
     if action == "view":
-        return redirect(
-            "/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/" % locals()
-        )
+        return redirect(f"/agency/{jurisdiction}-{jidx}/{slug}-{idx}/")
 
-    return redirect(
-        "/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/" % locals()
-    )
+    return redirect(f"/agency/{jurisdiction}-{jidx}/{slug}-{idx}/{action}/")
 
 
 def redirect_flag(request, jurisdiction, jidx, slug, idx):

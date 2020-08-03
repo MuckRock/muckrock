@@ -13,7 +13,7 @@ import requests
 logger = logging.getLogger(__name__)
 
 
-class DropboxDownloader(object):
+class DropboxDownloader:
     """Download configuration for dropbox links"""
 
     name = "DropBox"

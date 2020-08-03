@@ -10,7 +10,7 @@ from muckrock.accounts.models import Profile
 logger = logging.getLogger(__name__)
 
 
-def associate_by_uuid(backend, response, user=None, *args, **kwargs):
+def associate_by_uuid(backend, response, *args, user=None, **kwargs):
     """Associate current auth with a user with the same uuid in the DB."""
     # pylint: disable=unused-argument
 
@@ -22,6 +22,8 @@ def associate_by_uuid(backend, response, user=None, *args, **kwargs):
             return None
         else:
             return {"user": profile.user, "is_new": False}
+    else:
+        return None
 
 
 def save_profile(backend, user, response, *args, **kwargs):

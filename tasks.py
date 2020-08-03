@@ -76,12 +76,7 @@ def coverage(c, settings="test", reuse="0"):
 @task
 def pylint(c):
     """Run the linter"""
-    c.run(
-        DJANGO_RUN.format(
-            cmd="pylint muckrock --rcfile=config/pylint.conf "
-            "--jobs=$(expr $(nproc) / 2)"
-        )
-    )
+    c.run(DJANGO_RUN.format(cmd="pylint muckrock --rcfile=config/pylint.conf"))
 
 
 @task
