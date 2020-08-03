@@ -145,7 +145,7 @@ scikit-learn==0.16.1
 scipy==0.14.0
 simplegeneric==0.8.1      # via ipython
 simplejson==3.16.0
-six==1.15.0               # via bleach, django-compat, django-extensions, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pathlib2, prompt-toolkit, pyjwkest, python-dateutil, social-auth-app-django, social-auth-core, traitlets, zenpy
+six==1.10.0               # via bleach, django-compat, django-extensions, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pathlib2, prompt-toolkit, pyjwkest, python-dateutil, social-auth-app-django, social-auth-core, traitlets, zenpy
 smart-open==1.6.0
 smartypants==1.8.6
 social-auth-app-django==2.1.0
