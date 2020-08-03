@@ -22,7 +22,6 @@ import '../vendor/quicksearch';
 import '../vendor/stacktable';
 
 import './account';
-import './autocomplete';
 import './checkout';
 import './communication';
 import './crowdfund';
