@@ -25,17 +25,14 @@
 var levelFilter = $('#id_level');
 var stateFilter = $('#id_parent');
 function disableStateFilter(){
-    $(stateFilter).attr('disabled', true).closest('.field').addClass('disabled');
-    $('#id_parent-autocomplete').attr('disabled', true);
-    $('#id_parent-wrapper').yourlabsWidget().freeDeck();
+    stateFilter.attr('disabled', true).closest('.field').addClass('disabled');
+    stateFilter.val(null).trigger('change');
 }
 function enableStateFilter(){
-    $(stateFilter).attr('disabled', false).closest('.field').removeClass('disabled');
-    $(stateFilter).siblings('#id_parent-autocomplete').attr('disabled', false);
+    stateFilter.attr('disabled', false).closest('.field').removeClass('disabled');
 }
 function updateStateFilter(){
     var levelValue = $(levelFilter).val();
-    console.log(levelValue);
     if (levelValue != 'l') {
         disableStateFilter();
     } else {

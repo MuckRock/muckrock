@@ -21,7 +21,7 @@ class JurisdictionFilterSet(django_filters.FilterSet):
     parent = django_filters.ModelChoiceFilter(
         label="State",
         queryset=Jurisdiction.objects.filter(level="s", hidden=False),
-        widget=autocomplete.ModelSelect2Multiple(
+        widget=autocomplete.ModelSelect2(
             url="jurisdiction-autocomplete",
             attrs={"data-placeholder": "Search for state"},
             forward=(forward.Const(["s"], "levels"),),
