@@ -7,8 +7,6 @@ from django import forms
 from django.contrib.auth.models import User
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
-from autocomplete_light.contrib.taggit_field import TaggitField
 from dal import forward
 from dal.autocomplete import TaggitSelect2
 from requests.exceptions import HTTPError
@@ -19,7 +17,6 @@ from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
-from muckrock.core.forms import TaggitWidget
 from muckrock.foia.forms.comms import ContactInfoForm
 from muckrock.foia.models import FOIAComposer
 

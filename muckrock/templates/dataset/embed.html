@@ -16,12 +16,12 @@
     </style>
     {% compress js %}
       {% render_bundle 'main' 'js' %}
-      <script type="text/javascript" src="{% static 'autocomplete_light/django_admin.js' %}"></script>
-      <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.js' %}"></script>
-      <script type="text/javascript" src="{% static 'autocomplete_light/widget.js' %}"></script>
-      <script type="text/javascript" src="{% static 'autocomplete_light/addanother.js' %}"></script>
-      <script type="text/javascript" src="{% static 'autocomplete_light/text_widget.js' %}"></script>
-      <script type="text/javascript" src="{% static 'autocomplete_light/remote.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/jquery.init.js' %}"></script>
+      <script type="text/javascript" src="{% static 'vendor/select2/dist/js/select2.full.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/forward.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/select2.js' %}"></script>
+      <script type="text/javascript" src="{% static 'autocomplete_light/jquery.post-setup.js' %}"></script>
     {% endcompress %}
   </head>
   <body style="margin: 0;">

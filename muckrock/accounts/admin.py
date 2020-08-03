@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock

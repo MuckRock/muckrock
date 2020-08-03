@@ -6,8 +6,6 @@ Forms for the project application
 from django import forms
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
-from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 from dal import forward
 from dal.autocomplete import TaggitSelect2
 from taggit.forms import TagField

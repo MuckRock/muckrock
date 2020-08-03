@@ -4,7 +4,6 @@ Filters for the Agency application
 
 # Third Party
 import django_filters
-from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.agency.models import Agency

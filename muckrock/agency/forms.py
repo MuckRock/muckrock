@@ -4,7 +4,6 @@
 from django import forms
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from localflavor.us.forms import USZipCodeField
 from localflavor.us.us_states import STATE_CHOICES
 from phonenumber_field.formfields import PhoneNumberField

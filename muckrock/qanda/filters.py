@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 
 # Third Party
 import django_filters
-from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.core import autocomplete

@@ -8,14 +8,12 @@ from django.contrib.auth.models import User
 
 # Third Party
 import phonenumbers
-from autocomplete_light import shortcuts as autocomplete_light
 from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.fields import EmptyLastModelChoiceField
-from muckrock.core.forms import TaggitWidget
 from muckrock.foia.models import FOIACommunication
 
 AGENCY_STATUS = [

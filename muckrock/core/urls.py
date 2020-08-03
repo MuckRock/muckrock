@@ -117,7 +117,6 @@ urlpatterns = [
     url(r"^admin/", admin.site.urls),
     url(r"^search/$", views.SearchView.as_view(), name="search"),
     url(r"^api_v1/", include(router.urls)),
-    url(r"^autocomplete/", include("autocomplete_light.urls")),
     url(r"^robots\.txt$", include("robots.urls")),
     url(
         r"^favicon.ico$",

@@ -11,7 +11,6 @@ from django.db import models
 import re
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from taggit.models import GenericTaggedItemBase, Tag as TaggitTag
 from taggit.utils import _parse_tags
 
@@ -50,8 +49,3 @@ class TaggedItemBase(GenericTaggedItemBase):
     tag = models.ForeignKey(
         Tag, related_name="%(app_label)s_%(class)s_items", on_delete=models.CASCADE
     )
-
-
-autocomplete_light.register(
-    Tag, attrs={"placeholder": "Search tags", "data-autocomplete-minimum-characters": 1}
-)

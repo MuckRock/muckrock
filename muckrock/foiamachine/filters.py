@@ -4,7 +4,6 @@ QuerySet filters for FOIA Machine models
 
 # Third Party
 import django_filters
-from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.agency.models import Agency

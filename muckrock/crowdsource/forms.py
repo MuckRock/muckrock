@@ -10,7 +10,6 @@ import csv
 import json
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from dal import forward
 
 # MuckRock

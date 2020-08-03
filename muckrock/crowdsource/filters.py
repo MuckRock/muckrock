@@ -8,9 +8,9 @@ from django.contrib.auth.models import User
 
 # Third Party
 import django_filters
-from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.core.filters import NULL_BOOLEAN_CHOICES
 from muckrock.crowdsource.models import Crowdsource
 
@@ -28,7 +28,9 @@ class CrowdsourceFilterSet(django_filters.FilterSet):
     )
     user = django_filters.ModelChoiceFilter(
         queryset=User.objects.all(),
-        widget=autocomplete_light.ChoiceWidget("UserAutocomplete"),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "Search users"}
+        ),
     )
 
     class Meta:

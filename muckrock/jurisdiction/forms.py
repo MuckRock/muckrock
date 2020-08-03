@@ -3,9 +3,6 @@
 # Django
 from django import forms
 
-# Third Party
-from autocomplete_light import shortcuts as autocomplete_light
-
 # MuckRock
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import ExampleAppeal, Jurisdiction

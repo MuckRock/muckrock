@@ -9,7 +9,6 @@ from django import forms
 import logging
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from dal import forward
 
 # MuckRock

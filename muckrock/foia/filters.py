@@ -12,17 +12,11 @@ import re
 
 # Third Party
 import django_filters
-from autocomplete_light import shortcuts as autocomplete_light
 
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
-from muckrock.core.filters import (
-    BLANK_STATUS,
-    NULL_BOOLEAN_CHOICES,
-    AutocompleteModelMultipleChoiceFilter,
-    RangeWidget,
-)
+from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag

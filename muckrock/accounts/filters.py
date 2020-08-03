@@ -4,7 +4,6 @@ Filters for accounts
 
 # Third Party
 import django_filters
-from autocomplete_light import shortcuts as autocomplete_light
 from dal import forward
 
 # MuckRock

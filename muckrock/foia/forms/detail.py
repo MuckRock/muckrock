@@ -9,9 +9,6 @@ from django.contrib.auth.models import User
 # Standard Library
 from datetime import date, timedelta
 
-# Third Party
-from autocomplete_light import shortcuts as autocomplete_light
-
 # MuckRock
 from muckrock.core import autocomplete
 from muckrock.foia.models import END_STATUS, FOIANote, FOIARequest, TrackingNumber

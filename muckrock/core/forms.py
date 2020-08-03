@@ -5,13 +5,9 @@ Forms for MuckRock
 # Django
 from django import forms
 from django.conf import settings
-from django.contrib.auth.models import User
 
 # Third Party
 import six
-from autocomplete_light import shortcuts as autocomplete_light
-from autocomplete_light.contrib.taggit_field import TaggitField
-from autocomplete_light.widgets import TextWidget
 from dal.autocomplete import TaggitSelect2
 from taggit.forms import TagField
 from taggit.utils import edit_string_for_tags
@@ -19,15 +15,6 @@ from taggit.utils import edit_string_for_tags
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-
-
-class TaggitWidget(TextWidget):
-    """built in one breaks on select_related... not sure why"""
-
-    def render(self, name, value, attrs=None):
-        if value is not None and not isinstance(value, six.string_types):
-            value = edit_string_for_tags(value)
-        return super(TaggitWidget, self).render(name, value, attrs)
 
 
 class TagManagerForm(forms.Form):

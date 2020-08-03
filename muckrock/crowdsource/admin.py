@@ -7,9 +7,6 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-# Third Party
-from autocomplete_light import shortcuts as autocomplete_light
-
 # MuckRock
 from muckrock.communication.models import EmailAddress
 from muckrock.core import autocomplete

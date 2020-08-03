@@ -17,7 +17,6 @@ import os
 from datetime import date, timedelta
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from reversion.admin import VersionAdmin
 
 # MuckRock

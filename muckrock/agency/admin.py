@@ -16,7 +16,6 @@ import logging
 import sys
 
 # Third Party
-from autocomplete_light import shortcuts as autocomplete_light
 from dal import forward
 from pdfrw import PdfReader
 from reversion.admin import VersionAdmin

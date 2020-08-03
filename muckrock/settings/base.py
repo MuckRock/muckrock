@@ -195,7 +195,6 @@ INSTALLED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.sites",
-    "autocomplete_light",
     "dal",
     "dal_select2",
     "dal_legacy_static",
