@@ -7,6 +7,7 @@ Tests for the FOIA views
 
 # Django
 from django.contrib.auth.models import AnonymousUser, User
+from django.http.request import QueryDict
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
 from django.urls import resolve, reverse
@@ -224,7 +225,7 @@ class TestRequestDetailView(TestCase):
 
     def test_add_tags(self):
         """Posting a collection of tags to a request should update its tags."""
-        data = {"action": "tags", "tags": "foo, bar"}
+        data = {"action": "tags", "tags": ["foo", "bar"]}
         http_post_response(self.url, self.view, data, self.foia.user, **self.kwargs)
         self.foia.refresh_from_db()
         ok_("foo" in [tag.name for tag in self.foia.tags.all()])
@@ -570,7 +571,9 @@ class TestBulkActions(TestCase):
         foia = FOIARequestFactory(composer__user=user)
 
         MyRequestList()._tags(
-            FOIARequest.objects.filter(pk=foia.pk), user, {"tags": "red, blue"}
+            FOIARequest.objects.filter(pk=foia.pk),
+            user,
+            QueryDict("tags=red&tags=blue"),
         )
 
         foia.refresh_from_db()

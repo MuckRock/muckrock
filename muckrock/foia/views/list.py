@@ -39,7 +39,7 @@ from muckrock.foia.tasks import export_csv
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
-from muckrock.tags.models import Tag, parse_tags
+from muckrock.tags.models import Tag, normalize, parse_tags
 from muckrock.task.models import ReviewAgencyTask
 
 

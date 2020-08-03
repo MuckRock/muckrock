@@ -230,7 +230,7 @@ class TestProjectEditView(TestCase):
         When sending data, the 'edit' keyword should be set to 'description'.
         """
         desc = "Lorem ipsum"
-        data = {"title": self.project.title, "description": desc}
+        data = {"title": self.project.title, "description": desc, "tags": ""}
         form = forms.ProjectUpdateForm(data, instance=self.project)
         ok_(form.is_valid(), "The form should validate. %s" % form.errors)
         http_post_response(self.url, self.view, data, self.contributor, **self.kwargs)
@@ -244,6 +244,7 @@ class TestProjectEditView(TestCase):
         data = {
             "title": self.project.title,
             "contributors": [self.contributor.pk, new_contributor.pk],
+            "tags": "",
         }
         form = forms.ProjectUpdateForm(data, instance=self.project)
         ok_(form.is_valid(), "The form should validate. %s" % form.errors)

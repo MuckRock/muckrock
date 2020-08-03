@@ -202,7 +202,7 @@ class TestFOIAComposerForm(TestCase):
         foia = FOIARequestFactory(composer__status="filed", embargo=False)
         FOIARequestFactory(composer=foia.composer)
         form = BaseComposerForm(
-            {"action": "save", "parent": foia.composer.pk},
+            {"action": "save", "parent": foia.composer.pk, "tags": ""},
             user=foia.composer.user,
             request=None,
         )
