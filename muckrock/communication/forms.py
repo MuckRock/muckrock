@@ -33,7 +33,7 @@ class AddressForm(forms.ModelForm):
     street = forms.CharField(max_length=64)
     suite = forms.CharField(max_length=64, required=False)
     city = forms.CharField(max_length=200)
-    state = forms.ChoiceField(choices=(("", "---"),) + STATE_CHOICES)
+    state = forms.ChoiceField(choices=(("", "---"),) + tuple(STATE_CHOICES))
     zip_code = USZipCodeField()
 
     class Meta:

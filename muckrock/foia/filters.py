@@ -57,7 +57,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
 
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     user = django_filters.ModelMultipleChoiceFilter(
-        name="composer__user",
+        field_name="composer__user",
         label="User",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
@@ -72,14 +72,14 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         ),
     )
     projects = django_filters.ModelMultipleChoiceFilter(
-        name="projects",
+        field_name="projects",
         queryset=lambda request: Project.objects.get_visible(request.user),
         widget=autocomplete.ModelSelect2Multiple(
             url="project-autocomplete", attrs={"data-placeholder": "Search projects"}
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
-        name="tags__name",
+        field_name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
         widget=autocomplete.ModelSelect2Multiple(
@@ -87,23 +87,23 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         ),
     )
     has_embargo = django_filters.BooleanFilter(
-        name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
+        field_name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
     )
     has_crowdfund = django_filters.BooleanFilter(
-        name="crowdfund",
+        field_name="crowdfund",
         lookup_expr="isnull",
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
     minimum_pages = django_filters.NumberFilter(
-        name="communications__files__pages",
+        field_name="communications__files__pages",
         lookup_expr="gte",
         label="Min. Pages",
         distinct=True,
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name="communications__datetime",
+        field_name="communications__datetime",
         label="Date Range",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
@@ -137,7 +137,7 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
-        name="tags__name",
+        field_name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
         widget=autocomplete.ModelSelect2Multiple(
@@ -145,23 +145,23 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         ),
     )
     has_embargo = django_filters.BooleanFilter(
-        name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
+        field_name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
     )
     has_crowdfund = django_filters.BooleanFilter(
-        name="crowdfund",
+        field_name="crowdfund",
         lookup_expr="isnull",
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
     minimum_pages = django_filters.NumberFilter(
-        name="communications__files__pages",
+        field_name="communications__files__pages",
         lookup_expr="gte",
         label="Min. Pages",
         distinct=True,
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name="communications__datetime",
+        field_name="communications__datetime",
         label="Date Range",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
@@ -188,7 +188,7 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
     """Allows filtering a request by user, agency, jurisdiction, or tags."""
 
     user = django_filters.ModelMultipleChoiceFilter(
-        name="composer__user",
+        field_name="composer__user",
         label="User",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
@@ -203,7 +203,7 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
-        name="tags__name",
+        field_name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
         widget=autocomplete.ModelSelect2Multiple(
@@ -220,7 +220,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     """Filters for agency users"""
 
     user = django_filters.ModelMultipleChoiceFilter(
-        name="composer__user",
+        field_name="composer__user",
         label="User",
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
@@ -229,7 +229,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
-        name="tags__name",
+        field_name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
         widget=autocomplete.ModelSelect2Multiple(
@@ -237,7 +237,7 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         ),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        name="communications__datetime",
+        field_name="communications__datetime",
         label="Date Range",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),

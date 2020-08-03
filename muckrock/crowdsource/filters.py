@@ -22,7 +22,7 @@ class CrowdsourceFilterSet(django_filters.FilterSet):
         choices=(("draft", "Draft"), ("open", "Open"), ("close", "Closed"))
     )
     is_staff = django_filters.BooleanFilter(
-        name="user__is_staff",
+        field_name="user__is_staff",
         label="Staff Owned",
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )

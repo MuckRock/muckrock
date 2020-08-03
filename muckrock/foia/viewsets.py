@@ -61,20 +61,22 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
 
-        agency = django_filters.NumberFilter(name="agency__id")
+        agency = django_filters.NumberFilter(field_name="agency__id")
         jurisdiction = django_filters.NumberFilter(
-            name="agency__jurisdiction__id", label="Jurisdiction ID"
+            field_name="agency__jurisdiction__id", label="Jurisdiction ID"
         )
-        user = django_filters.CharFilter(name="composer__user__username", label="User")
-        tags = django_filters.CharFilter(name="tags__name", label="Tags")
+        user = django_filters.CharFilter(
+            field_name="composer__user__username", label="User"
+        )
+        tags = django_filters.CharFilter(field_name="tags__name", label="Tags")
         has_datetime_submitted = django_filters.BooleanFilter(
-            name="composer__datetime_submitted",
+            field_name="composer__datetime_submitted",
             label="Has DateTime Submitted",
             lookup_expr="isnull",
             exclude=True,
         )
         has_datetime_done = django_filters.BooleanFilter(
-            name="datetime_done",
+            field_name="datetime_done",
             label="Has DateTime Done",
             lookup_expr="isnull",
             exclude=True,
@@ -369,9 +371,9 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
 
-        min_date = django_filters.DateFilter(name="datetime", lookup_expr="gte")
-        max_date = django_filters.DateFilter(name="datetime", lookup_expr="lte")
-        foia = django_filters.NumberFilter(name="foia__id")
+        min_date = django_filters.DateFilter(field_name="datetime", lookup_expr="gte")
+        max_date = django_filters.DateFilter(field_name="datetime", lookup_expr="lte")
+        foia = django_filters.NumberFilter(field_name="foia__id")
         delivered = django_filters.ChoiceFilter(
             method="filter_delivered", choices=DELIVERED_CHOICES
         )

@@ -15,14 +15,14 @@ class CheckFilterSet(django_filters.FilterSet):
     """Filtering for checks"""
 
     date_range = django_filters.DateFromToRangeFilter(
-        name="created_datetime",
+        field_name="created_datetime",
         label="Date Range",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
     minimum_amount = django_filters.NumberFilter(
-        name="amount",
+        field_name="amount",
         lookup_expr="gte",
         label="Min. Amount",
         widget=forms.NumberInput(),

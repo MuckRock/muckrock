@@ -23,8 +23,9 @@ import requests
 import stripe
 from actstream.models import Action
 from easy_thumbnails.fields import ThumbnailerImageField
-from localflavor.us.models import PhoneNumberField, USStateField
+from localflavor.us.models import USStateField
 from memoize import mproperty
+from phonenumber_field.modelfields import PhoneNumberField
 
 # MuckRock
 from muckrock.accounts.querysets import ProfileQuerySet

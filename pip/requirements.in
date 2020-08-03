@@ -1,6 +1,6 @@
 -e git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun # Mail backend used directly (on production)
 -e git://github.com/jazzband/django-queued-storage@541faad8f5d03e7e066d02b2a2d5b89d45b77819#egg=django_queued_storage # For delayed uploading of files
--e git://github.com/mitchelljkotler/django-news-sitemaps.git@be138fc8481ae999b052efe215d52ef5733506f4#egg=django_news_sitemaps # For generating news sitemaps
+-e git://github.com/theatlantic/django-news-sitemaps.git@v1.3.0#egg=django_news_sitemaps # For generating news sitemaps
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto # Used to access AWS
@@ -18,13 +18,13 @@ django-dashing # Used to create the dashboard
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
 django-extensions # Nicer shell
-django-filter # Used for filtering in viewsets
+django-filter<2 # Used for filtering in viewsets
 django-hijack # Allows admins to log in to other user accounts
 django-hosts # Used for multi-domain routing
 django-ipware # Used to get user's IP address
-django-localflavor # Used for phone numbers and state list
+django-localflavor<3 # Used for phone numbers and state list
 django-mathfilters # Mathematical template filters
-django-opensearch # Enables opensearch
+django-opensearch<0.5 # Enables opensearch
 django-phonenumber-field # for storing phone numbers in the database
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
@@ -35,7 +35,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
-django<2.0 # Django is kinda important...
+django<2.1 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF

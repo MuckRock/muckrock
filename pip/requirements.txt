@@ -5,7 +5,7 @@
 #    pip-compile --output-file pip/requirements.txt pip/requirements.in
 #
 -e git+git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun
--e git+git://github.com/mitchelljkotler/django-news-sitemaps.git@be138fc8481ae999b052efe215d52ef5733506f4#egg=django_news_sitemaps
+-e git+git://github.com/theatlantic/django-news-sitemaps.git@v1.3.0#egg=django_news_sitemaps
 -e git+git://github.com/jazzband/django-queued-storage@541faad8f5d03e7e066d02b2a2d5b89d45b77819#egg=django_queued_storage
 amqp==2.6.0               # via kombu
 babel==2.5.1              # via django-phonenumber-field
@@ -34,23 +34,23 @@ django-appconf==1.0.4     # via django-celery-email, django-compressor
 django-autocomplete-light==3.5.1
 django-celery-email==1.1.5
 django-choices==1.6.1
-django-compat==1.0.14     # via django-hijack
+django-compat==1.0.15     # via django-hijack
 django-compressor==2.4
-django-constance[database]==2.0.0
+django-constance[database]==2.7.0
 django-cors-headers==1.3.1
 django-dashing==0.3.3
 django-debug-toolbar==1.8
 django-email-bandit==1.2.0
 django-extensions==2.0.7
-django-filter==1.0.4
-django-hijack==2.1.4
+django-filter==1.1.0
+django-hijack==2.1.10
 django-hosts==3.0
 django-ipware==2.1.0
-django-localflavor==1.3
+django-localflavor==2.2
 django-mathfilters==0.4.0
-django-opensearch==0.4.0
+django-opensearch==0.4.2
 django-phonenumber-field==1.3.0
-django-picklefield==1.0.0  # via django-constance
+django-picklefield==3.0.0  # via django-constance
 django-premailer==0.2.0
 django-pylibmc==0.6.1
 django-redis==4.10.0      # via python-redis-lock
@@ -58,10 +58,10 @@ django-reversion==2.0.13
 django-robots==4.0
 django-sslify==0.2.7
 django-storages==1.5.1
-django-taggit==0.20.1
+django-taggit==1.3.0
 django-watson==1.5.5
 django-webpack-loader==0.7.0
-django==1.11.20
+django==2.0.13
 djangorestframework==3.11.0
 docutils==0.14            # via botocore
 dogslow==1.2
@@ -125,6 +125,7 @@ python-jose==3.1.0        # via social-auth-core
 python-levenshtein==0.12.0
 python-magic==0.4.15      # via pyimagediet
 python-redis-lock[django]==3.2.0
+python-stdnum==1.13       # via django-localflavor
 python3-openid==3.2.0     # via social-auth-core
 pytz==2020.1              # via babel, celery, django, zenpy
 pyyaml==5.1               # via pyimagediet

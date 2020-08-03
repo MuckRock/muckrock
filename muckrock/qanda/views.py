@@ -247,7 +247,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for Questions"""
 
-        foia = django_filters.NumberFilter(name="foia__id")
+        foia = django_filters.NumberFilter(field_name="foia__id")
 
         class Meta:
             model = Question

@@ -43,7 +43,7 @@ class JurisdictionViewSet(ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for Jurisdictions"""
 
-        parent = django_filters.NumberFilter(name="parent__id")
+        parent = django_filters.NumberFilter(field_name="parent__id")
 
         class Meta:
             model = Jurisdiction
@@ -98,7 +98,7 @@ class ExemptionViewSet(ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for Examptions"""
 
-        jurisdiction = django_filters.NumberFilter(name="jurisdiction__id")
+        jurisdiction = django_filters.NumberFilter(field_name="jurisdiction__id")
 
         class Meta:
             model = Exemption

@@ -22,12 +22,12 @@ class ArticleViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for Articles"""
 
-        authors = django_filters.CharFilter(name="authors__username")
-        editors = django_filters.CharFilter(name="editors__username")
-        foias = django_filters.NumberFilter(name="foias__id")
-        tags = django_filters.CharFilter(name="tags__name")
-        min_date = django_filters.DateFilter(name="pub_date", lookup_expr="gte")
-        max_date = django_filters.DateFilter(name="pub_date", lookup_expr="lte")
+        authors = django_filters.CharFilter(field_name="authors__username")
+        editors = django_filters.CharFilter(field_name="editors__username")
+        foias = django_filters.NumberFilter(field_name="foias__id")
+        tags = django_filters.CharFilter(field_name="tags__name")
+        min_date = django_filters.DateFilter(field_name="pub_date", lookup_expr="gte")
+        max_date = django_filters.DateFilter(field_name="pub_date", lookup_expr="lte")
 
         class Meta:
             model = Article

@@ -47,21 +47,27 @@ def create_task_viewset(model, serializer, fields):
     )
 
     filter_fields = dict(
-        assigned=django_filters.CharFilter(name="assigned__username"),
+        assigned=django_filters.CharFilter(field_name="assigned__username"),
         min_date_created=django_filters.DateFilter(
-            name="date_created", lookup_expr="gte"
+            field_name="date_created", lookup_expr="gte"
         ),
         max_date_created=django_filters.DateFilter(
-            name="date_created", lookup_expr="lte"
+            field_name="date_created", lookup_expr="lte"
         ),
-        min_date_done=django_filters.DateFilter(name="date_done", lookup_expr="gte"),
-        max_date_done=django_filters.DateFilter(name="date_done", lookup_expr="lte"),
+        min_date_done=django_filters.DateFilter(
+            field_name="date_done", lookup_expr="gte"
+        ),
+        max_date_done=django_filters.DateFilter(
+            field_name="date_done", lookup_expr="lte"
+        ),
         Meta=Meta,
     )
     relation_fields = ["user", "foia", "communication", "agency", "jurisdiction"]
     for rfield in relation_fields:
         if rfield in fields:
-            filter_fields[rfield] = django_filters.NumberFilter(name="%s__id" % rfield)
+            filter_fields[rfield] = django_filters.NumberFilter(
+                field_name="%s__id" % rfield
+            )
     Filter = type("Filter", (django_filters.FilterSet,), filter_fields)
 
     return type(

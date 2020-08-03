@@ -116,8 +116,10 @@ class AgencyViewSet(viewsets.ModelViewSet):
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
 
-        jurisdiction = django_filters.NumberFilter(name="jurisdiction__id")
-        types = django_filters.CharFilter(name="types__name", lookup_expr="iexact")
+        jurisdiction = django_filters.NumberFilter(field_name="jurisdiction__id")
+        types = django_filters.CharFilter(
+            field_name="types__name", lookup_expr="iexact"
+        )
 
         class Meta:
             model = Agency

@@ -46,7 +46,7 @@ class AgencyForm(forms.ModelForm):
         required=False, widget=forms.TextInput(attrs={"placeholder": "City"})
     )
     address_state = forms.ChoiceField(
-        required=False, choices=(("", "---"),) + STATE_CHOICES
+        required=False, choices=(("", "---"),) + tuple(STATE_CHOICES)
     )
     address_zip = USZipCodeField(
         required=False, widget=forms.TextInput(attrs={"placeholder": "Zip"})

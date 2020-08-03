@@ -83,7 +83,7 @@ class CrowdsourceResponseViewSet(
     class Filter(django_filters.FilterSet):
         """API Filter for Crowdsource Responses"""
 
-        crowdsource = django_filters.NumberFilter(name="crowdsource__id")
+        crowdsource = django_filters.NumberFilter(field_name="crowdsource__id")
 
         class Meta:
             model = CrowdsourceResponse
