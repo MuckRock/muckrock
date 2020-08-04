@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Avg, Count, F, Q, Sum
 from django.db.models.expressions import Value
-from django.db.models.functions.base import Coalesce
+from django.db.models.functions import Coalesce
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 

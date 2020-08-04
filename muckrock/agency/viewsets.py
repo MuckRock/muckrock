@@ -4,7 +4,7 @@
 from django.db.models.aggregates import Avg, Count, Sum
 from django.db.models.expressions import Case, F, Value, When
 from django.db.models.fields import FloatField, IntegerField
-from django.db.models.functions.base import Coalesce
+from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch
 
 # Third Party
@@ -125,4 +125,4 @@ class AgencyViewSet(viewsets.ModelViewSet):
             model = Agency
             fields = ("name", "status", "jurisdiction", "types", "requires_proxy")
 
-    filter_class = Filter
+    filterset_class = Filter

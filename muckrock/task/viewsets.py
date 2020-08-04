@@ -77,7 +77,7 @@ def create_task_viewset(model, serializer, fields):
             "queryset": model.objects.all(),
             "serializer_class": serializer,
             "permission_classes": (IsAdminUser,),
-            "filter_class": Filter,
+            "filterset_class": Filter,
         },
     )
 

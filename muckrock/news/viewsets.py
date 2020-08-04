@@ -42,7 +42,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
                 "publish",
             )
 
-    filter_class = Filter
+    filterset_class = Filter
 
     def get_queryset(self):
         if "no_editor" in self.request.query_params:

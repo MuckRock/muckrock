@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.expressions import F, Value
-from django.db.models.functions.base import Concat
+from django.db.models.functions import Concat
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.utils import timezone

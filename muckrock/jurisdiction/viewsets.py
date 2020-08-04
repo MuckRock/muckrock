@@ -49,7 +49,7 @@ class JurisdictionViewSet(ModelViewSet):
             model = Jurisdiction
             fields = ("name", "abbrev", "level", "parent", "law__requires_proxy")
 
-    filter_class = Filter
+    filterset_class = Filter
 
     @action(detail=True)
     def template(self, request, pk=None):

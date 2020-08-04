@@ -10,7 +10,7 @@ from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models.aggregates import Count
 from django.db.models.expressions import Case, Value, When
-from django.db.models.functions.base import Concat
+from django.db.models.functions import Concat
 from django.db.models.functions.datetime import TruncDay
 from django.urls import reverse
 from django.utils import timezone

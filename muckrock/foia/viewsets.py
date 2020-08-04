@@ -98,7 +98,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             model = FOIARequest
             fields = ("user", "title", "status", "embargo", "jurisdiction", "agency")
 
-    filter_class = Filter
+    filterset_class = Filter
 
     def get_queryset(self):
         return (
@@ -396,7 +396,7 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
             model = FOIACommunication
             fields = ("max_date", "min_date", "foia", "status", "response", "delivered")
 
-    filter_class = Filter
+    filterset_class = Filter
 
     def get_queryset(self):
         return FOIACommunication.objects.prefetch_related(

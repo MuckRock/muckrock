@@ -23,7 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by("id").prefetch_related("profile", "groups")
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
-    filter_fields = ("username", "profile__full_name", "email", "is_staff")
+    filterset_fields = ("username", "profile__full_name", "email", "is_staff")
 
 
 class StatisticsViewSet(viewsets.ModelViewSet):
@@ -32,4 +32,4 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     queryset = Statistics.objects.all()
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
-    filter_fields = ("date",)
+    filterset_fields = ("date",)

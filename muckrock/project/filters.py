@@ -25,7 +25,7 @@ class ProjectFilterSet(django_filters.FilterSet):
         ),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
-        name="tags__name",
+        field_name="tags__name",
         queryset=Tag.objects.all(),
         label="Tags",
         widget=autocomplete.ModelSelect2Multiple(

@@ -89,5 +89,5 @@ class CrowdsourceResponseViewSet(
             model = CrowdsourceResponse
             fields = ("id", "flag")
 
-    filter_class = Filter
+    filterset_class = Filter
     search_fields = ("values__value", "tags__name")

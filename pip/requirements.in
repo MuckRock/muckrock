@@ -18,7 +18,7 @@ django-dashing # Used to create the dashboard
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
 django-extensions # Nicer shell
-django-filter<2 # Used for filtering in viewsets
+django-filter # Used for filtering in viewsets
 django-hijack # Allows admins to log in to other user accounts
 django-hosts # Used for multi-domain routing
 django-ipware # Used to get user's IP address
@@ -35,7 +35,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
-django<2.1 # Django is kinda important...
+django<2.2 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF

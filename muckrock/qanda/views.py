@@ -38,7 +38,7 @@ class QuestionList(MRSearchFilterListView):
     """List of unanswered questions"""
 
     model = Question
-    filter_class = QuestionFilterSet
+    filterset_class = QuestionFilterSet
     title = "Q&A Forum"
     template_name = "qanda/list.html"
     default_sort = "date"
@@ -253,7 +253,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             model = Question
             fields = ("title", "foia")
 
-    filter_class = Filter
+    filterset_class = Filter
 
     def pre_save(self, obj):
         """Auto fill fields on create"""
