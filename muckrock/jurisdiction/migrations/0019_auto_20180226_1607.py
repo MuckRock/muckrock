@@ -8,52 +8,45 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('jurisdiction', '0018_auto_20180214_1443'),
-    ]
+    dependencies = [("jurisdiction", "0018_auto_20180214_1443")]
 
     operations = [
         migrations.CreateModel(
-            name='LawYear',
+            name="LawYear",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
                 (
-                    'reason',
+                    "reason",
                     models.CharField(
-                        choices=[('Enacted', 'Enacted'), ('Passed', 'Passed'),
-                                 ('Updated', 'Updated')],
-                        max_length=7
-                    )
+                        choices=[
+                            ("Enacted", "Enacted"),
+                            ("Passed", "Passed"),
+                            ("Updated", "Updated"),
+                        ],
+                        max_length=7,
+                    ),
                 ),
-                ('year', models.PositiveSmallIntegerField()),
+                ("year", models.PositiveSmallIntegerField()),
             ],
-            options={
-                'ordering': ['year'],
-            },
+            options={"ordering": ["year"]},
         ),
-        migrations.RemoveField(
-            model_name='law',
-            name='intro',
-        ),
-        migrations.RemoveField(
-            model_name='law',
-            name='summary',
-        ),
+        migrations.RemoveField(model_name="law", name="intro"),
+        migrations.RemoveField(model_name="law", name="summary"),
         migrations.AddField(
-            model_name='lawyear',
-            name='law',
+            model_name="lawyear",
+            name="law",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='years',
-                to='jurisdiction.Law'
+                related_name="years",
+                to="jurisdiction.Law",
             ),
         ),
     ]

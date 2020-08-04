@@ -14,142 +14,134 @@ import muckrock.foia.models.attachment
 class Migration(migrations.Migration):
 
     replaces = [
-        ('foia',
-         '0055_auto_20180323_1548'), ('foia', '0056_auto_20180326_1409'),
-        ('foia',
-         '0057_auto_20180326_1412'), ('foia', '0058_auto_20180326_1413'),
-        ('foia',
-         '0059_auto_20180327_1157'), ('foia', '0060_auto_20180413_1102')
+        ("foia", "0055_auto_20180323_1548"),
+        ("foia", "0056_auto_20180326_1409"),
+        ("foia", "0057_auto_20180326_1412"),
+        ("foia", "0058_auto_20180326_1413"),
+        ("foia", "0059_auto_20180327_1157"),
+        ("foia", "0060_auto_20180413_1102"),
     ]
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('foia', '0052_foiamultirequest_composer'),
+        ("foia", "0052_foiamultirequest_composer"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='foiarequest',
-            old_name='date_done',
-            new_name='datetime_done',
+            model_name="foiarequest", old_name="date_done", new_name="datetime_done"
         ),
         migrations.RenameField(
-            model_name='foiarequest',
-            old_name='date_updated',
-            new_name='datetime_updated',
+            model_name="foiarequest",
+            old_name="date_updated",
+            new_name="datetime_updated",
         ),
         migrations.CreateModel(
-            name='OutboundComposerAttachment',
+            name="OutboundComposerAttachment",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
                 (
-                    'ffile',
+                    "ffile",
                     models.FileField(
                         max_length=255,
-                        upload_to=muckrock.foia.models.attachment.
-                        attachment_path,
-                        verbose_name='file'
-                    )
+                        upload_to=muckrock.foia.models.attachment.attachment_path,
+                        verbose_name="file",
+                    ),
                 ),
-                ('date_time_stamp', models.DateTimeField()),
-                ('sent', models.BooleanField(default=False)),
+                ("date_time_stamp", models.DateTimeField()),
+                ("sent", models.BooleanField(default=False)),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False},
         ),
         migrations.AlterModelOptions(
-            name='foiacomposer',
+            name="foiacomposer",
             options={
-                'permissions': (('view_foiacomposer', 'Can view this composer'),
-                                ),
-                'verbose_name':
-                    'FOIA Composer'
+                "permissions": (("view_foiacomposer", "Can view this composer"),),
+                "verbose_name": "FOIA Composer",
             },
         ),
         migrations.AlterField(
-            model_name='outboundattachment',
-            name='ffile',
+            model_name="outboundattachment",
+            name="ffile",
             field=models.FileField(
                 max_length=255,
                 upload_to=muckrock.foia.models.attachment.attachment_path,
-                verbose_name='file'
+                verbose_name="file",
             ),
         ),
         migrations.AlterField(
-            model_name='outboundattachment',
-            name='foia',
+            model_name="outboundattachment",
+            name="foia",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='pending_request_attachments',
-                to='foia.FOIARequest'
+                related_name="pending_request_attachments",
+                to="foia.FOIARequest",
             ),
         ),
         migrations.AlterField(
-            model_name='outboundattachment',
-            name='user',
+            model_name="outboundattachment",
+            name="user",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='pending_outboundattachment',
-                to=settings.AUTH_USER_MODEL
+                related_name="pending_outboundattachment",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
-            model_name='outboundcomposerattachment',
-            name='composer',
+            model_name="outboundcomposerattachment",
+            name="composer",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='pending_attachments',
-                to='foia.FOIAComposer'
+                related_name="pending_attachments",
+                to="foia.FOIAComposer",
             ),
         ),
         migrations.AddField(
-            model_name='outboundcomposerattachment',
-            name='user',
+            model_name="outboundcomposerattachment",
+            name="user",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='pending_outboundcomposerattachment',
-                to=settings.AUTH_USER_MODEL
+                related_name="pending_outboundcomposerattachment",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.RenameModel(
-            old_name='OutboundAttachment',
-            new_name='OutboundRequestAttachment',
+            old_name="OutboundAttachment", new_name="OutboundRequestAttachment"
         ),
         migrations.AlterField(
-            model_name='outboundrequestattachment',
-            name='user',
+            model_name="outboundrequestattachment",
+            name="user",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='pending_outboundrequestattachment',
-                to=settings.AUTH_USER_MODEL
+                related_name="pending_outboundrequestattachment",
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AlterField(
-            model_name='outboundrequestattachment',
-            name='foia',
+            model_name="outboundrequestattachment",
+            name="foia",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='pending_attachments',
-                to='foia.FOIARequest'
+                related_name="pending_attachments",
+                to="foia.FOIARequest",
             ),
         ),
         migrations.AddField(
-            model_name='foiacomposer',
-            name='delayed_id',
+            model_name="foiacomposer",
+            name="delayed_id",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AlterField(
-            model_name='foiacomposer',
-            name='datetime_created',
+            model_name="foiacomposer",
+            name="datetime_created",
             field=models.DateTimeField(
                 db_index=True, default=django.utils.timezone.now
             ),

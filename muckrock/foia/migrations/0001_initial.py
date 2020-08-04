@@ -276,7 +276,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'agency',
-                    models.ForeignKey(
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, 
                         blank=True, to='agency.Agency', null=True
                     )
                 ),
@@ -291,7 +291,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'jurisdiction',
-                    models.ForeignKey(to='jurisdiction.Jurisdiction')
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='jurisdiction.Jurisdiction')
                 ),
                 (
                     'parent',
@@ -333,7 +333,7 @@ class Migration(migrations.Migration):
                 ('raw_email', models.TextField(blank=True)),
                 (
                     'communication',
-                    models.OneToOneField(to='foia.FOIACommunication')
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='foia.FOIACommunication')
                 ),
             ],
             options={},

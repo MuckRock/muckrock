@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import migrations, models
+# Django
+import django.db.models.deletion
 from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='flaggedtask',
             name='user',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, blank=True, to=settings.AUTH_USER_MODEL, null=True),
         ),
     ]

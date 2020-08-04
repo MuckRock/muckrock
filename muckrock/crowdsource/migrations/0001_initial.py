@@ -12,230 +12,215 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-    ]
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
 
     operations = [
         migrations.CreateModel(
-            name='Crowdsource',
+            name="Crowdsource",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
-                ('title', models.CharField(max_length=255)),
-                ('slug', models.SlugField(max_length=255)),
+                ("title", models.CharField(max_length=255)),
+                ("slug", models.SlugField(max_length=255)),
                 (
-                    'datetime_created',
-                    models.DateTimeField(default=django.utils.timezone.now)
+                    "datetime_created",
+                    models.DateTimeField(default=django.utils.timezone.now),
                 ),
+                ("datetime_opened", models.DateTimeField(blank=True, null=True)),
+                ("datetime_closed", models.DateTimeField(blank=True, null=True)),
                 (
-                    'datetime_opened',
-                    models.DateTimeField(blank=True, null=True)
-                ),
-                (
-                    'datetime_closed',
-                    models.DateTimeField(blank=True, null=True)
-                ),
-                (
-                    'status',
+                    "status",
                     models.CharField(
-                        choices=[('draft', 'Draft'), ('open', 'Opened'),
-                                 ('close', 'Closed')],
-                        default='draft',
-                        max_length=9
-                    )
+                        choices=[
+                            ("draft", "Draft"),
+                            ("open", "Opened"),
+                            ("close", "Closed"),
+                        ],
+                        default="draft",
+                        max_length=9,
+                    ),
                 ),
-                ('description', models.CharField(max_length=255)),
+                ("description", models.CharField(max_length=255)),
                 (
-                    'user',
+                    "user",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='crowdsources',
-                        to=settings.AUTH_USER_MODEL
-                    )
+                        related_name="crowdsources",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='CrowdsourceChoice',
+            name="CrowdsourceChoice",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
-                ('choice', models.CharField(max_length=255)),
-                ('order', models.PositiveSmallIntegerField()),
+                ("choice", models.CharField(max_length=255)),
+                ("order", models.PositiveSmallIntegerField()),
             ],
-            options={
-                'ordering': ('order',),
-            },
+            options={"ordering": ("order",)},
         ),
         migrations.CreateModel(
-            name='CrowdsourceData',
+            name="CrowdsourceData",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
                 (
-                    'url',
+                    "url",
                     models.URLField(
-                        help_text='This should be an oEmbed enabled URL',
-                        max_length=255
-                    )
+                        help_text="This should be an oEmbed enabled URL", max_length=255
+                    ),
                 ),
                 (
-                    'crowdsource',
+                    "crowdsource",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='data',
-                        to='crowdsource.Crowdsource'
-                    )
+                        related_name="data",
+                        to="crowdsource.Crowdsource",
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='CrowdsourceField',
+            name="CrowdsourceField",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
-                ('label', models.CharField(max_length=255)),
+                ("label", models.CharField(max_length=255)),
                 (
-                    'type',
+                    "type",
                     models.CharField(
-                        choices=[('text', 'text'), ('select', 'select')],
-                        max_length=10
-                    )
+                        choices=[("text", "text"), ("select", "select")], max_length=10
+                    ),
                 ),
-                ('order', models.PositiveSmallIntegerField()),
+                ("order", models.PositiveSmallIntegerField()),
                 (
-                    'crowdsource',
+                    "crowdsource",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='fields',
-                        to='crowdsource.Crowdsource'
-                    )
+                        related_name="fields",
+                        to="crowdsource.Crowdsource",
+                    ),
                 ),
             ],
-            options={
-                'ordering': ('order',),
-            },
+            options={"ordering": ("order",)},
         ),
         migrations.CreateModel(
-            name='CrowdsourceResponse',
+            name="CrowdsourceResponse",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
+                ("datetime", models.DateTimeField(default=django.utils.timezone.now)),
                 (
-                    'datetime',
-                    models.DateTimeField(default=django.utils.timezone.now)
-                ),
-                (
-                    'crowdsource',
+                    "crowdsource",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='responses',
-                        to='crowdsource.Crowdsource'
-                    )
+                        related_name="responses",
+                        to="crowdsource.Crowdsource",
+                    ),
                 ),
                 (
-                    'data',
+                    "data",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='responses',
-                        to='crowdsource.CrowdsourceData'
-                    )
+                        related_name="responses",
+                        to="crowdsource.CrowdsourceData",
+                    ),
                 ),
                 (
-                    'user',
+                    "user",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='crowdsource_responses',
-                        to=settings.AUTH_USER_MODEL
-                    )
+                        related_name="crowdsource_responses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='CrowdsourceValue',
+            name="CrowdsourceValue",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
-                ('value', models.CharField(max_length=255)),
+                ("value", models.CharField(max_length=255)),
                 (
-                    'field',
+                    "field",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='values',
-                        to='crowdsource.CrowdsourceField'
-                    )
+                        related_name="values",
+                        to="crowdsource.CrowdsourceField",
+                    ),
                 ),
                 (
-                    'response',
+                    "response",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name='values',
-                        to='crowdsource.CrowdsourceResponse'
-                    )
+                        related_name="values",
+                        to="crowdsource.CrowdsourceResponse",
+                    ),
                 ),
             ],
         ),
         migrations.AddField(
-            model_name='crowdsourcechoice',
-            name='field',
+            model_name="crowdsourcechoice",
+            name="field",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='choices',
-                to='crowdsource.CrowdsourceField'
+                related_name="choices",
+                to="crowdsource.CrowdsourceField",
             ),
         ),
         migrations.AlterUniqueTogether(
-            name='crowdsourcefield',
-            unique_together=set([('crowdsource', 'order'),
-                                 ('crowdsource', 'label')]),
+            name="crowdsourcefield",
+            unique_together=set([("crowdsource", "order"), ("crowdsource", "label")]),
         ),
         migrations.AlterUniqueTogether(
-            name='crowdsourcechoice',
-            unique_together=set([('field', 'order'), ('field', 'choice')]),
+            name="crowdsourcechoice",
+            unique_together=set([("field", "order"), ("field", "choice")]),
         ),
     ]

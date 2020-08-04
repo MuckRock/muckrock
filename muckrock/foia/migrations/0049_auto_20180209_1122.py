@@ -10,126 +10,120 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '0017_auto_20180122_1353'),
+        ("project", "0017_auto_20180122_1353"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('jurisdiction', '0013_jurisdiction_aliases'),
-        ('agency', '0016_auto_20180208_1452'),
-        ('tags', '0002_remove_tag_user'),
-        ('foia', '0048_remove_foiarequest_tracking_id'),
+        ("jurisdiction", "0013_jurisdiction_aliases"),
+        ("agency", "0016_auto_20180208_1452"),
+        ("tags", "0002_remove_tag_user"),
+        ("foia", "0048_remove_foiarequest_tracking_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='FOIASavedSearch',
+            name="FOIASavedSearch",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
-                ('title', models.CharField(max_length=255)),
-                ('query', models.CharField(blank=True, max_length=255)),
+                ("title", models.CharField(max_length=255)),
+                ("query", models.CharField(blank=True, max_length=255)),
                 (
-                    'status',
+                    "status",
                     models.CharField(
                         choices=[
-                            ('', '-'), ('started',
-                                        'Draft'), ('submitted', 'Processing'),
-                            ('ack', 'Awaiting Acknowledgement'),
-                            ('processed', 'Awaiting Response'),
-                            ('appealing',
-                             'Awaiting Appeal'), ('fix', 'Fix Required'),
-                            ('payment',
-                             'Payment Required'), ('lawsuit', 'In Litigation'),
-                            ('rejected', 'Rejected'),
-                            ('no_docs',
-                             'No Responsive Documents'), ('done', 'Completed'),
-                            ('partial',
-                             'Partially Completed'), ('abandoned', 'Withdrawn')
+                            ("", "-"),
+                            ("started", "Draft"),
+                            ("submitted", "Processing"),
+                            ("ack", "Awaiting Acknowledgement"),
+                            ("processed", "Awaiting Response"),
+                            ("appealing", "Awaiting Appeal"),
+                            ("fix", "Fix Required"),
+                            ("payment", "Payment Required"),
+                            ("lawsuit", "In Litigation"),
+                            ("rejected", "Rejected"),
+                            ("no_docs", "No Responsive Documents"),
+                            ("done", "Completed"),
+                            ("partial", "Partially Completed"),
+                            ("abandoned", "Withdrawn"),
                         ],
-                        max_length=10
-                    )
+                        max_length=10,
+                    ),
                 ),
-                ('embargo', models.NullBooleanField()),
-                ('exclude_crowdfund', models.NullBooleanField()),
-                (
-                    'min_pages',
-                    models.PositiveSmallIntegerField(blank=True, null=True)
-                ),
-                ('min_date', models.DateField(blank=True, null=True)),
-                ('max_date', models.DateField(blank=True, null=True)),
-                ('agencies', models.ManyToManyField(to='agency.Agency')),
+                ("embargo", models.NullBooleanField()),
+                ("exclude_crowdfund", models.NullBooleanField()),
+                ("min_pages", models.PositiveSmallIntegerField(blank=True, null=True)),
+                ("min_date", models.DateField(blank=True, null=True)),
+                ("max_date", models.DateField(blank=True, null=True)),
+                ("agencies", models.ManyToManyField(to="agency.Agency")),
             ],
         ),
         migrations.CreateModel(
-            name='SearchJurisdiction',
+            name="SearchJurisdiction",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
-                ('include_local', models.BooleanField()),
+                ("include_local", models.BooleanField()),
                 (
-                    'jurisdiction',
+                    "jurisdiction",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='jurisdiction.Jurisdiction'
-                    )
+                        to="jurisdiction.Jurisdiction",
+                    ),
                 ),
                 (
-                    'search',
+                    "search",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='foia.FOIASavedSearch'
-                    )
+                        to="foia.FOIASavedSearch",
+                    ),
                 ),
             ],
         ),
         migrations.AddField(
-            model_name='foiasavedsearch',
-            name='jurisdictions',
+            model_name="foiasavedsearch",
+            name="jurisdictions",
             field=models.ManyToManyField(
-                through='foia.SearchJurisdiction',
-                to='jurisdiction.Jurisdiction'
+                through="foia.SearchJurisdiction", to="jurisdiction.Jurisdiction"
             ),
         ),
         migrations.AddField(
-            model_name='foiasavedsearch',
-            name='projects',
-            field=models.ManyToManyField(to='project.Project'),
+            model_name="foiasavedsearch",
+            name="projects",
+            field=models.ManyToManyField(to="project.Project"),
         ),
         migrations.AddField(
-            model_name='foiasavedsearch',
-            name='tags',
-            field=models.ManyToManyField(to='tags.Tag'),
+            model_name="foiasavedsearch",
+            name="tags",
+            field=models.ManyToManyField(to="tags.Tag"),
         ),
         migrations.AddField(
-            model_name='foiasavedsearch',
-            name='user',
+            model_name="foiasavedsearch",
+            name="user",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
             ),
         ),
         migrations.AddField(
-            model_name='foiasavedsearch',
-            name='users',
+            model_name="foiasavedsearch",
+            name="users",
             field=models.ManyToManyField(
-                related_name='_foiasavedsearch_users_+',
-                to=settings.AUTH_USER_MODEL
+                related_name="_foiasavedsearch_users_+", to=settings.AUTH_USER_MODEL
             ),
         ),
         migrations.AlterUniqueTogether(
-            name='foiasavedsearch',
-            unique_together=set([('user', 'title')]),
+            name="foiasavedsearch", unique_together=set([("user", "title")])
         ),
     ]

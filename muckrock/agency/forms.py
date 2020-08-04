@@ -9,13 +9,7 @@ from localflavor.us.us_states import STATE_CHOICES
 from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock
-from muckrock.agency.models import (
-    Agency,
-    AgencyAddress,
-    AgencyEmail,
-    AgencyPhone,
-    AgencyType,
-)
+from muckrock.agency.models import Agency, AgencyAddress, AgencyEmail, AgencyPhone
 from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.fields import FullEmailField

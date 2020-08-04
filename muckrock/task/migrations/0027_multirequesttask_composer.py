@@ -9,18 +9,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foia', '0059_auto_20180426_1112'),
-        ('task', '0026_flaggedtask_category'),
+        ("foia", "0059_auto_20180426_1112"),
+        ("task", "0026_flaggedtask_category"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='multirequesttask',
-            name='composer',
+            model_name="multirequesttask",
+            name="composer",
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to='foia.FOIAComposer'
+                to="foia.FOIAComposer",
             ),
-        ),
+        )
     ]

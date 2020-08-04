@@ -116,8 +116,8 @@ class Holiday(models.Model):
                 # get number of days in the month
                 days = monthrange(date_.year, date_.month)[1]
                 return (days - date_.day) // 7 + 1 == -self.num
-        else:
-            return False
+
+        return False
 
     def _match_easter(self, date_, _):
         """match for easter based dates"""

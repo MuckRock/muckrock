@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
                 ('zip_code', models.CharField(max_length=10, blank=True)),
                 (
                     'phone',
-                    localflavor.us.models.PhoneNumberField(
+                    models.CharField(
                         max_length=20, blank=True
                     )
                 ),

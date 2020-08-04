@@ -9,48 +9,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foia', '0069_auto_20190718_1424'),
-        ('task', '0038_snailmailtask_reason'),
+        ("foia", "0069_auto_20190718_1424"),
+        ("task", "0038_snailmailtask_reason"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PaymentInfoTask',
+            name="PaymentInfoTask",
             fields=[
                 (
-                    'task_ptr',
+                    "task_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to='task.Task'
-                    )
+                        to="task.Task",
+                    ),
                 ),
                 (
-                    'amount',
-                    models.DecimalField(
-                        decimal_places=2, default=0.0, max_digits=8
-                    )
+                    "amount",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=8),
                 ),
                 (
-                    'communication',
+                    "communication",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to='foia.FOIACommunication'
-                    )
+                        to="foia.FOIACommunication",
+                    ),
                 ),
             ],
-            bases=('task.task',),
+            bases=("task.task",),
         ),
         migrations.AlterField(
-            model_name='snailmailtask',
-            name='switch',
+            model_name="snailmailtask",
+            name="switch",
             field=models.BooleanField(
                 default=False,
-                help_text=
-                'Designates we have switched to sending to this address from another form of communication due to some sort of error.  A note should be included in the communication with an explanation.'
+                help_text="Designates we have switched to sending to this address from another form of communication due to some sort of error.  A note should be included in the communication with an explanation.",
             ),
         ),
     ]

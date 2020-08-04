@@ -9,104 +9,111 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('agency', '0009_agency_manual_stale'),
-    ]
+    dependencies = [("agency", "0009_agency_manual_stale")]
 
     operations = [
         migrations.CreateModel(
-            name='AgencyAddress',
+            name="AgencyAddress",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
                 (
-                    'request_type',
+                    "request_type",
                     models.CharField(
-                        choices=[('primary', 'Primary'), ('appeal', 'Appeal'),
-                                 ('none', 'None')],
-                        default='none',
-                        max_length=7
-                    )
+                        choices=[
+                            ("primary", "Primary"),
+                            ("appeal", "Appeal"),
+                            ("none", "None"),
+                        ],
+                        default="none",
+                        max_length=7,
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='AgencyEmail',
+            name="AgencyEmail",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
                 (
-                    'request_type',
+                    "request_type",
                     models.CharField(
-                        choices=[('primary', 'Primary'), ('appeal', 'Appeal'),
-                                 ('none', 'None')],
-                        default='none',
-                        max_length=7
-                    )
+                        choices=[
+                            ("primary", "Primary"),
+                            ("appeal", "Appeal"),
+                            ("none", "None"),
+                        ],
+                        default="none",
+                        max_length=7,
+                    ),
                 ),
                 (
-                    'email_type',
+                    "email_type",
                     models.CharField(
-                        choices=[('to', 'To'), ('cc', 'CC'), ('none', 'None')],
-                        default='none',
-                        max_length=4
-                    )
+                        choices=[("to", "To"), ("cc", "CC"), ("none", "None")],
+                        default="none",
+                        max_length=4,
+                    ),
                 ),
             ],
         ),
         migrations.CreateModel(
-            name='AgencyPhone',
+            name="AgencyPhone",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID'
-                    )
+                        verbose_name="ID",
+                    ),
                 ),
                 (
-                    'request_type',
+                    "request_type",
                     models.CharField(
-                        choices=[('primary', 'Primary'), ('appeal', 'Appeal'),
-                                 ('none', 'None')],
-                        default='none',
-                        max_length=7
-                    )
+                        choices=[
+                            ("primary", "Primary"),
+                            ("appeal", "Appeal"),
+                            ("none", "None"),
+                        ],
+                        default="none",
+                        max_length=7,
+                    ),
                 ),
             ],
         ),
         migrations.AlterField(
-            model_name='agency',
-            name='user',
+            model_name="agency",
+            name="user",
             field=models.ForeignKey(
                 blank=True,
-                help_text='The user who submitted this agency',
+                help_text="The user who submitted this agency",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to=settings.AUTH_USER_MODEL
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
         migrations.AddField(
-            model_name='agencyphone',
-            name='agency',
+            model_name="agencyphone",
+            name="agency",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to='agency.Agency'
+                on_delete=django.db.models.deletion.CASCADE, to="agency.Agency"
             ),
         ),
     ]

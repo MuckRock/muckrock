@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='location',
-            field=models.ForeignKey(blank=True, to='jurisdiction.Jurisdiction', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, blank=True, to='jurisdiction.Jurisdiction', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, unique=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, unique=True),
             preserve_default=True,
         ),
     ]

@@ -1,53 +1,54 @@
 # -*- coding: utf-8 -*-
 
 # Django
+import django.db.models.deletion
 from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '0001_initial'),
-        ('crowdfund', '0005_auto_20150720_1132'),
+        ("project", "0001_initial"),
+        ("crowdfund", "0005_auto_20150720_1132"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CrowdfundProject',
+            name="CrowdfundProject",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
-                        verbose_name='ID',
+                        verbose_name="ID",
                         serialize=False,
                         auto_created=True,
-                        primary_key=True
-                    )
+                        primary_key=True,
+                    ),
                 ),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True)),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True)),
                 (
-                    'payment_required',
+                    "payment_required",
                     models.DecimalField(
-                        default='0.00', max_digits=14, decimal_places=2
-                    )
+                        default="0.00", max_digits=14, decimal_places=2
+                    ),
                 ),
                 (
-                    'payment_received',
+                    "payment_received",
                     models.DecimalField(
-                        default='0.00', max_digits=14, decimal_places=2
-                    )
+                        default="0.00", max_digits=14, decimal_places=2
+                    ),
                 ),
-                ('date_due', models.DateField()),
+                ("date_due", models.DateField()),
                 (
-                    'project',
+                    "project",
                     models.ForeignKey(
-                        related_name='crowdfund', to='project.Project'
-                    )
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="crowdfund",
+                        to="project.Project",
+                    ),
                 ),
             ],
-            options={
-                'abstract': False,
-            },
-        ),
+            options={"abstract": False},
+        )
     ]

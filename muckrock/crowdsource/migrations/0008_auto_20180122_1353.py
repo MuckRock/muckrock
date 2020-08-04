@@ -9,39 +9,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '0017_auto_20180122_1353'),
-        ('crowdsource', '0007_auto_20180122_1047'),
+        ("project", "0017_auto_20180122_1353"),
+        ("crowdsource", "0007_auto_20180122_1047"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='crowdsource',
-            name='project',
+            model_name="crowdsource",
+            name="project",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name='crowdsources',
-                to='project.Project'
+                related_name="crowdsources",
+                to="project.Project",
             ),
         ),
         migrations.AddField(
-            model_name='crowdsource',
-            name='project_only',
+            model_name="crowdsource",
+            name="project_only",
             field=models.BooleanField(
                 default=False,
-                help_text=
-                'Only members of the project will be able to complete assignments for this crowdsource'
+                help_text="Only members of the project will be able to complete assignments for this crowdsource",
             ),
         ),
         migrations.AlterField(
-            model_name='crowdsource',
-            name='multiple_per_page',
+            model_name="crowdsource",
+            name="multiple_per_page",
             field=models.BooleanField(
                 default=False,
-                help_text=
-                'This is useful for cases when there may be multiple records of interest per data source',
-                verbose_name='Allow multiple submissions per data item'
+                help_text="This is useful for cases when there may be multiple records of interest per data source",
+                verbose_name="Allow multiple submissions per data item",
             ),
         ),
     ]
