@@ -82,7 +82,6 @@ class FOIAComposer(models.Model):
 
     class Meta:
         verbose_name = "FOIA Composer"
-        permissions = (("view_foiacomposer", "Can view this composer"),)
 
     def __str__(self):
         return self.title

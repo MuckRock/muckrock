@@ -76,7 +76,13 @@ def coverage(c, settings="test", reuse="0"):
 @task
 def pylint(c):
     """Run the linter"""
-    c.run(DJANGO_RUN.format(cmd="pylint muckrock --rcfile=config/pylint.conf"))
+    c.run(
+        DOCKER_COMPOSE_RUN_OPT.format(
+            opt="-e DJANGO_SETTINGS_MODULE=muckrock.settings.local",
+            service="muckrock_django",
+            cmd="pylint muckrock --rcfile=config/pylint.conf",
+        )
+    )
 
 
 @task

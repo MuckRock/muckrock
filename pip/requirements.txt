@@ -61,7 +61,7 @@ django-storages==1.5.1
 django-taggit==1.3.0
 django-watson==1.5.5
 django-webpack-loader==0.7.0
-django==2.1.15
+django==2.2.15
 djangorestframework==3.11.0
 docutils==0.14            # via botocore
 dogslow==1.2
@@ -147,8 +147,8 @@ smart-open==1.11.1
 smartypants==1.8.6
 social-auth-app-django==4.0.0
 social-auth-core[openidconnect]==3.3.3
-sorl-thumbnail==12.5.0
-sqlparse==0.2.4           # via django-debug-toolbar
+sorl-thumbnail==12.6.3
+sqlparse==0.2.4           # via django, django-debug-toolbar
 stripe==1.75.0
 threadpoolctl==2.1.0      # via scikit-learn
 traitlets==4.3.2          # via ipython

@@ -18,10 +18,11 @@ from muckrock.tags.models import Tag
 
 def list_all_tags():
     """Should list all tags that exist and that have at least one object"""
-    tags = Tag.objects.all()
-    tags = tags.annotate(num_times=Count("tags_taggeditembase_items"))
-    tags = tags.exclude(num_times=0)
-    return tags
+    return (
+        Tag.objects.annotate(num_times=Count("tags_taggeditembase_items"))
+        .exclude(num_times=0)
+        .order_by("name")
+    )
 
 
 class TagListView(TemplateView):

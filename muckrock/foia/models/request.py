@@ -1315,7 +1315,6 @@ class FOIARequest(models.Model):
         verbose_name = "FOIA Request"
         app_label = "foia"
         permissions = (
-            ("view_foiarequest", "Can view this request"),
             ("embargo_foiarequest", "Can embargo request to make it private"),
             ("embargo_perm_foiarequest", "Can embargo a request permananently"),
             ("crowdfund_foiarequest", "Can start a crowdfund campaign for the request"),

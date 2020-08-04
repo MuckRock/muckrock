@@ -450,7 +450,6 @@ class RawEmail(models.Model):
 
     class Meta:
         app_label = "foia"
-        permissions = (("view_rawemail", "Can view the raw email for communications"),)
 
 
 class FOIANote(models.Model):
