@@ -257,7 +257,7 @@ $(document).ready(function(){
     $("input[name='action']").val("submit");
 
     $(".submit-required").attr("required", "required");
-    if (agencyWidget.vals().length === 0) {
+    if (agencyWidget.val().length === 0) {
       // no agency choices
       agencyInput.attr("required", "required");
     } else {
