@@ -140,11 +140,11 @@ class ProjectDetailView(DetailView):
         self._obj = None
         super(ProjectDetailView, self).__init__(*args, **kwargs)
 
-    def get_object(self, *args, **kwargs):
+    def get_object(self, queryset=None):
         """Cache getting the object"""
         if self._obj is not None:
             return self._obj
-        self._obj = super(ProjectDetailView, self).get_object(*args, **kwargs)
+        self._obj = super(ProjectDetailView, self).get_object(queryset=queryset)
         return self._obj
 
     def get_context_data(self, **kwargs):

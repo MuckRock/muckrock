@@ -533,6 +533,6 @@ class UserAutocomplete(MRAutocompleteView):
 
         return queryset
 
-    def get_selected_result_label(self, item):
+    def get_selected_result_label(self, result):
         """Do not use HTML template for selected label"""
-        return f"{item.profile.full_name} ({item.username})"
+        return f"{result.profile.full_name} ({result.username})"

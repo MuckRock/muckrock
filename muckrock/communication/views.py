@@ -180,13 +180,13 @@ class PhoneNumberAutocomplete(CommunicationAutocomplete):
         self.q = self.q.translate({ord("("): None, ord(")"): None, ord(" "): "-"})
         return super().get_queryset()
 
-    def get_result_label(self, item):
+    def get_result_label(self, result):
         """Show number type"""
-        return f"{item.number} ({item.type})"
+        return f"{result.number} ({result.type})"
 
-    def get_selected_result_label(self, item):
+    def get_selected_result_label(self, result):
         """Show number type"""
-        return self.get_result_label(item)
+        return self.get_result_label(result)
 
 
 class FaxAutocomplete(PhoneNumberAutocomplete):
@@ -200,9 +200,9 @@ class FaxAutocomplete(PhoneNumberAutocomplete):
         """Use phone number fetch to create the object"""
         return PhoneNumber.objects.fetch(text)
 
-    def get_result_label(self, item):
+    def get_result_label(self, result):
         """Do not show number type"""
-        return str(item)
+        return str(result)
 
 
 class EmailOrFaxAutocomplete(Select2ListView):

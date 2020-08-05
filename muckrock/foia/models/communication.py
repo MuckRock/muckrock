@@ -112,6 +112,7 @@ class FOIACommunication(models.Model):
 
     def save(self, *args, **kwargs):
         """Remove controls characters from text before saving"""
+        # pylint: disable=signature-differs
         remove_control = dict.fromkeys(
             list(range(0, 9)) + list(range(11, 13)) + list(range(14, 32))
         )
@@ -149,6 +150,7 @@ class FOIACommunication(models.Model):
         the requests. Returns the moved and cloned communications.
         """
         # avoid circular imports
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import upload_document_cloud
 
         foias = FOIARequest.objects.filter(pk__in=foia_pks)
@@ -307,6 +309,7 @@ class FOIACommunication(models.Model):
     def attach_file(self, file_=None, content=None, name=None, source=None):
         """Given a file or name and the file contents, attach a file to this"""
         # must supply either file_ or content and name_
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import upload_document_cloud
 
         if file_ is None:
@@ -465,7 +468,6 @@ class FOIANote(models.Model):
     note = models.TextField()
 
     def __str__(self):
-        # pylint: disable=redefined-variable-type
         if self.author:
             user = self.author
         else:

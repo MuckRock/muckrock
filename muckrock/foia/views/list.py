@@ -39,7 +39,7 @@ from muckrock.foia.tasks import export_csv
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
-from muckrock.tags.models import Tag, normalize, parse_tags
+from muckrock.tags.models import Tag, normalize
 from muckrock.task.models import ReviewAgencyTask
 
 
@@ -147,9 +147,9 @@ class RequestList(MRSearchFilterListView):
         )
         return objects.get_viewable(self.request.user)
 
-    def get_context_data(self):
+    def get_context_data(self, **kwargs):
         """Add download link for downloading csv"""
-        context = super(RequestList, self).get_context_data()
+        context = super(RequestList, self).get_context_data(**kwargs)
         url = furl(self.request.get_full_path())
         url.args["content_type"] = "csv"
         context["csv_link"] = url.url
@@ -331,9 +331,9 @@ class MyRequestList(RequestList):
         queryset = super(MyRequestList, self).get_queryset()
         return queryset.filter(composer__user=self.request.user)
 
-    def get_context_data(self):
+    def get_context_data(self, **kwargs):
         """Add forms for bulk actions"""
-        context = super(MyRequestList, self).get_context_data()
+        context = super(MyRequestList, self).get_context_data(**kwargs)
         context["project_form"] = ProjectManagerForm(user=self.request.user)
         context["tag_form"] = TagManagerForm(required=False)
         context["share_form"] = FOIAAccessForm(required=False)
@@ -394,6 +394,8 @@ class MyRequestList(RequestList):
             for foia in foias:
                 foia.projects.add(*projects)
             return "Requests added to projects"
+        else:
+            return None
 
     def _tags(self, foias, user, post):
         """Add tags to the selected requests"""
@@ -401,7 +403,7 @@ class MyRequestList(RequestList):
         tags = [
             Tag.objects.get_or_create(name=normalize(t)) for t in post.getlist("tags")
         ]
-        tags = set([t for t, _ in tags])
+        tags = {t for t, _ in tags}
         for foia in foias:
             foia.tags.add(*tags)
         return "Tags added to requests"
@@ -422,6 +424,8 @@ class MyRequestList(RequestList):
                     foia.edit_collaborators.remove(*users)
                     foia.read_collaborators.add(*users)
             return "Requests shared"
+        else:
+            return None
 
     def _autofollowup_on(self, foias, user, _post):
         """Turn autofollowups on"""

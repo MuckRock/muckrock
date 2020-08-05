@@ -45,6 +45,7 @@ class PreloadFileQuerysetMixin:
 
     def _do_preload_files(self):
         """Do the preloading of the files lazily"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.models.file import FOIAFile
 
         comm_ids = [getattr(i, self.comm_id) for i in self._result_cache]
@@ -232,6 +233,7 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def get_stale(self):
         """Get stale requests"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.models import FOIACommunication
 
         with_response = (

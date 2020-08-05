@@ -101,9 +101,9 @@ class CommunicationTaskMixin(PreloadFileQuerysetMixin):
         queryset = super(CommunicationTaskMixin, self).preload_files(limit=limit)
         return queryset.select_related("communication")
 
-    def _process_preloaded_files(self, task_, files):
+    def _process_preloaded_files(self, obj, files):
         """What to do with the preloaded files for each record"""
-        task_.communication.display_files = files.get(task_.communication.pk, [])
+        obj.communication.display_files = files.get(obj.communication.pk, [])
 
     def preload_communication_siblings(self):
         """Preload all communications on the communication's FOIA request"""
@@ -145,6 +145,7 @@ class SnailMailTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
 
     def preload_list(self):
         """Preload relations for list display"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.agency.models import AgencyEmail, AgencyPhone, AgencyAddress
 
         return (
@@ -254,6 +255,7 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
 
     def preload_list(self):
         """Preload relations for list display"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.agency.models import AgencyEmail, AgencyPhone, AgencyAddress
 
         return self.select_related(
@@ -294,6 +296,7 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
 
     def preload_list(self):
         """Preload relations for list display"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.agency.models import AgencyEmail, AgencyPhone, AgencyAddress
 
         return self.select_related(

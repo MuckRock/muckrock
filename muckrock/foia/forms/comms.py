@@ -7,7 +7,6 @@ from django import forms
 from django.contrib.auth.models import User
 
 # Third Party
-import phonenumbers
 from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock

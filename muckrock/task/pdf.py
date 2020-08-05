@@ -124,7 +124,7 @@ class MailPDF(PDF):
         try:
             merger.write(single_pdf)
         except PdfReadError:
-            return (None, None, files)
+            return (None, None, files, None)
 
         # create the mail communication object
         mail, _ = MailCommunication.objects.update_or_create(
@@ -242,11 +242,11 @@ class CoverPDF(PDF):
                             snail.amount,
                         )
                     )
-                for file_, status, pages in files:
+                for file_, status, pages_ in files:
                     if status == "attached":
                         lines.append(
                             "{}▣ Attached: {} - {} pages".format(
-                                2 * tab, file_.name(), pages
+                                2 * tab, file_.name(), pages_
                             )
                         )
                     elif status == "skipped":

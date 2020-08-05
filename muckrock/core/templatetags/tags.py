@@ -20,6 +20,7 @@ from email.parser import Parser
 # Third Party
 import bleach
 import markdown
+import smartypants as _smartypants
 from sorl.thumbnail.templatetags.thumbnail import thumbnail
 
 # MuckRock
@@ -232,6 +233,7 @@ def display_eml(foia_file):
         for sub_msg in msg.get_payload():
             if sub_msg.get_content_type() == "text/plain":
                 return sub_msg.get_payload(decode=True)
+    return ""
 
 
 @register.filter
@@ -249,8 +251,6 @@ def get_attr(obj, attr):
 @register.filter
 def smartypants(text):
     """Renders typographically-correct quotes with the smartpants library"""
-    import smartypants as _smartypants
-
     smart_text = _smartypants.smartypants(text)
     return mark_safe(bleach.clean(smart_text))
 

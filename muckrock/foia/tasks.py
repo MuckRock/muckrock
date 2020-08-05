@@ -84,10 +84,10 @@ lob.api_key = settings.LOB_SECRET_KEY
 
 def authenticate_documentcloud(request):
     """This is just standard username/password encoding"""
-    username = settings.DOCUMENTCLOUD_USERNAME
-    password = settings.DOCUMENTCLOUD_PASSWORD
-    auth = base64.encodestring("%s:%s" % (username, password))[:-1]
-    request.add_header("Authorization", "Basic %s" % auth)
+    username = settings.DOCUMENTCLOUD_USERNAME.encode()
+    password = settings.DOCUMENTCLOUD_PASSWORD.encode()
+    auth = base64.encodebytes(b"%s:%s" % (username, password))[:-1]
+    request.add_header("Authorization", "Basic %s" % auth.decode())
     return request
 
 

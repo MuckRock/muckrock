@@ -13,9 +13,10 @@ class TaskConfig(AppConfig):
 
     def ready(self):
         """Sets global options for FPDF"""
+        # pylint: disable=unused-import, unused-variable, import-outside-toplevel
         from fpdf import set_global
         from tempfile import mkdtemp
-        import muckrock.task.signals  # pylint: disable=unused-import,unused-variable
+        import muckrock.task.signals
 
         # cache in a temp directory since the font
         # directory is read only on heroku

@@ -44,7 +44,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         ),
         (r"\[External Message Added\]", "text_reply"),
         (
-            r"(?:\[Document Released to Requester\]|" r"\[Document Released\])",
+            r"(?:\[Document Released to Requester\]|\[Document Released\])",
             "document_reply",
         ),
         (

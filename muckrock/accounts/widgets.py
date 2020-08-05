@@ -47,6 +47,7 @@ def cmp(x, y):
     the outcome. The return value is negative if x < y, zero if x == y
     and strictly positive if x > y.
     """
+    # pylint: disable=invalid-name
 
     return (x > y) - (x < y)
 

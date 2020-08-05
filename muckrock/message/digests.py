@@ -240,11 +240,11 @@ class ActivityDigest(Digest):
             subject += "s"
         return self.subject + ": " + subject
 
-    def send(self, *args):
+    def send(self, fail_silently=False):
         """Don't send the email if there's no activity."""
         if self.activity["count"] < 1:
             return 0
-        return super(ActivityDigest, self).send(*args)
+        return super(ActivityDigest, self).send(fail_silently)
 
 
 class StaffDigest(Digest):
@@ -408,6 +408,7 @@ class StaffDigest(Digest):
 
     def get_stale_tasks(self):
         """Get stale tasks"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.task.models import (
             NewAgencyTask,
             OrphanTask,
@@ -459,6 +460,7 @@ class StaffDigest(Digest):
 
     def get_projects(self):
         """Get project information"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.project.models import Project
 
         project_info = OrderedDict()
@@ -485,9 +487,9 @@ class StaffDigest(Digest):
         context["projects"] = self.get_projects()
         return context
 
-    def send(self, *args):
+    def send(self, fail_silently=False):
         """Don't send to users who are not staff"""
         user = self.get_user()
         if not user.is_staff:
             return 0
-        return super(StaffDigest, self).send(*args)
+        return super(StaffDigest, self).send(fail_silently)

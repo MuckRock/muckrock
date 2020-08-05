@@ -13,7 +13,7 @@ class QuestionConfig(AppConfig):
 
     def ready(self):
         """Registers the application with the activity streams plugin"""
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, import-outside-toplevel
         from actstream import registry
         from watson import search
 

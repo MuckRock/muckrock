@@ -90,8 +90,9 @@ class OrganizationDetailView(DetailView):
 class OrganizationSquareletView(RedirectView):
     """Organization squarelet view redirects to squarelet"""
 
-    def get_redirect_url(self, slug, *args, **kwargs):
+    def get_redirect_url(self, *args, **kwargs):
         """Different URL for individual orgs"""
+        slug = kwargs["slug"]
         organization = get_object_or_404(Organization, slug=slug)
         if organization.individual:
             user = User.objects.get(profile__uuid=organization.uuid)
@@ -104,7 +105,9 @@ class OrganizationSquareletView(RedirectView):
 def activate(request):
     """Activate one of your organizations"""
     redirect_url = request.POST.get("next", "/")
-    redirect_url = redirect_url if is_safe_url(redirect_url) else "/"
+    redirect_url = (
+        redirect_url if is_safe_url(redirect_url, allowed_hosts=None) else "/"
+    )
 
     try:
         organization = request.user.organizations.get(

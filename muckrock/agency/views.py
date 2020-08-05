@@ -403,11 +403,13 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
             name=capwords(name), jurisdiction=jurisdiction, user=self.request.user
         )
 
-    def get_selected_result_label(self, item):
+    def get_selected_result_label(self, result):
         """Show full template for selected label"""
-        return self.get_result_label(item)
+        return self.get_result_label(result)
 
     def get_create_option(self, context, query):
+        """Split the jurisdiction out for the create option"""
+        # pylint: disable=arguments-differ
         create_option = super().get_create_option(context, query)
         if not query:
             return create_option

@@ -195,6 +195,7 @@ class FOIARequest(models.Model):
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving and set the embargo expiration if necessary"""
+        # pylint: disable=signature-differs
         self.slug = slugify(self.slug)
         self.title = self.title.strip()
         if self.embargo:
@@ -300,6 +301,7 @@ class FOIARequest(models.Model):
 
     def get_files(self):
         """Get all files under this FOIA"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.models.file import FOIAFile
 
         return FOIAFile.objects.filter(comm__foia=self)
@@ -365,6 +367,8 @@ class FOIARequest(models.Model):
         response = self.last_response()
         if response:
             return (date.today() - response.datetime.date()).days
+        else:
+            return None
 
     def processing_length(self):
         """How many days since the request was set as processing"""
@@ -580,7 +584,6 @@ class FOIARequest(models.Model):
 
     def process_attachments(self, user, composer=False):
         """Attach all outbound attachments to the last communication"""
-        # pylint: disable=redefined-variable-type
         if composer:
             attm_source = self.composer
         else:
@@ -710,6 +713,7 @@ class FOIARequest(models.Model):
 
     def send_email(self, comm, **kwargs):
         """Send the message as an email - asynchrnously"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import foia_send_email
 
         # set status and mail id here to avoid altering the request in the
@@ -767,6 +771,7 @@ class FOIARequest(models.Model):
 
     def _send_fax(self, comm, **kwargs):
         """Send the message as a fax"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import send_fax
 
         switch = kwargs.get("switch") or (
@@ -794,6 +799,7 @@ class FOIARequest(models.Model):
 
     def _send_snail_mail(self, comm, **kwargs):
         """Send the message as a snail mail"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import prepare_snail_mail
 
         category, extra = self.process_manual_send(**kwargs)
@@ -1003,6 +1009,7 @@ class FOIARequest(models.Model):
 
     def user_actions(self, user):
         """Provides action interfaces for users"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.forms import (
             FOIAFlagForm,
             FOIAContactUserForm,
@@ -1089,6 +1096,7 @@ class FOIARequest(models.Model):
 
     def proxy_reject(self):
         """Mark this request as being rejected due to a proxy being required"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.task.models import FlaggedTask
 
         # mark the agency as requiring a proxy going forward
@@ -1244,6 +1252,7 @@ class FOIARequest(models.Model):
         """If a user requests that this request be deleted, use this to wipe the
         sensitive data without destroying the history that a request existed with
         this MR number"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.models.communication import RawEmail
 
         self.delete_files()
@@ -1264,6 +1273,7 @@ class FOIARequest(models.Model):
         """Delete all files for this request, batching the delete from
         cloudfront to avoid throttle errors
         """
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.models.file import FOIAFile
         from muckrock.foia.signals import foia_file_delete_s3
 

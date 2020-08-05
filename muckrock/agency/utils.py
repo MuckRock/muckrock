@@ -46,7 +46,7 @@ def initial_communication_template(agencies, user_name, requested_docs, **kwargs
         return requested_docs
     elif kwargs.get("edited_boilerplate"):
         return requested_docs
-    elif not kwargs.get("edited_boilerplate"):
+    else:
         template = get_template("text/foia/request.txt")
         context = {
             "requested_docs": smart_text(requested_docs),

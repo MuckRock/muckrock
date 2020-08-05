@@ -214,6 +214,7 @@ class Agency(models.Model, RequestHelper):
 
     def save(self, *args, **kwargs):
         """Save the agency"""
+        # pylint: disable=signature-differs
         self.slug = slugify(self.slug)
         self.name = self.name.strip()
         super(Agency, self).save(*args, **kwargs)

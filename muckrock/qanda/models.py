@@ -40,7 +40,8 @@ class Question(models.Model):
 
     def save(self, *args, **kwargs):
         """Creates an action if question is newly asked"""
-        is_new = True if self.pk is None else False
+        # pylint: disable=signature-differs
+        is_new = self.pk is None
         super(Question, self).save(*args, **kwargs)
         if is_new:
             action = new_action(self.user, "asked", target=self)
@@ -92,7 +93,8 @@ class Answer(models.Model):
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
-        is_new = True if self.pk is None else False
+        # pylint: disable=signature-differs
+        is_new = self.pk is None
         super(Answer, self).save(*args, **kwargs)
         self.question.answer_date = self.date
         self.question.save()

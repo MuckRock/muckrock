@@ -32,7 +32,7 @@ SUITE = 11
 AGENCY_OVERRIDE = 12
 ATTN_OVERRIDE = 13
 
-STATES = {s[0] for s in STATE_CHOICES}
+STATES = {s[0] for s in list(STATE_CHOICES)}
 p_zip = re.compile(r"^\d{5}(?:-\d{4})?$")
 
 # pylint: disable=broad-except

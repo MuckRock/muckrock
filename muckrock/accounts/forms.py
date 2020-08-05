@@ -73,6 +73,7 @@ class OrgPreferencesForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         """Set the active organization in addition to saving the other preferences"""
+        # pylint: disable=signature-differs
         super(OrgPreferencesForm, self).save(*args, **kwargs)
         self.instance.organization = self.cleaned_data["active_org"]
 

@@ -109,6 +109,7 @@ class EmptyLastModelChoiceIterator(ModelChoiceIterator):
     """Put the empty choice last"""
 
     def __iter__(self):
+        # pylint: disable=stop-iteration-return
         iter_self = super(EmptyLastModelChoiceIterator, self).__iter__()
         empty = next(iter_self)
         for obj in iter_self:

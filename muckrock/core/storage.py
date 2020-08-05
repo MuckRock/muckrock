@@ -9,6 +9,8 @@ from django.core.files.storage import get_storage_class
 from queued_storage.backends import QueuedStorage
 from storages.backends.s3boto3 import S3Boto3Storage
 
+# pylint: disable=abstract-method
+
 
 class QueuedS3DietStorage(QueuedStorage):
     """
@@ -18,10 +20,10 @@ class QueuedS3DietStorage(QueuedStorage):
 
     def __init__(
         self,
+        *args,
         local="storages.backends.s3boto.S3BotoStorage",
         remote="image_diet.storage.DietStorage",
         remote_options=None,
-        *args,
         **kwargs
     ):
         if remote_options is None:

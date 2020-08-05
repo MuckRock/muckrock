@@ -60,6 +60,7 @@ class AgencyForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         """Save email, phone, fax, and address models on save"""
+        # pylint: disable=signature-differs
         agency = super(AgencyForm, self).save(*args, **kwargs)
         if self.cleaned_data["email"]:
             email_address = EmailAddress.objects.fetch(self.cleaned_data["email"])

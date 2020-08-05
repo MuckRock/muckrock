@@ -15,23 +15,18 @@ from muckrock.foia.models import STATUS, FOIACommunication, FOIARequest
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
-    # pylint: disable=unused-variable
-    # pylint: disable=unused-argument
-
     # some jurisdiction slugs changed, just ignore the jurisdiction slug passed in
     foia = get_object_or_404(FOIARequest, pk=idx)
     jurisdiction = foia.jurisdiction.slug
     jidx = foia.jurisdiction.pk
 
     if action == "view":
-        return redirect("/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/" % locals())
+        return redirect(f"/foi/{jurisdiction}-{jidx}/{slug}-{idx}/")
 
     if action == "admin-fix":
         action = "admin_fix"
 
-    return redirect(
-        "/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/" % locals()
-    )
+    return redirect(f"/foi/{jurisdiction}-{jidx}/{slug}-{idx}/{action}/")
 
 
 def acronyms(request):

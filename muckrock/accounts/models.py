@@ -199,6 +199,7 @@ class Profile(models.Model):
 
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""
+        # pylint: disable=comparison-with-callable
         return self.feature_level > 0
 
     @mproperty

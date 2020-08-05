@@ -532,8 +532,8 @@ class NewAgencyTaskViewTests(TestCase):
         self.client.post(
             self.url,
             {
-                f"replace": True,
-                f"task": self.task.pk,
+                "replace": True,
+                "task": self.task.pk,
                 f"{self.task.pk}-replace_agency": replacement.pk,
                 f"{self.task.pk}-replace_jurisdiction": replacement.jurisdiction.pk,
             },

@@ -122,6 +122,7 @@ class FOIAFile(models.Model):
 
     def clone(self, new_comm):
         """Clone this file to a new communication"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import upload_document_cloud
 
         access = "private" if new_comm.foia.embargo else "public"

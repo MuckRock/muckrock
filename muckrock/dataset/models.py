@@ -127,6 +127,7 @@ class DataSet(models.Model):
 
     def save(self, *args, **kwargs):
         """Save the slug"""
+        # pylint: disable=signature-differs
         self.slug = slugify(self.name)
         super(DataSet, self).save(*args, **kwargs)
 
@@ -161,6 +162,7 @@ class DataField(models.Model):
 
     def save(self, *args, **kwargs):
         """Save the slug"""
+        # pylint: disable=signature-differs
         if not self.slug:
             self.slug = slugify(self.name)
         super(DataField, self).save(*args, **kwargs)

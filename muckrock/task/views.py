@@ -275,14 +275,14 @@ class SnailMailTaskList(TaskList):
             check_number = request.POST.get("check_number")
             if status and status not in dict(STATUS):
                 messages.error(request, "Invalid status")
-                return
+                return None
             try:
                 if check_number:
                     check_number = int(check_number)
                     form_data["check_number"] = check_number
             except ValueError:
                 messages.error(request, "Check number must be an integer")
-                return
+                return None
             if status:
                 task.set_status(status)
                 form_data["status"] = status
@@ -338,7 +338,7 @@ class ReviewAgencyTaskList(TaskList):
                     request,
                     "A valid email or fax is required if " "snail mail is not checked",
                 )
-                return
+                return None
         return super(ReviewAgencyTaskList, self).task_post_helper(request, task)
 
 
@@ -362,10 +362,10 @@ class FlaggedTaskList(TaskList):
                 form_data["text"] = text
             elif reply_form.is_valid():
                 messages.error(request, "Cannot reply - task has no user")
-                return
+                return None
             else:
                 messages.error(request, "The form is invalid")
-                return
+                return None
         return super(FlaggedTaskList, self).task_post_helper(
             request, task, form_data=form_data
         )
@@ -434,7 +434,7 @@ class NewAgencyTaskList(TaskList):
                 task.resolve(request.user, form_data)
             else:
                 messages.error(request, "Bad form data")
-                return
+                return None
         elif request.POST.get("reject"):
             task.reject()
             form_data = {"reject": True}
@@ -459,7 +459,7 @@ class ResponseTaskList(TaskList):
             form = ResponseTaskForm(request.POST, task=task)
             if not form.is_valid():
                 messages.error(request, "Form is invalid")
-                return
+                return None
             action_taken, error_msgs = form.process_form(task, request.user)
             for msg in error_msgs:
                 messages.error(request, msg)
@@ -670,12 +670,12 @@ class PaymentInfoTaskList(TaskList):
             tasks = PaymentInfoTask.objects.filter(
                 resolved=False, communication__foia__agency=agency
             )
-            for task in tasks:
+            for task_ in tasks:
                 # send the check
                 prepare_snail_mail.delay(
-                    task.communication.pk, "p", False, {"amount": task.amount}
+                    task_.communication.pk, "p", False, {"amount": task_.amount}
                 )
-                task.resolve(request.user, form.cleaned_data)
+                task_.resolve(request.user, form.cleaned_data)
         elif request.POST.get("reject"):
             SnailMailTask.objects.create(
                 category="p",

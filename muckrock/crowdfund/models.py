@@ -70,8 +70,8 @@ class Crowdfund(models.Model):
     def expired(self):
         """Has this crowdfund run out of time?"""
         return (
-            self.date_due is not None and date.today() >= self.date_due
-        ) or self.closed
+            date.today() >= self.date_due if self.date_due is not None else self.closed
+        )
 
     def amount_remaining(self):
         """Reports the amount still needed to be raised as a decimal."""
@@ -101,7 +101,6 @@ class Crowdfund(models.Model):
             logger.info("Crowdfund %d reached its goal.", self.id)
             verb = "succeeded"
         new_action(self, verb)
-        return
 
     def contributors_count(self):
         """Return a count of all the contributors to a crowdfund"""

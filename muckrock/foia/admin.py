@@ -28,9 +28,8 @@ from muckrock.communication.admin import (
     PortalCommunicationInline,
     WebCommunicationInline,
 )
-from muckrock.communication.models import Address, EmailAddress, PhoneNumber
+from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
-from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import (
     CommunicationMoveLog,
     FOIACommunication,
@@ -47,8 +46,6 @@ from muckrock.foia.tasks import (
     set_document_cloud_pages,
     upload_document_cloud,
 )
-from muckrock.organization.models import Organization
-from muckrock.portal.models import Portal
 
 
 class FOIAFileAdminForm(forms.ModelForm):
@@ -209,9 +206,10 @@ class FOIACommunicationAdmin(VersionAdmin):
         # pylint: disable=unused-argument
 
         if formset.model != FOIAFile:
-            return super(FOIACommunicationAdmin, self).save_formset(
+            super(FOIACommunicationAdmin, self).save_formset(
                 request, form, formset, change
             )
+            return
 
         instances = formset.save(commit=False)
         for instance in instances:

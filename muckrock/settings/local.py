@@ -44,7 +44,7 @@ class ExceptionLoggingMiddleware:
         return self.get_response(request)
 
     def process_exception(self, request, exception):
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument, import-outside-toplevel
         """printe the exception traceback"""
         import traceback
 

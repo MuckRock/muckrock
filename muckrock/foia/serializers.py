@@ -163,7 +163,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     datetime_done = DateTimeField()
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=super-on-old-class
         super(FOIARequestSerializer, self).__init__(*args, **kwargs)
         if self.instance and isinstance(self.instance, FOIARequest):
             foia = self.instance

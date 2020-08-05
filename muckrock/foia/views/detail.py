@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Prefetch
-from django.http import Http404, HttpResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.urls import reverse
@@ -102,7 +102,7 @@ class Detail(DetailView):
         self._obj = None
         self.agency_reply_form = FOIAAgencyReplyForm()
         self.admin_fix_form = None
-        self.resend_form = None
+        self.resend_forms = None
         self.fee_form = None
         super(Detail, self).__init__(*args, **kwargs)
 
@@ -680,7 +680,7 @@ class Detail(DetailView):
         else:
             key = foia.generate_access_key()
             if request.is_ajax():
-                return HttpResponse(json.dumps({"key": key}), "application/json")
+                return JsonResponse({"key": key})
             else:
                 messages.success(request, "New private link created.")
                 return redirect(foia.get_absolute_url() + "#")

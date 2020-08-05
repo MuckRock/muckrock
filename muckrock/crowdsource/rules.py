@@ -1,9 +1,6 @@
 """Rules based permissions for the crowdsource app"""
 
-# pylint: disable=missing-docstring
-# pylint: disable=unused-argument
-
-# needed for rules
+# pylint: disable=missing-docstring, unused-argument, invalid-unary-operand-type
 
 # Third Party
 from rules import add_perm, always_deny, is_staff, predicate

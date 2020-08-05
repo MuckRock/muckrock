@@ -47,6 +47,7 @@ class FoiaMachineRequest(models.Model):
 
     def save(self, *args, **kwargs):
         """Automatically update the slug field."""
+        # pylint: disable=signature-differs
         autoslug = kwargs.pop("autoslug", True)
         if autoslug:
             self.slug = slugify(self.title)

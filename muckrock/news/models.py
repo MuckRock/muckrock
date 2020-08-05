@@ -96,6 +96,7 @@ class Article(models.Model):
 
     def save(self, *args, **kwargs):
         """Save the news article"""
+        # pylint: disable=signature-differs
         # epiceditor likes to stick non breaking spaces in here for some reason
         self.body = self.body.replace("\xa0", " ")
         # invalidate the template cache for the page on a save

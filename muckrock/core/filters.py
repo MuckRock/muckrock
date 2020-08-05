@@ -17,6 +17,7 @@ class RangeWidget(django_filters.widgets.RangeWidget):
     """Customizes the rendered output of the RangeWidget"""
 
     def format_output(self, rendered_widgets):
+        """Customizes the rendered output of the RangeWidget"""
         return """
             <div class="input-range">
                 <div class="small labels nomargin">

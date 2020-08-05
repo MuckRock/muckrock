@@ -1,9 +1,6 @@
 """Rules based permissions for the FOIA app"""
 
-# pylint: disable=missing-docstring
-# pylint: disable=unused-argument
-
-# needed for rules
+# pylint: disable=missing-docstring, unused-argument, invalid-unary-operand-type
 
 # Django
 from django.contrib.auth import load_backend
@@ -205,8 +202,7 @@ def can_view_composer_child(user, composer):
 @skip_if_not_obj
 @user_authenticated
 def is_owner_composer(user, composer):
-    if composer.user_id == user.pk:
-        return True
+    return composer.user_id == user.pk
 
 
 can_view_composer = can_view_composer_child | is_owner_composer | is_staff

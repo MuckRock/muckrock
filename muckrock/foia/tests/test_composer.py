@@ -23,54 +23,34 @@ from muckrock.organization.factories import MembershipFactory, OrganizationFacto
 class TestFOIAComposer(TestCase):
     """Test the foia composer"""
 
-    # XXX
-    def _test_return_requests(self):
+    def test_return_requests(self):
         """Test return requests"""
-        organization = OrganizationFactory(num_requests=100)
         composer = FOIAComposerFactory(
-            status="submitted",
-            num_org_requests=1,
-            num_monthly_requests=2,
-            num_reg_requests=3,
-            user__profile__num_requests=5,
-            user__profile__monthly_requests=10,
-            user__profile__organization=organization,
+            status="submitted", num_monthly_requests=2, num_reg_requests=3
         )
-        composer._return_requests({"regular": 2, "monthly": 0, "org": 1})
-        composer.user.profile.refresh_from_db()
-        composer.user.profile.organization.refresh_from_db()
+        composer.organization.number_requests = 100
+        composer.organization.monthly_requests = 50
+        composer.organization.save()
+        composer._return_requests({"regular": 2, "monthly": 1})
+        composer.refresh_from_db()
         eq_(composer.num_reg_requests, 1)
-        eq_(composer.num_monthly_requests, 2)
-        eq_(composer.num_org_requests, 0)
-        eq_(composer.user.profile.num_requests, 7)
-        eq_(composer.user.profile.monthly_requests, 10)
-        eq_(composer.user.profile.organization.num_requests, 101)
+        eq_(composer.num_monthly_requests, 1)
+        eq_(composer.organization.number_requests, 102)
+        eq_(composer.organization.monthly_requests, 51)
 
-    def _test_calc_return_requests(self):
+    def test_calc_return_requests(self):
         """Test calculating the return requests"""
         composer = FOIAComposerFactory(
             status="submitted",
             agencies=AgencyFactory.create_batch(6),
-            num_org_requests=1,
             num_monthly_requests=2,
             num_reg_requests=3,
-            user__profile__num_requests=5,
-            user__profile__monthly_requests=10,
-            user__profile__organization=OrganizationFactory(num_requests=100),
         )
-        values = [
-            (7, 4, 2, 1),
-            (6, 3, 2, 1),
-            (5, 3, 2, 0),
-            (4, 3, 1, 0),
-            (3, 3, 0, 0),
-            (2, 2, 0, 0),
-            (1, 1, 0, 0),
-        ]
-        for total, reg, monthly, org in values:
+        values = [(6, 4, 2), (5, 3, 2), (4, 3, 1), (3, 3, 0), (2, 2, 0), (1, 1, 0)]
+        for total, reg, monthly in values:
             eq_(
                 composer._calc_return_requests(total),
-                {"regular": reg, "monthly": monthly, "org": org},
+                {"regular": reg, "monthly": monthly},
             )
 
 

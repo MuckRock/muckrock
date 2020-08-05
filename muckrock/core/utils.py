@@ -36,8 +36,6 @@ logger = logging.getLogger(__name__)
 class BlockNotFound(Exception):
     """Block not found exception"""
 
-    pass
-
 
 def get_node(template, context=Context(), name="subject"):
     """Render one block from a template"""
@@ -69,7 +67,7 @@ def new_action(
 def generate_status_action(foia):
     """Generate activity stream action for agency response and return it."""
     if not foia.agency:
-        return
+        return None
     verbs = {
         "rejected": "rejected",
         "done": "completed",
@@ -85,6 +83,7 @@ def generate_status_action(foia):
 
 def notify(users, action):
     """Notify a set of users about an action and return the list of notifications."""
+    # pylint: disable=import-outside-toplevel
     from muckrock.accounts.models import Notification
 
     notifications = []

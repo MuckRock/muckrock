@@ -8,7 +8,6 @@ from django.urls import reverse
 
 # Standard Library
 import os
-import sys
 import urllib.parse
 from collections import OrderedDict
 from datetime import date

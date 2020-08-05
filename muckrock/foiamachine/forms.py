@@ -7,7 +7,6 @@ from django import forms
 
 # Third Party
 import bleach
-from dal import forward
 
 # MuckRock
 from muckrock.core import autocomplete

@@ -126,7 +126,7 @@ class CrowdsourceDetailView(DetailView):
             )
         return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *_args, **_kwargs):
         """Handle actions on the crowdsource"""
         crowdsource = self.get_object()
         has_perm = self.request.user.has_perm(

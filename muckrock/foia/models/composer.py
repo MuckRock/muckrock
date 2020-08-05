@@ -88,12 +88,14 @@ class FOIAComposer(models.Model):
 
     def save(self, *args, **kwargs):
         """Set title and slug on save"""
+        # pylint: disable=signature-differs
         self.title = self.title.strip() or "Untitled"
         self.slug = slugify(self.title) or "untitled"
         super(FOIAComposer, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """Resolve any pending new agency tasks"""
+        # pylint: disable=signature-differs
         for agency in self.agencies.filter(status="pending"):
             if agency.composers.count() == 1:
                 agency.delete()
@@ -107,6 +109,7 @@ class FOIAComposer(models.Model):
 
     def submit(self, contact_info=None):
         """Submit a composer to create the requests"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
         num_requests = self.agencies.count()
@@ -201,6 +204,7 @@ class FOIAComposer(models.Model):
 
     def revoke(self):
         """Revoke a submitted composer"""
+        # pylint: disable=import-outside-toplevel
         from muckrock.foia.signals import foia_file_delete_s3
 
         current_app.control.revoke(self.delayed_id)

@@ -642,7 +642,7 @@ def _detect_portal(comm, email, post):
     ):
         # if this request already has a portal or an open new portal task,
         # no need to auto-detect
-        return
+        return None
 
     for type_, portal_email in portal_emails:
         if portal_email[0] == "@":
@@ -652,8 +652,8 @@ def _detect_portal(comm, email, post):
         if match:
             return NewPortalTask.objects.create(communication=comm, portal_type=type_)
 
-        for type_, detector in portal_detectors:
-            if detector(post):
-                return NewPortalTask.objects.create(
-                    communication=comm, portal_type=type_
-                )
+    for type_, detector in portal_detectors:
+        if detector(post):
+            return NewPortalTask.objects.create(communication=comm, portal_type=type_)
+
+    return None

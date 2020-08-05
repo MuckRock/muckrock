@@ -13,7 +13,7 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         """Registers users with the activity streams plugin"""
-        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-locals, import-outside-toplevel
         from actstream import registry
         from dashing.utils import router
 

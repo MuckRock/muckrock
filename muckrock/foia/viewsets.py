@@ -235,7 +235,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             clean_attachments.append((title, res.content))
         return clean_attachments
 
-    def create(self, request):
+    def create(self, request, *_args, **_kwargs):
         """Submit new request"""
         try:
             data = self._validate_create(request.user, request.data)
@@ -334,11 +334,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             if request.method == "POST":
                 actstream.actions.follow(request.user, foia, actor_only=False)
                 return Response({"status": "Following"}, status=http_status.HTTP_200_OK)
-            if request.method == "DELETE":
+            elif request.method == "DELETE":
                 actstream.actions.unfollow(request.user, foia)
                 return Response(
                     {"status": "Not following"}, status=http_status.HTTP_200_OK
                 )
+            else:
+                return Response(status=http_status.HTTP_400_BAD_REQUEST)
 
         except FOIARequest.DoesNotExist:
             return Response(

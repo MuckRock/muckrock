@@ -35,6 +35,8 @@ class AuthorListFilter(admin.SimpleListFilter):
         """Articles by the selected author"""
         if self.value():
             return queryset.filter(authors=self.value())
+        else:
+            return None
 
 
 class ArticleAdminForm(forms.ModelForm):

@@ -139,6 +139,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
+        # pylint: disable=signature-differs
         self.slug = slugify(self.slug)
         self.name = self.name.strip()
         super(Jurisdiction, self).save(*args, **kwargs)
@@ -331,6 +332,7 @@ class Exemption(models.Model):
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
+        # pylint: disable=signature-differs
         self.slug = slugify(self.name)
         super(Exemption, self).save(*args, **kwargs)
 

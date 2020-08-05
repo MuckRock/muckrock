@@ -13,7 +13,7 @@ class FOIAConfig(AppConfig):
 
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, import-outside-toplevel
         from actstream import registry as action
 
         from watson import search

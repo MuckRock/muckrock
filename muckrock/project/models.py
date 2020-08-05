@@ -150,6 +150,7 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         """Autogenerates the slug based on the title"""
+        # pylint: disable=signature-differs
         self.slug = slugify(self.title) or "project"
         super(Project, self).save(*args, **kwargs)
 
@@ -161,13 +162,11 @@ class Project(models.Model):
         """Sets a project to be private."""
         self.private = True
         self.save()
-        return
 
     def make_public(self):
         """Sets a project to be public."""
         self.private = False
         self.save()
-        return
 
     def has_contributor(self, user):
         """Checks if the user is a contributor."""

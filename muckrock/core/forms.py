@@ -7,14 +7,8 @@ from django import forms
 from django.conf import settings
 
 # Third Party
-import six
 from dal.autocomplete import TaggitSelect2
 from taggit.forms import TagField
-from taggit.utils import edit_string_for_tags
-
-# MuckRock
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
 
 
 class TagManagerForm(forms.Form):

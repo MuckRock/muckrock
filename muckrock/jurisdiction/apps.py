@@ -13,7 +13,7 @@ class JurisdictionConfig(AppConfig):
 
     def ready(self):
         """Registers exemptions with watson"""
-        # pylint: disable=invalid-name
+        # pylint: disable=invalid-name, import-outside-toplevel
         from watson import search
 
         Exemption = self.get_model("Exemption")

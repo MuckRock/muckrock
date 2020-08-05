@@ -217,21 +217,15 @@ class MRListView(PaginationMixin, ListView):
 class MROrderedListView(OrderedSortMixin, MRListView):
     """Adds ordering to a list view."""
 
-    pass
-
 
 class MRFilterListView(OrderedSortMixin, ModelFilterMixin, MRListView):
     """Adds ordered sorting and filtering to a MRListView."""
-
-    pass
 
 
 class MRSearchFilterListView(
     OrderedSortMixin, ModelSearchMixin, ModelFilterMixin, MRListView
 ):
     """Adds ordered sorting, searching, and filtering to a MRListView."""
-
-    pass
 
 
 class SearchView(SearchMixin, MRListView):
@@ -259,8 +253,9 @@ class NewsletterSignupView(View):
         next_ = request.GET.get("next", "index")
         return redirect(next_)
 
-    def post(self, request, *args, **kwargs):
-        """Check if the form is valid and then pass it on to our form handling functions."""
+    def post(self, request, *_args, **_kwargs):
+        """Check if the form is valid and then pass it on to our form handling
+        functions."""
         form = NewsletterSignupForm(request.POST)
         if not form.is_valid():
             return self.form_invalid(request, form)
@@ -478,7 +473,7 @@ class DonationFormView(StripeFormMixin, FormView):
             stripe.error.StripeError,  # Generic error
         ) as exception:
             logger.error(exception, exc_info=sys.exc_info())
-            error_msg = "Oops, something went wrong on our end." " Sorry about that!"
+            error_msg = "Oops, something went wrong on our end. Sorry about that!"
         finally:
             if error_msg:
                 messages.error(self.request, error_msg)
@@ -591,6 +586,7 @@ class MRAutocompleteView(autocomplete.Select2QuerySetView):
         if self.queryset is not None:
             queryset = self.queryset.all()
         elif self.model is not None:
+            # pylint: disable=protected-access
             queryset = self.model._default_manager.all()
         else:
             raise ImproperlyConfigured
@@ -645,13 +641,13 @@ class MRAutocompleteView(autocomplete.Select2QuerySetView):
 
         return queryset
 
-    def get_result_label(self, item):
+    def get_result_label(self, result):
         """Render the choice from an optional HTML template"""
         if self.template:
-            return render_to_string(self.template, {"choice": item})
+            return render_to_string(self.template, {"choice": result})
         else:
-            return str(item)
+            return str(result)
 
-    def get_selected_result_label(self, item):
+    def get_selected_result_label(self, result):
         """Do not use HTML template for selected label"""
-        return str(item)
+        return str(result)
