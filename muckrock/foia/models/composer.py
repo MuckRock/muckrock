@@ -71,8 +71,6 @@ class FOIAComposer(models.Model):
     # for refunding requests if necessary
     num_monthly_requests = models.PositiveSmallIntegerField(default=0)
     num_reg_requests = models.PositiveSmallIntegerField(default=0)
-    # deprecate this field
-    num_org_requests = models.PositiveSmallIntegerField(default=0)
 
     # for delayed submission
     delayed_id = models.CharField(blank=True, max_length=255)

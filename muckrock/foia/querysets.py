@@ -301,7 +301,6 @@ class FOIAComposerQuerySet(models.QuerySet):
             permanent_embargo=False,
             parent=None,
             tags=None,
-            num_org_requests=0,
             num_monthly_requests=0,
             num_reg_requests=0,
         ).first()

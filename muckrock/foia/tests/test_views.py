@@ -1134,7 +1134,7 @@ class TestFOIAComposerViews(TestCase):
 
     def test_post_update_composer(self):
         """Test submitting a composer"""
-        composer = FOIAComposerFactory(status="started", user__profile__num_requests=4)
+        composer = FOIAComposerFactory(status="started")
         agency = AgencyFactory()
         data = {
             "title": "Title",
@@ -1155,7 +1155,7 @@ class TestFOIAComposerViews(TestCase):
 
     def test_post_delete_update_composer(self):
         """Test deleting a composer"""
-        composer = FOIAComposerFactory(status="started", user__profile__num_requests=4)
+        composer = FOIAComposerFactory(status="started")
         data = {"action": "delete"}
         request = self.request_factory.post(
             reverse("foia-draft", kwargs={"idx": composer.pk}), data

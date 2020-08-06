@@ -555,11 +555,8 @@ class MultiRequestTaskTests(TestCase):
         self.composer = FOIAComposerFactory(
             status="submitted",
             agencies=self.agencies,
-            num_org_requests=1,
             num_monthly_requests=2,
             num_reg_requests=3,
-            user__profile__num_requests=5,
-            user__profile__monthly_requests=10,
         )
         self.task = MultiRequestTask.objects.create(composer=self.composer)
 

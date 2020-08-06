@@ -22,19 +22,13 @@ from uuid import uuid4
 import requests
 import stripe
 from actstream.models import Action
-from easy_thumbnails.fields import ThumbnailerImageField
 from localflavor.us.models import USStateField
 from memoize import mproperty
 from phonenumber_field.modelfields import PhoneNumberField
 
 # MuckRock
 from muckrock.accounts.querysets import ProfileQuerySet
-from muckrock.core.utils import (
-    cache_get_or_set,
-    get_image_storage,
-    squarelet_get,
-    stripe_retry_on_error,
-)
+from muckrock.core.utils import cache_get_or_set, squarelet_get, stripe_retry_on_error
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
@@ -93,18 +87,6 @@ class Profile(models.Model):
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
 
-    # deprecate ##
-    acct_type = models.CharField(max_length=10, choices=ACCT_TYPES, default="basic")
-    _organization = models.ForeignKey(
-        "organization.Organization",
-        blank=True,
-        null=True,
-        related_name="members",
-        on_delete=models.SET_NULL,
-        db_column="organization",
-    )
-    # deprecate ##
-
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(
@@ -118,14 +100,6 @@ class Profile(models.Model):
     twitter = models.CharField(max_length=255, blank=True)
     linkedin = models.URLField(
         max_length=255, blank=True, help_text="Begin with http://"
-    )
-    # deprecate
-    avatar = ThumbnailerImageField(
-        upload_to="account_images",
-        blank=True,
-        null=True,
-        resize_source={"size": (600, 600), "crop": "smart"},
-        storage=get_image_storage(),
     )
     avatar_url = models.URLField(max_length=255, blank=True)
 
@@ -165,18 +139,6 @@ class Profile(models.Model):
         verbose_name="Share",
         help_text="Let other members of my organization view " "my embargoed requests",
     )
-
-    # deprecate ##
-    # paid for requests
-    num_requests = models.IntegerField(default=0)
-    # for limiting # of requests / month
-    monthly_requests = models.IntegerField(default=0)
-    date_update = models.DateField(blank=True, null=True)
-    # for Stripe
-    customer_id = models.CharField(max_length=255, blank=True)
-    subscription_id = models.CharField(max_length=255, blank=True)
-    payment_failed = models.BooleanField(default=False)
-    # deprecate ##
 
     preferred_proxy = models.BooleanField(
         default=False,
@@ -283,19 +245,6 @@ class Profile(models.Model):
         """Does this user have a public profile page?"""
         filed_request = self.user.composers.exclude(status="started").count() > 0
         return not self.private_profile and filed_request
-
-
-# deprecate ##
-class ReceiptEmail(models.Model):
-    """An additional email address to send receipts to"""
-
-    user = models.ForeignKey(
-        User, related_name="receipt_emails", on_delete=models.CASCADE
-    )
-    email = models.EmailField()
-
-    def __str__(self):
-        return "Receipt Email: <%s>" % self.email
 
 
 class RecurringDonation(models.Model):

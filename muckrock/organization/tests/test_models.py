@@ -113,7 +113,6 @@ class TestSquareletUpdateData(TestCase):
         organization = OrganizationFactory(
             entitlement=OrganizationEntitlementFactory(),
             date_update=date(2019, 2, 21),
-            max_users=5,
             requests_per_month=50,
             monthly_requests=33,
         )
@@ -140,7 +139,6 @@ class TestSquareletUpdateData(TestCase):
         organization = OrganizationFactory(
             entitlement=OrganizationEntitlementFactory(),
             date_update=date(2019, 2, 21),
-            max_users=5,
             requests_per_month=50,
             monthly_requests=33,
         )
@@ -169,7 +167,6 @@ class TestSquareletUpdateData(TestCase):
         organization = OrganizationFactory(
             entitlement=plus,
             date_update=date(2019, 2, 21),
-            max_users=5,
             requests_per_month=100,
             monthly_requests=83,
         )
@@ -194,7 +191,6 @@ class TestSquareletUpdateData(TestCase):
         organization = OrganizationFactory(
             entitlement=ent,
             date_update=date(2019, 2, 21),
-            max_users=5,
             requests_per_month=50,
             monthly_requests=33,
         )
@@ -219,7 +215,6 @@ class TestSquareletUpdateData(TestCase):
         organization = OrganizationFactory(
             entitlement=ent,
             date_update=date(2019, 2, 21),
-            max_users=10,
             requests_per_month=75,
             monthly_requests=33,
         )
@@ -244,7 +239,6 @@ class TestSquareletUpdateData(TestCase):
         organization = OrganizationFactory(
             entitlement=ent,
             date_update=date(2019, 2, 21),
-            max_users=5,
             requests_per_month=50,
             monthly_requests=33,
         )

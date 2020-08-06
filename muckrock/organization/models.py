@@ -69,14 +69,6 @@ class Organization(models.Model):
 
     payment_failed = models.BooleanField(default=False)
 
-    # deprecate #
-    plan = models.ForeignKey("organization.Plan", null=True, on_delete=models.SET_NULL)
-    owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
-    max_users = models.IntegerField(default=3)
-    monthly_cost = models.IntegerField(default=10000)
-    stripe_id = models.CharField(max_length=255, blank=True)
-    active = models.BooleanField(default=False)
-
     def __str__(self):
         if self.individual:
             return "{} (Individual)".format(self.name)
