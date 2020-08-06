@@ -110,7 +110,6 @@ urlpatterns = [
     url(r"^tags/", include("muckrock.tags.urls")),
     url(r"^organization/", include("muckrock.organization.urls")),
     url(r"^project/", include("muckrock.project.urls")),
-    url(r"^dataset/", include("muckrock.dataset.urls")),
     url(r"^fine-uploader/", include("muckrock.fine_uploader.urls")),
     url(r"^communication/", include("muckrock.communication.urls")),
     url(r"^squarelet/", include("muckrock.squarelet.urls")),

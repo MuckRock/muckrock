@@ -23,11 +23,6 @@ urlpatterns = [
     ),
     url(r"^success_comm/$", views.success_comm, name="fine-uploader-success-comm"),
     url(
-        r"^success_dataset/$",
-        views.success_dataset,
-        name="fine-uploader-success-dataset",
-    ),
-    url(
         r"^key_request/$", views.key_name_request, name="fine-uploader-key-name-request"
     ),
     url(
@@ -36,9 +31,6 @@ urlpatterns = [
         name="fine-uploader-key-name-composer",
     ),
     url(r"^key_comm/$", views.key_name_comm, name="fine-uploader-key-name-comm"),
-    url(
-        r"^key_dataset/$", views.key_name_dataset, name="fine-uploader-key-name-dataset"
-    ),
     url(
         r"^delete_request/$", views.delete_request, name="fine-uploader-delete-request"
     ),

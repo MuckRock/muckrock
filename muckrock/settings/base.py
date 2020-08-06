@@ -254,7 +254,6 @@ INSTALLED_APPS = (
     "muckrock.fine_uploader",
     "muckrock.communication",
     "muckrock.portal",
-    "muckrock.dataset",
     "muckrock.crowdsource",
     "actstream",
 )
@@ -290,7 +289,6 @@ CELERY_IMPORTS = (
     "muckrock.agency.tasks",
     "muckrock.communication.tasks",
     "muckrock.crowdsource.tasks",
-    "muckrock.dataset.tasks",
     "muckrock.foia.tasks",
     "muckrock.portal.tasks",
     "muckrock.squarelet.tasks",

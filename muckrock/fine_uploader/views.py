@@ -18,10 +18,8 @@ import hashlib
 import hmac
 import json
 import os
-from datetime import date
 
 # MuckRock
-from muckrock.dataset.tasks import process_dataset_file
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
@@ -91,18 +89,6 @@ def success_comm(request):
     file_.ffile.name = request.POST["key"]
     file_.save()
 
-    return HttpResponse()
-
-
-@login_required
-def success_dataset(request):
-    """"File has been succesfully uploaded for data set creation"""
-    if "key" not in request.POST:
-        return HttpResponseBadRequest()
-    if len(request.POST["key"]) > 255:
-        return HttpResponseBadRequest()
-
-    process_dataset_file.delay(request.POST["key"], request.user.pk)
     return HttpResponse()
 
 
@@ -276,23 +262,6 @@ def key_name_comm(request):
     name = _key_name_trim(name)
     file_ = FOIAFile()
     key = file_.ffile.field.generate_filename(file_.ffile.instance, name)
-    key = default_storage.get_available_name(key)
-    return JsonResponse({"key": key})
-
-
-@login_required
-def key_name_dataset(request):
-    """Generate the S3 key name from the filename"""
-    name = request.POST.get("name")
-    name = _key_name_trim(name)
-    today = date.today()
-    key = "dataset_uploads/{username}/{year}/{month:02d}/{day:02d}/{name}".format(
-        username=request.user.username,
-        year=today.year,
-        month=today.month,
-        day=today.day,
-        name=name,
-    )
     key = default_storage.get_available_name(key)
     return JsonResponse({"key": key})
 
