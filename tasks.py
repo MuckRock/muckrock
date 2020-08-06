@@ -95,6 +95,17 @@ def format(c):
     )
 
 
+@task(name="format-check")
+def format_check(c):
+    """Check your code format"""
+    c.run(
+        DJANGO_RUN_USER.format(
+            cmd="black --check muckrock --exclude migrations\\|vendor && "
+            "isort --check-only -rc muckrock"
+        )
+    )
+
+
 # Run
 # --------------------------------------------------------------------------------
 
