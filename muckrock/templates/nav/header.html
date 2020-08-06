@@ -247,7 +247,12 @@
                 {% if not user_organization.individual %}
                   <li><a class="nav-item" href="{{user_organization.get_absolute_url}}">Your&nbsp;Organization</a></li>
                 {% endif %}
-                <li class="{% if organizations|length > 1 %}separator{% endif %}"><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
+                <li ><a class="nav-item" href="{% url 'acct-my-profile' %}">Your&nbsp;Profile</a></li>
+                <li class="{% if organizations|length > 1 %}separator{% endif %}">
+                  <a class="nav-item" href="{{ settings.SQUARELET_URL }}/users/~redirect/">
+                    Your&nbsp;Account
+                  </a>
+                </li>
 
                 {% if organizations|length > 1 %}
                   <li class="separator nav-item nolink">Switch&nbsp;Organization</li>

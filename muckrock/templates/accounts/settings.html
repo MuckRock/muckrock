@@ -6,46 +6,32 @@
 {% block content %}
   <article class="account settings detail">
     <header>
-      <h1>Settings</h1>
+      <h1>MuckRock Settings</h1>
       <dl>
-        <dt>Account Preferences</dt>
-        <dd><a href="{{ squarelet_url }}/users/~update/">Profile</a></dd>
+        <dd><a href="{{ squarelet_url }}/users/~redirect/">Your Account</a></dd>
+        <dd><a href="{{ squarelet_url }}/users/~update/">Account Settings</a></dd>
+        <dd><a href="{{ squarelet_url }}/users/~payment/">
+          Subscription and Payments
+        </a></dd>
         <dd><a href="{% url 'acct-reset-pw' %}">Reset Password</a></dd>
-        <dt>Preferences</dt>
-        <dd><a href="#profile">Profile</a></dd>
-        <dd><a href="#email">Email</a></dd>
-        <dd><a href="#organization">Organization</a></dd>
-        <dd><a href="#donations">Donations</a></dd>
-        <dd><a href="#crowdfunds">Crowdfund Payments</a></dd>
       </dl>
     </header>
     <main>
-    <form enctype="multipart/form-data" method="post" class="profile form" id="profile">
-      {% csrf_token %}
-      <h2>Profile</h2>
-      <input type="hidden" name="action" value="profile" />
-      <div class="fields">
-        <div class="other-info">
-          {% include 'lib/pattern/field.html' with field=profile_form.twitter %}
-          {% include 'lib/pattern/field.html' with field=profile_form.location %}
-        </div>
-        {% include 'lib/pattern/field.html' with field=profile_form.private_profile %}
-      </div>
-      <footer>
-        <button type="submit" class="primary button">Update profile</button>
-      </footer>
-    </form>
     <form method="post" class="email form" id="email">
       {% csrf_token %}
       <input type="hidden" name="action" value="email" />
       <h2>Email</h2>
+      <p>
+        You can update your email address in your
+        <a href="{{ squarelet_url }}/accounts/email/">account settings</a>.
+      </p>
       <div class="fields">
         {% for field in email_form.visible_fields %}
           {% include 'lib/pattern/field.html' %}
         {% endfor %}
       </div>
       <footer>
-        <button type="submit" class="primary button">Update email</button>
+        <button type="submit" class="primary button">Save email settings</button>
         {% if request.user.profile.email_confirmed %}
           <span class="green badge">Verified</span>
         {% endif %}
@@ -54,14 +40,17 @@
     <form method="post" class="organization form" id="organization">
       {% csrf_token %}
       <input type="hidden" name="action" value="org" />
-      <h2>Organization</h2>
+      <h2>Privacy</h2>
+      <p>
+        Read MuckRock's full <a href="/privacy-policy/">privacy policy</a>.
+      </p>
       <div class="fields">
         {% for field in org_form.visible_fields %}
           {% include 'lib/pattern/field.html' %}
         {% endfor %}
       </div>
       <footer>
-        <button type="submit" class="primary button">Update organization settings</button>
+        <button type="submit" class="primary button">Save organization settings</button>
       </footer>
     </form>
     <form method="post" class="donations form" id="donations">

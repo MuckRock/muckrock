@@ -8,40 +8,11 @@ from django import forms
 # Standard Library
 import logging
 
-# Third Party
-from dal import forward
-
 # MuckRock
 from muckrock.accounts.models import Profile
-from muckrock.core import autocomplete
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.organization.forms import OrganizationChoiceField, StripeForm
-from muckrock.organization.models import Organization
+from muckrock.organization.forms import StripeForm
 
 logger = logging.getLogger(__name__)
-
-
-class ProfileSettingsForm(forms.ModelForm):
-    """A form for updating user information"""
-
-    location = forms.ModelChoiceField(
-        required=False,
-        queryset=Jurisdiction.objects.filter(level="l"),
-        widget=autocomplete.ModelSelect2(
-            url="jurisdiction-autocomplete",
-            attrs={"data-placeholder": "Search for city or county"},
-            forward=(forward.Const(["l"], "levels"),),
-        ),
-    )
-
-    class Meta:
-        model = Profile
-        fields = ["twitter", "location", "private_profile"]
-
-    def clean_twitter(self):
-        """Stripe @ from beginning of Twitter name, if it exists."""
-        twitter = self.cleaned_data["twitter"]
-        return twitter.split("@")[-1]
 
 
 class EmailSettingsForm(forms.ModelForm):
@@ -55,31 +26,9 @@ class EmailSettingsForm(forms.ModelForm):
 class OrgPreferencesForm(forms.ModelForm):
     """A form for updating user organization preferences"""
 
-    active_org = OrganizationChoiceField(
-        queryset=Organization.objects.none(),
-        empty_label=None,
-        label="Choose active organization",
-        help_text="You can also change your current organizational page by hovering over "
-        "your name (or tapping it on mobile), and then selecting the "
-        "organization you'd like to use from the selection that appears.",
-    )
-
-    def __init__(self, *args, **kwargs):
-        super(OrgPreferencesForm, self).__init__(*args, **kwargs)
-        self.fields["active_org"].queryset = self.instance.user.organizations.order_by(
-            "-individual", "name"
-        )
-        self.fields["active_org"].initial = self.instance.organization
-
-    def save(self, *args, **kwargs):
-        """Set the active organization in addition to saving the other preferences"""
-        # pylint: disable=signature-differs
-        super(OrgPreferencesForm, self).save(*args, **kwargs)
-        self.instance.organization = self.cleaned_data["active_org"]
-
     class Meta:
         model = Profile
-        fields = ["org_share"]
+        fields = ["org_share", "private_profile"]
 
 
 class BuyRequestForm(StripeForm):

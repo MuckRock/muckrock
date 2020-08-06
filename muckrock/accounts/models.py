@@ -136,8 +136,8 @@ class Profile(models.Model):
     # deprecate after projects on squarelet #
     org_share = models.BooleanField(
         default=False,
-        verbose_name="Share",
-        help_text="Let other members of my organization view " "my embargoed requests",
+        verbose_name="Share with Organization",
+        help_text="Let other members of my organization view my embargoed requests",
     )
 
     preferred_proxy = models.BooleanField(

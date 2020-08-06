@@ -110,11 +110,11 @@ class TestAccountFunctional(TestCase):
         """Test the account settings view"""
         # pylint: disable=unused-argument
         profile = self.user.profile
-        profile_data = {"action": "profile", "twitter": "allanlasser"}
+        org_data = {"action": "org", "org_share": True}
         email_data = {"action": "email", "email_pref": "hourly"}
         settings_url = reverse("acct-settings")
         http_post_response(
-            settings_url, views.ProfileSettings.as_view(), profile_data, self.user
+            settings_url, views.ProfileSettings.as_view(), org_data, self.user
         )
         http_post_response(
             settings_url, views.ProfileSettings.as_view(), email_data, self.user
@@ -122,7 +122,7 @@ class TestAccountFunctional(TestCase):
         self.user.refresh_from_db()
         profile.refresh_from_db()
         all_data = {}
-        all_data.update(profile_data)
+        all_data.update(org_data)
         all_data.update(email_data)
         all_data.pop("action")
         for key, val in all_data.items():

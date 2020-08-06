@@ -40,7 +40,6 @@ from muckrock.accounts.forms import (
     ContactForm,
     EmailSettingsForm,
     OrgPreferencesForm,
-    ProfileSettingsForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import Notification, RecurringDonation
@@ -106,11 +105,7 @@ class ProfileSettings(TemplateView):
     def post(self, request, **kwargs):
         """Handle form processing"""
         # pylint: disable=unused-argument
-        settings_forms = {
-            "profile": ProfileSettingsForm,
-            "email": EmailSettingsForm,
-            "org": OrgPreferencesForm,
-        }
+        settings_forms = {"email": EmailSettingsForm, "org": OrgPreferencesForm}
         action = request.POST.get("action")
         receipt_form = None
         if action == "cancel-donations":
@@ -121,7 +116,7 @@ class ProfileSettings(TemplateView):
                 "recurring_crowdfund_payments", "cancel-crowdfunds"
             )
             return redirect("acct-settings")
-        elif action:
+        elif action in settings_forms:
             form = settings_forms[action]
             form = form(request.POST, request.FILES, instance=request.user.profile)
             if form.is_valid():
@@ -164,7 +159,6 @@ class ProfileSettings(TemplateView):
         context = super(ProfileSettings, self).get_context_data(**kwargs)
         user_profile = self.request.user.profile
         email_initial = {"email": self.request.user.email}
-        profile_form = ProfileSettingsForm(instance=user_profile)
         email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
         org_form = OrgPreferencesForm(instance=user_profile)
         # these move to squarelet in the future
@@ -173,7 +167,6 @@ class ProfileSettings(TemplateView):
         context.update(
             {
                 "squarelet_url": settings.SQUARELET_URL,
-                "profile_form": profile_form,
                 "email_form": email_form,
                 "org_form": org_form,
                 "donations": donations,
