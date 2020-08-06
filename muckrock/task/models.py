@@ -22,8 +22,7 @@ from itertools import groupby
 # Third Party
 import bleach
 from zenpy import Zenpy
-from zenpy.lib.api_objects import User as ZenUser
-from zenpy.lib.api_objects import Comment, Request
+from zenpy.lib.api_objects import Comment, Request, User as ZenUser
 
 # MuckRock
 from muckrock.agency.utils import initial_communication_template
@@ -671,43 +670,42 @@ class FlaggedTask(Task):
         )
 
         description = self.text
-        tags = ['flag', self.category.replace(' ', '_')]
+        tags = ["flag", self.category.replace(" ", "_")]
 
         for obj_name in ["foia", "agency", "jurisdiction"]:
             obj = getattr(self, obj_name)
             if obj:
-                description += '\n{}{}'.format(
-                    settings.MUCKROCK_URL,
-                    obj.get_absolute_url(),
+                description += "\n{}{}".format(
+                    settings.MUCKROCK_URL, obj.get_absolute_url()
                 )
-                tags.append('{}_flag'.format(obj_name))
+                tags.append("{}_flag".format(obj_name))
 
         if self.user:
             entitlements = list(
                 self.user.organizations.values_list(
-                    'entitlement__slug', flat=True
+                    "entitlement__slug", flat=True
                 ).distinct()
             )
-            if 'free' in entitlements and len(entitlements) > 1:
-                entitlements.remove('free')
+            if "free" in entitlements and len(entitlements) > 1:
+                entitlements.remove("free")
             tags.extend(entitlements)
 
         request = {
-            'subject': self.get_category_display() or 'Generic Flag',
-            'comment': Comment(body=description),
-            'type': 'task',
-            'priority': 'normal',
-            'status': 'new',
-            'tags': tags,
+            "subject": self.get_category_display() or "Generic Flag",
+            "comment": Comment(body=description),
+            "type": "task",
+            "priority": "normal",
+            "status": "new",
+            "tags": tags,
         }
         requester = {}
         if self.user and self.user.profile.full_name:
-            requester['name'] = self.user.profile.full_name
+            requester["name"] = self.user.profile.full_name
         if self.user and self.user.email:
-            requester['email'] = self.user.email
+            requester["email"] = self.user.email
         if not requester:
-            requester = {'name': 'Anonymous User'}
-        request['requester'] = ZenUser(**requester)
+            requester = {"name": "Anonymous User"}
+        request["requester"] = ZenUser(**requester)
         request = client.requests.create(Request(**request))
         return request.id
 
