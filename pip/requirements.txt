@@ -16,7 +16,6 @@ bleach==3.1.5
 boto3==1.14.19            # via smart-open
 boto==2.42.0
 botocore==1.17.19         # via boto3, s3transfer
-bz2file==0.98             # via smart-open
 cachetools==3.1.1         # via zenpy
 celery==4.4.6
 certifi==2017.4.17        # via requests
@@ -142,7 +141,7 @@ s3transfer==0.3.3         # via boto3
 scikit-learn==0.23.1
 scipy==1.5.0
 simplejson==3.16.0
-six==1.15.0               # via bleach, cryptography, django-autocomplete-light, django-compat, django-compressor, django-extensions, ecdsa, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pyjwkest, python-dateutil, python-jose, social-auth-app-django, social-auth-core, traitlets
+six==1.15.0               # via bleach, cryptography, django-autocomplete-light, django-compat, django-compressor, django-extensions, ecdsa, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pyjwkest, python-dateutil, python-jose, social-auth-app-django, social-auth-core, traitlets, zenpy
 smart-open==1.11.1
 smartypants==1.8.6
 social-auth-app-django==4.0.0
