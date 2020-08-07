@@ -335,7 +335,8 @@ class MyRequestList(RequestList):
         """Add forms for bulk actions"""
         context = super(MyRequestList, self).get_context_data(**kwargs)
         context["project_form"] = ProjectManagerForm(user=self.request.user)
-        context["tag_form"] = TagManagerForm(required=False)
+        # set auto_id to avoid clashing IDs with the tag filter
+        context["tag_form"] = TagManagerForm(required=False, auto_id="id_tm_%s")
         context["share_form"] = FOIAAccessForm(required=False)
         context["can_embargo"] = can_embargo(self.request.user)
         context["can_perm_embargo"] = can_embargo_permananently(self.request.user)
