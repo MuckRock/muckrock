@@ -86,6 +86,11 @@ class TestNewsFunctional(TestCase):
         """Should redirect to list"""
         get_allowed(self.client, reverse("news-index"))
 
+    def test_news_archive(self):
+        """Should return all articles"""
+        response = get_allowed(self.client, reverse("news-archive"))
+        eq_(len(response.context["object_list"]), 5)
+
     def test_news_archive_year(self):
         """Should return all articles in the given year"""
         response = get_allowed(

@@ -23,7 +23,7 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
     tags."""
 
     projects = django_filters.ModelMultipleChoiceFilter(
-        name="projects",
+        field_name="projects",
         queryset=lambda request: Project.objects.get_visible(request.user),
         widget=autocomplete.ModelSelect2Multiple(
             url="project-autocomplete", attrs={"data-placeholder": "Search projects"}
