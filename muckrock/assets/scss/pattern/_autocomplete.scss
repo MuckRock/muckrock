@@ -90,3 +90,12 @@ input.autocomplete.xhr-pending { background-image: none; }
   /*makes the placeholder to be 100% of the width while there are no options selected*/
   width: 100% !important;
 }
+
+.select2-selection__clear::before {
+  content: "Clear all";
+  visibility: visible;
+}
+
+.select2-selection__clear {
+  visibility: hidden;
+}
