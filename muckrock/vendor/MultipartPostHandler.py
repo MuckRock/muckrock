@@ -62,7 +62,7 @@ class MultipartPostHandler(urllib.request.BaseHandler):
     handler_order = urllib.request.HTTPHandler.handler_order - 10  # needs to run first
 
     def http_request(self, request):
-        data = request.get_data()
+        data = request.data
         if data is not None and type(data) != str:
             v_files = []
             v_vars = []
@@ -94,7 +94,7 @@ class MultipartPostHandler(urllib.request.BaseHandler):
                     )
                 request.add_unredirected_header("Content-Type", contenttype)
 
-            request.add_data(data)
+            request.data = data
         return request
 
     def multipart_encode(vars, files, boundary=None, buffer=None):
