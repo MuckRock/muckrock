@@ -224,7 +224,7 @@ class FlaggedTaskTests(TestCase):
         flagged_task = FlaggedTaskFactory()
         reply = "Lorem ipsum"
         flagged_task.reply(reply)
-        mock_support.assert_called_with(flagged_task.user, reply, flagged_task)
+        mock_support.assert_called_with(flagged_task.user.pk, reply, flagged_task.pk)
 
     @requests_mock.Mocker()
     def test_create_zoho_ticket(self, mock_requests):

@@ -33,7 +33,7 @@ class TestDailyTask(TestCase):
         """The send method should be called when a user has unread notifications."""
         NotificationFactory(user=self.user)
         tasks.daily_digest()
-        mock_send.assert_called_with(self.user, "Daily Digest", relativedelta(days=1))
+        mock_send.assert_called_with(self.user.pk, "Daily Digest", "daily")
 
     @mock.patch("muckrock.message.tasks.send_activity_digest.delay")
     def test_when_no_unread(self, mock_send):
@@ -66,12 +66,12 @@ class TestNotificationTasks(TestCase):
     def test_support(self, mock_send):
         """Notifies the user with a support response."""
         task = FlaggedTaskFactory()
-        tasks.support(self.user, "Hello", task)
+        tasks.support(self.user.pk, "Hello", task.pk)
         mock_send.assert_called_with(fail_silently=False)
 
     def test_notify_contributor(self, mock_send):
         """Notifies a contributor that they were added to a project."""
         project = ProjectFactory()
         added_by = UserFactory()
-        tasks.notify_project_contributor(self.user, project, added_by)
+        tasks.notify_project_contributor(self.user.pk, project.pk, added_by.pk)
         mock_send.assert_called_with(fail_silently=False)

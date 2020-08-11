@@ -253,7 +253,7 @@ class TestProjectEditView(TestCase):
         ok_(self.project.has_contributor(new_contributor))
         ok_(self.project.has_contributor(self.contributor))
         mock_notify.assert_called_once_with(
-            new_contributor, self.project, self.contributor
+            new_contributor.pk, self.project.pk, self.contributor.pk
         )
 
 

@@ -236,7 +236,7 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
         added_contributors = list(set(new) - set(existing))
         for contributor in added_contributors:
             notify_project_contributor.delay(
-                contributor, self.object, self.request.user
+                contributor.pk, self.object.pk, self.request.user.pk
             )
 
 

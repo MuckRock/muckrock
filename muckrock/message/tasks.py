@@ -34,8 +34,16 @@ logger = logging.getLogger(__name__)
     soft_time_limit=570,
     name="muckrock.message.tasks.send_activity_digest",
 )
-def send_activity_digest(user, subject, interval):
+def send_activity_digest(user_id, subject, preference):
     """Individual task to create and send an activity digest to a user."""
+    user = User.objects.get(id=user_id)
+    interval = {
+        "hourly": relativedelta(hours=1),
+        "daily": relativedelta(days=1),
+        "weekly": relativedelta(weeks=1),
+        "monthly": relativedelta(months=1),
+    }[preference]
+
     logger.info(
         "Starting activity digest at: %s User: %s Subject: %s Interval: %s",
         timezone.now(),
@@ -55,13 +63,13 @@ def send_activity_digest(user, subject, interval):
         )
 
 
-def send_digests(preference, subject, interval):
+def send_digests(preference, subject):
     """Helper to send out timed digests"""
     users = User.objects.filter(
         profile__email_pref=preference, notifications__read=False
     ).distinct()
     for user in users:
-        send_activity_digest.delay(user, subject, interval)
+        send_activity_digest.delay(user.pk, subject, preference)
 
 
 # every hour
@@ -70,7 +78,7 @@ def send_digests(preference, subject, interval):
 )
 def hourly_digest():
     """Send out hourly digest"""
-    send_digests("hourly", "Hourly Digest", relativedelta(hours=1))
+    send_digests("hourly", "Hourly Digest")
 
 
 # every day at 10am
@@ -79,7 +87,7 @@ def hourly_digest():
 )
 def daily_digest():
     """Send out daily digest"""
-    send_digests("daily", "Daily Digest", relativedelta(days=1))
+    send_digests("daily", "Daily Digest")
 
 
 # every Monday at 10am
@@ -89,7 +97,7 @@ def daily_digest():
 )
 def weekly_digest():
     """Send out weekly digest"""
-    send_digests("weekly", "Weekly Digest", relativedelta(weeks=1))
+    send_digests("weekly", "Weekly Digest")
 
 
 # first day of every month at 10am
@@ -99,7 +107,7 @@ def weekly_digest():
 )
 def monthly_digest():
     """Send out monthly digest"""
-    send_digests("monthly", "Monthly Digest", relativedelta(months=1))
+    send_digests("monthly", "Monthly Digest")
 
 
 # every day at 9:30am
@@ -108,7 +116,7 @@ def monthly_digest():
 )
 def staff_digest():
     """Send out staff digest"""
-    staff_users = User.objects.filter(is_staff=True).distinct()
+    staff_users = User.objects.filter(is_staff=True)
     for staff_user in staff_users:
         email = digests.StaffDigest(user=staff_user, subject="Daily Staff Digest")
         email.send()
@@ -268,22 +276,33 @@ def failed_payment(invoice_id):
 
 
 @task(name="muckrock.message.tasks.support")
-def support(user, message, _task):
-    """Send a response to a user about a task."""
-    context = {"message": message, "task": _task}
+def support(user_id, message, task_id):
+    """Send a response to a user about a flag task."""
+    # pylint: disable=import-outside-toplevel
+    from muckrock.task.models import FlaggedTask
+
+    user = User.objects.get(id=user_id)
+    task_ = FlaggedTask.objects.get(id=task_id)
+    context = {"message": message, "task": task_}
     notification = TemplateEmail(
         user=user,
         extra_context=context,
         text_template="message/notification/support.txt",
         html_template="message/notification/support.html",
-        subject="Support #%d" % _task.id,
+        subject="Support #%d" % task_.id,
     )
     notification.send(fail_silently=False)
 
 
 @task(name="muckrock.message.tasks.notify_project_contributor")
-def notify_project_contributor(user, project, added_by):
+def notify_project_contributor(user_id, project_id, added_by_id):
     """Notify a user that they were added as a contributor to a project."""
+    # pylint: disable=import-outside-toplevel
+    from muckrock.project.models import Project
+
+    user = User.objects.get(id=user_id)
+    project = Project.objects.get(id=project_id)
+    added_by = User.objects.get(id=added_by_id)
     context = {"project": project, "added_by": added_by}
     notification = TemplateEmail(
         user=user,
@@ -307,17 +326,3 @@ def slack(payload):
             args=[payload],
             exc=exc,
         )
-
-
-@task(name="muckrock.message.tasks.gift")
-def gift(to_user, from_user, gift_description):
-    """Notify the user when they have been gifted requests."""
-    context = {"from": from_user, "gift": gift_description}
-    notification = TemplateEmail(
-        user=to_user,
-        extra_context=context,
-        text_template="message/notification/gift.txt",
-        html_template="message/notification/gift.html",
-        subject="You got a gift!",
-    )
-    notification.send(fail_silently=False)
