@@ -681,9 +681,9 @@ class FlaggedTask(Task):
                 tags.append('{}_flag'.format(obj_name))
 
         if self.user:
-            entitlements = self.user.organizations.values_list(
+            entitlements = list(self.user.organizations.values_list(
                 'entitlement__slug', flat=True
-            ).distinct()
+            ).distinct())
             if 'free' in entitlements and len(entitlements) > 1:
                 entitlements.remove('free')
             tags.extend(entitlements)
