@@ -69,7 +69,6 @@ from muckrock.task.models import (
     SnailMailTask,
 )
 from muckrock.task.pdf import LobPDF
-from muckrock.vendor import MultipartPostHandler
 
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 
@@ -124,33 +123,33 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         logger.warning("Upload Doc Cloud: Changing without a doc id: %s", doc.pk)
         return
 
-    # these need to be encoded -> unicode to regular byte strings
     params = {
-        "title": doc.title.encode("utf8"),
-        "source": doc.source.encode("utf8"),
-        "description": doc.description.encode("utf8"),
-        "access": doc.access.encode("utf8"),
+        "title": doc.title,
+        "source": doc.source,
+        "description": doc.description,
+        "access": doc.access,
     }
     foia = doc.get_foia()
     if foia:
         params["related_article"] = (
             "https://www.muckrock.com" + doc.get_foia().get_absolute_url()
-        ).encode("utf8")
+        )
     if change:
-        params["_method"] = str("put")
-        url = "/documents/%s.json" % quote_plus(doc.doc_id.encode("utf-8"))
+        params["_method"] = "put"
+        url = "/documents/%s.json" % quote_plus(doc.doc_id)
     else:
         params["file"] = doc.ffile.url.replace("https", "http", 1)
         url = "/upload.json"
 
-    opener = urllib.request.build_opener(MultipartPostHandler.MultipartPostHandler)
+    params = urllib.parse.urlencode(params)
+    params = params.encode("utf8")
     request = urllib.request.Request(
         "https://www.documentcloud.org/api/%s" % url, params
     )
     request = authenticate_documentcloud(request)
 
     try:
-        ret = opener.open(request).read()
+        ret = urllib.request.urlopen(request).read()
         if not change:
             info = json.loads(ret)
             doc.doc_id = info["id"]
