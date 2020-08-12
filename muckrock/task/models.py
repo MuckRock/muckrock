@@ -691,7 +691,7 @@ class FlaggedTask(Task):
             tags.extend(entitlements)
 
         request = {
-            'subject': self.get_category_display(),
+            'subject': self.get_category_display() or 'Generic Flag',
             'comment': Comment(body=description),
             'type': 'task',
             'priority': 'normal',
