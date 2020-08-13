@@ -41,7 +41,9 @@ class AsyncFileDownloadTask:
             m=today.month,
             d=today.day,
             md5=md5(
-                "{}{}{}{}".format(int(time()), settings.SECRET_KEY, user_pk, hash_key)
+                "{}{}{}{}".format(
+                    int(time()), settings.SECRET_KEY, user_pk, hash_key
+                ).encode("ascii")
             ).hexdigest(),
         )
         self.key = self.bucket.new_key(self.file_key)
