@@ -20,7 +20,7 @@ from dashing.widgets import GraphWidget, ListWidget, NumberWidget, Widget
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
-from smart_open import smart_open
+from smart_open.smart_open_lib import smart_open
 
 # MuckRock
 from muckrock.accounts.models import Statistics

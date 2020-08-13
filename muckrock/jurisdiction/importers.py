@@ -9,7 +9,7 @@ import csv
 
 # Third Party
 from boto.s3.connection import S3Connection
-from smart_open import smart_open
+from smart_open.smart_open_lib import smart_open
 
 # MuckRock
 from muckrock.jurisdiction.models import Jurisdiction, Law
