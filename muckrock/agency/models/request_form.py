@@ -11,7 +11,7 @@ from django.db import models
 # Standard Library
 import inspect
 from datetime import date
-from io import StringIO
+from io import BytesIO
 
 # Third Party
 from pdfrw import PageMerge, PdfReader, PdfWriter
@@ -57,7 +57,7 @@ class AgencyRequestForm(models.Model):
     def _create_overlay(self, data):
         """Create the filled in overlay"""
         # initiate an overlay buffer where we will fill in the information
-        overlay_buffer = StringIO()
+        overlay_buffer = BytesIO()
         overlay_canvas = canvas.Canvas(overlay_buffer)
         overlay_canvas.setFont("Times-Roman", 10)
         # open a copy of the template form to fill in
@@ -87,7 +87,7 @@ class AgencyRequestForm(models.Model):
         for t_page, o_page in zip(template.pages, overlay_pdf.pages):
             overlay = PageMerge().add(o_page)[0]
             PageMerge(t_page).add(overlay).render()
-        final_form = StringIO()
+        final_form = BytesIO()
         PdfWriter().write(final_form, template)
         final_form.seek(0)
         return final_form

@@ -11,7 +11,7 @@ from django.utils import timezone
 # Standard Library
 import os.path
 from datetime import date
-from io import StringIO
+from io import BytesIO
 from itertools import groupby
 
 # Third Party
@@ -108,7 +108,7 @@ class MailPDF(PDF):
         # keep track of any problematic attachments
         self.generate()
         merger = PdfFileMerger(strict=False)
-        merger.append(StringIO(self.output(dest="S")))
+        merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
         files = []
         for file_ in self.comm.files.all():
             if file_.get_extension() == "pdf":
@@ -120,7 +120,7 @@ class MailPDF(PDF):
                     files.append((file_, "error", 0))
             else:
                 files.append((file_, "skipped", 0))
-        single_pdf = StringIO()
+        single_pdf = BytesIO()
         try:
             merger.write(single_pdf)
         except PdfReadError:

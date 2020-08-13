@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Standard Library
-from io import StringIO
+from io import BytesIO
 from random import randint
 
 # Third Party
@@ -68,7 +68,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 
     blank_pdf = FPDF()
     blank_pdf.add_page()
-    blank = StringIO(blank_pdf.output(dest="S"))
+    blank = BytesIO(blank_pdf.output(dest="S").encode("latin-1"))
     for snail in snails.iterator():
         # generate the pdf and merge all pdf attachments
         pdf = SnailMailPDF(
@@ -90,9 +90,9 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     cover_pdf.generate()
     if cover_pdf.page % 2 == 1:
         cover_pdf.add_page()
-    bulk_merger.merge(0, StringIO(cover_pdf.output(dest="S")))
+    bulk_merger.merge(0, BytesIO(cover_pdf.output(dest="S").encode("latin-1")))
 
-    bulk_pdf = StringIO()
+    bulk_pdf = BytesIO()
     bulk_merger.write(bulk_pdf)
     bulk_pdf.seek(0)
 

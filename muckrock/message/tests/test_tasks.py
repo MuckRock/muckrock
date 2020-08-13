@@ -10,7 +10,6 @@ from django.test import TestCase
 # Third Party
 import mock
 import nose.tools
-from dateutil.relativedelta import relativedelta
 
 # MuckRock
 from muckrock.core.factories import NotificationFactory, ProjectFactory, UserFactory
