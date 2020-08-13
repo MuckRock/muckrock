@@ -111,6 +111,7 @@ $(document).ready(function(){
       data: {
         agencies: agencyWidget.val()
       },
+      traditional: true,
       type: "get",
       success: function(data) {
         $(".document-boilerplate.intro").html(data.intro);
