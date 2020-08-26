@@ -31,8 +31,10 @@ from muckrock.task.factories import (
     NewAgencyTaskFactory,
     NewPortalTaskFactory,
     OrphanTaskFactory,
+    PortalTaskFactory,
     ProjectReviewTaskFactory,
     ResponseTaskFactory,
+    ReviewAgencyTaskFactory,
     SnailMailTaskFactory,
 )
 from muckrock.task.forms import FlaggedTaskForm, ProjectReviewTaskForm
@@ -45,8 +47,10 @@ from muckrock.task.models import (
 from muckrock.task.views import (
     FlaggedTaskList,
     NewPortalTaskList,
+    PortalTaskList,
     ProjectReviewTaskList,
     ResponseTaskList,
+    ReviewAgencyTaskList,
     TaskList,
 )
 
@@ -787,3 +791,37 @@ class NewPortalTaskListViewTests(TestCase):
     def _test_n_plus_one_query(self):
         """Should make the same number of SQL queries regardless of amount of data"""
         n_plus_one_query(self.client, self.url, NewPortalTaskFactory)
+
+
+class ReviewAgencyTaskListViewTests(TestCase):
+    """Tests ReviewAgencyTask-specific view tests"""
+
+    def setUp(self):
+        password = "abc"
+        self.user = UserFactory(is_staff=True, password=password)
+        self.url = reverse("review-agency-task-list")
+        self.view = ReviewAgencyTaskList.as_view()
+        self.task = ReviewAgencyTaskFactory()
+        self.client.login(username=self.user.username, password=password)
+
+    def test_get_list(self):
+        """Staff users should be able to view a list of tasks."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200)
+
+
+class PortalTaskListViewTests(TestCase):
+    """Tests PortalTask-specific view tests"""
+
+    def setUp(self):
+        password = "abc"
+        self.user = UserFactory(is_staff=True, password=password)
+        self.url = reverse("portal-task-list")
+        self.view = PortalTaskList.as_view()
+        self.task = PortalTaskFactory()
+        self.client.login(username=self.user.username, password=password)
+
+    def test_get_list(self):
+        """Staff users should be able to view a list of tasks."""
+        response = http_get_response(self.url, self.view, self.user)
+        eq_(response.status_code, 200)

@@ -209,7 +209,7 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
     jurisdiction_field = "agency__jurisdiction"
 
     agency = django_filters.ModelMultipleChoiceFilter(
-        name="agency",
+        field_name="agency",
         queryset=Agency.objects.exclude(reviewagencytask=None),
         widget=autocomplete.ModelSelect2Multiple(
             url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
@@ -256,7 +256,7 @@ class PortalTaskFilterSet(TaskFilterSet):
     # pylint: disable=invalid-name
     category = django_filters.ChoiceFilter(choices=PORTAL_CATEGORIES)
     agency = django_filters.ModelMultipleChoiceFilter(
-        name="communication__foia__agency",
+        field_name="communication__foia__agency",
         label="Agency",
         queryset=Agency.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(

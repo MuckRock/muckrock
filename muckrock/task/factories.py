@@ -96,3 +96,24 @@ class NewPortalTaskFactory(factory.django.DjangoModelFactory):
         "muckrock.foia.factories.FOIACommunicationFactory"
     )
     portal_type = "other"
+
+
+class ReviewAgencyTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating review agency tasks"""
+
+    class Meta:
+        model = task.models.ReviewAgencyTask
+
+    agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
+
+
+class PortalTaskFactory(factory.django.DjangoModelFactory):
+    """A factory for creating review agency tasks"""
+
+    class Meta:
+        model = task.models.PortalTask
+
+    communication = factory.SubFactory(
+        "muckrock.foia.factories.FOIACommunicationFactory"
+    )
+    category = "u"
