@@ -56,17 +56,27 @@ def test(c, test_path="", reuse="0", capture=False, warning=False):
 
 
 @task
-def coverage(c, settings="test", reuse="0"):
+def coverage(c, settings="test", reuse="0", codeship=False):
     """Run the tests and generate a coverage report"""
-    cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
-        opt="-e REUSE_DB={reuse}".format(reuse=reuse),
-        service="muckrock_django",
-        cmd="sh -c 'coverage erase && "
+    if codeship:
+        settings = "codeship"
+    cmds = [
+        "coverage erase",
         'coverage run --branch --source muckrock --omit="*/migrations/*" '
-        "manage.py test --settings=muckrock.settings.{settings} && "
-        "coverage html -i'".format(settings=settings),
-    )
-    c.run(cmd)
+        f"manage.py test --settings=muckrock.settings.{settings}",
+        "coverage html -i",
+    ]
+    if codeship:
+        for cmd in cmds:
+            c.run(cmd)
+    else:
+        sh_cmd = " && ".join(cmds)
+        cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
+            opt="-e REUSE_DB={reuse}".format(reuse=reuse),
+            service="muckrock_django",
+            cmd=f"sh -c '{sh_cmd}'",
+        )
+        c.run(cmd)
 
 
 # Code Quality
@@ -74,15 +84,19 @@ def coverage(c, settings="test", reuse="0"):
 
 
 @task
-def pylint(c):
+def pylint(c, codeship=False):
     """Run the linter"""
-    c.run(
-        DOCKER_COMPOSE_RUN_OPT.format(
-            opt="-e DJANGO_SETTINGS_MODULE=muckrock.settings.local",
-            service="muckrock_django",
-            cmd="pylint muckrock --rcfile=config/pylint.conf",
+    cmd = "pylint muckrock --rcfile=config/pylint.conf"
+    if codeship:
+        c.run(cmd)
+    else:
+        c.run(
+            DOCKER_COMPOSE_RUN_OPT.format(
+                opt="-e DJANGO_SETTINGS_MODULE=muckrock.settings.local",
+                service="muckrock_django",
+                cmd=cmd,
+            )
         )
-    )
 
 
 @task
