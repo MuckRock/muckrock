@@ -505,6 +505,8 @@ ORG_REQUESTS_PER_SEAT = 10
 MUCKROCK_URL = "http://dev.muckrock.com"
 FOIAMACHINE_URL = "http://dev.foiamachine.org"
 SQUARELET_URL = "http://dev.squarelet.com"
+DOCCLOUD_URL = "http://www.dev.documentcloud.org"
+DOCCLOUD_API_URL = "http://api.dev.documentcloud.org"
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r"^/api(_v\d)?/.*$"
@@ -707,3 +709,7 @@ ZENDESK_SUBDOMAIN = os.environ.get("ZENDESK_SUBDOMAIN", "muckrock")
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 USE_SCOUT = False
+
+DOCCLOUD_EXTENSIONS = os.environ.get("DOCCLOUD_EXTENSIONS", ".pdf,.doc,.docx").split(
+    ","
+)

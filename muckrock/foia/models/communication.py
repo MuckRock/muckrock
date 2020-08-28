@@ -162,16 +162,19 @@ class FOIACommunication(models.Model):
         # to document cloud
         change = old_foia is not None
 
-        access = "private" if self.foia.embargo else "public"
-        for file_ in self.files.all():
-            file_.access = access
-            file_.source = self.get_source()
-            file_.save()
-            upload_document_cloud.apply_async(args=[file_.pk, change], countdown=3)
-        self.save()
-        CommunicationMoveLog.objects.create(
-            communication=self, foia=old_foia, user=user
-        )
+        with transaction.atomic():
+            access = "private" if self.foia.embargo else "public"
+            for file_ in self.files.all():
+                file_.access = access
+                file_.source = self.get_source()
+                file_.save()
+                transaction.on_commit(
+                    lambda file_=file_: upload_document_cloud.delay(file_.pk, change)
+                )
+            self.save()
+            CommunicationMoveLog.objects.create(
+                communication=self, foia=old_foia, user=user
+            )
         logger.info("Communication #%d moved to request #%d", self.id, self.foia.id)
         # if cloning happens, self gets overwritten. so we save it to a variable here
         comm = FOIACommunication.objects.get(pk=self.pk)
@@ -181,6 +184,7 @@ class FOIACommunication(models.Model):
             cloned = self.clone(foias[1:], user)
         return moved + cloned
 
+    @transaction.atomic
     def clone(self, foias, user):
         """
         Copies the communication to each request in the list,

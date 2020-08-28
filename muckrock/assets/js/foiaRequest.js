@@ -123,15 +123,33 @@ export function displayFile(file) {
     var docId = file.data('doc-id');
     var title = file.data('title') || 'Untitled';
     var pages = file.data('pages') || 0;
+    var legacy = file.data('legacy') === 'True';
+    var iframe = $("#viewer-iframe");
+
     $('#doc-title').empty().text(title);
     $('#doc-pages').empty().text(pages);
     // remove the active class from all the list items,
     // then apply active class to this file's list item
     files.parent('li').removeClass('active');
     files.filter(file).parent('li').addClass('active');
-    var docCloudSettings = {sidebar: false, container: "#viewer"};
-    /* DV is defined by the external DocumentCloud script at runtime. */
-    DV.load('https://www.documentcloud.org/documents/' + docId + '.js', docCloudSettings);
+
+    // XXX need to show/hide div/iframe apprprioately and make iframe 100% width
+    if (legacy) {
+        /* DV is defined by the external DocumentCloud script at runtime. */
+        DV.load(
+            'https://www.documentcloud.org/documents/' + docId + '.js',
+            {sidebar: false, container: "#viewer"}
+        );
+    } else {
+        // load new embed in the iframe
+        // XXX make this configurable
+        var url = "http://www.dev.documentcloud.org/";
+        iframe.attr(
+            "src",
+            url + "documents/" + docId + "/?embed=1&amp;title=1"
+        );
+    }
+
     activeFile.addClass('visible');
     window.scrollTo(0, 0);
 }

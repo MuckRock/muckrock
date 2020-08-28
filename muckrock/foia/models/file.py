@@ -6,7 +6,7 @@ Models for the FOIA application
 # Django
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 
 # Standard Library
 import logging
@@ -47,7 +47,9 @@ class FOIAFile(models.Model):
     access = models.CharField(
         max_length=12, default="public", choices=access, db_index=True
     )
+    # XXX do we want to split to a id and slug field?
     doc_id = models.SlugField(max_length=80, blank=True, editable=False)
+    dc_legacy = models.BooleanField(default=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
 
     def __str__(self):
@@ -61,7 +63,7 @@ class FOIAFile(models.Model):
         """Is this a file doc cloud can support"""
 
         _, ext = os.path.splitext(self.ffile.name)
-        return ext.lower() in [".pdf", ".doc", ".docx"]
+        return ext.lower() in settings.DOCCLOUD_EXTENSIONS
 
     def get_thumbnail(self):
         """Get the url to the thumbnail image. If document is not public, use a generic fallback."""
@@ -86,6 +88,7 @@ class FOIAFile(models.Model):
             index = self.doc_id.index("-")
             num = self.doc_id[0:index]
             name = self.doc_id[index + 1 :]
+            # XXX
             return (
                 "https://assets.documentcloud.org/documents/"
                 + num
@@ -120,6 +123,7 @@ class FOIAFile(models.Model):
         """Anchor name"""
         return "file-%d" % self.pk
 
+    @transaction.atomic
     def clone(self, new_comm):
         """Clone this file to a new communication"""
         # pylint: disable=import-outside-toplevel
@@ -144,7 +148,7 @@ class FOIAFile(models.Model):
         new_ffile.name = self.name()
         self.ffile = new_ffile
         self.save()
-        upload_document_cloud.apply_async(args=[self.pk, False], countdown=3)
+        transaction.on_commit(lambda: upload_document_cloud.delay(self.pk, False))
 
     class Meta:
         verbose_name = "FOIA Document File"

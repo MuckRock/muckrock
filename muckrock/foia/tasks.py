@@ -43,6 +43,7 @@ import requests
 from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError
+from documentcloud import DocumentCloud
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
 from raven import Client
@@ -81,15 +82,6 @@ register_signal(client)
 lob.api_key = settings.LOB_SECRET_KEY
 
 
-def authenticate_documentcloud(request):
-    """This is just standard username/password encoding"""
-    username = settings.DOCUMENTCLOUD_USERNAME.encode()
-    password = settings.DOCUMENTCLOUD_PASSWORD.encode()
-    auth = base64.encodebytes(b"%s:%s" % (username, password))[:-1]
-    request.add_header("Authorization", "Basic %s" % auth.decode())
-    return request
-
-
 @task(
     ignore_result=True,
     max_retries=10,
@@ -98,16 +90,14 @@ def authenticate_documentcloud(request):
 )
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
+    # XXX keep new and old version of code around to deal with changing documents
+    # on legacy dc
+    # XXX check and update .dc_legacy
+    # XXX rethink how change param works
 
     logger.info("Upload Doc Cloud: %s", doc_pk)
 
-    try:
-        doc = FOIAFile.objects.get(pk=doc_pk)
-    except FOIAFile.DoesNotExist as exc:
-        # give database time to sync
-        upload_document_cloud.retry(
-            countdown=300, args=[doc_pk, change], kwargs=kwargs, exc=exc
-        )
+    doc = FOIAFile.objects.get(pk=doc_pk)
 
     if not doc.is_doccloud():
         # not a file doc cloud supports, do not attempt to upload
@@ -120,8 +110,16 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 
     if not doc.doc_id and change:
         # if we are changing it must have an id - this should never happen but it is!
+        # XXX happens if upload new file from admin
         logger.warning("Upload Doc Cloud: Changing without a doc id: %s", doc.pk)
         return
+
+    client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_USERNAME,
+        password=settings.DOCUMENTCLOUD_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
 
     params = {
         "title": doc.title,
@@ -132,35 +130,23 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     foia = doc.get_foia()
     if foia:
         params["related_article"] = (
-            "https://www.muckrock.com" + doc.get_foia().get_absolute_url()
+            settings.MUCKROCK_URL + doc.get_foia().get_absolute_url()
         )
+
     if change:
-        params["_method"] = "put"
-        url = "/documents/%s.json" % quote_plus(doc.doc_id)
+        # XXX error handle
+        # use auto error handling, catch doccloud library error
+        document = client.documents.get(id=doc.doc_id)
+        for attr, value in params.items():
+            setattr(document, attr, value)
+        document.save()
     else:
-        params["file"] = doc.ffile.url.replace("https", "http", 1)
-        url = "/upload.json"
-
-    params = urllib.parse.urlencode(params)
-    params = params.encode("utf8")
-    request = urllib.request.Request(
-        "https://www.documentcloud.org/api/%s" % url, params
-    )
-    request = authenticate_documentcloud(request)
-
-    try:
-        ret = urllib.request.urlopen(request).read()
-        if not change:
-            info = json.loads(ret)
-            doc.doc_id = info["id"]
-            doc.save()
-            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
-    except (urllib.error.URLError, urllib.error.HTTPError) as exc:
-        logger.warning("Upload Doc Cloud error: %s %s", url, doc.pk)
-        countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
-        upload_document_cloud.retry(
-            args=[doc.pk, change], kwargs=kwargs, exc=exc, countdown=countdown
-        )
+        # XXX error handle
+        # XXX pass by url?
+        # document = client.documents.upload(doc.ffile.url, **params)
+        document = client.documents.upload(doc.ffile, **params)
+        doc.doc_id = f"{document.id}-{document.slug}"
+        doc.save()
 
 
 @task(
@@ -170,6 +156,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 )
 def set_document_cloud_pages(doc_pk, **kwargs):
     """Get the number of pages from the document cloud server and save it locally"""
+    # XXX do this through a callback
 
     try:
         doc = FOIAFile.objects.get(pk=doc_pk)
@@ -386,7 +373,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             batch_delay=settings.PHAXIO_BATCH_DELAY,
             batch_collision_avoidance=True,
             callback_url=callback_url,
-            **{"tag[fax_id]": fax.pk, "tag[error_count]": error_count}
+            **{"tag[fax_id]": fax.pk, "tag[error_count]": error_count},
         )
         fax.fax_id = results["faxId"]
         fax.save()
@@ -525,7 +512,7 @@ def retry_stuck_documents():
     ]
     logger.info("Reupload documents, %d documents are stuck", len(docs))
     for doc in docs:
-        upload_document_cloud.apply_async(args=[doc.pk, False])
+        upload_document_cloud.delay(doc.pk, False)
 
 
 # Increase the time limit for autoimport to 10 hours, and a soft time limit to
@@ -597,6 +584,7 @@ def autoimport():
 
         return foia_pks, file_datetime
 
+    @transaction.atomic
     def import_key(key, storage_bucket, comm, log):
         """Import a key"""
 
@@ -629,7 +617,7 @@ def autoimport():
             % (file_name, foia.pk, foia.status)
         )
 
-        upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
+        transaction.on_commit(lambda: upload_document_cloud.delay(foia_file.pk, False))
 
     def import_prefix(prefix, bucket, storage_bucket, comm, log):
         """Import a prefix (folder) full of documents"""
@@ -938,7 +926,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             switch=switch,
             reason=reason,
             error_msg=error_msg,
-            **extra
+            **extra,
         )
 
     if category == "p":

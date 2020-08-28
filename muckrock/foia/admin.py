@@ -7,6 +7,7 @@ from django import forms
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -202,6 +203,7 @@ class FOIACommunicationAdmin(VersionAdmin):
 
     foia_link.short_description = "FOIA Request"
 
+    @transaction.atomic
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline files"""
         # pylint: disable=unused-argument
@@ -226,7 +228,11 @@ class FOIACommunicationAdmin(VersionAdmin):
             if not change:
                 instance.comm.foia.update(instance.anchor())
 
-            upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
+            transaction.on_commit(
+                lambda instance=instance: upload_document_cloud.delay(
+                    instance.pk, change
+                )
+            )
 
         formset.save_m2m()
 

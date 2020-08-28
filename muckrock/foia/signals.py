@@ -2,6 +2,7 @@
 
 # Django
 from django.conf import settings
+from django.db import transaction
 from django.db.models.signals import post_delete, pre_save
 
 # MuckRock
@@ -10,6 +11,7 @@ from muckrock.foia.models import FOIAFile, FOIARequest, OutboundRequestAttachmen
 from muckrock.foia.tasks import upload_document_cloud
 
 
+@transaction.atomic
 def foia_update_embargo(sender, **kwargs):
     """When embargo has possibly been switched, update the document cloud permissions"""
     # pylint: disable=unused-argument
@@ -22,7 +24,9 @@ def foia_update_embargo(sender, **kwargs):
             if doc.is_doccloud() and doc.access != access:
                 doc.access = access
                 doc.save()
-                upload_document_cloud.apply_async(args=[doc.pk, True], countdown=3)
+                transaction.on_commit(
+                    lambda doc=doc: upload_document_cloud.delay(doc.pk, True)
+                )
 
 
 def foia_file_delete_s3(sender, **kwargs):
