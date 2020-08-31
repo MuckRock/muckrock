@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
@@ -107,6 +108,7 @@ class CrowdsourceFieldAdmin(admin.ModelAdmin):
     fields = ("cs_link", "label", "type", "order")
     readonly_fields = ("cs_link",)
 
+    @mark_safe
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
         link = reverse(
@@ -114,7 +116,6 @@ class CrowdsourceFieldAdmin(admin.ModelAdmin):
         )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
 
-    cs_link.allow_tags = True
     cs_link.short_description = "Crowdsource"
 
 
@@ -133,6 +134,7 @@ class CrowdsourceResponseAdmin(admin.ModelAdmin):
     fields = ("cs_link", "user", "datetime", "data")
     readonly_fields = ("cs_link", "data")
 
+    @mark_safe
     def cs_link(self, obj):
         """Link back to the crowdsource page"""
         link = reverse(
@@ -140,5 +142,4 @@ class CrowdsourceResponseAdmin(admin.ModelAdmin):
         )
         return '<a href="{}">{}</a>'.format(link, obj.crowdsource.title)
 
-    cs_link.allow_tags = True
     cs_link.short_description = "Crowdsource"

@@ -4,6 +4,7 @@
 # Django
 from django.contrib import admin
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 # Third Party
 from reversion.admin import VersionAdmin
@@ -39,6 +40,7 @@ class ReadOnlyMixin:
 class CommunicationLinkMixin:
     """Admin mixin to show FOIA Communication link"""
 
+    @mark_safe
     def comm_link(self, obj):
         """Link to the FOIA communication admin"""
         link = reverse(
@@ -46,7 +48,6 @@ class CommunicationLinkMixin:
         )
         return '<a href="%s">FOIA Communication</a>' % link
 
-    comm_link.allow_tags = True
     comm_link.short_description = "FOIA Communication"
 
 

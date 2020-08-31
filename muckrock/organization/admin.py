@@ -6,6 +6,7 @@ Admin registration for organization models
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 # Third Party
 from reversion.admin import VersionAdmin
@@ -59,13 +60,13 @@ class OrganizationAdmin(VersionAdmin):
         else:
             return self.readonly_fields
 
+    @mark_safe
     def user_link(self, obj):
         """Link to the individual org's user"""
         user = User.objects.get(profile__uuid=obj.uuid)
         link = reverse("admin:auth_user_change", args=(user.pk,))
         return '<a href="%s">%s</a>' % (link, user.username)
 
-    user_link.allow_tags = True
     user_link.short_description = "User"
 
 

@@ -11,6 +11,7 @@ from django.db.models import Count, Max
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 # Standard Library
 import os
@@ -106,12 +107,12 @@ class CommunicationMoveLogInline(admin.TabularInline):
     fields = ("datetime", "user", "foia_link")
     extra = 0
 
+    @mark_safe
     def foia_link(self, obj):
         """Link to the FOIA"""
         link = reverse("admin:foia_foiarequest_change", args=(obj.foia.pk,))
         return '<a href="%s">%s</a>' % (link, obj.foia.title)
 
-    foia_link.allow_tags = True
     foia_link.short_description = "From FOIA Request"
 
 
@@ -193,12 +194,12 @@ class FOIACommunicationAdmin(VersionAdmin):
         CommunicationMoveLogInline,
     )
 
+    @mark_safe
     def foia_link(self, obj):
         """Link to this communication's FOIA admin"""
         link = reverse("admin:foia_foiarequest_change", args=(obj.foia.pk,))
         return '<a href="%s">%s</a>' % (link, obj.foia.title)
 
-    foia_link.allow_tags = True
     foia_link.short_description = "FOIA Request"
 
     def save_formset(self, request, form, formset, change):
@@ -430,12 +431,12 @@ class FOIARequestAdmin(VersionAdmin):
     get_user.short_description = "User"
     get_user.admin_order_field = "composer__user"
 
+    @mark_safe
     def composer_link(self, obj):
         """Link to the Composer"""
         link = reverse("admin:foia_foiacomposer_change", args=(obj.composer.pk,))
         return '<a href="%s">%s</a>' % (link, obj.composer.title)
 
-    composer_link.allow_tags = True
     composer_link.short_description = "Composer"
 
     def get_jurisdiction(self, obj):

@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 # Third Party
 from reversion.admin import VersionAdmin
@@ -88,6 +89,7 @@ class ProfileInline(admin.StackedInline):
     )
     readonly_fields = ("org_link", "uuid", "full_name", "email_confirmed", "avatar_url")
 
+    @mark_safe
     def org_link(self, obj):
         """Link to the individual org"""
         link = reverse(
@@ -96,7 +98,6 @@ class ProfileInline(admin.StackedInline):
         )
         return '<a href="%s">%s</a>' % (link, obj.individual_organization.name)
 
-    org_link.allow_tags = True
     org_link.short_description = "Individual Organization"
 
 
