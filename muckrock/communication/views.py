@@ -122,7 +122,7 @@ class CommunicationAutocomplete(MRAutocompleteView):
         """Staff only"""
         return request.user.is_staff
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         """Create an object given a text after checking permissions.
 
         This is mostly the same as the parent class, but needs to be overriden
