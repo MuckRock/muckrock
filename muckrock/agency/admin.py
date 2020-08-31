@@ -48,7 +48,7 @@ class AgencyAddressInline(admin.TabularInline):
 
     model = AgencyAddress
     show_change_link = True
-    # autocomplete_fields = ["address"]
+    autocomplete_fields = ["address"]
     extra = 1
 
 
@@ -165,7 +165,7 @@ class AgencyAdmin(VersionAdmin):
     formats = ["xls", "csv"]
     inlines = (AgencyAddressInline, AgencyEmailInline, AgencyPhoneInline)
     save_on_top = True
-    # autocomplete_fields = ["portal"]
+    autocomplete_fields = ["portal"]
     fieldsets = (
         (
             None,

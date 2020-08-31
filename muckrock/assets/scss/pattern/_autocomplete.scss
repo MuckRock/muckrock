@@ -91,11 +91,11 @@ input.autocomplete.xhr-pending { background-image: none; }
   width: 100% !important;
 }
 
-.select2-selection__clear::before {
+.create-request .select2-selection__clear::before {
   content: "Clear all";
   visibility: visible;
 }
 
-.select2-selection__clear {
+.create-request .select2-selection__clear {
   visibility: hidden;
 }

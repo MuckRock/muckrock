@@ -420,9 +420,9 @@ class FOIARequestAdmin(VersionAdmin):
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
-    # autocomplete_fields = ["address"]
+    autocomplete_fields = ["address"]
     exclude = ["composer"]
-    # autocomplete_fields = ["crowdfund", "portal"]
+    autocomplete_fields = ["crowdfund", "portal"]
 
     def get_user(self, obj):
         """Get the user"""
@@ -607,7 +607,7 @@ class FOIAComposerAdmin(VersionAdmin):
     prepopulated_fields = {"slug": ("title",)}
     list_display = ("title", "user", "status")
     search_fields = ["title", "requested_docs"]
-    # autocomplete_fields = ["organization", "parent"]
+    autocomplete_fields = ["organization", "parent"]
     form = FOIAComposerAdminForm
     inlines = [FOIARequestInline]
 
@@ -668,7 +668,7 @@ class OutboundComposerAttachmentAdmin(VersionAdmin):
     list_display = ("composer", "user", "ffile", "date_time_stamp")
     list_select_related = ("composer", "user")
     date_hierarchy = "date_time_stamp"
-    # autocomplete_fields = ["composer"]
+    autocomplete_fields = ["composer"]
     form = OutboundComposerAttachmentAdminForm
 
 
