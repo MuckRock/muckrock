@@ -193,7 +193,6 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "dal",
     "dal_select2",
-    "dal_legacy_static",
     "django.contrib.admin",
     "django.contrib.sitemaps",
     "django.contrib.messages",
