@@ -38,7 +38,7 @@ class QuestionList(MRSearchFilterListView):
     """List of unanswered questions"""
 
     model = Question
-    filterset_class = QuestionFilterSet
+    filter_class = QuestionFilterSet
     title = "Q&A Forum"
     template_name = "qanda/list.html"
     default_sort = "date"

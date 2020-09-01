@@ -13,7 +13,7 @@ import nose.tools
 # MuckRock
 from muckrock.core.factories import AnswerFactory, QuestionFactory, UserFactory
 from muckrock.core.test_utils import mock_middleware
-from muckrock.qanda.views import block_user, report_spam
+from muckrock.qanda.views import QuestionList, block_user, report_spam
 
 
 class TestQandA(TestCase):
@@ -66,3 +66,10 @@ class TestQandA(TestCase):
         answer.refresh_from_db()
         nose.tools.ok_(answer.user.is_active)
         nose.tools.eq_(len(mail.outbox), 1)
+
+    def test_get_question_index(self):
+        """Get the question index view"""
+        request = RequestFactory().get(reverse("question-index"))
+        request = mock_middleware(request)
+        response = QuestionList.as_view()(request)
+        nose.tools.eq_(response.status_code, 200)
