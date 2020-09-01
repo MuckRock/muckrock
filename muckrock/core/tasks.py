@@ -66,7 +66,7 @@ class AsyncFileDownloadTask:
     def run(self):
         """Task entry point"""
         with smart_open(
-            self.key, "wb", s3_min_part_size=settings.AWS_S3_MIN_PART_SIZE
+            self.key, "w", s3_min_part_size=settings.AWS_S3_MIN_PART_SIZE
         ) as out_file:
             self.generate_file(out_file)
         self.key.set_acl("public-read")
