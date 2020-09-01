@@ -819,7 +819,7 @@ class Detail(DetailView):
                 )
             except requests.exceptions.RequestException as exc:
                 logger.warning("Payment error: %s", exc, exc_info=sys.exc_info())
-                if exc.response.status_code / 100 == 4:
+                if exc.response.status_code // 100 == 4:
                     messages.error(
                         self.request,
                         "Payment Error: {}".format(
