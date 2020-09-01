@@ -281,6 +281,17 @@ def _handle_request(request, mail_id):
             comm.process_attachments(request.FILES)
             transaction.on_commit(lambda: download_links(comm.pk))
 
+            if foia.portal:
+                transaction.on_commit(lambda: foia.portal.receive_msg(comm))
+            else:
+                task = comm.responsetask_set.create()
+                transaction.on_commit(
+                    lambda: classify_status.apply_async(
+                        args=(task.pk,), countdown=30 * 60
+                    )
+                )
+                comm.create_agency_notifications()
+
         # attempt to autodetect a known portal
         _detect_portal(comm, from_email.email, post)
 
@@ -302,13 +313,6 @@ def _handle_request(request, mail_id):
             )
 
         comm.extract_tracking_id()
-
-        if foia.portal:
-            foia.portal.receive_msg(comm)
-        else:
-            task = comm.responsetask_set.create()
-            classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
-            comm.create_agency_notifications()
 
         muckrock_domains = (settings.MAILGUN_SERVER_NAME, "muckrock.com")
         new_cc_emails = [
