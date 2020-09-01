@@ -4,7 +4,7 @@
 <p>{{ salutation }}, {{ user.profile.full_name }}.</p>
 {% if stale_tasks_show %}
   <h1>Stale Tasks</h1>
-  {% for task_type, tasks in stale_tasks.iteritems %}
+  {% for task_type, tasks in stale_tasks.items %}
     {% if tasks %}
       <h2>{{ task_type }}</h2>
       <ul>
@@ -285,7 +285,7 @@
   </ul>
 {% endif %}
 
-{% for title, projects in projects.iteritems %}
+{% for title, projects in projects.items %}
   {% if projects %}
   <h1>{{ title }}</h1>
     <ul>

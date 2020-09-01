@@ -32,7 +32,7 @@
           {% if task.form_data %}
             <div class="form-data-table">
               <div class="row">
-                {% for key, value in task.form_data.iteritems %}
+                {% for key, value in task.form_data.items %}
                   <div class="cell">
                     <strong>{{key}}:</strong><br>{{value}}
                   </div>
