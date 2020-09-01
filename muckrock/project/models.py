@@ -16,7 +16,6 @@ from datetime import date
 import taggit
 
 # MuckRock
-from muckrock.core.utils import get_image_storage
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -93,10 +92,7 @@ class Project(models.Model):
     summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(
-        upload_to="project_images/%Y/%m/%d",
-        blank=True,
-        null=True,
-        storage=get_image_storage(),
+        upload_to="project_images/%Y/%m/%d", blank=True, null=True
     )
     private = models.BooleanField(
         default=True,

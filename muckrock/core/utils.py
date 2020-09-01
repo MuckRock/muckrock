@@ -8,7 +8,6 @@ from django.contrib.auth.models import Group, User
 from django.core.cache import cache, caches
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
-from django.utils.module_loading import import_string
 
 # Standard Library
 import datetime
@@ -24,9 +23,6 @@ import boto
 import requests
 import stripe
 from boto.s3.connection import S3Connection
-
-# MuckRock
-from muckrock.core.storage import QueuedS3DietStorage
 
 logger = logging.getLogger(__name__)
 
@@ -131,14 +127,6 @@ def cache_get_or_set(key, update, timeout):
         value = update()
         cache.set(key, value, timeout)
     return value
-
-
-def get_image_storage():
-    """Return the storage class to use for images we want optimized"""
-    if settings.USE_QUEUED_STORAGE:
-        return QueuedS3DietStorage()
-    else:
-        return import_string(settings.DEFAULT_FILE_STORAGE)()
 
 
 def retry_on_error(error, func, *args, **kwargs):

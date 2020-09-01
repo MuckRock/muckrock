@@ -16,7 +16,6 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock.core.utils import get_image_storage
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
@@ -75,7 +74,6 @@ class Article(models.Model):
         blank=True,
         null=True,
         resize_source={"size": (1600, 1200), "crop": "smart"},
-        storage=get_image_storage(),
     )
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -130,9 +128,7 @@ class Article(models.Model):
 class Photo(models.Model):
     """A photograph to embed in a news article"""
 
-    image = models.ImageField(
-        upload_to="news_photos/%Y/%m/%d", storage=get_image_storage()
-    )
+    image = models.ImageField(upload_to="news_photos/%Y/%m/%d")
 
     def __str__(self):
         return self.image.name

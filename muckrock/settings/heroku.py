@@ -11,8 +11,6 @@ from muckrock.settings.base import *
 
 # media and static asset handling
 DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
-DIET_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-DIET_CONFIG = os.path.join(SITE_ROOT, "../config/image_diet.yaml")
 THUMBNAIL_DEFAULT_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
 COMPRESS_STORAGE = STATICFILES_STORAGE
@@ -24,7 +22,6 @@ else:
 COMPRESS_URL = STATIC_URL
 MEDIA_URL = STATIC_URL + "media/"
 CLEAN_S3_ON_FOIA_DELETE = True
-USE_QUEUED_STORAGE = True
 COMPRESS_ENABLED = True
 
 TEMPLATES[0]["OPTIONS"]["loaders"] = [

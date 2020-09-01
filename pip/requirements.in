@@ -1,5 +1,4 @@
 -e git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun # Mail backend used directly (on production)
--e git://github.com/jazzband/django-queued-storage@541faad8f5d03e7e066d02b2a2d5b89d45b77819#egg=django_queued_storage # For delayed uploading of files
 -e git://github.com/theatlantic/django-news-sitemaps.git@v1.3.0#egg=django_news_sitemaps # For generating news sitemaps
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
@@ -46,7 +45,6 @@ furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
-image-diet2 # Used to compress images on upload
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson
 lob # sending mail via lob.com

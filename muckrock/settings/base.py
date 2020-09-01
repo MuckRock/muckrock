@@ -99,24 +99,20 @@ COMPRESS_JS_FILTERS = []
 THUMBNAIL_CACHE_DIMENSIONS = True
 
 if AWS_DEBUG:
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-    THUMBNAIL_DEFAULT_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-    STATICFILES_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+    DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
+    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+    STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = "https://muckrock-devel2.s3.amazonaws.com/"
+    STATIC_URL = "https://muckrock-devel2.s3.amazonaws.com/static/"
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = "https://muckrock-devel2.s3.amazonaws.com/media/"
     CLEAN_S3_ON_FOIA_DELETE = True
-    USE_QUEUED_STORAGE = True
-    DIET_STORAGE = "storages.backends.s3boto.S3BotoStorage"
-    DIET_CONFIG = os.path.join(SITE_ROOT, "../config/image_diet.yaml")
     AWS_S3_CUSTOM_DOMAIN = ""
 else:
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
     STATIC_URL = "/static/"
     MEDIA_URL = "/media/"
     CLEAN_S3_ON_FOIA_DELETE = False
-    USE_QUEUED_STORAGE = False
 
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -221,9 +217,7 @@ INSTALLED_APPS = (
     "taggit",
     "watson",
     "webpack_loader",
-    "image_diet",
     "django_hosts",
-    "queued_storage",
     "hijack",
     "compat",  # for hijack
     "django_filters",

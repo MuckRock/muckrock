@@ -6,35 +6,9 @@ Cache classes that extend S3, for asset compression
 from django.core.files.storage import get_storage_class
 
 # Third Party
-from queued_storage.backends import QueuedStorage
 from storages.backends.s3boto3 import S3Boto3Storage
 
 # pylint: disable=abstract-method
-
-
-class QueuedS3DietStorage(QueuedStorage):
-    """
-    Use S3 as the "local" storage and image_diet as the "remote"
-    Since all files live on S3 we don't need to cache which storage the file is on
-    """
-
-    def __init__(
-        self,
-        *args,
-        local="storages.backends.s3boto.S3BotoStorage",
-        remote="image_diet.storage.DietStorage",
-        remote_options=None,
-        **kwargs
-    ):
-        if remote_options is None:
-            remote_options = {"file_overwrite": True}
-        super(QueuedS3DietStorage, self).__init__(
-            local=local, remote=remote, remote_options=remote_options, *args, **kwargs
-        )
-
-    def get_storage(self, name):
-        """No need to check cache, just always return local"""
-        return self.local
 
 
 class CachedS3Boto3Storage(S3Boto3Storage):
@@ -57,3 +31,7 @@ class CachedS3Boto3Storage(S3Boto3Storage):
 
 class MediaRootS3BotoStorage(S3Boto3Storage):
     file_overwrite = False
+
+
+class QueuedS3DietStorage:
+    """Left here for old migrations to reference"""
