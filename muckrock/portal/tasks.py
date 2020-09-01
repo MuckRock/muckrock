@@ -127,11 +127,11 @@ def foiaonline_autologin():
                 "password": foia.portal_password,
             },
         )
-        if bad_msg in response.content:
+        if bad_msg in response.text:
             create_flag(foia, "bad password")
-        elif lock_msg in response.content:
+        elif lock_msg in response.text:
             create_flag(foia, "account locked")
-        elif good_msg not in response.content:
+        elif good_msg not in response.text:
             create_flag(foia, "unknown")
         else:
             logger.info("FOIAOnline autologin: request %s login succeeded", foia.pk)
