@@ -107,7 +107,12 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 @task(ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_ticket")
 def create_ticket(flag_pk, **kwargs):
     """Create a ticket from a flag"""
-    flag = FlaggedTask.objects.get(pk=flag_pk)
+    try:
+        flag = FlaggedTask.objects.get(pk=flag_pk)
+    except FlaggedTask.DoesNotExist as exc:
+        # give database time to sync
+        create_ticket.retry(countdown=300, args=[flag_pk], kwargs=kwargs, exc=exc)
+
     if flag.resolved:
         return
 
