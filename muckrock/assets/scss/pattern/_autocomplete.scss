@@ -99,3 +99,7 @@ input.autocomplete.xhr-pending { background-image: none; }
 .create-request .select2-selection__clear {
   visibility: hidden;
 }
+
+.field .select2-container {
+  min-width: inherit;
+}
