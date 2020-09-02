@@ -291,6 +291,7 @@ class FOIACommunication(models.Model):
                 file_.content_type == t or file_.name.endswith(s)
                 for t, s in ignore_types
             ):
+                logger.info("process attachment: %s closed: %s", file_, file_.closed)
                 self.attach_file(file_=file_)
 
     def create_agency_notifications(self):
