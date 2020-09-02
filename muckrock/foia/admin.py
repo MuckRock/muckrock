@@ -420,9 +420,8 @@ class FOIARequestAdmin(VersionAdmin):
     inlines = [TrackingNumberInline, FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
-    autocomplete_fields = ["address"]
     exclude = ["composer"]
-    autocomplete_fields = ["crowdfund", "portal"]
+    autocomplete_fields = ["address", "crowdfund", "portal"]
 
     def get_user(self, obj):
         """Get the user"""
