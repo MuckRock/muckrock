@@ -491,17 +491,18 @@ def embargo_expire():
         ).send(fail_silently=False)
 
 
-@periodic_task(
-    run_every=crontab(hour=0, minute=0),
-    name="muckrock.foia.tasks.set_all_document_cloud_pages",
-)
-def set_all_document_cloud_pages():
-    """Re-upload all document cloud documents that have no page count set"""
-    docs = [doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()]
-    logger.info("Re-upload documents, %d documents with 0 pages", len(docs))
-    for doc in docs:
-        logger.info("0 page re-upload: %s", doc.pk)
-        upload_document_cloud.apply_async(args=[doc.pk, False])
+# This is breaking document cloud
+# @periodic_task(
+#     run_every=crontab(hour=0, minute=0),
+#     name="muckrock.foia.tasks.set_all_document_cloud_pages",
+# )
+# def set_all_document_cloud_pages():
+#     """Re-upload all document cloud documents that have no page count set"""
+#     docs = [doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()]
+#     logger.info("Re-upload documents, %d documents with 0 pages", len(docs))
+#     for doc in docs:
+#         logger.info("0 page re-upload: %s", doc.pk)
+#         upload_document_cloud.apply_async(args=[doc.pk, False])
 
 
 @periodic_task(
