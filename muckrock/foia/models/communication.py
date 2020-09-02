@@ -326,7 +326,9 @@ class FOIACommunication(models.Model):
                 title=title, datetime=timezone.now(), source=source[:70], access=access
             )
             name = name[:233].encode("ascii", "ignore").decode()
+            logger.info("attaching file: %s closed: %s", file_, file_.closed)
             foia_file.ffile.save(name, file_)
+            logger.info("file attached successfully")
             if self.foia:
                 transaction.on_commit(
                     lambda: upload_document_cloud.delay(foia_file.pk, False)
