@@ -827,6 +827,7 @@ class ZipRequest(AsyncFileDownloadTask):
     text_template = "message/notification/zip_request.txt"
     html_template = "message/notification/zip_request.html"
     subject = "Your zip archive of your request"
+    mode = "wb"
 
     def __init__(self, user_pk, foia_pk):
         super(ZipRequest, self).__init__(user_pk, foia_pk)
