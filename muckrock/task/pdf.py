@@ -159,7 +159,7 @@ class SnailMailPDF(MailPDF):
 
         # Check notification
         if self.amount:
-            self._extra_header("Check Enclosed for ${}".format(self.amount))
+            self._extra_header("Check Enclosed for ${:.2f}".format(self.amount))
 
 
 class LobPDF(MailPDF):

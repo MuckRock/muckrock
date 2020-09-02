@@ -918,6 +918,8 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
+    # amount may be a string if it was JSON serialized from a Decimal
+    amount = float(extra.get("amount", 0))
 
     def create_snail_mail_task(reason, error_msg=""):
         """Create a snail mail task for this communication"""
@@ -934,7 +936,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     if category == "p":
         check_address = comm.foia.agency.get_addresses("check").first()
         if check_address is None:
-            PaymentInfoTask.objects.create(communication=comm, amount=extra["amount"])
+            PaymentInfoTask.objects.create(communication=comm, amount=amount)
             return
 
     for test, reason in [
@@ -942,13 +944,13 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         (not comm.foia.address, "addr"),
         (category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
         (category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
-        (extra.get("amount", 0) > settings.CHECK_LIMIT, "limit"),
+        (amount > settings.CHECK_LIMIT, "limit"),
     ]:
         if test:
             create_snail_mail_task(reason)
             return
 
-    pdf = LobPDF(comm, category, switch, amount=extra.get("amount"))
+    pdf = LobPDF(comm, category, switch, amount=amount)
     prepared_pdf, page_count, files, mail = pdf.prepare()
 
     if prepared_pdf:
@@ -968,9 +970,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     # send via lob
     try:
         if category == "p":
-            lob_obj = _lob_create_check(
-                comm, prepared_pdf, mail, check_address, extra["amount"]
-            )
+            lob_obj = _lob_create_check(comm, prepared_pdf, mail, check_address, amount)
         else:
             lob_obj = _lob_create_letter(comm, prepared_pdf, mail)
         mail.lob_id = lob_obj.id
