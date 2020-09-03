@@ -31,7 +31,7 @@ from muckrock.qanda.filters import QuestionFilterSet
 from muckrock.qanda.forms import AnswerForm, QuestionForm
 from muckrock.qanda.models import Answer, Question
 from muckrock.qanda.serializers import QuestionPermissions, QuestionSerializer
-from muckrock.tags.models import Tag, parse_tags
+from muckrock.tags.models import Tag, normalize
 
 
 class QuestionList(MRSearchFilterListView):
@@ -117,14 +117,13 @@ class Detail(DetailView):
             except Answer.DoesNotExist:
                 pass
 
-        tags = request.POST.get("tags")
+        tags = request.POST.getlist("tags")
         if tags:
             tag_set = set()
-            for tag in parse_tags(tags):
-                new_tag, _ = Tag.objects.get_or_create(name=tag)
+            for tag in tags:
+                new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
                 tag_set.add(new_tag)
-            self.get_object().tags.set(*tag_set)
-            self.get_object().save()
+            question.tags.set(*tag_set)
             messages.success(request, "Your tags have been saved to this question.")
 
         return redirect(question)

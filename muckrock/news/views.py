@@ -28,7 +28,7 @@ from muckrock.news.filters import ArticleDateRangeFilterSet
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
-from muckrock.tags.models import Tag, parse_tags
+from muckrock.tags.models import Tag, normalize
 
 
 class NewsDetail(DateDetailView):
@@ -116,11 +116,11 @@ class NewsDetail(DateDetailView):
                 projects = form.cleaned_data["projects"]
                 article.projects.set(projects)
                 clear_cache = True
-        tags = request.POST.get("tags")
+        tags = request.POST.getlist("tags")
         if tags:
             tag_set = set()
-            for tag in parse_tags(tags):
-                new_tag, _ = Tag.objects.get_or_create(name=tag)
+            for tag in tags:
+                new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
                 tag_set.add(new_tag)
             article.tags.set(*tag_set)
             clear_cache = True
