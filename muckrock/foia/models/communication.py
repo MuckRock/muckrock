@@ -19,7 +19,7 @@ import re
 import chardet
 
 # MuckRock
-from muckrock.core.utils import new_action
+from muckrock.core.utils import UnclosableFile, new_action
 from muckrock.foia.models.request import STATUS, FOIARequest
 from muckrock.foia.querysets import FOIACommunicationQuerySet
 
@@ -291,7 +291,6 @@ class FOIACommunication(models.Model):
                 file_.content_type == t or file_.name.endswith(s)
                 for t, s in ignore_types
             ):
-                logger.info("process attachment: %s closed: %s", file_, file_.closed)
                 self.attach_file(file_=file_)
 
     def create_agency_notifications(self):
@@ -327,9 +326,10 @@ class FOIACommunication(models.Model):
                 title=title, datetime=timezone.now(), source=source[:70], access=access
             )
             name = name[:233].encode("ascii", "ignore").decode()
-            logger.info("attaching file: %s closed: %s", file_, file_.closed)
-            foia_file.ffile.save(name, file_)
-            logger.info("file attached successfully")
+            # this closes the file_ when using the S3 backend, which is problematic
+            # if we need to use the file again for another request.
+            # Make the file unclosable
+            foia_file.ffile.save(name, UnclosableFile(file_))
             if self.foia:
                 transaction.on_commit(
                     lambda: upload_document_cloud.delay(foia_file.pk, False)

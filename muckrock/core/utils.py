@@ -274,3 +274,18 @@ def clear_cloudfront_cache(file_names):
     if distributions:
         distribution = distributions[0]
         cloudfront.create_invalidation_request(distribution.id, file_names)
+
+
+class UnclosableFile:
+    """A wrapper for a file to make it unclosable"""
+
+    def __init__(self, file_):
+        self.file = file_
+
+    def __getattr__(self, attr):
+        print("uf", attr)
+        return getattr(self.file, attr)
+
+    def close(self):
+        """Do not close the underlying file"""
+        pass

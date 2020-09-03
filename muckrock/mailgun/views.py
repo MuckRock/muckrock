@@ -278,13 +278,6 @@ def _handle_request(request, mail_id):
                 raw_email="%s\n%s"
                 % (post.get("message-headers", ""), post.get("body-plain", "")),
             )
-            for file_ in request.FILES.values():
-                logger.info(
-                    "mailgun route file: %s closed: %s content type: %s",
-                    file_,
-                    file_.closed,
-                    file_.content_type,
-                )
             comm.process_attachments(request.FILES)
             transaction.on_commit(lambda: download_links(comm.pk))
 
