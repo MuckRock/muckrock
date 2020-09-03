@@ -287,4 +287,3 @@ class UnclosableFile:
 
     def close(self):
         """Do not close the underlying file"""
-        pass
