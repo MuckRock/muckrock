@@ -283,7 +283,6 @@ class UnclosableFile:
         self.file = file_
 
     def __getattr__(self, attr):
-        print("uf", attr)
         return getattr(self.file, attr)
 
     def close(self):
