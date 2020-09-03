@@ -204,7 +204,7 @@ class TestNewsArticleViews(TestCase):
 
     def test_set_tags(self):
         """Posting a group of tags to an article should set the tags on that article."""
-        tags = "foo, bar, baz"
+        tags = ["foo", "bar", "baz"]
         staff = UserFactory(is_staff=True)
         response = self.post_helper({"tags": tags}, staff)
         self.article.refresh_from_db()
