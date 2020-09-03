@@ -68,7 +68,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
                     self, comm, reason="Error downloading file: {}".format(name)
                 )
                 return
-            comm.attach_file(content=reply.text, name=name, source=self.portal.name)
+            comm.attach_file(content=reply.content, name=name, source=self.portal.name)
         self._accept_comm(comm, "There are eFOIA files available for you to download.")
 
     def send_msg(self, comm, **kwargs):
