@@ -169,6 +169,8 @@ class PhoneNumberAutocomplete(CommunicationAutocomplete):
 
     queryset = PhoneNumber.objects.order_by("number")
     search_fields = ["number"]
+    create_field = "number"
+    create_error = '"{text}" is not a valid phone/fax number'
 
     def get_queryset(self):
         """Pre process the query"""
@@ -187,6 +189,19 @@ class PhoneNumberAutocomplete(CommunicationAutocomplete):
     def get_selected_result_label(self, result):
         """Show number type"""
         return self.get_result_label(result)
+
+    def create_object(self, text):
+        """Use phone number fetch to create the object"""
+        types = {"(fax)": "fax", "(phone)": "phone"}
+
+        # if they include a type, use it
+        if " " in text:
+            number, type_ = text.rsplit(" ", 1)
+            if type_ in types:
+                return PhoneNumber.objects.fetch(number, types[type_])
+
+        # otherwise fall back to the default (fax)
+        return PhoneNumber.objects.fetch(text)
 
 
 class FaxAutocomplete(PhoneNumberAutocomplete):

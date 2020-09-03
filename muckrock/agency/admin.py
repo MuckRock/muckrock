@@ -87,7 +87,11 @@ class AgencyPhoneAdminForm(forms.ModelForm):
         queryset=PhoneNumber.objects.all(),
         widget=autocomplete.ModelSelect2(
             url="phone-autocomplete",
-            attrs={"data-placeholder": "Phone Number?", "data-width": None},
+            attrs={
+                "data-placeholder": "Phone Number?",
+                "data-width": None,
+                "data-html": False,
+            },
         ),
     )
 
