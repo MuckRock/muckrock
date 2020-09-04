@@ -172,10 +172,11 @@ class PhoneNumber(models.Model):
     objects = PhoneNumberQuerySet.as_manager()
 
     def __str__(self):
+        number = f"{self.number.as_national} ({self.type})"
         if self.status == "error":
-            return "%s (%s)" % (self.number.as_national, self.status)
+            return f"{number} ({self.status})"
         else:
-            return self.number.as_national
+            return number
 
     def get_absolute_url(self):
         """The url for this phone number"""
