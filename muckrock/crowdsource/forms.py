@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.validators import URLValidator
 
 # Standard Library
+import codecs
 import csv
 import json
 
@@ -100,7 +101,7 @@ class CrowdsourceDataCsvForm(forms.Form):
         """If there is a data CSV, ensure it has a URL column"""
         data_csv = self.cleaned_data["data_csv"]
         if data_csv:
-            reader = csv.reader(data_csv)
+            reader = csv.reader(codecs.iterdecode(data_csv, "utf-8"))
             headers = [h.lower() for h in next(reader)]
             if "url" not in headers:
                 raise forms.ValidationError("Data CSV should contain a URL column")
@@ -113,7 +114,7 @@ class CrowdsourceDataCsvForm(forms.Form):
         data_csv = self.cleaned_data["data_csv"]
         doccloud_each_page = self.cleaned_data["doccloud_each_page"]
         if data_csv:
-            reader = csv.reader(data_csv)
+            reader = csv.reader(codecs.iterdecode(data_csv, "utf-8"))
             headers = [h.lower() for h in next(reader)]
             for line in reader:
                 data = dict(list(zip(headers, line)))
