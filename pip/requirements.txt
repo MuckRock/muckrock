@@ -70,7 +70,7 @@ emoji==0.6.0
 fpdf==1.7.2
 furl==1.0.1
 future==0.18.2            # via celery, pyjwkest
-fuzzywuzzy==0.14.0
+fuzzywuzzy==0.18.0
 google-api-python-client==1.6.5
 gunicorn==19.6.0
 httplib2==0.18.1          # via google-api-python-client, oauth2client
