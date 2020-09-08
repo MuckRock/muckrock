@@ -529,27 +529,11 @@ def db_cleanup():
     """Call some management commands to clean up the database"""
     step = 0
     try:
-        call_command(
-            "deleterevisions",
-            "foia",
-            days=180,
-            force=True,
-            confirmation=False,
-            verbosity=2,
-        )
+        call_command("deleterevisions", "foia", days=180, verbosity=2)
         step = 1
-        call_command(
-            "deleterevisions",
-            "task",
-            days=180,
-            force=True,
-            confirmation=False,
-            verbosity=2,
-        )
+        call_command("deleterevisions", "task", days=180, verbosity=2)
         step = 2
-        call_command(
-            "deleterevisions", days=730, force=True, confirmation=False, verbosity=2
-        )
+        call_command("deleterevisions", days=730, verbosity=2)
         step = 3
         call_command("clearsessions", verbosity=2)
         step = 4
