@@ -55,12 +55,8 @@ class Receipt(TemplateEmail):
                 raise TypeError("Each item in the list should be a receipt LineItem.")
         self.items = items
         super(Receipt, self).__init__(**kwargs)
-        # add additional receipt emails for this user
-        if self.user:
-            cc_emails = [r.email for r in self.user.receipt_emails.all()]
-            self.cc.extend(cc_emails)
         # if no user provided, send the email to the address on the charge
-        elif "email" in self.charge.metadata:
+        if not self.user and "email" in self.charge.metadata:
             user_email = self.charge.metadata["email"]
             self.to.append(user_email)
         else:
