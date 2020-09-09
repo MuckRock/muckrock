@@ -66,7 +66,8 @@ class FOIAFile(models.Model):
         return ext.lower() in settings.DOCCLOUD_EXTENSIONS
 
     def get_thumbnail(self):
-        """Get the url to the thumbnail image. If document is not public, use a generic fallback."""
+        """Get the url to the thumbnail image. If document is not public,
+        use a generic fallback."""
         mimetypes = {
             "avi": "file-video.png",
             "bmp": "file-image.png",
@@ -85,17 +86,12 @@ class FOIAFile(models.Model):
             "zip": "file-archive.png",
         }
         if self.is_public() and self.is_doccloud() and self.doc_id:
-            index = self.doc_id.index("-")
-            num = self.doc_id[0:index]
-            name = self.doc_id[index + 1 :]
-            # XXX
-            return (
-                "https://assets.documentcloud.org/documents/"
-                + num
-                + "/pages/"
-                + name
-                + "-p1-small.gif"
-            )
+            id_, slug = self.doc_id.split("-", 1)
+            if self.dc_legacy:
+                asset_url = settings.DOCCLOUD_LEGACY_ASSET_URL
+            else:
+                asset_url = settings.DOCCLOUD_ASSET_URL
+            return f"{asset_url}documents/{id_}/pages/{slug}-p1-small.gif"
         else:
             filename = mimetypes.get(self.get_extension(), "file-document.png")
             return "%simg/%s" % (settings.STATIC_URL, filename)

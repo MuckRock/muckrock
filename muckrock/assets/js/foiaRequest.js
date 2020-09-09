@@ -141,6 +141,7 @@ export function displayFile(file) {
             'https://www.documentcloud.org/documents/' + docId + '.js',
             {sidebar: false, container: "#viewer"}
         );
+        iframe.attr("src", "");
         iframe.hide();
         viewer.show();
     } else {

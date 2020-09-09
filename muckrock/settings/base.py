@@ -507,6 +507,8 @@ FOIAMACHINE_URL = "http://dev.foiamachine.org"
 SQUARELET_URL = "http://dev.squarelet.com"
 DOCCLOUD_URL = "http://www.dev.documentcloud.org"
 DOCCLOUD_API_URL = "http://api.dev.documentcloud.org"
+DOCCLOUD_LEGACY_ASSET_URL = "https://assets.documentcloud.org/"
+DOCCLOUD_ASSET_URL = "https://documentcloud-dev-mjk.s3.amazonaws.com/"
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r"^/api(_v\d)?/.*$"
