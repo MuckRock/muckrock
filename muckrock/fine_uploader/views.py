@@ -4,6 +4,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
+from django.db import transaction
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -28,6 +29,7 @@ from muckrock.foia.models import (
     OutboundComposerAttachment,
     OutboundRequestAttachment,
 )
+from muckrock.foia.tasks import upload_document_cloud
 
 
 def _success(request, model, attachment_model, fk_name):
@@ -79,15 +81,17 @@ def success_comm(request):
         return HttpResponseBadRequest()
 
     access = "private" if comm.foia.embargo else "public"
-    file_ = FOIAFile(
-        comm=comm,
-        title=os.path.basename(request.POST["key"]),
-        datetime=timezone.now(),
-        source=request.user.profile.full_name,
-        access=access,
-    )
-    file_.ffile.name = request.POST["key"]
-    file_.save()
+    with transaction.atomic():
+        file_ = FOIAFile(
+            comm=comm,
+            title=os.path.basename(request.POST["key"]),
+            datetime=timezone.now(),
+            source=request.user.profile.full_name,
+            access=access,
+        )
+        file_.ffile.name = request.POST["key"]
+        file_.save()
+        transaction.on_commit(lambda: upload_document_cloud.delay(file_.pk, False))
 
     return HttpResponse()
 
