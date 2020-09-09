@@ -362,6 +362,16 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             exc=exc,
         )
 
+    # the fax number should always be set before calling this, if it is not
+    # it is likely a race condition and we should retry
+    if comm.foia.fax is None:
+        send_fax.retry(
+            countdown=300,
+            args=[comm_id, subject, body, error_count],
+            kwargs=kwargs,
+            exc=exc,
+        )
+
     files = [f.ffile for f in comm.files.all()]
     callback_url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"))
 
