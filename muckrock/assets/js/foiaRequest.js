@@ -125,6 +125,7 @@ export function displayFile(file) {
     var pages = file.data('pages') || 0;
     var legacy = file.data('legacy') === 'True';
     var iframe = $("#viewer-iframe");
+    var viewer = $("#viewer");
 
     $('#doc-title').empty().text(title);
     $('#doc-pages').empty().text(pages);
@@ -140,6 +141,8 @@ export function displayFile(file) {
             'https://www.documentcloud.org/documents/' + docId + '.js',
             {sidebar: false, container: "#viewer"}
         );
+        iframe.hide();
+        viewer.show();
     } else {
         // load new embed in the iframe
         // XXX make this configurable
@@ -148,6 +151,8 @@ export function displayFile(file) {
             "src",
             url + "documents/" + docId + "/?embed=1&amp;title=1"
         );
+        viewer.hide();
+        iframe.show();
     }
 
     activeFile.addClass('visible');
