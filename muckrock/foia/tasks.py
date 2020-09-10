@@ -82,44 +82,87 @@ register_signal(client)
 lob.api_key = settings.LOB_SECRET_KEY
 
 
+def authenticate_documentcloud(request):
+    """This is just standard username/password encoding"""
+    username = settings.DOCUMENTCLOUD_USERNAME.encode()
+    password = settings.DOCUMENTCLOUD_PASSWORD.encode()
+    auth = base64.encodebytes(b"%s:%s" % (username, password))[:-1]
+    request.add_header("Authorization", "Basic %s" % auth.decode())
+    return request
+
+
 @task(
     ignore_result=True,
     max_retries=10,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
 )
-def upload_document_cloud(doc_pk, change, **kwargs):
+def upload_document_cloud(ffile_pk, **kwargs):
     """Upload a document to Document Cloud"""
     # XXX keep new and old version of code around to deal with changing documents
     # on legacy dc
-    # XXX check and update .dc_legacy
+    # XXX check .dc_legacy
     # XXX rethink how change param works
 
-    logger.info("Upload Doc Cloud: %s", doc_pk)
+    logger.info("Upload Doc Cloud: %s", ffile_pk)
 
-    doc = FOIAFile.objects.get(pk=doc_pk)
+    ffile = FOIAFile.objects.get(pk=ffile_pk)
+
+    if not ffile.is_doccloud():
+        # not a file doc cloud supports, do not attempt to upload
+        return
+
+    # if it has a doc_id already, we are changing it, not creating it
+    change = bool(ffile.doc_id)
+
+    if ffile.dc_legacy:
+        upload_document_cloud_legacy(ffile, change, **kwargs)
+        return
+
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+
+    params = {
+        "title": ffile.title,
+        "source": ffile.source,
+        "description": ffile.description,
+        "access": ffile.access,
+    }
+    foia = ffile.get_foia()
+    if foia:
+        params["related_article"] = (
+            settings.MUCKROCK_URL + ffile.get_foia().get_absolute_url()
+        )
+
+    if change:
+        # XXX error handle
+        # use auto error handling, catch doccloud library error
+        document = dc_client.documents.get(id=ffile.doc_id)
+        for attr, value in params.items():
+            setattr(document, attr, value)
+        document.save()
+    else:
+        # XXX error handle
+
+        # XXX pass by url?
+        # document = dc_client.documents.upload(ffile.ffile.url, **params)
+        document = dc_client.documents.upload(ffile.ffile, **params)
+        ffile.doc_id = f"{document.id}-{document.slug}"
+        ffile.save()
+
+
+def upload_document_cloud_legacy(doc, change, **kwargs):
+    """Upload a document to legacy Document Cloud"""
+
+    logger.info("Upload Doc Cloud Legacy: %s", doc.pk)
 
     if not doc.is_doccloud():
         # not a file doc cloud supports, do not attempt to upload
         return
-
-    if doc.doc_id and not change:
-        # not change means we are re-uploading - remove old doc_id
-        doc.doc_id = ""
-        doc.save()
-
-    if not doc.doc_id and change:
-        # if we are changing it must have an id - this should never happen but it is!
-        # XXX happens if upload new file from admin
-        logger.warning("Upload Doc Cloud: Changing without a doc id: %s", doc.pk)
-        return
-
-    client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_USERNAME,
-        password=settings.DOCUMENTCLOUD_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
 
     params = {
         "title": doc.title,
@@ -130,23 +173,35 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     foia = doc.get_foia()
     if foia:
         params["related_article"] = (
-            settings.MUCKROCK_URL + doc.get_foia().get_absolute_url()
+            "https://www.muckrock.com" + doc.get_foia().get_absolute_url()
         )
-
     if change:
-        # XXX error handle
-        # use auto error handling, catch doccloud library error
-        document = client.documents.get(id=doc.doc_id)
-        for attr, value in params.items():
-            setattr(document, attr, value)
-        document.save()
+        params["_method"] = "put"
+        url = "/documents/%s.json" % quote_plus(doc.doc_id)
     else:
-        # XXX error handle
-        # XXX pass by url?
-        # document = client.documents.upload(doc.ffile.url, **params)
-        document = client.documents.upload(doc.ffile, **params)
-        doc.doc_id = f"{document.id}-{document.slug}"
-        doc.save()
+        params["file"] = doc.ffile.url.replace("https", "http", 1)
+        url = "/upload.json"
+
+    params = urllib.parse.urlencode(params)
+    params = params.encode("utf8")
+    request = urllib.request.Request(
+        "https://www.documentcloud.org/api/%s" % url, params
+    )
+    request = authenticate_documentcloud(request)
+
+    try:
+        ret = urllib.request.urlopen(request).read()
+        if not change:
+            info = json.loads(ret)
+            doc.doc_id = info["id"]
+            doc.save()
+            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
+    except (urllib.error.URLError, urllib.error.HTTPError) as exc:
+        logger.warning("Upload Doc Cloud error: %s %s", url, doc.pk)
+        countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
+        upload_document_cloud.retry(
+            args=[doc.pk], kwargs=kwargs, exc=exc, countdown=countdown
+        )
 
 
 @task(
@@ -192,6 +247,24 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         set_document_cloud_pages.retry(
             args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
         )
+
+
+@periodic_task(
+    run_every=crontab(hour=0, minute=20),
+    name="muckrock.foia.tasks.retry_stuck_documents",
+)
+def retry_stuck_documents():
+    """Reupload all document cloud documents which are stuck"""
+    # XXX rethink how retrying works
+    # XXX redo this query to not be super slow for legacy docs for now
+    docs = [
+        doc
+        for doc in FOIAFile.objects.filter(doc_id="")
+        if doc.is_doccloud() and doc.get_foia()
+    ]
+    logger.info("Reupload documents, %d documents are stuck", len(docs))
+    for doc in docs:
+        upload_document_cloud.delay(doc.pk)
 
 
 @task(
@@ -485,36 +558,6 @@ def embargo_expire():
         ).send(fail_silently=False)
 
 
-# This is breaking document cloud
-# @periodic_task(
-#     run_every=crontab(hour=0, minute=0),
-#     name="muckrock.foia.tasks.set_all_document_cloud_pages",
-# )
-# def set_all_document_cloud_pages():
-#     """Re-upload all document cloud documents that have no page count set"""
-#     docs = [doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()]
-#     logger.info("Re-upload documents, %d documents with 0 pages", len(docs))
-#     for doc in docs:
-#         logger.info("0 page re-upload: %s", doc.pk)
-#         upload_document_cloud.apply_async(args=[doc.pk, False])
-
-
-@periodic_task(
-    run_every=crontab(hour=0, minute=20),
-    name="muckrock.foia.tasks.retry_stuck_documents",
-)
-def retry_stuck_documents():
-    """Reupload all document cloud documents which are stuck"""
-    docs = [
-        doc
-        for doc in FOIAFile.objects.filter(doc_id="")
-        if doc.is_doccloud() and doc.get_foia()
-    ]
-    logger.info("Reupload documents, %d documents are stuck", len(docs))
-    for doc in docs:
-        upload_document_cloud.delay(doc.pk, False)
-
-
 # Increase the time limit for autoimport to 10 hours, and a soft time limit to
 # 5 minutes before that
 @periodic_task(
@@ -591,24 +634,17 @@ def autoimport():
         foia = comm.foia
         file_name = os.path.split(key.name)[1]
 
-        access = "private" if foia.embargo else "public"
-
-        foia_file = FOIAFile(
-            comm=comm,
-            title=file_name,
-            datetime=comm.datetime,
-            source=comm.get_source(),
-            access=access,
-        )
-        full_file_name = foia_file.ffile.field.generate_filename(
-            foia_file.ffile.instance, file_name
-        )
+        # first parameter is instance, but we do not have one yet
+        # luckily, it is only used if the upload_to for the field is
+        # a callable, which it is not, so it is safe to pass in None
+        full_file_name = FOIAFile.ffile.field.generate_filename(None, file_name)
         full_file_name = default_storage.get_available_name(full_file_name)
+
         new_key = key.copy(storage_bucket, full_file_name)
         new_key.set_acl("public-read")
 
-        foia_file.ffile.name = full_file_name
-        foia_file.save()
+        foia_file = comm.attach_file(path=full_file_name, name=file_name, now=False)
+
         if key.size != foia_file.ffile.size:
             raise SizeError(key.size, foia_file.ffile.size, foia_file)
 
@@ -616,8 +652,6 @@ def autoimport():
             "SUCCESS: %s uploaded to FOIA Request %s with a status of %s"
             % (file_name, foia.pk, foia.status)
         )
-
-        transaction.on_commit(lambda: upload_document_cloud.delay(foia_file.pk, False))
 
     def import_prefix(prefix, bucket, storage_bucket, comm, log):
         """Import a prefix (folder) full of documents"""

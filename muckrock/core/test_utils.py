@@ -5,6 +5,7 @@ Utilities for testing MuckRock applications
 # Django
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.db import transaction
 from django.test import RequestFactory
 from django.utils.text import slugify
 
@@ -14,7 +15,7 @@ import uuid
 from urllib.parse import parse_qs
 
 # Third Party
-from mock import MagicMock
+from mock import MagicMock, patch
 
 
 def mock_middleware(request):
@@ -102,3 +103,20 @@ def mock_squarelet(mock_requests, requests_json=None):
         re.compile(r"{}/api/organizations/[a-f0-9-]+/".format(settings.SQUARELET_URL)),
         json={"number_requests": 5, "monthly_requests": 0},
     )
+
+
+class RunCommitHooksMixin:
+    """Mixin to include run commit hooks for test cases"""
+
+    def run_commit_hooks(self):
+        """
+        Fake transaction commit to run delayed on_commit functions
+        https://medium.com/gitux/speed-up-django-transaction-hooks-tests-6de4a558ef96
+        """
+        for db_name in reversed(self._databases_names()):
+            with patch(
+                "django.db.backends.base.base.BaseDatabaseWrapper."
+                "validate_no_atomic_block",
+                lambda a: False,
+            ):
+                transaction.get_connection(using=db_name).run_and_clear_commit_hooks()

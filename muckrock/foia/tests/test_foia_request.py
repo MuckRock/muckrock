@@ -20,7 +20,6 @@ import re
 from datetime import date, datetime, timedelta
 
 # Third Party
-import mock
 import nose.tools
 import pytz
 import requests_mock
@@ -30,7 +29,7 @@ from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, AppealAgencyFactory, UserFactory
-from muckrock.core.test_utils import mock_squarelet
+from muckrock.core.test_utils import RunCommitHooksMixin, mock_squarelet
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
@@ -40,23 +39,6 @@ from muckrock.foia.factories import (
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.task.models import PaymentInfoTask, SnailMailTask
-
-
-class RunCommitHooksMixin:
-    """Mixin to include run commit hooks for test cases"""
-
-    def run_commit_hooks(self):
-        """
-        Fake transaction commit to run delayed on_commit functions
-        https://medium.com/gitux/speed-up-django-transaction-hooks-tests-6de4a558ef96
-        """
-        for db_name in reversed(self._databases_names()):
-            with mock.patch(
-                "django.db.backends.base.base.BaseDatabaseWrapper."
-                "validate_no_atomic_block",
-                lambda a: False,
-            ):
-                transaction.get_connection(using=db_name).run_and_clear_commit_hooks()
 
 
 class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):

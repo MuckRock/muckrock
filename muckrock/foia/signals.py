@@ -25,7 +25,7 @@ def foia_update_embargo(sender, **kwargs):
                 doc.access = access
                 doc.save()
                 transaction.on_commit(
-                    lambda doc=doc: upload_document_cloud.delay(doc.pk, True)
+                    lambda doc=doc: upload_document_cloud.delay(doc.pk)
                 )
 
 

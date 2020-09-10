@@ -29,7 +29,6 @@ from muckrock.foia.models import (
     OutboundComposerAttachment,
     OutboundRequestAttachment,
 )
-from muckrock.foia.tasks import upload_document_cloud
 
 
 def _success(request, model, attachment_model, fk_name):
@@ -80,18 +79,11 @@ def success_comm(request):
     if len(request.POST["key"]) > 255:
         return HttpResponseBadRequest()
 
-    access = "private" if comm.foia.embargo else "public"
-    with transaction.atomic():
-        file_ = FOIAFile(
-            comm=comm,
-            title=os.path.basename(request.POST["key"]),
-            datetime=timezone.now(),
-            source=request.user.profile.full_name,
-            access=access,
-        )
-        file_.ffile.name = request.POST["key"]
-        file_.save()
-        transaction.on_commit(lambda: upload_document_cloud.delay(file_.pk, False))
+    comm.attach_file(
+        path=request.POST["key"],
+        name=os.path.basename(request.POST["key"]),
+        source=request.user.profile.full_name,
+    )
 
     return HttpResponse()
 

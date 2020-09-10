@@ -20,6 +20,7 @@ import chardet
 
 # MuckRock
 from muckrock.core.utils import UnclosableFile, new_action
+from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import STATUS, FOIARequest
 from muckrock.foia.querysets import FOIACommunicationQuerySet
 
@@ -137,9 +138,9 @@ class FOIACommunication(models.Model):
     def get_source(self):
         """Get the source line for an attached file"""
         if self.foia and self.foia.agency:
-            return self.foia.agency.name[:70]
+            return self.foia.agency.name
         elif self.from_user:
-            return self.from_user.profile.full_name[:70]
+            return self.from_user.profile.full_name
         else:
             return ""
 
@@ -158,9 +159,6 @@ class FOIACommunication(models.Model):
             raise ValueError("Expected a request to move the communication to.")
         old_foia = self.foia
         self.foia = foias[0]
-        # if this was an orphan, it has not yet been uploaded
-        # to document cloud
-        change = old_foia is not None
 
         with transaction.atomic():
             access = "private" if self.foia.embargo else "public"
@@ -169,7 +167,7 @@ class FOIACommunication(models.Model):
                 file_.source = self.get_source()
                 file_.save()
                 transaction.on_commit(
-                    lambda file_=file_: upload_document_cloud.delay(file_.pk, change)
+                    lambda file_=file_: upload_document_cloud.delay(file_.pk)
                 )
             self.save()
             CommunicationMoveLog.objects.create(
@@ -308,15 +306,26 @@ class FOIACommunication(models.Model):
         if self.foia:
             self.foia.update(self.anchor())
 
-    def attach_file(self, file_=None, content=None, name=None, source=None):
-        """Given a file or name and the file contents, attach a file to this"""
-        # must supply either file_ or content and name_
+    def attach_file(
+        self, file_=None, content=None, path=None, name=None, source=None, now=True
+    ):
+        """Attach a file to this communication"""
+        # must supply either:
+        # * a file_
+        # * content and name_
+        # * path and name_ (for files already uploaded to s3)
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import upload_document_cloud
 
-        if file_ is None:
+        assert (
+            (file_ is not None)
+            or (content is not None and name is not None)
+            or (path is not None and name is not None)
+        )
+
+        if file_ is None and content is not None:
             file_ = ContentFile(content)
-        if name is None:
+        if name is None and file_ is not None:
             name = file_.name
         if source is None:
             source = self.get_source()
@@ -324,18 +333,21 @@ class FOIACommunication(models.Model):
         title = os.path.splitext(name)[0][:255]
         access = "private" if not self.foia or self.foia.embargo else "public"
         with transaction.atomic():
-            foia_file = self.files.create(
-                title=title, datetime=timezone.now(), source=source[:70], access=access
+            foia_file = FOIAFile(
+                comm=self,
+                title=title,
+                datetime=timezone.now() if now else self.datetime,
+                source=source,
+                access=access,
             )
-            name = name[:233].encode("ascii", "ignore").decode()
-            # this closes the file_ when using the S3 backend, which is problematic
-            # if we need to use the file again for another request.
-            # Make the file unclosable
-            foia_file.ffile.save(name, UnclosableFile(file_))
+            if file_:
+                name = name[:233].encode("ascii", "ignore").decode()
+                foia_file.ffile.save(name, UnclosableFile(file_))
+            else:
+                foia_file.ffile.name = path
+                foia_file.save()
             if self.foia:
-                transaction.on_commit(
-                    lambda: upload_document_cloud.delay(foia_file.pk, False)
-                )
+                transaction.on_commit(lambda: upload_document_cloud.delay(foia_file.pk))
         return foia_file
 
     def attach_files_to_email(self, msg):

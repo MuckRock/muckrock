@@ -229,9 +229,7 @@ class FOIACommunicationAdmin(VersionAdmin):
                 instance.comm.foia.update(instance.anchor())
 
             transaction.on_commit(
-                lambda instance=instance: upload_document_cloud.delay(
-                    instance.pk, change
-                )
+                lambda instance=instance: upload_document_cloud.delay(instance.pk)
             )
 
         formset.save_m2m()

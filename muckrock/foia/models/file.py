@@ -144,7 +144,7 @@ class FOIAFile(models.Model):
         new_ffile.name = self.name()
         self.ffile = new_ffile
         self.save()
-        transaction.on_commit(lambda: upload_document_cloud.delay(self.pk, False))
+        transaction.on_commit(lambda: upload_document_cloud.delay(self.pk))
 
     class Meta:
         verbose_name = "FOIA Document File"
