@@ -590,13 +590,11 @@ class FOIARequest(models.Model):
             attm_source = self
         attachments = attm_source.pending_attachments.filter(user=user, sent=False)
         comm = self.communications.last()
-        access = "private" if self.embargo else "public"
         for attachment in attachments:
             file_ = comm.files.create(
                 title=os.path.basename(attachment.ffile.name),
                 datetime=comm.datetime,
                 source=user.profile.full_name,
-                access=access,
             )
             file_.ffile.name = attachment.ffile.name
             file_.save()

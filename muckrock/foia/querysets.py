@@ -3,6 +3,7 @@ QuerySets for the FOIA application
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models import Count, F, Max, OuterRef, Q, Subquery, Sum
@@ -158,9 +159,7 @@ class FOIARequestQuerySet(models.QuerySet):
             foias = list(self)
 
         count_qs = (
-            self.model.objects.filter(
-                id__in=[f.pk for f in foias], communications__files__access="public"
-            )
+            self.model.objects.filter(id__in=[f.pk for f in foias])
             .values_list("id")
             .annotate(Count("communications__files"))
         )
@@ -374,3 +373,10 @@ class FOIAFileQuerySet(models.QuerySet):
             comm_id: list(files)
             for comm_id, files in groupby(file_qs, lambda f: f.comm_id)
         }
+
+    def get_doccloud(self):
+        """Return files which can be uploaded to DocumentCloud"""
+        is_doccloud = Q()
+        for ext in settings.DOCCLOUD_EXTENSIONS:
+            is_doccloud |= Q(ffile__iendswith=ext)
+        return self.filter(is_doccloud)

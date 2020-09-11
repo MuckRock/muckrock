@@ -161,9 +161,7 @@ class FOIACommunication(models.Model):
         self.foia = foias[0]
 
         with transaction.atomic():
-            access = "private" if self.foia.embargo else "public"
             for file_ in self.files.all():
-                file_.access = access
                 file_.source = self.get_source()
                 file_.save()
                 transaction.on_commit(
@@ -331,14 +329,12 @@ class FOIACommunication(models.Model):
             source = self.get_source()
 
         title = os.path.splitext(name)[0][:255]
-        access = "private" if not self.foia or self.foia.embargo else "public"
         with transaction.atomic():
             foia_file = FOIAFile(
                 comm=self,
                 title=title,
                 datetime=timezone.now() if now else self.datetime,
                 source=source,
-                access=access,
             )
             if file_:
                 name = name[:233].encode("ascii", "ignore").decode()

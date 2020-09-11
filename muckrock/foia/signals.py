@@ -19,14 +19,8 @@ def foia_update_embargo(sender, **kwargs):
     old_request = request.get_saved()
     # if we are saving a new FOIA Request, there are no docs to update
     if old_request and request.embargo != old_request.embargo:
-        access = "private" if request.embargo else "public"
-        for doc in request.get_files().all():
-            if doc.is_doccloud() and doc.access != access:
-                doc.access = access
-                doc.save()
-                transaction.on_commit(
-                    lambda doc=doc: upload_document_cloud.delay(doc.pk)
-                )
+        for doc in request.get_files().get_doccloud():
+            transaction.on_commit(lambda doc=doc: upload_document_cloud.delay(doc.pk))
 
 
 def foia_file_delete_s3(sender, **kwargs):

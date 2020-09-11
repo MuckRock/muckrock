@@ -13,7 +13,7 @@ from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMessage
 from django.db import transaction
-from django.db.models import DurationField, F, Q
+from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -256,10 +256,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
     # XXX rethink how retrying works
-    is_doccloud = Q()
-    for ext in settings.DOCCLOUD_EXTENSIONS:
-        is_doccloud |= Q(ffile__iendswith=ext)
-    docs = FOIAFile.objects.filter(is_doccloud, doc_id="").exclude(comm__foia=None)
+    docs = FOIAFile.objects.filter(doc_id="").exclude(comm__foia=None).get_doccloud()
     logger.info("Reupload documents, %d documents are stuck", len(docs))
     for doc in docs:
         upload_document_cloud.delay(doc.pk)

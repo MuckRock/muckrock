@@ -23,12 +23,6 @@ class FOIAFile(models.Model):
 
     objects = FOIAFileQuerySet.as_manager()
 
-    access = (
-        ("public", "Public"),
-        ("private", "Private"),
-        ("organization", "Organization"),
-    )
-
     comm = models.ForeignKey(
         "foia.FOIACommunication",
         related_name="files",
@@ -43,14 +37,16 @@ class FOIAFile(models.Model):
     datetime = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
-    # for doc cloud only
-    access = models.CharField(
-        max_length=12, default="public", choices=access, db_index=True
-    )
     # XXX do we want to split to a id and slug field?
     doc_id = models.SlugField(max_length=80, blank=True, editable=False)
     dc_legacy = models.BooleanField(default=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
+
+    # XXX deprecated
+    # for doc cloud only
+    old_access = models.CharField(
+        max_length=12, default="public", db_index=True, db_column="access"
+    )
 
     def __str__(self):
         return self.title
@@ -125,11 +121,9 @@ class FOIAFile(models.Model):
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import upload_document_cloud
 
-        access = "private" if new_comm.foia.embargo else "public"
         original_id = self.pk
         self.pk = None
         self.comm = new_comm
-        self.access = access
         self.source = new_comm.get_source()
         # make a copy of the file on the storage backend
         try:
@@ -145,6 +139,14 @@ class FOIAFile(models.Model):
         self.ffile = new_ffile
         self.save()
         transaction.on_commit(lambda: upload_document_cloud.delay(self.pk))
+
+    @property
+    def access(self):
+        """Is this document public or private?"""
+        foia = self.get_foia()
+        if foia is None:
+            return None
+        return "private" if foia.embargo else "public"
 
     class Meta:
         verbose_name = "FOIA Document File"

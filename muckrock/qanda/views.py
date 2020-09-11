@@ -160,7 +160,7 @@ class Detail(DetailView):
         context["answer_form"] = AnswerForm()
         foia = self.object.foia
         if foia is not None:
-            foia.public_file_count = foia.get_files().filter(access="public").count()
+            foia.public_file_count = foia.get_files().count()
         context["foia_viewable"] = foia is not None and foia.has_perm(
             self.request.user, "view"
         )
