@@ -24,7 +24,7 @@
             </select>
             items per page
         </p>
-        {% for key, value_list in request.GET.iterlists %}
+        {% for key, value_list in request.GET.lists %}
             {% if key != 'page' and key != 'per_page' %}
                 {% for value in value_list %}
                     {% if value %}
