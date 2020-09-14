@@ -153,7 +153,7 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     foia_requests = jurisdiction.get_requests()
     foia_requests = (
-        foia_requests.get_viewable(request.user)
+        foia_requests.get_public()
         .get_done()
         .order_by("-datetime_done")
         .select_related_view()

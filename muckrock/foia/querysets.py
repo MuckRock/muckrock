@@ -145,7 +145,9 @@ class FOIARequestQuerySet(models.QuerySet):
     def select_related_view(self):
         """Select related models for viewing"""
         return self.select_related(
-            "agency__jurisdiction__parent__parent", "composer__user", "crowdfund"
+            "agency__jurisdiction__parent__parent",
+            "composer__user__profile",
+            "crowdfund",
         )
 
     def get_public_file_count(self, limit=None):
