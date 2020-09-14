@@ -366,10 +366,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     # it is likely a race condition and we should retry
     if comm.foia.fax is None:
         send_fax.retry(
-            countdown=300,
-            args=[comm_id, subject, body, error_count],
-            kwargs=kwargs,
-            exc=exc,
+            countdown=300, args=[comm_id, subject, body, error_count], kwargs=kwargs
         )
 
     files = [f.ffile for f in comm.files.all()]
