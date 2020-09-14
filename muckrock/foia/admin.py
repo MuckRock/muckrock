@@ -536,6 +536,7 @@ class FOIARequestAdmin(VersionAdmin):
     def retry_pages(self, request, idx):
         """Retry getting the page count"""
 
+        # XXX rethink this, differentiate for legacy/beta
         docs = FOIAFile.objects.filter(foia=idx, pages=0)
         for doc in docs:
             if doc.is_doccloud():

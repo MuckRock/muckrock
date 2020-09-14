@@ -99,10 +99,6 @@ def authenticate_documentcloud(request):
 )
 def upload_document_cloud(ffile_pk, **kwargs):
     """Upload a document to Document Cloud"""
-    # XXX keep new and old version of code around to deal with changing documents
-    # on legacy dc
-    # XXX check .dc_legacy
-    # XXX rethink how change param works
 
     logger.info("Upload Doc Cloud: %s", ffile_pk)
 
@@ -138,21 +134,28 @@ def upload_document_cloud(ffile_pk, **kwargs):
             settings.MUCKROCK_URL + ffile.get_foia().get_absolute_url()
         )
 
-    if change:
-        # XXX error handle
-        # use auto error handling, catch doccloud library error
-        document = dc_client.documents.get(id=ffile.doc_id)
-        for attr, value in params.items():
-            setattr(document, attr, value)
-        document.save()
-    else:
-        # XXX error handle
+    with transaction.atomic():
+        if change:
+            # XXX error handle
+            # use auto error handling, catch doccloud library error
+            document = dc_client.documents.get(id=ffile.doc_id)
+            for attr, value in params.items():
+                setattr(document, attr, value)
+            document.save()
+        else:
+            # XXX error handle
 
-        # XXX pass by url?
-        # document = dc_client.documents.upload(ffile.ffile.url, **params)
-        document = dc_client.documents.upload(ffile.ffile, **params)
-        ffile.doc_id = f"{document.id}-{document.slug}"
-        ffile.save()
+            # XXX pass by url?
+            # document = dc_client.documents.upload(ffile.ffile.url, **params)
+            document = dc_client.documents.upload(ffile.ffile, **params)
+            ffile.doc_id = f"{document.id}-{document.slug}"
+            ffile.save()
+
+        transaction.on_commit(
+            lambda: set_document_cloud_pages.apply_async(
+                args=[ffile.pk], countdown=settings.DOCCLOUD_PROCESSING_WAIT
+            )
+        )
 
 
 def upload_document_cloud_legacy(doc, change, **kwargs):
@@ -195,7 +198,7 @@ def upload_document_cloud_legacy(doc, change, **kwargs):
             info = json.loads(ret)
             doc.doc_id = info["id"]
             doc.save()
-            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
+            set_document_cloud_pages_legacy.apply_async(args=[doc.pk], countdown=1800)
     except (urllib.error.URLError, urllib.error.HTTPError) as exc:
         logger.warning("Upload Doc Cloud error: %s %s", url, doc.pk)
         countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
@@ -207,11 +210,10 @@ def upload_document_cloud_legacy(doc, change, **kwargs):
 @task(
     ignore_result=True,
     max_retries=10,
-    name="muckrock.foia.tasks.set_document_cloud_pages",
+    name="muckrock.foia.tasks.set_document_cloud_pages_legacy",
 )
-def set_document_cloud_pages(doc_pk, **kwargs):
+def set_document_cloud_pages_legacy(doc_pk, **kwargs):
     """Get the number of pages from the document cloud server and save it locally"""
-    # XXX do this through a callback
 
     try:
         doc = FOIAFile.objects.get(pk=doc_pk)
@@ -240,13 +242,63 @@ def set_document_cloud_pages(doc_pk, **kwargs):
             doc.doc_id = ""
             doc.save()
         else:
-            set_document_cloud_pages.retry(
+            set_document_cloud_pages_legacy.retry(
                 args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
             )
     except urllib.error.URLError as exc:
-        set_document_cloud_pages.retry(
+        set_document_cloud_pages_legacy.retry(
             args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
         )
+
+
+@task(
+    ignore_result=True,
+    max_retries=10,
+    name="muckrock.foia.tasks.set_document_cloud_pages",
+)
+def set_document_cloud_pages(ffile_pk, **kwargs):
+    """Get the number of pages from the document cloud server and save it locally"""
+
+    # XXX Error handle (APIs)
+
+    try:
+        ffile = FOIAFile.objects.get(pk=ffile_pk)
+    except FOIAFile.DoesNotExist:
+        return
+
+    if ffile.pages or not ffile.is_doccloud() or not ffile.doc_id:
+        # already has pages set or not a doc cloud, just return
+        return
+
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    document = dc_client.documents.get(id=ffile.doc_id)
+
+    if document.status == "success":
+        # the document was processed succsefully, save the page count
+        ffile.pages = document.page_count
+        ffile.save()
+    elif document.status in ("pending", "readable", "nofile"):
+        # the document is still processing or downloading the file,
+        # retry with exponential backoff
+        # autoretry on this error
+        raise DocumentCloudRetryError()
+        # set_document_cloud_pages.retry(
+        #     args=[ffile_pk],
+        #     countdown=(2 ** set_document_cloud_pages.request.retries)
+        #     * settings.DOCCLOUD_PROCESSING_WAIT
+        #     + randint(0, 60),
+        #     kwargs=kwargs,
+        # )
+    elif document.status == "error":
+        # if there was an error, try to reprocess the document, then retry
+        # setting the pages
+        document.process()
+        raise DocumentCloudRetryError()
 
 
 @periodic_task(
