@@ -941,6 +941,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             **extra
         )
 
+    check_address = None
     if category == "p":
         check_address = comm.foia.agency.get_addresses("check").first()
         if check_address is None:
@@ -949,7 +950,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
 
     for test, reason in [
         (not config.AUTO_LOB and not force, "auto"),
-        (not comm.foia.address, "addr"),
+        (not check_address if category == "p" else not comm.foia.address, "addr"),
         (category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
         (category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
         (amount > settings.CHECK_LIMIT, "limit"),
