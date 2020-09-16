@@ -960,7 +960,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
 
     pdf = LobPDF(comm, category, switch, amount=amount)
-    prepared_pdf, page_count, files, mail = pdf.prepare()
+    prepared_pdf, page_count, files, mail = pdf.prepare(check_address)
 
     if prepared_pdf:
         # page count will be None if prepare_pdf is None

@@ -102,7 +102,7 @@ class MailPDF(PDF):
     def _extra_generate(self):
         """Hook for subclasses to override"""
 
-    def prepare(self):
+    def prepare(self, address_override=None):
         """Prepare the PDF to be sent by appending attachments"""
         # generate the pdf and merge all pdf attachments
         # keep track of any problematic attachments
@@ -127,12 +127,10 @@ class MailPDF(PDF):
             return (None, None, files, None)
 
         # create the mail communication object
+        address = address_override if address_override else self.comm.foia.address
         mail, _ = MailCommunication.objects.update_or_create(
             communication=self.comm,
-            defaults={
-                "to_address": self.comm.foia.address,
-                "sent_datetime": timezone.now(),
-            },
+            defaults={"to_address": address, "sent_datetime": timezone.now()},
         )
         single_pdf.seek(0)
         mail.pdf.save("{}.pdf".format(self.comm.pk), ContentFile(single_pdf.read()))
