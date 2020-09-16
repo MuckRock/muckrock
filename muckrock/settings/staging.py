@@ -13,10 +13,6 @@ from django_mailgun import MailgunBackend
 # MuckRock
 from muckrock.settings.heroku import *
 
-MUCKROCK_URL = "https://muckrock-staging.herokuapp.com"
-FOIAMACHINE_URL = "https://staging.foiamachine.org"
-SQUARELET_URL = "https://squarelet-staging.herokuapp.com"
-
 INSTALLED_APPS += ("bandit",)
 
 BANDIT_EMAIL = "staging@muckrock.com"

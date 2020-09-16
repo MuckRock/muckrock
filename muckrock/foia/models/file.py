@@ -37,12 +37,11 @@ class FOIAFile(models.Model):
     datetime = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
-    # XXX do we want to split to a id and slug field?
     doc_id = models.SlugField(max_length=80, blank=True, editable=False)
     dc_legacy = models.BooleanField(default=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
 
-    # XXX deprecated
+    # deprecated
     # for doc cloud only
     old_access = models.CharField(
         max_length=12, default="public", db_index=True, db_column="access"

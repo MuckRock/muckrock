@@ -44,6 +44,7 @@ from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError
 from documentcloud import DocumentCloud
+from documentcloud.exceptions import DocumentCloudError
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
 from raven import Client
@@ -93,9 +94,11 @@ def authenticate_documentcloud(request):
 
 @task(
     ignore_result=True,
-    max_retries=10,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
+    autoretry_for=(DocumentCloudError,),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
 )
 def upload_document_cloud(ffile_pk, **kwargs):
     """Upload a document to Document Cloud"""
@@ -136,18 +139,12 @@ def upload_document_cloud(ffile_pk, **kwargs):
 
     with transaction.atomic():
         if change:
-            # XXX error handle
-            # use auto error handling, catch doccloud library error
             document = dc_client.documents.get(id=ffile.doc_id)
             for attr, value in params.items():
                 setattr(document, attr, value)
             document.save()
         else:
-            # XXX error handle
-
-            # XXX pass by url?
-            # document = dc_client.documents.upload(ffile.ffile.url, **params)
-            document = dc_client.documents.upload(ffile.ffile, **params)
+            document = dc_client.documents.upload(ffile.ffile.url, **params)
             ffile.doc_id = f"{document.id}-{document.slug}"
             ffile.save()
 
@@ -251,15 +248,19 @@ def set_document_cloud_pages_legacy(doc_pk, **kwargs):
         )
 
 
+class DocumentCloudRetryError(Exception):
+    """Custom Error to trigger a retry if the document is not done processing"""
+
+
 @task(
     ignore_result=True,
-    max_retries=10,
     name="muckrock.foia.tasks.set_document_cloud_pages",
+    autoretry_for=(DocumentCloudError, DocumentCloudRetryError),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
 )
-def set_document_cloud_pages(ffile_pk, **kwargs):
+def set_document_cloud_pages(ffile_pk):
     """Get the number of pages from the document cloud server and save it locally"""
-
-    # XXX Error handle (APIs)
 
     try:
         ffile = FOIAFile.objects.get(pk=ffile_pk)
@@ -285,15 +286,7 @@ def set_document_cloud_pages(ffile_pk, **kwargs):
     elif document.status in ("pending", "readable", "nofile"):
         # the document is still processing or downloading the file,
         # retry with exponential backoff
-        # autoretry on this error
         raise DocumentCloudRetryError()
-        # set_document_cloud_pages.retry(
-        #     args=[ffile_pk],
-        #     countdown=(2 ** set_document_cloud_pages.request.retries)
-        #     * settings.DOCCLOUD_PROCESSING_WAIT
-        #     + randint(0, 60),
-        #     kwargs=kwargs,
-        # )
     elif document.status == "error":
         # if there was an error, try to reprocess the document, then retry
         # setting the pages
@@ -307,7 +300,6 @@ def set_document_cloud_pages(ffile_pk, **kwargs):
 )
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
-    # XXX rethink how retrying works
     docs = FOIAFile.objects.filter(doc_id="").exclude(comm__foia=None).get_doccloud()
     logger.info("Reupload documents, %d documents are stuck", len(docs))
     for doc in docs:
