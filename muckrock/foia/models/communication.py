@@ -312,7 +312,7 @@ class FOIACommunication(models.Model):
         # * a file_
         # * content and name_
         # * path and name_ (for files already uploaded to s3)
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, too-many-arguments
         from muckrock.foia.tasks import upload_document_cloud
 
         assert (

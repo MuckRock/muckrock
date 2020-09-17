@@ -47,7 +47,7 @@ def foia_file_delete_dc(sender, **kwargs):
     # pylint: disable=unused-argument
 
     foia_file = kwargs["instance"]
-    if not foia_file.dc_legacy:
+    if not foia_file.dc_legacy and foia_file.doc_id:
         dc_client = DocumentCloud(
             username=settings.DOCUMENTCLOUD_BETA_USERNAME,
             password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
