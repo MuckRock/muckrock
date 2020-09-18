@@ -139,7 +139,7 @@ def upload_document_cloud(ffile_pk, **kwargs):
 
     with transaction.atomic():
         if change:
-            document = dc_client.documents.get(id=ffile.doc_id)
+            document = dc_client.documents.get(ffile.doc_id)
             for attr, value in params.items():
                 setattr(document, attr, value)
             document.save()
@@ -277,7 +277,7 @@ def set_document_cloud_pages(ffile_pk):
         base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
         auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
-    document = dc_client.documents.get(id=ffile.doc_id)
+    document = dc_client.documents.get(ffile.doc_id)
 
     if document.status == "success":
         # the document was processed succsefully, save the page count
