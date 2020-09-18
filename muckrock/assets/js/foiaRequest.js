@@ -148,7 +148,7 @@ export function displayFile(file) {
         // load new embed in the iframe
         iframe.attr(
             "src",
-            url + "documents/" + docId + "/?embed=1&amp;title=1"
+            url + "/documents/" + docId + "/?embed=1&amp;title=1"
         );
         viewer.hide();
         iframe.show();
