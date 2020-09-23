@@ -138,7 +138,7 @@ class FOIACommunication(models.Model):
     def get_source(self):
         """Get the source line for an attached file"""
         if self.foia and self.foia.agency:
-            return self.foia.agency.name
+            return f"{self.foia.agency.name}, {self.foia.agency.jurisdiction}"
         elif self.from_user:
             return self.from_user.profile.full_name
         else:

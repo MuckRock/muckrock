@@ -80,7 +80,7 @@ class FOIAFile(models.Model):
             "xlsx": "file-spreadsheet.png",
             "zip": "file-archive.png",
         }
-        if self.is_public() and self.is_doccloud() and self.doc_id:
+        if self.show_embed:
             id_, slug = self.doc_id.split("-", 1)
             if self.dc_legacy:
                 asset_url = settings.DOCCLOUD_LEGACY_ASSET_URL
@@ -146,6 +146,11 @@ class FOIAFile(models.Model):
         if foia is None:
             return None
         return "private" if foia.embargo else "public"
+
+    @property
+    def show_embed(self):
+        """Should we show a DocumentCloud embed for this file?"""
+        return self.is_doccloud() and self.doc_id and self.is_public and self.pages > 0
 
     class Meta:
         verbose_name = "FOIA Document File"

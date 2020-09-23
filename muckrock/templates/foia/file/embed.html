@@ -38,7 +38,7 @@
             </div>
             <div class="header__section">
                 <div class="file-actions button-group">
-                    {% if file.is_doccloud and file.doc_id and file.is_public %}
+                    {% if file.show_embed %}
                     <span class="toggle-embed button action">
                         {% include 'lib/component/icon/embed.svg' %}
                         <span class="label">Embed</span>

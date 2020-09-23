@@ -105,7 +105,11 @@ def upload_document_cloud(ffile_pk, **kwargs):
 
     logger.info("Upload Doc Cloud: %s", ffile_pk)
 
-    ffile = FOIAFile.objects.get(pk=ffile_pk)
+    ffile = (
+        FOIAFile.objects.filter(pk=ffile_pk)
+        .select_related("comm__foia__agency__jurisdiction")
+        .first()
+    )
 
     if not ffile.is_doccloud():
         # not a file doc cloud supports, do not attempt to upload
@@ -130,8 +134,18 @@ def upload_document_cloud(ffile_pk, **kwargs):
         "source": ffile.source,
         "description": ffile.description,
         "access": ffile.access,
+        "data": {},
     }
     foia = ffile.get_foia()
+    if foia:
+        params["data"] = {
+            "_mr_request": str(ffile.comm.foia.pk),
+            "_mr_agency": str(ffile.comm.foia.agency.pk),
+            "_mr_jurisdiction": str(ffile.comm.foia.agency.jurisdiction.pk),
+        }
+    if ffile.comm and ffile.comm.status:
+        params["data"]["_mr_status"] = ffile.comm.get_status_display()
+    print(params)
     if foia:
         params["related_article"] = (
             settings.MUCKROCK_URL + ffile.get_foia().get_absolute_url()

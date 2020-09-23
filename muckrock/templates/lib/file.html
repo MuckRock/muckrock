@@ -1,6 +1,6 @@
 {% load tags %}
 <div class="file" data-doc-id="{{file.doc_id}}" data-title="{{file.title}}" data-pages="{{file.pages}}" data-legacy="{{file.dc_legacy}}" data-url="{{settings.DOCCLOUD_URL}}" {% if not hide_id %}id="{{file.anchor}}"{% endif %}>
-    {% if file.is_doccloud and file.doc_id and file.is_public %}
+    {% if file.show_embed %}
     <div class="file-image thumbnail">
     {% else %}
     <div class="file-image">
@@ -10,7 +10,7 @@
     <div class="file-info">
         <p class="title">{{file.title}}</p>
         <ul class="file-actions">
-            {% if file.is_doccloud and file.doc_id and file.is_public %}
+            {% if file.show_embed %}
             <li>
                 {% if foia_url %}
                 {# if foia_url, then we are on the FOIA page already #}
