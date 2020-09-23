@@ -8,6 +8,7 @@ appdirs==1.4.4            # via black
 asn1crypto==0.24.0        # via cryptography
 astroid==2.4.2            # via pylint
 attrs==19.3.0             # via black
+autopep8==1.5.4           # via django-silk
 backcall==0.2.0           # via ipython
 bcrypt==3.1.6             # via paramiko
 black==19.10b0
@@ -22,19 +23,23 @@ dj-inmemorystorage==1.4.0
 django-debug-toolbar-request-history==0.0.5
 django-debug-toolbar==1.8  # via django-debug-toolbar-request-history
 django-nose==1.4.4
+django-silk==4.1.0
 django==2.2.15
 fabric==1.14.1
 factory-boy==2.7.0
 fake-factory==0.7.2       # via factory-boy
 first==2.0.1              # via pip-tools
 freezegun==0.3.8
+gprof2dot==2019.11.30     # via django-silk
 idna==2.5                 # via requests
 ipdb==0.10.1
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.16.1           # via ipdb
 isort==4.3.21
 jedi==0.17.1              # via ipython
+jinja2==2.11.2            # via django-silk
 lazy-object-proxy==1.4.3  # via astroid
+markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint
 mock==2.0.0
 nose==1.3.7               # via django-nose
@@ -48,20 +53,21 @@ pip-tools==2.0.2
 prompt-toolkit==3.0.5     # via ipython
 ptyprocess==0.6.0         # via pexpect
 pyasn1==0.4.5             # via paramiko
+pycodestyle==2.6.0        # via autopep8
 pycparser==2.19           # via cffi
-pygments==2.2.0           # via ipython
+pygments==2.2.0           # via django-silk, ipython
 pylint-django==2.2.0
 pylint-plugin-utils==0.6  # via pylint-django
 pylint==2.5.3             # via pylint-django, pylint-plugin-utils
 pynacl==1.3.0             # via paramiko
-python-dateutil==2.5.3    # via fake-factory, freezegun
-pytz==2020.1              # via django
+python-dateutil==2.5.3    # via django-silk, fake-factory, freezegun
+pytz==2020.1              # via django, django-silk
 regex==2020.6.8           # via black
 requests-mock==1.3.0
-requests==2.21.0          # via requests-mock
+requests==2.21.0          # via django-silk, requests-mock
 six==1.15.0               # via astroid, bcrypt, cryptography, dj-inmemorystorage, fake-factory, freezegun, mock, pip-tools, pynacl, python-dateutil, requests-mock, traitlets
-sqlparse==0.2.4           # via django, django-debug-toolbar
-toml==0.10.1              # via black, pylint
+sqlparse==0.2.4           # via django, django-debug-toolbar, django-silk
+toml==0.10.1              # via autopep8, black, pylint
 traitlets==4.3.2          # via ipython
 typed-ast==1.4.1          # via astroid, black
 urllib3==1.24.2           # via requests

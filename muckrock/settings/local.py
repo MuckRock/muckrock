@@ -14,6 +14,13 @@ THUMBNAIL_DEBUG = DEBUG
 AWS_DEBUG = False
 
 MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
+MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
+
+INSTALLED_APPS += ("silk",)
+
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_BINARY = True
+SILKY_META = True
 
 DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.versions.VersionsPanel",

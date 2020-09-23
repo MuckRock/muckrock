@@ -14,3 +14,4 @@ pylint-django # Pylint for Django integration
 requests-mock # Mock for http requests
 whoosh # Used for search backend in development
 black==19.10b0 # code formatter
+django-silk # profiler
