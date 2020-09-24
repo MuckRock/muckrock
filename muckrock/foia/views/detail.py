@@ -261,7 +261,7 @@ class Detail(DetailView):
             "admin:foia_foiarequest_change", args=(foia.pk,)
         )
         context["is_thankable"] = foia.has_perm(self.request.user, "thank")
-        context["files"] = foia.get_files()[:50]
+        context["files"] = foia.get_files().select_related("comm__foia")[:50]
         if self.request.user.is_authenticated:
             context["foia_cache_timeout"] = 0
         else:
