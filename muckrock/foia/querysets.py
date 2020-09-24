@@ -368,7 +368,7 @@ class FOIAFileQuerySet(models.QuerySet):
             ) rank_filter WHERE ROW_NUMBER <= %s
             """,
             [tuple(comm_ids), limit],
-        )
+        ).prefetch_related("comm__foia")
         return {
             comm_id: list(files)
             for comm_id, files in groupby(file_qs, lambda f: f.comm_id)
