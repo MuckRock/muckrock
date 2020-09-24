@@ -108,38 +108,16 @@ class ModelFilterMixin:
         object_list value with the filter's queryset.
         We also apply pagination to the filter queryset.
         """
-        context = super(ModelFilterMixin, self).get_context_data(**kwargs)
-        _filter = self.get_filter()
-        queryset = _filter.qs
-        if any(_filter.data.values()):
+        filter_ = self.get_filter()
+        queryset = filter_.qs
+        if any(filter_.data.values()):
             queryset = queryset.distinct()
-        try:
-            page_size = self.get_paginate_by(queryset)
-        except AttributeError:
-            page_size = 0
-        if page_size:
-            paginator, page, queryset, is_paginated = self.paginate_queryset(
-                queryset, page_size
-            )
-            context.update(
-                {
-                    "filter": _filter,
-                    "paginator": paginator,
-                    "page_obj": page,
-                    "is_paginated": is_paginated,
-                    "object_list": queryset,
-                }
-            )
-        else:
-            context.update(
-                {
-                    "filter": _filter,
-                    "paginator": None,
-                    "page_obj": None,
-                    "is_paginated": False,
-                    "object_list": queryset,
-                }
-            )
+
+        context = super(ModelFilterMixin, self).get_context_data(
+            object_list=queryset, **kwargs
+        )
+        context["filter"] = filter_
+
         return context
 
 
