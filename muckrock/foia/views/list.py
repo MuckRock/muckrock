@@ -93,13 +93,13 @@ class RequestExploreView(TemplateView):
         )
         context["recently_completed"] = (
             visible_requests.get_done()
-            .order_by("-datetime_done", "pk")
+            .order_by("-datetime_done")
             .select_related_view()
             .get_public_file_count(limit=5)
         )
         context["recently_rejected"] = (
             visible_requests.filter(status__in=["rejected", "no_docs"])
-            .order_by("-datetime_updated", "pk")
+            .order_by("-datetime_updated")
             .select_related_view()
             .get_public_file_count(limit=5)
         )
