@@ -66,9 +66,9 @@ class OrderedSortMixin:
         order = self.request.GET.get("order", self.default_order)
         sort = self.sort_map.get(sort, self.default_sort)
         if order == "desc":
-            sort = F(sort).desc(nulls_last=True)
+            sort = F(sort).desc()
         else:
-            sort = F(sort).asc(nulls_last=True)
+            sort = F(sort).asc()
         return queryset.order_by(sort)
 
     def get_queryset(self):
