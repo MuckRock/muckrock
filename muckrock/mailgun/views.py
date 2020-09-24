@@ -380,8 +380,8 @@ def _find_likely_bounce(subject):
     else:
         return None
     # remove RE: and trailing space
-    subject = subject[subject.find(reply) + 4 :]
-    comm = FOIACommunication.objects.filter(subject__contains=subject).last()
+    subject = subject[subject.find(reply) + 3 :].lstrip()
+    comm = FOIACommunication.objects.filter(subject=subject).last()
     if comm:
         return comm.foia
     else:

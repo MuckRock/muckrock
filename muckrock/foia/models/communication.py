@@ -54,7 +54,7 @@ class FOIACommunication(models.Model):
         on_delete=models.PROTECT,
     )
 
-    subject = models.CharField(max_length=255, blank=True)
+    subject = models.CharField(max_length=255, blank=True, db_index=True)
     datetime = models.DateTimeField(db_index=True)
 
     response = models.BooleanField(
