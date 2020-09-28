@@ -651,6 +651,7 @@ class PaymentInfoTaskList(TaskList):
     title = "Payment Info"
     queryset = PaymentInfoTask.objects.preload_list()
 
+    @transaction.atomic
     def task_post_helper(self, request, task, form_data=None):
         if request.POST.get("save"):
             agency = task.communication.foia.agency
@@ -672,10 +673,12 @@ class PaymentInfoTaskList(TaskList):
             )
             for task_ in tasks:
                 # send the check
-                prepare_snail_mail.delay(
-                    task_.communication.pk, "p", False, {"amount": task_.amount}
-                )
                 task_.resolve(request.user, form.cleaned_data)
+                transaction.on_commit(
+                    lambda t=task_: prepare_snail_mail.delay(
+                        t.communication.pk, "p", False, {"amount": t.amount}
+                    )
+                )
         elif request.POST.get("reject"):
             SnailMailTask.objects.create(
                 category="p",
