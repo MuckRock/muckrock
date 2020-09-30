@@ -42,6 +42,7 @@ def plaid_checks():
         )
     except plaid.errors.PlaidError as exc:
         logger.error(exc, exc_info=sys.exc_info())
+        return
 
     p_check_number = re.compile(r"^Check ([0-9]+)$")
     for transaction in transactions_response["transactions"]:
