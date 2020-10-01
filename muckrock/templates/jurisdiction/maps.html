@@ -1,3 +1,6 @@
+{% load cache %}
+
+{% cache cache_timeout jurisdiction_maps %}
 <div class="explore__section jurisdiction-explore">
   <div class="place-map top-map">
     <h2>Average Response Time</h2>
@@ -117,3 +120,4 @@
   </div>
   <p class="credits">Michael Andre, Gurman Bhatia, JPat Brown, Jabril Faraj, Maddy Kennedy, Mitchell Kotler, Beryl Lipton, Edgar Mendez, Michael Morisy, Devi Shastri, Theresa Soley, Miranda Spivack, and Curtis Waltman contributed to the research, fact checking, design and implementation of this database. For any updates, additions or corrections, please send an email to info@muckrock.com. It was funded in part by the Fund for Investigative Journalism, Marquette’s O’Brien Fellowship in Public Service Journalism, and the Arnold Foundation.</p>
 </div>
+{% endcache %}
