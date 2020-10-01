@@ -9,6 +9,9 @@ Not used directly - imported from production and staging settings
 # MuckRock
 from muckrock.settings.base import *
 
+INSTALLED_APPS = ("scout_apm.django",) + INSTALLED_APPS
+USE_SCOUT = True
+
 # media and static asset handling
 DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
 THUMBNAIL_DEFAULT_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"

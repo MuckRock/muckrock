@@ -30,3 +30,5 @@ else:
 MUCKROCK_URL = "https://www.muckrock.com"
 FOIAMACHINE_URL = "https://www.foiamachine.org"
 SQUARELET_URL = "https://accounts.muckrock.com"
+
+SCOUT_NAME = "MuckRock"

@@ -705,3 +705,5 @@ ZENDESK_EMAIL = os.environ.get("ZENDESK_EMAIL", "")
 ZENDESK_SUBDOMAIN = os.environ.get("ZENDESK_SUBDOMAIN", "muckrock")
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+USE_SCOUT = False

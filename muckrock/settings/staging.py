@@ -37,3 +37,5 @@ EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
 # white list muckrock and squarelet staging sites
 os.environ["http_proxy"] = os.environ.get("FIXIE_URL", "")
 os.environ["https_proxy"] = os.environ.get("FIXIE_URL", "")
+
+SCOUT_NAME = "MuckRock Staging"

@@ -72,6 +72,7 @@ requests # HTTP for humans
 rules # Rule based permissions
 scikit-learn # Used for machine learning
 scipy # Used for machine learning
+scout-apm # performance monitoring
 simplejson # json decoder for requests
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
