@@ -34,6 +34,7 @@ class StatisticsAdmin(VersionAdmin):
         "total_fees",
     )
     formats = ["xls", "csv"]
+    autocomplete_fields = ["users_today"]
 
 
 class ProfileAdminForm(forms.ModelForm):
