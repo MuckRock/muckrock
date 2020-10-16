@@ -206,6 +206,7 @@ class SnailMailTask(Task):
         choices=(
             ("auto", "Automatic Lob sending was disabled"),
             ("addr", "FOIA had no address"),
+            ("badadd", "Address field too long for Lob"),
             ("appeal", "This is an appeal"),
             ("pay", "This is a payment"),
             ("limit", "Over the payment limit"),

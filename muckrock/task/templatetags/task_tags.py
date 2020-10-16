@@ -226,7 +226,6 @@ class SnailMailTaskNode(TaskNode):
         else:
             agency_ = foia_.agency
         extra_context["agency"] = agency_
-        extra_context["address"] = foia_.address
         extra_context["body"] = foia_.render_msg_body(
             comm=self.task.communication,
             switch=self.task.switch,
@@ -239,7 +238,10 @@ class SnailMailTaskNode(TaskNode):
         extra_context["phones"] = [
             str(p) for p in agency_.agencyphone_set.all() if p.phone.type == "phone"
         ]
-        extra_context["addresses"] = [str(a) for a in agency_.agencyaddress_set.all()]
+        extra_context["addresses"] = [
+            (str(a), a.address.lob_errors(agency_))
+            for a in agency_.agencyaddress_set.all()
+        ]
 
         def get_file_size(file_):
             """We will sometimes get an AttributeError when checking file sizes on S3

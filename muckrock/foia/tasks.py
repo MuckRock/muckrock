@@ -941,16 +941,18 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             **extra
         )
 
-    check_address = None
     if category == "p":
-        check_address = comm.foia.agency.get_addresses("check").first()
-        if check_address is None:
+        address = comm.foia.agency.get_addresses("check").first()
+        if address is None:
             PaymentInfoTask.objects.create(communication=comm, amount=amount)
             return
+    else:
+        address = comm.foia.address
 
     for test, reason in [
         (not config.AUTO_LOB and not force, "auto"),
-        (not check_address if category == "p" else not comm.foia.address, "addr"),
+        (not address, "addr"),
+        (address.lob_errors(comm.foia.agency), "badadd"),
         (category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
         (category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
         (amount > settings.CHECK_LIMIT, "limit"),
@@ -960,7 +962,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
 
     pdf = LobPDF(comm, category, switch, amount=amount)
-    prepared_pdf, page_count, files, mail = pdf.prepare(check_address)
+    prepared_pdf, page_count, files, mail = pdf.prepare(address)
 
     if prepared_pdf:
         # page count will be None if prepare_pdf is None
@@ -979,7 +981,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     # send via lob
     try:
         if category == "p":
-            lob_obj = _lob_create_check(comm, prepared_pdf, mail, check_address, amount)
+            lob_obj = _lob_create_check(comm, prepared_pdf, mail, address, amount)
         else:
             lob_obj = _lob_create_letter(comm, prepared_pdf, mail)
         mail.lob_id = lob_obj.id

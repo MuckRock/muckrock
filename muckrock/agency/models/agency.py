@@ -91,6 +91,7 @@ class Agency(models.Model, RequestHelper):
     """An agency for a particular jurisdiction that has at least one agency type"""
 
     name = models.CharField(max_length=255)
+    mail_name = models.CharField(max_length=40)
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(
         Jurisdiction, related_name="agencies", on_delete=models.PROTECT

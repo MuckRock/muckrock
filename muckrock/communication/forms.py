@@ -27,8 +27,8 @@ class AddressForm(forms.ModelForm):
         max_length=40,
         label="Attention of",
         required=False,
-        help_text="Who the letter should be to the attention of.  If left blank, will default "
-        "to the FOIA Office (or applicable law for states).",
+        help_text="Who the letter should be to the attention of.  If left blank, "
+        "will default to the FOIA Office (or applicable law for states).",
     )
     street = forms.CharField(max_length=64)
     suite = forms.CharField(max_length=64, required=False)
@@ -55,8 +55,12 @@ class AddressForm(forms.ModelForm):
     def clean_agency_override(self):
         """Require this field if the agency name is too long"""
         agency_override = self.cleaned_data["agency_override"]
-        if not agency_override and len(self.agency.name) > 40:
+        if (
+            not agency_override
+            and not self.agency.mail_name
+            and len(self.agency.name) > 40
+        ):
             raise forms.ValidationError(
-                "Must supply a name since the agency name is over 40 " "characters long"
+                "Must supply a name since the agency name is over 40 characters long"
             )
         return agency_override

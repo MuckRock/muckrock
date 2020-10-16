@@ -27,17 +27,32 @@ class AgencyForm(forms.ModelForm):
             attrs={"data-placeholder": "Search for jurisdiction"},
         ),
     )
+    mail_name = forms.CharField(
+        required=False,
+        max_length=40,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Mail To (Can be agency name, shortened to fit "
+                "into 40 characters)"
+            }
+        ),
+    )
     address_suite = forms.CharField(
         required=False,
+        max_length=64,
         widget=forms.TextInput(
             attrs={"placeholder": "Suite / Building Number (Optional)"}
         ),
     )
     address_street = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "Street"})
+        required=False,
+        max_length=64,
+        widget=forms.TextInput(attrs={"placeholder": "Street"}),
     )
     address_city = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"placeholder": "City"})
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(attrs={"placeholder": "City"}),
     )
     address_state = forms.ChoiceField(
         required=False, choices=(("", "---"),) + tuple(STATE_CHOICES)
@@ -137,6 +152,7 @@ class AgencyForm(forms.ModelForm):
         model = Agency
         fields = [
             "name",
+            "mail_name",
             "jurisdiction",
             "aliases",
             "email",

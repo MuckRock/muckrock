@@ -49,8 +49,15 @@
         {% endif %}
         {% if addresses %}
           <dt>Address</dt>
-          {% for address in addresses %}
+          {% for address, errors in addresses %}
             <dd>{{ address|linebreaks }}</dd>
+            {% if errors %}
+              {% for field, max_len in errors.items %}
+                <dd><p class="error">
+                  Field "{{ field }}" is over the max length of {{ max_len }}
+                </p></dd>
+              {% endfor %}
+            {% endif %}
           {% endfor %}
         {% endif %}
         {% if agency.portal %}

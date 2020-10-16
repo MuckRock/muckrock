@@ -150,6 +150,24 @@ class AgencyAdminForm(forms.ModelForm):
         fields = "__all__"
 
 
+class MailNameFilter(admin.SimpleListFilter):
+    """Filter for empy mail name's"""
+
+    title = "Empty Mail Name"
+    parameter_name = "empty_mail_name"
+
+    def lookups(self, request, model_admin):
+        """Empty"""
+        return ((True, "Empty"),)
+
+    def queryset(self, request, queryset):
+        """Filter for empty mail name"""
+        if self.value():
+            return queryset.filter(mail_name="")
+
+        return queryset
+
+
 class AgencyAdmin(VersionAdmin):
     """Agency admin options"""
 
@@ -162,7 +180,7 @@ class AgencyAdmin(VersionAdmin):
         "exempt",
         "uncooperative",
     )
-    list_filter = ["status", "exempt", "uncooperative", "types"]
+    list_filter = ["status", "exempt", "uncooperative", MailNameFilter, "types"]
     search_fields = ["name", "aliases"]
     filter_horizontal = ("types",)
     form = AgencyAdminForm
@@ -176,6 +194,7 @@ class AgencyAdmin(VersionAdmin):
             {
                 "fields": (
                     "name",
+                    "mail_name",
                     "slug",
                     "aliases",
                     "jurisdiction",

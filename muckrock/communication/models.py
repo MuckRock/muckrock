@@ -262,8 +262,10 @@ class Address(models.Model):
     def lob_format(self, agency):
         """Format an address for use with Lob"""
         lob = {}
-        if self.agency_override:
+        if self.agency_override and len(self.agency_override) < 40:
             lob["name"] = self.agency_override
+        elif agency.mail_name:
+            lob["name"] = agency.mail_name
         else:
             lob["name"] = agency.name
         if self.attn_override:
@@ -280,6 +282,26 @@ class Address(models.Model):
         lob["address_state"] = self.state
         lob["address_zip"] = self.zip_code
         return lob
+
+    def lob_errors(self, agency):
+        """Check that the lob address is well formatted
+
+        Returns a dictionary of all fields over the limit, as well as their
+        max length
+        """
+        limits = {
+            "name": 40,
+            "company": 40,
+            "address_line1": 64,
+            "address_line2": 64,
+            "city": 200,
+        }
+        lob_format = self.lob_format(agency)
+        errors = {}
+        for field, max_len in limits.items():
+            if len(lob_format.get(field, "")) > max_len:
+                errors[field] = max_len
+        return errors
 
     class Meta:
         verbose_name_plural = "addresses"
