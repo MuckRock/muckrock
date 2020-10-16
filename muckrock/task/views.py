@@ -306,7 +306,9 @@ class ReviewAgencyTaskList(TaskList):
     def task_post_helper(self, request, task, form_data=None):
         """Update the requests with new contact information"""
         if request.POST.get("update"):
-            form = ReviewAgencyTaskForm(request.POST)
+            form = ReviewAgencyTaskForm(
+                request.POST, prefix=request.POST.get("task", "")
+            )
             if form.is_valid():
                 email_or_fax = form.cleaned_data["email_or_fax"]
                 foia_keys = [
