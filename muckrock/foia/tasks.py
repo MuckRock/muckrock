@@ -952,7 +952,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     for test, reason in [
         (not config.AUTO_LOB and not force, "auto"),
         (not address, "addr"),
-        (address.lob_errors(comm.foia.agency), "badadd"),
+        (address and address.lob_errors(comm.foia.agency), "badadd"),
         (category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
         (category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
         (amount > settings.CHECK_LIMIT, "limit"),
