@@ -19,6 +19,7 @@ from dateutil.relativedelta import relativedelta
 # MuckRock
 from muckrock.accounts.models import Notification, Statistics
 from muckrock.communication.models import (
+    Check,
     EmailCommunication,
     FaxCommunication,
     MailCommunication,
@@ -473,6 +474,14 @@ class StaffDigest(Digest):
         )
         return project_info
 
+    def get_checks(self):
+        """Get checks sent or deposited"""
+        yesterday = date.today() - timedelta(1)
+        checks = {}
+        checks["created"] = Check.objects.filter(created_datetime__date=yesterday)
+        checks["deposited"] = Check.objects.filter(deposit_date=yesterday)
+        return checks
+
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
         context = super(StaffDigest, self).get_context_data(*args)
@@ -485,6 +494,7 @@ class StaffDigest(Digest):
         context["stale_tasks_show"] = any(i for i in context["stale_tasks"].values())
         context["crowdfunds"] = self.get_crowdfunds()
         context["projects"] = self.get_projects()
+        context["checks"] = self.get_checks()
         return context
 
     def send(self, fail_silently=False):

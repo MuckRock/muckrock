@@ -295,6 +295,36 @@
     </ul>
   {% endif %}
 {% endfor %}
+
+{% if checks.created %}
+  <h1>Checks sent yesterday</h1>
+  <ul>
+  {% for check in checks.created %}
+    <li>
+      #{{check.number}} for ${{check.amount}} sent to {{check.agency}} for
+      <a href="{{ check.communication.get_absolute_url }}">
+        {{check.communication.foia}}
+      </a>
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+{% if checks.deposited %}
+  <h1>Checks deposited yesterday</h1>
+  <ul>
+  {% for check in checks.deposited %}
+    <li>
+      #{{check.number}} for ${{check.amount}} sent to {{check.agency}}
+      on {{check.created_datetime|date}} for
+      <a href="{{ check.communication.get_absolute_url }}">
+        {{check.communication.foia}}
+      </a>
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
 <hr />
 <p>That is all for today. {{ signoff }} and see you tomorrow.</p>
 {% endblock %}
