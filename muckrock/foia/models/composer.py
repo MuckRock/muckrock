@@ -196,7 +196,7 @@ class FOIAComposer(models.Model):
         return (
             self.delayed_id != ""
             and self.datetime_submitted
-            < timezone.now() + timedelta(seconds=COMPOSER_EDIT_DELAY)
+            > timezone.now() - timedelta(seconds=COMPOSER_EDIT_DELAY)
             and self.status == "submitted"
         )
 
