@@ -113,6 +113,7 @@
           {% if field == "address" %}
             <fieldset>
               <label>Address</label>
+              {{ agency_form.mail_name }}
               {{ agency_form.address_suite }}
               {{ agency_form.address_street }}
               {{ agency_form.address_city }}

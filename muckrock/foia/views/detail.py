@@ -659,7 +659,9 @@ class Detail(DetailView):
 
     def _update_new_agency(self, request, foia):
         """Update the new agency"""
-        form = AgencyForm(request.POST, instance=foia.agency)
+        form = AgencyForm(
+            request.POST, instance=foia.agency, prefix=request.POST.get("task", "")
+        )
         if foia.has_perm(request.user, "change"):
             if form.is_valid():
                 form.save()
