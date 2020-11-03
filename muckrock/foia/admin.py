@@ -589,7 +589,7 @@ class FOIAComposerAdminForm(forms.ModelForm):
     agencies = forms.ModelMultipleChoiceField(
         queryset=Agency.objects.all(),
         required=False,
-        widget=autocomplete.ModelSelect2(
+        widget=autocomplete.ModelSelect2Multiple(
             url="agency-autocomplete",
             attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
