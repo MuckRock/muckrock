@@ -78,13 +78,15 @@ class TestCommunication(test.TestCase):
         self.comm.foia = None
         self.comm.make_sender_primary_contact()
 
-    @raises(ValueError)
-    def test_bad_sender_error(self):
-        """Comms with bad sender email should raise an error"""
+    def test_bad_sender(self):
+        """Comms with bad sender email should not change contact information"""
         email = self.comm.emails.first()
         email.from_email = None
+        foia_email = self.foia.email
         email.save()
         self.comm.make_sender_primary_contact()
+        self.foia.refresh_from_db()
+        eq_(self.foia.email, foia_email)
 
 
 class TestCommunicationMove(test.TestCase):
