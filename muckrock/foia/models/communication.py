@@ -248,8 +248,6 @@ class FOIACommunication(models.Model):
             ]
             self.foia.cc_emails.set(new_cc_emails)
             self.foia.save(comment="update primary contact from comm")
-        else:
-            raise ValueError("Communication was not sent from a valid email.")
 
     def _presave_special_handling(self):
         """Special handling before saving
