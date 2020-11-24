@@ -144,6 +144,8 @@ class CrowdsourceDataCsvForm(forms.Form):
                         pass
                     else:
                         crowdsource.data.create(url=url, metadata=data)
+                else:
+                    crowdsource.data.create(metadata=data)
 
 
 class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
