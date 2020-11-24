@@ -9,6 +9,7 @@ from django.core.validators import URLValidator
 import codecs
 import csv
 import json
+import re
 
 # Third Party
 from dal import forward
@@ -43,10 +44,24 @@ class CrowdsourceAssignmentForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         crowdsource = kwargs.pop("crowdsource")
+        datum = kwargs.pop("datum")
+        metadata = datum.metadata if datum else None
         user = kwargs.pop("user")
         super(CrowdsourceAssignmentForm, self).__init__(*args, **kwargs)
 
+        def sub(text, metadata):
+            if text is None:
+                return text
+            text = re.sub(r"{\s*", "{", text)
+            text = re.sub(r"\s*}", "}", text)
+            return text.format_map(metadata)
+
         for field in crowdsource.fields.filter(deleted=False):
+            # swap in template tags from metadata
+            form_field = field.get_form_field()
+            form_field.label = sub(form_field.label, metadata)
+            form_field.help_text = sub(form_field.help_text, metadata)
+            form_field.initial = sub(form_field.initial, metadata)
             self.fields[str(field.pk)] = field.get_form_field()
         if user.is_anonymous and crowdsource.registration != "off":
             required = crowdsource.registration == "required"
@@ -96,17 +111,6 @@ class CrowdsourceDataCsvForm(forms.Form):
         "up into one assignment per page",
         required=False,
     )
-
-    def clean_data_csv(self):
-        """If there is a data CSV, ensure it has a URL column"""
-        data_csv = self.cleaned_data["data_csv"]
-        if data_csv:
-            reader = csv.reader(codecs.iterdecode(data_csv, "utf-8"))
-            headers = [h.lower() for h in next(reader)]
-            if "url" not in headers:
-                raise forms.ValidationError("Data CSV should contain a URL column")
-            data_csv.seek(0)
-        return data_csv
 
     def process_data_csv(self, crowdsource):
         """Create the crowdsource data from the uploaded CSV"""

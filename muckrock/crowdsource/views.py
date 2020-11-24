@@ -243,7 +243,13 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
     def get_form_kwargs(self):
         """Add the crowdsource object to the form"""
         kwargs = super(CrowdsourceFormView, self).get_form_kwargs()
-        kwargs.update({"crowdsource": self.get_object(), "user": self.request.user})
+        kwargs.update(
+            {
+                "crowdsource": self.get_object(),
+                "user": self.request.user,
+                "datum": self.data,
+            }
+        )
         return kwargs
 
     def get_context_data(self, **kwargs):
