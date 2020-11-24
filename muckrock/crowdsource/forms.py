@@ -58,10 +58,11 @@ class CrowdsourceAssignmentForm(forms.Form):
 
         for field in crowdsource.fields.filter(deleted=False):
             # swap in template tags from metadata
-            form_field = field.get_form_field()
-            form_field.label = sub(form_field.label, metadata)
-            form_field.help_text = sub(form_field.help_text, metadata)
-            form_field.initial = sub(form_field.initial, metadata)
+            if metadata:
+                form_field = field.get_form_field()
+                form_field.label = sub(form_field.label, metadata)
+                form_field.help_text = sub(form_field.help_text, metadata)
+                form_field.initial = sub(form_field.initial, metadata)
             self.fields[str(field.pk)] = field.get_form_field()
         if user.is_anonymous and crowdsource.registration != "off":
             required = crowdsource.registration == "required"
