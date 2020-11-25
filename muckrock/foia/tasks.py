@@ -134,6 +134,7 @@ def upload_document_cloud(ffile_pk, **kwargs):
         "source": ffile.source,
         "description": ffile.description,
         "access": ffile.access,
+        "original_extension": ffile.get_extension(),
         "data": {},
     }
     foia = ffile.get_foia()
