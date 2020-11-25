@@ -146,7 +146,6 @@ def upload_document_cloud(ffile_pk, **kwargs):
         }
     if ffile.comm and ffile.comm.status:
         params["data"]["_mr_status"] = ffile.comm.get_status_display()
-    print(params)
     if foia:
         params["related_article"] = (
             settings.MUCKROCK_URL + ffile.get_foia().get_absolute_url()
