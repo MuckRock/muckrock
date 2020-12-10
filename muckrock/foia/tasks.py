@@ -517,10 +517,9 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             error_code=exc.args[0],
         )
         fatal_errors = {
-            (
-                "Phone number is not formatted correctly or invalid. "
-                "Please check the number and try again."
-            )
+            "Phone number is not formatted correctly or invalid. "
+            "Please check the number and try again.",
+            "Phone number is not permitted.",
         }
         if exc.args[0] in fatal_errors:
             comm.foia.fax.status = "error"
