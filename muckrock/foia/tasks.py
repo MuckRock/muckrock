@@ -360,7 +360,12 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         contact_info,
         kwargs,
     )
-    composer = FOIAComposer.objects.get(pk=composer_pk)
+    try:
+        composer = FOIAComposer.objects.get(pk=composer_pk)
+    except FOIAComposer.DoesNotExist:
+        # If the composer was deleted, just return
+        return
+
     logger.info("Fetched the composer")
     # the delayed submit is processing,
     # clear the delayed id, it is too late to cancel
