@@ -36,7 +36,12 @@ from taggit.managers import TaggableManager
 from muckrock import task
 from muckrock.accounts.models import Notification
 from muckrock.agency.utils import initial_communication_template
-from muckrock.communication.models import EmailAddress, EmailCommunication, PhoneNumber
+from muckrock.communication.models import (
+    EmailAddress,
+    EmailCommunication,
+    EmailError,
+    PhoneNumber,
+)
 from muckrock.core import utils
 from muckrock.core.utils import (
     TempDisconnectSignal,
@@ -778,7 +783,7 @@ class FOIARequest(models.Model):
                 )
                 self.email.status = "error"
                 self.email.save()
-                ReviewAgencyTask.objects.ensure_one_created(
+                task.models.ReviewAgencyTask.objects.ensure_one_created(
                     agency=self.agency, resolved=False
                 )
 
@@ -1111,14 +1116,11 @@ class FOIARequest(models.Model):
 
     def proxy_reject(self):
         """Mark this request as being rejected due to a proxy being required"""
-        # pylint: disable=import-outside-toplevel
-        from muckrock.task.models import FlaggedTask
-
         # mark the agency as requiring a proxy going forward
         self.agency.requires_proxy = True
         self.agency.save()
         # mark to re-file with a proxy
-        FlaggedTask.objects.create(
+        task.models.FlaggedTask.objects.create(
             foia=self,
             category="proxy",
             text="This request was rejected as requiring a proxy; please refile"
