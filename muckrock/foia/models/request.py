@@ -28,6 +28,7 @@ from hashlib import md5
 # Third Party
 from actstream.models import followers
 from constance import config
+from django_mailgun import MailgunAPIError
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
@@ -763,7 +764,23 @@ class FOIARequest(models.Model):
             # atach all files from the latest communication
             comm.attach_files_to_email(msg)
 
-            msg.send(fail_silently=False)
+            try:
+                msg.send(fail_silently=False)
+            except MailgunAPIError as exc:
+                EmailError.objects.create(
+                    email=email_comm,
+                    datetime=timezone.now(),
+                    recipient=self.email,
+                    code=exc.args[0].status_code,
+                    error=exc.args[0].text,
+                    event="mailgunapi",
+                    reason="",
+                )
+                self.email.status = "error"
+                self.email.save()
+                ReviewAgencyTask.objects.ensure_one_created(
+                    agency=self.agency, resolved=False
+                )
 
         email_comm.set_raw_email(msg.message())
 
