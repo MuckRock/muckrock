@@ -78,7 +78,6 @@ simplejson # json decoder for requests
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
 social-auth-app-django # for oauth client
-social-auth-core[openidconnect] # for oauth client
 sorl-thumbnail # used for squarlet avatars
 stripe # Stripe payment processor integration
 unidecode # Used for unicode decoding
