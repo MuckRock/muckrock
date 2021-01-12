@@ -118,7 +118,7 @@ def upload_document_cloud(ffile_pk, **kwargs):
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
 
-    if ffile.dc_legacy:
+    if ffile.dc_legacy and settings.USE_DC_LEGACY:
         upload_document_cloud_legacy(ffile, change, **kwargs)
         return
 

@@ -724,3 +724,5 @@ DOCCLOUD_EXTENSIONS = os.environ.get("DOCCLOUD_EXTENSIONS", ".pdf,.doc,.docx").s
     ","
 )
 DOCCLOUD_PROCESSING_WAIT = int(os.environ.get("DOCCLOUD_PROCESSING_WAIT", 60))
+
+USE_DC_LEGACY = boolcheck(os.environ.get("USE_DC_LEGACY", True))

@@ -82,7 +82,7 @@ class FOIAFile(models.Model):
         }
         if self.show_embed:
             id_, slug = self.doc_id.split("-", 1)
-            if self.dc_legacy:
+            if self.dc_legacy and settings.USE_DC_LEGACY:
                 asset_url = settings.DOCCLOUD_LEGACY_ASSET_URL
             else:
                 asset_url = settings.DOCCLOUD_ASSET_URL
@@ -153,6 +153,11 @@ class FOIAFile(models.Model):
         return (
             self.is_doccloud() and self.doc_id and self.is_public() and self.pages > 0
         )
+
+    @property
+    def use_dc_legacy(self):
+        """Should we use DC legacy for this file?"""
+        return self.dc_legacy and settings.USE_DC_LEGACY
 
     class Meta:
         verbose_name = "FOIA Document File"
