@@ -38,14 +38,7 @@ class FOIAFile(models.Model):
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     doc_id = models.SlugField(max_length=266, blank=True, editable=False)
-    dc_legacy = models.BooleanField(default=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
-
-    # deprecated
-    # for doc cloud only
-    old_access = models.CharField(
-        max_length=12, default="public", db_index=True, db_column="access"
-    )
 
     def __str__(self):
         return self.title
@@ -82,11 +75,10 @@ class FOIAFile(models.Model):
         }
         if self.show_embed:
             id_, slug = self.doc_id.split("-", 1)
-            if self.dc_legacy and settings.USE_DC_LEGACY:
-                asset_url = settings.DOCCLOUD_LEGACY_ASSET_URL
-            else:
-                asset_url = settings.DOCCLOUD_ASSET_URL
-            return f"{asset_url}documents/{id_}/pages/{slug}-p1-small.gif"
+            return (
+                f"{settings.DOCCLOUD_ASSET_URL}documents/"
+                f"{id_}/pages/{slug}-p1-small.gif"
+            )
         else:
             filename = mimetypes.get(self.get_extension(), "file-document.png")
             return "%simg/%s" % (settings.STATIC_URL, filename)
@@ -153,11 +145,6 @@ class FOIAFile(models.Model):
         return (
             self.is_doccloud() and self.doc_id and self.is_public() and self.pages > 0
         )
-
-    @property
-    def use_dc_legacy(self):
-        """Should we use DC legacy for this file?"""
-        return self.dc_legacy and settings.USE_DC_LEGACY
 
     class Meta:
         verbose_name = "FOIA Document File"

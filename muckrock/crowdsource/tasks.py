@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @task(name="muckrock.crowdsource.tasks.datum_per_page")
 def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
     """Create a crowdsource data item for each page of the document"""
+    # XXX redo this for beta
 
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
 
@@ -54,6 +55,7 @@ def import_doccloud_proj(
     crowdsource_pk, proj_id, metadata, doccloud_each_page, **kwargs
 ):
     """Import documents from a document cloud project"""
+    # XXX redo this for beta
 
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
     json_url = "https://www.documentcloud.org/api/projects/{}.json".format(proj_id)

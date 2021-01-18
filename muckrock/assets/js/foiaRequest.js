@@ -123,7 +123,6 @@ export function displayFile(file) {
     var docId = file.data('doc-id');
     var title = file.data('title') || 'Untitled';
     var pages = file.data('pages') || 0;
-    var legacy = file.data('legacy') === 'True';
     var url = file.data('url');
     var iframe = $("#viewer-iframe");
     var viewer = $("#viewer");
@@ -135,24 +134,13 @@ export function displayFile(file) {
     files.parent('li').removeClass('active');
     files.filter(file).parent('li').addClass('active');
 
-    if (legacy) {
-        /* DV is defined by the external DocumentCloud script at runtime. */
-        DV.load(
-            'https://www.documentcloud.org/documents/' + docId + '.js',
-            {sidebar: false, container: "#viewer"}
-        );
-        iframe.attr("src", "");
-        iframe.hide();
-        viewer.show();
-    } else {
-        // load new embed in the iframe
-        iframe.attr(
-            "src",
-            url + "/documents/" + docId + "/?embed=1&amp;title=1"
-        );
-        viewer.hide();
-        iframe.show();
-    }
+    // load new embed in the iframe
+    iframe.attr(
+        "src",
+        url + "/documents/" + docId + "/?embed=1&amp;title=1"
+    );
+    viewer.hide();
+    iframe.show();
 
     activeFile.addClass('visible');
     window.scrollTo(0, 0);

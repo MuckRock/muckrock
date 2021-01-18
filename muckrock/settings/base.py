@@ -409,8 +409,6 @@ MAILGUN_SERVER_NAME = "requests.muckrock.com"
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-DOCUMENTCLOUD_USERNAME = os.environ.get("DOCUMENTCLOUD_USERNAME")
-DOCUMENTCLOUD_PASSWORD = os.environ.get("DOCUMENTCLOUD_PASSWORD")
 DOCUMENTCLOUD_BETA_USERNAME = os.environ.get("DOCUMENTCLOUD_BETA_USERNAME")
 DOCUMENTCLOUD_BETA_PASSWORD = os.environ.get("DOCUMENTCLOUD_BETA_PASSWORD")
 
@@ -510,9 +508,6 @@ SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
 DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "http://www.dev.documentcloud.org")
 DOCCLOUD_API_URL = os.environ.get(
     "DOCCLOUD_API_URL", "http://api.dev.documentcloud.org"
-)
-DOCCLOUD_LEGACY_ASSET_URL = os.environ.get(
-    "DOCCLOUD_LEGACY_ASSET_URL", "https://assets.documentcloud.org/"
 )
 DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
@@ -724,5 +719,3 @@ DOCCLOUD_EXTENSIONS = os.environ.get("DOCCLOUD_EXTENSIONS", ".pdf,.doc,.docx").s
     ","
 )
 DOCCLOUD_PROCESSING_WAIT = int(os.environ.get("DOCCLOUD_PROCESSING_WAIT", 60))
-
-USE_DC_LEGACY = boolcheck(os.environ.get("USE_DC_LEGACY", True))
