@@ -277,21 +277,21 @@ def classify_status(task_pk, **kwargs):
 
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
-        doc_cloud_url = "http://www.documentcloud.org/api/documents/%s.json"
-        resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode("utf-8")))
+
+        dc_client = DocumentCloud(
+            username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+            password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+            base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+            auth_uri=f"{settings.SQUARELET_URL}/api/",
+        )
+
         try:
-            doc_cloud_json = resp.json()
-        except ValueError:
-            logger.warning("Doc Cloud error for %s: %s", doc_id, resp.content)
+            document = dc_client.documents.get(doc_id)
+        except DocumentCloudError as exc:
+            logger.warning("Doc Cloud error for %s: %s", doc_id, exc.error)
             return ""
-        if "error" in doc_cloud_json:
-            logger.warning(
-                "Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"]
-            )
-            return ""
-        text_url = doc_cloud_json["document"]["resources"]["text"]
-        resp = requests.get(text_url)
-        return resp.content.decode("utf-8")
+
+        return document.full_text
 
     def get_classifier():
         """Load the pickled classifier"""
