@@ -38,7 +38,7 @@ class ExemptionFilterSet(django_filters.FilterSet):
     jurisdiction = django_filters.ModelChoiceFilter(
         label="Jurisdiction",
         queryset=Jurisdiction.objects.filter(level__in=("s", "f"), hidden=False),
-        widget=autocomplete.ModelSelect2Multiple(
+        widget=autocomplete.ModelSelect2(
             url="jurisdiction-autocomplete",
             attrs={"data-placeholder": "Search for jurisdiction"},
             forward=(forward.Const(["s", "f"], "levels"),),
