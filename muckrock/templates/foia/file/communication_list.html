@@ -1,0 +1,18 @@
+{% extends "base_list.html" %}
+
+{% block list-header %}
+  <p><a href="{{ communication.get_absolute_url }}">{{ communication.foia }}</a></p>
+  <h1 class="list-title">Files</h1>
+{% endblock list-header %}
+
+{% block list-actions %}
+  {% include "foia/communication.html" with hide_options=True %}
+{% endblock list-actions %}
+
+{% block list-objects %}
+  <ul class="nostyle">
+      {% for file in object_list %}
+        <li>{% include "lib/file.html" %}</li>
+      {% endfor %}
+  </ul>
+{% endblock list-objects %}

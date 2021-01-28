@@ -907,7 +907,9 @@ class FOIARequest(models.Model):
         if reply_link:
             context["reply_link"] = self.get_agency_reply_link(self.email.email)
         if attm_link:
-            context["attm_link"] = "https://www.example.com/view_attachments/"
+            context["attm_link"] = settings.MUCKROCK_URL + reverse(
+                "communication-file-list", kwargs={"idx": comm.pk}
+            )
         if switch:
             first_request = self.communications.all()[0]
             context["original"] = {
