@@ -27,7 +27,7 @@ asynpool.PROC_ALIVE_TIMEOUT = 60.0
 DEBUG = False
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
+AWS_DEBUG = True
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
