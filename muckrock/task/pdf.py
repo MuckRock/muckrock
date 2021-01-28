@@ -51,6 +51,10 @@ class MailPDF(PDF):
         self.appeal = category == "a"
         self.switch = switch
         self.amount = amount
+        if amount:
+            self.page_limit = 6
+        else:
+            self.page_limit = 12
         super(MailPDF, self).__init__("P", "pt", "Letter")
 
     def header(self):
@@ -70,7 +74,7 @@ class MailPDF(PDF):
         self.line(72 / 2, 1.55 * 72, 8 * 72, 1.55 * 72)
         self.ln(38)
 
-    def generate(self):
+    def generate(self, attm_link=False):
         """Generate a PDF for a given FOIA"""
         self.configure()
         self._extra_generate()
@@ -84,6 +88,7 @@ class MailPDF(PDF):
             switch=self.switch,
             include_address=self.include_address,
             payment=self.amount is not None and self.amount > 0,
+            attm_link=attm_link,
         )
         # remove emoji's, as they break pdf rendering
         msg_body = emoji.get_emoji_regexp().sub("", msg_body)
@@ -106,9 +111,10 @@ class MailPDF(PDF):
         """Prepare the PDF to be sent by appending attachments"""
         # generate the pdf and merge all pdf attachments
         # keep track of any problematic attachments
-        self.generate()
         merger = PdfFileMerger(strict=False)
-        merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
+        attm_link = False
+        include_attms = True
+        total_pages = 0
         files = []
         for file_ in self.comm.files.all():
             if file_.get_extension() == "pdf":
@@ -116,15 +122,47 @@ class MailPDF(PDF):
                     pages = PdfFileReader(file_.ffile).getNumPages()
                     merger.append(file_.ffile)
                     files.append((file_, "attached", pages))
+                    total_pages += pages
                 except (PdfReadError, ValueError):
                     files.append((file_, "error", 0))
+                    attm_link = True
             else:
                 files.append((file_, "skipped", 0))
-        single_pdf = BytesIO()
-        try:
-            merger.write(single_pdf)
-        except PdfReadError:
-            return (None, None, files, None)
+                attm_link = True
+
+        if total_pages >= self.page_limit:
+            # if the attachments are already at or above the page limit
+            # we will not be able to include them
+            attm_link = True
+            include_attms = False
+
+        self.generate(attm_link)
+        base_pdf = BytesIO(self.output(dest="S").encode("latin-1"))
+        total_pages += self.page
+
+        if total_pages > self.page_limit:
+            # if the total pages includng the base communication, is over the page
+            # limit, do not include attachments, and regenerate the base communication
+            # with the attachment link if it was not already included
+            include_attms = False
+            if not attm_link:
+                total_pages -= self.page
+                # re-init the pdf
+                super(MailPDF, self).__init__("P", "pt", "Letter")
+                self.generate(attm_link=True)
+                base_pdf = BytesIO(self.output(dest="S").encode("latin-1"))
+                total_pages += self.page
+
+        if include_attms:
+            merger.merge(0, base_pdf)
+
+            single_pdf = BytesIO()
+            try:
+                merger.write(single_pdf)
+            except PdfReadError:
+                return (None, None, files, None)
+        else:
+            single_pdf = base_pdf
 
         # create the mail communication object
         address = address_override if address_override else self.comm.foia.address
@@ -138,7 +176,7 @@ class MailPDF(PDF):
         # return to begining of merged pdf before returning
         single_pdf.seek(0)
 
-        return (single_pdf, self.page, files, mail)
+        return (single_pdf, total_pages, files, mail)
 
 
 class SnailMailPDF(MailPDF):

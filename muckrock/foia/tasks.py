@@ -930,17 +930,11 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
 
     pdf = LobPDF(comm, category, switch, amount=amount)
-    prepared_pdf, page_count, files, mail = pdf.prepare(address)
-
-    if prepared_pdf:
-        # page count will be None if prepare_pdf is None
-        total_page_count = page_count + sum(f[2] for f in files)
-        file_error = any(f[1] in ("error", "skipped") for f in files)
+    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address)
 
     for test, reason in [
         (prepared_pdf is None, "pdf"),
         (total_page_count > 12, "page"),
-        (file_error, "attm"),
     ]:
         if test:
             create_snail_mail_task(reason)

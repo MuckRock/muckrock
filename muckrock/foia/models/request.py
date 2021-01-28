@@ -881,6 +881,7 @@ class FOIARequest(models.Model):
         self,
         comm,
         reply_link=False,
+        attm_link=False,
         switch=False,
         appeal=False,
         include_address=True,
@@ -905,6 +906,8 @@ class FOIARequest(models.Model):
             context["address"] = self.address.format(agency, appeal=appeal)
         if reply_link:
             context["reply_link"] = self.get_agency_reply_link(self.email.email)
+        if attm_link:
+            context["attm_link"] = "https://www.example.com/view_attachments/"
         if switch:
             first_request = self.communications.all()[0]
             context["original"] = {
