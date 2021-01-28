@@ -9,7 +9,7 @@ from django.views.generic import DetailView, ListView
 
 # MuckRock
 from muckrock.core.views import PaginationMixin
-from muckrock.foia.models import FOIAFile, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 
 
 @method_decorator(xframe_options_exempt, name="dispatch")
@@ -50,4 +50,38 @@ class FOIAFileListView(PaginationMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(FOIAFileListView, self).get_context_data(**kwargs)
         context["foia"] = self.get_foia()
+        return context
+
+
+class FOIACommunicationFileListView(PaginationMixin, ListView):
+    """Presents a paginated list of files for a single communication."""
+
+    model = FOIAFile
+    template_name = "foia/file/communication_list.html"
+    communication = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """Prevent unauthorized users from viewing the files."""
+        communication = self.get_communication()
+        if not communication.foia.has_perm(request.user, "view"):
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_communication(self):
+        """Returns the FOIA Communication for the files. Caches it as an attribute."""
+        if self.communication is None:
+            self.communication = get_object_or_404(
+                FOIACommunication, pk=self.kwargs.get("idx")
+            )
+        return self.communication
+
+    def get_queryset(self):
+        """Only files for one FOIA communication"""
+        communication = self.get_communication()
+        queryset = super().get_queryset()
+        return queryset.filter(comm=communication)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["communication"] = self.get_communication()
         return context

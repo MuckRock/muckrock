@@ -118,7 +118,7 @@ def upload_document_cloud(ffile_pk, **kwargs):
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
 
-    if ffile.dc_legacy:
+    if ffile.dc_legacy and settings.USE_DC_LEGACY:
         upload_document_cloud_legacy(ffile, change, **kwargs)
         return
 
@@ -360,7 +360,12 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         contact_info,
         kwargs,
     )
-    composer = FOIAComposer.objects.get(pk=composer_pk)
+    try:
+        composer = FOIAComposer.objects.get(pk=composer_pk)
+    except FOIAComposer.DoesNotExist:
+        # If the composer was deleted, just return
+        return
+
     logger.info("Fetched the composer")
     # the delayed submit is processing,
     # clear the delayed id, it is too late to cancel
@@ -512,10 +517,9 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             error_code=exc.args[0],
         )
         fatal_errors = {
-            (
-                "Phone number is not formatted correctly or invalid. "
-                "Please check the number and try again."
-            )
+            "Phone number is not formatted correctly or invalid. "
+            "Please check the number and try again.",
+            "Phone number is not permitted.",
         }
         if exc.args[0] in fatal_errors:
             comm.foia.fax.status = "error"
@@ -1037,17 +1041,11 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
 
     pdf = LobPDF(comm, category, switch, amount=amount)
-    prepared_pdf, page_count, files, mail = pdf.prepare(address)
-
-    if prepared_pdf:
-        # page count will be None if prepare_pdf is None
-        total_page_count = page_count + sum(f[2] for f in files)
-        file_error = any(f[1] in ("error", "skipped") for f in files)
+    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address)
 
     for test, reason in [
         (prepared_pdf is None, "pdf"),
         (total_page_count > 12, "page"),
-        (file_error, "attm"),
     ]:
         if test:
             create_snail_mail_task(reason)

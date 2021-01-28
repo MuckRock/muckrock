@@ -28,6 +28,7 @@ from hashlib import md5
 # Third Party
 from actstream.models import followers
 from constance import config
+from django_mailgun import MailgunAPIError
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
@@ -35,7 +36,12 @@ from taggit.managers import TaggableManager
 from muckrock import task
 from muckrock.accounts.models import Notification
 from muckrock.agency.utils import initial_communication_template
-from muckrock.communication.models import EmailAddress, EmailCommunication, PhoneNumber
+from muckrock.communication.models import (
+    EmailAddress,
+    EmailCommunication,
+    EmailError,
+    PhoneNumber,
+)
 from muckrock.core import utils
 from muckrock.core.utils import (
     TempDisconnectSignal,
@@ -763,7 +769,23 @@ class FOIARequest(models.Model):
             # atach all files from the latest communication
             comm.attach_files_to_email(msg)
 
-            msg.send(fail_silently=False)
+            try:
+                msg.send(fail_silently=False)
+            except MailgunAPIError as exc:
+                EmailError.objects.create(
+                    email=email_comm,
+                    datetime=timezone.now(),
+                    recipient=self.email,
+                    code=exc.args[0].status_code,
+                    error=exc.args[0].text,
+                    event="mailgunapi",
+                    reason="",
+                )
+                self.email.status = "error"
+                self.email.save()
+                task.models.ReviewAgencyTask.objects.ensure_one_created(
+                    agency=self.agency, resolved=False
+                )
 
         email_comm.set_raw_email(msg.message())
 
@@ -859,6 +881,7 @@ class FOIARequest(models.Model):
         self,
         comm,
         reply_link=False,
+        attm_link=False,
         switch=False,
         appeal=False,
         include_address=True,
@@ -883,6 +906,10 @@ class FOIARequest(models.Model):
             context["address"] = self.address.format(agency, appeal=appeal)
         if reply_link:
             context["reply_link"] = self.get_agency_reply_link(self.email.email)
+        if attm_link:
+            context["attm_link"] = settings.MUCKROCK_URL + reverse(
+                "communication-file-list", kwargs={"idx": comm.pk}
+            )
         if switch:
             first_request = self.communications.all()[0]
             context["original"] = {
@@ -1094,14 +1121,11 @@ class FOIARequest(models.Model):
 
     def proxy_reject(self):
         """Mark this request as being rejected due to a proxy being required"""
-        # pylint: disable=import-outside-toplevel
-        from muckrock.task.models import FlaggedTask
-
         # mark the agency as requiring a proxy going forward
         self.agency.requires_proxy = True
         self.agency.save()
         # mark to re-file with a proxy
-        FlaggedTask.objects.create(
+        task.models.FlaggedTask.objects.create(
             foia=self,
             category="proxy",
             text="This request was rejected as requiring a proxy; please refile"

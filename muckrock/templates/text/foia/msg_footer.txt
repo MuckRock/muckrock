@@ -3,6 +3,8 @@ E-mail (Preferred): {{ request.get_request_email }}
 {% if reply_link %}Upload documents directly: {{ reply_link }}
 Is this email coming to the wrong contact?  Something else wrong?  Use the above link to let us know.
 {% endif %}
+{% if attm_link %}View all attachments here: {{ attm_link }}
+{% endif %}
 For mailed responses, please address (see note):
 MuckRock News
 DEPT MR {{ request.pk }}

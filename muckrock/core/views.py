@@ -605,7 +605,8 @@ class MRAutocompleteView(autocomplete.Select2QuerySetView):
                     or_queries = [Q(**{orm_lookup: word}) for orm_lookup in orm_lookups]
                     word_conditions.append(reduce(operator.or_, or_queries))
                 op_ = operator.or_ if self.split_words == "or" else operator.and_
-                queryset = queryset.filter(reduce(op_, word_conditions))
+                if word_conditions:
+                    queryset = queryset.filter(reduce(op_, word_conditions))
             else:
                 or_queries = [
                     Q(**{orm_lookup: search_term}) for orm_lookup in orm_lookups

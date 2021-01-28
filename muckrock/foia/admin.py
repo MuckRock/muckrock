@@ -4,6 +4,7 @@ Admin registration for FOIA models
 
 # Django
 from django import forms
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
@@ -539,7 +540,7 @@ class FOIARequestAdmin(VersionAdmin):
 
         docs = FOIAFile.objects.filter(foia=idx, pages=0).get_doccloud()
         for doc in docs:
-            if doc.dc_legacy:
+            if doc.dc_legacy and settings.USE_DC_LEGACY:
                 set_document_cloud_pages_legacy.delay(doc.pk)
             else:
                 set_document_cloud_pages.delay(doc.pk)

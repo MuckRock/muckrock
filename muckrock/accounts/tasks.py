@@ -520,22 +520,17 @@ def store_statistics():
 
 
 @periodic_task(
-    run_every=crontab(day_of_week="sun", hour=1, minute=0),
+    run_every=crontab(hour=1, minute=0),
     time_limit=1800,
     soft_time_limit=1740,
     name="muckrock.accounts.tasks.db_cleanup",
 )
 def db_cleanup():
     """Call some management commands to clean up the database"""
-    step = 0
+    logger.info("Starting DB Clean up")
     try:
-        call_command("deleterevisions", "foia", days=180, verbosity=2)
-        step = 1
-        call_command("deleterevisions", "task", days=180, verbosity=2)
-        step = 2
-        call_command("deleterevisions", days=730, verbosity=2)
-        step = 3
         call_command("clearsessions", verbosity=2)
-        step = 4
+        call_command("deleterevisions", days=180, verbosity=2)
     except SoftTimeLimitExceeded:
-        logger.error("DB Clean up took too long, step %s", step)
+        logger.error("DB Clean up took too long")
+    logger.info("Ending DB Clean up")
