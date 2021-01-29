@@ -22,6 +22,11 @@ class MRSelect2Mixin:
         attrs.update(kwargs.pop("attrs", {}))
         super().__init__(*args, attrs=attrs, **kwargs)
 
+    def filter_choices_to_render(self, selected_choices):
+        """Filter out non-numeric choices"""
+        selected_choices = [c for c in selected_choices if c.isdecimal()]
+        return super().filter_choices_to_render(selected_choices)
+
 
 class ModelSelect2(MRSelect2Mixin, autocomplete.ModelSelect2):
     """MuckRock Model Select2"""
