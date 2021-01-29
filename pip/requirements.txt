@@ -146,7 +146,6 @@ six==1.15.0               # via bleach, cryptography, django-autocomplete-light,
 smart-open==1.6.0
 smartypants==1.8.6
 social-auth-app-django==4.0.0
-social-auth-core[openidconnect]==3.3.3
 sorl-thumbnail==12.6.3
 sqlparse==0.2.4           # via django, django-debug-toolbar
 stripe==1.75.0
