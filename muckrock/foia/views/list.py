@@ -285,9 +285,8 @@ class RequestList(MRSearchFilterListView):
                             datum_per_page.delay(crowdsource.pk, file_.doc_id, {})
                         elif file_.doc_id and not split:
                             crowdsource.data.create(
-                                url="https://www.documentcloud.org/documents/{}.html".format(
-                                    file_.doc_id
-                                )
+                                url="https://beta.documentcloud.org/documents/"
+                                f"{file_.doc_id}/"
                             )
         return "Files added to assignment"
 

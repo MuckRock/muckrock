@@ -20,26 +20,19 @@ from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
-import base64
 import csv
-import json
 import logging
 import os
 import os.path
 import re
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 from datetime import date, datetime, time, timedelta
 from random import randint
-from urllib.parse import quote_plus
 
 # Third Party
 import dill as pickle
 import lob
 import numpy as np
-import requests
 from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError
@@ -83,15 +76,6 @@ register_signal(client)
 lob.api_key = settings.LOB_SECRET_KEY
 
 
-def authenticate_documentcloud(request):
-    """This is just standard username/password encoding"""
-    username = settings.DOCUMENTCLOUD_USERNAME.encode()
-    password = settings.DOCUMENTCLOUD_PASSWORD.encode()
-    auth = base64.encodebytes(b"%s:%s" % (username, password))[:-1]
-    request.add_header("Authorization", "Basic %s" % auth.decode())
-    return request
-
-
 @task(
     ignore_result=True,
     time_limit=600,
@@ -100,7 +84,7 @@ def authenticate_documentcloud(request):
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
-def upload_document_cloud(ffile_pk, **kwargs):
+def upload_document_cloud(ffile_pk):
     """Upload a document to Document Cloud"""
 
     logger.info("Upload Doc Cloud: %s", ffile_pk)
@@ -117,10 +101,6 @@ def upload_document_cloud(ffile_pk, **kwargs):
 
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
-
-    if ffile.dc_legacy and settings.USE_DC_LEGACY:
-        upload_document_cloud_legacy(ffile, change, **kwargs)
-        return
 
     dc_client = DocumentCloud(
         username=settings.DOCUMENTCLOUD_BETA_USERNAME,
@@ -166,99 +146,6 @@ def upload_document_cloud(ffile_pk, **kwargs):
             lambda: set_document_cloud_pages.apply_async(
                 args=[ffile.pk], countdown=settings.DOCCLOUD_PROCESSING_WAIT
             )
-        )
-
-
-def upload_document_cloud_legacy(doc, change, **kwargs):
-    """Upload a document to legacy Document Cloud"""
-
-    logger.info("Upload Doc Cloud Legacy: %s", doc.pk)
-
-    if not doc.is_doccloud():
-        # not a file doc cloud supports, do not attempt to upload
-        return
-
-    params = {
-        "title": doc.title,
-        "source": doc.source,
-        "description": doc.description,
-        "access": doc.access,
-    }
-    foia = doc.get_foia()
-    if foia:
-        params["related_article"] = (
-            "https://www.muckrock.com" + doc.get_foia().get_absolute_url()
-        )
-    if change:
-        params["_method"] = "put"
-        url = "/documents/%s.json" % quote_plus(doc.doc_id)
-    else:
-        params["file"] = doc.ffile.url.replace("https", "http", 1)
-        url = "/upload.json"
-
-    params = urllib.parse.urlencode(params)
-    params = params.encode("utf8")
-    request = urllib.request.Request(
-        "https://www.documentcloud.org/api/%s" % url, params
-    )
-    request = authenticate_documentcloud(request)
-
-    try:
-        ret = urllib.request.urlopen(request).read()
-        if not change:
-            info = json.loads(ret)
-            doc.doc_id = info["id"]
-            doc.save()
-            set_document_cloud_pages_legacy.apply_async(args=[doc.pk], countdown=1800)
-    except (urllib.error.URLError, urllib.error.HTTPError) as exc:
-        logger.warning("Upload Doc Cloud error: %s %s", url, doc.pk)
-        countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
-        upload_document_cloud.retry(
-            args=[doc.pk], kwargs=kwargs, exc=exc, countdown=countdown
-        )
-
-
-@task(
-    ignore_result=True,
-    max_retries=10,
-    name="muckrock.foia.tasks.set_document_cloud_pages_legacy",
-)
-def set_document_cloud_pages_legacy(doc_pk, **kwargs):
-    """Get the number of pages from the document cloud server and save it locally"""
-
-    try:
-        doc = FOIAFile.objects.get(pk=doc_pk)
-    except FOIAFile.DoesNotExist:
-        return
-
-    if doc.pages or not doc.is_doccloud() or not doc.doc_id:
-        # already has pages set or not a doc cloud, just return
-        return
-
-    request = urllib.request.Request(
-        "https://www.documentcloud.org/api/documents/%s.json"
-        % quote_plus(doc.doc_id.encode("utf-8"))
-    )
-    request = authenticate_documentcloud(request)
-
-    try:
-        ret = urllib.request.urlopen(request).read()
-        info = json.loads(ret)
-        doc.pages = info["document"]["pages"]
-        doc.save()
-    except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            # if 404, this doc id is not on document cloud
-            # delete the doc_id which will cause it to get reuploaded by retry_stuck_documents
-            doc.doc_id = ""
-            doc.save()
-        else:
-            set_document_cloud_pages_legacy.retry(
-                args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
-            )
-    except urllib.error.URLError as exc:
-        set_document_cloud_pages_legacy.retry(
-            args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
         )
 
 
@@ -388,21 +275,21 @@ def classify_status(task_pk, **kwargs):
 
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
-        doc_cloud_url = "http://www.documentcloud.org/api/documents/%s.json"
-        resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode("utf-8")))
+
+        dc_client = DocumentCloud(
+            username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+            password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+            base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+            auth_uri=f"{settings.SQUARELET_URL}/api/",
+        )
+
         try:
-            doc_cloud_json = resp.json()
-        except ValueError:
-            logger.warning("Doc Cloud error for %s: %s", doc_id, resp.content)
+            document = dc_client.documents.get(doc_id)
+        except DocumentCloudError as exc:
+            logger.warning("Doc Cloud error for %s: %s", doc_id, exc.error)
             return ""
-        if "error" in doc_cloud_json:
-            logger.warning(
-                "Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"]
-            )
-            return ""
-        text_url = doc_cloud_json["document"]["resources"]["text"]
-        resp = requests.get(text_url)
-        return resp.content.decode("utf-8")
+
+        return document.full_text
 
     def get_classifier():
         """Load the pickled classifier"""
