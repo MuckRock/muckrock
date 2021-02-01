@@ -1,4 +1,4 @@
-FROM public.ecr.aws/alexaprizesharedresources/python:3.7-slim-buster
+FROM python:3.6-alpine
 
 ENV PYTHONUNBUFFERED 1
 

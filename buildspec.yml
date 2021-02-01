@@ -1,0 +1,28 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} > commit_hash
+      - echo "Building commit `cat commit_hash`"
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/django-media-browser:$DEPLOYMENT_ENV-latest || true
+  build:
+    commands:
+      - |
+        docker build \
+          --cache-from $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/django-media-browser:$DEPLOYMENT_ENV-latest \
+          --tag django-media-browser:$DEPLOYMENT_ENV-`cat commit_hash` .
+  post_build:
+    commands:
+      # For each valid region, need to push to ECR in each region
+      - export REGIONS=${REGIONS_LIST:-`aws ssm get-parameter --name "/bootstrap/account-regions" --query Parameter.Value --output text`}
+      - export IFS=","
+      - |
+        for REGION in $REGIONS; do
+          docker tag django-media-browser:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/django-media-browser:$DEPLOYMENT_ENV-`cat commit_hash`
+          docker tag django-media-browser:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/django-media-browser:$DEPLOYMENT_ENV-latest
+          eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/django-media-browser:$DEPLOYMENT_ENV-`cat commit_hash`
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/django-media-browser:$DEPLOYMENT_ENV-latest
+          aws --region $AWS_DEFAULT_REGION ssm put-parameter --overwrite --name "/deployments/django-media-browser/$DEPLOYMENT_ENV-latest" --value $DEPLOYMENT_ENV-`cat commit_hash` --type String
+        done

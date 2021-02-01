@@ -1,0 +1,425 @@
+{%- set routing = routing | default({}) | v1_setdefaults({"is_private": False, "is_public": True}) %}
+
+{%- macro generate_container_config(container) %}
+Name: {{ container.name }}
+Essential: {{ container.essential | default("true") }}
+{% if container.raw_image_path is defined -%}
+Image: "{{ container.raw_image_path }}"
+{%- else -%}
+Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/{{ service.image if service.image is defined else container.name }}:${ImageVersion}"
+{%- endif %}
+MemoryReservation: {{ container.memory_reservation|default(512) }}
+
+{%- if service.network_mode is defined and  service.network_mode == 'host' %}
+{%- else %}
+PortMappings:
+  {%- if container.port_mapping is defined %}
+  {%- for port, protocol in container.port_mapping.items() %}
+  - ContainerPort: {{ port|default(8080) }}
+    Protocol: {{ protocol|default(tcp) }}
+  {%- endfor %}
+  {%- else %}
+  - ContainerPort: {{ container.port|default(8080) }}
+  {%- endif %}
+{%- endif %}
+{%- if container.mount_points is defined %}
+MountPoints:
+  {% for mount_point in container.mount_points %}
+  - ContainerPath: {{ mount_point.containerPath }}
+    SourceVolume: {{ mount_point.sourceVolume }}
+    ReadOnly: {{ mount_point.readOnly }}
+  {% endfor %}
+{%- endif %}
+
+{%- if container.logs is defined and container.logs == "fluentd" %}
+LogConfiguration:
+  LogDriver: fluentd
+  Options:
+      fluentd-address: 172.17.0.1:24224
+      tag: "docker-container.{{ name }}-{{ environment }}.{{ '{{ .ID }}'  }}"
+      {% if container.log_options is defined %}{% for key, value in container.log_options.items() %}
+      {{ key }}: "{{ value }}"
+      {% endfor %}{% endif %}
+{%- elif container.logs is defined%}
+LogConfiguration:
+  LogDriver: {{ container.logs }}
+  {% if container.log_options is defined %}
+  Options:
+      {% for key, value in container.log_options.items() %}
+      {{ key }}: "{{ value }}"
+      {% endfor %}
+  {%- endif %}
+{%- else %}
+LogConfiguration:
+  LogDriver: awslogs
+  Options:
+      awslogs-group: !Ref AWS::StackName
+      awslogs-region: !Ref AWS::Region
+      awslogs-stream-prefix: {{ environment }}
+{% endif -%}
+{% if container.environment is defined %}
+Environment:
+  - Name: SQL_USER
+    Value: !Sub ${RdsUser}
+
+  - Name: SQL_PASSWORD
+    Value: !Sub ${RdsPass}
+
+  - Name: SQL_HOST
+    Value: !Sub ${RdsEndpoint}
+
+  - Name: SQL_DATABASE
+    Value: !Sub ${RdsDb}
+
+  - Name: SECRET_KEY
+    Value: !Sub ${SecretKey}
+
+  {% for env_key, env_var in container.environment.items() %}
+  - Name: {{ env_key }}
+    Value: "{{ env_var }}"
+  {% endfor %}
+{% endif %}
+{% if container.cfn_properties is defined %}
+{% for key, value in container.cfn_properties.items() %}
+{{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+{% endmacro -%}
+
+Description: >
+    This template deploys a pair of example ECS services from containers published in
+    Amazon EC2 Container Registry (Amazon ECR).
+
+Metadata:
+    Stackjack:
+        CanonicalTemplate: v1/cfn/shared/clusters/simple-ecs/service/service.template.yml
+
+Parameters:
+
+    ClusterName:
+        Description: the name of the cluster to host the service (should be something like 'trident-prod' not 'trident-prod-cluster')
+        Type: String
+
+    RdsUser:
+      Description: User for RDS
+      Type: 'AWS::SSM::Parameter::Value<String>'
+      Default: /muckrock/{{ environment }}/postgres-username
+
+    RdsPass:
+      Description: Password for RDS
+      Type: 'AWS::SSM::Parameter::Value<String>'
+      Default: /muckrock/{{ environment }}/postgres-password
+
+    RdsEndpoint:
+      Description: Endpoint for RDS
+      Type: 'AWS::SSM::Parameter::Value<String>'
+      Default: /muckrock/{{ environment }}/postgres-host
+
+    RdsDb:
+      Description: RDS DB for the admin to use
+      Type: 'AWS::SSM::Parameter::Value<String>'
+      Default: /muckrock/{{ environment }}/postgres-name
+
+    SecretKey:
+      Description: Secret key for Django admin
+      Type: 'AWS::SSM::Parameter::Value<String>'
+      Default: /muckrock/{{ environment }}/django-secret-key
+
+    {% if container.raw_image_path is not defined -%}
+    ImageVersion:
+      Description: Version to deploy
+      Type: 'AWS::SSM::Parameter::Value<String>'
+      Default: /deployments/{{ service.image if service.image is defined else name }}/{{ environment }}-latest
+    {% endif %}  
+
+Resources:
+    # If a load balancer is desired do not include 'no_load_balancer' in the config
+    # 'no_load_balancer: false' will still prevent the load balancer from creating
+    {% if no_load_balancer is not defined %}
+    {% if vpc_environment is not defined %}{% set vpc_environment=environment %}{% endif %}
+    {% if routing.import_target_group is not defined and routing.import_listener is not defined %}
+    # This security group defines who/where is allowed to access the Application Load Balancer.
+    # We've opened this up to the public internet (0.0.0.0/0)
+    LoadBalancerSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            VpcId:
+                Fn::ImportValue: !Sub "vpc-{{ vpc_environment }}-VpcId"
+            GroupDescription: Access to the load balancer that sits in front of ECS
+            SecurityGroupIngress:
+                # Allow access from anywhere to our ECS services
+                - CidrIp: 0.0.0.0/0
+                  IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                - CidrIp: 0.0.0.0/0
+                  IpProtocol: tcp
+                  FromPort: 443
+                  ToPort: 443
+
+    LoadBalancer:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties:
+            Name: !Ref AWS::StackName
+            {% if not routing.is_public or routing.is_private %}Scheme: internal{% endif %}
+            Subnets: !Split
+                - ","
+                - Fn::ImportValue: !Sub "vpc-{{ vpc_environment }}-{% if not routing.is_public or routing.is_private %}Private{% else %}Public{% endif %}SubnetIds-Group0"
+            SecurityGroups:
+                - !Ref LoadBalancerSecurityGroup
+
+    LoadBalancerListener:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            LoadBalancerArn: !Ref LoadBalancer
+            {% if routing.certificate is defined %}
+            Port: 443
+            Protocol: HTTPS
+            Certificates:
+              - CertificateArn: {{ routing.certificate }}
+            {% else %}
+            Port: 80
+            Protocol: HTTP
+            {% endif %}
+            DefaultActions:
+                - Type: forward
+                  TargetGroupArn: !Ref DefaultTargetGroup
+
+    DefaultTargetGroup:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        Properties:
+            {% if routing.target_group_name is not defined %}
+            Name: !Sub ${AWS::StackName}-default
+            {% endif %}
+            {% if routing.target_group_name is defined %}
+            Name: {{ routing.target_group_name }}
+            {% endif %}
+            VpcId:
+                Fn::ImportValue: !Sub "vpc-{{ vpc_environment }}-VpcId"
+            Port: 80
+            Protocol: HTTP
+            Matcher:
+                HttpCode: 200-299
+            HealthCheckPath: {{ service.health_check_path|default("/") }}
+            HealthCheckIntervalSeconds: {{ service.health_check_interval_seconds|default(10) }}
+            HealthyThresholdCount: {{ service.healthy_threshold_count|default(2) }}
+            UnhealthyThresholdCount: {{ service.unhealthy_threshold_count|default(6) }}
+            HealthCheckTimeoutSeconds: {{ service.health_check_timeout_seconds|default(5) }}
+            {% if service.target_group_attributes is defined and service.target_group_attributes is not none %}
+            TargetGroupAttributes:
+              {% for attr_key, attr_var in service.target_group_attributes.items() %}
+              - Key: {{ attr_key }}
+                Value: {{ attr_var }}
+              {% endfor %}
+            {% endif %}
+
+    ECSHostSecurityGroupIngress:
+        Type: AWS::EC2::SecurityGroupIngress
+        Properties:
+            Description: Rule to put in clusters security group to allow load balancer to reach ECS instances
+            SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+            IpProtocol: -1
+            GroupId:
+                Fn::ImportValue: !Sub "cluster-${ClusterName}-ECSHostSecurityGroup"
+
+    {% elif routing.import_listener is defined %}
+    TargetGroup:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        Properties:
+            {% if routing.target_group_name is defined %}Name: {{ routing.target_group_name }}{% endif %}
+            VpcId:
+                Fn::ImportValue: !Sub "vpc-{{ vpc_environment }}-VpcId"
+            Port: 80
+            Protocol: HTTP
+            Matcher:
+                HttpCode: 200-299
+            HealthCheckPath: {{ routing.health_check_path|default("/") }}
+            HealthCheckIntervalSeconds: {{ routing.health_check_interval_seconds|default(10) }}
+            HealthyThresholdCount: {{ routing.healthy_threshold_count|default(2) }}
+            UnhealthyThresholdCount: {{ routing.unhealthy_threshold_count|default(6) }}
+            HealthCheckTimeoutSeconds: {{ routing.health_check_timeout_seconds|default(5) }}
+
+    ListenerRule:
+        Type: AWS::ElasticLoadBalancingV2::ListenerRule
+        Properties:
+            Actions:
+                - Type: forward
+                  TargetGroupArn: !Ref TargetGroup
+            {% if routing.dns is defined %}
+            Conditions:
+                - Field: host-header
+                  Values:
+                    - {{ routing.dns.domain }}
+            {% endif %}
+            ListenerArn: !ImportValue {{ routing.import_listener }}
+            Priority: {{ routing.priority }}
+    {% endif %}
+    {% endif %}
+    Service:
+        Type: AWS::ECS::Service
+        {% if routing.import_target_group is not defined and routing.import_listener is not defined %}
+        {% if no_load_balancer is not defined %}
+        DependsOn: LoadBalancerListener
+        {% endif %}
+        {% endif %}
+        Properties:
+            Cluster: !Ref ClusterName
+            {% if no_load_balancer is not defined %}
+            Role: !Ref ServiceRole
+            {%- endif %}
+            {%- if service.strategy is not defined or service.strategy != "DAEMON"  %}
+            DesiredCount: {{ service.default_scale|default(2) }}
+            {%- endif%}
+            TaskDefinition: !Ref TaskDefinition
+            ServiceName: {{ name }}-{{ environment }}
+            {% if no_load_balancer is not defined %}
+            LoadBalancers:
+                - ContainerName: "{{ container.name }}"
+                  ContainerPort: {{ container.port|default(8080) }}
+                  TargetGroupArn: {% if routing.import_target_group is defined -%}
+                    !ImportValue {{ routing.import_target_group }}
+                    {%- elif routing.import_listener is defined -%}
+                    !Ref TargetGroup
+                    {%- else -%}
+                    !Ref DefaultTargetGroup
+                    {%- endif %}
+            {%- endif %}
+            {%- if service.strategy is defined %}
+            SchedulingStrategy: {{ service.strategy }}
+            {%- endif %}
+            {% if service.cfn_properties is defined %}
+            {% for key, value in service.cfn_properties.items() %}
+            {{ key }}: {{ value }}
+            {% endfor %}
+            {% endif %}
+
+    TaskDefinition:
+        Type: AWS::ECS::TaskDefinition
+        Properties:
+            Family: {{ name }}-{{ environment }}
+            {% if service.task_role is defined %}
+            TaskRoleArn: {% if service.task_role.import_role is defined -%}
+                {%- if service.task_role.import_role[:3] != "arn" %}!ImportValue{%- endif -%}{{- service.task_role.import_role -}}
+                {{- service.task_role.import_role -}}{%- else -%}!Ref TaskRole{%- endif -%}
+            {%- endif %}
+            {% if  service.network_mode is defined %}
+            NetworkMode: {{  service.network_mode }}
+            {%- endif %}
+            ContainerDefinitions:
+                -
+                  {{ generate_container_config(container) | indent(18) }}
+                {% if other_containers is defined %}
+                {%- for o_container in other_containers %}
+                -
+                  {{ generate_container_config(o_container) | indent(18) }}
+                {%- endfor %}
+                {% endif %}
+            {%- if container.volumes is defined %}
+            Volumes:
+            {% for volume in container.volumes %}
+              -
+                Host:
+                  SourcePath: {{ volume.host.sourcePath }}
+                Name: {{ volume.name }}
+            {% endfor %}
+            {%- endif %}
+
+    CloudWatchLogsGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Ref AWS::StackName
+            RetentionInDays: 90
+    {% if no_load_balancer is not defined %}
+    # This IAM Role grants the service access to register/unregister with the
+    # Application Load Balancer (ALB). It is based on the default documented here:
+    # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service_IAM_role.html
+    ServiceRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Sub ecs-service-${AWS::StackName}-${AWS::Region}
+            Path: /
+            AssumeRolePolicyDocument:
+                Statement:
+                - Action:
+                  - sts:AssumeRole
+                  Effect: Allow
+                  Principal:
+                    Service:
+                    - ecs.amazonaws.com
+
+            Policies:
+                - PolicyName: !Sub ecs-service-${AWS::StackName}-${AWS::Region}
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                      - Action:
+                        - ec2:AuthorizeSecurityGroupIngress
+                        - ec2:Describe*
+                        - elasticloadbalancing:DeregisterInstancesFromLoadBalancer
+                        - elasticloadbalancing:Describe*
+                        - elasticloadbalancing:RegisterInstancesWithLoadBalancer
+                        - elasticloadbalancing:DeregisterTargets
+                        - elasticloadbalancing:DescribeTargetGroups
+                        - elasticloadbalancing:DescribeTargetHealth
+                        - elasticloadbalancing:RegisterTargets
+                        Resource: '*'
+                        Effect: Allow
+    {%- endif %}
+    {% if service.task_role is defined and not service.task_role.import_role is defined -%}
+    TaskRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Sub service-task-role-${AWS::StackName}-${AWS::Region}
+            Path: /
+            AssumeRolePolicyDocument:
+                Statement:
+                - Action:
+                  - sts:AssumeRole
+                  Effect: Allow
+                  Principal:
+                    Service:
+                    - ecs-tasks.amazonaws.com
+
+            Policies:
+                - PolicyName: !Sub service-task-role-policy-${AWS::StackName}-${AWS::Region}
+                  PolicyDocument:
+                      Version: '2012-10-17'
+                      Statement:
+                      {% for policy in service.task_role.policies %}
+                      - Action:
+                            {% for action in policy.actions -%}
+                            - "{{ action }}"
+                            {% endfor %}
+                        Resource:
+                            {% if policy.resources is defined -%}
+                            {% for resource in policy.resources -%}
+                            - "{{ resource }}"
+                            {% endfor %}
+                            {% else -%}
+                            - "*"
+                            {%- endif %}
+                        Effect: Allow
+                      {%- endfor %}
+    {% endif %}
+    {% if routing.dns is defined %}
+    DNSRecord:
+        Type: AWS::Route53::RecordSetGroup
+        Properties:
+            HostedZoneName: {{ routing.dns.zone_apex }}
+            RecordSets:
+                - Name: {{ routing.dns.domain }}
+                  Type: A
+                  AliasTarget:
+                      HostedZoneId: {% if routing.import_target_group is defined or routing.import_listener is defined %}!ImportValue {{ routing.dns.load_balancer_zone_id }}{% else %}!GetAtt LoadBalancer.CanonicalHostedZoneID{% endif%}
+                      DNSName: {% if routing.import_target_group is defined or routing.import_listener is defined %}!ImportValue {{ routing.dns.load_balancer_dns }}{% else %}!GetAtt LoadBalancer.DNSName{% endif%}
+    {% endif %}
+
+{% if routing.import_target_group is not defined and routing.import_listener is not defined %}
+
+{% if no_load_balancer is not defined %}
+Outputs:
+    ServiceUrl:
+        Description: The URL endpoint for the service
+        Value: LoadBalancer.DNSName
+{% endif %}
+{% endif %}

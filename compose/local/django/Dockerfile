@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM python:3.8
+FROM public.ecr.aws/alexaprizesharedresources/python:3.7-slim-buster
 
 ENV PYTHONUNBUFFERED 1
 
