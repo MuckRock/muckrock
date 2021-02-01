@@ -1,8 +1,8 @@
 template: v1/cfn/shared/clusters/simple-ecs/image.template.yml
-stack_name: django-media-browser-image
+stack_name: muckrock-image
 region: us-east-1
 context:
-  name: django-media-browser
+  name: muckrock
   environment: image
   # Enable this to add support for quay.io legacy images
   # enable_legacy_quay_auth: true
