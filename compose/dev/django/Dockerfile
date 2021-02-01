@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM public.ecr.aws/bitnami/python:3.8.7-prod
 
 ENV PYTHONUNBUFFERED 1
 

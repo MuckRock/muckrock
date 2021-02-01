@@ -1,4 +1,4 @@
-FROM public.ecr.aws/alexaprizesharedresources/python:3.7-slim-buster
+FROM public.ecr.aws/bitnami/python:3.8.7-prod
 
 ENV PYTHONUNBUFFERED 1
 
