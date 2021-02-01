@@ -28,13 +28,11 @@ import re
 import sys
 from datetime import date, datetime, time, timedelta
 from random import randint
-from urllib.parse import quote_plus
 
 # Third Party
 import dill as pickle
 import lob
 import numpy as np
-import requests
 from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError

@@ -9,10 +9,8 @@ from django.conf import settings
 # Standard Library
 import csv
 import logging
-from urllib.parse import quote_plus
 
 # Third Party
-import requests
 from documentcloud import DocumentCloud
 from documentcloud.exceptions import DocumentCloudError
 
