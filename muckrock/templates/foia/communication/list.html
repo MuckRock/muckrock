@@ -1,0 +1,9 @@
+{% extends "base_list.html" %}
+
+{% block list-objects %}
+  <div class="communications-list">
+    {% for communication in object_list %}
+      {% include "foia/communication.html" with hide_options=True show_foia=True %}
+    {% endfor %}
+  </div>
+{% endblock list-objects %}

@@ -84,6 +84,7 @@
                 <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
                 {% if user.is_staff %}
                   <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
+                  <li><a class="nav-item" href="{% url 'communication-list' %}">Communications</a></li>
                 {% endif %}
               </ul>
             </li>
