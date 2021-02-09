@@ -9,7 +9,6 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile.deploy
-
     image: muckrock_local_django
     depends_on:
       - muckrock_redis
