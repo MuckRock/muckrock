@@ -1,0 +1,113 @@
+version: "2"
+
+volumes:
+  postgres_data_local: {}
+  postgres_backup_local: {}
+
+services:
+  muckrock_django: &django
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile.deploy
+      # args:
+      #   AWS_ACCESS_KEY_ID: ASIAYHTOK4GFON3H7SVN
+      #   AWS_SECRET_ACCESS_KEY: L5qQwGyP1ZOPP2hf5UzxN6PKuw1sIo8fNkAF7Akq
+    image: muckrock_local_django
+    depends_on:
+      - muckrock_redis
+    # - muckrock_postgres
+    volumes:
+      - .:/app
+      - ~/.netrc:/root/.netrc
+    environment:
+      - IPYTHONDIR=/app/.ipython
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    # expose:
+    #   - "5000"
+    command: /start
+    # networks:
+    #   default:
+    #     aliases:
+    #       - dev.muckrock.com
+    #       - dev.foiamachine.org
+    #   squarelet_default:
+    #     aliases:
+    #       - dev.muckrock.com
+    #       - dev.foiamachine.org
+    #   redis-net:
+    #     aliases: []
+    ports:
+      - "5000:5000"
+      - "5005:5005" # for debugging locally
+  # muckrock_postgres:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/production/postgres/Dockerfile
+  #   image: muckrock_production_postgres
+  #   volumes:
+  #     - postgres_data_local:/var/lib/postgresql/data
+  #     - postgres_backup_local:/backups
+  #   env_file:
+  #     - ./.envs/.local/.postgres
+  #   networks:
+  #     default:
+  #       aliases: []
+  muckrock_redis:
+    image: redis:3.2
+    # networks:
+    #   redis-net:
+    #     aliases: []
+  # muckrock_celeryworker:
+  #   <<: *django
+  #   image: muckrock_local_celeryworker
+  #   depends_on:
+  #     - muckrock_redis
+  #   #   - muckrock_postgres
+  #   command: /start-celeryworker
+  #   environment:
+  #     - C_FORCE_ROOT=true
+  #   networks:
+  #     redis-net:
+  #       aliases: []
+  #   ports:
+  #     - "5001:5001"
+  # muckrock_celerybeat:
+  #   <<: *django
+  #   image: muckrock_local_celerybeat
+  #   depends_on:
+  #     - muckrock_redis
+  #   #   - muckrock_postgres
+  #   command: /start-celerybeat
+  #   networks:
+  #     redis-net:
+  #       aliases: []
+  #   ports:
+  #     - "5002:5002"
+  # nginx:
+  #   restart: always
+  #   container_name: nginx_server
+  #   build:
+  #     context: ./compose/production/nginx/
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - muckrock_django
+  #   ports:
+  #     - "8081:8081"
+  #   networks:
+  #     default:
+  #       aliases:
+  #         - dev.muckrock.com
+  #         - dev.foiamachine.org
+  #     squarelet_default:
+  #       aliases:
+  #         - dev.muckrock.com
+  #         - dev.foiamachine.org
+  #     redis-net:
+  #       aliases: []
+# networks:
+#   squarelet_default:
+#     external: true
+#   redis-net:
+#     external: false

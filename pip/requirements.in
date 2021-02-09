@@ -6,6 +6,7 @@ boto # Used to access AWS
 celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
+dj_database_url # Used to read in url of remote DB
 django-activity-stream # Used for notifications
 django-autocomplete-light==3.7.0.dev0 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery

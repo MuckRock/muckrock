@@ -12,6 +12,9 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+# Third Party
+import dj_database_url
+
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -155,7 +158,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
-                #'django.template.context_processors.i18n',
+                # 'django.template.context_processors.i18n',
                 "django.template.context_processors.media",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
@@ -443,24 +446,26 @@ PUBLICATION_NAME = "MuckRock"
 PUBLICATION_TIME_ZONE = "-05:00"
 
 # Register database schemes in URLs.
-urllib.parse.uses_netloc.append("postgres")
+# urllib.parse.uses_netloc.append("postgres")
 
 url = urllib.parse.urlparse(
     os.environ.get("DATABASE_URL", "postgres://vagrant@localhost/muckrock")
 )
 
 # Update with environment configuration.
-DATABASES = {
-    "default": {
-        "NAME": url.path[1:],
-        "USER": url.username,
-        "PASSWORD": url.password,
-        "HOST": url.hostname,
-        "PORT": url.port,
-        "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "NAME": url.path[1:],
+#         "USER": url.username,
+#         "PASSWORD": url.password,
+#         "HOST": url.hostname,
+#         "PORT": url.port,
+#         "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#     }
+# }
+DATABASES = {}
+DATABASES["default"] = dj_database_url.config(conn_max_age=600)
 
 CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
@@ -490,6 +495,7 @@ REST_FRAMEWORK = {
 MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
 
 if "ALLOWED_HOSTS" in os.environ:
+    print()
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
     ALLOWED_HOSTS = []
