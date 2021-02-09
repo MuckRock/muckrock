@@ -13,7 +13,6 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Prefetch
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import DetailView
@@ -73,8 +72,6 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
 from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.qanda.forms import QuestionForm
-from muckrock.qanda.models import Question
 from muckrock.tags.models import Tag
 from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask, Task
 
@@ -214,7 +211,6 @@ class Detail(DetailView):
         )
         context["note_form"] = FOIANoteForm()
         context["access_form"] = FOIAAccessForm()
-        context["question_form"] = QuestionForm(user=user, initial={"foia": foia})
         context["crowdfund_form"] = CrowdfundForm(
             initial={
                 "name": "Crowdfund Request: %s" % str(foia),
@@ -323,7 +319,6 @@ class Detail(DetailView):
             "projects": self._projects,
             "follow_up": self._follow_up,
             "thanks": self._thank,
-            "question": self._question,
             "add_note": self._add_note,
             "flag": self._flag,
             "delete": self._delete,
@@ -396,24 +391,6 @@ class Detail(DetailView):
             )
             for task in response_tasks:
                 task.resolve(request.user)
-        return redirect(foia.get_absolute_url() + "#")
-
-    def _question(self, request, foia):
-        """Handle asking a question"""
-        text = request.POST.get("text")
-        has_perm = foia.has_perm(request.user, "change")
-        if has_perm and text:
-            title = "Question about request: %s" % foia.title
-            question = Question.objects.create(
-                user=request.user,
-                title=title,
-                slug=slugify(title),
-                foia=foia,
-                question=text,
-                date=timezone.now(),
-            )
-            messages.success(request, "Your question has been posted.")
-            return redirect(question)
         return redirect(foia.get_absolute_url() + "#")
 
     def _add_note(self, request, foia):

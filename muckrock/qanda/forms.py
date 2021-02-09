@@ -6,33 +6,7 @@ Forms for Q&A application
 from django import forms
 
 # MuckRock
-from muckrock.foia.models import FOIARequest
-from muckrock.qanda.models import Answer, Question
-
-
-class QuestionForm(forms.ModelForm):
-    """A form for a Question"""
-
-    foia = forms.ModelChoiceField(
-        queryset=None, required=False, widget=forms.HiddenInput()
-    )
-
-    def __init__(self, *args, user=None, **kwargs):
-        super(QuestionForm, self).__init__(*args, **kwargs)
-        self.fields["foia"].queryset = FOIARequest.objects.get_viewable(user)
-
-    class Meta:
-        model = Question
-        fields = ["title", "question", "foia"]
-        widgets = {
-            "question": forms.Textarea(
-                attrs={
-                    "placeholder": "Write your question here",
-                    "class": "prose-editor",
-                }
-            )
-        }
-        help_texts = {"question": "Markdown syntax supported"}
+from muckrock.qanda.models import Answer
 
 
 class AnswerForm(forms.ModelForm):

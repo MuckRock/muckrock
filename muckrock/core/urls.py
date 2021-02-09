@@ -58,7 +58,6 @@ router.register(r"foia", muckrock.foia.viewsets.FOIARequestViewSet, "api-foia")
 router.register(
     r"exemption", muckrock.jurisdiction.viewsets.ExemptionViewSet, "api-exemption"
 )
-router.register(r"question", muckrock.qanda.views.QuestionViewSet, "api-question")
 router.register(
     r"statistics", muckrock.accounts.viewsets.StatisticsViewSet, "api-statistics"
 )
