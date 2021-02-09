@@ -12,6 +12,8 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+import dj_database_url
+
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -127,8 +129,10 @@ AWS_HEADERS = {
     "Cache-Control": "max-age=94608000",
 }
 AWS_DEFAULT_ACL = "public-read"
-AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get("AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
-AWS_S3_MIN_PART_SIZE = int(os.environ.get("AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
+AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get(
+    "AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
+AWS_S3_MIN_PART_SIZE = int(os.environ.get(
+    "AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
 
 TEMPLATES = [
     {
@@ -139,7 +143,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
-                #'django.template.context_processors.i18n',
+                # 'django.template.context_processors.i18n',
                 "django.template.context_processors.media",
                 "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
@@ -261,7 +265,8 @@ def show_toolbar(request):
     return False
 
 
-DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, "JQUERY_URL": ""}
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": show_toolbar, "JQUERY_URL": ""}
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
@@ -390,7 +395,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
+AWS_STORAGE_BUCKET_NAME = os.environ.get(
+    "AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
 AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
     "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
 )
@@ -429,24 +435,26 @@ PUBLICATION_NAME = "MuckRock"
 PUBLICATION_TIME_ZONE = "-05:00"
 
 # Register database schemes in URLs.
-urllib.parse.uses_netloc.append("postgres")
+# urllib.parse.uses_netloc.append("postgres")
 
 url = urllib.parse.urlparse(
     os.environ.get("DATABASE_URL", "postgres://vagrant@localhost/muckrock")
 )
 
 # Update with environment configuration.
-DATABASES = {
-    "default": {
-        "NAME": url.path[1:],
-        "USER": url.username,
-        "PASSWORD": url.password,
-        "HOST": url.hostname,
-        "PORT": url.port,
-        "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "NAME": url.path[1:],
+#         "USER": url.username,
+#         "PASSWORD": url.password,
+#         "HOST": url.hostname,
+#         "PORT": url.port,
+#         "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
+#         "ENGINE": "django.db.backends.postgresql_psycopg2",
+#     }
+# }
+DATABASES = {}
+DATABASES["default"] = dj_database_url.config(conn_max_age=600)
 
 CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
@@ -475,6 +483,7 @@ REST_FRAMEWORK = {
 }
 
 if "ALLOWED_HOSTS" in os.environ:
+    print()
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
     ALLOWED_HOSTS = []
@@ -489,7 +498,8 @@ SOUTH_MIGRATION_MODULES = {
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 ROBOTS_SITE_BY_REQUEST = True
 
-PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, "../requirements.txt")
+PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(
+    SITE_ROOT, "../requirements.txt")
 
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = "muckrock.tags.models.parse_tags"
@@ -505,9 +515,11 @@ ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
 MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.muckrock.com")
-FOIAMACHINE_URL = os.environ.get("FOIAMACHINE_URL", "http://dev.foiamachine.org")
+FOIAMACHINE_URL = os.environ.get(
+    "FOIAMACHINE_URL", "http://dev.foiamachine.org")
 SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
-DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "http://www.dev.documentcloud.org")
+DOCCLOUD_URL = os.environ.get(
+    "DOCCLOUD_URL", "http://www.dev.documentcloud.org")
 DOCCLOUD_API_URL = os.environ.get(
     "DOCCLOUD_API_URL", "http://api.dev.documentcloud.org"
 )
@@ -521,7 +533,8 @@ DOCCLOUD_ASSET_URL = os.environ.get(
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r"^/api(_v\d)?/.*$"
 # Limit CORS origin to just FOIA machine
-CORS_ORIGIN_REGEX_WHITELIST = (r"^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$",)
+CORS_ORIGIN_REGEX_WHITELIST = (
+    r"^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$",)
 CORS_ALLOW_CREDENTIALS = True
 
 # Django Filter settings
@@ -544,7 +557,8 @@ ALLOWED_FILE_MIMES = [
     "text/html",
     "text/plain",
 ]
-ALLOWED_FILE_EXTS = ["pdf", "jpg", "png", "tif", "doc", "docx", "odt", "html", "txt"]
+ALLOWED_FILE_EXTS = ["pdf", "jpg", "png",
+                     "tif", "doc", "docx", "odt", "html", "txt"]
 
 # for django-phonenumber-field
 PHONENUMBER_DB_FORMAT = "INTERNATIONAL"
@@ -657,7 +671,8 @@ HIJACK_AUTHORIZE_STAFF_TO_HIJACK_STAFF = True
 
 MULTI_REVIEW_AMOUNT = 2
 
-MIXPANEL_TOKEN = os.environ.get("MIXPANEL_TOKEN", "f0342a5341ddad56dfa73505aa604c74")
+MIXPANEL_TOKEN = os.environ.get(
+    "MIXPANEL_TOKEN", "f0342a5341ddad56dfa73505aa604c74")
 
 ZOHO_TOKEN = os.environ.get("ZOHO_TOKEN")
 ZOHO_URL = os.environ.get("ZOHO_URL", "https://desk.zoho.com/api/v1/")
@@ -670,7 +685,8 @@ ZOHO_DEPT_IDS = {
 
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_SQUARELET_KEY = os.environ.get("SQUARELET_KEY")
-SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get("SQUARELET_SECRET")
+SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get(
+    "SQUARELET_SECRET")
 SOCIAL_AUTH_SQUARELET_SCOPE = ["uuid", "organizations", "preferences"]
 SOCIAL_AUTH_SQUARELET_AUTH_EXTRA_ARGUMENTS = {"intent": "muckrock"}
 SOCIAL_AUTH_TRAILING_SLASH = False
@@ -701,7 +717,8 @@ THUMBNAIL_PRESERVE_FORMAT = True
 THUMBNAIL_PRESERVE_EXTENSIONS = ("png",)
 
 # Google Tag Manager
-USE_GOOGLE_TAG_MANAGER = boolcheck(os.environ.get("USE_GOOGLE_TAG_MANAGER", False))
+USE_GOOGLE_TAG_MANAGER = boolcheck(
+    os.environ.get("USE_GOOGLE_TAG_MANAGER", False))
 
 # Plaid allows programtic access to our bank account transactions
 PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")
