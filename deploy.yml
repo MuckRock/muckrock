@@ -25,7 +25,12 @@ services:
     #   - "5000"
     command: /start
     ports:
-      - "5000:5000"
+      # the application runs on 0.0.0.0:80
+      # in order to access it from a browser we have to set the access here
+      # I always remember this with a phrase I made up, "looking outside in",
+      # where the left most port is the outside (your browser aka localhost:5000)
+      # and the inside port is what the app is serving, in this case 0.0.0.0:80
+      - "5000:80"
       - "5005:5005" # for debugging locally
   # muckrock_postgres:
   #   build:
