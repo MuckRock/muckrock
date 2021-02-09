@@ -3,9 +3,7 @@
 set -o errexit
 # set -o pipefail
 set -o nounset
-# export AWS_ACCESS_KEY_ID=AKIAYHTOK4GFICBXWKOZ
-# export AWS_SECRET_ACCESS_KEY=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
 # python /app/manage.py collectstatic --noinput
 touch /app/gunicorn.error.log
 touch /app/gunicorn.access.log
-/usr/local/bin/gunicorn --bind 127.0.0.1:5000 -c file:config/gunicorn.conf.py --log-level 'debug' muckrock.wsgi:application
+/usr/local/bin/gunicorn --bind 127.0.0.1:5005 -c file:config/gunicorn.conf.py --log-level 'debug' muckrock.wsgi:application
