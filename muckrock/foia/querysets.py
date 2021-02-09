@@ -101,8 +101,8 @@ class FOIARequestQuerySet(models.QuerySet):
             )
             return self.filter(query)
         else:
-            # anonymous user, filter out embargoes
-            return self.exclude(embargo=True)
+            # anonymous user, filter out embargoes and noindex requests
+            return self.exclude(embargo=True).exclude(noindex=True)
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
