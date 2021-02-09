@@ -746,6 +746,8 @@ class ExportCsv(AsyncFileDownloadTask):
         super(ExportCsv, self).__init__(
             user_pk, "".join(str(pk) for pk in foia_pks[:100])
         )
+        if self.user.is_staff:
+            self.fields += ((lambda f: f.get_request_email(), "Request Email"),)
         self.foias = (
             FOIARequest.objects.filter(pk__in=foia_pks)
             .select_related("composer__user", "agency__jurisdiction__parent")
