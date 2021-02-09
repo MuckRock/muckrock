@@ -9,9 +9,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile.deploy
-      # args:
-      #   AWS_ACCESS_KEY_ID: ASIAYHTOK4GFON3H7SVN
-      #   AWS_SECRET_ACCESS_KEY: L5qQwGyP1ZOPP2hf5UzxN6PKuw1sIo8fNkAF7Akq
+
     image: muckrock_local_django
     depends_on:
       - muckrock_redis
