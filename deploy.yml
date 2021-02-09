@@ -24,17 +24,6 @@ services:
     # expose:
     #   - "5000"
     command: /start
-    # networks:
-    #   default:
-    #     aliases:
-    #       - dev.muckrock.com
-    #       - dev.foiamachine.org
-    #   squarelet_default:
-    #     aliases:
-    #       - dev.muckrock.com
-    #       - dev.foiamachine.org
-    #   redis-net:
-    #     aliases: []
     ports:
       - "5000:5000"
       - "5005:5005" # for debugging locally
@@ -48,9 +37,6 @@ services:
   #     - postgres_backup_local:/backups
   #   env_file:
   #     - ./.envs/.local/.postgres
-  #   networks:
-  #     default:
-  #       aliases: []
   muckrock_redis:
     image: redis:3.2
     # networks:
@@ -65,9 +51,6 @@ services:
   #   command: /start-celeryworker
   #   environment:
   #     - C_FORCE_ROOT=true
-  #   networks:
-  #     redis-net:
-  #       aliases: []
   #   ports:
   #     - "5001:5001"
   # muckrock_celerybeat:
@@ -77,9 +60,6 @@ services:
   #     - muckrock_redis
   #   #   - muckrock_postgres
   #   command: /start-celerybeat
-  #   networks:
-  #     redis-net:
-  #       aliases: []
   #   ports:
   #     - "5002:5002"
   # nginx:
@@ -92,19 +72,3 @@ services:
   #     - muckrock_django
   #   ports:
   #     - "8081:8081"
-  #   networks:
-  #     default:
-  #       aliases:
-  #         - dev.muckrock.com
-  #         - dev.foiamachine.org
-  #     squarelet_default:
-  #       aliases:
-  #         - dev.muckrock.com
-  #         - dev.foiamachine.org
-  #     redis-net:
-  #       aliases: []
-# networks:
-#   squarelet_default:
-#     external: true
-#   redis-net:
-#     external: false
