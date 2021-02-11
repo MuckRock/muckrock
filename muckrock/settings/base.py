@@ -442,19 +442,17 @@ url = urllib.parse.urlparse(
 )
 
 # Update with environment configuration.
-# DATABASES = {
-#     "default": {
-#         "NAME": url.path[1:],
-#         "USER": url.username,
-#         "PASSWORD": url.password,
-#         "HOST": url.hostname,
-#         "PORT": url.port,
-#         "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#     }
-# }
-DATABASES = {}
-DATABASES["default"] = dj_database_url.config(conn_max_age=600)
+DATABASES = {
+    "default": {
+        "NAME": url.path[1:],
+        "USER": url.username,
+        "PASSWORD": url.password,
+        "HOST": url.hostname,
+        "PORT": url.port,
+        "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+    }
+}
 
 CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
@@ -483,7 +481,6 @@ REST_FRAMEWORK = {
 }
 
 if "ALLOWED_HOSTS" in os.environ:
-    print()
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
     ALLOWED_HOSTS = []
@@ -743,3 +740,4 @@ DOCCLOUD_EXTENSIONS = os.environ.get("DOCCLOUD_EXTENSIONS", ".pdf,.doc,.docx").s
 DOCCLOUD_PROCESSING_WAIT = int(os.environ.get("DOCCLOUD_PROCESSING_WAIT", 60))
 
 USE_DC_LEGACY = boolcheck(os.environ.get("USE_DC_LEGACY", True))
+SECURE_SSL_REDIRECT = False

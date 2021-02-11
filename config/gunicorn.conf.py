@@ -5,7 +5,7 @@ import os
 #     f = '/tmp/app-initialized'
 #     open(f, 'w').close()
 
-# bind = "127.0.0.1:5000"
+bind = "0.0.0.0:5000"
 workers = int(os.environ.get('GUNICORN_WORKERS', 3))
 max_requests = 50
 timeout = 120
