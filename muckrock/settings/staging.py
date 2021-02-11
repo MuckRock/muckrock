@@ -19,8 +19,12 @@ BANDIT_EMAIL = "staging@muckrock.com"
 BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
+# I was being redirected to SSL locally so I disabled
+SECURE_SSL_REDIRECT = False
 
-SECURE_SSL_REDIRECT = True
+# got some warning locally about compression, this can probably be killed after you sort out the prod/staging/local stuff
+COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = False
 
 
 class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
