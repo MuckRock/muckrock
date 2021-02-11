@@ -453,19 +453,17 @@ url = urllib.parse.urlparse(
 )
 
 # Update with environment configuration.
-# DATABASES = {
-#     "default": {
-#         "NAME": url.path[1:],
-#         "USER": url.username,
-#         "PASSWORD": url.password,
-#         "HOST": url.hostname,
-#         "PORT": url.port,
-#         "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#     }
-# }
-DATABASES = {}
-DATABASES["default"] = dj_database_url.config(conn_max_age=600)
+DATABASES = {
+    "default": {
+        "NAME": url.path[1:],
+        "USER": url.username,
+        "PASSWORD": url.password,
+        "HOST": url.hostname,
+        "PORT": url.port,
+        "CONN_MAX_AGE": int(os.environ.get("CONN_MAX_AGE", 500)),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+    }
+}
 
 CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
@@ -495,7 +493,6 @@ REST_FRAMEWORK = {
 MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
 
 if "ALLOWED_HOSTS" in os.environ:
-    print()
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
     ALLOWED_HOSTS = []

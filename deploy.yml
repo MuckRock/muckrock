@@ -1,4 +1,4 @@
-version: "2"
+version: "3.7"
 
 volumes:
   postgres_data_local: {}
@@ -9,10 +9,9 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile.deploy
-    image: muckrock_local_django
     depends_on:
       - muckrock_redis
-    # - muckrock_postgres
+      # - muckrock_postgres
     volumes:
       - .:/app
       - ~/.netrc:/root/.netrc
@@ -21,8 +20,6 @@ services:
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
-    # expose:
-    #   - "5000"
     command: /start
     ports:
       # the application runs on 0.0.0.0:80
@@ -30,8 +27,18 @@ services:
       # I always remember this with a phrase I made up, "looking outside in",
       # where the left most port is the outside (your browser aka localhost:5000)
       # and the inside port is what the app is serving, in this case 0.0.0.0:80
-      - "5000:80"
-      - "5005:5005" # for debugging locally
+      # - "5000:80"
+      - "5000:5000"
+  nginx:
+    restart: always
+    container_name: nginx_server
+    build:
+      context: ./compose/production/nginx/
+      dockerfile: Dockerfile
+    depends_on:
+      - muckrock_django
+    ports:
+      - "8000:80"
   # muckrock_postgres:
   #   build:
   #     context: .
@@ -43,37 +50,25 @@ services:
   #   env_file:
   #     - ./.envs/.local/.postgres
   muckrock_redis:
-    image: redis:3.2
-    # networks:
-    #   redis-net:
-    #     aliases: []
-  # muckrock_celeryworker:
-  #   <<: *django
-  #   image: muckrock_local_celeryworker
-  #   depends_on:
-  #     - muckrock_redis
-  #   #   - muckrock_postgres
-  #   command: /start-celeryworker
-  #   environment:
-  #     - C_FORCE_ROOT=true
-  #   ports:
-  #     - "5001:5001"
-  # muckrock_celerybeat:
-  #   <<: *django
-  #   image: muckrock_local_celerybeat
-  #   depends_on:
-  #     - muckrock_redis
-  #   #   - muckrock_postgres
-  #   command: /start-celerybeat
-  #   ports:
-  #     - "5002:5002"
-  # nginx:
-  #   restart: always
-  #   container_name: nginx_server
-  #   build:
-  #     context: ./compose/production/nginx/
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - muckrock_django
-  #   ports:
-  #     - "8081:8081"
+    image: "redis:3.2"
+
+  muckrock_celeryworker:
+    <<: *django
+    image: "muckrock_local_celeryworker"
+    depends_on:
+      - muckrock_redis
+    #   - muckrock_postgres
+    command: /start-celeryworker
+    environment:
+      - C_FORCE_ROOT=true
+    ports:
+      - "5001:5001"
+  muckrock_celerybeat:
+    <<: *django
+    image: "muckrock_local_celerybeat"
+    depends_on:
+      - muckrock_redis
+    #   - muckrock_postgres
+    command: /start-celerybeat
+    ports:
+      - "5002:5002"

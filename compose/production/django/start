@@ -3,7 +3,5 @@
 set -o errexit
 # set -o pipefail
 set -o nounset
-python /app/manage.py collectstatic --noinput
-touch /app/gunicorn.error.log
-touch /app/gunicorn.access.log
-/usr/local/bin/gunicorn --bind 127.0.0.1:5005 -c file:config/gunicorn.conf.py --log-level 'debug' muckrock.wsgi:application
+# python /app/manage.py collectstatic --noinput
+/usr/local/bin/gunicorn -c file:config/gunicorn.conf.py muckrock.wsgi:application
