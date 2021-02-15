@@ -362,7 +362,7 @@ def _catch_all(request, address):
     else:
         foia = None
 
-    if from_email.allowed():
+    if from_email and from_email.allowed():
         comm = _make_orphan_comm(
             from_email, to_emails, cc_emails, subject, post, request.FILES, foia
         )
