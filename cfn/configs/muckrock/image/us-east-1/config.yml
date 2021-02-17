@@ -1,4 +1,4 @@
-template: cfn/templates/ecs-cluster.template.yml
+template: v1/cfn/shared/clusters/simple-ecs/image.template.yml
 stack_name: muckrock-image
 region: us-east-1
 context:
