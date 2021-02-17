@@ -1,0 +1,52 @@
+Description: >
+    This template creates an ECR repository that automatically expires untagged images
+
+Metadata:
+    Stackjack:
+        CanonicalTemplate: v1/cfn/shared/clusters/simple-ecs/service/image.template.yml
+
+Resources:
+
+    # Create the repo
+    ECRRepo:
+        Type: "AWS::ECR::Repository"
+        Properties:
+            RepositoryName: {{ name }}
+            RepositoryPolicyText: |
+                {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "ecr:GetDownloadUrlForLayer",
+                                "ecr:BatchGetImage",
+                                "ecr:BatchCheckLayerAvailability"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "codebuild.amazonaws.com"
+                            },
+                            "Sid": "default via codebuild"
+                        }
+                    ]
+                }
+            LifecyclePolicy:
+                LifecyclePolicyText: |
+                    {
+                        "rules": [
+                            {
+                                "action": {
+                                    "type": "expire"
+                                },
+                                "description": "Expire untagged images older than 30 days",
+                                "rulePriority": 1,
+                                "selection": {
+                                    "countNumber": 30,
+                                    "countType": "sinceImagePushed",
+                                    "countUnit": "days",
+                                    "tagStatus": "untagged"
+                                }
+                            }
+                        ]
+                    }
+
+    # Create the LoadBalancer for the service.
