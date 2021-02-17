@@ -10,28 +10,10 @@ ENV AWS_SECRET_ACCESS_KEY $AWS_SECRET_ACCESS_KEY
 
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  # psycopg2 dependencies
-  #&& apt-get install build-deps gcc python2-dev musl-dev \
-  #&& apt-get install postgresql-dev \
-  # Pillow dependencies
-  #&& apt-get install jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev \
-  # CFFI dependencies
-  #&& apt-get install libffi-dev py-cffi \
-  # Translations dependencies
-  #&& apt-get install gettext \
-  # https://docs.djangoproject.com/en/dev/ref/django-admin/#dbshell
   postgresql-client \
-  # for downloading dependencies from git
-  #&& apt-get install git \
-  # xml parser
-  #&& apt-get install libxml2-dev libxslt-dev \
-  # for numpy / scipy
-  #&& apt-get install openblas-dev gfortran g++ \
-  # memcahced
   libmemcached-dev
-# for imagediet
-#&& apt-get install libmagic
 
+#
 # install NVM
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 5.6.0

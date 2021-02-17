@@ -39,7 +39,7 @@ phases:
       - export IFS=","
       - |
         for REGION in $REGIONS; do
-          docker tag muckrock_django:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_:$DEPLOYMENT_ENV-`cat commit_hash`
+          docker tag muckrock_django:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_django:$DEPLOYMENT_ENV-`cat commit_hash`
           docker tag muckrock_django:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_django:$DEPLOYMENT_ENV-latest
           eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_django:$DEPLOYMENT_ENV-`cat commit_hash`
