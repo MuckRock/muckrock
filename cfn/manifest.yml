@@ -1,0 +1,12 @@
+templates:
+  shared:
+    source: v1/cfn/shared
+    version: 60881b53a710c3de6741e287e1d857a451b974e4
+plugins:
+  ecs:
+    cfn/templates/ecs-service.template.yml: 60881b53a710c3de6741e287e1d857a451b974e4
+    buildspec.yml: 60881b53a710c3de6741e287e1d857a451b974e4
+    cfn/templates/image.template.yml: 60881b53a710c3de6741e287e1d857a451b974e4
+    cfn/configs/image/us-east-1/config.yml: 60881b53a710c3de6741e287e1d857a451b974e4
+    cfn/configs/dev/us-east-1/config.yml: 60881b53a710c3de6741e287e1d857a451b974e4
+    cfn/configs/prod/us-east-1/config.yml: 60881b53a710c3de6741e287e1d857a451b974e4

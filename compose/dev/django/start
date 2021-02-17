@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -o errexit
+# set -o pipefail
+set -o nounset
+python /app/manage.py collectstatic --noinput
+/usr/local/bin/gunicorn -c file:config/gunicorn.conf.py muckrock.wsgi:application
