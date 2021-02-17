@@ -19,7 +19,7 @@ ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 5.6.0
 
 RUN mkdir $NVM_DIR
-RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash \
+RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.37.2/install.sh | bash \
   && . $NVM_DIR/nvm.sh \
   && nvm install $NODE_VERSION \
   && nvm alias default $NODE_VERSION \
@@ -31,7 +31,6 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 # Requirements are installed here to ensure they will be cached.
 COPY ./pip /pip
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
 
 COPY ./compose/dev/django/entrypoint /entrypoint
 RUN sed -i 's/\r//' /entrypoint
