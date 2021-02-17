@@ -7,7 +7,6 @@ phases:
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
       - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_django:$DEPLOYMENT_ENV-latest || true
       - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_nginx:$DEPLOYMENT_ENV-latest || true
-      - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_redis:$DEPLOYMENT_ENV-latest || true
       - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celeryworker:$DEPLOYMENT_ENV-latest || true
       - docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celerybeat:$DEPLOYMENT_ENV-latest || true
   build:
@@ -20,10 +19,6 @@ phases:
         docker build \
           --cache-from $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_nginx:$DEPLOYMENT_ENV-latest \
           --tag muckrock_nginx:$DEPLOYMENT_ENV-`cat commit_hash` .
-      - |
-        docker build \
-          --cache-from $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_redis:$DEPLOYMENT_ENV-latest \
-          --tag muckrock_redis:$DEPLOYMENT_ENV-`cat commit_hash` .
       - |
         docker build \
           --cache-from $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celeryworker:$DEPLOYMENT_ENV-latest \
@@ -50,12 +45,6 @@ phases:
           eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_nginx:$DEPLOYMENT_ENV-`cat commit_hash`
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_nginx:$DEPLOYMENT_ENV-latest
-
-          docker tag muckrock_redis:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_redis:$DEPLOYMENT_ENV-`cat commit_hash`
-          docker tag muckrock_redis:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_redis:$DEPLOYMENT_ENV-latest
-          eval $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_redis:$DEPLOYMENT_ENV-`cat commit_hash`
-          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_redis:$DEPLOYMENT_ENV-latest
 
           docker tag muckrock_celerybeat:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celerybeat:$DEPLOYMENT_ENV-`cat commit_hash`
           docker tag muckrock_celerybeat:$DEPLOYMENT_ENV-`cat commit_hash` $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celerybeat:$DEPLOYMENT_ENV-latest
