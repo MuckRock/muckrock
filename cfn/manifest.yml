@@ -1,0 +1,11 @@
+templates:
+  shared:
+    source: v1/cfn/shared
+    version: e54109c13ff47b2ceda42c67df6cb7960f3b500a
+plugins:
+  ecs:
+    cfn/templates/ecs-service.template.yml: e54109c13ff47b2ceda42c67df6cb7960f3b500a
+    cfn/templates/image.template.yml: e54109c13ff47b2ceda42c67df6cb7960f3b500a
+    cfn/configs/muckrock/image/us-east-1/config.yml: e54109c13ff47b2ceda42c67df6cb7960f3b500a
+    cfn/configs/muckrock/dev/us-east-1/config.yml: e54109c13ff47b2ceda42c67df6cb7960f3b500a
+    cfn/configs/muckrock/prod/us-east-1/config.yml: e54109c13ff47b2ceda42c67df6cb7960f3b500a
