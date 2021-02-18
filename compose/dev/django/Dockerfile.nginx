@@ -1,4 +1,6 @@
 FROM nginx:latest
-ADD nginx.conf /etc/nginx/nginx.conf
+
+ARG DEPLOYMENT_ENV=dev
+ADD compose/$DEPLOYMENT_ENV/django/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8000 80/tcp
