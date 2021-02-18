@@ -31,7 +31,8 @@ ENV POSTGRES_PORT $POSTGRES_PORT
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
-  libmemcached-dev
+  libmemcached-dev \
+  libz-dev
 
 # install NVM
 ENV NVM_DIR /usr/local/nvm
