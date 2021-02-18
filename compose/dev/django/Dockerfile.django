@@ -53,7 +53,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.
 COPY . /app/
 WORKDIR /app
 
-RUN mv compose/dev/django/entrypoint entrypoint
+RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
 RUN chmod +x entrypoint
 
 EXPOSE 5000/tcp
