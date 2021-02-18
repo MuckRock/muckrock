@@ -53,7 +53,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.
 COPY . /app/
 WORKDIR /app
 
-RUN mv compose/dev/django/celery/worker/start entrypoint
+RUN mv compose/$DEPLOYMENT_ENV/django/celery/worker/start entrypoint
 RUN chmod +x entrypoint
 
 ENTRYPOINT ["/app/entrypoint"]
