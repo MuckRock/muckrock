@@ -49,7 +49,7 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./pip /pip
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
+RUN pip install -r /pip/requirements.txt
 
 COPY . /app/
 WORKDIR /app
