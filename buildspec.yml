@@ -34,7 +34,7 @@ phases:
           --tag muckrock_celerybeat:$DEPLOYMENT_ENV-`cat commit_hash` \
           --build-arg DEPLOYMENT_ENV \
           --file compose/$DEPLOYMENT_ENV/django/Dockerfile.celerybeat .
-.
+
   post_build:
     commands:
       # For each valid region, need to push to ECR in each region
