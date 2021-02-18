@@ -2,7 +2,19 @@ template: v1/cfn/shared/clusters/simple-ecs/image.template.yml
 stack_name: muckrock-image
 region: us-east-1
 context:
-  name: muckrock
+  ecr_images: 
+    - muckrock_django:
+        resource_name: MuckrockDjangoECRRepo
+        image_name: muckrock_django 
+    - muckrock_nginx:
+        resource_name: MuckrockNginxECRRepo
+        image_name: muckrock_nginx
+    - muckrock_celeryworker:
+        resource_name: MuckrockCeleryworkerECRRepo
+        image_name: muckrock_celeryworker
+    - muckrock_celerybeat:
+        resource_name: MuckrockCelerybeatECRRepo
+        image_name: muckrock_celerybeat
   environment: image
   # Enable this to add support for quay.io legacy images
   # enable_legacy_quay_auth: true

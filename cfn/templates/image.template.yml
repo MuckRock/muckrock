@@ -6,12 +6,12 @@ Metadata:
         CanonicalTemplate: v1/cfn/shared/clusters/simple-ecs/service/image.template.yml
 
 Resources:
-
+{% for key, value in ecr_images %}
     # Create the repo
-    ECRRepo:
+    {{ value.resource_name }}:
         Type: "AWS::ECR::Repository"
         Properties:
-            RepositoryName: {{ name }}
+            RepositoryName: {{ value.image_name }}
             RepositoryPolicyText: |
                 {
                     "Statement": [
@@ -48,5 +48,5 @@ Resources:
                             }
                         ]
                     }
-
+{% endfor %}
     # Create the LoadBalancer for the service.
