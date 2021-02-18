@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM public.ecr.aws/nginx/nginx:latest
 
 ARG DEPLOYMENT_ENV=dev
 ADD compose/$DEPLOYMENT_ENV/django/nginx.conf /etc/nginx/nginx.conf
