@@ -56,11 +56,11 @@ RUN npm run build
 
 # Requirements are installed here to ensure they will be cached.
 RUN pip install -r pip/requirements.txt
+WORKDIR /app
 
 RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
 RUN chmod +x entrypoint
 
 EXPOSE 5000/tcp
-WORKDIR /app
 
 ENTRYPOINT ["/app/entrypoint"]
