@@ -49,8 +49,7 @@ context:
       # import_role:
       policies:
         # List of policies
-        - # An example
-          actions:
+        - actions:
             - s3:*
           resources:
             - arn:aws:s3:::wapo-muckrock-dev/*
