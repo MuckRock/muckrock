@@ -45,10 +45,7 @@ context:
     # cfn_properties:
     # Not required, only needed if you access AWS resources with the task
     task_role:
-      #   # Use this if the role was created in another cloudformation
-      # import_role:
       policies:
-        # List of policies
         - actions:
             - s3:*
           resources:
