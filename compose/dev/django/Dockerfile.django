@@ -48,11 +48,14 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.37.2/install.sh | b
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-# Requirements are installed here to ensure they will be cached.
-COPY ./pip /pip
-RUN pip install -r /pip/requirements.txt
-
 COPY . /app/
+
+# Compile front-end dependencies
+RUN npm install
+RUN npm run build
+
+# Requirements are installed here to ensure they will be cached.
+RUN pip install -r pip/requirements.txt
 WORKDIR /app
 
 RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
