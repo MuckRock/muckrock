@@ -1,5 +1,5 @@
 template: v1/cfn/shared/clusters/simple-ecs/image.template.yml
-stack_name: muckrock-image
+stack_name: muckrock-django-image
 region: us-east-1
 context:
   name: muckrock_django
