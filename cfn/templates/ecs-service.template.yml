@@ -104,38 +104,45 @@ Parameters:
         Type: String
     
     PostgresHost:
-      Description: Host of RDS postgres database
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/POSTGRES_HOST
+        Description: Host of RDS postgres database
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/POSTGRES_HOST
+    
     PostgresUser:
-      Description:User for RDS postgres database
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/POSTGRES_USER
+        Description:User for RDS postgres database
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/POSTGRES_USER
+    
     PostgresUser:
-      Description:User for RDS postgres database
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/POSTGRES_USER
+        Description:User for RDS postgres database
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/POSTGRES_USER
+    
     PostgresDb:
-      Description: Password of RDS postgres database
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/POSTGRES_DB
+        Description: Password of RDS postgres database
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/POSTGRES_DB
+    
     RedisUrl:
-      Description: URL for redis on elasticache
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/REDIS_URL
+        Description: URL for redis on elasticache
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/REDIS_URL
+    
     SecretKey:
-      Description: Django secret key
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/SECRET_KEY
+        Description: Django secret key
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/SECRET_KEY
+
     # TODO remove and replace these with IAM policy
     AwsAccessKeyId:
-      Description: Cred for accessint s3 bucket as user
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/AWS_ACCESS_KEY_ID
+        Description: Cred for accessint s3 bucket as user
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/AWS_ACCESS_KEY_ID
+
     AwsSecretAccessKey:
-      Description: Cred for accessint s3 bucket as user
-      Type: 'AWS::SSM::Parameter::Value<String>'
-      Default: /muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
+        Description: Cred for accessint s3 bucket as user
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
 
     {% if container.image is defined or service.image is defined -%}
     ImageVersion:
