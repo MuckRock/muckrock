@@ -48,6 +48,7 @@ context:
       policies:
         - actions:
             - s3:*
+            - ssm:GetParameter
           resources:
             - arn:aws:s3:::wapo-muckrock-dev/*
 
