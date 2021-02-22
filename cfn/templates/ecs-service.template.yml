@@ -109,12 +109,12 @@ Parameters:
         Default: /muckrock/{{ environment }}/POSTGRES_HOST
     
     PostgresUser:
-        Description:User for RDS postgres database
+        Description: User for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /muckrock/{{ environment }}/POSTGRES_USER
     
     PostgresUser:
-        Description:User for RDS postgres database
+        Description: User for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /muckrock/{{ environment }}/POSTGRES_USER
     
