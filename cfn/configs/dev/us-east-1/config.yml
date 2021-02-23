@@ -75,6 +75,7 @@ context:
     - name: muckrock_nginx
       image: muckrock_nginx
       port: 8000
+      links: muckrock_django
       health_check:
         - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
     - name: muckrock_celerybeat
