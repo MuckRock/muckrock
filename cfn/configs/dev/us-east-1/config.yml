@@ -37,10 +37,10 @@ context:
     health_check_path: /
 
     # health check info and defaults
-    # health_check_interval_seconds: 10
+    health_check_interval_seconds: 30
     # healthy_threshold_count: 2
     # unhealthy_threshold_count: 6
-    # health_check_timeout_seconds: 5
+    health_check_timeout_seconds: 20
     # Not required, additional cloudformation properties
     # cfn_properties:
     # Not required, only needed if you access AWS resources with the task
@@ -56,7 +56,6 @@ context:
   container:
     name: muckrock_django
     image: muckrock_django
-    port: 5000
     memory_reservation: 512
     # Not required, map of environment variables
     environment:
@@ -69,13 +68,14 @@ context:
       ExtraHosts:
         - Hostname: statsd
           IpAddress: 172.17.0.1
+        - Port: 5000
 
   # Not required, other companion containers
   other_containers:
     - name: muckrock_nginx
       image: muckrock_nginx
-      port: 8000
-      links: muckrock_django:django
+      port: 80
+      links: muckrock_django:muckrock_django
       # health_check:
       #   - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
     - name: muckrock_celerybeat
