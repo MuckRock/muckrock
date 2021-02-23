@@ -148,7 +148,7 @@ Parameters:
     ImageVersion:
         Description: Version to deploy
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /deployments/{{ container.image if container.image is defined else service.image if service.image is defined }}/latest
+        Default: /deployments/{{ container.image if container.image is defined else service.image if service.image is defined }}/{{ environment }}-latest
     {% else %}
     ImageVersion:
         Description: Version to deploy
