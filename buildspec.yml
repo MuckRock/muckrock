@@ -66,6 +66,9 @@ phases:
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celeryworker:$DEPLOYMENT_ENV-`cat commit_hash`
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/muckrock_celeryworker:$DEPLOYMENT_ENV-latest
 
-
           aws --region $AWS_DEFAULT_REGION ssm put-parameter --overwrite --name "/deployments/muckrock_django/$DEPLOYMENT_ENV-latest" --value $DEPLOYMENT_ENV-`cat commit_hash` --type String
+          aws --region $AWS_DEFAULT_REGION ssm put-parameter --overwrite --name "/deployments/muckrock_nginx/$DEPLOYMENT_ENV-latest" --value $DEPLOYMENT_ENV-`cat commit_hash` --type String
+          aws --region $AWS_DEFAULT_REGION ssm put-parameter --overwrite --name "/deployments/muckrock_celeryworker/$DEPLOYMENT_ENV-latest" --value $DEPLOYMENT_ENV-`cat commit_hash` --type String
+          aws --region $AWS_DEFAULT_REGION ssm put-parameter --overwrite --name "/deployments/muckrock_celerybeat/$DEPLOYMENT_ENV-latest" --value $DEPLOYMENT_ENV-`cat commit_hash` --type String
+
         done

@@ -55,6 +55,7 @@ context:
   # Required
   container:
     name: muckrock_django
+    image: muckrock_django
     port: 8000
     memory_reservation: 512
     # Not required, map of environment variables
@@ -72,11 +73,14 @@ context:
   # Not required, other companion containers
   other_containers:
     - name: muckrock_nginx
+      image: muckrock_nginx
       port: 8000
       health_check:
         - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
     - name: muckrock_celerybeat
+      image: muckrock_celerybeat
     - name: muckrock_celeryworker
+      image: muckrock_celeryworker
 params:
   # define the cluster name to run the service on
   ClusterName: newsroom-dev
