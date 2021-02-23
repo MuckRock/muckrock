@@ -54,7 +54,7 @@ context:
 
   # Required
   container:
-    name: muckrock
+    name: muckrock_django
     port: 8000
     memory_reservation: 512
     # Not required, map of environment variables
