@@ -75,13 +75,18 @@ context:
     - name: muckrock_nginx
       image: muckrock_nginx
       port: 8000
-      links: muckrock_django
-      health_check:
-        - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      links: muckrock_django:django
+      # health_check:
+      #   - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
+      environment:
+        ALLOWED_HOSTS: "*"
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
+      environment:
+        ALLOWED_HOSTS: "*"
+
 params:
   # define the cluster name to run the service on
   ClusterName: newsroom-dev
