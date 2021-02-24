@@ -64,8 +64,7 @@ context:
         - Hostname: statsd
           IpAddress: 172.17.0.1
       HealthCheck:
-        Command:
-          - ["CMD-SHELL", "curl -f http://127.0.0.1:8080/health || exit 1"]
+        Command: ["CMD-SHELL", "curl -f http://127.0.0.1:8080/health || exit 1"]
 
   # Not required, other companion containers
   other_containers:
