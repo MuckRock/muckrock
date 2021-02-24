@@ -65,12 +65,15 @@ context:
           IpAddress: 172.17.0.1
       HealthCheck:
         Command: ["CMD-SHELL", "curl -f http://127.0.0.1:8080/health || exit 1"]
+      Links:
+        - muckrock_django:muckrock_django
 
   # Not required, other companion containers
   other_containers:
     - name: muckrock_django
       image: muckrock_django
       port: 5000
+      hostname: muckrock_django
       environment:
         AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
         POSTGRES_PORT: 5432
