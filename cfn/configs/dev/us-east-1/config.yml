@@ -54,15 +54,10 @@ context:
 
   # Required
   container:
-    name: muckrock_django
-    image: muckrock_django
+    name: muckrock_nginx
+    image: muckrock_nginx
     memory_reservation: 512
     # Not required, map of environment variables
-    environment:
-      AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
-      POSTGRES_PORT: 5432
-      DJANGO_SETTINGS_MODULE: muckrock.settings.staging
-      ALLOWED_HOSTS: "*"
     # Not required, additional cloudformation properties
     cfn_properties:
       ExtraHosts:
@@ -71,12 +66,15 @@ context:
 
   # Not required, other companion containers
   other_containers:
-    - name: muckrock_nginx
-      image: muckrock_nginx
-      port: 80
-      links: muckrock_django:muckrock_django
-      # health_check:
-      #   - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+    - name: muckrock_django
+      image: muckrock_django
+      port: 5000
+      environment:
+        AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
+        POSTGRES_PORT: 5432
+        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
+        ALLOWED_HOSTS: "*"
+
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
       environment:
