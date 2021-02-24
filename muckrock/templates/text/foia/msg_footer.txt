@@ -1,10 +1,17 @@
-{% autoescape off %}Filed via MuckRock.com
-E-mail (Preferred): {{ request.get_request_email }}
-{% if reply_link %}Upload documents directly: {{ reply_link }}
+{% load humanize%}{% autoescape off %}
+Upload documents directly {% if attachments %}and view {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}{% endif %}: {{ reply_link }}
+{% for attachment in attachments %}
+* {{ attachment }}
+{% endfor %}
+{% if passcode %}
+If prompted for a passcode, please enter:
+{{ passcode }}
+{% endif %}
 Is this email coming to the wrong contact?  Something else wrong?  Use the above link to let us know.
-{% endif %}
-{% if attm_link %}View all attachments here: {{ attm_link }}
-{% endif %}
+
+Filed via MuckRock.com
+E-mail (Preferred): {{ request.get_request_email }}
+
 For mailed responses, please address (see note):
 MuckRock News
 DEPT MR {{ request.pk }}

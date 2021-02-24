@@ -2,6 +2,11 @@
 
 # Django
 from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import get_object_or_404
+from django.views.generic.base import RedirectView
+
+# Third Party
+from furl import furl
 
 # MuckRock
 from muckrock.core.views import MRListView, class_view_decorator
@@ -25,3 +30,16 @@ class AdminCommunicationView(MRListView):
             .preload_list()
             .select_related("foia__agency__jurisdiction", "from_user__profile__agency")
         )
+
+
+class FOIACommunicationDirectAgencyView(RedirectView):
+    """View to redirect agency users to communication"""
+
+    def get_redirect_url(self, *args, **kwargs):
+        """Get the anchor to the communication and append a parameter to
+        signify this is an agency viewer
+        """
+        communication = get_object_or_404(FOIACommunication, pk=kwargs["idx"])
+        url = furl(communication.get_absolute_url())
+        url.args["agency"] = 1
+        return url.url

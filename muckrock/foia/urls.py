@@ -4,7 +4,6 @@ URL mappings for the FOIA application
 
 # Django
 from django.conf.urls import url
-from django.urls import path
 from django.views.generic.base import RedirectView
 
 # MuckRock
@@ -113,11 +112,6 @@ urlpatterns = [
     ),
     # Files
     url(r"^file/(?P<pk>\d+)/embed/$", views.FileEmbedView.as_view(), name="file-embed"),
-    path(
-        "c/<int:idx>/",
-        views.FOIACommunicationFileListView.as_view(),
-        name="communication-file-list",
-    ),
     # Webhooks
     url(r"^lob/$", views.lob_webhook, name="lob-webhook"),
     # Old URLS

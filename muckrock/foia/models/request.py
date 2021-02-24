@@ -740,7 +740,7 @@ class FOIARequest(models.Model):
 
         body = self.render_msg_body(
             comm=comm,
-            reply_link=True,
+            is_email=True,
             switch=kwargs.get("switch"),
             appeal=kwargs.get("appeal"),
         )
@@ -880,8 +880,7 @@ class FOIARequest(models.Model):
     def render_msg_body(
         self,
         comm,
-        reply_link=False,
-        attm_link=False,
+        is_email=False,
         switch=False,
         appeal=False,
         include_address=True,
@@ -904,12 +903,14 @@ class FOIARequest(models.Model):
             else:
                 agency = self.agency
             context["address"] = self.address.format(agency, appeal=appeal)
-        if reply_link:
+        if is_email:
             context["reply_link"] = self.get_agency_reply_link(self.email.email)
-        if attm_link:
-            context["attm_link"] = settings.MUCKROCK_URL + reverse(
-                "communication-file-list", kwargs={"idx": comm.pk}
+        else:
+            context["reply_link"] = settings.MUCKROCK_URL + reverse(
+                "communication-direct-agency", kwargs={"idx": comm.pk}
             )
+            context["passcode"] = comm.foia.get_passcode()
+        context["attachments"] = comm.files.values_list("title", flat=True)
         if switch:
             first_request = self.communications.all()[0]
             context["original"] = {
@@ -1341,6 +1342,10 @@ class FOIARequest(models.Model):
         if extra_data is not None:
             data.update(extra_data)
         return data
+
+    def get_passcode(self):
+        """Get a passcode for agencies to view and reply to this request"""
+        return "ABCKITTENS"
 
     class Meta:
         ordering = ["title"]

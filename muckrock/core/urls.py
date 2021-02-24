@@ -7,6 +7,7 @@ import django.contrib.sitemaps.views
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.urls import path
 from django.views import static
 from django.views.generic.base import RedirectView, TemplateView
 
@@ -30,6 +31,7 @@ from muckrock.agency.sitemap import AgencySitemap
 from muckrock.core.sitemap import FlatPageSitemap
 from muckrock.core.views import handler500  # pylint: disable=unused-import
 from muckrock.foia.sitemap import FoiaSitemap
+from muckrock.foia.views.communications import FOIACommunicationDirectAgencyView
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 from muckrock.project.sitemap import ProjectSitemap
@@ -140,6 +142,11 @@ urlpatterns = [
     url(r"^hijack/", include("hijack.urls")),
     url(r"^opensearch/", include("opensearch.urls")),
     url(r"^dashboard/", include(dashing_router.urls)),
+    path(
+        "c/<int:idx>/",
+        FOIACommunicationDirectAgencyView.as_view(),
+        name="communication-direct-agency",
+    ),
 ]
 
 if settings.DEBUG:
