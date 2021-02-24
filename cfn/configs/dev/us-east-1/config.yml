@@ -69,8 +69,6 @@ context:
     - name: muckrock_django
       image: muckrock_django
       port: 5000
-      # health_check:
-      #   - ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
       environment:
         AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
         POSTGRES_PORT: 5432
