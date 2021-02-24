@@ -56,6 +56,7 @@ context:
   container:
     name: muckrock_nginx
     image: muckrock_nginx
+    essential: false
     memory_reservation: 512
     # Not required, map of environment variables
     # Not required, additional cloudformation properties
