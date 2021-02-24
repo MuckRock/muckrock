@@ -29,6 +29,7 @@ django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-reversion # Version history for models
 django-robots # Manage robots.txt file
+django-silk # Profiler (from dev requirements)
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
