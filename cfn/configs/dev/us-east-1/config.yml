@@ -83,10 +83,12 @@ context:
 
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
+      essential: false
       environment:
         ALLOWED_HOSTS: "*"
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
+      essential: false
       environment:
         ALLOWED_HOSTS: "*"
 
