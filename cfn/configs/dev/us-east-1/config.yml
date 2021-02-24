@@ -68,7 +68,6 @@ context:
       ExtraHosts:
         - Hostname: statsd
           IpAddress: 172.17.0.1
-      Port: 5000
 
   # Not required, other companion containers
   other_containers:
