@@ -85,11 +85,13 @@ context:
       image: muckrock_celerybeat
       essential: false
       environment:
+        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
       essential: false
       environment:
+        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
 
 params:
