@@ -170,6 +170,7 @@ class FOIARequest(models.Model):
         User, related_name="edit_access", blank=True
     )
     access_key = models.CharField(blank=True, max_length=255)
+    passcode = models.CharField(blank=True, max_length=8)
 
     deleted = models.BooleanField(
         default=False,
@@ -303,6 +304,20 @@ class FOIARequest(models.Model):
         self.access_key = key
         self.save()
         logger.info("New access key generated for %s", self)
+        return key
+
+    def get_passcode(self):
+        """Get a passcode for agency users"""
+        if self.passcode:
+            return self.passcode
+
+        key = utils.generate_key(8, "ABCEFGHJKLMNPRUVWXY")
+        with transaction.atomic():
+            foia = FOIARequest.objects.select_for_update().get(pk=self.pk)
+            if foia.passcode:
+                return foia.passcode
+            foia.passcode = key
+            foia.save()
         return key
 
     def get_files(self):
@@ -1342,10 +1357,6 @@ class FOIARequest(models.Model):
         if extra_data is not None:
             data.update(extra_data)
         return data
-
-    def get_passcode(self):
-        """Get a passcode for agencies to view and reply to this request"""
-        return "ABCKITTENS"
 
     class Meta:
         ordering = ["title"]

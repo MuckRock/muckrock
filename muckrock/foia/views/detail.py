@@ -24,6 +24,7 @@ import logging
 import sys
 from datetime import timedelta
 from heapq import merge
+from hmac import compare_digest
 
 # Third Party
 import requests
@@ -58,6 +59,7 @@ from muckrock.foia.forms import (
     ResendForm,
     TrackingNumberForm,
 )
+from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import (
     END_STATUS,
     STATUS,
@@ -103,9 +105,11 @@ class Detail(DetailView):
     def __init__(self, *args, **kwargs):
         self._obj = None
         self.agency_reply_form = FOIAAgencyReplyForm()
+        self.agency_passcode_form = AgencyPasscodeForm()
         self.admin_fix_form = None
         self.resend_forms = None
         self.fee_form = None
+        self.valid_passcode = False
         super(Detail, self).__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -180,9 +184,15 @@ class Detail(DetailView):
             slug=self.kwargs["slug"],
             pk=self.kwargs["idx"],
         )
-        valid_access_key = self.request.GET.get("key") == foia.access_key
+        valid_access_key = (
+            compare_digest(self.request.GET.get("key", ""), foia.access_key)
+            and foia.access_key != ""
+        )
+        self.valid_passcode = compare_digest(
+            self.request.session.get(f"foiapasscode:{foia.pk}", ""), foia.get_passcode()
+        )
         has_perm = foia.has_perm(self.request.user, "view")
-        if not has_perm and not valid_access_key:
+        if not has_perm and not valid_access_key and not self.valid_passcode:
             raise Http404()
         self._obj = foia
         return foia
@@ -270,6 +280,13 @@ class Detail(DetailView):
         context["settings"] = settings
         context["agency_status_choices"] = AGENCY_STATUS
         context["agency_reply_form"] = self.agency_reply_form
+        context["agency_passcode_form"] = self.agency_passcode_form
+        context["can_agency_reply"] = (
+            foia.has_perm(self.request.user, "agency_reply") or self.valid_passcode
+        )
+        context["unauthenticated_agency"] = not context[
+            "can_agency_reply"
+        ] and self.request.GET.get("agency")
         context["admin_fix_form"] = self.admin_fix_form
         context["resend_forms"] = self.resend_forms
         context["cc_emails"] = json.dumps([str(e) for e in foia.cc_emails.all()])
@@ -738,9 +755,15 @@ class Detail(DetailView):
     def _agency_reply(self, request, foia):
         """Agency reply directly through the site"""
         has_perm = foia.has_perm(self.request.user, "agency_reply")
+
         if has_perm:
-            form = FOIAAgencyReplyForm(request.POST)
+            form = FOIAAgencyReplyForm()
             if form.is_valid():
+                if not has_perm:
+                    # not logged in an agency user, so save passcode to session
+                    request.session[f"foiapasscode:{foia.pk}"] = form.cleaned_data[
+                        "passcode"
+                    ]
                 comm = FOIACommunication.objects.create(
                     foia=foia,
                     from_user=request.user,
@@ -749,6 +772,7 @@ class Detail(DetailView):
                     datetime=timezone.now(),
                     communication=form.cleaned_data["reply"],
                     status=form.cleaned_data["status"],
+                    hidden=not has_perm,
                 )
                 WebCommunication.objects.create(
                     communication=comm, sent_datetime=timezone.now()

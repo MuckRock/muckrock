@@ -41,7 +41,6 @@
 {% block content %}
 
   {% has_perm 'foia.appeal_foiarequest' request.user foia as can_appeal %}
-  {% has_perm 'foia.agency_reply_foiarequest' request.user foia as can_agency_reply %}
   {% has_perm 'foia.view_foiacomposer' request.user foia.composer.parent as view_parent %}
 
   {% if foia.deleted %}
@@ -205,7 +204,7 @@
     {% crowdfund foia.crowdfund.pk %}
   {% endif %}
 
-  {% compress_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk %}
+  {% compress_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk unauthenticated_agency %}
   {% include 'foia/foia_actions.html' %}
 
   <div class="tab-container">

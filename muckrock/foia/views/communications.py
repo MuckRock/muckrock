@@ -2,14 +2,16 @@
 
 # Django
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import get_object_or_404
-from django.views.generic.base import RedirectView
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormView
 
 # Third Party
 from furl import furl
 
 # MuckRock
 from muckrock.core.views import MRListView, class_view_decorator
+from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import FOIACommunication
 
 
@@ -32,14 +34,48 @@ class AdminCommunicationView(MRListView):
         )
 
 
-class FOIACommunicationDirectAgencyView(RedirectView):
+class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
     """View to redirect agency users to communication"""
 
-    def get_redirect_url(self, *args, **kwargs):
-        """Get the anchor to the communication and append a parameter to
-        signify this is an agency viewer
-        """
-        communication = get_object_or_404(FOIACommunication, pk=kwargs["idx"])
-        url = furl(communication.get_absolute_url())
+    form_class = AgencyPasscodeForm
+    model = FOIACommunication
+    pk_url_kwarg = "idx"
+    template_name = "foia/communication/agency.html"
+
+    def get_success_url(self):
+        """URL for the communication, with a parameter marking this is an agency user"""
+        url = furl(self.object.get_absolute_url())
         url.args["agency"] = 1
         return url.url
+
+    def get(self, request, *args, **kwargs):
+        """Check if the communication requires a passcode"""
+        self.object = self.get_object()
+
+        if self.object.foia.has_perm(request.user, "view"):
+            return redirect(self.get_success_url())
+
+        key = f"foiapasscode:{self.object.foia.pk}"
+        if key in request.session:
+            form = AgencyPasscodeForm({"passcode": request.session[key]})
+            if form.is_valid():
+                return redirect(self.get_success_url())
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Save the passcode to the session"""
+        self.request.session[f"foiapasscode:{self.object.foia.pk}"] = form.cleaned_data[
+            "passcode"
+        ]
+        return redirect(self.get_success_url())
+
+    def get_form_kwargs(self):
+        """Pass the communication to the form"""
+        kwargs = super().get_form_kwargs()
+        kwargs.update({"communication": self.object})
+        return kwargs
