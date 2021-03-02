@@ -40,11 +40,6 @@ urlpatterns = [
         name="question-detail",
     ),
     url(
-        r"^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/answer/$",
-        views.create_answer,
-        name="answer-create",
-    ),
-    url(
         r"^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/follow/$",
         views.follow,
         name="question-follow",

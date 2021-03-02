@@ -52,7 +52,7 @@ class QuestionList(MRSearchFilterListView):
         """Adds an info message to the context"""
         context = super(QuestionList, self).get_context_data(**kwargs)
         info_msg = (
-            "The Q&A forum is being retired.  You may browse and answer "
+            "The Q&A forum is being retired.  You may browse "
             "existing questions, but asking new questions has been disabled. "
             "Have a technical support or customer service issue? Those should "
             'be reported either using the "Report" button on the request page '
@@ -170,27 +170,6 @@ def follow(request, slug, idx):
         actstream.actions.follow(request.user, question, actor_only=False)
         messages.success(request, "You are now following this question.")
     return redirect(question)
-
-
-@permission_required("qanda.post")
-def create_answer(request, slug, idx):
-    """Create an answer"""
-
-    question = get_object_or_404(Question, slug=slug, pk=idx)
-
-    if request.method == "POST":
-        form = AnswerForm(request.POST)
-        if form.is_valid():
-            answer = form.save(commit=False)
-            answer.user = request.user
-            answer.date = timezone.now()
-            answer.question = question
-            answer.save()
-            return redirect(answer.question)
-    else:
-        form = AnswerForm()
-
-    return render(request, "forms/answer.html", {"form": form, "question": question})
 
 
 @permission_required("qanda.block")
