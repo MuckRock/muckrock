@@ -40,6 +40,7 @@ from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
 from muckrock.mailgun.tasks import download_links
 from muckrock.task.models import (
+    FileDownloadLink,
     FlaggedTask,
     NewPortalTask,
     OrphanTask,
@@ -294,6 +295,8 @@ def _handle_request(request, mail_id):
 
         # attempt to autodetect a known portal
         _detect_portal(comm, from_email.email, post)
+        # attempt to find file download links
+        _detect_file_download_links(comm)
 
         # if agency isn't currently using an outgoing email or a portal, flag it
         if (
@@ -661,3 +664,24 @@ def _detect_portal(comm, email, post):
             return NewPortalTask.objects.create(communication=comm, portal_type=type_)
 
     return None
+
+
+def _detect_file_download_links(comm):
+    """Try to auto-detect known file download links"""
+
+    for link in FileDownloadLink.objects.all():
+        # escape the url for regex, but replace * with a regex for any number
+        # of non-whitespace characters
+        url = re.escape(link.url).replace(r"\*", r"[\S]*")
+        # match the base url, and then all text until the next whitespace
+        # angle bracket or quote (to capture the full url)
+        links = re.findall(url + "[^\\s<>\"']*", comm.communication)
+        if links:
+            FlaggedTask.objects.create(
+                foia=comm.foia,
+                category="download file",
+                text="A download link to {name} was found.  Please download the "
+                "file(s) and attach them to the request:\n{links}".format(
+                    name=link.name, links="\n".join(links)
+                ),
+            )

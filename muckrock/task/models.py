@@ -1139,3 +1139,17 @@ class BlacklistDomain(models.Model):
         tasks_to_resolve = OrphanTask.objects.get_from_domain(self.domain)
         for task in tasks_to_resolve:
             task.resolve()
+
+
+class FileDownloadLink(models.Model):
+    """A URL to look for in communications which needs to be downloaded"""
+
+    name = models.CharField(max_length=255, help_text="The name of the download site")
+    url = models.CharField(
+        max_length=255,
+        help_text="The URL to look for in the communication text. "
+        "You may use * to match anything: 'https://*.sharefile.com'",
+    )
+
+    def __str__(self):
+        return self.name
