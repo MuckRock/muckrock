@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   #&& apt-get install openblas-dev gfortran g++ \
   # memcahced
   libmemcached-dev
-  # for imagediet
-  #&& apt-get install libmagic
+# for imagediet
+#&& apt-get install libmagic
 
 # heroku cli
 RUN curl https://cli-assets.heroku.com/install.sh | sh
@@ -35,10 +35,10 @@ ENV NODE_VERSION 5.6.0
 
 RUN mkdir $NVM_DIR
 RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash \
-    && . $NVM_DIR/nvm.sh \
-    && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION \
-    && nvm use default
+  && . $NVM_DIR/nvm.sh \
+  && nvm install $NODE_VERSION \
+  && nvm alias default $NODE_VERSION \
+  && nvm use default
 
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
@@ -48,7 +48,7 @@ COPY ./pip /pip
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
 
-COPY ./compose/production/django/entrypoint /entrypoint
+COPY ./compose/local/django/entrypoint /entrypoint
 RUN sed -i 's/\r//' /entrypoint
 RUN chmod +x /entrypoint
 
