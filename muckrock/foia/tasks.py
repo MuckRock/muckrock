@@ -694,13 +694,13 @@ def autoimport():
         )
         log.append("End Time: %s" % timezone.now())
     finally:
-        send_mail(
-            "[AUTOIMPORT] %s Logs" % timezone.now(),
-            "\n".join(log),
-            "info@muckrock.com",
-            ["info@muckrock.com"],
-            fail_silently=False,
-        )
+        EmailMessage(
+            subject="[AUTOIMPORT] %s Logs" % timezone.now(),
+            body="\n".join(log),
+            from_email="scans@muckrock.com",
+            to=["info@muckrock.com"],
+            bcc=["diagnostics@muckrock.com"],
+        ).send(fail_silently=False)
 
 
 class ExportCsv(AsyncFileDownloadTask):
