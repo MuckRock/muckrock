@@ -10,7 +10,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
-from django.core.mail import send_mail
 from django.core.mail.message import EmailMessage
 from django.db import transaction
 from django.db.models import DurationField, F
