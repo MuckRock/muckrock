@@ -331,6 +331,14 @@ class Detail(DetailView):
         context["can_agency_reply"] = (
             self.foia.has_perm(self.request.user, "agency_reply") or self.valid_passcode
         )
+        context["is_agency_user"] = (
+            (
+                self.request.user.is_authenticated
+                and self.request.user.profile.is_agency_user
+            )
+            or self.valid_passcode
+            or "agency" in self.request.GET
+        )
         context["agency_status_choices"] = AGENCY_STATUS
         context["unauthenticated_agency"] = (
             not self.request.user.is_authenticated and "agency" in self.request.GET

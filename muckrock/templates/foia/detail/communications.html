@@ -57,7 +57,7 @@
             {% if can_agency_reply %}
               <a href="#agency-reply" class="blue button">Reply Directly</a>
             {% endif %}
-            {% if not request.user.profile.is_agency_user %}
+            {% if not is_agency_user %}
               <a href="#follow-up" class="blue button">Follow Up</a>
             {% endif %}
             {% if user_can_pay %}
@@ -73,7 +73,7 @@
               <a href="#appeal" id="appeal-button" class="red button">Appeal</a>
             {% endif %}
           </div>
-          {% if not request.user.profile.is_agency_user %}
+          {% if not is_agency_user %}
             <span data-modal="#flag-modal" class="modal-link button">
               Get Help
             </span>
@@ -83,7 +83,7 @@
         <div class="composer-inputs">
           <div class="composer" id="inactive">
             <div class="composer-input">
-              {% if request.user.profile.is_agency_user %}
+              {% if is_agency_user %}
                 <p>
                   You may <a href="#agency-reply">reply directly</a> to this request.
                 </p>
@@ -101,7 +101,7 @@
               {% endif %}
             </div>
           </div>
-          {% if not request.user.profile.is_agency_user %}
+          {% if not is_agency_user %}
             <div class="follow-up composer" id="follow-up">
               <form class="composer-input" method="post">
                 <header>

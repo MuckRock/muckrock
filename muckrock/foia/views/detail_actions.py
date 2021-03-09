@@ -451,15 +451,11 @@ def promote(request, foia):
 def agency_reply(request, foia):
     """Agency reply directly through the site"""
     has_perm = foia.has_perm(request.user, "agency_reply")
+    valid_passcode = request.session.get(f"foiapasscode:{foia.pk}")
 
-    if has_perm:
+    if has_perm or valid_passcode:
         form = FOIAAgencyReplyForm()
         if form.is_valid():
-            if not has_perm:
-                # not logged in an agency user, so save passcode to session
-                request.session[f"foiapasscode:{foia.pk}"] = form.cleaned_data[
-                    "passcode"
-                ]
             comm = FOIACommunication.objects.create(
                 foia=foia,
                 from_user=request.user,
@@ -481,11 +477,15 @@ def agency_reply(request, foia):
             foia.save()
             foia.process_attachments(request.user)
             comm.create_agency_notifications()
-            FlaggedTask.objects.create(
-                user=request.user,
-                foia=foia,
-                text="An agency used its login to update this request",
-            )
+            if has_perm:
+                text = "An agency used its full login to update this request"
+            else:
+                text = (
+                    "An agency used its passcode login to update this request. "
+                    "This communication is hidden by default. Please review it "
+                    "and show it if appropriate"
+                )
+            FlaggedTask.objects.create(user=request.user, foia=foia, text=text)
             messages.success(request, "Reply succesfully posted")
         else:
             raise FoiaFormError("agency_reply_form", form)
