@@ -1,0 +1,394 @@
+
+<section role="tabpanel" class="tab-panel communications" id="comms">
+  <h2 class="tab-panel-heading">Communications</h2>
+  <div class="communications-controls">
+    <div class="communications filter">
+      <input id="comms-filter" type="search" placeholder="Filter communications" />
+    </div>
+    <button class="button" id="toggle-communication-collapse" data-state="0">
+      Collapse All
+    </button>
+  </div>
+
+  <div class="communications-list">
+    {% with foia_url=foia.get_absolute_url %}
+      {% for comm in foia.communications.all %}
+        {% include "foia/communication.html" with communication=comm %}
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  {% if user_can_edit %}
+    {% if foia.status == "ack" or foia.status == "processed" %}
+      <div class="auto-follow-up">
+        {% if foia.disable_autofollowups %}
+          <p>Automatic follow ups are disabled.</p>
+          <a
+            href="{% url "foia-toggle-followups" jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}"
+            title="Enable automatic follow ups"
+          >Enable</a>
+        {% else %}
+          {% if enable_followup %}
+            <p>
+              We'll automatically follow-up with the agency{% if foia.date_followup %}
+              in {{ foia.date_followup|timeuntil }}{% endif %}.
+            </p>
+          {% else %}
+            <p>{{ disabled_followup_message }}</p>
+          {% endif %}
+          <a
+            href="{% url "foia-toggle-followups" jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}"
+            title="Disable automatic follow ups"
+          >Disable</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if not can_revoke %}
+    {% if user_can_edit or can_agency_reply %}
+
+      <div class="communications-composer">
+        <div class="composer-actions">
+          <div class="button-group">
+            {% if is_thankable %}
+              <a href="#thanks" class="blue button">Say Thanks</a>
+            {% endif %}
+            {% if can_agency_reply %}
+              <a href="#agency-reply" class="blue button">Reply Directly</a>
+            {% endif %}
+            {% if not request.user.profile.is_agency_user %}
+              <a href="#follow-up" class="blue button">Follow Up</a>
+            {% endif %}
+            {% if user_can_pay %}
+              <a href="#pay" class="green button">Pay Fees</a>
+              {% if not foia.crowdfund %}
+                <a href="#crowdfund" class="green button">Crowdfund</a>
+              {% endif %}
+              {% if request.user.is_staff %}
+                <a href="#staff-pay" class="green button">Staff Pay</a>
+              {% endif %}
+            {% endif %}
+            {% if can_appeal %}
+              <a href="#appeal" id="appeal-button" class="red button">Appeal</a>
+            {% endif %}
+          </div>
+          {% if not request.user.profile.is_agency_user %}
+            <span data-modal="#flag-modal" class="modal-link button">
+              Get Help
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="composer-inputs">
+          <div class="composer" id="inactive">
+            <div class="composer-input">
+              {% if request.user.profile.is_agency_user %}
+                <p>
+                  You may <a href="#agency-reply">reply directly</a> to this request.
+                </p>
+              {% else %}
+                <p>
+                  You may <a href="#follow-up">follow up</a>
+                  {% if not foia.disable_autofollowups %}manually {% endif %}
+                  with the agency
+                  {% if can_appeal %}
+                    or <a href="#appeal">appeal</a> their decision.  If you appeal,
+                    MuckRock staff can review the rejection and help write an appeal
+                  {% endif %}
+                  .
+                </p>
+              {% endif %}
+            </div>
+          </div>
+          {% if not request.user.profile.is_agency_user %}
+            <div class="follow-up composer" id="follow-up">
+              <form class="composer-input" method="post">
+                <header>
+                  Send a follow up to the {{ foia.agency.name }}
+                  <br class="nomargin">
+                  <div class="contact-info">
+                    <a class="see-where" href="#">
+                      See
+                      {% if perms.foia.set_info_foiarequest %}
+                        where
+                      {% else %}
+                        how
+                      {% endif %}
+                      this followup will be sent
+                    </a>
+
+                    {% include "lib/pattern/contact_info.html" with portal=foia.portal email=foia.email cc_emails=cc_emails fax=foia.fax address=foia.address subject="follow up communication" has_perm=perms.foia.set_info_foiarequest form=contact_info_form only %}
+
+                  </div>
+                </header>
+                {% csrf_token %}
+                {% if request.user.is_staff %}
+                  {% include "lib/pattern/form.html" with form=admin_fix_form %}
+                {% else %}
+                  <textarea name="text" id="follow-up-composer"></textarea>
+                {% endif %}
+                <input type="hidden" name="action" value="follow_up" />
+                <label class="bold">Attachments</label>
+                <div
+                  id="fine-uploader-follow-up"
+                  class="fine-uploader-request"
+                  data-foia-pk="{{ foia.pk }}">
+                </div>
+                <div class="buttons">
+                  <button class="primary button" type="submit" name="appeal" value="1">
+                    Send
+                  </button>
+                  <a href="#inactive" class="button cancel">Cancel</a>
+                </div>
+              </form>
+            </div>
+          {% endif %}
+
+          {% if is_thankable %}
+            <div class="composer" id="thanks">
+              <form class="composer-input" method="post">
+                <header>Send a thank you note to the {{ foia.agency.name }}</header>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="thanks" />
+                <textarea name="text" id="thanks-composer">
+                  Hi,
+
+                  Thanks so much for your help with this request! I really appreciate it.
+
+                  Sincerely,
+                  {{ foia.user.profile.full_name }}
+                </textarea>
+                <div class="buttons">
+                  <button class="primary button" type="submit" name="thanks" value="1">
+                    Send
+                  </button>
+                  <a href="#inactive" class="button">Cancel</a>
+                </div>
+              </form>
+            </div>
+          {% endif %}
+
+          {% if can_agency_reply %}
+            <div class="composer" id="agency-reply">
+              <form class="composer-input" method="post" enctype="multipart/form-data">
+                <header>Reply directly</header>
+                {% csrf_token %}
+                {% include "lib/pattern/form.html" with form=agency_reply_form %}
+                <label class="bold">Attachments</label>
+                <div
+                  id="fine-uploader-agency-reply"
+                  class="fine-uploader-request"
+                  data-foia-pk="{{ foia.pk }}">
+                </div>
+                <input type="hidden" name="action" value="agency_reply" />
+                <div class="buttons">
+                  <button
+                    class="primary button"
+                    type="submit"
+                    name="agency-reply"
+                    value="1"
+                  >
+                    Send
+                  </button>
+                  <a href="#inactive" class="button">Cancel</a>
+                </div>
+              </form>
+            </div>
+          {% endif %}
+
+          {% if can_appeal %}
+            <div class="composer" id="appeal">
+              {% if not foia.jurisdiction.has_appeal %}
+                <div class="message warning">
+                  <span class="symbol">
+                    {% include "lib/component/icon/warning.svg" %}
+                  </span>
+                  <span class="text">
+                    <p>
+                      {% if foia.jurisdiction.level == "l" %}
+                        {{ foia.jurisdiction.parent.name }}
+                      {% else %}
+                        {{ foia.jurisdiction.name }}
+                      {% endif %}
+                      does not have a formal appeals process open to requesters.
+                      However, you can ask an agency to reconsider its determination
+                      or find ways to reword your request. If you're looking for legal
+                      resources,
+                      <a href="
+                        {% if foia.jurisdiction.level == "l" %}
+                          {{ foia.jurisdiction.parent.get_absolute_url }}
+                        {% else %}
+                          {{ foia.jurisdiction.get_absolute_url }}
+                        {% endif %}"
+                      >
+                        check out our
+                        {% if foia.jurisdiction.level == "l" %}
+                          {{ foia.jurisdiction.parent.name }}
+                        {% else %}
+                          {{ foia.jurisdiction.name }}
+                        {% endif %}
+                        public records guide
+                      </a>.
+                    </p>
+                  </span>
+                </div>
+              {% endif %}
+              <div id="dom-data"
+                   style="display: none;"
+                   data-request="{{ foia.pk }}"
+                   data-jurisdiction="{% if foia.jurisdiction.level == "l" %}{{ foia.jurisdiction.parent.pk }}{% else %}{{ foia.jurisdiction.pk }}{% endif %}"
+                   data-agency="{{ foia.agency.pk }}">
+              </div>
+              <div class="exemption-browser" id="exemptionBrowser">
+                <noscript>
+                  To search for exemptions and appeals, please enable Javascript.
+                </noscript>
+              </div>
+              <form class="composer-input" method="post">
+                <header>
+                  Send an appeal to the
+                  {{ foia.agency.appeal_agency.name|default:foia.agency.name }}
+                  <br class="nomargin">
+                  <div class="contact-info">
+                    <a class="see-where" href="#">
+                      See
+                      {% if perms.foia.set_info_foiarequest %}
+                        where
+                      {% else %}
+                        how
+                      {% endif %}
+                      this appeal will be sent
+                    </a>
+                    {% with appeal_info=foia.get_appeal_contact_info %}
+                      {% include "lib/pattern/contact_info.html" with email=appeal_info.email cc_emails=appeal_info.cc_emails fax=appeal_info.fax address=appeal_info.address subject="appeal communication" has_perm=perms.foia.set_info_foiarequest form=appeal_contact_info_form only %}
+                    {% endwith %}
+                  </div>
+                </header>
+                {% csrf_token %}
+                <textarea name="text" id="appeal-composer"></textarea>
+                <label class="bold">Attachments</label>
+                <div
+                  id="fine-uploader-appeal"
+                  class="fine-uploader-request"
+                  data-foia-pk="{{ foia.pk }}">
+                </div>
+                <div class="buttons">
+                  <a href="#inactive" class="button">Cancel</a>
+                  <button
+                    class="primary button"
+                    type="submit"
+                    name="action"
+                    value="appeal"
+                  >
+                    Send Appeal
+                  </button>
+                </div>
+              </form>
+            </div>
+          {% endif %}
+
+          {% if user_can_pay %}
+            <div class="composer" id="pay">
+              <form class="composer-input" method="post">
+                <input type="hidden" name="action" value="pay_fee">
+                <header>
+                  <p>Pay your request fees</p>
+                  <p class="help-text">
+                    We will add a 5% fee to this amount to cover our transaction fees.
+                  </p>
+                </header>
+                {% csrf_token %}
+                {% include "lib/pattern/form.html" with form=fee_form %}
+                <div class="form-group field" id="card-element-container">
+                  <label for="card-element">
+                    Credit or debit card
+                  </label>
+                  <div id="card-element" class="form-control"></div>
+                </div>
+                <div class="buttons">
+                  <button type="submit" class="primary button">Pay</button>
+                  <a href="#inactive" class="button">Cancel</a>
+                </div>
+              </form>
+            </div>
+            {% if not foia.crowdfund %}
+              <div class="composer" id="crowdfund">
+                <form
+                  class="crowdfund composer-input"
+                  id="crowdfund"
+                  method="post"
+                  action="{% url "foia-crowdfund" jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}"
+                >
+                  <header>Crowdfund your request fees</header>
+                  {% csrf_token %}
+                  {% include "lib/pattern/form.html" with form=crowdfund_form %}
+                  <div class="buttons">
+                    <button type="submit" class="primary button">
+                      Create Crowdfund
+                    </button>
+                    <a href="#inactive" class="button">Cancel</a>
+                  </div>
+                </form>
+              </div>
+            {% endif %}
+
+            {% if request.user.is_staff %}
+              <div class="composer" id="staff-pay">
+                <form class="composer-input" method="post">
+                  <header>
+                    <p>Pay your request fees</p>
+                  </header>
+                  {% csrf_token %}
+                  <input
+                    type="number"
+                    name="amount"
+                    class="currency-field"
+                    value="{{ foia.get_stripe_amount }}"
+                  />
+                  <div class="buttons">
+                    <button
+                      type="submit"
+                      name="action"
+                      value="staff_pay"
+                      class="primary button"
+                    >Pay</button>
+                    <a href="#inactive" class="button">Cancel</a>
+                  </div>
+                </form>
+              </div>
+            {% endif %}
+
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if unauthenticated_agency %}
+      <div class="communications-composer">
+        <div class="composer-inputs">
+          <div class="composer" id="inactive">
+            <form class="composer-input" method="post">
+              <header>
+                To reply to this request, enter the 8 letter security code that was
+                included with the request letter.
+              </header>
+              {% csrf_token %}
+              {% include "lib/pattern/form.html" with form=agency_passcode_form %}
+              <div class="buttons">
+                <button
+                  type="submit"
+                  name="action"
+                  value="agency_passcode"
+                  class="primary button"
+                >OK</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+  {% endif %}
+
+</section>

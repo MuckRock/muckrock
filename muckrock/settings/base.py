@@ -720,3 +720,5 @@ DOCCLOUD_EXTENSIONS = os.environ.get("DOCCLOUD_EXTENSIONS", ".pdf,.doc,.docx").s
     ","
 )
 DOCCLOUD_PROCESSING_WAIT = int(os.environ.get("DOCCLOUD_PROCESSING_WAIT", 60))
+
+AGENCY_SESSION_TIME = int(os.environ.get("AGENCY_SESSION_TIME", 7200))

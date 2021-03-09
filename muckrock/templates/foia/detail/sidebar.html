@@ -1,0 +1,198 @@
+{% load tags %}
+
+{% cond_cache foia_cache_timeout foia_detail_sidebar foia.pk request.user.pk %}
+  <section class="request properties grid__column one-quarter">
+    <header>
+      <section class="identity">
+        <h1>{{ foia.title }}</h1>
+      </section>
+    </header>
+
+    {% social title=foia.title url=foia.get_absolute_url %}
+
+    <section class="basic-information">
+
+      <summary class="synopsis">
+        <a href="{% url "acct-profile" foia.user.username %}">
+          {{ foia.user.profile.full_name }}
+        </a> filed this request
+        {% if foia.agency %}
+          with the {{foia.agency.link_display}} of
+          {% if foia.jurisdiction.level == "f" %}the{% endif %}
+          <a href="{{ foia.jurisdiction.get_absolute_url }}">
+            {{ foia.jurisdiction.name }}
+          </a>
+          {% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %},
+            <a
+              href="{{ foia.jurisdiction.parent.get_absolute_url }}"
+              title="{{ foia.jurisdiction.parent.name }}"
+              >
+              {{ foia.jurisdiction.parent.abbrev }}
+            </a>
+          {% endif %}
+        {% endif %}.
+      </summary>
+
+      {% if foia.composer.parent and not request.user.profile.is_agency_user and view_parent %}
+        <p>
+          It is a clone of
+          <a href="{{ foia.composer.parent.get_absolute_url }}">this request</a>.
+        </p>
+      {% endif %}
+
+    </section>
+
+    <section class="specific-information">
+      {% if request.user.is_staff or foia.current_tracking_id or foia.composer.foias.count > 1 %}
+        <table class="numbers">
+          {% if request.user.is_staff %}
+            <tr class="muckrock-number">
+              <td>MuckRock #</td>
+              <td>{{ foia.id }}</td>
+            </tr>
+          {% endif %}
+          {% if foia.tracking_ids.all %}
+            <tr class="tracking-number">
+              <td>Tracking #</td>
+              <td>
+                {% for tracking_id in foia.tracking_ids.all %}
+                  <p>{{ tracking_id }}</p>
+                {% endfor %}
+              </td>
+            </tr>
+          {% endif %}
+          {% if foia.composer.foias.count > 1 %}
+            <tr class="multirequest">
+              <td>Multi Request</td>
+              <td>
+                <a href="{{foia.composer.get_absolute_url}}">
+                  {{ foia.composer.title }}
+                </a>
+              </td>
+            </tr>
+          {% endif %}
+        </table>
+      {% endif %}
+
+      {% if request.user.is_staff %}
+        <p class="edit action tracking-id">Add Tracking ID</p>
+        <form class="add-tracking-id hidden-form" method="post">
+          {% csrf_token %}
+          {% include "lib/pattern/form.html" with form=tracking_id_form %}
+          <footer>
+            <button
+              class="primary button"
+              type="submit"
+              name="action"
+              value="tracking_id">Add</button>
+            <button class="cancel button">Cancel</button>
+          </footer>
+        </form>
+      {% endif %}
+      <table class="dates">
+        <tr class="submitted">
+          <td class="label">Submitted</td>
+          <td class="date">{{ foia.composer.datetime_submitted|date }}</td>
+        </tr>
+        {% if foia.date_due and foia.status == "processed" %}
+          <tr class="due">
+            <td class="label">Due</td>
+            {% if past_due %}
+              <td class="date failure">{{ foia.date_due }}</td>
+            {% else %}
+              <td class="date">{{ foia.date_due }}</td>
+            {% endif %}
+          </tr>
+        {% endif %}
+        {% with last_response as foia.last_response %}
+          {% if last_response %}
+            <tr class="last-response">
+              <td class="label">Last Response</td>
+              <td class="date">{{ last_response.date.date }}</td>
+            </tr>
+          {% endif %}
+        {% endwith %}
+        {% if show_estimated_date %}
+          <tr class="estimated-completion">
+            <td class="label">Est. Completion</td>
+            <td class="date">
+              {% if foia.date_estimate %}
+                {{ foia.date_estimate|date }}
+              {% else %}
+                None
+              {% endif %}
+              {% if user_can_edit %}
+                <span class="edit action">Edit</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endif %}
+      </table>
+
+      {% if user_can_edit and foia.portal %}
+        <div id="show-portal-info" class="action">Show Portal Info</div>
+        <table class="portal-info">
+          <tr>
+            <td>Portal Link</td>
+            <td><a href="{{foia.portal.url}}">{{foia.portal.name}}</a></td>
+          </tr>
+          <tr>
+            <td>Username</td>
+            <td>{{foia.get_request_email}}</td>
+          </tr>
+          <tr>
+            <td>Password</td>
+            <td>{{foia.portal_password}}</td>
+          </tr>
+        </table>
+      {% elif request.user.is_staff %}
+        <div id="show-portal-info" class="action">Show Request Info</div>
+        <table class="portal-info">
+          <tr>
+            <td>Request Email</td>
+            <td>{{foia.get_request_email}}</td>
+          </tr>
+          <tr>
+            <td>Password (if needed)</td>
+            <td>{{foia.portal_password}}</td>
+          </tr>
+        </table>
+      {% endif %}
+
+      {% if request.user.is_staff and not foia.portal %}
+        <p class="edit action new-portal">Add Portal</p>
+        <form class="add-portal hidden-form" method="post">
+          {% csrf_token %}
+          {% include "lib/pattern/form.html" with form=portal_form %}
+          <footer>
+            <button class="primary button" type="submit" name="action" value="portal">
+              Add
+            </button>
+            <button class="cancel button">Cancel</button>
+          </footer>
+        </form>
+      {% endif %}
+
+      {% if user_can_edit %}
+        <form class="change-date hidden-form" method="post">
+          {% csrf_token %}
+          {% include "lib/pattern/form.html" with form=change_estimated_date %}
+          <footer>
+            <button
+              class="primary button"
+              type="submit"
+              name="action"
+              value="date_estimate">Save</button>
+            <button class="cancel button">Cancel</button>
+          </footer>
+        </form>
+      {% endif %}
+      {% include "foia/component/status.html" %}
+      {% if not request.user.profile.is_agency_user %}
+        {% include "foia/component/embargo.html" %}
+        {% project_manager foia %}
+        {% tag_manager foia %}
+      {% endif %}
+    </section>
+  </section>
+{% endcache %}

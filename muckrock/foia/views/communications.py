@@ -1,8 +1,9 @@
 """Views for handling communications"""
 
 # Django
+from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormView
 
@@ -42,6 +43,10 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
     pk_url_kwarg = "idx"
     template_name = "foia/communication/agency.html"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.object = None
+
     def get_success_url(self):
         """URL for the communication, with a parameter marking this is an agency user"""
         url = furl(self.object.get_absolute_url())
@@ -56,10 +61,8 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
             return redirect(self.get_success_url())
 
         key = f"foiapasscode:{self.object.foia.pk}"
-        if key in request.session:
-            form = AgencyPasscodeForm({"passcode": request.session[key]})
-            if form.is_valid():
-                return redirect(self.get_success_url())
+        if request.session.get(key):
+            return redirect(self.get_success_url())
 
         return super().get(request, *args, **kwargs)
 
@@ -69,13 +72,12 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
 
     def form_valid(self, form):
         """Save the passcode to the session"""
-        self.request.session[f"foiapasscode:{self.object.foia.pk}"] = form.cleaned_data[
-            "passcode"
-        ]
+        self.request.session[f"foiapasscode:{self.object.foia.pk}"] = True
+        self.request.session.set_expiry(settings.AGENCY_SESSION_TIME)
         return redirect(self.get_success_url())
 
     def get_form_kwargs(self):
         """Pass the communication to the form"""
         kwargs = super().get_form_kwargs()
-        kwargs.update({"communication": self.object})
+        kwargs.update({"foia": self.object.foia})
         return kwargs

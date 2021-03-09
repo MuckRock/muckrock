@@ -1,0 +1,21 @@
+{% if open_task_count and user_can_edit or user.is_staff %}
+  <section role="tabpanel" class="tab-panel tasks" id="tasks">
+    <h2 class="tab-panel-heading">Tasks</h2>
+    {% if user.is_staff and task_count > 0 %}
+      <header class="tasks-control">
+        <p>
+          <a href="{% url "request-task-list" pk=foia.pk %}" class="task-link">
+            See all tasks for this request.
+          </a>
+        </p>
+      </header>
+    {% endif %}
+    {% for task in open_tasks %}
+      {% include "lib/task.html" with task=task %}
+    {% empty %}
+      {% if open_task_count > 0 %}
+        <p class="empty">There are no open tasks for this request.</p>
+      {% endif %}
+    {% endfor %}
+  </section>
+{% endif %}

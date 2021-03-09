@@ -82,14 +82,12 @@ class AgencyPasscodeForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.communication = kwargs.pop("communication")
+        self.foia = kwargs.pop("foia")
         super().__init__(*args, **kwargs)
 
     def clean_passcode(self):
         """Compare the passcode"""
-        if not compare_digest(
-            self.cleaned_data["passcode"], self.communication.foia.get_passcode()
-        ):
+        if not compare_digest(self.cleaned_data["passcode"], self.foia.get_passcode()):
             raise forms.ValidationError("Incorrect passcode")
         return self.cleaned_data["passcode"]
 

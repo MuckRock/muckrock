@@ -1,0 +1,47 @@
+<section role="tabpanel" class="tab-panel files" id="files">
+  <h2 class="tab-panel-heading">Files</h2>
+  {% if foia.total_pages > 0 %}
+    <div class="active-document">
+      <header>
+        <span>
+          <h3 id="doc-title"></h3>
+          <p><small><span id="doc-pages"></span> pages</small></p>
+        </span>
+        <span>
+          <span class="red cancel button">Close</span>
+        </span>
+      </header>
+      <div class="viewer" id="viewer"></div>
+      <iframe
+        id="viewer-iframe"
+        src="about:blank"
+        height="905"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+        ></iframe>
+    </div>
+  {% endif %}
+  {% if files %}
+    <ul class="files-list nostyle" id="all-files">
+      {% with foia_url=foia.get_absolute_url %}
+        {% for file in files %}
+          <li>{% include "lib/file.html" %}</li>
+        {% endfor %}
+      {% endwith %}
+    </ul>
+  {% else %}
+    <p class="empty">There are no files associated with this request.</p>
+  {% endif %}
+  {% if foia.get_files.count > 50 %}
+    <div class="notification warning">
+      <span class="symbol">{% include "lib/component/icon/warning.svg" %}</span>
+      <span class="text">
+        <p>
+          There are too many files to display on the request page.
+          <a href="{% url "foia-files" jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+            See all files
+          </a>.
+        </p>
+      </span>
+    </div>
+  {% endif %}
+</section>

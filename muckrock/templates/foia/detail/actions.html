@@ -1,16 +1,21 @@
+
 {% if user.is_authenticated %}
   <section class="actions">
+
     {% if can_revoke %}
       <div class="prompt">
         <p>
           Thank you for submitting this request.  Please review it now.
           You will have until {{ revoke_deadline|time:"g:i a" }}
-          ({{ revoke_deadline|timeuntil }} from now) in order to make any changes before
-          it is sent to the agency.
+          ({{ revoke_deadline|timeuntil }} from now) in order to make any changes
+          before it is sent to the agency.
         </p>
         <footer class="button-group">
           {% if user.is_staff %}
-            <form method="post" action="{% url "foia-composer-detail" idx=foia.composer.pk slug=foia.composer.slug %}">
+            <form
+              method="post"
+              action="{% url "foia-composer-detail" idx=foia.composer.pk slug=foia.composer.slug %}"
+            >
               {% csrf_token %}
               <button class="button" name="action" value="send-now">Send Now</button>
             </form>
@@ -21,9 +26,13 @@
         </footer>
       </div>
     {% endif %}
+
     {% if user_can_pay %}
       <div class="payment prompt">
-        <p>This request requires a payment{% if foia.price %} of ${{foia.price|floatformat:2}}{% endif %}.</p>
+        <p>
+          This request requires a payment{% if foia.price %} of
+          ${{foia.price|floatformat:2}}{% endif %}.
+        </p>
         <footer class="button-group">
           <a class="success button" href="#pay">Pay</a>
           {% if not foia.crowdfund %}
@@ -35,16 +44,24 @@
         </footer>
       </div>
     {% endif %}
+
     <form method="post" novalidate>
       {% csrf_token %}
       {% for action in user_actions %}
         {% if action.test %}
           {% if action.link %}
-            <a href="{{ action.link }}" class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+            <a
+              href="{{ action.link }}"
+              class="button{% if action.class_name %} {{ action.class_name }}{% endif %}"
+              title="{{ action.desc }}"
+            >{{ action.title }}</a>
           {% endif %}
 
           {% if action.modal %}
-            <span data-modal="#{{action.action}}-modal" class="text-area modal-button button {% if action.class_name %}{{ action.class_name }}{% endif %}">{{ action.title }}</span>
+            <span
+              data-modal="#{{action.action}}-modal"
+              class="text-area modal-button button {% if action.class_name %}{{ action.class_name }}{% endif %}"
+              >{{ action.title }}</span>
             <div class="modal" id="{{action.action}}-modal">
               <h1>{{ action.title }}</h1>
               <h2>{{ action.desc }}</h2>
@@ -54,23 +71,33 @@
                   <p class="help-text">{{ field.help_text }}</p>
                 {% endif %}
               {% endfor %}
-              <button type="submit" name="action" value="{{ action.action }}" class="primary button">{{ action.title }}</button>
+              <button
+                type="submit"
+                name="action"
+                value="{{ action.action }}"
+                class="primary button"
+              >{{ action.title }}</button>
               <span class="close-modal button">Close</span>
             </div>
           {% endif %}
-
         {% endif %}
       {% endfor %}
     </form>
   </section>
-{% else %}
+
+{% else %} {# unauthenticated #}
+
   <div class="signup prompt">
-    <p>MuckRock users can file, duplicate, track, and share public records requests like this one. <a href="/about/muckrock-101">Learn more.</a></p>
+    <p>
+      MuckRock users can file, duplicate, track, and share public records requests
+      like this one. <a href="/about/muckrock-101/">Learn more.</a>
+    </p>
     <footer>
-      <a href="{% url 'foia-create' %}" class="primary button">
-        {% include 'lib/component/icon/create-request.svg' %}
+      <a href="{% url "foia-create" %}" class="primary button">
+        {% include "lib/component/icon/create-request.svg" %}
         <span>File a Request</span>
       </a>
     </footer>
   </div>
+
 {% endif %}
