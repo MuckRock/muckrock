@@ -83,4 +83,4 @@ context:
 params:
 
   # define the cluster name to run the service on
-  ClusterName: example-prod
+  ClusterName: muckrock-prod
