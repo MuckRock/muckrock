@@ -34,4 +34,11 @@ PRIVATE_FLAG_CATEGORIES = [
     ("foiaonline", "The FOIAOnline autologin failed"),
     ("download file", "This request contains a link to a file to download"),
 ]
-FLAG_CATEGORIES = PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES
+AGENCY_FLAG_CATEGORIES = [
+    ("already responded", "I already responded to this request"),
+    ("bad contact", "I am not the best contact for this request"),
+    ("wrong agency", "This request should go to a different agency"),
+]
+FLAG_CATEGORIES = (
+    PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES + AGENCY_FLAG_CATEGORIES
+)

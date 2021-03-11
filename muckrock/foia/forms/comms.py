@@ -76,9 +76,7 @@ class AgencyPasscodeForm(forms.Form):
     """A form for agencies to enter their passcode to view embargoed requests"""
 
     passcode = forms.CharField(
-        label="Passcode",
-        help_text="Please enter the passcode included with the original request",
-        widget=forms.PasswordInput,
+        label="Passcode", widget=forms.PasswordInput, max_length=8
     )
 
     def __init__(self, *args, **kwargs):

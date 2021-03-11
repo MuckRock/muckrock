@@ -1,1 +1,18 @@
-{% extends "forms/base_form.html" %}
+{% extends "base.html" %}
+
+{% block content %}
+  <article class="grid__row passcode-form">
+    <section class="grid__column one-quarter"></section>
+    <main class="grid__column three-quarters">
+      <section class="form">
+        <header class="form-head larger">
+          To view this request, enter the 8 letter security code that was
+          included with the request letter.
+        </header>
+      </section>
+      {% include "lib/form.html" %}
+    </main>
+  </article>
+{% endblock %}
+
+

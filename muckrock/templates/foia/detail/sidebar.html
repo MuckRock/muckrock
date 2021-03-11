@@ -1,6 +1,6 @@
 {% load tags %}
 
-{% cond_cache foia_cache_timeout foia_detail_sidebar foia.pk request.user.pk %}
+{% cond_cache foia_cache_timeout foia_detail_sidebar foia.pk request.user.pk is_agency_user %}
   <section class="request properties grid__column one-quarter">
     <header>
       <section class="identity">
@@ -8,32 +8,32 @@
       </section>
     </header>
 
-    {% social title=foia.title url=foia.get_absolute_url %}
+    {% if not is_agency_user %}
+      {% social title=foia.title url=foia.get_absolute_url %}
+    {% endif %}
 
     <section class="basic-information">
 
       <summary class="synopsis">
-        <a href="{% url "acct-profile" foia.user.username %}">
-          {{ foia.user.profile.full_name }}
-        </a> filed this request
+        {% url "acct-profile" foia.user.username as acct_url %}
+        {% cond_link is_agency_user|not acct_url foia.user.profile.full_name %}
+         filed this request
         {% if foia.agency %}
-          with the {{foia.agency.link_display}} of
+          with the
+          {% if not is_agency_user %}
+            {{ foia.agency.link_display }}
+          {% else %}
+            {{ foia.agency.name }}
+          {% endif %}
+          of
           {% if foia.jurisdiction.level == "f" %}the{% endif %}
-          <a href="{{ foia.jurisdiction.get_absolute_url }}">
-            {{ foia.jurisdiction.name }}
-          </a>
-          {% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %},
-            <a
-              href="{{ foia.jurisdiction.parent.get_absolute_url }}"
-              title="{{ foia.jurisdiction.parent.name }}"
-              >
-              {{ foia.jurisdiction.parent.abbrev }}
-            </a>
+          {% cond_link is_agency_user|not foia.jurisdiction.get_absolute_url foia.jurisdiction.name %}{% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %},
+            {% cond_link is_agency_user|not foia.jurisdiction.parent.get_absolute_url foia.jurisdiction.parent.abbrev title=foia.jurisdiction.parent.name %}
           {% endif %}
         {% endif %}.
       </summary>
 
-      {% if foia.composer.parent and not request.user.profile.is_agency_user and view_parent %}
+      {% if foia.composer.parent and not is_agency_user and view_parent %}
         <p>
           It is a clone of
           <a href="{{ foia.composer.parent.get_absolute_url }}">this request</a>.
@@ -188,7 +188,7 @@
         </form>
       {% endif %}
       {% include "foia/component/status.html" %}
-      {% if not request.user.profile.is_agency_user %}
+      {% if not is_agency_user %}
         {% include "foia/component/embargo.html" %}
         {% project_manager foia %}
         {% tag_manager foia %}

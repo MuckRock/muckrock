@@ -1,5 +1,5 @@
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated or is_agency_user %}
   <section class="actions">
 
     {% if can_revoke %}
@@ -101,3 +101,67 @@
   </div>
 
 {% endif %}
+
+{% if is_agency_user %}
+  <section class="agency-info">
+    <p>
+      This request was filed by {{ foia.user.profile.full_name }} through
+      MuckRock, a non-profit organization that helps journalists, researchers,
+      and the public file, track, and share records requests. You may follow up
+      directly with the requester by following the prompts below. Should this
+      request be directed elsewhere? Have you already responded? Click Get Help
+      above and let us know, or reach our team directly at
+      <a href="tel:617-299-1832">617-299-1832</a> or at
+      <a href="mailto:info@muckrock.com">info@muckrock.com</a>.
+      <a href="/agency-faq/">Frequently asked questions</a> about MuckRock.
+    </p>
+    <p>
+      Upload documents and update the status of the request below, or choose an
+      option to reach our team directly:
+    </p>
+    <ul>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category="already responded"
+          class="modal-link agency-flag"
+          >
+          I already responded to this request
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category="bad contact"
+          class="modal-link agency-flag"
+          >
+          I’m not the best contact for this
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category="wrong agency"
+          class="modal-link agency-flag"
+          >
+          This request should go to a different agency
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category=""
+          class="modal-link agency-flag"
+          >
+          Something else not covered here.
+        </a>
+      </li>
+    </ul>
+  </section>
+{% endif %}
+
+

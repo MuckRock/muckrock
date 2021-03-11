@@ -184,13 +184,13 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
 
         self._get_permission_context_data(context)
-        self._get_form_context_data(context)
         self._get_task_context_data(context)
         self._get_obj_context_data(context)
         self._get_date_context_data(context)
         self._get_config_context_data(context)
         self._get_revoke_context_data(context)
         self._get_agency_context_data(context)
+        self._get_form_context_data(context)
 
         return context
 
@@ -250,7 +250,9 @@ class Detail(DetailView):
 
         # this data used in a form
         context["status_choices"] = [(k, v) for (k, v) in STATUS if k != "submitted"]
-        context["user_actions"] = self.foia.user_actions(self.request.user)
+        context["user_actions"] = self.foia.user_actions(
+            self.request.user, context["is_agency_user"]
+        )
 
     def _get_task_context_data(self, context):
         """Get context data for tasks"""
@@ -332,12 +334,11 @@ class Detail(DetailView):
             self.foia.has_perm(self.request.user, "agency_reply") or self.valid_passcode
         )
         context["is_agency_user"] = (
-            (
-                self.request.user.is_authenticated
-                and self.request.user.profile.is_agency_user
-            )
-            or self.valid_passcode
-            or "agency" in self.request.GET
+            self.request.user.is_authenticated
+            and self.request.user.profile.is_agency_user
+        ) or (
+            not self.request.user.is_authenticated
+            and (self.valid_passcode or "agency" in self.request.GET)
         )
         context["agency_status_choices"] = AGENCY_STATUS
         context["unauthenticated_agency"] = (
@@ -365,7 +366,6 @@ class Detail(DetailView):
 
     def post(self, request):
         """Handle form submissions"""
-        self.foia = self.get_object()
         action = getattr(detail_actions, request.POST.get("action", ""), None)
         if action is None:
             messages.error(request, "Something went wrong")

@@ -215,6 +215,13 @@ $('.text-area.modal-button').click(function(e){
     return false;
 });
 
+$('.modal-link.agency-flag').click(function(e){
+    e.preventDefault();
+    $("#id_flag-category").val($(this).data("category"));
+    modal($($(this).data('modal')));
+    return false;
+});
+
 $('.modal-link').click(function(e){
     e.preventDefault();
     modal($($(this).data('modal')));

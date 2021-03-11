@@ -66,6 +66,16 @@ def obj_link(obj):
         return "None"
 
 
+@register.simple_tag
+def cond_link(cond, url, text, **kwargs):
+    """Always show the text, but wrap in a link to URL conditionally"""
+    if cond:
+        attrs = " ".join(f'{attr}="{value}"' for attr, value in kwargs.items())
+        return format_html('<a href="{}"{}>{}</a>', url, attrs, text)
+    else:
+        return text
+
+
 @register.filter
 @stringfilter
 def company_title(companies):
@@ -80,6 +90,12 @@ def company_title(companies):
 def abs_filter(value):
     """Absolute value of a number"""
     return abs(value)
+
+
+@register.filter(name="not")
+def not_filter(value):
+    """Boolean not"""
+    return not value
 
 
 email_re = re.compile(

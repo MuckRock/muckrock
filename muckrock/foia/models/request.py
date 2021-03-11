@@ -1048,7 +1048,7 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
-    def user_actions(self, user):
+    def user_actions(self, user, is_agency_user):
         """Provides action interfaces for users"""
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.forms import (
@@ -1058,7 +1058,6 @@ class FOIARequest(models.Model):
         )
 
         is_owner = self.created_by(user)
-        is_agency_user = user.is_authenticated and user.profile.is_agency_user
         can_follow = user.is_authenticated and not is_owner and not is_agency_user
         is_following = user.is_authenticated and user in followers(self)
         is_admin = user.is_staff
@@ -1095,14 +1094,14 @@ class FOIARequest(models.Model):
                 "class_name": "primary",
             },
             {
-                "test": self.has_perm(user, "flag"),
+                "test": self.has_perm(user, "flag") or is_agency_user,
                 "title": "Get Help",
                 "action": "flag",
                 "desc": "Something broken, buggy, or off?  "
                 "Let us know and we'll fix it",
                 "class_name": "failure",
                 "modal": True,
-                "form": FOIAFlagForm(),
+                "form": FOIAFlagForm(is_agency_user=is_agency_user),
             },
             {
                 "test": user.has_perm("foia.delete_foiarequest"),
