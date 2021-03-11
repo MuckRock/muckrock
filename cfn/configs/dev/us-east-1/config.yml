@@ -96,4 +96,4 @@ context:
 
 params:
   # define the cluster name to run the service on
-  ClusterName: muckrock-dev
+  ClusterName: foia-dev
