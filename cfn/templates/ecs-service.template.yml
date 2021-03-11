@@ -106,43 +106,43 @@ Parameters:
     PostgresHost:
         Description: Host of RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/POSTGRES_HOST
+        Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_HOST
     
     PostgresUser:
         Description: User for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/POSTGRES_USER
+        Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_USER
     
     PostgresPassword:
         Description: Password for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/POSTGRES_PASSWORD
+        Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_PASSWORD
     
     PostgresDb:
         Description: Password of RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/POSTGRES_DB
+        Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_DB
     
     RedisUrl:
         Description: URL for redis on elasticache
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/REDIS_URL
+        Default: /news-engineering/muckrock/{{ environment }}/REDIS_URL
     
     SecretKey:
         Description: Django secret key
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/SECRET_KEY
+        Default: /news-engineering/muckrock/{{ environment }}/SECRET_KEY
 
     # TODO remove and replace these with IAM policy
     AwsAccessKeyId:
         Description: Cred for accessint s3 bucket as user
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/AWS_ACCESS_KEY_ID
+        Default: /news-engineering/muckrock/{{ environment }}/AWS_ACCESS_KEY_ID
 
     AwsSecretAccessKey:
         Description: Cred for accessint s3 bucket as user
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
+        Default: /news-engineering/muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
 
     {% if container.image is defined or service.image is defined -%}
     ImageVersion:
