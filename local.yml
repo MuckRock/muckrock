@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 
 volumes:
   postgres_data_local: {}
@@ -22,6 +22,8 @@ services:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
     command: /start
+    ports:
+      - 80:80
     networks:
       default:
         aliases:
@@ -60,7 +62,8 @@ services:
         aliases: []
       squarelet_default:
         aliases: []
-
+    ports:
+      - 8001:8001 # this is dumb, just needs a dummy port that is different than 80 since it inherits the django properties
   muckrock_celerybeat:
     <<: *django
     image: muckrock_local_celerybeat
@@ -73,7 +76,8 @@ services:
         aliases: []
       squarelet_default:
         aliases: []
-
+    ports:
+      - 8002:8002
 networks:
   squarelet_default:
     external: true

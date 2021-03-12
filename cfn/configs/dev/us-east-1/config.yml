@@ -1,4 +1,3 @@
-template: cfn/templates/ecs-service.template.yml
 stack_name: muckrock-dev
 region: us-east-1
 context:
@@ -9,10 +8,10 @@ context:
   # was created in another cloudformation
   routing:
     is_public: false
-    certificate: arn:aws:acm:us-east-1:566093341066:certificate/adf4c1f6-1a81-49b2-aa9c-7e84b0da5eb3
+    certificate: arn:aws:acm:us-east-1:912288704264:certificate/c1ff8358-9b24-4e68-9d38-28caf63c0fde
     dns:
-      zone_apex: elections.aws.wapo.pub.
-      domain: muckrock-dev.elections.aws.wapo.pub.
+      zone_apex: news-engineering.aws.wapo.pub.
+      domain: muckrock-dev.news-engineering.aws.wapo.pub.
   # # Required if using `import_listener`
   # priority: 0
 
@@ -97,4 +96,4 @@ context:
 
 params:
   # define the cluster name to run the service on
-  ClusterName: newsroom-dev
+  ClusterName: foia-dev

@@ -12,7 +12,7 @@ if [ -z "${POSTGRES_USER}" ]; then
     export POSTGRES_USER="${base_postgres_image_default_user}"
 fi
 export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE}"
+export DJANGO_SETTINGS_MODULE="muckrock.settings.staging"
 
 postgres_ready() {
     python <<END
@@ -41,6 +41,3 @@ done
 echo >&2 'PostgreSQL is available'
 
 exec "$@"
-
-python /app/manage.py collectstatic --noinput
-gunicorn -c file:config/gunicorn.conf.py muckrock.wsgi:application
