@@ -1,3 +1,4 @@
+template: cfn/templates/ecs-service.template.yml
 stack_name: muckrock-dev
 region: us-east-1
 context:
