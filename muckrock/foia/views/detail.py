@@ -183,13 +183,13 @@ class Detail(DetailView):
         # pylint: disable=too-many-statements, too-many-locals
         context = super(Detail, self).get_context_data(**kwargs)
 
+        self._get_agency_context_data(context)
         self._get_permission_context_data(context)
         self._get_task_context_data(context)
         self._get_obj_context_data(context)
         self._get_date_context_data(context)
         self._get_config_context_data(context)
         self._get_revoke_context_data(context)
-        self._get_agency_context_data(context)
         self._get_form_context_data(context)
 
         return context
@@ -305,9 +305,10 @@ class Detail(DetailView):
         context["sidebar_admin_url"] = reverse(
             "admin:foia_foiarequest_change", args=(self.foia.pk,)
         )
-        context["foia_cache_timeout"] = (
-            0 if self.request.user.is_authenticated else settings.DEFAULT_CACHE_TIMEOUT
-        )
+        if self.request.user.is_authenticated or context["is_agency_user"]:
+            context["foia_cache_timeout"] = 0
+        else:
+            context["foia_cache_timeout"] = settings.DEFAULT_CACHE_TIMEOUT
         context["meta_noindex"] = self.foia.noindex
         context["enable_followup"] = config.ENABLE_FOLLOWUP
         context["disabled_followup_message"] = config.DISABLED_FOLLOWUP_MESSAGE
@@ -341,7 +342,9 @@ class Detail(DetailView):
         )
         context["agency_status_choices"] = AGENCY_STATUS
         context["unauthenticated_agency"] = (
-            not self.request.user.is_authenticated and "agency" in self.request.GET
+            not self.request.user.is_authenticated
+            and "agency" in self.request.GET
+            and not self.valid_passcode
         )
 
     def get(self, request, *args, **kwargs):
