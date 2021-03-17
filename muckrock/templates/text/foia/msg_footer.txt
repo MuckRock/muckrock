@@ -1,5 +1,7 @@
 {% load humanize%}{% autoescape off %}
-Upload documents directly {% if attachments %}and view {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}{% endif %}: {{ reply_link }}
+Upload documents directly {% if attachments %}and view {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}{% endif %}:
+View request history, {% if attachments %}see {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}, {% endif %}upload responsive documents, and report problems here:
+{{ reply_link }}
 {% for attachment in attachments %}
 * {{ attachment }}
 {% endfor %}
