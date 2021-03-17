@@ -1,15 +1,11 @@
-{% load humanize%}{% autoescape off %}
-Upload documents directly {% if attachments %}and view {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}{% endif %}:
-View request history, {% if attachments %}see {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}, {% endif %}upload responsive documents, and report problems here:
+{% load humanize%}{% autoescape off %}View request history, {% if attachments %}see {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}, {% endif %}upload responsive documents, and report problems here:
 {{ reply_link }}
-{% for attachment in attachments %}
-* {{ attachment }}
-{% endfor %}
 {% if passcode %}
 If prompted for a passcode, please enter:
 {{ passcode }}
 {% endif %}
-Is this email coming to the wrong contact?  Something else wrong?  Use the above link to let us know.
+{% if attachments %}Attachments:{% endif %}{% for attachment in attachments %}
+• {{ attachment }}{% endfor %}
 
 Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_request_email }}
