@@ -308,7 +308,6 @@ class Detail(DetailView):
         context["foia_cache_timeout"] = (
             0 if self.request.user.is_authenticated else settings.DEFAULT_CACHE_TIMEOUT
         )
-        context["foia_cache_timeout"] = 0  # XXX
         context["meta_noindex"] = self.foia.noindex
         context["enable_followup"] = config.ENABLE_FOLLOWUP
         context["disabled_followup_message"] = config.DISABLED_FOLLOWUP_MESSAGE
