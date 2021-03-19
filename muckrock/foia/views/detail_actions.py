@@ -463,11 +463,16 @@ def agency_reply(request, foia):
     valid_passcode = request.session.get(f"foiapasscode:{foia.pk}")
 
     if has_perm or valid_passcode:
-        form = FOIAAgencyReplyForm()
+        form = FOIAAgencyReplyForm(request.POST)
         if form.is_valid():
+            agency_user = (
+                request.user
+                if request.user.is_authenticated
+                else foia.agency.get_user()
+            )
             comm = FOIACommunication.objects.create(
                 foia=foia,
-                from_user=request.user,
+                from_user=agency_user,
                 to_user=foia.user,
                 response=True,
                 datetime=timezone.now(),
@@ -484,7 +489,7 @@ def agency_reply(request, foia):
             if foia.status == "payment":
                 foia.price = form.cleaned_data["price"] / 100.0
             foia.save()
-            foia.process_attachments(request.user)
+            foia.process_attachments(agency_user)
             comm.create_agency_notifications()
             if has_perm:
                 text = "An agency used its full login to update this request"
@@ -494,8 +499,13 @@ def agency_reply(request, foia):
                     "This communication is hidden by default. Please review it "
                     "and show it if appropriate"
                 )
-            FlaggedTask.objects.create(user=request.user, foia=foia, text=text)
-            messages.success(request, "Reply succesfully posted")
+            FlaggedTask.objects.create(user=agency_user, foia=foia, text=text)
+            messages.success(
+                request,
+                "Thank you for your message! We’ll alert the user and they’ll be "
+                "able to respond as required. If you need to reach our staff, "
+                'click the "Get Help" button.',
+            )
         else:
             raise FoiaFormError("agency_reply_form", form)
 
