@@ -18,6 +18,7 @@ import hashlib
 import hmac
 import json
 import os
+from functools import wraps
 
 # MuckRock
 from muckrock.foia.models import (
@@ -28,6 +29,33 @@ from muckrock.foia.models import (
     OutboundComposerAttachment,
     OutboundRequestAttachment,
 )
+
+
+def login_or_agency_required(function):
+    """Allow semi-authenticated agency users to upload files"""
+
+    @wraps(function)
+    def wrapper(request, *args, **kwargs):
+        """If the user has a valid passcode for the request, treat them as the
+        agency user for this view
+        """
+        if not request.user.is_authenticated:
+            try:
+                if request.method == "POST":
+                    data = request.POST
+                else:
+                    data = request.GET
+                foia = FOIARequest.objects.get(pk=data["id"])
+            except (FOIARequest.DoesNotExist, KeyError):
+                return HttpResponseForbidden()
+            if request.session.get(f"foiapasscode:{foia.pk}"):
+                request.user = foia.agency.get_user()
+            else:
+                return HttpResponseForbidden()
+
+        return function(request, *args, **kwargs)
+
+    return wrapper
 
 
 def _success(request, model, attachment_model, fk_name):
@@ -52,7 +80,7 @@ def _success(request, model, attachment_model, fk_name):
     return HttpResponse()
 
 
-@login_required
+@login_or_agency_required
 def success_request(request):
     """"File has been succesfully uploaded to a FOIA"""
     return _success(request, FOIARequest, OutboundRequestAttachment, "foia")
@@ -111,7 +139,7 @@ def _session(request, model):
     return JsonResponse(data, safe=False)
 
 
-@login_required
+@login_or_agency_required
 def session_request(request):
     """Get the initial file list for a request"""
     return _session(request, FOIARequest)
@@ -126,20 +154,27 @@ def session_composer(request):
 def _delete(request, model):
     """Delete a pending attachment"""
     try:
-        attm = model.objects.get(
-            ffile=request.POST.get("key"), user=request.user, sent=False
-        )
+        attm = model.objects.get(ffile=request.POST.get("key"), sent=False)
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if not attm.attached_to.has_perm(request.user, "upload_attachment"):
+    if request.user.is_authenticated:
+        user = request.user
+    elif model is OutboundRequestAttachment and request.session.get(
+        f"foiapasscode:{attm.foia_id}"
+    ):
+        user = attm.foia.agency.get_user()
+
+    if attm.user != user:
+        return HttpResponseForbidden()
+
+    if not attm.attached_to.has_perm(user, "upload_attachment"):
         return HttpResponseForbidden()
 
     attm.delete()
     return HttpResponse()
 
 
-@login_required
 def delete_request(request):
     """Delete a pending attachment from a FOIA Request"""
     return _delete(request, OutboundRequestAttachment)
@@ -151,7 +186,6 @@ def delete_composer(request):
     return _delete(request, OutboundComposerAttachment)
 
 
-@login_required
 def sign(request):
     """Sign the data to upload to S3"""
     payload = json.loads(request.body)
@@ -238,7 +272,7 @@ def _key_name(request, model, id_name):
     return JsonResponse({"key": key})
 
 
-@login_required
+@login_or_agency_required
 def key_name_request(request):
     """Generate the S3 key name for a FOIA Request"""
     return _key_name(request, OutboundRequestAttachment, "foia_id")
