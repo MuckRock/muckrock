@@ -143,7 +143,7 @@ urlpatterns = [
     url(r"^opensearch/", include("opensearch.urls")),
     url(r"^dashboard/", include(dashing_router.urls)),
     path(
-        "c/<int:idx>/",
+        "respond/<int:idx>/",
         FOIACommunicationDirectAgencyView.as_view(),
         name="communication-direct-agency",
     ),
