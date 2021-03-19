@@ -75,9 +75,7 @@ class FOIAAgencyReplyForm(forms.Form):
 class AgencyPasscodeForm(forms.Form):
     """A form for agencies to enter their passcode to view embargoed requests"""
 
-    passcode = forms.CharField(
-        label="Passcode", widget=forms.PasswordInput, max_length=8
-    )
+    passcode = forms.CharField(label="Passcode", max_length=8)
 
     def __init__(self, *args, **kwargs):
         self.foia = kwargs.pop("foia")
@@ -85,7 +83,8 @@ class AgencyPasscodeForm(forms.Form):
 
     def clean_passcode(self):
         """Compare the passcode"""
-        if not compare_digest(self.cleaned_data["passcode"], self.foia.get_passcode()):
+        passcode = self.cleaned_data["passcode"].upper()
+        if not compare_digest(passcode, self.foia.get_passcode()):
             raise forms.ValidationError("Incorrect passcode")
         return self.cleaned_data["passcode"]
 
