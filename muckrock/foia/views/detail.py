@@ -66,7 +66,11 @@ from muckrock.foia.models import (
     FOIAMultiRequest,
     FOIARequest,
 )
-from muckrock.foia.tasks import composer_delayed_submit, zip_request
+from muckrock.foia.tasks import (
+    composer_delayed_submit,
+    import_doccloud_file,
+    zip_request,
+)
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
@@ -340,6 +344,7 @@ class Detail(DetailView):
             "pay_fee": self._pay_fee,
             "tracking_id": self._tracking_id,
             "portal": self._portal,
+            "import_dc_file": self._import_dc_file,
         }
         try:
             return actions[request.POST["action"]](request, foia)
@@ -892,6 +897,16 @@ class Detail(DetailView):
                     comm.save()
             except (KeyError, FOIACommunication.DoesNotExist):
                 messages.error(request, "The communication does not exist.")
+        return redirect(foia.get_absolute_url() + "#")
+
+    def _import_dc_file(self, request, foia):
+        """Import a file from DocumentCloud"""
+        if request.user.is_staff:
+            file_pk = request.POST.get("file_pk")
+            import_doccloud_file.delay(file_pk)
+            messages.success(
+                request, "The file will be imported from DocumentCloud soon"
+            )
         return redirect(foia.get_absolute_url() + "#")
 
     def _get_zip_download(self):

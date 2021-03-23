@@ -1,48 +1,73 @@
 {% load tags %}
-<div class="file" data-doc-id="{{file.doc_id}}" data-title="{{file.title}}" data-pages="{{file.pages}}" data-url="{{settings.DOCCLOUD_URL}}" {% if not hide_id %}id="{{file.anchor}}"{% endif %}>
-    {% if file.show_embed %}
-    <div class="file-image thumbnail">
-    {% else %}
-    <div class="file-image">
+<div
+  class="file"
+  data-doc-id="{{ file.doc_id }}"
+  data-title="{{ file.title }}"
+  data-pages="{{ file.pages }}"
+  data-url="{{ settings.DOCCLOUD_EMBED_URL }}"
+  {% if not hide_id %}id="{{ file.anchor }}"{% endif %}
+  >
+  <div class="file-image{% if file.show_embed %} thumbnail{% endif %}">
+    <img src="{{ SITE_ROOT }}{{ file.get_thumbnail }}" />
+  </div>
+  <div class="file-info">
+    <p class="title">{{ file.title }}</p>
+    <ul class="file-actions">
+      {% if file.show_embed %}
+        <li>
+          {# if foia_url, then we are on the FOIA page already #}
+          <a
+            href="{% if not foia_url %}{{ SITE_ROOT }}{{ file.comm.foia.get_absolute_url }}{% endif %}#{{ file.anchor }}"
+            class="view-file action"
+            >
+            {% include "lib/component/icon/view.svg" %}
+            <span class="label">View</span>
+          </a>
+        </li>
+        <li>
+          <span class="toggle-embed action">
+            {% include "lib/component/icon/embed.svg" %}
+            <span class="label">Embed</span>
+          </span>
+        </li>
+      {% endif %}
+      {% if file.ffile %}
+        <li>
+          <a href="{{ file.ffile.url }}" target="_blank" class="action">
+            {% include "lib/component/icon/download.svg" %}
+            <span class="label">Download</span>
+          </a>
+        </li>
+      {% endif %}
+      {% if request.user.is_staff and file.doc_id %}
+        <li>
+          <a
+            href="{{ settings.DOCCLOUD_URL }}/documents/{{ file.doc_id }}/"
+            target="_blank"
+            class="action"
+            >
+            {% include "lib/component/icon/options.svg" %}
+            <span class="label">Edit</span>
+          </a>
+        </li>
+        <li>
+          <form method="post">
+            <span class="dc-import action" >
+              {% include "lib/component/icon/success.svg" %}
+              {% csrf_token %}
+              <input type="hidden" name="file_pk" value="{{ file.pk }}">
+              <input type="hidden" name="action" value="import_dc_file">
+              <span class="label">Import</span>
+            </span>
+          </form>
+        </li>
+      {% endif %}
+    </ul>
+    {% if file.is_doccloud and file.doc_id %}
+      <div class="file-embed">
+        <textarea rows="1" readonly><iframe src="https://{{domain}}{% url "file-embed" pk=file.pk %}" width="100%" height="600px"></iframe></textarea>
+      </div>
     {% endif %}
-        <img src="{{SITE_ROOT}}{{file.get_thumbnail}}" />
-    </div>
-    <div class="file-info">
-        <p class="title">{{file.title}}</p>
-        <ul class="file-actions">
-            {% if file.show_embed %}
-            <li>
-                {% if foia_url %}
-                {# if foia_url, then we are on the FOIA page already #}
-                <a href="#{{ file.anchor }}" class="view-file action">
-                {% else %}
-                <a href="{{ SITE_ROOT }}{{ file.comm.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file action">
-                {% endif %}
-                    {% include 'lib/component/icon/view.svg' %}
-                    <span class="label">View</span>
-                </a>
-            </li>
-            <li>
-                <span class="toggle-embed action">
-                    {% include 'lib/component/icon/embed.svg' %}
-                    <span class="label">Embed</span>
-                </span>
-            </li>
-            {% endif %}
-            {% if file.ffile %}
-            <li>
-                <a href="{{file.ffile.url}}" target="_blank" class="action">
-                    {% include 'lib/component/icon/download.svg' %}
-                    <span class="label">Download</span>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-        {% if file.is_doccloud and file.doc_id %}
-        <div class="file-embed">
-            <textarea rows="1" readonly><iframe src="https://{{domain}}{% url 'file-embed' pk=file.pk %}" width="100%" height="600px"></iframe></textarea>
-        </div>
-        {% endif %}
-    </div>
+  </div>
 
 </div>

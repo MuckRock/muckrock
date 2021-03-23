@@ -32,6 +32,7 @@ from random import randint
 import dill as pickle
 import lob
 import numpy as np
+import requests
 from boto.s3.connection import S3Connection
 from constance import config
 from django_mailgun import MailgunAPIError
@@ -1024,3 +1025,29 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
     )
     mr_check.send_email()
     return check
+
+
+@task(
+    ignore_result=True, max_retries=10, name="muckrock.foia.tasks.import_doccloud_file"
+)
+def import_doccloud_file(file_pk):
+    """Import a file from DocumentCloud back into MuckRock"""
+    try:
+        ffile = FOIAFile.objects.get(pk=file_pk)
+    except FOIAFile.DoesNotExist:
+        return
+
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    document = dc_client.documents.get(ffile.doc_id)
+
+    with ffile.ffile.open("wb") as out_file, requests.get(
+        document.pdf_url, stream=True
+    ) as response:
+        response.raise_for_status()
+        for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
+            out_file.write(chunk)

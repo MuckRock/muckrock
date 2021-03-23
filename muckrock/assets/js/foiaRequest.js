@@ -171,6 +171,10 @@ $('.toggle-embed').click(function(){
     });
 });
 
+$('.dc-import').click(function(){
+    $(this).closest('form').submit();
+});
+
 /* Notes */
 
 $('.note-header').click(function(){

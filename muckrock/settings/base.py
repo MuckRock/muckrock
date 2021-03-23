@@ -506,6 +506,7 @@ MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.muckrock.com")
 FOIAMACHINE_URL = os.environ.get("FOIAMACHINE_URL", "http://dev.foiamachine.org")
 SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
 DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "http://www.dev.documentcloud.org")
+DOCCLOUD_EMBED_URL = os.environ.get("DOCCLOUD_EMBED_URL", DOCCLOUD_URL)
 DOCCLOUD_API_URL = os.environ.get(
     "DOCCLOUD_API_URL", "http://api.dev.documentcloud.org"
 )

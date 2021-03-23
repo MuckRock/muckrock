@@ -137,7 +137,7 @@ class FOIAFile(models.Model):
         foia = self.get_foia()
         if foia is None:
             return None
-        return "private" if foia.embargo else "public"
+        return "organization" if foia.embargo else "public"
 
     @property
     def show_embed(self):
