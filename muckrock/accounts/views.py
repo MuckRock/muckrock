@@ -432,9 +432,7 @@ class ProxyList(MRFilterListView):
     def get_queryset(self):
         """Display all proxies"""
         objects = super(ProxyList, self).get_queryset()
-        return objects.filter(
-            organizations__entitlement__resources__proxy=True
-        ).select_related("profile")
+        return objects.filter(profile__proxy=True).select_related("profile")
 
 
 def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx):

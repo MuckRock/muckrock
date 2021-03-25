@@ -188,15 +188,10 @@ class Jurisdiction(models.Model, RequestHelper):
             return Calendar()
 
     def get_proxy(self):
-        """Get a random proxy user for this jurisdiction"""
-        return (
-            User.objects.filter(
-                organizations__entitlement__resources__proxy=True,
-                profile__state=self.legal.abbrev,
-            )
-            .order_by("-profile__preferred_proxy")
-            .first()
-        )
+        """Get the proxy user for this jurisdiction"""
+        return User.objects.filter(
+            profile__proxy=True, profile__state=self.legal.abbrev
+        ).first()
 
     def get_requests(self):
         """State level jurisdictions should return requests from their localities as well."""
