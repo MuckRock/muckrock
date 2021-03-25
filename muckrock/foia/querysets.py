@@ -225,7 +225,7 @@ class FOIARequestQuerySet(models.QuerySet):
             permanent_embargo=composer.permanent_embargo,
             composer=composer,
             date_due=date_due,
-            proxy=proxy_info["proxy"],
+            proxy=proxy_info.get("from_user"),
             missing_proxy=proxy_info["missing_proxy"],
         )
         foia.tags.set(*composer.tags.all())
