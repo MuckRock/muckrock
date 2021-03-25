@@ -172,6 +172,14 @@ class FOIARequest(models.Model):
     access_key = models.CharField(blank=True, max_length=255)
     passcode = models.CharField(blank=True, max_length=8)
 
+    proxy = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="proxy_foias",
+        blank=True,
+        null=True,
+    )
+
     deleted = models.BooleanField(
         default=False,
         help_text='This request has been "deleted" and should reject new communications',

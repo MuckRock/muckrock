@@ -18,6 +18,9 @@
       {% if organization %}
         <li class="{% active request '^/foi/organization-list/$' %}"><a href="{% url 'foia-org-list' %}">Organization</a></li>
       {% endif %}
+      {% if user.proxy %}
+        <li class="{% active request '^/foi/proxy-list/$' %}"><a href="{% url 'foia-proxy-list' %}">Proxy</a></li>
+      {% endif %}
       <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
       {% if user.is_staff %}
         <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>

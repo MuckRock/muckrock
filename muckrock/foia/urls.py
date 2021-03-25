@@ -21,6 +21,7 @@ urlpatterns = [
     url(
         r"^organization-list/$", views.MyOrgRequestList.as_view(), name="foia-org-list"
     ),
+    url(r"^proxy-list/$", views.MyProxyRequestList.as_view(), name="foia-proxy-list"),
     url(r"^agency-list/$", views.AgencyRequestList.as_view(), name="foia-agency-list"),
     url(
         r"^list/following/$",

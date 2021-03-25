@@ -87,6 +87,7 @@ class FOIARequestQuerySet(models.QuerySet):
             # or if they are not embargoed
             query = (
                 Q(composer__user=user)
+                | Q(proxy=user)
                 | Q(pk__in=user.edit_access.all())
                 | Q(pk__in=user.read_access.all())
                 | ~Q(embargo=True)
@@ -224,6 +225,7 @@ class FOIARequestQuerySet(models.QuerySet):
             permanent_embargo=composer.permanent_embargo,
             composer=composer,
             date_due=date_due,
+            proxy=proxy_info["proxy"],
             missing_proxy=proxy_info["missing_proxy"],
         )
         foia.tags.set(*composer.tags.all())

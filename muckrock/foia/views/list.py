@@ -463,6 +463,22 @@ class MyOrgRequestList(UserPassesTestMixin, RequestList):
         )
 
 
+class MyProxyRequestList(UserPassesTestMixin, RequestList):
+    """View requests that you are the proxy for"""
+
+    filter_class = FOIARequestFilterSet
+    title = "My Proxy Requests"
+    template_name = "foia/list.html"
+
+    def test_func(self):
+        """User must be a proxy"""
+        return self.request.user.profile.proxy
+
+    def get_queryset(self):
+        """Limit to just requests the user is a proxy for"""
+        return super().get_queryset().filter(proxy=self.request.user)
+
+
 @class_view_decorator(
     user_passes_test(lambda u: u.is_authenticated and u.profile.is_agency_user)
 )
