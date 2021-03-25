@@ -23,3 +23,22 @@
         }
     }
 }
+
+.action.red {
+    color: $color-red;
+    .icon path,
+    .icon polygon,
+    .icon rect,
+    .icon circle{
+        fill: $color-red;
+    }
+    &:hover {
+        color: $color-red-dark;
+        .icon path,
+        .icon polygon,
+        .icon rect,
+        .icon circle{
+            fill: $color-red-dark;
+        }
+    }
+}

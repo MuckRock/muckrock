@@ -63,6 +63,7 @@ from muckrock.foia.models import (
     STATUS,
     FOIACommunication,
     FOIAComposer,
+    FOIAFile,
     FOIAMultiRequest,
     FOIARequest,
 )
@@ -345,6 +346,7 @@ class Detail(DetailView):
             "tracking_id": self._tracking_id,
             "portal": self._portal,
             "import_dc_file": self._import_dc_file,
+            "delete_file": self._delete_file,
         }
         try:
             return actions[request.POST["action"]](request, foia)
@@ -907,6 +909,14 @@ class Detail(DetailView):
             messages.success(
                 request, "The file will be imported from DocumentCloud soon"
             )
+        return redirect(foia.get_absolute_url() + "#")
+
+    def _delete_file(self, request, foia):
+        """Import a file from DocumentCloud"""
+        if request.user.is_staff:
+            file_pk = request.POST.get("file_pk")
+            FOIAFile.objects.filter(pk=file_pk).delete()
+            messages.success(request, "File succesfully deleted")
         return redirect(foia.get_absolute_url() + "#")
 
     def _get_zip_download(self):

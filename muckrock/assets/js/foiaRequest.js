@@ -171,7 +171,7 @@ $('.toggle-embed').click(function(){
     });
 });
 
-$('.dc-import').click(function(){
+$('.file-form').click(function(){
     $(this).closest('form').submit();
 });
 

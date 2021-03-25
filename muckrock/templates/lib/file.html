@@ -47,17 +47,30 @@
             class="action"
             >
             {% include "lib/component/icon/options.svg" %}
-            <span class="label">Edit</span>
+            <span class="label">Edit on DocumentCloud</span>
           </a>
         </li>
         <li>
           <form method="post">
-            <span class="dc-import action" >
+            <span class="file-form action" >
               {% include "lib/component/icon/success.svg" %}
               {% csrf_token %}
               <input type="hidden" name="file_pk" value="{{ file.pk }}">
               <input type="hidden" name="action" value="import_dc_file">
-              <span class="label">Import</span>
+              <span class="label">Import from DocumentCloud</span>
+            </span>
+          </form>
+        </li>
+      {% endif %}
+      {% if request.user.is_staff %}
+        <li>
+          <form method="post">
+            <span class="file-form action red" >
+              {% include "lib/component/icon/error.svg" %}
+              {% csrf_token %}
+              <input type="hidden" name="file_pk" value="{{ file.pk }}">
+              <input type="hidden" name="action" value="delete_file">
+              <span class="label">Delete</span>
             </span>
           </form>
         </li>
