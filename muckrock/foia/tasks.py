@@ -1045,6 +1045,13 @@ def import_doccloud_file(file_pk):
     )
     document = dc_client.documents.get(ffile.doc_id)
 
+    ext = ffile.get_extension()
+    if ext != "pdf":
+        name = ffile.ffile.name[: -len(ext)] + "pdf"
+        ffile.ffile.delete(save=False)
+        ffile.ffile.name = name
+        ffile.save()
+
     with ffile.ffile.open("wb") as out_file, requests.get(
         document.pdf_url, stream=True
     ) as response:

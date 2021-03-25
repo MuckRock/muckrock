@@ -85,7 +85,7 @@ class FOIAFile(models.Model):
 
     def get_extension(self):
         """Get the file extension"""
-        return os.path.splitext(self.name())[1][1:]
+        return os.path.splitext(self.name())[1][1:].lower()
 
     def get_foia(self):
         """Get FOIA"""
