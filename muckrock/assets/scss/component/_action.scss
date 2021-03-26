@@ -24,7 +24,7 @@
     }
 }
 
-.action.red {
+.action.red, .action.red a {
     color: $color-red;
     .icon path,
     .icon polygon,

@@ -64,15 +64,12 @@
       {% endif %}
       {% if request.user.is_staff %}
         <li>
-          <form method="post">
-            <span class="file-form action red" >
-              {% include "lib/component/icon/error.svg" %}
-              {% csrf_token %}
-              <input type="hidden" name="file_pk" value="{{ file.pk }}">
-              <input type="hidden" name="action" value="delete_file">
-              <span class="label">Delete</span>
-            </span>
-          </form>
+          <span class="action red" >
+            {% include "lib/component/icon/error.svg" %}
+            <a href="#delete-file-{{ file.pk }}" class="modal-trigger label">
+              Delete
+            </a>
+          </span>
         </li>
       {% endif %}
     </ul>
@@ -84,3 +81,19 @@
   </div>
 
 </div>
+
+{% if request.user.is_staff %}
+  <div class="modal" id="delete-file-{{ file.pk }}">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="file_pk" value="{{ file.pk }}">
+      <h1>Confirm</h1>
+      <p>Really delete {{ file.name }}?</p>
+      <footer>
+        <button type="submit" name="action" value="delete_file" class="red button">DELETE</button>
+        <span class="close-modal button">Cancel</span>
+      </footer>
+    </form>
+  </div>
+{% endif %}
+
