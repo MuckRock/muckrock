@@ -96,6 +96,8 @@ class Jurisdiction(models.Model, RequestHelper):
     public_notes = models.TextField(blank=True, help_text="May use html")
     aliases = models.TextField(blank=True)
 
+    always_proxy = models.BooleanField(default=False)
+
     # non local
     observe_sat = models.BooleanField(
         default=False,

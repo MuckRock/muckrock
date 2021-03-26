@@ -282,7 +282,7 @@ class Agency(models.Model, RequestHelper):
 
     def get_proxy_info(self):
         """Handle proxy users for request creation in this agency"""
-        if self.requires_proxy:
+        if self.requires_proxy or self.jurisdiction.legal.always_proxy:
             proxy_user = self.jurisdiction.get_proxy()
             if proxy_user is None:
                 return {
