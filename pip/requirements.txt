@@ -4,8 +4,6 @@
 #
 #    pip-compile --output-file=pip/requirements.txt pip/requirements.in
 #
---extra-index-url https://glenngreggs:AKCp5dKiN12abq99iBzGCKTcssb6wX3GH39YVNmgeXQESgrTUw8dzWe9QB5SzyXi6VS1sSD1u@washingtonpost.jfrog.io/washingtonpost/api/pypi/python-alpine-repo/simple
-
 -e git+git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun
     # via -r pip/requirements.in
 -e git+git://github.com/theatlantic/django-news-sitemaps.git@v1.3.0#egg=django_news_sitemaps
@@ -180,6 +178,8 @@ drf-nested-routers==0.91
     # via -r pip/requirements.in
 easy-thumbnails==2.7
     # via -r pip/requirements.in
+ecdsa==0.14.1
+    # via python-jose
 emoji==0.6.0
     # via -r pip/requirements.in
 fpdf==1.7.2
@@ -243,6 +243,7 @@ numpy==1.19.0
     # via
     #   -r pip/requirements.in
     #   scikit-learn
+    #   scipy
 oauth2client==4.1.2
     # via google-api-python-client
 oauthlib==2.1.0
@@ -288,6 +289,7 @@ pyasn1==0.4.2
     # via
     #   oauth2client
     #   pyasn1-modules
+    #   python-jose
     #   rsa
 pycodestyle==2.6.0
     # via autopep8
@@ -322,6 +324,8 @@ python-dateutil==2.8.1
     #   django-silk
     #   documentcloud
     #   zenpy
+python-jose==3.2.0
+    # via social-auth-core
 python-levenshtein==0.12.0
     # via -r pip/requirements.in
 python-redis-lock[django]==3.2.0
@@ -372,7 +376,9 @@ requests==2.21.0
 rjsmin==1.1.0
     # via django-compressor
 rsa==3.4.2
-    # via oauth2client
+    # via
+    #   oauth2client
+    #   python-jose
 rules==2.2
     # via -r pip/requirements.in
 s3transfer==0.3.3
@@ -397,6 +403,7 @@ six==1.15.0
     #   django-extensions
     #   django-mailgun
     #   django-news-sitemaps
+    #   ecdsa
     #   furl
     #   google-api-python-client
     #   oauth2client
@@ -404,6 +411,7 @@ six==1.15.0
     #   packaging
     #   pyjwkest
     #   python-dateutil
+    #   python-jose
     #   social-auth-app-django
     #   traitlets
     #   zenpy
@@ -413,8 +421,10 @@ smartypants==1.8.6
     # via -r pip/requirements.in
 social-auth-app-django==4.0.0
     # via -r pip/requirements.in
-social-auth-core==4.0.3
-    # via social-auth-app-django
+social-auth-core[openidconnect]==4.0.3
+    # via
+    #   -r pip/requirements.in
+    #   social-auth-app-django
 sorl-thumbnail==12.6.3
     # via -r pip/requirements.in
 sqlparse==0.2.4
