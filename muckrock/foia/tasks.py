@@ -954,7 +954,8 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         mail.lob_id = lob_obj.id
         mail.save()
         comm.foia.status = comm.foia.sent_status(category == "a", comm.thanks)
-        comm.foia.save()
+        comm.foia.save(comment="sent via lob")
+        comm.foia.update()
     except lob.error.APIConnectionError as exc:
         prepare_snail_mail.retry(
             countdown=(2 ** prepare_snail_mail.request.retries) * 300 + randint(0, 300),
