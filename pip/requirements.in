@@ -33,6 +33,7 @@ django-silk # Profiler (from dev requirements)
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
+django-watchman # Used for health check
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
 django<3.0 # Django is kinda important...
