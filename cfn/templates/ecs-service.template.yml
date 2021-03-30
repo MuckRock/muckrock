@@ -76,6 +76,14 @@ Environment:
     Value: !Sub ${AwsAccessKeyId}
   - Name: AWS_SECRET_ACCESS_KEY
     Value: !Sub ${AwsSecretAccessKey}
+  - Name: SQUARELET_KEY
+    Value: !Sub ${SquareletKey}
+  - Name: SQUARELET_SECRET
+    Value: !Sub ${SquareletSecret}
+  - Name: STRIPE_SECRET_KEY
+    Value: !Sub ${StripeSecretKey}
+  - Name: STRIPE_PUB_KEY
+    Value: !Sub ${StripePublicKey}
   {% for env_key, env_var in container.environment.items() %}
   - Name: {{ env_key }}
     Value: "{{ env_var }}"
@@ -132,6 +140,26 @@ Parameters:
         Description: Django secret key
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/SECRET_KEY
+
+    SquareletKey:
+        Description: Key for authenticating with Muckrock's Squarelet Service
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/SQUARELET_KEY
+    
+    SquareletSecret:
+        Description: Secret for authenticating with Muckrock's Squarelet Service
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/SQUARELET_SECRET
+    
+    StripeSecretKey:
+        Description: Stripe secret key
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/STRIPE_SECRET_KEY
+    
+    StripePublicKey:
+        Description: Stripe Public Key
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/STRIPE_PUB_KEY
 
     # TODO remove and replace these with IAM policy
     AwsAccessKeyId:
