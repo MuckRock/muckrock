@@ -188,6 +188,7 @@ def _is_valid_policy(user, policy_document):
 def _sign_policy_document(policy_document):
     """Sign and return the policy doucument for a simple upload.
     http://aws.amazon.com/articles/1434/#signyours3postform"""
+    # TODO refactor into IAM
     policy = base64.b64encode(json.dumps(policy_document).encode("utf8"))
     signature = base64.b64encode(
         hmac.new(
@@ -199,6 +200,7 @@ def _sign_policy_document(policy_document):
 
 def _sign_headers(headers):
     """Sign and return the headers for a chunked upload"""
+    # TODO refactor into IAM
     return {
         "signature": base64.b64encode(
             hmac.new(

@@ -10,7 +10,7 @@ from django.template.defaultfilters import slugify
 import csv
 
 # Third Party
-from boto.s3.connection import S3Connection
+import boto
 
 # MuckRock
 from muckrock.agency.models import (
@@ -51,7 +51,7 @@ LAST_UPDATE = 21
 def import_schools(file_name):
     """Import schools from spreadsheet"""
     # pylint: disable=too-many-locals
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = boto.connect_s3()
     bucket = conn.get_bucket("muckrock")
     key = bucket.get_key(file_name)
     key.get_contents_to_filename("/tmp/tmp.csv")

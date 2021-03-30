@@ -8,7 +8,7 @@ from django.conf import settings
 import csv
 
 # Third Party
-from boto.s3.connection import S3Connection
+import boto
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -18,7 +18,8 @@ from muckrock.jurisdiction.models import Jurisdiction, Law
 def import_laws(file_name):
     """Import laws from a spreadsheet"""
     # pylint: disable=too-many-locals
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    # TODO refactor into IAM
+    conn = boto.connect_s3()
     bucket = conn.get_bucket("muckrock")
     key = bucket.get_key(file_name)
     with smart_open(key) as law_file:

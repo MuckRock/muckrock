@@ -40,7 +40,7 @@ import dill as pickle
 import lob
 import numpy as np
 import requests
-from boto.s3.connection import S3Connection
+import boto
 from constance import config
 from django_mailgun import MailgunAPIError
 from documentcloud import DocumentCloud
@@ -738,7 +738,7 @@ def autoimport():
     def process(log):
         """Process the files"""
         log.append("Start Time: %s" % timezone.now())
-        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        conn = boto.connect_s3()
         bucket = conn.get_bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
         storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         for key in bucket.list(prefix="scans/", delimiter="/"):
@@ -958,7 +958,7 @@ def clean_export_csv():
     p_csv = re.compile(
         r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results)\.(?:csv|zip)"
     )
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = boto.connect_s3()
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     older_than = date.today() - timedelta(5)
     for prefix in ["exported_csv/", "zip_request/"]:
