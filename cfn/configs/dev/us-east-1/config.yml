@@ -52,9 +52,9 @@ context:
             - arn:aws:s3:::wapo-muckrock-dev/*
         - actions:
             - cloudfront:ListDistributions
-            - cloudfront:ClearCache # TODO verify for S3
+            - cloudfront:CreateInvalidation
           resources:
-            - arn:aws:cloudfront:*:*:*
+            - "*"
 
   # Required
   container:
