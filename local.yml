@@ -16,9 +16,11 @@ services:
     volumes:
       - .:/app
       - ~/.netrc:/root/.netrc
+      - ~/.aws:/root/.aws
     environment:
       - IPYTHONDIR=/app/.ipython
       # - MIGRATE=true
+      - AWS_PROFILE=${AWS_PROFILE}
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
