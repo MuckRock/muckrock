@@ -29,11 +29,11 @@ from datetime import date, datetime, time, timedelta
 from random import randint
 
 # Third Party
+import boto3
 import dill as pickle
 import lob
 import numpy as np
 import requests
-import boto
 from constance import config
 from django_mailgun import MailgunAPIError
 from documentcloud import DocumentCloud
@@ -232,10 +232,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
         )
 
 
-@task(
-    max_retries=10,
-    name="muckrock.foia.tasks.composer_delayed_submit",
-)
+@task(max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit")
 def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     # pylint: disable=unused-argument
@@ -526,31 +523,33 @@ def autoimport():
 
     def s3_copy(bucket, key_or_pre, dest_name):
         """Copy an s3 key or prefix"""
-
-        if key_or_pre.name.endswith("/"):
-            for key in bucket.list(prefix=key_or_pre.name, delimiter="/"):
-                if key.name == key_or_pre.name:
-                    key.copy(bucket, dest_name)
+        if key_or_pre.endswith("/"):
+            for obj in bucket.objects.filter(prefix=key_or_pre):
+                if obj.key == key_or_pre:
+                    bucket.Object(dest_name).copy_from(
+                        CopySource={"Bucket": bucket.name, "Key": obj.key}
+                    )
                     continue
                 s3_copy(
                     bucket,
-                    key,
+                    obj.key,
                     "%s/%s" % (dest_name, os.path.basename(os.path.normpath(key.name))),
                 )
         else:
-            key_or_pre.copy(bucket, dest_name)
+            bucket.Object(dest_name).copy_from(
+                CopySource={"Bucket": bucket.name, "Key": key_or_pre}
+            )
 
     def s3_delete(bucket, key_or_pre):
         """Delete an s3 key or prefix"""
-
-        if key_or_pre.name.endswith("/"):
-            for key in bucket.list(prefix=key_or_pre.name, delimiter="/"):
-                if key.name == key_or_pre.name:
-                    key.delete()
+        if key_or_pre.endswith("/"):
+            for obj in bucket.objects.filter(prefix=key_or_pre):
+                if obj.key == key_or_pre:
+                    obj.delete()
                     continue
                 s3_delete(bucket, key)
         else:
-            key_or_pre.delete()
+            bucket.Object(key_or_pre).delete()
 
     def parse_name(name):
         """Parse a file name"""
@@ -574,11 +573,10 @@ def autoimport():
         return foia_pks, file_datetime
 
     @transaction.atomic
-    def import_key(key, storage_bucket, comm, log):
+    def import_key(key, bucket, storage_bucket, comm, log):
         """Import a key"""
-
         foia = comm.foia
-        file_name = os.path.split(key.name)[1]
+        file_name = os.path.split(key)[1]
 
         # first parameter is instance, but we do not have one yet
         # luckily, it is only used if the upload_to for the field is
@@ -586,8 +584,10 @@ def autoimport():
         full_file_name = FOIAFile.ffile.field.generate_filename(None, file_name)
         full_file_name = default_storage.get_available_name(full_file_name)
 
-        new_key = key.copy(storage_bucket, full_file_name)
-        new_key.set_acl("public-read")
+        new_obj = storage_bucket.Object(full_file_name)
+        new_obj.copy_from(
+            CopySource={"Bucket": bucket.name, "Key": key}, ACL="public-read"
+        )
 
         foia_file = comm.attach_file(path=full_file_name, name=file_name, now=False)
 
@@ -601,44 +601,43 @@ def autoimport():
 
     def import_prefix(prefix, bucket, storage_bucket, comm, log):
         """Import a prefix (folder) full of documents"""
-
-        for key in bucket.list(prefix=prefix.name, delimiter="/"):
-            if key.name == prefix.name:
+        for obj in bucket.objects.filter(prefix=prefix):
+            if obj.key == prefix:
                 continue
-            if key.name.endswith("/"):
+            if obj.key.endswith("/"):
                 log.append(
                     "ERROR: nested directories not allowed: %s in %s"
                     % (key.name, prefix.name)
                 )
                 continue
             try:
-                import_key(key, storage_bucket, comm, log)
+                import_key(obj.key, bucket, storage_bucket, comm, log)
             except SizeError as exc:
-                s3_copy(bucket, key, "review/%s" % key.name[6:])
+                s3_copy(bucket, obj.key, "review/%s" % obj.key[6:])
                 exc.args[2].delete()  # delete the foia file
                 comm.delete()
                 log.append(
                     "ERROR: %s was %s bytes and after uploaded was %s bytes - retry"
-                    % (key.name[6:], exc.args[0], exc.args[1])
+                    % (obj.key[6:], exc.args[0], exc.args[1])
                 )
 
     def process(log):
         """Process the files"""
         log.append("Start Time: %s" % timezone.now())
-        conn = boto.connect_s3()
-        bucket = conn.get_bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
-        storage_bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-        for key in bucket.list(prefix="scans/", delimiter="/"):
-            if key.name == "scans/":
+        s3 = boto3.resource("s3")
+        bucket = s3.Bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
+        storage_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        for obj in bucket.objects.filter(prefix="scans/"):
+            if obj.key == "scans/":
                 continue
             # strip off 'scans/'
-            file_name = key.name[6:]
+            file_name = obj.key[6:]
 
             try:
                 foia_pks, file_datetime = parse_name(file_name)
             except ValueError as exc:
-                s3_copy(bucket, key, "review/%s" % file_name)
-                s3_delete(bucket, key)
+                s3_copy(bucket, obj.key, "review/%s" % file_name)
+                s3_delete(bucket, obj.key)
                 log.append(str(exc))
                 continue
 
@@ -661,13 +660,13 @@ def autoimport():
                         communication=comm, sent_datetime=file_datetime
                     )
 
-                    if key.name.endswith("/"):
-                        import_prefix(key, bucket, storage_bucket, comm, log)
+                    if obj.key.endswith("/"):
+                        import_prefix(obj.key, bucket, storage_bucket, comm, log)
                     else:
-                        import_key(key, storage_bucket, comm, log)
+                        import_key(obj.key, bucket, storage_bucket, comm, log)
 
                 except FOIARequest.DoesNotExist:
-                    s3_copy(bucket, key, "review/%s" % file_name)
+                    s3_copy(bucket, obj.key, "review/%s" % file_name)
                     log.append(
                         "ERROR: %s references FOIA Request %s, but it does not exist"
                         % (file_name, foia_pk)
@@ -677,13 +676,13 @@ def autoimport():
                     # re-raise so we can catch and clean up
                     raise
                 except Exception as exc:
-                    s3_copy(bucket, key, "review/%s" % file_name)
+                    s3_copy(bucket, obj.key, "review/%s" % file_name)
                     log.append(
                         "ERROR: %s has caused an unknown error. %s" % (file_name, exc)
                     )
                     logger.error("Autoimport error: %s", exc, exc_info=sys.exc_info())
             # delete key after processing all requests for it
-            s3_delete(bucket, key)
+            s3_delete(bucket, obj.key)
         log.append("End Time: %s" % timezone.now())
 
     try:
@@ -847,8 +846,8 @@ def clean_export_csv():
     p_csv = re.compile(
         r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results|agencies)\.(?:csv|zip)"
     )
-    conn = boto.connect_s3()
-    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
     older_than = date.today() - timedelta(5)
     for prefix in ["exported_csv/", "zip_request/", "agency_mass_import/"]:
         for key in bucket.list(prefix=prefix):
@@ -857,7 +856,7 @@ def clean_export_csv():
             if m_csv:
                 file_date = date(*(int(i) for i in m_csv.groups()))
                 if file_date < older_than:
-                    key.delete()
+                    obj.delete()
 
 
 @task(max_retries=10, name="muckrock.foia.tasks.foia_send_email")

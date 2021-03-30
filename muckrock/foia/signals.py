@@ -35,9 +35,7 @@ def foia_file_delete_s3(sender, **kwargs):
         foia_file = kwargs["instance"]
 
         bucket = get_s3_storage_bucket()
-        key = bucket.get_key(foia_file.ffile.name)
-        if key:
-            key.delete()
+        bucket.Object(foia_file.ffile.name).delete()
 
         clear_cloudfront_cache([foia_file.ffile.name])
 
@@ -66,9 +64,7 @@ def attachment_delete_s3(sender, **kwargs):
         attachment = kwargs["instance"]
 
         bucket = get_s3_storage_bucket()
-        key = bucket.get_key(attachment.ffile.name)
-        if key:
-            key.delete()
+        bucket.Object(attachment.ffile.name).delete()
 
 
 pre_save.connect(

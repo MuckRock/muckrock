@@ -1347,9 +1347,7 @@ class FOIARequest(models.Model):
             # delete from s3
             bucket = get_s3_storage_bucket()
             for file_ in files:
-                key = bucket.get_key(file_.ffile.name)
-                if key:
-                    key.delete()
+                bucket.Object(file_.ffile.name).delete()
 
             clear_cloudfront_cache([f.ffile.name for f in files])
 

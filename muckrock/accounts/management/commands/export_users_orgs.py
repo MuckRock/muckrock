@@ -12,7 +12,6 @@ from django.utils import timezone
 import csv
 
 # Third Party
-import boto
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -30,8 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # pylint: disable=unused-argument
         # pylint: disable=attribute-defined-outside-init
-        conn = boto.connect_s3()
-        self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        self.bucket = settings.AWS_STORAGE_BUCKET_NAME
         if kwargs["date_joined"]:
             with transaction.atomic():
                 self.export_date_joined()
@@ -49,7 +47,7 @@ class Command(BaseCommand):
     def export_users(self):
         """Export users"""
         print("Begin User Export - {}".format(timezone.now()))
-        key = self.bucket.new_key("squarelet_export/users.csv")
+        key = f"s3://{self.bucket}/squarelet_export/users.csv"
         with smart_open(key, "wb") as out_file:
             writer = csv.writer(out_file)
             writer.writerow(
@@ -102,7 +100,7 @@ class Command(BaseCommand):
         """Export organizations"""
         # pylint: disable=protected-access
         print("Begin Organization Export - {}".format(timezone.now()))
-        key = self.bucket.new_key("squarelet_export/orgs.csv")
+        key = f"s3://{self.bucket}/squarelet_export/orgs.csv"
         with smart_open(key, "wb") as out_file:
             writer = csv.writer(out_file)
             writer.writerow(
@@ -160,7 +158,7 @@ class Command(BaseCommand):
     def export_members(self):
         """Export memberships"""
         print("Begin Membership Export - {}".format(timezone.now()))
-        key = self.bucket.new_key("squarelet_export/members.csv")
+        key = f"s3://{self.bucket}/squarelet_export/members.csv"
         with smart_open(key, "wb") as out_file:
             writer = csv.writer(out_file)
             writer.writerow(
@@ -188,7 +186,7 @@ class Command(BaseCommand):
     def export_date_joined(self):
         """Export date joined data"""
         print("Begin Date Joined Export - {}".format(timezone.now()))
-        key = self.bucket.new_key("squarelet_export/date_joined.csv")
+        key = f"s3://{self.bucket}/squarelet_export/date_joined.csv"
         with smart_open(key, "wb") as out_file:
             writer = csv.writer(out_file)
             writer.writerow(["uuid", "date_joined"])

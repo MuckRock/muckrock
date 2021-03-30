@@ -78,10 +78,6 @@ Environment:
     Value: !Sub ${RedisHost}
   - Name: SECRET_KEY
     Value: !Sub ${SecretKey}
-  - Name: AWS_ACCESS_KEY_ID
-    Value: !Sub ${AwsAccessKeyId}
-  - Name: AWS_SECRET_ACCESS_KEY
-    Value: !Sub ${AwsSecretAccessKey}
   - Name: SQUARELET_KEY
     Value: !Sub ${SquareletKey}
   - Name: SQUARELET_SECRET
@@ -191,6 +187,7 @@ Parameters:
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/STRIPE_PUB_KEY
 
+<<<<<<< HEAD
     # TODO remove and replace these with IAM policy
     AwsAccessKeyId:
         Description: Cred for accessint s3 bucket as user
@@ -202,6 +199,20 @@ Parameters:
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
 
+||||||| parent of 288218a18... chore: migrate boto -> boto3
+    # TODO remove and replace these with IAM policy
+    AwsAccessKeyId:
+        Description: Cred for accessint s3 bucket as user
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/AWS_ACCESS_KEY_ID
+
+    AwsSecretAccessKey:
+        Description: Cred for accessint s3 bucket as user
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
+      
+=======
+>>>>>>> 288218a18... chore: migrate boto -> boto3
     MailgunAccessKey:
         Description: Mailgun API Key
         Type: 'AWS::SSM::Parameter::Value<String>'
