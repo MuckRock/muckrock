@@ -90,9 +90,10 @@ context:
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
       essential: false
+      port: 5001
       cfn_properties:
         HealthCheck:
-          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5001/watchman || exit 1"]
           Timeout: 20
       environment:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
@@ -100,9 +101,10 @@ context:
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
       essential: false
+      port: 5002
       cfn_properties:
         HealthCheck:
-          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5002/watchman || exit 1"]
           Timeout: 20
       environment:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
