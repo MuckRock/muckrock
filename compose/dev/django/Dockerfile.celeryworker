@@ -58,6 +58,7 @@ WORKDIR /app
 RUN mv compose/$DEPLOYMENT_ENV/django/celery/worker/start entrypoint
 RUN chmod +x entrypoint
 
-EXPOSE 5002/tcp
+HEALTHCHECK --interval=1m --timeout=5s \
+	CMD celery inspect ping -A muckrock.core.celery || exit 1
 
 ENTRYPOINT ["/app/entrypoint"]
