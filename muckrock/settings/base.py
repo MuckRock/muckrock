@@ -20,7 +20,6 @@ def boolcheck(setting):
     else:
         return bool(setting)
 
-
 # monkey patch celery to prevent Timed out waiting for UP message errors
 asynpool.PROC_ALIVE_TIMEOUT = 60.0
 
@@ -198,7 +197,7 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 ROOT_URLCONF = "muckrock.core.urls"
 
-INSTALLED_APPS = (
+INSTALLED_APPS = (  
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -265,6 +264,7 @@ INSTALLED_APPS = (
     "muckrock.portal",
     "muckrock.crowdsource",
     "actstream",
+    "watchman"
 )
 
 

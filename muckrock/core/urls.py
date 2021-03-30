@@ -5,7 +5,7 @@ URL mappings for muckrock project
 # Django
 import django.contrib.sitemaps.views
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include, re_path, url
 from django.contrib import admin
 from django.urls import path
 from django.views import static
@@ -147,6 +147,7 @@ urlpatterns = [
         FOIACommunicationDirectAgencyView.as_view(),
         name="communication-direct-agency",
     ),
+    re_path(r"^watchman/", include("watchman.urls")),
 ]
 
 if settings.DEBUG:
