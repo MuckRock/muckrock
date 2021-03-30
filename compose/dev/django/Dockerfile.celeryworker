@@ -58,6 +58,6 @@ WORKDIR /app
 RUN mv compose/$DEPLOYMENT_ENV/django/celery/worker/start entrypoint
 RUN chmod +x entrypoint
 
-EXPOSE 5000/tcp
+EXPOSE 5002/tcp
 
 ENTRYPOINT ["/app/entrypoint"]
