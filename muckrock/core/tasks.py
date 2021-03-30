@@ -11,7 +11,7 @@ from hashlib import md5
 from time import time
 
 # Third Party
-from boto.s3.connection import S3Connection
+import boto
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -34,7 +34,7 @@ class AsyncFileDownloadTask:
 
     def __init__(self, user_pk, hash_key):
         self.user = User.objects.get(pk=user_pk)
-        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        conn = boto.connect_s3()
         self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         today = date.today()
         self.file_key = "{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}".format(

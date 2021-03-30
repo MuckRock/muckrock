@@ -14,7 +14,7 @@ from calendar import monthrange
 from datetime import date
 
 # Third Party
-from boto.s3.connection import S3Connection
+import boto
 from constance import config
 from dashing.widgets import GraphWidget, ListWidget, NumberWidget, Widget
 from googleapiclient.discovery import build
@@ -489,9 +489,7 @@ class PageViewsWidget(NumberWidget):
 
             # initalize google analytics api
             # we store the keyfile on s3
-            conn = S3Connection(
-                settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
-            )
+            conn = boto.connect_s3()
             bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
             key = bucket.get_key("google/analytics_key.json")
             with smart_open(key) as key_file:

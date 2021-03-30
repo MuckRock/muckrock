@@ -12,7 +12,7 @@ from django.utils import timezone
 import csv
 
 # Third Party
-from boto.s3.connection import S3Connection
+import boto
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # pylint: disable=unused-argument
         # pylint: disable=attribute-defined-outside-init
-        conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        conn = boto.connect_s3()
         self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
         if kwargs["date_joined"]:
             with transaction.atomic():

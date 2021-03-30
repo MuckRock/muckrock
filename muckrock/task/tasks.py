@@ -14,7 +14,7 @@ from io import BytesIO
 from random import randint
 
 # Third Party
-from boto.s3.connection import S3Connection
+import boto
 from boto.s3.key import Key
 from fpdf import FPDF
 from PyPDF2 import PdfFileMerger, PdfFileReader
@@ -96,7 +96,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     bulk_merger.write(bulk_pdf)
     bulk_pdf.seek(0)
 
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    conn = boto.connect_s3()
     bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
     key = Key(bucket)
     key.key = pdf_name
