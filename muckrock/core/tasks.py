@@ -11,7 +11,7 @@ from hashlib import md5
 from time import time
 
 # Third Party
-import boto
+import boto3
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -34,8 +34,7 @@ class AsyncFileDownloadTask:
 
     def __init__(self, user_pk, hash_key):
         self.user = User.objects.get(pk=user_pk)
-        conn = boto.connect_s3()
-        self.bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        self.bucket = settings.AWS_STORAGE_BUCKET_NAME
         today = date.today()
         self.file_key = "{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}".format(
             dir_name=self.dir_name,
@@ -49,7 +48,7 @@ class AsyncFileDownloadTask:
                 ).encode("ascii")
             ).hexdigest(),
         )
-        self.key = self.bucket.new_key(self.file_key)
+        self.key = f"s3://{self.bucket}/{self.file_key}"
 
     def get_context(self):
         """Get context for the notification email"""
@@ -72,7 +71,10 @@ class AsyncFileDownloadTask:
             self.key, self.mode, s3_min_part_size=settings.AWS_S3_MIN_PART_SIZE
         ) as out_file:
             self.generate_file(out_file)
-        self.key.set_acl("public-read")
+        
+        s3 = boto3.resource('s3')
+        obj = s3.ObjectAcl(self.bucket, self.file_key)
+        obj.put(ACL='public-read')
         self.send_notification()
 
     def generate_file(self, out_file):

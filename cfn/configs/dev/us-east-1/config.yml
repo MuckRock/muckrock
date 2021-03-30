@@ -44,13 +44,17 @@ context:
     # Not required, additional cloudformation properties
     # cfn_properties:
     # Not required, only needed if you access AWS resources with the task
-    # task_role:
-    #   policies:
-    #     - actions:
-    #         - s3:*
-    #         - ssm:GetParameter
-    #       resources:
-    #         - arn:aws:s3:::wapo-muckrock-dev/*
+    task_role:
+      policies:
+        - actions:
+            - s3:*
+          resources:
+            - arn:aws:s3:::wapo-muckrock-dev/*
+        - actions:
+            - cloudfront:ListDistributions
+            - cloudfront:ClearCache # TODO verify for S3
+          resources:
+            - arn:aws:cloudfront:*:*:*
 
   # Required
   container:

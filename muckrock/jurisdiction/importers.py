@@ -8,7 +8,6 @@ from django.conf import settings
 import csv
 
 # Third Party
-import boto
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -18,10 +17,7 @@ from muckrock.jurisdiction.models import Jurisdiction, Law
 def import_laws(file_name):
     """Import laws from a spreadsheet"""
     # pylint: disable=too-many-locals
-    # TODO refactor into IAM
-    conn = boto.connect_s3()
-    bucket = conn.get_bucket("muckrock")
-    key = bucket.get_key(file_name)
+    key = f"s3://{settings.AWS_STORAGE_BUCKET_NAME}/{file_name}"
     with smart_open(key) as law_file:
         law_reader = csv.reader(law_file)
         for (
