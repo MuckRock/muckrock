@@ -658,7 +658,7 @@ def import_dc_file(request, foia):
         file_pk = request.POST.get("file_pk")
         import_doccloud_file.delay(file_pk)
         messages.success(request, "The file will be imported from DocumentCloud soon")
-    return redirect(foia.get_absolute_url() + "#")
+    return _get_redirect(request, foia)
 
 
 def delete_file(request, foia):
@@ -667,4 +667,4 @@ def delete_file(request, foia):
         file_pk = request.POST.get("file_pk")
         FOIAFile.objects.filter(pk=file_pk).delete()
         messages.success(request, "File succesfully deleted")
-    return redirect(foia.get_absolute_url() + "#")
+    return _get_redirect(request, foia)
