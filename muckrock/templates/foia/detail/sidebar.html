@@ -15,9 +15,17 @@
     <section class="basic-information">
 
       <summary class="synopsis">
-        {% url "acct-profile" foia.user.username as acct_url %}
-        {% cond_link is_agency_user|not acct_url foia.user.profile.full_name %}
-         filed this request
+        {% if foia.proxy %}
+          {% url "acct-profile" foia.user.username as acct_url %}
+          {% url "acct-profile" foia.proxy.username as proxy_url %}
+          {% cond_link is_agency_user|not proxy_url foia.proxy.profile.full_name %}
+          filed this request on behalf of
+          {% cond_link is_agency_user|not acct_url foia.user.profile.full_name %}
+        {% else %}
+          {% url "acct-profile" foia.user.username as acct_url %}
+          {% cond_link is_agency_user|not acct_url foia.user.profile.full_name %}
+           filed this request
+        {% endif %}
         {% if foia.agency %}
           with the
           {% if not is_agency_user %}
