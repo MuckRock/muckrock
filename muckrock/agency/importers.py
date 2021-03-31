@@ -50,7 +50,7 @@ LAST_UPDATE = 21
 
 def import_schools(file_name):
     """Import schools from spreadsheet"""
-    s3_path = f"s3://{settings.AWS_STORAGE_BUCKET_NAME}/tmp/muckrock-schools-tmp.csv"
+    s3_path = f"s3://{settings.AWS_STORAGE_BUCKET_NAME}/{file_name}"
     school_district = AgencyType.objects.get(name="School District")
     with smart_open(s3_path) as tmp_file:
         reader = csv.reader(tmp_file)
