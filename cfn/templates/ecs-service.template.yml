@@ -84,6 +84,8 @@ Environment:
     Value: !Sub ${StripeSecretKey}
   - Name: STRIPE_PUB_KEY
     Value: !Sub ${StripePublicKey}
+  - Name: MAILGUN_ACCESS_KEY
+    Value: !Sub ${MailgunAccessKey}
   {% for env_key, env_var in container.environment.items() %}
   - Name: {{ env_key }}
     Value: "{{ env_var }}"
@@ -171,6 +173,11 @@ Parameters:
         Description: Cred for accessint s3 bucket as user
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
+      
+    MailgunAccessKey:
+        Description: Mailgun API Key
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/MAILGUN_ACCESS_KEY
 
     {% if container.image is defined or service.image is defined -%}
     ImageVersion:
