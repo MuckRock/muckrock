@@ -52,6 +52,6 @@ def initial_communication_template(agencies, user_name, requested_docs, **kwargs
             "requested_docs": smart_text(requested_docs),
             "jurisdiction": jurisdiction,
             "user_name": user_name,
-            "proxy": kwargs.get("proxy"),
+            "proxy": kwargs["proxy"].profile.full_name if "proxy" in kwargs else None,
         }
         return template.render(context)

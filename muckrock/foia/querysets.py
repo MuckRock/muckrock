@@ -230,7 +230,7 @@ class FOIARequestQuerySet(models.QuerySet):
         )
         foia.tags.set(*composer.tags.all())
         foia.create_initial_communication(
-            proxy_info.get("from_user", composer.user), proxy=proxy_info["proxy"]
+            composer.user, proxy=proxy_info.get("from_user")
         )
         foia.process_attachments(composer.user, composer=True)
 

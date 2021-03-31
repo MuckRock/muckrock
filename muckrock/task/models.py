@@ -834,10 +834,10 @@ class NewAgencyTask(Task):
                 comm = foia.communications.first()
                 comm.communication = initial_communication_template(
                     [foia.agency],
-                    comm.from_user.profile.full_name,
+                    foia.user.profile.full_name,
                     foia.composer.requested_docs,
                     edited_boilerplate=foia.composer.edited_boilerplate,
-                    proxy=proxy_info["proxy"],
+                    proxy=proxy_info.get("from_user"),
                 )
                 comm.save()
                 foia.submit(clear=True)
