@@ -12,7 +12,7 @@
         {% if choice.exempt_note %}
           <span class="exempt-note">{{ choice.exempt_note|safe }}</span>
         {% endif %}
-      {% elif choice.requires_proxy %}
+      {% elif choice.requires_proxy or choice.jurisdiction.legal.always_proxy %}
         <span class="small yellow badge proxy">Proxy Required</span>
         <span class="exempt-note">This agency doesn't accept out of state requesters, so a local volunteer will file it on your behalf once submitted.</span>
       {% endif %}
