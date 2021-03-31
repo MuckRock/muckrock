@@ -79,7 +79,10 @@ CONFIG = [
                     "https://www.mailgun.com",
                 "description":
                     "Mailgun is used for sending and receiving email",
-                "envvars": [("MAILGUN_ACCESS_KEY", ""),],
+                "envvars": [
+                    ("MAILGUN_ACCESS_KEY", ""),
+                    ("MAILGUN_SERVER_NAME", "")
+                ],
             },
             {
                 "name":

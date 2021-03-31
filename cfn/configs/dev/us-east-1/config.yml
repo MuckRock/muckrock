@@ -86,6 +86,7 @@ context:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub 
         BANDIT_EMAIL: news-engineering-qa@washpost.com
 
     - name: muckrock_celerybeat

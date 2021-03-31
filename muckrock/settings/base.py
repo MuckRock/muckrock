@@ -407,7 +407,7 @@ MAILCHIMP_API_ROOT = "https://us2.api.mailchimp.com/3.0"
 MAILCHIMP_LIST_DEFAULT = "20aa4a931d"
 
 MAILGUN_ACCESS_KEY = os.environ.get("MAILGUN_ACCESS_KEY")
-MAILGUN_SERVER_NAME = "requests.muckrock.com"
+MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME")
 
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
