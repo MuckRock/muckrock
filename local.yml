@@ -33,6 +33,8 @@ services:
         aliases:
           - dev.muckrock.com
           - dev.foiamachine.org
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:80/watchman || exit 1"]
 
   muckrock_postgres:
     build:
@@ -64,6 +66,8 @@ services:
         aliases: []
     ports:
       - 8001:8001 # this is dumb, just needs a dummy port that is different than 80 since it inherits the django properties
+    healthcheck:
+      test: celery inspect ping -A muckrock.core.celery || exit 1
   muckrock_celerybeat:
     <<: *django
     image: muckrock_local_celerybeat
@@ -78,6 +82,8 @@ services:
         aliases: []
     ports:
       - 8002:8002
+    healthcheck: 
+      test: celery inspect ping -A muckrock.core.celery || exit 1
 networks:
   squarelet_default:
     external: true

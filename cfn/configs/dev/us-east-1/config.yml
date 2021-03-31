@@ -90,12 +90,18 @@ context:
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
       essential: false
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
       essential: false
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
