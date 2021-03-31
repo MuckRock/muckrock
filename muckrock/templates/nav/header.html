@@ -81,6 +81,9 @@
                 {% if user_organization and not user_organization.individual %}
                   <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
                 {% endif %}
+                {% if user.profile.proxy %}
+                  <li><a class="nav-item" class="nav-item" href="{% url 'foia-proxy-list' %}">Proxy&nbsp;Requests</a></li>
+                {% endif %}
                 <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
                 {% if user.is_staff %}
                   <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
