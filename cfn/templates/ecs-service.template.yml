@@ -86,10 +86,16 @@ Environment:
     Value: !Sub ${StripePublicKey}
   - Name: MAILGUN_ACCESS_KEY
     Value: !Sub ${MailgunAccessKey}
+  - Name: LOB_SECRET_KEY
+    Value: !Sub ${LobSecretKey}
+  - Name: LOB_WEBHOOK_KEY
+    Value: !Sub ${LobWebhookKey}
+  - Name: LOB_BANK_ACCOUNT_ID
+    Value: !Sub ${LobBankAccountId}
   {% for env_key, env_var in container.environment.items() %}
   - Name: {{ env_key }}
     Value: "{{ env_var }}"
-  
+
   {% endfor %}
 {% endif %}
 {% if container.cfn_properties is defined %}
@@ -112,32 +118,32 @@ Parameters:
     ClusterName:
         Description: the name of the cluster to host the service (should be something like 'trident-prod' not 'trident-prod-cluster')
         Type: String
-    
+
     PostgresHost:
         Description: Host of RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_HOST
-    
+
     PostgresUser:
         Description: User for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_USER
-    
+
     PostgresPassword:
         Description: Password for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_PASSWORD
-    
+
     PostgresDb:
         Description: Password of RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_DB
-    
+
     RedisUrl:
         Description: URL for redis on elasticache
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/REDIS_URL
-    
+
     SecretKey:
         Description: Django secret key
         Type: 'AWS::SSM::Parameter::Value<String>'
@@ -147,17 +153,17 @@ Parameters:
         Description: Key for authenticating with Muckrock's Squarelet Service
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/SQUARELET_KEY
-    
+
     SquareletSecret:
         Description: Secret for authenticating with Muckrock's Squarelet Service
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/SQUARELET_SECRET
-    
+
     StripeSecretKey:
         Description: Stripe secret key
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/STRIPE_SECRET_KEY
-    
+
     StripePublicKey:
         Description: Stripe Public Key
         Type: 'AWS::SSM::Parameter::Value<String>'
@@ -173,11 +179,26 @@ Parameters:
         Description: Cred for accessint s3 bucket as user
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
-      
+
     MailgunAccessKey:
         Description: Mailgun API Key
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/MAILGUN_ACCESS_KEY
+
+    LobSecretKey:
+        Description: Lob API Key
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/LOB_SECRET_KEY
+
+    LobWebhookKey:
+        Description: Lob Webhook Key
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/LOB_WEBHOOK_KEY
+
+    LobBankAccountId:
+        Description: Lob Bank Account ID
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/LOB_BANK_ACCOUNT_ID
 
     {% if container.image is defined or service.image is defined -%}
     ImageVersion:
