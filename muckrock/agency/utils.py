@@ -48,10 +48,11 @@ def initial_communication_template(agencies, user_name, requested_docs, **kwargs
         return requested_docs
     else:
         template = get_template("text/foia/request.txt")
+        proxy = kwargs.get("proxy")
         context = {
             "requested_docs": smart_text(requested_docs),
             "jurisdiction": jurisdiction,
             "user_name": user_name,
-            "proxy": kwargs["proxy"].profile.full_name if "proxy" in kwargs else None,
+            "proxy": proxy.profile.full_name if proxy else None,
         }
         return template.render(context)
