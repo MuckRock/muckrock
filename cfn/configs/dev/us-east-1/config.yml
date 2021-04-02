@@ -82,6 +82,7 @@ context:
           Timeout: 20
       environment:
         AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
+        POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
