@@ -75,5 +75,4 @@ def _validate_lob(signature, timestamp, body):
         digestmod=hashlib.sha256,
     ).hexdigest()
     match = hmac.compare_digest(signature, digest)
-    logger.info("Lob verification: %s %s %s %s", signature, timestamp, body, match)
     return match and int(timestamp) / 1000 + 300 > time.time()
