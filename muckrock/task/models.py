@@ -699,12 +699,12 @@ class FlaggedTask(Task):
             "status": "new",
             "tags": tags,
         }
-        requester = {}
-        if self.user and self.user.profile.full_name:
-            requester["name"] = self.user.profile.full_name
-        if self.user and self.user.email:
-            requester["email"] = self.user.email
-        if not requester:
+        if self.user:
+            requester = {
+                "name": self.user.profile.full_name or self.user.username,
+                "email": self.user.email,
+            }
+        else:
             requester = {"name": "Anonymous User"}
         request["requester"] = ZenUser(**requester)
         request = client.requests.create(Request(**request))
