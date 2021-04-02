@@ -60,14 +60,16 @@ LogConfiguration:
 {% endif -%}
 {% if container.environment is defined %}
 Environment:
-  - Name: POSTGRES_HOST
-    Value: !Sub ${PostgresHost}
-  - Name: POSTGRES_DB
-    Value: !Sub ${PostgresDb}
   - Name: POSTGRES_USER
-    Value: !Sub ${PostgresUser}
+    {% raw %}Value: '{{resolve:secretsmanager:/newsroom-apps/aurora-postgresql-{% endraw %}{{ environment }}{% raw %}/app:SecretString:username}}'{% endraw %}
+
   - Name: POSTGRES_PASSWORD
-    Value: !Sub ${PostgresPassword}
+    {% raw %}Value: '{{resolve:secretsmanager:/newsroom-apps/aurora-postgresql-{% endraw %}{{ environment }}{% raw %}/app:SecretString:password}}'{% endraw %}
+
+  - Name: POSTGRES_HOST
+    Value:
+      Fn::ImportValue: !Sub 'newsroom-apps-{{ environment }}-writer-host'
+
   - Name: REDIS_URL
     Value: !Sub ${RedisUrl}
   - Name: SECRET_KEY
@@ -125,11 +127,6 @@ Parameters:
         Description: Password for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_PASSWORD
-    
-    PostgresDb:
-        Description: Password of RDS postgres database
-        Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_DB
     
     RedisUrl:
         Description: URL for redis on elasticache
