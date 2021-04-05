@@ -40,7 +40,9 @@ until postgres_ready; do
 done
 echo >&2 'PostgreSQL is available'
 
-python manage.py migrate
+if [ -n "${MIGRATE}" ]; then 
+	python manage.py migrate
+fi
 
 # clean up celery if pid exists
 if test -f './celerybeat.pid'; then
