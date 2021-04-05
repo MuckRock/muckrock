@@ -18,6 +18,7 @@ services:
       - ~/.netrc:/root/.netrc
     environment:
       - IPYTHONDIR=/app/.ipython
+      # - MIGRATE=true
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
