@@ -42,5 +42,3 @@ echo >&2 'PostgreSQL is available'
 
 exec "$@"
 
-python /app/manage.py collectstatic --noinput
-gunicorn -c file:config/gunicorn.conf.py muckrock.wsgi:application
