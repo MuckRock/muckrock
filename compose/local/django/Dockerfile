@@ -3,6 +3,9 @@ FROM python:3.8
 
 ENV PYTHONUNBUFFERED 1
 
+ARG MIGRATE
+ENV MIGRATE $MIGRATE
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
   # psycopg2 dependencies
   #&& apt-get install build-deps gcc python2-dev musl-dev \
