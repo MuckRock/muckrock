@@ -90,8 +90,5 @@ RUN npm run build
 RUN pip install -r pip/requirements.txt
 WORKDIR /app
 
-RUN python /app/manage.py collectstatic --noinput
-
 EXPOSE 5000/tcp
-
-ENTRYPOINT ["gunicorn", "-c", "file:config/gunicorn.conf.py", "muckrock.wsgi:application"]
+ENTRYPOINT ["/app/entrypoint"]
