@@ -90,9 +90,8 @@ RUN npm run build
 RUN pip install -r pip/requirements.txt
 WORKDIR /app
 
-RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
-RUN chmod +x entrypoint
+RUN python /app/manage.py collectstatic --noinput
 
 EXPOSE 5000/tcp
 
-ENTRYPOINT ["/app/entrypoint"]
+ENTRYPOINT ["gunicorn", "-c", "file:config/gunicorn.conf.py", "muckrock.wsgi:application"]
