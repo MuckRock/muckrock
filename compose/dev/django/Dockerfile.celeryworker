@@ -55,7 +55,4 @@ RUN pip install -r /pip/requirements.txt
 COPY . /app/
 WORKDIR /app
 
-RUN mv compose/$DEPLOYMENT_ENV/django/celery/worker/start entrypoint
-RUN chmod +x entrypoint
-
-ENTRYPOINT ["/app/entrypoint"]
+ENTRYPOINT ["celery", "-A", "muckrock.core.celery", "worker", "-l", "INFO"]
