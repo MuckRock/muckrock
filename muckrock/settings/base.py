@@ -574,7 +574,8 @@ DASHING = {
     "PERMISSION_CLASSES": ("dashing.permissions.IsAdminUser",),
 }
 
-CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+CONSTANCE_BACKEND = "constance.backends.database.RedisBackend"
+CONSTANCE_REDIS_CONNECTION = os.environ.get("REDIS_URL")
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
     [
