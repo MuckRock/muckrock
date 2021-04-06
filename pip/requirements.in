@@ -12,6 +12,7 @@ django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
 django-compressor # Compress all JS and CSS assets into a single file
 django-constance[database] # Use for dynamic settings
+django-constance[redis] # Use for redis backend
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dashing # Used to create the dashboard
 django-debug-toolbar # Toolbar for debugging

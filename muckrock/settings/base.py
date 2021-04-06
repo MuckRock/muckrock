@@ -239,7 +239,6 @@ INSTALLED_APPS = (
     "opensearch",
     "dashing",
     "constance",
-    "constance.backends.database",
     "django_extensions",
     "social_django",
     "muckrock.accounts",
@@ -579,8 +578,12 @@ DASHING = {
     "PERMISSION_CLASSES": ("dashing.permissions.IsAdminUser",),
 }
 
-CONSTANCE_BACKEND = "constance.backends.database.RedisBackend"
-CONSTANCE_REDIS_CONNECTION = os.environ.get("REDIS_URL")
+CONSTANCE_REDIS_CONNECTION = {
+    'host': os.environ.get("REDIS_URL"),
+    'port': 6379,
+}
+
+print(CONSTANCE_REDIS_CONNECTION)
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
     [
