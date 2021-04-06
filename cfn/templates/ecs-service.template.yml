@@ -72,6 +72,8 @@ Environment:
 
   - Name: REDIS_URL
     Value: !Sub ${RedisUrl}
+  - Name: REDIS_HOST
+    Value: !Sub ${RedisHost}
   - Name: SECRET_KEY
     Value: !Sub ${SecretKey}
   - Name: AWS_ACCESS_KEY_ID
@@ -145,7 +147,12 @@ Parameters:
         Description: URL for redis on elasticache
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/REDIS_URL
-
+    
+    RedisHost:
+        Description: Host for redis on elasticache (no protocol)
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/REDIS_HOST
+    
     SecretKey:
         Description: Django secret key
         Type: 'AWS::SSM::Parameter::Value<String>'

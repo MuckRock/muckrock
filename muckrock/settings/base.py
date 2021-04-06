@@ -579,7 +579,7 @@ DASHING = {
 }
 
 CONSTANCE_REDIS_CONNECTION = {
-    'host': os.environ.get("REDIS_URL"),
+    'host': os.environ.get("REDIS_HOST"),
     'port': 6379,
 }
 
