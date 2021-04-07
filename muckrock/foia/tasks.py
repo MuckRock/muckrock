@@ -233,7 +233,6 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
 
 
 @task(
-    ignore_result=True,
     max_retries=10,
     name="muckrock.foia.tasks.composer_delayed_submit",
 )
@@ -241,7 +240,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     # pylint: disable=unused-argument
     logger.info(
-        "Starting composer_delayed_submit: (%s, %s, %s, %s)",
+        "Starting a composer_delayed_submit: (%s, %s, %s, %s)",
         composer_pk,
         approve,
         contact_info,
@@ -249,6 +248,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     )
     try:
         composer = FOIAComposer.objects.get(pk=composer_pk)
+        logger.info("FOIAComposer: %s", composer)
     except FOIAComposer.DoesNotExist:
         # If the composer was deleted, just return
         logger.info("could not fetch composer %s from db", composer_pk)
