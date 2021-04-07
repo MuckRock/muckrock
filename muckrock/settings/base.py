@@ -20,6 +20,7 @@ def boolcheck(setting):
     else:
         return bool(setting)
 
+
 # monkey patch celery to prevent Timed out waiting for UP message errors
 asynpool.PROC_ALIVE_TIMEOUT = 60.0
 
@@ -114,13 +115,16 @@ COMPRESS_JS_FILTERS = []
 THUMBNAIL_CACHE_DIMENSIONS = True
 
 if AWS_DEBUG:
+    STORAGE_BASE_URL = os.environ.get(
+        "CLOUDFRONT_DOMAIN", "muckrock-devel2.s3.amazonaws.com"
+    )
     DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
     THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
     STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = "https://muckrock-devel2.s3.amazonaws.com/static/"
+    STATIC_URL = "https://" + STORAGE_BASE_URL + "/static/"
     COMPRESS_URL = STATIC_URL
-    MEDIA_URL = "https://muckrock-devel2.s3.amazonaws.com/media/"
+    MEDIA_URL = "https://" + STORAGE_BASE_URL + "/media/"
     CLEAN_S3_ON_FOIA_DELETE = True
     AWS_S3_CUSTOM_DOMAIN = ""
 else:
@@ -197,7 +201,7 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 ROOT_URLCONF = "muckrock.core.urls"
 
-INSTALLED_APPS = (  
+INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -263,7 +267,7 @@ INSTALLED_APPS = (
     "muckrock.portal",
     "muckrock.crowdsource",
     "actstream",
-    "watchman"
+    "watchman",
 )
 
 
@@ -578,10 +582,7 @@ DASHING = {
     "PERMISSION_CLASSES": ("dashing.permissions.IsAdminUser",),
 }
 
-CONSTANCE_REDIS_CONNECTION = {
-    'host': os.environ.get("REDIS_HOST"),
-    'port': 6379,
-}
+CONSTANCE_REDIS_CONNECTION = {"host": os.environ.get("REDIS_HOST"), "port": 6379}
 
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
