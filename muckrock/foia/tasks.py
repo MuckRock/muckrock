@@ -360,8 +360,9 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     try:
         comm = FOIACommunication.objects.get(pk=comm_id)
     except FOIACommunication.DoesNotExist as exc:
+        logger.info("send_fax: retry for missing comm")
         send_fax.retry(
-            countdown=300,
+            countdown=10,
             args=[comm_id, subject, body, error_count],
             kwargs=kwargs,
             exc=exc,
@@ -370,6 +371,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     # the fax number should always be set before calling this, if it is not
     # it is likely a race condition and we should retry
     if comm.foia.fax is None:
+        logger.info("send_fax: retry for missing fax")
         send_fax.retry(
             countdown=300, args=[comm_id, subject, body, error_count], kwargs=kwargs
         )

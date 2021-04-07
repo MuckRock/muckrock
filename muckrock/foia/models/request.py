@@ -308,17 +308,22 @@ class FOIARequest(models.Model):
 
     def get_passcode(self):
         """Get a passcode for agency users"""
+        logger.info("PASSCODE start: %s", self.pk)
         if self.passcode:
+            logger.info("PASSCODE have: %s %s", self.pk, self.passcode)
             return self.passcode
 
         key = utils.generate_key(8, "ABCEFGHJKLMNPRUVWXY")
         with transaction.atomic():
             foia = FOIARequest.objects.select_for_update().get(pk=self.pk)
             if foia.passcode:
-                return foia.passcode
-            foia.passcode = key
+                logger.info("PASSCODE other: %s %s", self.pk, foia.passcode)
+                self.passcode = foia.passcode
+                return self.passcode
+            self.passcode = foia.passcode = key
             foia.save()
-        return key
+        logger.info("PASSCODE mine: %s %s", self.pk, key)
+        return self.passcode
 
     def get_files(self):
         """Get all files under this FOIA"""
