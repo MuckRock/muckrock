@@ -81,14 +81,14 @@ context:
           Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
           Timeout: 20
       environment:
+        ALLOWED_HOSTS: "*"
         AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
+        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
-        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
-        ALLOWED_HOSTS: "*"
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
-        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
-        BANDIT_EMAIL: news-engineering-qa@washpost.com
 
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
@@ -97,10 +97,13 @@ context:
         HealthCheck:
           Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
+        ALLOWED_HOSTS: "*"
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
-        BANDIT_EMAIL: news-engineering-qa@washpost.com
-        ALLOWED_HOSTS: "*"
+        POSTGRES_DB: muckrock
+        POSTGRES_PORT: 5432
+        SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
       essential: false
@@ -108,10 +111,13 @@ context:
         HealthCheck:
           Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
+        ALLOWED_HOSTS: "*"
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
-        BANDIT_EMAIL: news-engineering-qa@washpost.com
-        ALLOWED_HOSTS: "*"
+        POSTGRES_DB: muckrock
+        POSTGRES_PORT: 5432
+        SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
 
 params:
   # define the cluster name to run the service on

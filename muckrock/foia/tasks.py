@@ -251,6 +251,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         composer = FOIAComposer.objects.get(pk=composer_pk)
     except FOIAComposer.DoesNotExist:
         # If the composer was deleted, just return
+        logger.info("could not fetch composer %s from db", composer_pk)
         return
 
     logger.info("Fetched the composer")
