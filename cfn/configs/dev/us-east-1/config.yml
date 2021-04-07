@@ -87,7 +87,7 @@ context:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
         ALLOWED_HOSTS: "*"
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
-        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub 
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
         BANDIT_EMAIL: news-engineering-qa@washpost.com
 
     - name: muckrock_celerybeat
@@ -98,6 +98,8 @@ context:
           Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
         ALLOWED_HOSTS: "*"
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
@@ -107,6 +109,8 @@ context:
           Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
         DJANGO_SETTINGS_MODULE: muckrock.settings.staging
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
         ALLOWED_HOSTS: "*"
 
 params:
