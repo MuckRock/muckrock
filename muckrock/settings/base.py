@@ -97,13 +97,14 @@ COMPRESS_JS_FILTERS = []
 THUMBNAIL_CACHE_DIMENSIONS = True
 
 if AWS_DEBUG:
+    STORAGE_BASE_URL = os.environ.get("CLOUDFRONT_DOMAIN", "muckrock-devel2.s3.amazonaws.com")
     DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
     THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
     STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = "https://muckrock-devel2.s3.amazonaws.com/static/"
+    STATIC_URL = "https://" + STORAGE_BASE_URL + "/static/"
     COMPRESS_URL = STATIC_URL
-    MEDIA_URL = "https://muckrock-devel2.s3.amazonaws.com/media/"
+    MEDIA_URL = "https://" + STORAGE_BASE_URL + "/media/"
     CLEAN_S3_ON_FOIA_DELETE = True
     AWS_S3_CUSTOM_DOMAIN = ""
 else:
@@ -124,7 +125,7 @@ AWS_HEADERS = {
     "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
     "Cache-Control": "max-age=94608000",
 }
-AWS_DEFAULT_ACL = "public-read"
+AWS_DEFAULT_ACL = os.environ.get("AWS_STORAGE_DEFAULT_ACL", "public-read")
 AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get(
     "AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
 AWS_S3_MIN_PART_SIZE = int(os.environ.get(
@@ -507,7 +508,7 @@ ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
-MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.muckrock.com")
+MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.www.muckrock.com")
 FOIAMACHINE_URL = os.environ.get(
     "FOIAMACHINE_URL", "http://dev.foiamachine.org")
 SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
