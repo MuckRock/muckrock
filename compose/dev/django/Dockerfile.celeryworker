@@ -55,4 +55,5 @@ RUN pip install -r /pip/requirements.txt
 COPY . /app/
 WORKDIR /app
 
+EXPOSE 5555/tcp
 ENTRYPOINT ["celery", "-A", "muckrock.core.celery", "worker", "-l", "INFO"]
