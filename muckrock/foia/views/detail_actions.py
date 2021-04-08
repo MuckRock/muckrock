@@ -492,14 +492,17 @@ def agency_reply(request, foia):
             foia.process_attachments(agency_user)
             comm.create_agency_notifications()
             if has_perm:
-                text = "An agency used its full login to update this request"
+                text = "An agency used a secure login to update this request"
+                category = "agency login confirm"
             else:
                 text = (
-                    "An agency used its passcode login to update this request. "
-                    "This communication is hidden by default. Please review it "
-                    "and show it if appropriate"
+                    "An agency used an insecure login to update this request. (Hidden)"
+                    "\n\nPlease review it and show it if appropriate"
                 )
-            FlaggedTask.objects.create(user=agency_user, foia=foia, text=text)
+                category = "agency login validate"
+            FlaggedTask.objects.create(
+                user=agency_user, foia=foia, text=text, category=category
+            )
             messages.success(
                 request,
                 "Thank you for your message! We’ll alert the user and they’ll be "
