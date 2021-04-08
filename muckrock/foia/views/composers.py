@@ -187,16 +187,14 @@ class GenericComposer(BuyRequestsMixin):
                 "requestors to be in-state citizens.  We will file these "
                 "with volunteer filers in states in which we have a "
                 "volunteer available.  If we do not have a volunteer "
-                "available, your request will be filed once we find a "
-                "suitable volunteer."
+                "available, your request will be filed in your name."
             )
         elif proxies["missing"]:
             return (
                 "Some of the agencies you are requesting from require "
                 "requestors to be in-state citizens.  We do not currently "
                 "have a citizen proxy requestor on file for these "
-                "agencies, but will attempt to find one to submit these "
-                "requests on your behalf."
+                "agencies, so we will file this request in your name."
             )
         elif proxies["non-missing"]:
             return (

@@ -470,10 +470,7 @@ class FOIARequest(models.Model):
         # it will be handled after agency is approved
         approved_agency = agency.status == "approved"
 
-        if self.missing_proxy:
-            self._flag_proxy_resubmit()
-            self.save()
-        elif not approved_agency or needs_review:
+        if not approved_agency or needs_review:
             # the request needs attention from staff before going out
             # the request is processing until the correpsonding task is completed
             self.status = "submitted"
@@ -597,24 +594,6 @@ class FOIARequest(models.Model):
             "fax": agency.get_faxes("appeal").first(),
             "address": agency.get_addresses("appeal").first(),
         }
-
-    def _flag_proxy_resubmit(self):
-        """Flag this request to be re-submitted with a proxy"""
-        self.status = "submitted"
-        self.date_processing = date.today()
-        task.models.FlaggedTask.objects.create(
-            foia=self,
-            category="no proxy",
-            text="This request was filed for an agency requiring a "
-            "proxy, but no proxy was available.  Please add a suitable "
-            "proxy for the state and refile it with a note that the "
-            "request is being filed by a state citizen. Make sure the "
-            "new request is associated with the original user's "
-            "account. To add someone as a proxy, change their user type "
-            'to "Proxy" and make sure they properly have their state '
-            "set on the backend.  This message should only appear when "
-            "a suitable proxy does not exist.",
-        )
 
     def process_attachments(self, user, composer=False):
         """Attach all outbound attachments to the last communication"""
