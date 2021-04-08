@@ -3,6 +3,7 @@
 # Django
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.http import (
     HttpResponse,
@@ -13,10 +14,6 @@ from django.http import (
 from django.utils import timezone
 
 # Standard Library
-import base64
-import hashlib
-import hmac
-import json
 import os
 from functools import wraps
 
@@ -191,9 +188,13 @@ def delete_composer(request, idx):
     return _delete(request, OutboundComposerAttachment, idx)
 
 
-def _build_presigned_url(key, user=None):
+def _build_presigned_url(key, contentType, user=None):
     """Generate a policy document and presigned URL for an upload
     https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html#generating-a-presigned-url-to-upload-a-file"""
+
+    # Validate MIME type
+    if not contentType in settings.ALLOWED_FILE_MIMES:
+        raise ValidationError("Invalid file type")
 
     bucket = settings.AWS_STORAGE_BUCKET_NAME
     conditions = [
@@ -202,7 +203,7 @@ def _build_presigned_url(key, user=None):
         {"bucket": bucket},
         {"key": key},
         {"success_action_status": "200"},
-        # Make sure the MIME type is valid
+        {"Content-Type": contentType},
         # Whitelist metadata headers
         ["starts-with", "$x-amz-meta-qqfilename", ""],
         ["starts-with", "$x-amz-meta-qquuid", ""],
@@ -219,6 +220,7 @@ def _build_presigned_url(key, user=None):
 
     url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
     url_data["fields"]["success_action_status"] = 200
+    url_data["fields"]["Content-Type"] = contentType
 
     return url_data
 
@@ -255,7 +257,13 @@ def _get_key(request, model, id_name=None):
 def _preupload(request, model, id_name):
     """Generates request info so the client can update directly to S3"""
     key = _get_key(request, model, id_name)
-    presigned_url = _build_presigned_url(key, user=request.user)
+    contentType = request.POST.get("type")
+
+    try:
+        presigned_url = _build_presigned_url(key, contentType, user=request.user)
+    except ValidationError as e:
+        return JsonResponse({"error": e.message}, status=400)
+
     return JsonResponse(presigned_url)
 
 

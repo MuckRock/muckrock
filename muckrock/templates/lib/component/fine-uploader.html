@@ -138,10 +138,14 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
           $.ajax({
             type: 'POST',
             url: urls.pre,
-            data: { name: filename, id: pk },
+            data: { 
+              name: filename, 
+              id: pk,
+              type: uploader.getFile(id).type
+            },
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
           })
-          .fail(function() {promise.failure();})
+          .fail(function(data) { promise.failure(data); })
           .done(function(data) {
             // Overide upload endpoint and params with values from AWS signature
             uploader.setEndpoint(data.url, id);
