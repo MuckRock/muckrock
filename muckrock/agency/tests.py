@@ -83,12 +83,11 @@ class TestAgencyUnit(TestCase):
         assert_not_in("from_user", proxy_info)
         assert_not_in("warning", proxy_info)
 
-        proxy_placeholder = UserFactory(username="Proxy")
         agency_ = AgencyFactory(requires_proxy=True)
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info["proxy"], True)
         eq_(proxy_info["missing_proxy"], True)
-        eq_(proxy_info["from_user"], proxy_placeholder)
+        assert_not_in("from_user", proxy_info)
         assert_in("warning", proxy_info)
 
         proxy = UserFactory(
