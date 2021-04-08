@@ -204,6 +204,9 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def create_new(self, composer, agency):
         """Create a new request and submit it"""
+        # pylint: disable=import-outside-toplevel
+        from muckrock.foia.message import notify_proxy_user
+
         if composer.agencies.count() > 1:
             title = "%s (%s)" % (composer.title, agency.name)
         else:
@@ -216,6 +219,7 @@ class FOIARequestQuerySet(models.QuerySet):
         else:
             date_due = None
         proxy_info = agency.get_proxy_info()
+        proxy_user = proxy_info.get("from_user")
         foia = self.create(
             status="submitted",
             title=title,
@@ -225,13 +229,13 @@ class FOIARequestQuerySet(models.QuerySet):
             permanent_embargo=composer.permanent_embargo,
             composer=composer,
             date_due=date_due,
-            proxy=proxy_info.get("from_user"),
+            proxy=proxy_user,
             missing_proxy=proxy_info["missing_proxy"],
         )
         foia.tags.set(*composer.tags.all())
-        foia.create_initial_communication(
-            composer.user, proxy=proxy_info.get("from_user")
-        )
+        foia.create_initial_communication(composer.user, proxy=proxy_user)
+        if proxy_user:
+            notify_proxy_user(foia)
         foia.process_attachments(composer.user, composer=True)
 
     def get_stale(self):

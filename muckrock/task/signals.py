@@ -8,6 +8,7 @@ import logging
 
 # MuckRock
 from muckrock.message.tasks import slack
+from muckrock.message.utils import format_user, slack_attachment, slack_message
 from muckrock.task.models import (
     BlacklistDomain,
     FlaggedTask,
@@ -34,30 +35,6 @@ def domain_blacklist(sender, instance, created, **kwargs):
     if BlacklistDomain.objects.filter(domain=domain).exists():
         instance.resolve()
     return
-
-
-def format_user(user):
-    """Format a user for inclusion in a Slack notification"""
-    base_url = "https://www.muckrock.com"
-    return "<%(url)s|%(name)s>" % {
-        "url": base_url + user.get_absolute_url(),
-        "name": user.profile.full_name,
-    }
-
-
-def slack_message(icon, channel, text, attachments):
-    """Formats and returns data in a Slack message format."""
-    return {
-        "icon_emoji": icon,
-        "channel": channel,
-        "text": text,
-        "attachments": attachments,
-    }
-
-
-def slack_attachment(field_title, field_value, field_short=True):
-    """Formats and returns data in in the Slack attachment format."""
-    return {"title": field_title, "value": field_value, "short": field_short}
 
 
 def notify_flagged(sender, instance, created, **kwargs):
