@@ -31,7 +31,7 @@ context:
   # Required
   service:
     # Initial number of tasks to run, defaults to 2
-    default_scale: 2
+    default_scale: 1 # TODO we will want more for prod but this makes debugging easier
 
     # Health check, defaults to "/"
     health_check_path: /
@@ -106,6 +106,7 @@ context:
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
+      port: 5555 # For flower celery task monitoring
       essential: false
       cfn_properties:
         HealthCheck:
