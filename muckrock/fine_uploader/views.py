@@ -20,6 +20,9 @@ import json
 import os
 from functools import wraps
 
+# Third Party
+import boto3
+
 # MuckRock
 from muckrock.foia.models import (
     FOIACommunication,
@@ -77,7 +80,8 @@ def _success(request, model, attachment_model, fk_name):
     attachment.ffile.name = request.POST["key"]
     attachment.save()
 
-    return HttpResponse()
+    # Send the client the ID to update its reference
+    return JsonResponse({"id": attachment.id})
 
 
 @login_or_agency_required
@@ -106,13 +110,13 @@ def success_comm(request):
     if len(request.POST["key"]) > 255:
         return HttpResponseBadRequest()
 
-    comm.attach_file(
+    attachment = comm.attach_file(
         path=request.POST["key"],
         name=os.path.basename(request.POST["key"]),
         source=request.user.profile.full_name,
     )
 
-    return HttpResponse()
+    return JsonResponse({"id": attachment.id})
 
 
 def _session(request, model):
@@ -134,6 +138,7 @@ def _session(request, model):
                 "uuid": attm.pk,
                 "size": attm.ffile.size,
                 "s3Key": attm.ffile.name,
+                "s3Bucket": settings.AWS_STORAGE_BUCKET_NAME,
             }
         )
     return JsonResponse(data, safe=False)
@@ -151,10 +156,10 @@ def session_composer(request):
     return _session(request, FOIAComposer)
 
 
-def _delete(request, model):
+def _delete(request, model, idx):
     """Delete a pending attachment"""
     try:
-        attm = model.objects.get(ffile=request.POST.get("key"), sent=False)
+        attm = model.objects.get(pk=idx, sent=False)
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
@@ -175,79 +180,47 @@ def _delete(request, model):
     return HttpResponse()
 
 
-def delete_request(request):
+def delete_request(request, idx):
     """Delete a pending attachment from a FOIA Request"""
-    return _delete(request, OutboundRequestAttachment)
+    return _delete(request, OutboundRequestAttachment, idx)
 
 
 @login_required
-def delete_composer(request):
+def delete_composer(request, idx):
     """Delete a pending attachment from a FOIA Composer"""
-    return _delete(request, OutboundComposerAttachment)
+    return _delete(request, OutboundComposerAttachment, idx)
 
 
-def sign(request):
-    """Sign the data to upload to S3"""
-    try:
-        payload = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"invalid": True}, status=400)
+def _build_presigned_url(key, user=None):
+    """Generate a policy document and presigned URL for an upload
+    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html#generating-a-presigned-url-to-upload-a-file"""
 
-    if "headers" in payload:
-        return JsonResponse(_sign_headers(payload["headers"]))
-    elif _is_valid_policy(request.user, payload):
-        return JsonResponse(_sign_policy_document(payload))
-    else:
-        return JsonResponse({"invalid": True}, status=400)
+    bucket = settings.AWS_STORAGE_BUCKET_NAME
+    conditions = [
+        # Restrict uploads to specific bucket/key/ACL
+        {"acl": settings.AWS_DEFAULT_ACL},
+        {"bucket": bucket},
+        {"key": key},
+        {"success_action_status": "200"},
+        # Make sure the MIME type is valid
+        # Whitelist metadata headers
+        ["starts-with", "$x-amz-meta-qqfilename", ""],
+        ["starts-with", "$x-amz-meta-qquuid", ""],
+        ["starts-with", "$x-amz-meta-qqtotalfilesize", ""],
+    ]
 
+    if not user or not user.has_perm("foia.unlimited_attachment_size"):
+        conditions.append(["content-length-range", "0", settings.MAX_ATTACHMENT_SIZE])
 
-def _is_valid_policy(user, policy_document):
-    """
-    Verify the policy document has not been tampered with client-side
-    before sending it off.
-    """
-    bucket = None
-    parsed_max_size = None
-
-    if user.has_perm("foia.unlimited_attachment_size"):
-        max_size = None
-    else:
-        max_size = settings.MAX_ATTACHMENT_SIZE
-
-    for condition in policy_document["conditions"]:
-        if isinstance(condition, list) and condition[0] == "content-length-range":
-            parsed_max_size = int(condition[2])
-        elif "bucket" in condition:
-            bucket = condition["bucket"]
-
-    return bucket == settings.AWS_STORAGE_BUCKET_NAME and parsed_max_size == max_size
-
-
-def _sign_policy_document(policy_document):
-    """Sign and return the policy doucument for a simple upload.
-    http://aws.amazon.com/articles/1434/#signyours3postform"""
-    # TODO refactor into IAM
-    policy = base64.b64encode(json.dumps(policy_document).encode("utf8"))
-    signature = base64.b64encode(
-        hmac.new(
-            settings.AWS_SECRET_ACCESS_KEY.encode("utf8"), policy, hashlib.sha1
-        ).digest()
+    s3 = boto3.client("s3")
+    url_data = s3.generate_presigned_post(
+        bucket, key, Conditions=conditions, ExpiresIn=60
     )
-    return {"policy": policy.decode("utf8"), "signature": signature.decode("utf8")}
 
+    url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
+    url_data["fields"]["success_action_status"] = 200
 
-def _sign_headers(headers):
-    """Sign and return the headers for a chunked upload"""
-    # TODO refactor into IAM
-    return {
-        "signature": base64.b64encode(
-            hmac.new(
-                settings.AWS_SECRET_ACCESS_KEY.encode("utf8"),
-                headers.encode("utf8"),
-                hashlib.sha1,
-            ).digest()
-        ).decode("utf8")
-    }
+    return url_data
 
 
 def _key_name_trim(name):
@@ -267,38 +240,41 @@ def _key_name_trim(name):
     return name
 
 
-def _key_name(request, model, id_name):
-    """Generate the S3 key name from the filename"""
+def _get_key(request, model, id_name=None):
+    """Generate the S3 key name from the filename, while guaranteeing uniqueness"""
     name = request.POST.get("name")
     attached_id = request.POST.get("id")
     name = _key_name_trim(name)
-    attachment = model(user=request.user, **{id_name: attached_id})
+    attachment = (
+        model(user=request.user, **{id_name: attached_id}) if id_name else model()
+    )
     key = attachment.ffile.field.generate_filename(attachment.ffile.instance, name)
-    key = default_storage.get_available_name(key)
-    return JsonResponse({"key": key})
+    return default_storage.get_available_name(key)
+
+
+def _preupload(request, model, id_name):
+    """Generates request info so the client can update directly to S3"""
+    key = _get_key(request, model, id_name)
+    presigned_url = _build_presigned_url(key, user=request.user)
+    return JsonResponse(presigned_url)
 
 
 @login_or_agency_required
-def key_name_request(request):
-    """Generate the S3 key name for a FOIA Request"""
-    return _key_name(request, OutboundRequestAttachment, "foia_id")
+def preupload_request(request):
+    """Generate upload info for a FOIA Request"""
+    return _preupload(request, OutboundRequestAttachment, "foia_id")
 
 
 @login_required
-def key_name_composer(request):
-    """Generate the S3 key name for a FOIA Composer"""
-    return _key_name(request, OutboundComposerAttachment, "composer_id")
+def preupload_composer(request):
+    """Generate upload info for a FOIA Composer"""
+    return _preupload(request, OutboundComposerAttachment, "composer_id")
 
 
 @login_required
-def key_name_comm(request):
-    """Generate the S3 key name from the filename"""
-    name = request.POST.get("name")
-    name = _key_name_trim(name)
-    file_ = FOIAFile()
-    key = file_.ffile.field.generate_filename(file_.ffile.instance, name)
-    key = default_storage.get_available_name(key)
-    return JsonResponse({"key": key})
+def preupload_comm(request):
+    """Generate upload info for a communication"""
+    return _preupload(request, FOIAFile)
 
 
 @login_required
