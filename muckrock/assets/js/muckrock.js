@@ -41,7 +41,7 @@ import './stripe';
 import './tabs';
 import './task';
 
-import qq from 'fine-uploader/lib/s3';
+import qq from 'fine-uploader';
 window.qq = qq;
 
 import 'jquery.tabulator';
