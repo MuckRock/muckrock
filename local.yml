@@ -23,8 +23,6 @@ services:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
     command: ["python", "manage.py", "runserver", "0.0.0.0:80"]
-    ports:
-      - 80:80
     networks:
       default:
         aliases:
@@ -47,6 +45,8 @@ services:
       - postgres_backup_local:/backups
     env_file:
       - ./.envs/.local/.postgres
+    ports:
+      - 5434:5432
 
   muckrock_redis:
     image: redis:3.2
