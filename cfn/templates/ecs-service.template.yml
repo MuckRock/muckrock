@@ -70,6 +70,8 @@ Environment:
     Value:
       Fn::ImportValue: !Sub 'newsroom-apps-{{ environment }}-writer-host'
 
+  - Name: DATABASE_URL
+    Value: !Sub ${DatabaseUrl}
   - Name: REDIS_URL
     Value: !Sub ${RedisUrl}
   - Name: REDIS_HOST
@@ -137,12 +139,23 @@ Parameters:
         Description: Password for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_PASSWORD
+<<<<<<< HEAD
 
     PostgresDb:
         Description: Password of RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_DB
 
+||||||| parent of 97c36b7d0... move DB string to ecs template/SSM
+    
+=======
+    
+    DatabaseUrl:
+        Description: Full connection string for RDS postgres database
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/DATABASE_URL
+    
+>>>>>>> 97c36b7d0... move DB string to ecs template/SSM
     RedisUrl:
         Description: URL for redis on elasticache
         Type: 'AWS::SSM::Parameter::Value<String>'
