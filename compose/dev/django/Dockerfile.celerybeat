@@ -28,6 +28,8 @@ ENV POSTGRES_HOST $POSTGRES_HOST
 ARG POSTGRES_PORT
 ENV POSTGRES_PORT $POSTGRES_PORT
 
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
