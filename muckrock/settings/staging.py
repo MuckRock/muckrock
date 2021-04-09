@@ -20,10 +20,10 @@ BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
 
-class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
-    """This backend hijacks all emails and sends them via Mailgun"""
+#  class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
+    #  """This backend hijacks all emails and sends them via Mailgun"""
 
-EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
+EMAIL_BACKEND = "bandit.backends.smtp.HijackSMTPBackend"
 
 # set proxy for static outgoing IP address, so we can cross
 # white list muckrock and squarelet staging sites
