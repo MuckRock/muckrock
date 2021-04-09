@@ -247,6 +247,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         kwargs,
     )
     try:
+        logger.info("trying to fetch composer with pk: %s", composer_pk)
         composer = FOIAComposer.objects.get(pk=composer_pk)
         logger.info("FOIAComposer: %s", composer)
     except FOIAComposer.DoesNotExist:
