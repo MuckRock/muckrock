@@ -23,8 +23,6 @@ BANDIT_WHITELIST = [
 class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
     """This backend hijacks all emails and sends them via Mailgun"""
 
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django_mailgun.MailgunBackend")
-
 # set proxy for static outgoing IP address, so we can cross
 # white list muckrock and squarelet staging sites
 os.environ["http_proxy"] = os.environ.get("FIXIE_URL", "")
