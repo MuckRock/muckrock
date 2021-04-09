@@ -780,6 +780,7 @@ class FOIARequest(models.Model):
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
         backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
+        logger.info("email backend: %s", backend)
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
                 subject=comm.subject,
