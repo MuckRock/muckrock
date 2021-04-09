@@ -20,8 +20,6 @@ BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
 
-SECURE_SSL_REDIRECT = True
-
 class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
     """This backend hijacks all emails and sends them via Mailgun"""
 
