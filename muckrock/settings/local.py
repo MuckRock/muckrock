@@ -18,9 +18,9 @@ MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
 
 INSTALLED_APPS += ("silk",)
 
-SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_BINARY = True
-SILKY_META = True
+SILKY_PYTHON_PROFILER = False
+SILKY_PYTHON_PROFILER_BINARY = False
+SILKY_META = False
 
 DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.versions.VersionsPanel",

@@ -737,6 +737,7 @@ class FOIARequest(models.Model):
         from_email, _ = EmailAddress.objects.get_or_create(
             email=self.get_request_email()
         )
+        logger.info("starting delayed email send to: %s from: %s", self.email, from_email)
 
         body = self.render_msg_body(
             comm=comm,
@@ -772,6 +773,7 @@ class FOIARequest(models.Model):
             comm.attach_files_to_email(msg)
 
             try:
+                logger.info("sending mail with backend: %s", backend)
                 msg.send(fail_silently=False)
             except MailgunAPIError as exc:
                 EmailError.objects.create(
