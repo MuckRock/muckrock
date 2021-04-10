@@ -771,7 +771,7 @@ class FOIARequest(models.Model):
             comm.attach_files_to_email(msg)
 
             try:
-                logger.info("sending mail")
+                logger.info("sending mail with backend: %s", backend)
                 msg.send(fail_silently=False)
             except MailgunAPIError as exc:
                 EmailError.objects.create(
