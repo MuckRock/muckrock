@@ -89,7 +89,7 @@ context:
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
-        EMAIL_BACKEND: 'bandit.backends.smtp.HijackSMTPBackend'
+        EMAIL_BACKEND: bandit.backends.smtp.HijackSMTPBackend
 
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
@@ -105,7 +105,7 @@ context:
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
-        EMAIL_BACKEND: 'bandit.backends.smtp.HijackSMTPBackend'
+        EMAIL_BACKEND: bandit.backends.smtp.HijackSMTPBackend
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
       port: 5555 # For flower celery task monitoring
@@ -121,7 +121,7 @@ context:
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
-        EMAIL_BACKEND: 'bandit.backends.smtp.HijackSMTPBackend'
+        EMAIL_BACKEND: bandit.backends.smtp.HijackSMTPBackend
 
 params:
   # define the cluster name to run the service on
