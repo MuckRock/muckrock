@@ -422,7 +422,7 @@ MAILGUN_ACCESS_KEY = os.environ.get("MAILGUN_ACCESS_KEY")
 MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME")
 
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
-EMAIL_BACKEND = os.environ.get(EMAIL_BACKEND, "django_mailgun.MailgunBackend")
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django_mailgun.MailgunBackend")
 
 DOCUMENTCLOUD_BETA_USERNAME = os.environ.get("DOCUMENTCLOUD_BETA_USERNAME")
 DOCUMENTCLOUD_BETA_PASSWORD = os.environ.get("DOCUMENTCLOUD_BETA_PASSWORD")
