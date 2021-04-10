@@ -754,7 +754,7 @@ class FOIARequest(models.Model):
 
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
-        backend = 'django_mailgun.MailgunBackend'
+        backend = settings.EMAIL_BACKEND
         logger.info("email backend from settings: %s", settings.EMAIL_BACKEND)
         logger.info("backend hardcoded: %s", backend)
         with get_connection(backend) as email_connection:
