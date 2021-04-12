@@ -129,7 +129,6 @@ def _session(request, model):
     attms = foia.pending_attachments.filter(user=request.user, sent=False)
 
     data = []
-    storage = MediaRootS3BotoStorage()
     for attm in attms:
         data.append(
             {
