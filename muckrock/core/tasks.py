@@ -34,7 +34,7 @@ class AsyncFileDownloadTask:
 
     def __init__(self, user_pk, hash_key):
         self.user = User.objects.get(pk=user_pk)
-        self.bucket = settings.AWS_STORAGE_BUCKET_NAME
+        self.bucket = settings.AWS_MEDIA_BUCKET_NAME
         today = date.today()
         self.file_key = "{dir_name}/{y:4d}/{m:02d}/{d:02d}/{md5}/{file_name}".format(
             dir_name=self.dir_name,
@@ -74,7 +74,7 @@ class AsyncFileDownloadTask:
         
         s3 = boto3.resource('s3')
         obj = s3.ObjectAcl(self.bucket, self.file_key)
-        obj.put(ACL='public-read')
+        obj.put(ACL=settings.AWS_DEFAULT_ACL)
         self.send_notification()
 
     def generate_file(self, out_file):

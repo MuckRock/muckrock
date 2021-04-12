@@ -17,7 +17,7 @@ from muckrock.jurisdiction.models import Jurisdiction, Law
 def import_laws(file_name):
     """Import laws from a spreadsheet"""
     # pylint: disable=too-many-locals
-    key = f"s3://{settings.AWS_STORAGE_BUCKET_NAME}/{file_name}"
+    key = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{file_name}"
     with smart_open(key) as law_file:
         law_reader = csv.reader(law_file)
         for (
