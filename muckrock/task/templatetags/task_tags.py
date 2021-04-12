@@ -283,7 +283,9 @@ class PortalTaskNode(TaskNode):
                     "communication": self.task.communication.communication,
                     "word_to_pass": foia_.portal_password,
                 }
-                extra_context["previous_communications"] = foia_.reverse_communications
+                extra_context["previous_communications"] = foia_.reverse_communications[
+                    :10
+                ]
             else:
                 form_initial = {}
             extra_context["form"] = task.forms.IncomingPortalForm(initial=form_initial)
