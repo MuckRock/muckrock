@@ -254,7 +254,7 @@ def _get_key(request, model, id_name=None):
     return default_storage.get_available_name(key)
 
 
-def _preupload(request, model, id_name):
+def _preupload(request, model, id_name=None):
     """Generates request info so the client can update directly to S3"""
     key = _get_key(request, model, id_name)
     contentType = request.POST.get("type")
