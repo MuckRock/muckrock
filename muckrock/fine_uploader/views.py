@@ -21,6 +21,7 @@ from functools import wraps
 import boto3
 
 # MuckRock
+from muckrock.core.storage import MediaRootS3BotoStorage
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
@@ -128,6 +129,7 @@ def _session(request, model):
     attms = foia.pending_attachments.filter(user=request.user, sent=False)
 
     data = []
+    storage = MediaRootS3BotoStorage()
     for attm in attms:
         data.append(
             {
@@ -135,7 +137,7 @@ def _session(request, model):
                 "uuid": attm.pk,
                 "size": attm.ffile.size,
                 "s3Key": attm.ffile.name,
-                "s3Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                "s3Bucket": settings.AWS_MEDIA_BUCKET_NAME,
             }
         )
     return JsonResponse(data, safe=False)
@@ -196,7 +198,7 @@ def _build_presigned_url(key, contentType, user=None):
     if not contentType in settings.ALLOWED_FILE_MIMES:
         raise ValidationError("Invalid file type")
 
-    bucket = settings.AWS_STORAGE_BUCKET_NAME
+    bucket = settings.AWS_MEDIA_BUCKET_NAME
     conditions = [
         # Restrict uploads to specific bucket/key/ACL
         {"acl": settings.AWS_DEFAULT_ACL},

@@ -25,9 +25,6 @@ def boolcheck(setting):
 asynpool.PROC_ALIVE_TIMEOUT = 60.0
 
 DEBUG = False
-EMAIL_DEBUG = DEBUG
-THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -114,41 +111,26 @@ COMPRESS_JS_FILTERS = []
 
 THUMBNAIL_CACHE_DIMENSIONS = True
 
+# Boto3S3Storage configuration
+DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
+THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
+COMPRESS_STORAGE = STATICFILES_STORAGE
+CLEAN_S3_ON_FOIA_DELETE = True
+
+# Settings for static bucket storage
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
 AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
     "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
 )
-
-if AWS_DEBUG:
-    STORAGE_BASE_URL = os.environ.get(
-        "CLOUDFRONT_DOMAIN", "muckrock-devel2.s3.amazonaws.com"
-    )
-    DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
-    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
-    STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
-    COMPRESS_STORAGE = STATICFILES_STORAGE
-    CLEAN_S3_ON_FOIA_DELETE = True
-    AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
-    BASE_URL = (
-        "https://" + AWS_S3_CUSTOM_DOMAIN
-        if AWS_S3_CUSTOM_DOMAIN
-        else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-    )
-    STATIC_URL = BASE_URL + "/static/"
-    COMPRESS_URL = STATIC_URL
-    MEDIA_URL = BASE_URL + "/media/"
-else:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-    STATIC_URL = "/static/"
-    MEDIA_URL = "/media/"
-    CLEAN_S3_ON_FOIA_DELETE = False
-
-STATICFILES_FINDERS = (
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    "compressor.finders.CompressorFinder",
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
+STATIC_URL = (
+    f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+    if AWS_S3_CUSTOM_DOMAIN
+    else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
 )
-
+COMPRESS_URL = STATIC_URL
+COMPRESS_ENABLED = True
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_HEADERS = {
@@ -158,6 +140,31 @@ AWS_HEADERS = {
 AWS_DEFAULT_ACL = "public-read"
 AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get("AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
 AWS_S3_MIN_PART_SIZE = int(os.environ.get("AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
+
+# Set these ENV vars for a separate user-data storage bucket (otherwise matches storage settings above)
+AWS_MEDIA_BUCKET_NAME = os.environ.get("AWS_MEDIA_BUCKET_NAME", AWS_STORAGE_BUCKET_NAME)
+AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get(
+    "AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH
+)
+AWS_MEDIA_CUSTOM_DOMAIN = os.environ.get("MEDIA_CLOUDFRONT_DOMAIN")
+
+if AWS_MEDIA_BUCKET_NAME == AWS_STORAGE_BUCKET_NAME:
+    # Inherit bucket/cloudfront settings from static data if they match
+    MEDIA_URL = ""
+    AWS_MEDIA_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN
+else:
+    # Infer the media url from the custom domain or bucket name settings
+    MEDIA_URL = (
+        f"https://{AWS_MEDIA_CUSTOM_DOMAIN}/"
+        if AWS_MEDIA_CUSTOM_DOMAIN
+        else f"https://{AWS_MEDIA_BUCKET_NAME}.s3.amazonaws.com/"
+    )
+
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+)
 
 TEMPLATES = [
     {
