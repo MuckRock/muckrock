@@ -253,7 +253,7 @@ def zoho_get(path, params=None):
 def get_s3_storage_bucket():
     """Return the S3 storage bucket"""
     s3 = boto3.resource("s3")
-    return s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    return s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
 
 
 def clear_cloudfront_cache(file_names):

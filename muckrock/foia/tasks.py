@@ -740,7 +740,7 @@ def autoimport():
         log.append("Start Time: %s" % timezone.now())
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
-        storage_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        storage_bucket = s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
         for obj in bucket.objects.filter(prefix='scans/'):
             if obj.key == "scans/":
                 continue
@@ -959,7 +959,7 @@ def clean_export_csv():
         r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results)\.(?:csv|zip)"
     )
     s3 = boto3.resource("s3")
-    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    bucket = s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
     older_than = date.today() - timedelta(5)
     for prefix in ["exported_csv/", "zip_request/"]:
         for obj in bucket.objects.filter(prefix=prefix):
