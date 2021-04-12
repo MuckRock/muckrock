@@ -223,6 +223,7 @@ class FOIAComposer(models.Model):
 
     def attachments_over_size_limit(self, user):
         """Are the pending attachments for this composer over the size limit?"""
+        print(self.pending_attachments)
         total_size = sum(
             a.ffile.size for a in self.pending_attachments.filter(user=user, sent=False)
         )

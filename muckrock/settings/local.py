@@ -9,9 +9,10 @@ Settings used when developing locally
 from muckrock.settings.base import *
 
 DEBUG = True
-EMAIL_DEBUG = DEBUG
-THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
+
+# Loads static files locally
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+STATIC_URL = "/static/"
 
 MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
 MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
