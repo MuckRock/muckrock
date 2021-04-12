@@ -67,7 +67,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 EMAIL_HOST = "dev.mailhog.com"
 EMAIL_PORT = 1025
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 QUERYCOUNT = {"DISPLAY_DUPLICATES": 10}
 
