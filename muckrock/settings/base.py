@@ -96,16 +96,23 @@ COMPRESS_JS_FILTERS = []
 
 THUMBNAIL_CACHE_DIMENSIONS = True
 
+AWS_STORAGE_BUCKET_NAME = os.environ.get(
+    "AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
+AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
+    "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
+)
+
 if AWS_DEBUG:
     DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
     THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
     STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
     COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = "https://muckrock-devel2.s3.amazonaws.com/static/"
-    COMPRESS_URL = STATIC_URL
-    MEDIA_URL = "https://muckrock-devel2.s3.amazonaws.com/media/"
     CLEAN_S3_ON_FOIA_DELETE = True
-    AWS_S3_CUSTOM_DOMAIN = ""
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
+    BASE_URL = "https://" + AWS_S3_CUSTOM_DOMAIN if AWS_S3_CUSTOM_DOMAIN else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    STATIC_URL = BASE_URL + "/static/"
+    COMPRESS_URL = STATIC_URL
+    MEDIA_URL = BASE_URL + "/media/"
 else:
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
     STATIC_URL = "/static/"
@@ -124,7 +131,7 @@ AWS_HEADERS = {
     "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
     "Cache-Control": "max-age=94608000",
 }
-AWS_DEFAULT_ACL = "public-read"
+AWS_DEFAULT_ACL = os.environ.get("AWS_STORAGE_DEFAULT_ACL", "public-read")
 AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get(
     "AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
 AWS_S3_MIN_PART_SIZE = int(os.environ.get(
@@ -391,11 +398,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get(
-    "AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
-AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
-    "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
-)
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")

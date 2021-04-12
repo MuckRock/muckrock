@@ -29,11 +29,11 @@ billiard==3.6.3.0
 bleach==3.1.5
     # via -r pip/requirements.in
 boto3==1.14.19
-    # via smart-open
-boto==2.42.0
     # via
     #   -r pip/requirements.in
     #   smart-open
+boto==2.42.0
+    # via smart-open
 botocore==1.17.19
     # via
     #   boto3
@@ -213,6 +213,11 @@ humanize==3.3.0
     # via flower
 idna==2.5
     # via requests
+importlib-metadata==3.10.0
+    # via
+    #   kombu
+    #   markdown
+    #   scout-apm
 ipython-genutils==0.2.0
     # via traitlets
 ipython==7.16.1
@@ -454,6 +459,8 @@ tornado==6.1
     # via flower
 traitlets==4.3.2
     # via ipython
+typing-extensions==3.7.4.3
+    # via importlib-metadata
 unidecode==0.4.19
     # via -r pip/requirements.in
 uritemplate==3.0.0
@@ -479,6 +486,8 @@ xlrd==1.1.0
     # via -r pip/requirements.in
 zenpy==2.0.20
     # via -r pip/requirements.in
+zipp==3.4.1
+    # via importlib-metadata
 zipstream==1.1.4
     # via -r pip/requirements.in
 

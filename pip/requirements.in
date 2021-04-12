@@ -2,7 +2,7 @@
 -e git://github.com/theatlantic/django-news-sitemaps.git@v1.3.0#egg=django_news_sitemaps # For generating news sitemaps
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
-boto # Used to access AWS
+boto3 # Used to access AWS
 celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
