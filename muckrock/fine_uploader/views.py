@@ -28,7 +28,6 @@ from muckrock.foia.models import (
     OutboundComposerAttachment,
     OutboundRequestAttachment,
 )
-from muckrock.core.storage import MediaRootS3BotoStorage
 
 
 def _success(request, model, attachment_model, fk_name):
@@ -97,11 +96,10 @@ def _session(request, model):
         return HttpResponseBadRequest()
     if not foia.has_perm(request.user, "upload_attachment"):
         return HttpResponseForbidden()
-    
+
     attms = foia.pending_attachments.filter(user=request.user, sent=False)
 
     data = []
-    storage = MediaRootS3BotoStorage()
     for attm in attms:
         data.append(
             {
