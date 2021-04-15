@@ -475,4 +475,8 @@ class ComposerDetail(DetailView):
             # something has gone wrong
             messages.error(request, "This request could not be sent")
 
-        return redirect(composer)
+        messages.error(request, "This request could not be sent")
+        if composer.foias.count() == 1:
+            return redirect(composer.foias.first())
+        else:
+            return redirect(composer)

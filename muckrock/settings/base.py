@@ -590,6 +590,10 @@ CONSTANCE_CONFIG = OrderedDict(
             "FOLLOWUP_DAYS_OTHER",
             (15, "Number of days between auto followups for state and local requests"),
         ),
+        (
+            "MODERATION_KEYWORDS",
+            ("!\n?", "Keywords to trigger manual moderation - one per line"),
+        ),
         ("AUTO_LOB", (False, "Automatically send snail mail via Lob")),
         ("AUTO_LOB_PAY", (False, "Automatically send checks via Lob")),
         ("AUTO_LOB_APPEAL", (False, "Automatically send appeal snail mail via Lob")),
@@ -632,6 +636,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FOLLOWUP_DAYS_PORTAL",
         "FOLLOWUP_DAYS_FEDERAL",
         "FOLLOWUP_DAYS_OTHER",
+        "MODERATION_KEYWORDS",
     ),
     "Lob Options": ("AUTO_LOB", "AUTO_LOB_PAY", "AUTO_LOB_APPEAL"),
     "Machine Learning Options": ("ENABLE_ML", "CONFIDENCE_MIN"),
