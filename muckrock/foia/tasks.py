@@ -210,7 +210,7 @@ def retry_stuck_documents():
 @task(
     ignore_result=True, max_retries=10, name="muckrock.foia.tasks.composer_create_foias"
 )
-def composer_create_foias(composer_pk, contact_info, **kwargs):
+def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
     """Create all the foias for a composer"""
     # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
@@ -225,7 +225,7 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
             "jurisdiction__law", "jurisdiction__parent__law"
         ).iterator():
             logger.info("Creating the foia for agency (%s, %s)", agency.pk, agency.name)
-            FOIARequest.objects.create_new(composer=composer, agency=agency)
+            FOIARequest.objects.create_new(composer, agency, no_proxy)
         # mark all attachments as sent here, after all requests have been sent
         composer.pending_attachments.filter(user=composer.user, sent=False).update(
             sent=True

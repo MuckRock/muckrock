@@ -136,7 +136,8 @@ $color-advanced-container: lighten($color-agency, 40%);
     .embargo label,
     .register_newsletter label,
     .edited_boilerplate label,
-    .permanent_embargo label {
+    .permanent_embargo label,
+    .no_proxy label {
       display: inline;
       margin-right: $vr/2;
     }

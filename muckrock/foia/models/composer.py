@@ -106,7 +106,7 @@ class FOIAComposer(models.Model):
             "foia-composer-detail", kwargs={"slug": self.slug, "idx": self.pk}
         )
 
-    def submit(self, contact_info=None):
+    def submit(self, contact_info=None, no_proxy=False):
         """Submit a composer to create the requests"""
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
@@ -121,10 +121,10 @@ class FOIAComposer(models.Model):
 
         if num_requests == 1:
             # if only one request, create it immediately so we can redirect there
-            composer_create_foias(self.pk, contact_info)
+            composer_create_foias(self.pk, contact_info, no_proxy)
         else:
             # otherwise do it delayed so the page doesn't risk timing out
-            composer_create_foias.delay(self.pk, contact_info)
+            composer_create_foias.delay(self.pk, contact_info, no_proxy)
 
         # if num_requests is less than the multi-review amount, we will approve
         # the request right away, other wise we create a multirequest task
