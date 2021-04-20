@@ -51,7 +51,7 @@
           </a>
         </li>
         <li>
-          <form method="post">
+          <form method="post" action="{{ file.comm.foia.get_absolute_url }}" >
             <span class="file-form action" >
               {% include "lib/component/icon/success.svg" %}
               {% csrf_token %}
@@ -84,7 +84,7 @@
 
 {% if request.user.is_staff %}
   <div class="modal" id="delete-file-{{ file.pk }}">
-    <form method="post">
+    <form method="post" action="{{ file.comm.foia.get_absolute_url }}">
       {% csrf_token %}
       <input type="hidden" name="file_pk" value="{{ file.pk }}">
       <h1>Confirm</h1>
