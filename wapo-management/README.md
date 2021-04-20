@@ -1,7 +1,25 @@
 # Developing Muckrock at the Washington Post
 
 ## Seeding a local database
-We have a forked version of the [Muckrock](https://github.com/MuckRock/muckrock) codebase and have made some changes to suit our needs. Since we didn't want a full database dump of the organization's data, we have a subset of agencies and jurisdictions that enable us to file FOIA requests. 
+We have a forked version of the [Muckrock](https://github.com/MuckRock/muckrock) codebase and have made some changes to suit our needs. Since we didn't want a full database dump of the organization's data, we have a subset of agencies and jurisdictions that enable us to file FOIA requests. The fixture contains data from these django models:
+
+```python
+[
+  "business_days.holiday",                                                                                                                                                                                                                                                     
+  "jurisdiction.jurisdiction",                                                                                                                                                                                                                                                  
+  "jurisdiction.law",                                                                                                                                                                                                                                                           
+  "jurisdiction.lawyear",                                                                                                                                                                                                                                                       
+  "communication.emailaddress",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+  "communication.address",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+  "communication.phonenumber",                                                                                                                                                                                                                                                  
+  "portal.portal",                                                                                                                                                                                                                                                              
+  "agency.agencytype",                                                                                                                                                                                                                                                           
+  "agency.agency",                                                                                                                                                                                                                                                              
+  "agency.agencyaddress",                                                                                                                                                                                                                                                       
+  "agency.agencyphone",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+  "agency.agencyemail",
+ ]
+ ```
 
 Locally, you'll want to load data from these fixtures into a postgres instance running inside of docker on your machine. To do this, follow these steps:
 
