@@ -18,6 +18,7 @@ import os
 
 # Third Party
 import boto3
+import botocore.exceptions
 
 # MuckRock
 from muckrock.foia.models import (
@@ -101,15 +102,23 @@ def _session(request, model):
 
     data = []
     for attm in attms:
-        data.append(
-            {
-                "name": attm.name(),
-                "uuid": attm.pk,
-                "size": attm.ffile.size,
-                "s3Key": attm.ffile.name,
-                "s3Bucket": settings.AWS_MEDIA_BUCKET_NAME
-            }
-        )
+        try:
+            data.append(
+                {
+                    "name": attm.name(),
+                    "uuid": attm.pk,
+                    "size": attm.ffile.size,
+                    "s3Key": attm.ffile.name,
+                    "s3Bucket": settings.AWS_MEDIA_BUCKET_NAME
+                }
+            )
+        except botocore.exceptions.ClientError as error:
+            if error.response['Error']['Code'] == '404':
+                # Somehow this file upload didn't succeed, so delete it
+                attm.delete()
+            else:
+                raise error
+        
     return JsonResponse(data, safe=False)
 
 
@@ -248,6 +257,11 @@ def preupload_comm(request):
     """Generate upload info for a communication"""
     return _preupload(request, FOIAFile)
 
+
+@login_required
+def upload_chunk(request):
+    """Generate an upload URL for a chunk"""
+    return JsonResponse({})
 
 @login_required
 def blank(request):
