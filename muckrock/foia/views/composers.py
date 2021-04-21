@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
@@ -413,7 +414,21 @@ def autosave(request, idx):
     data["action"] = "save"
     form = BaseComposerForm(data, instance=composer, user=request.user, request=request)
     if form.is_valid():
-        composer = form.save(update_owners=False)
+        composer = form.save(update_owners=False, commit=False)
+        fields = {
+            f: getattr(composer, f)
+            for f in form.cleaned_data
+            if f not in ("agencies", "tags", "action")
+        }
+        with transaction.atomic():
+            # ensure that the status is still started
+            # otherwise there is a race condition where the auto save is overriding
+            # the status back to started after it has been submitted
+            updated = FOIAComposer.objects.filter(
+                pk=composer.pk, status="started"
+            ).update(**fields)
+            if updated:
+                form.save_m2m()
         new_agencies = set(composer.agencies.all())
         removed_agencies = old_agencies - new_agencies
         # delete pending agencies which have been removed from composers and requests

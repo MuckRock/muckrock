@@ -116,6 +116,7 @@ class FOIAComposer(models.Model):
         self.num_monthly_requests = request_count["monthly"]
         self.status = "submitted"
         self.datetime_submitted = timezone.now()
+        self.save()
 
         if num_requests == 1:
             # if only one request, create it immediately so we can redirect there
