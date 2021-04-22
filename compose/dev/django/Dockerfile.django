@@ -87,10 +87,9 @@ ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 COPY . /app/
-
-# Requirements are installed here to ensure they will be cached.
-RUN pip install -r pip/requirements.txt
 WORKDIR /app
+
+RUN pip install -r pip/requirements.txt
 
 # Compile front-end dependencies
 RUN npm install
