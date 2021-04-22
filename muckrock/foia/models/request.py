@@ -77,7 +77,7 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(max_length=1024, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
