@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM 912288704264.dkr.ecr.us-east-1.amazonaws.com/python_38
+FROM 912288704264.dkr.ecr.us-east-1.amazonaws.com/shared/python:3.8
 
 ENV PYTHONUNBUFFERED 1
 ARG DEPLOYMENT_ENV=dev
