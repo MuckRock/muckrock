@@ -116,7 +116,18 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
         uuidName: 'x-amz-meta-qquuid',
         totalFileSizeName: 'x-amz-meta-qqtotalfilesize',
         requireSuccessJson: false,
-        endpoint: null // will be set in onUpload handler
+        endpoint: '' // will be set in onUpload handler
+      },
+      credentials: {
+        accessKey: " ",
+        secretKey: " ",
+        expiration: new Date("2100-01-01") // far into the future
+      },
+      signature: {
+        version: 1 // intentionally invalid
+      },
+      key: function(id){
+        return uploader._s3FileKeys[id];
       },
       iframeSupport: {
         localBlankPagePath: '{% url "fine-uploader-blank" %}',
@@ -125,13 +136,18 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
         enableAuto: true,
       },
       chunking: {
-        enabled: false
+        enabled: true,
+        concurrent: {
+          enabled: true
+        }
       },
       resume: {
         enabled: true,
       },
       callbacks: {
         onUpload: function(id, filename){
+          var isChunked = uploader._handler.isUploadChunked(id);
+          console.log('onUpload', id, filename, isChunked);
           var promise = new qq.Promise();
 
           // Fetch S3 path and presigned URLs from the server
@@ -141,7 +157,8 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             data: { 
               name: filename, 
               id: pk,
-              type: uploader.getFile(id).type
+              type: uploader.getFile(id).type,
+              chunked: isChunked
             },
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
           })
@@ -158,7 +175,44 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
 
           return promise;
         },
+        onUploadChunk: function(id, filename, chunkData){
+          var params = uploader._paramsStore.get(id);
+          console.log("onUploadChunk", id, filename, chunkData, params);
+          var promise = new qq.Promise();
+
+          // Fetch S3 path and presigned URLs from the server
+          $.ajax({
+            type: 'POST',
+            url: '{% url "fine-uploader-chunk" %}',
+            data: {
+              key: params.key,
+              id: params.uploadId,
+              index: chunkData.partIndex
+            },
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .fail(function(data) { promise.failure(data); })
+          .done(function(data) {
+            // Overide upload endpoint and params with values from AWS signature
+            uploader.setEndpoint(data.url, id);
+            uploader.setParams(data.fields, id);
+            
+            // Resolve with success so upload begins
+            promise.success();
+          });
+
+          return promise;
+        },
+        onUploadChunkSuccess: function(chunkData){
+          console.log("onUploadChunkSuccess", chunkData);
+        },
         onComplete: function(id, filename, req){
+          if(req.success === false){
+            console.log("Request failed, skipping onComplete hook...");
+            return;
+          }
+
+          console.log("onComplete", id, filename, req);
           var promise = new qq.Promise();
 
           // Notify server on successful upload so it can create DB records
@@ -203,7 +257,7 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       };
     }
     
-    var uploader = new qq.FineUploader(options);
+    var uploader = new qq.s3.FineUploader(options);
     uploader._s3FileKeys = {};
   };
 };
