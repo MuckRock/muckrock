@@ -16,6 +16,7 @@ from django.utils import timezone
 # Standard Library
 import os
 import urllib
+import json
 
 # Third Party
 import boto3
@@ -31,6 +32,19 @@ from muckrock.foia.models import (
     OutboundRequestAttachment,
 )
 
+def _complete_chunked_upload(key, uploadId, chunks):
+    """
+    Merges all parts of a multipart upload into the final file
+    """
+    parts = [{ 'ETag': chunk['etag'], 'PartNumber': chunk['part'] } for chunk in chunks]
+    boto3.client("s3").complete_multipart_upload(
+        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
+        Key=key,
+        MultipartUpload={
+            'Parts': parts
+        },
+        UploadId=uploadId
+    )
 
 def _success(request, model, attachment_model, fk_name):
     """"File has been succesfully uploaded to a FOIA/composer"""
@@ -40,15 +54,23 @@ def _success(request, model, attachment_model, fk_name):
         return HttpResponseBadRequest()
     if not foia.has_perm(request.user, "upload_attachment"):
         return HttpResponseForbidden()
-    if "key" not in request.POST:
+    
+    key = request.POST.get("key")
+    if not key or len(key) > 255:
         return HttpResponseBadRequest()
-    if len(request.POST["key"]) > 255:
-        return HttpResponseBadRequest()
+
+    if request.POST.get("chunked") == "true":
+        uploadId = request.POST.get("uploadId")
+        chunks = json.loads(request.POST.get("etags"))
+        if not (key and uploadId and chunks):
+            return HttpResponseBadRequest()
+        # Merge all the chunks into the final file
+        _complete_chunked_upload(key, uploadId, chunks)
 
     attachment = attachment_model(
         user=request.user, date_time_stamp=timezone.now(), **{fk_name: foia}
     )
-    attachment.ffile.name = request.POST["key"]
+    attachment.ffile.name = key
     attachment.save()
 
     # Send the client the ID to update its reference
@@ -115,7 +137,8 @@ def _session(request, model):
             )
         except botocore.exceptions.ClientError as error:
             if error.response['Error']['Code'] == '404':
-                # Somehow this file upload didn't succeed, so delete it
+                # Somehow this file upload didn't succeed,
+                # so we want to delete the DB reference.
                 attm.delete()
             else:
                 raise error
@@ -176,9 +199,8 @@ def _build_presigned_url(key, content_type, user=None):
         {"success_action_status": "200"},
         {"Content-Type": content_type},
         # Whitelist metadata headers
-        ["starts-with", "$x-amz-meta-qqfilename", ""],
-        ["starts-with", "$x-amz-meta-qquuid", ""],
-        ["starts-with", "$x-amz-meta-qqtotalfilesize", ""],
+        ["starts-with", "$x-amz-meta-filename", ""],
+        ["starts-with", "$x-amz-meta-content-type", ""],
     ]
 
     if not user or not user.has_perm("foia.unlimited_attachment_size"):
@@ -187,7 +209,7 @@ def _build_presigned_url(key, content_type, user=None):
     s3 = boto3.client("s3")
     url_data = s3.generate_presigned_post(bucket, key,
         Conditions=conditions,
-        ExpiresIn=60
+        ExpiresIn=5*60 # five minutes
     )
 
     url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
@@ -211,15 +233,10 @@ def _start_chunked_upload(key, content_type):
     )
 
     # Return a subset of keys from boto3 response to the client
-    key_map = {
-        # old key: new key
-        "Key": "key", 
-        "Bucket": "bucket", 
-        "UploadId": "uploadId"
-    }
+    response_keys = ["Key", "Bucket", "UploadId"]
     return {
         "fields": { 
-            new: response[old] for old, new in key_map.items() 
+            key.lower(): response[key] for key in response_keys
         }
     }
 
@@ -236,10 +253,10 @@ def _build_presigned_chunk(key, upload_id, chunk_index):
             'Bucket': settings.AWS_MEDIA_BUCKET_NAME,
             'Key': key,
             'UploadId': upload_id,
-            'PartNumber': int(chunk_index)
+            # Chunk Indexes are 0-based, but PartNumbers are 1-based
+            'PartNumber': int(chunk_index) + 1
         },
-        ExpiresIn=5*60,
-        HttpMethod='POST'
+        ExpiresIn=5*60
     )
 
     # Convert URL params into POST fields for client

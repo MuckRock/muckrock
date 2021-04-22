@@ -3473,6 +3473,9 @@
             // (called in onUpload handler to determine which type is needed)
             isUploadChunked: function(id) {
                 return chunkingPossible && handler._shouldChunkThisFile(id);
+            },
+            getPersistableData: function(id) {
+                return handler._getPersistableData(id) || {};
             }
         });
         qq.extend(options, o);
@@ -5999,7 +6002,25 @@
             V4_SIGNATURE_PARAM_NAME: "x-amz-signature",
             CASE_SENSITIVE_PARAM_NAMES: [ "Cache-Control", "Content-Disposition", "Content-Encoding", "Content-MD5" ],
             UNSIGNABLE_REST_HEADER_NAMES: [ "Cache-Control", "Content-Disposition", "Content-Encoding", "Content-MD5" ],
-            UNPREFIXED_PARAM_NAMES: [ "Cache-Control", "Content-Disposition", "Content-Encoding", "Content-MD5", "x-amz-server-side-encryption", "x-amz-server-side-encryption-aws-kms-key-id", "x-amz-server-side-encryption-customer-algorithm", "x-amz-server-side-encryption-customer-key", "x-amz-server-side-encryption-customer-key-MD5" ],
+            UNPREFIXED_PARAM_NAMES: [ 
+                "Cache-Control", 
+                "Content-Disposition", 
+                "Content-Encoding", 
+                "Content-MD5", 
+                "x-amz-server-side-encryption", 
+                "x-amz-server-side-encryption-aws-kms-key-id", 
+                "x-amz-server-side-encryption-customer-algorithm", 
+                "x-amz-server-side-encryption-customer-key", 
+                "x-amz-server-side-encryption-customer-key-MD5", 
+                // Custom settings to allow for self-signing requests
+                "key",
+                "awsaccesskeyid", 
+                "x-amz-security-token", 
+                "policy", 
+                "signature", 
+                "acl", 
+                "success_action_status", 
+            ],
             getBucket: function(endpoint) {
                 var patterns = [ /^(?:https?:\/\/)?([a-z0-9.\-_]+)\.s3(?:-[a-z0-9\-]+)?\.amazonaws\.com/i, /^(?:https?:\/\/)?s3(?:-[a-z0-9\-]+)?\.amazonaws\.com\/([a-z0-9.\-_]+)/i, /^(?:https?:\/\/)?([a-z0-9.\-_]+)/i ], bucket;
                 qq.each(patterns, function(idx, pattern) {
@@ -6143,13 +6164,14 @@
                     awsParams[qq.s3.util.DATE_PARAM_NAME] = qq.s3.util.getV4PolicyDate(now, drift);
                 }
                 signPolicyCallback(policyJson).then(function(policyAndSignature, updatedAccessKey, updatedSessionToken) {
-                    awsParams.policy = policyAndSignature.policy;
                     if (spec.signatureVersion === 2) {
+                        awsParams.policy = policyAndSignature.policy;
                         awsParams.signature = policyAndSignature.signature;
                         if (updatedAccessKey) {
                             awsParams.AWSAccessKeyId = updatedAccessKey;
                         }
                     } else if (spec.signatureVersion === 4) {
+                        awsParams.policy = policyAndSignature.policy;
                         awsParams[qq.s3.util.V4_SIGNATURE_PARAM_NAME] = policyAndSignature.signature;
                     }
                     if (updatedSessionToken) {
@@ -6846,8 +6868,11 @@
                 }, function(err) {
                     promise.failure(err);
                 });
-            } else {
+            } else if (version === 2){ // Customized to allow bypass of normal signatures
                 promise.success(generateStringToSign(requestInfo));
+            }else{
+                console.log("Skipping stringToSign because of invalid version...");
+                promise.success();
             }
             return promise;
         }
@@ -6907,7 +6932,11 @@
                         v4: true
                     };
                 }
-                if (credentialsProvider.get().secretKey && qq.CryptoJS) {
+                // Customized to allow bypass of normal signatures
+                if(qq.indexOf([2,4], options.signatureSpec.version) < 0){
+                    console.log("Skipping determineSignatureClientSide for invalid version");
+                    signatureEffort.success({});
+                }else if (credentialsProvider.get().secretKey && qq.CryptoJS) {
                     if (credentialsProvider.get().expiration.getTime() > Date.now()) {
                         determineSignatureClientSide(id, toBeSigned, signatureEffort);
                     } else {
@@ -7182,6 +7211,10 @@
         qq.extend(this, {
             send: function(id) {
                 var promise = new qq.Promise();
+                if(qq.indexOf([2,4], options.signatureSpec.version) < 0){
+                    options.log("Skipping initiate multiple upload request for " + id);
+                    return promise.success();
+                }
                 getHeaders(id).then(function(headers, endOfUrl) {
                     options.log("Submitting S3 initiate multipart upload request for " + id);
                     pendingInitiateRequests[id] = promise;
@@ -7271,6 +7304,10 @@
         qq.extend(this, {
             send: function(id, uploadId, etagEntries) {
                 var promise = new qq.Promise(), body = getCompleteRequestBody(etagEntries);
+                if(qq.indexOf([2,4], options.signatureSpec.version) < 0){
+                    options.log("Skipping complete multiple upload request for " + id);
+                    return promise.success();
+                }
                 getHeaders(id, uploadId, body).then(function(headers, endOfUrl) {
                     options.log("Submitting S3 complete multipart upload request for " + id);
                     pendingCompleteRequests[id] = promise;
@@ -7337,6 +7374,10 @@
         }));
         qq.extend(this, {
             send: function(id, uploadId) {
+                if(qq.indexOf([2,4], options.signatureSpec.version) < 0){
+                    options.log("Skipping abort multiple upload request for " + id);
+                    return;
+                }
                 getHeaders(id, uploadId).then(function(headers, endOfUrl) {
                     options.log("Submitting S3 Abort multipart upload request for " + id);
                     requester.initTransport(id).withPath(endOfUrl).withHeaders(headers).send();
@@ -7386,7 +7427,11 @@
                             error: "Chunk upload cancelled"
                         });
                     } else {
-                        var url = domain + "/" + endOfUrl;
+                        // Customized to provide entire URL via endpointHandler
+                        var url = domain;
+                        if(endOfUrl){
+                            url = url + "/" + endOfUrl;
+                        }
                         handler._registerProgressHandler(id, chunkIdx, chunkData.size);
                         upload.track(id, xhr, chunkIdx).then(promise.success, promise.failure);
                         xhr.open("PUT", url, true);
