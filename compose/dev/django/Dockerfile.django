@@ -88,13 +88,13 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 COPY . /app/
 
-# Compile front-end dependencies
-RUN npm install
-RUN npm run build
-
 # Requirements are installed here to ensure they will be cached.
 RUN pip install -r pip/requirements.txt
 WORKDIR /app
+
+# Compile front-end dependencies
+RUN npm install
+RUN npm run build
 
 RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
 RUN chmod +x entrypoint
