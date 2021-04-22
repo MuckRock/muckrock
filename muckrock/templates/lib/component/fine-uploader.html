@@ -112,11 +112,8 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       validation: validation,
       request: {
         inputName: 'file',
-        filenameParam: 'x-amz-meta-qqfilename',
-        uuidName: 'x-amz-meta-qquuid',
-        totalFileSizeName: 'x-amz-meta-qqtotalfilesize',
-        requireSuccessJson: false,
-        endpoint: '' // will be set in onUpload handler
+        filenameParam: 'filename',
+        endpoint: ' ' // Replaced in onUpload handler
       },
       credentials: {
         accessKey: " ",
@@ -124,7 +121,8 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
         expiration: new Date("2100-01-01") // far into the future
       },
       signature: {
-        version: 1 // intentionally invalid
+        // intentionally invalid, because we're managing signing ourselves
+        version: -1
       },
       key: function(id){
         return uploader._s3FileKeys[id];
@@ -167,9 +165,15 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             // Overide upload endpoint and params with values from AWS signature
             uploader.setEndpoint(data.url, id);
             uploader.setParams(data.fields, id);
+
+            if(data.fields.uploadid){
+              uploader._handler.getPersistableData(id).uploadId = data.fields.uploadid;
+            }
+
             // Cache S3 key onComplete handler to use
             uploader._s3FileKeys[id] = data.fields.key;
             // Resolve with success so upload begins
+            console.log(data.fields);
             promise.success();
           });
 
@@ -186,7 +190,7 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             url: '{% url "fine-uploader-chunk" %}',
             data: {
               key: params.key,
-              id: params.uploadId,
+              id: params.uploadid,
               index: chunkData.partIndex
             },
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
@@ -203,23 +207,26 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
 
           return promise;
         },
-        onUploadChunkSuccess: function(chunkData){
-          console.log("onUploadChunkSuccess", chunkData);
-        },
         onComplete: function(id, filename, req){
           if(req.success === false){
             console.log("Request failed, skipping onComplete hook...");
             return;
           }
-
-          console.log("onComplete", id, filename, req);
+          var chunking = uploader._handler.getPersistableData(id);
+          console.log("onComplete", id, filename, req, chunking);
           var promise = new qq.Promise();
 
           // Notify server on successful upload so it can create DB records
           $.ajax({
             type: 'POST',
             url: urls.success,
-            data: { key: uploader._s3FileKeys[id], id: pk },
+            data: { 
+              key: uploader._s3FileKeys[id], 
+              id: pk,
+              chunked: chunking.enabled,
+              etags: JSON.stringify(chunking.etags),
+              uploadId: chunking.uploadId
+            },
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
           })
           .fail(function(){ promise.failure(); })
