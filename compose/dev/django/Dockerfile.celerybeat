@@ -28,6 +28,8 @@ ENV POSTGRES_HOST $POSTGRES_HOST
 ARG POSTGRES_PORT
 ENV POSTGRES_PORT $POSTGRES_PORT
 
+ARG DATABASE_URL
+ENV DATABASE_URL $DATABASE_URL
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
@@ -55,7 +57,4 @@ RUN pip install -r /pip/requirements.txt
 COPY . /app/
 WORKDIR /app
 
-RUN mv compose/$DEPLOYMENT_ENV/django/celery/beat/start entrypoint
-RUN chmod +x entrypoint
-
-ENTRYPOINT ["/app/entrypoint"]
+ENTRYPOINT ["celery", "-A", "muckrock.core.celery", "beat", "-l", "INFO"]

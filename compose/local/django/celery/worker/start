@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -o errexit
-set -o nounset
-
-
-celery -A muckrock.core.celery worker -Q celery,phaxio -l DEBUG

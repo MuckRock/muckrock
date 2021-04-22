@@ -19,10 +19,9 @@ import uuid
 
 # Third Party
 import actstream
-import boto
+import boto3
 import requests
 import stripe
-from boto.s3.connection import S3Connection
 
 logger = logging.getLogger(__name__)
 
@@ -253,8 +252,8 @@ def zoho_get(path, params=None):
 
 def get_s3_storage_bucket():
     """Return the S3 storage bucket"""
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
-    return conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    s3 = boto3.resource("s3")
+    return s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
 
 
 def clear_cloudfront_cache(file_names):
@@ -262,18 +261,15 @@ def clear_cloudfront_cache(file_names):
     if not file_names:
         # invalidation fails if file names is empty
         return
-    cloudfront = boto.connect_cloudfront(
-        settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY
-    )
+    cloudfront = boto3.client("cloudfront")
     # find the current distribution
     distributions = [
         d
-        for d in cloudfront.get_all_distributions()
-        if settings.AWS_S3_CUSTOM_DOMAIN in d.cnames
+        for d in cloudfront.list_distributions()['DistributionList']['Items']
+        if settings.AWS_S3_CUSTOM_DOMAIN in d['Aliases']['Items']
     ]
     if distributions:
-        distribution = distributions[0]
-        cloudfront.create_invalidation_request(distribution.id, file_names)
+        cloudfront.create_invalidation_request(distributions[0]['Id'], file_names)
 
 
 class UnclosableFile:

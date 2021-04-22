@@ -60,22 +60,24 @@ LogConfiguration:
 {% endif -%}
 {% if container.environment is defined %}
 Environment:
-  - Name: POSTGRES_HOST
-    Value: !Sub ${PostgresHost}
-  - Name: POSTGRES_DB
-    Value: !Sub ${PostgresDb}
   - Name: POSTGRES_USER
-    Value: !Sub ${PostgresUser}
+    {% raw %}Value: '{{resolve:secretsmanager:/newsroom-apps/aurora-postgresql-{% endraw %}{{ environment }}{% raw %}/app:SecretString:username}}'{% endraw %}
+
   - Name: POSTGRES_PASSWORD
-    Value: !Sub ${PostgresPassword}
+    {% raw %}Value: '{{resolve:secretsmanager:/newsroom-apps/aurora-postgresql-{% endraw %}{{ environment }}{% raw %}/app:SecretString:password}}'{% endraw %}
+
+  - Name: POSTGRES_HOST
+    Value:
+      Fn::ImportValue: !Sub 'newsroom-apps-{{ environment }}-writer-host'
+
+  - Name: DATABASE_URL
+    Value: !Sub ${DatabaseUrl}
   - Name: REDIS_URL
     Value: !Sub ${RedisUrl}
+  - Name: REDIS_HOST
+    Value: !Sub ${RedisHost}
   - Name: SECRET_KEY
     Value: !Sub ${SecretKey}
-  - Name: AWS_ACCESS_KEY_ID
-    Value: !Sub ${AwsAccessKeyId}
-  - Name: AWS_SECRET_ACCESS_KEY
-    Value: !Sub ${AwsSecretAccessKey}
   - Name: SQUARELET_KEY
     Value: !Sub ${SquareletKey}
   - Name: SQUARELET_SECRET
@@ -134,15 +136,20 @@ Parameters:
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_PASSWORD
 
-    PostgresDb:
-        Description: Password of RDS postgres database
+    DatabaseUrl:
+        Description: Full connection string for RDS postgres database
         Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /news-engineering/muckrock/{{ environment }}/POSTGRES_DB
+        Default: /news-engineering/muckrock/{{ environment }}/DATABASE_URL
 
     RedisUrl:
         Description: URL for redis on elasticache
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/REDIS_URL
+
+    RedisHost:
+        Description: Host for redis on elasticache (no protocol)
+        Type: 'AWS::SSM::Parameter::Value<String>'
+        Default: /news-engineering/muckrock/{{ environment }}/REDIS_HOST
 
     SecretKey:
         Description: Django secret key
@@ -168,17 +175,6 @@ Parameters:
         Description: Stripe Public Key
         Type: 'AWS::SSM::Parameter::Value<String>'
         Default: /news-engineering/muckrock/{{ environment }}/STRIPE_PUB_KEY
-
-    # TODO remove and replace these with IAM policy
-    AwsAccessKeyId:
-        Description: Cred for accessint s3 bucket as user
-        Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /news-engineering/muckrock/{{ environment }}/AWS_ACCESS_KEY_ID
-
-    AwsSecretAccessKey:
-        Description: Cred for accessint s3 bucket as user
-        Type: 'AWS::SSM::Parameter::Value<String>'
-        Default: /news-engineering/muckrock/{{ environment }}/AWS_SECRET_ACCESS_KEY
 
     MailgunAccessKey:
         Description: Mailgun API Key

@@ -23,9 +23,6 @@ def boolcheck(setting):
 asynpool.PROC_ALIVE_TIMEOUT = 60.0
 
 DEBUG = False
-EMAIL_DEBUG = DEBUG
-THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -96,39 +93,53 @@ COMPRESS_JS_FILTERS = []
 
 THUMBNAIL_CACHE_DIMENSIONS = True
 
-if AWS_DEBUG:
-    DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
-    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
-    STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
-    COMPRESS_STORAGE = STATICFILES_STORAGE
-    STATIC_URL = "https://muckrock-devel2.s3.amazonaws.com/static/"
-    COMPRESS_URL = STATIC_URL
-    MEDIA_URL = "https://muckrock-devel2.s3.amazonaws.com/media/"
-    CLEAN_S3_ON_FOIA_DELETE = True
-    AWS_S3_CUSTOM_DOMAIN = ""
-else:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-    STATIC_URL = "/static/"
-    MEDIA_URL = "/media/"
-    CLEAN_S3_ON_FOIA_DELETE = False
+# Boto3S3Storage configuration
+DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
+THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
+COMPRESS_STORAGE = STATICFILES_STORAGE
+CLEAN_S3_ON_FOIA_DELETE = True
 
-STATICFILES_FINDERS = (
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    "compressor.finders.CompressorFinder",
+# Settings for static bucket storage
+AWS_STORAGE_BUCKET_NAME = os.environ.get(
+    "AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
+AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
+    "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
 )
-
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/" if AWS_S3_CUSTOM_DOMAIN else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
+COMPRESS_URL = STATIC_URL
+COMPRESS_ENABLED = True
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_HEADERS = {
     "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
     "Cache-Control": "max-age=94608000",
 }
-AWS_DEFAULT_ACL = "public-read"
+AWS_DEFAULT_ACL = os.environ.get("AWS_STORAGE_DEFAULT_ACL", "public-read")
 AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get(
     "AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
 AWS_S3_MIN_PART_SIZE = int(os.environ.get(
     "AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
+
+# Set these ENV vars for a separate user-data storage bucket (otherwise matches storage settings above)
+AWS_MEDIA_BUCKET_NAME = os.environ.get("AWS_MEDIA_BUCKET_NAME", AWS_STORAGE_BUCKET_NAME)
+AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get("AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH)
+AWS_MEDIA_CUSTOM_DOMAIN = os.environ.get("MEDIA_CLOUDFRONT_DOMAIN")
+
+if AWS_MEDIA_BUCKET_NAME == AWS_STORAGE_BUCKET_NAME:
+    # Inherit bucket/cloudfront settings from static data if they match
+    MEDIA_URL = ""
+    AWS_MEDIA_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN
+else:
+    # Infer the media url from the custom domain or bucket name settings
+    MEDIA_URL = f"https://{AWS_MEDIA_CUSTOM_DOMAIN}/" if AWS_MEDIA_CUSTOM_DOMAIN else f"https://{AWS_MEDIA_BUCKET_NAME}.s3.amazonaws.com/"
+
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+)
 
 TEMPLATES = [
     {
@@ -224,7 +235,6 @@ INSTALLED_APPS = (
     "opensearch",
     "dashing",
     "constance",
-    "constance.backends.database",
     "django_extensions",
     "social_django",
     "muckrock.accounts",
@@ -392,11 +402,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get(
-    "AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
-AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
-    "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
-)
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")
@@ -410,7 +415,7 @@ MAILGUN_ACCESS_KEY = os.environ.get("MAILGUN_ACCESS_KEY")
 MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME")
 
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django_mailgun.MailgunBackend")
 
 DOCUMENTCLOUD_USERNAME = os.environ.get("DOCUMENTCLOUD_USERNAME")
 DOCUMENTCLOUD_PASSWORD = os.environ.get("DOCUMENTCLOUD_PASSWORD")
@@ -574,7 +579,11 @@ DASHING = {
     "PERMISSION_CLASSES": ("dashing.permissions.IsAdminUser",),
 }
 
-CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+CONSTANCE_REDIS_CONNECTION = {
+    'host': os.environ.get("REDIS_HOST"),
+    'port': 6379,
+}
+
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
     [

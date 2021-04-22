@@ -74,6 +74,9 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
     if (dataAttr) {
       pk = element.getAttribute(dataAttr);
     }
+
+    // Build client-side validation options based on user perms
+    // (Server validation is handled separately)
     {% has_perm 'foia.unlimited_attachment_size' request.user as unlimited_attachment %}
     {% if unlimited_attachment %}
       var limitAttachments = false;
@@ -108,37 +111,12 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       template: 'qq-simple-thumbnails-template',
       validation: validation,
       request: {
-        endpoint: 'https://{{settings.AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
-        accessKey: '{{settings.AWS_ACCESS_KEY_ID}}',
-      },
-      objectProperties: {
-        acl: 'public-read',
-        key: function(fileId) {
-          var keyRetrieval = new qq.Promise();
-          var filename = encodeURIComponent(uploader.getName(fileId));
-          $.post(
-            urls.key,
-            {name: filename, id: pk}
-          )
-            .done(function(data) {keyRetrieval.success(data.key);})
-            .fail(function() {keyRetrieval.failure();});
-          return keyRetrieval;
-        },
-      },
-      signature: {
-        endpoint: '{% url "fine-uploader-sign" %}',
-        customHeaders: {
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
-      },
-      uploadSuccess: {
-        endpoint: urls.success,
-        customHeaders: {
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
-        params: {
-          'id': pk,
-        },
+        inputName: 'file',
+        filenameParam: 'x-amz-meta-qqfilename',
+        uuidName: 'x-amz-meta-qquuid',
+        totalFileSizeName: 'x-amz-meta-qqtotalfilesize',
+        requireSuccessJson: false,
+        endpoint: null // will be set in onUpload handler
       },
       iframeSupport: {
         localBlankPagePath: '{% url "fine-uploader-blank" %}',
@@ -147,70 +125,113 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
         enableAuto: true,
       },
       chunking: {
-        enabled: true,
-        concurrent: {
-          enabled: true,
-        },
-        success: {
-          endpoint: urls.success,
-          customHeaders: {
-            'X-CSRFToken': '{{ csrf_token }}',
-          },
-          params: {
-            'id': pk,
-          },
-        }
+        enabled: false
       },
       resume: {
         enabled: true,
       },
+      callbacks: {
+        onUpload: function(id, filename){
+          var promise = new qq.Promise();
+
+          // Fetch S3 path and presigned URLs from the server
+          $.ajax({
+            type: 'POST',
+            url: urls.pre,
+            data: { 
+              name: filename, 
+              id: pk,
+              type: uploader.getFile(id).type
+            },
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .fail(function(data) { promise.failure(data); })
+          .done(function(data) {
+            // Overide upload endpoint and params with values from AWS signature
+            uploader.setEndpoint(data.url, id);
+            uploader.setParams(data.fields, id);
+            // Cache S3 key onComplete handler to use
+            uploader._s3FileKeys[id] = data.fields.key;
+            // Resolve with success so upload begins
+            promise.success();
+          });
+
+          return promise;
+        },
+        onComplete: function(id, filename, req){
+          var promise = new qq.Promise();
+
+          // Notify server on successful upload so it can create DB records
+          $.ajax({
+            type: 'POST',
+            url: urls.success,
+            data: { key: uploader._s3FileKeys[id], id: pk },
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .fail(function(){ promise.failure(); })
+          .done(function(created){ 
+            // Update internal uuid with id of new DB entry
+            uploader.setUuid(id, created.id);
+            promise.success();
+          });
+
+          return promise;
+        }
+      }
     };
+
     if (urls.session) {
       options['session'] = {
         endpoint: urls.session,
         params: {
           'id': pk,
         },
+        customHeaders: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
       };
     }
+    
     if (urls.delete_) {
       options['deleteFile'] = {
         enabled: true,
-        method: 'POST',
+        method: 'DELETE',
         endpoint: urls.delete_,
         customHeaders: {
           'X-CSRFToken': '{{ csrf_token }}',
         },
       };
     }
-    const uploader = new qq.s3.FineUploader(options);
+    
+    var uploader = new qq.FineUploader(options);
+    uploader._s3FileKeys = {};
   };
 };
 
 var createUploaderRequest = createCreateUploader(
   'data-foia-pk',
   {
-    key: '{% url "fine-uploader-key-name-request" %}',
+    pre: '{% url "fine-uploader-preupload-request" %}',
     success: '{% url "fine-uploader-success-request" %}',
     session: '{% url "fine-uploader-session-request" %}',
-    delete_: '{% url "fine-uploader-delete-request" %}',
+    delete_: '{% url "fine-uploader-delete-request" "" %}',
   },
   false
   );
 var createUploaderComposer = createCreateUploader(
   'data-composer-pk',
   {
-    key: '{% url "fine-uploader-key-name-composer" %}',
+    pre: '{% url "fine-uploader-preupload-composer" %}',
     success: '{% url "fine-uploader-success-composer" %}',
     session: '{% url "fine-uploader-session-composer" %}',
-    delete_: '{% url "fine-uploader-delete-composer" %}',
+    delete_: '{% url "fine-uploader-delete-composer" "" %}',
   },
   false
   );
 var createUploaderComm = createCreateUploader(
   'data-comm-pk',
   {
-    key: '{% url "fine-uploader-key-name-comm" %}',
+    pre: '{% url "fine-uploader-preupload-comm" %}',
     success: '{% url "fine-uploader-success-comm" %}',
   },
   false

@@ -737,6 +737,7 @@ class FOIARequest(models.Model):
         from_email, _ = EmailAddress.objects.get_or_create(
             email=self.get_request_email()
         )
+        logger.info("starting delayed email send to: %s from: %s", self.email, from_email)
 
         body = self.render_msg_body(
             comm=comm,
@@ -753,15 +754,14 @@ class FOIARequest(models.Model):
 
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
-        backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
-        with get_connection(backend) as email_connection:
+        with get_connection(settings.EMAIL_BACKEND) as email_connection:
             msg = EmailMultiAlternatives(
                 subject=comm.subject,
                 body=body,
                 from_email=str(from_email),
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
-                bcc=["diagnostics@muckrock.com"],
+                #  bcc=["diagnostics@muckrock.com"],
                 headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
                 connection=email_connection,
             )
@@ -770,6 +770,7 @@ class FOIARequest(models.Model):
             comm.attach_files_to_email(msg)
 
             try:
+                logger.info("sending mail with backend: %s", settings.EMAIL_BACKEND)
                 msg.send(fail_silently=False)
             except MailgunAPIError as exc:
                 EmailError.objects.create(
@@ -1304,9 +1305,7 @@ class FOIARequest(models.Model):
             # delete from s3
             bucket = get_s3_storage_bucket()
             for file_ in files:
-                key = bucket.get_key(file_.ffile.name)
-                if key:
-                    key.delete()
+                bucket.Object(file_.ffile.name).delete()
 
             clear_cloudfront_cache([f.ffile.name for f in files])
 

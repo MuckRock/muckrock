@@ -9,18 +9,19 @@ Settings used when developing locally
 from muckrock.settings.base import *
 
 DEBUG = True
-EMAIL_DEBUG = DEBUG
-THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = False
+
+# Loads static files locally
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+STATIC_URL = "/static/"
 
 MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
 MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
 
 INSTALLED_APPS += ("silk",)
 
-SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_BINARY = True
-SILKY_META = True
+SILKY_PYTHON_PROFILER = False
+SILKY_PYTHON_PROFILER_BINARY = False
+SILKY_META = False
 
 DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.versions.VersionsPanel",
@@ -66,6 +67,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 EMAIL_HOST = "dev.mailhog.com"
 EMAIL_PORT = 1025
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 QUERYCOUNT = {"DISPLAY_DUPLICATES": 10}
 

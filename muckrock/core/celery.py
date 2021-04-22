@@ -10,7 +10,7 @@ import os
 import scout_apm.celery
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "muckrock.settings.local")
+#  os.environ.setdefault("DJANGO_SETTINGS_MODULE", "muckrock.settings.local")
 
 app = Celery("muckrock")
 
