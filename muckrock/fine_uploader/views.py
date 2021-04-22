@@ -15,6 +15,7 @@ from django.utils import timezone
 
 # Standard Library
 import os
+import urllib
 
 # Third Party
 import boto3
@@ -162,14 +163,10 @@ def delete_composer(request, idx):
     return _delete(request, OutboundComposerAttachment, idx)
 
 
-def _build_presigned_url(key, contentType, user=None):
+def _build_presigned_url(key, content_type, user=None):
     """Generate a policy document and presigned URL for an upload
     https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html#generating-a-presigned-url-to-upload-a-file"""
     
-    # Validate MIME type
-    if not contentType in settings.ALLOWED_FILE_MIMES:
-        raise ValidationError("Invalid file type")
-
     bucket = settings.AWS_MEDIA_BUCKET_NAME
     conditions = [
         # Restrict uploads to specific bucket/key/ACL
@@ -177,7 +174,7 @@ def _build_presigned_url(key, contentType, user=None):
         {"bucket": bucket},
         {"key": key},
         {"success_action_status": "200"},
-        {"Content-Type": contentType},
+        {"Content-Type": content_type},
         # Whitelist metadata headers
         ["starts-with", "$x-amz-meta-qqfilename", ""],
         ["starts-with", "$x-amz-meta-qquuid", ""],
@@ -195,10 +192,65 @@ def _build_presigned_url(key, contentType, user=None):
 
     url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
     url_data["fields"]["success_action_status"] = 200
-    url_data["fields"]["Content-Type"] = contentType
+    url_data["fields"]["Content-Type"] = content_type
 
     return url_data
 
+
+def _start_chunked_upload(key, content_type):
+    """
+    Tells AWS that we're beginning a chunked upload
+    """
+
+    s3 = boto3.client("s3")
+    response = s3.create_multipart_upload(
+        ACL=settings.AWS_DEFAULT_ACL,
+        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
+        Key=key,
+        ContentType=content_type,
+    )
+
+    # Return a subset of keys from boto3 response to the client
+    key_map = {
+        # old key: new key
+        "Key": "key", 
+        "Bucket": "bucket", 
+        "UploadId": "uploadId"
+    }
+    return {
+        "fields": { 
+            new: response[old] for old, new in key_map.items() 
+        }
+    }
+
+def _build_presigned_chunk(key, upload_id, chunk_index):
+    """
+    Builds a presigned URL for one part of a chunked upload.
+    (Validation isn't necessary here, since AWS checks the key
+    against the UploadId, which we already validated above.)
+    """
+    s3 = boto3.client("s3")
+    presigned_url = s3.generate_presigned_url(
+        ClientMethod='upload_part',
+        Params={
+            'Bucket': settings.AWS_MEDIA_BUCKET_NAME,
+            'Key': key,
+            'UploadId': upload_id,
+            'PartNumber': int(chunk_index)
+        },
+        ExpiresIn=5*60,
+        HttpMethod='POST'
+    )
+
+    # Convert URL params into POST fields for client
+    parsed = urllib.parse.urlparse(presigned_url)
+    query = urllib.parse.parse_qs(parsed.query)
+    query["key"] = [parsed.path[1:]]
+
+    return {
+        "url": presigned_url,
+        "fields": {}
+    }
 
 def _key_name_trim(name):
     """
@@ -230,14 +282,18 @@ def _get_key(request, model, id_name=None):
 def _preupload(request, model, id_name=None):
     """Generates request info so the client can update directly to S3"""
     key = _get_key(request, model, id_name)
-    contentType = request.POST.get("type")
 
-    try:
-        presigned_url = _build_presigned_url(key, contentType, user=request.user)
-    except ValidationError as e:
-        return JsonResponse({ "error": e.message }, status=400)
+    # Validate MIME type
+    content_type = request.POST.get("type")
+    if not content_type in settings.ALLOWED_FILE_MIMES:
+        return JsonResponse({ "error": "Invalid file type" }, status=400)
+
+    if request.POST.get("chunked") == "true":
+        response_data = _start_chunked_upload(key, content_type)
+    else:
+        response_data = _build_presigned_url(key, content_type, user=request.user)
     
-    return JsonResponse(presigned_url)
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -261,7 +317,16 @@ def preupload_comm(request):
 @login_required
 def upload_chunk(request):
     """Generate an upload URL for a chunk"""
-    return JsonResponse({})
+    key = request.POST.get("key")
+    upload_id = request.POST.get("id")
+    chunk_index = request.POST.get("index")
+
+    if not (key and upload_id and chunk_index):
+        return JsonResponse({ "error": "key, id, and index are required params" }, status=400)
+
+    response = _build_presigned_chunk(key, upload_id, chunk_index)
+
+    return JsonResponse(response)
 
 @login_required
 def blank(request):

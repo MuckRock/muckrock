@@ -10,6 +10,7 @@ from muckrock.fine_uploader import views
 
 urlpatterns = [
     url(r"^blank/$", views.blank, name="fine-uploader-blank"),
+    url(r"^upload_chunk/$", views.upload_chunk, name="fine-uploader-chunk"),
     url(
         r"^success_request/$",
         views.success_request,
