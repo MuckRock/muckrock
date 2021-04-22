@@ -700,10 +700,9 @@ class FlaggedTask(Task):
             "tags": tags,
         }
         if self.user:
-            requester = {
-                "name": self.user.profile.full_name or self.user.username,
-                "email": self.user.email,
-            }
+            requester = {"name": self.user.profile.full_name or self.user.username}
+            if self.user.email:
+                requester["email"] = self.user.email
         else:
             requester = {"name": "Anonymous User"}
         request["requester"] = ZenUser(**requester)
