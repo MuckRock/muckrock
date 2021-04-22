@@ -896,6 +896,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
+    logger.info("comm: %s", comm)
     # amount may be a string if it was JSON serialized from a Decimal
     amount = float(extra.get("amount", 0))
 
@@ -910,7 +911,6 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             error_msg=error_msg,
             **extra,
         )
-
     if category == "p":
         address = comm.foia.agency.get_addresses("check").first()
         if address is None:
@@ -918,7 +918,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
     else:
         address = comm.foia.address
-
+    logger.info("sending mail to %s", address)
     for test, reason in [
         (not config.AUTO_LOB and not force, "auto"),
         (not address, "addr"),

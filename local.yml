@@ -19,8 +19,7 @@ services:
       - ~/.aws:/root/.aws
     environment:
       - IPYTHONDIR=/app/.ipython
-      # - MIGRATE=true
-      - AWS_PROFILE=${AWS_PROFILE}
+      - AWS_PROFILE
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
@@ -51,6 +50,8 @@ services:
       - 5434:5432
 
   muckrock_redis:
+    ports:
+      - 6379:6379
     image: redis:3.2
 
   muckrock_celeryworker:
@@ -62,6 +63,7 @@ services:
     command: ["celery", "-A", "muckrock.core.celery", "worker", "-l", "INFO"]
     environment:
       - C_FORCE_ROOT=true
+      - AWS_PROFILE
     networks:
       default:
         aliases: []
@@ -78,6 +80,8 @@ services:
       - muckrock_redis
       - muckrock_postgres
     command: ["celery", "-A", "muckrock.core.celery", "beat", "-l", "INFO"]
+    environment:
+      - AWS_PROFILE 
     networks:
       default:
         aliases: []
