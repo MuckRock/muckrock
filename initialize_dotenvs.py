@@ -124,6 +124,7 @@ CONFIG = [
                     "Lob is used for sending snail mail",
                 "envvars": [
                     ("LOB_SECRET_KEY", ""),
+                    ("LOB_WEBHOOK_KEY", ""),
                     ("LOB_BANK_ACCOUNT_ID", ""),
                 ],
             },
