@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM public.ecr.aws/bitnami/python:3.8
+FROM 566093341066.dkr.ecr.us-east-1.amazonaws.com/python_38
 
 ENV PYTHONUNBUFFERED 1
 ARG DEPLOYMENT_ENV=dev
