@@ -188,7 +188,11 @@ def delete_composer(request):
 
 def sign(request):
     """Sign the data to upload to S3"""
-    payload = json.loads(request.body)
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"invalid": True}, status=400)
+
     if "headers" in payload:
         return JsonResponse(_sign_headers(payload["headers"]))
     elif _is_valid_policy(request.user, payload):

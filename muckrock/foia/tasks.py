@@ -80,7 +80,7 @@ lob.api_key = settings.LOB_SECRET_KEY
     ignore_result=True,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
-    autoretry_for=(DocumentCloudError,),
+    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
@@ -156,7 +156,7 @@ class DocumentCloudRetryError(Exception):
 @task(
     ignore_result=True,
     name="muckrock.foia.tasks.set_document_cloud_pages",
-    autoretry_for=(DocumentCloudError, DocumentCloudRetryError),
+    autoretry_for=(DocumentCloudError, DocumentCloudRetryError, requests.ReadTimeout),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
@@ -1024,7 +1024,11 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
 
 
 @task(
-    ignore_result=True, max_retries=10, name="muckrock.foia.tasks.import_doccloud_file"
+    ignore_result=True,
+    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
+    name="muckrock.foia.tasks.import_doccloud_file",
 )
 def import_doccloud_file(file_pk):
     """Import a file from DocumentCloud back into MuckRock"""
