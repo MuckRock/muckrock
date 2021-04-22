@@ -111,7 +111,7 @@ class MailPDF(PDF):
     def _extra_generate(self):
         """Hook for subclasses to override"""
 
-    def _resize_page(self, pages):
+    def _resize_pages(self, pages):
         """Resize the page if necessary and able"""
         for page in pages:
             width, height = page.pagedata.mediaBox.upperRight
