@@ -145,7 +145,6 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       callbacks: {
         onUpload: function(id, filename){
           var isChunked = uploader._handler.isUploadChunked(id);
-          console.log('onUpload', id, filename, isChunked);
           var promise = new qq.Promise();
 
           // Fetch S3 path and presigned URLs from the server
@@ -166,14 +165,15 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             uploader.setEndpoint(data.url, id);
             uploader.setParams(data.fields, id);
 
+            // Store the uploadId from chunked uploads inside the library
             if(data.fields.uploadid){
               uploader._handler.getPersistableData(id).uploadId = data.fields.uploadid;
             }
 
             // Cache S3 key onComplete handler to use
             uploader._s3FileKeys[id] = data.fields.key;
+
             // Resolve with success so upload begins
-            console.log(data.fields);
             promise.success();
           });
 
@@ -181,7 +181,6 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
         },
         onUploadChunk: function(id, filename, chunkData){
           var params = uploader._paramsStore.get(id);
-          console.log("onUploadChunk", id, filename, chunkData, params);
           var promise = new qq.Promise();
 
           // Fetch S3 path and presigned URLs from the server
@@ -213,7 +212,6 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             return;
           }
           var chunking = uploader._handler.getPersistableData(id);
-          console.log("onComplete", id, filename, req, chunking);
           var promise = new qq.Promise();
 
           // Notify server on successful upload so it can create DB records

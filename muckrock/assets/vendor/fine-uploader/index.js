@@ -6871,7 +6871,7 @@
             } else if (version === 2){ // Customized to allow bypass of normal signatures
                 promise.success(generateStringToSign(requestInfo));
             }else{
-                console.log("Skipping stringToSign because of invalid version...");
+                options.log("Skipping stringToSign because of invalid version...");
                 promise.success();
             }
             return promise;
@@ -6934,7 +6934,7 @@
                 }
                 // Customized to allow bypass of normal signatures
                 if(qq.indexOf([2,4], options.signatureSpec.version) < 0){
-                    console.log("Skipping determineSignatureClientSide for invalid version");
+                    options.log("Skipping determineSignatureClientSide for invalid version");
                     signatureEffort.success({});
                 }else if (credentialsProvider.get().secretKey && qq.CryptoJS) {
                     if (credentialsProvider.get().expiration.getTime() > Date.now()) {
