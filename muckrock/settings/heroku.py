@@ -9,6 +9,9 @@ Not used directly - imported from production and staging settings
 # MuckRock
 from muckrock.settings.base import *
 
+INSTALLED_APPS = ("scout_apm.django",) + INSTALLED_APPS
+USE_SCOUT = True
+
 TEMPLATES[0]["OPTIONS"]["loaders"] = [
     (
         "django.template.loaders.cached.Loader",
