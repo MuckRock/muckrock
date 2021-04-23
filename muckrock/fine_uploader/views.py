@@ -39,16 +39,13 @@ def _complete_chunked_upload(key, uploadId, chunks):
     """
     Merges all parts of a multipart upload into the final file
     """
-    print("Chunked upload!")
     parts = [{"ETag": chunk["etag"], "PartNumber": chunk["part"]} for chunk in chunks]
-    s3 = boto3.client("s3")
-    response = s3.complete_multipart_upload(
+    boto3.client("s3").complete_multipart_upload(
         Bucket=settings.AWS_MEDIA_BUCKET_NAME,
         Key=key,
         MultipartUpload={"Parts": parts},
         UploadId=uploadId,
     )
-    print(response)
 
 
 def login_or_agency_required(function):
