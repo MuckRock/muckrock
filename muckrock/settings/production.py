@@ -27,4 +27,5 @@ PREPEND_WWW = False
 #  else:
     #  EMAIL_BACKEND = "django_mailgun.MailgunBackend"
 
+# TODO Remove me once we've verified email sending in production
 EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
