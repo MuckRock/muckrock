@@ -15,9 +15,12 @@ from django.utils import timezone
 
 # Standard Library
 import os
+import urllib
+import json
 
 # Third Party
 import boto3
+import botocore.exceptions
 
 # MuckRock
 from muckrock.foia.models import (
@@ -29,6 +32,19 @@ from muckrock.foia.models import (
     OutboundRequestAttachment,
 )
 
+def _complete_chunked_upload(key, uploadId, chunks):
+    """
+    Merges all parts of a multipart upload into the final file
+    """
+    parts = [{ 'ETag': chunk['etag'], 'PartNumber': chunk['part'] } for chunk in chunks]
+    boto3.client("s3").complete_multipart_upload(
+        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
+        Key=key,
+        MultipartUpload={
+            'Parts': parts
+        },
+        UploadId=uploadId
+    )
 
 def _success(request, model, attachment_model, fk_name):
     """"File has been succesfully uploaded to a FOIA/composer"""
@@ -38,15 +54,23 @@ def _success(request, model, attachment_model, fk_name):
         return HttpResponseBadRequest()
     if not foia.has_perm(request.user, "upload_attachment"):
         return HttpResponseForbidden()
-    if "key" not in request.POST:
+    
+    key = request.POST.get("key")
+    if not key or len(key) > 255:
         return HttpResponseBadRequest()
-    if len(request.POST["key"]) > 255:
-        return HttpResponseBadRequest()
+
+    if request.POST.get("chunked") == "true":
+        uploadId = request.POST.get("uploadId")
+        chunks = json.loads(request.POST.get("etags"))
+        if not (key and uploadId and chunks):
+            return HttpResponseBadRequest()
+        # Merge all the chunks into the final file
+        _complete_chunked_upload(key, uploadId, chunks)
 
     attachment = attachment_model(
         user=request.user, date_time_stamp=timezone.now(), **{fk_name: foia}
     )
-    attachment.ffile.name = request.POST["key"]
+    attachment.ffile.name = key
     attachment.save()
 
     # Send the client the ID to update its reference
@@ -74,10 +98,18 @@ def success_comm(request):
         return HttpResponseBadRequest()
     if not (comm.foia and comm.foia.has_perm(request.user, "upload_attachment")):
         return HttpResponseForbidden()
-    if "key" not in request.POST:
+        
+    key = request.POST.get("key")
+    if not key or len(key) > 255:
         return HttpResponseBadRequest()
-    if len(request.POST["key"]) > 255:
-        return HttpResponseBadRequest()
+
+    if request.POST.get("chunked") == "true":
+        uploadId = request.POST.get("uploadId")
+        chunks = json.loads(request.POST.get("etags"))
+        if not (key and uploadId and chunks):
+            return HttpResponseBadRequest()
+        # Merge all the chunks into the final file
+        _complete_chunked_upload(key, uploadId, chunks)
 
     attachment = comm.attach_file(
         path=request.POST["key"],
@@ -101,15 +133,24 @@ def _session(request, model):
 
     data = []
     for attm in attms:
-        data.append(
-            {
-                "name": attm.name(),
-                "uuid": attm.pk,
-                "size": attm.ffile.size,
-                "s3Key": attm.ffile.name,
-                "s3Bucket": settings.AWS_MEDIA_BUCKET_NAME
-            }
-        )
+        try:
+            data.append(
+                {
+                    "name": attm.name(),
+                    "uuid": attm.pk,
+                    "size": attm.ffile.size,
+                    "s3Key": attm.ffile.name,
+                    "s3Bucket": settings.AWS_MEDIA_BUCKET_NAME
+                }
+            )
+        except botocore.exceptions.ClientError as error:
+            if error.response['Error']['Code'] == '404':
+                # Somehow this file upload didn't succeed,
+                # so we want to delete the DB reference.
+                attm.delete()
+            else:
+                raise error
+        
     return JsonResponse(data, safe=False)
 
 
@@ -153,14 +194,10 @@ def delete_composer(request, idx):
     return _delete(request, OutboundComposerAttachment, idx)
 
 
-def _build_presigned_url(key, contentType, user=None):
+def _build_presigned_url(key, content_type, user=None):
     """Generate a policy document and presigned URL for an upload
     https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html#generating-a-presigned-url-to-upload-a-file"""
     
-    # Validate MIME type
-    if not contentType in settings.ALLOWED_FILE_MIMES:
-        raise ValidationError("Invalid file type")
-
     bucket = settings.AWS_MEDIA_BUCKET_NAME
     conditions = [
         # Restrict uploads to specific bucket/key/ACL
@@ -168,11 +205,10 @@ def _build_presigned_url(key, contentType, user=None):
         {"bucket": bucket},
         {"key": key},
         {"success_action_status": "200"},
-        {"Content-Type": contentType},
+        {"Content-Type": content_type},
         # Whitelist metadata headers
-        ["starts-with", "$x-amz-meta-qqfilename", ""],
-        ["starts-with", "$x-amz-meta-qquuid", ""],
-        ["starts-with", "$x-amz-meta-qqtotalfilesize", ""],
+        ["starts-with", "$x-amz-meta-filename", ""],
+        ["starts-with", "$x-amz-meta-content-type", ""],
     ]
 
     if not user or not user.has_perm("foia.unlimited_attachment_size"):
@@ -181,15 +217,65 @@ def _build_presigned_url(key, contentType, user=None):
     s3 = boto3.client("s3")
     url_data = s3.generate_presigned_post(bucket, key,
         Conditions=conditions,
-        ExpiresIn=60
+        ExpiresIn=5*60 # five minutes
     )
 
     url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
     url_data["fields"]["success_action_status"] = 200
-    url_data["fields"]["Content-Type"] = contentType
+    url_data["fields"]["Content-Type"] = content_type
 
     return url_data
 
+
+def _start_chunked_upload(key, content_type):
+    """
+    Tells AWS that we're beginning a chunked upload
+    """
+
+    s3 = boto3.client("s3")
+    response = s3.create_multipart_upload(
+        ACL=settings.AWS_DEFAULT_ACL,
+        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
+        Key=key,
+        ContentType=content_type,
+    )
+
+    # Return a subset of keys from boto3 response to the client
+    response_keys = ["Key", "Bucket", "UploadId"]
+    return {
+        "fields": { 
+            key.lower(): response[key] for key in response_keys
+        }
+    }
+
+def _build_presigned_chunk(key, upload_id, chunk_index):
+    """
+    Builds a presigned URL for one part of a chunked upload.
+    (Validation isn't necessary here, since AWS checks the key
+    against the UploadId, which we already validated above.)
+    """
+    s3 = boto3.client("s3")
+    presigned_url = s3.generate_presigned_url(
+        ClientMethod='upload_part',
+        Params={
+            'Bucket': settings.AWS_MEDIA_BUCKET_NAME,
+            'Key': key,
+            'UploadId': upload_id,
+            # Chunk Indexes are 0-based, but PartNumbers are 1-based
+            'PartNumber': int(chunk_index) + 1
+        },
+        ExpiresIn=5*60
+    )
+
+    # Convert URL params into POST fields for client
+    parsed = urllib.parse.urlparse(presigned_url)
+    query = urllib.parse.parse_qs(parsed.query)
+    query["key"] = [parsed.path[1:]]
+
+    return {
+        "url": presigned_url,
+        "fields": {}
+    }
 
 def _key_name_trim(name):
     """
@@ -221,14 +307,18 @@ def _get_key(request, model, id_name=None):
 def _preupload(request, model, id_name=None):
     """Generates request info so the client can update directly to S3"""
     key = _get_key(request, model, id_name)
-    contentType = request.POST.get("type")
 
-    try:
-        presigned_url = _build_presigned_url(key, contentType, user=request.user)
-    except ValidationError as e:
-        return JsonResponse({ "error": e.message }, status=400)
+    # Validate MIME type
+    content_type = request.POST.get("type")
+    if not content_type in settings.ALLOWED_FILE_MIMES:
+        return JsonResponse({ "error": "Invalid file type" }, status=400)
+
+    if request.POST.get("chunked") == "true":
+        response_data = _start_chunked_upload(key, content_type)
+    else:
+        response_data = _build_presigned_url(key, content_type, user=request.user)
     
-    return JsonResponse(presigned_url)
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -248,6 +338,20 @@ def preupload_comm(request):
     """Generate upload info for a communication"""
     return _preupload(request, FOIAFile)
 
+
+@login_required
+def upload_chunk(request):
+    """Generate an upload URL for a chunk"""
+    key = request.POST.get("key")
+    upload_id = request.POST.get("id")
+    chunk_index = request.POST.get("index")
+
+    if not (key and upload_id and chunk_index):
+        return JsonResponse({ "error": "key, id, and index are required params" }, status=400)
+
+    response = _build_presigned_chunk(key, upload_id, chunk_index)
+
+    return JsonResponse(response)
 
 @login_required
 def blank(request):

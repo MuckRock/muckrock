@@ -555,9 +555,13 @@ ALLOWED_FILE_MIMES = [
     "application/vnd.oasis.opendocument.text",
     "text/html",
     "text/plain",
+    "text/csv",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 ]
-ALLOWED_FILE_EXTS = ["pdf", "jpg", "png",
-                     "tif", "doc", "docx", "odt", "html", "txt"]
+ALLOWED_FILE_EXTS = ["pdf", "jpg", "png", "tif", 
+                     "doc", "docx", "odt", "html", "txt",
+                     "csv", "xls", "xlsx"]
 
 # for django-phonenumber-field
 PHONENUMBER_DB_FORMAT = "INTERNATIONAL"
