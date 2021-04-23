@@ -90,6 +90,7 @@ context:
       environment: &base_env # below is also applied to celery containers
         ALLOWED_HOSTS: "*"
         BANDIT_EMAIL: news-engineering-qa@washpost.com
+        BANDIT_WHITELIST: washpost.com
         AWS_STORAGE_BUCKET_NAME: wp-muckrock-dev
         AWS_MEDIA_BUCKET_NAME: wp-muckrock-uploads-dev
         AWS_MEDIA_QUERYSTRING_AUTH: true
