@@ -100,17 +100,16 @@ function formHasAction(taskForm, action) {
     return actionExists;
 }
 
-function checkPdfExists(pdfName) {
-  var url = 'https://muckrock.s3.amazonaws.com/' + pdfName;
+function checkPdfExists(head_url, get_url) {
   $.ajax({
-    url: url,
+    url: head_url,
     type: 'head',
     success: function() {
       $('#snail-mail-bulk-download').text('Downloading');
-      window.location.href = url;
+      window.location.href = get_url;
     },
     error: function() {
-      setTimeout(checkPdfExists, 5000, pdfName);
+      setTimeout(checkPdfExists, 5000, head_url, get_url);
     }
   });
 }
@@ -207,7 +206,7 @@ $('document').ready(function(){
       data: window.location.search.substr(1),
       type: 'get',
       success: function(data) {
-        checkPdfExists(data['pdf_name']);
+        checkPdfExists(data['head_url'], data['get_url']);
       },
       error: function() {
         $(this.text('Error!'));

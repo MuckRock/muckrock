@@ -96,7 +96,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     bulk_pdf.seek(0)
 
     s3 = boto3.client("s3")
-    s3.upload_file(
+    s3.upload_fileobj(
         bulk_pdf, settings.AWS_MEDIA_BUCKET_NAME, pdf_name,
         ExtraArgs={'ACL': settings.AWS_DEFAULT_ACL}
     )
