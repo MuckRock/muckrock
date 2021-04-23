@@ -229,7 +229,7 @@ def _handle_request(request, mail_id):
                     body=render_to_string("text/foia/deleted_autoreply.txt"),
                     from_email=foia.get_request_email(),
                     to=[str(from_email)],
-                    bcc=["diagnostics@muckrock.com"],
+                    bcc=[settings.DIAGNOSTIC_EMAIL],
                 ).send(fail_silently=False)
             return HttpResponse("WARNING")
 
@@ -607,7 +607,7 @@ def _forward(post, files, title="", extra_content="", info=False):
 
     to_addresses = ["requests@muckrock.com"]
     if info:
-        to_addresses.append("info@muckrock.com")
+        to_addresses.append(settings.DEFAULT_FROM_EMAIL)
     email = EmailMessage(subject, body, post.get("From"), to_addresses)
     for file_ in files.values():
         email.attach(file_.name, file_.read(), file_.content_type)
@@ -622,10 +622,7 @@ def _log_mail(request):
         body.append("\n{}:".format(key))
         body.append(str(value))
     email = EmailMessage(
-        "[NEXTREQUEST LOG]",
-        "\n".join(body),
-        "info@muckrock.com",
-        ["mitch@muckrock.com"],
+        subject="[NEXTREQUEST LOG]", body="\n".join(body), to=["mitch@muckrock.com"]
     )
     email.send(fail_silently=False)
 

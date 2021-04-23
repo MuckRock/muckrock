@@ -614,7 +614,9 @@ class FlaggedTask(Task):
         description += make_url(self.jurisdiction)
 
         email = (
-            self.user.email if self.user and self.user.email else "info@muckrock.com"
+            self.user.email
+            if self.user and self.user.email
+            else settings.DEFAULT_FROM_EMAIL
         )
 
         response = zoho_post(
@@ -794,7 +796,6 @@ class NewAgencyTask(Task):
                     subject += ", and others"
                 TemplateEmail(
                     subject=subject,
-                    from_email="info@muckrock.com",
                     user=self.user,
                     text_template="task/email/agency_rejected.txt",
                     html_template="task/email/agency_rejected.html",
@@ -852,8 +853,8 @@ class NewAgencyTask(Task):
         self.agency.foiarequest_set.all().delete()
 
         send_mail(
-            "%s blocked as spammer" % self.user.username,
-            render_to_string(
+            subject="%s blocked as spammer" % self.user.username,
+            message=render_to_string(
                 "text/task/spam.txt",
                 {
                     "url": settings.MUCKROCK_URL + self.get_absolute_url(),
@@ -862,8 +863,8 @@ class NewAgencyTask(Task):
                     "agency": self.agency.name,
                 },
             ),
-            "info@muckrock.com",
-            ["info@muckrock.com"],
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.DEFAULT_FROM_EMAIL],
         )
 
 

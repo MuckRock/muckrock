@@ -458,7 +458,6 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
 
             msg = TemplateEmail(
                 subject="Login Token",
-                from_email="info@muckrock.com",
                 to=[email],
                 text_template="accounts/email/login_token.txt",
                 html_template="accounts/email/login_token.html",

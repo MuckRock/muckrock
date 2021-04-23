@@ -203,8 +203,8 @@ def _block_or_report(request, model, model_pk, block):
         subject = "%s reported as spam" % obj.user.username
 
     send_mail(
-        subject,
-        render_to_string(
+        subject=subject,
+        message=render_to_string(
             "text/qanda/spam.txt",
             {
                 "url": obj.get_absolute_url(),
@@ -214,8 +214,8 @@ def _block_or_report(request, model, model_pk, block):
                 "muckrock_url": settings.MUCKROCK_URL,
             },
         ),
-        "info@muckrock.com",
-        ["info@muckrock.com"],
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.DEFAULT_FROM_EMAIL],
     )
 
     if block:

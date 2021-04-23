@@ -36,7 +36,16 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-DEFAULT_FROM_EMAIL = "MuckRock <info@muckrock.com>"
+DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL", "info@muckrock.com")
+DIAGNOSTIC_EMAIL = os.environ.get("DIAGNOSTIC_EMAIL", "diagnostics@muckrock.com")
+SCANS_EMAIL = os.environ.get("SCANS_EMAIL", "scans@muckrock.com")
+ASSIGNMENTS_EMAIL = os.environ.get("ASSIGNMENTS_EMAIL", "assignments@muckrock.com")
+
+MAIL_ADDRESS = os.environ.get(
+    "MAIL_ADDRESS", "411A Highland Avenue, Somerville, MA 02144"
+)
+PHONE_NUMBER = os.environ.get("PHONE_NUMBER", "(617) 299-1832")
+
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 

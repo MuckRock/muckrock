@@ -14,7 +14,7 @@
         <input type="submit" value="Resend token" class="primary button">
       </form>
     {% else %}
-      <p>Your login token has expire and your email address is not valid for this agency.  If you need help logging in, please email <a href="mailto:info@muckrock.com">info@muckrock.com</a></p>
+      <p>Your login token has expire and your email address is not valid for this agency.  If you need help logging in, please email <a href="mailto:{{ settings.DEFAULT_FROM_EMAIL }}">{{ settings.DEFAULT_FROM_EMAIL }}</a></p>
     {% endif %}
   </article>
 {% endblock %}

@@ -222,7 +222,6 @@ class Crowdfund(models.Model):
         """Send an intro email to the user upon crowdfund creation"""
         msg = TemplateEmail(
             subject="Crowdfund Campaign Launched",
-            from_email="info@muckrock.com",
             user=user,
             bcc=["diagnostics@muckrock", "info@muckrock"],
             text_template="crowdfund/email/intro.txt",

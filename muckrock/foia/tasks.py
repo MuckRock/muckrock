@@ -475,9 +475,8 @@ def embargo_warn():
             body=render_to_string(
                 "text/foia/embargo_will_expire.txt", {"request": foia}
             ),
-            from_email="info@muckrock.com",
             to=[foia.user.email],
-            bcc=["diagnostics@muckrock.com"],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
 
@@ -498,9 +497,8 @@ def embargo_expire():
             body=render_to_string(
                 "text/foia/embargo_did_expire.txt", {"request": foia}
             ),
-            from_email="info@muckrock.com",
             to=[foia.user.email],
-            bcc=["diagnostics@muckrock.com"],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
 
@@ -699,9 +697,9 @@ def autoimport():
         EmailMessage(
             subject="[AUTOIMPORT] %s Logs" % timezone.now(),
             body="\n".join(log),
-            from_email="scans@muckrock.com",
-            to=["info@muckrock.com"],
-            bcc=["diagnostics@muckrock.com"],
+            from_email=settings.SCANS_EMAIL,
+            to=[settings.DEFAULT_FROM_EMAIL],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
 

@@ -535,9 +535,9 @@ class CrowdsourceResponse(models.Model):
                 self.crowdsource.title, self.user.username if self.user else "Anonymous"
             ),
             body=text,
-            from_email="assignments@muckrock.com",
+            from_email=settings.ASSIGNMENTS_EMAIL,
             to=[email],
-            bcc=["diagnostics@muckrock.com"],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
     class Meta:
