@@ -96,7 +96,7 @@ context:
         AWS_MEDIA_QUERYSTRING_AUTH: true
         AWS_STORAGE_DEFAULT_ACL: "private"
         CLOUDFRONT_DOMAIN: wp-muckrock-dev.news-engineering.aws.wapo.pub
-        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
+        DJANGO_SETTINGS_MODULE: muckrock.settings.wapo.staging
         MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432

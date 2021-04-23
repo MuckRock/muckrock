@@ -21,15 +21,8 @@ SESSION_COOKIE_SECURE = True
 
 PREPEND_WWW = False
 
-#  if boolcheck(os.environ.get("USE_CELERY_EMAIL", True)):
-    #  CELERY_EMAIL_BACKEND = "django_mailgun.MailgunBackend"
-    #  EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
-#  else:
-    #  EMAIL_BACKEND = "django_mailgun.MailgunBackend"
-
-# TODO Remove me once we've verified email sending in production
-EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
-BANDIT_EMAIL = os.environ.get("BANDIT_EMAIL", "staging@muckrock.com")
-BANDIT_WHITELIST = [
-    e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
-]
+if boolcheck(os.environ.get("USE_CELERY_EMAIL", True)):
+    CELERY_EMAIL_BACKEND = "django_mailgun.MailgunBackend"
+    EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
+else:
+    EMAIL_BACKEND = "django_mailgun.MailgunBackend"
