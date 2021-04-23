@@ -26,3 +26,5 @@ if boolcheck(os.environ.get("USE_CELERY_EMAIL", True)):
     EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
 else:
     EMAIL_BACKEND = "django_mailgun.MailgunBackend"
+
+SCOUT_NAME = "MuckRock"

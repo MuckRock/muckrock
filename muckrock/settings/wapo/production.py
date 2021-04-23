@@ -1,5 +1,5 @@
 """
-Washington Post settings for production
+Washington Post setting overrides for production
 """
 
 # pylint: disable=wildcard-import
