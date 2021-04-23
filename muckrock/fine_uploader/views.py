@@ -36,10 +36,8 @@ def _complete_chunked_upload(key, uploadId, chunks):
     """
     Merges all parts of a multipart upload into the final file
     """
-    print("Chunked upload!")
     parts = [{ 'ETag': chunk['etag'], 'PartNumber': chunk['part'] } for chunk in chunks]
-    s3 = boto3.client("s3")
-    response = s3.complete_multipart_upload(
+    boto3.client("s3").complete_multipart_upload(
         Bucket=settings.AWS_MEDIA_BUCKET_NAME,
         Key=key,
         MultipartUpload={
@@ -47,7 +45,6 @@ def _complete_chunked_upload(key, uploadId, chunks):
         },
         UploadId=uploadId
     )
-    print(response)
 
 def _success(request, model, attachment_model, fk_name):
     """"File has been succesfully uploaded to a FOIA/composer"""
