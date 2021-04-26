@@ -31,7 +31,7 @@ context:
   # Required
   service:
     # Initial number of tasks to run, defaults to 2
-    default_scale: 1 # TODO we will want more for prod but this makes debugging easier
+    default_scale: 2
 
     # Health check, defaults to "/"
     health_check_path: /
@@ -96,7 +96,7 @@ context:
         AWS_STORAGE_DEFAULT_ACL: "private"
         CLOUDFRONT_DOMAIN: wp-muckrock-prod.news-engineering.aws.wapo.pub
         DJANGO_SETTINGS_MODULE: muckrock.settings.wapo.production
-        MAILGUN_SERVER_NAME: foia-requests-prod.news-engineering.aws.wapo.pub
+        MAILGUN_SERVER_NAME: foi-requests.washpost.com
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
