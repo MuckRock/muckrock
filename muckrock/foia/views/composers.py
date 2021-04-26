@@ -416,7 +416,7 @@ def autosave(request, idx):
         fields = {
             f: getattr(composer, f)
             for f in form.cleaned_data
-            if f not in ("agencies", "tags", "action")
+            if f not in ("agencies", "tags", "no_proxy", "action")
         }
         with transaction.atomic():
             # ensure that the status is still started
