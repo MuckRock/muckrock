@@ -39,8 +39,8 @@ services:
   muckrock_postgres:
     build:
       context: .
-      dockerfile: ./compose/production/postgres/Dockerfile
-    image: muckrock_production_postgres
+      dockerfile: ./compose/local/postgres/Dockerfile
+    image: muckrock_local_postgres
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
       - postgres_backup_local:/backups
