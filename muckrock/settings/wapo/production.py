@@ -2,10 +2,12 @@
 Washington Post setting overrides for production
 """
 
+import requests
+
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
 
-from mucrock.settings.production import *
+from muckrock.settings.production import *
 
 # TODO Remove me once we've verified email sending in production
 EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
