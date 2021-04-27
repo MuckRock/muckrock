@@ -34,7 +34,7 @@ context:
     default_scale: 1 # TODO we will want more for prod but this makes debugging easier
 
     # Health check, defaults to "/"
-    health_check_path: /
+    health_check_path: /watchman
 
     # health check info and defaults
     health_check_interval_seconds: 30

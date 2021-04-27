@@ -30,7 +30,7 @@ context:
     default_scale: 2
 
     # Health check, defaults to "/"
-    health_check_path: /
+    health_check_path: /watchman
 
     # health check info and defaults
     health_check_interval_seconds: 30
