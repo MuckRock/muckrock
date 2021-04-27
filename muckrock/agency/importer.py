@@ -23,7 +23,7 @@ from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES, Portal
 
-STATES = [s[0] for s in STATE_CHOICES]
+STATES = [s[0] for s in STATE_CHOICES]  # pylint: disable=not-an-iterable
 PORTALS = [p[0] for p in PORTAL_TYPES]
 
 
