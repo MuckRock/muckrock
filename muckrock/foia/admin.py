@@ -405,6 +405,14 @@ class FOIARequestAdminForm(forms.ModelForm):
             },
         ),
     )
+    proxy = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
+        ),
+    )
 
     class Meta:
         model = FOIARequest
