@@ -42,7 +42,7 @@ context:
 >>>>>>> 970c41f33... fix mailgun server name, default scale
 
     # Health check, defaults to "/"
-    health_check_path: /
+    health_check_path: /watchman
 
     # health check info and defaults
     health_check_interval_seconds: 30
