@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils import timezone
@@ -38,7 +39,7 @@ from muckrock.foia.forms import (
     TrackingNumberForm,
 )
 from muckrock.foia.forms.comms import AgencyPasscodeForm
-from muckrock.foia.models import STATUS, FOIACommunication, FOIAFile
+from muckrock.foia.models import STATUS, FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.tasks import import_doccloud_file
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
@@ -536,46 +537,61 @@ def pay_fee(request, foia):
         messages.error(request, "Must be logged in to pay")
         return _get_redirect(request, foia)
     if form.is_valid():
-        try:
-            form.cleaned_data["organization"].pay(
-                amount=int(form.cleaned_data["amount"] * 1.05),
-                fee_amount=5,
-                description="Pay ${:.2f} fee for request #{}".format(
-                    form.cleaned_data["amount"] / 100.0, foia.pk
-                ),
-                token=form.cleaned_data["stripe_token"],
-                save_card=form.cleaned_data["save_card"],
-            )
-        except requests.exceptions.RequestException as exc:
-            logger.warning("Payment error: %s", exc, exc_info=sys.exc_info())
-            if exc.response.status_code // 100 == 4:
-                messages.error(
-                    request,
-                    "Payment Error: {}".format(
-                        "\n".join(
-                            "{}: {}".format(k, v)
-                            for k, v in exc.response.json().items()
-                        )
+        with transaction.atomic():
+            try:
+                locked_foia = FOIARequest.objects.select_for_update().get(pk=foia.pk)
+                if locked_foia.status != "payment":
+                    messages.warning(
+                        request,
+                        "This request no longer requires payment.  This prevents "
+                        "you from being charged twice for this request.  Your "
+                        "first payment should have been processed.",
+                    )
+                    return _get_redirect(request, foia)
+                locked_foia.status = "submitted"
+                locked_foia.save()
+                form.cleaned_data["organization"].pay(
+                    amount=int(form.cleaned_data["amount"] * 1.05),
+                    fee_amount=5,
+                    description="Pay ${:.2f} fee for request #{}".format(
+                        form.cleaned_data["amount"] / 100.0, foia.pk
                     ),
+                    token=form.cleaned_data["stripe_token"],
+                    save_card=form.cleaned_data["save_card"],
                 )
+            except requests.exceptions.RequestException as exc:
+                locked_foia.status = "payment"
+                locked_foia.save()
+                logger.warning("Payment error: %s", exc, exc_info=sys.exc_info())
+                if exc.response.status_code // 100 == 4:
+                    messages.error(
+                        request,
+                        "Payment Error: {}".format(
+                            "\n".join(
+                                "{}: {}".format(k, v)
+                                for k, v in exc.response.json().items()
+                            )
+                        ),
+                    )
+                else:
+                    messages.error(request, "Payment Error")
+                return _get_redirect(request, foia)
             else:
-                messages.error(request, "Payment Error")
-            return _get_redirect(request, foia)
-        else:
-            messages.success(
-                request,
-                "Your payment was successful. "
-                "We will get this to the agency right away!",
-            )
-            amount = form.cleaned_data["amount"] / 100.0
-            foia.pay(request.user, amount)
-            mixpanel_event(
-                request,
-                "Request Fee Paid",
-                foia.mixpanel_data({"Price": amount}),
-                charge=amount,
-            )
-            return _get_redirect(request, foia)
+                messages.success(
+                    request,
+                    "Your payment was successful. "
+                    "We will get this to the agency right away!",
+                )
+                foia.status = locked_foia.status
+                amount = form.cleaned_data["amount"] / 100.0
+                foia.pay(request.user, amount)
+                mixpanel_event(
+                    request,
+                    "Request Fee Paid",
+                    foia.mixpanel_data({"Price": amount}),
+                    charge=amount,
+                )
+                return _get_redirect(request, foia)
     else:
         raise FoiaFormError("fee_form", form)
 
