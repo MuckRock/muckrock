@@ -88,7 +88,7 @@ class MassImport(AsyncFileDownloadTask):
     def generate_file(self, out_file):
         """Do the import and generate the CSV file as output"""
         writer = csv.writer(out_file)
-        with smart_open(self.file_path, "rb") as in_file:
+        with smart_open(self.file_path, "r") as in_file:
             reader = CSVReader(in_file)
             importer = Importer(reader)
 

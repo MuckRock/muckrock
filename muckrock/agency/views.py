@@ -457,7 +457,7 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
                 md5=md5(
                     "{}{}{}".format(
                         int(time()), settings.SECRET_KEY, self.request.user.pk
-                    )
+                    ).encode("utf8")
                 ).hexdigest(),
             )
         )
@@ -468,7 +468,7 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
         mass_import.delay(
             self.request.user.pk,
             file_path,
-            form.cleaned_data.get("match"),
+            form.cleaned_data.get("match_or_import") == "match",
             form.cleaned_data.get("dry_run"),
         )
         messages.success(
