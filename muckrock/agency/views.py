@@ -16,6 +16,7 @@ from django.utils.html import linebreaks
 from django.views.generic.edit import FormView
 
 # Standard Library
+import codecs
 import re
 from datetime import date
 from hashlib import md5
@@ -478,7 +479,7 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
 
     def _import_html(self, form):
         """Return the import results via HTML"""
-        reader = CSVReader(self.request.FILES["csv"])
+        reader = CSVReader(codecs.iterdecode(self.request.FILES["csv"], "utf8"))
         importer = Importer(reader)
         if form.cleaned_data["match_or_import"] == "match":
             context = {"data": importer.match(), "match": True}
