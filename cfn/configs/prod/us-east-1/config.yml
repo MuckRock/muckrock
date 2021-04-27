@@ -18,10 +18,6 @@ context:
 
   # # Optional, name the target group that gets created (not available when importing)
   # target_group_name: example-prod
-  # # Optional, create a DNS entry
-  # dns:
-  #   zone_apex: myzonename.
-  #   domain: mydomainname
   # #  If you are using either `import_listener`  or `import_target_group`above,
   # #  you need to import the canonical hosted zone of the load balancer
   # #  and the dns name of the load balancer here
