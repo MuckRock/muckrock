@@ -8,6 +8,6 @@
 This email was sent to {{user.email}}.
 Add {{ settings.DEFAULT_FROM_EMAIL }} to your address book to prevent us from being marked as spam.
 We always welcome your feedback. Simply reply to this email or write to {{ settings.DEFAULT_FROM_EMAIL }}.
-MuckRock, 411A Highland Avenue, Somerville, MA 02144
+{{ settings.ADDRESS_NAME }}, {{ settings.ADDRESS_STREET}}, {{ settings.ADDRESS_CITY }}, {{ settings.ADDRESS_STATE }} {{ settings.ADDRESS_ZIP }}
 
 ===

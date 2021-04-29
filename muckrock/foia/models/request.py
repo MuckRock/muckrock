@@ -656,7 +656,7 @@ class FOIARequest(models.Model):
             # we include the latest pdf here under the assumption
             # it is the rejection letter
             include_latest_pdf=True,
-            **kwargs
+            **kwargs,
         )
 
     def pay(self, user, amount):
@@ -900,6 +900,13 @@ class FOIARequest(models.Model):
             "switch": switch,
             "msg_comms": self.get_msg_comms(comm, short=payment),
         }
+        context["return_address"] = (
+            f"{settings.ADDRESS_NAME}\n"
+            f"{settings.ADDRESS_DEPT}\n"
+            f"{settings.ADDRESS_STREET}\n"
+            f"{settings.ADDRESS_CITY}, {settings.ADDRESS_STATE} "
+            f"{settings.ADDRESS_ZIP}".format(pk=self.pk)
+        )
         if payment and include_address:
             payment_address = self.agency.get_addresses("check").first()
             if payment_address:
@@ -1029,7 +1036,7 @@ class FOIARequest(models.Model):
                     "foia_idx": self.pk,
                 },
             ),
-            **email_args
+            **email_args,
         )
 
     def update_tags(self, tags):

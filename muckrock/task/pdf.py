@@ -67,11 +67,12 @@ class MailPDF(PDF):
         self.set_font("DejaVu", "", 10)
         email = self.comm.foia.get_request_email()
         text = (
-            "MuckRock News\n"
-            "DEPT MR {pk}\n"
-            "411A Highland Ave\n"
-            "Somerville, MA 02144-2516\n"
-            "{email}".format(pk=self.comm.foia.pk, email=email)
+            f"{settings.ADDRESS_NAME}\n"
+            f"{settings.ADDRESS_DEPT}\n"
+            f"{settings.ADDRESS_STREET}\n"
+            f"{settings.ADDRESS_CITY}, {settings.ADDRESS_STATE} "
+            f"{settings.ADDRESS_ZIP}\n"
+            f"{email}".format(pk=self.comm.foia.pk)
         )
         width = self.get_string_width(email)
         self.set_xy(72 / 2, (72 * 0.6))

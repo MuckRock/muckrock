@@ -41,9 +41,13 @@ DIAGNOSTIC_EMAIL = os.environ.get("DIAGNOSTIC_EMAIL", "diagnostics@muckrock.com"
 SCANS_EMAIL = os.environ.get("SCANS_EMAIL", "scans@muckrock.com")
 ASSIGNMENTS_EMAIL = os.environ.get("ASSIGNMENTS_EMAIL", "assignments@muckrock.com")
 
-MAIL_ADDRESS = os.environ.get(
-    "MAIL_ADDRESS", "411A Highland Avenue, Somerville, MA 02144"
-)
+ADDRESS_NAME = os.environ.get("ADDRESS_NAME", "MuckRock News")
+ADDRESS_DEPT = os.environ.get("ADDRESS_DEPT", "DEPT MR {pk}")
+ADDRESS_STREET = os.environ.get("ADDRESS_STREET", "411A Highland Ave")
+ADDRESS_CITY = os.environ.get("ADDRESS_CITY", "Somerville")
+ADDRESS_STATE = os.environ.get("ADDRESS_STATE", "MA")
+ADDRESS_ZIP = os.environ.get("ADDRESS_ZIP", "02144-2516")
+
 PHONE_NUMBER = os.environ.get("PHONE_NUMBER", "(617) 299-1832")
 
 

@@ -11,10 +11,7 @@ Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_request_email }}
 
 For mailed responses, please address (see note):
-MuckRock News
-DEPT MR {{ request.pk }}
-411A Highland Ave
-Somerville, MA 02144-2516
+{{ return_address }}
 
 {% if request.user.is_staff %}PLEASE NOTE: This request was filed by a MuckRock staff reporter. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% else %}PLEASE NOTE: This request is not filed by a MuckRock staff member, but is being sent through MuckRock by the above in order to better track, share, and manage public records requests. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% endif %}
 {% endautoescape %}
