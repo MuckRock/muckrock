@@ -1,0 +1,125 @@
+template: cfn/templates/ecs-service.template.yml
+stack_name: muckrock-dev
+region: us-east-1
+context:
+  name: muckrock
+  environment: dev
+
+  # Not required, only required if the load balancer or target group
+  # was created in another cloudformation
+  routing:
+    is_public: false
+    certificate: arn:aws:acm:us-east-1:912288704264:certificate/c1ff8358-9b24-4e68-9d38-28caf63c0fde
+    dns:
+      zone_apex: news-engineering.aws.wapo.pub.
+      domain: muckrock-dev.news-engineering.aws.wapo.pub.
+  # # Required if using `import_listener`
+  # priority: 0
+
+  # # Optional, name the target group that gets created (not available when importing)
+  # target_group_name: example-prod
+  # # Optional, create a DNS entry
+  # dns:
+  #   zone_apex: myzonename.
+  #   domain: mydomainname
+  # #  If you are using either `import_listener`  or `import_target_group`above,
+  # #  you need to import the canonical hosted zone of the load balancer
+  # #  and the dns name of the load balancer here
+  #   load_balancer_zone_id: H1Z1234
+  #   load_balancer_dns: goodlb-111.eu-central-1.elb.amazonaws.com
+
+  # Required
+  service:
+    # Initial number of tasks to run, defaults to 2
+    default_scale: 1 # TODO we will want more for prod but this makes debugging easier
+
+    # Health check, defaults to "/"
+    health_check_path: /
+
+    # health check info and defaults
+    health_check_interval_seconds: 30
+    # healthy_threshold_count: 2
+    # unhealthy_threshold_count: 6
+    health_check_timeout_seconds: 20
+    # Not required, additional cloudformation properties
+    # cfn_properties:
+    # Not required, only needed if you access AWS resources with the task
+    task_role:
+      policies:
+        - actions:
+            - s3:*
+          resources:
+            - arn:aws:s3:::wp-muckrock-dev
+            - arn:aws:s3:::wp-muckrock-dev/*
+            - arn:aws:s3:::wp-muckrock-uploads-dev
+            - arn:aws:s3:::wp-muckrock-uploads-dev/*
+        - actions:
+            - cloudfront:ListDistributions
+            - cloudfront:CreateInvalidation
+          resources:
+            - "*"
+
+  # Required
+  container:
+    name: muckrock_nginx
+    image: muckrock_nginx
+    essential: false
+    memory_reservation: 512
+    # Not required, map of environment variables
+    # Not required, additional cloudformation properties
+    cfn_properties:
+      ExtraHosts:
+        - Hostname: statsd
+          IpAddress: 172.17.0.1
+      HealthCheck:
+        Command: ["CMD-SHELL", "curl -f http://127.0.0.1:8080/health || exit 1"]
+        Timeout: 10
+      Links:
+        - muckrock_django:muckrock_django
+
+  # Not required, other companion containers
+  other_containers:
+    - name: muckrock_django
+      image: muckrock_django
+      port: 5000
+      hostname: muckrock_django
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
+          Timeout: 20
+      environment: &base_env # below is also applied to celery containers
+        ALLOWED_HOSTS: "127.0.0.1,muckrock-dev.news-engineering.aws.wapo.pub"
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
+        BANDIT_WHITELIST: "washpost.com,pm.me" # TODO remove me testing with personal email
+        AWS_STORAGE_BUCKET_NAME: wp-muckrock-dev
+        AWS_MEDIA_BUCKET_NAME: wp-muckrock-uploads-dev
+        AWS_MEDIA_QUERYSTRING_AUTH: true
+        AWS_STORAGE_DEFAULT_ACL: "private"
+        CLOUDFRONT_DOMAIN: wp-muckrock-dev.news-engineering.aws.wapo.pub
+        DJANGO_SETTINGS_MODULE: muckrock.settings.wapo.staging
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
+        POSTGRES_DB: muckrock
+        POSTGRES_PORT: 5432
+        SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
+
+    - name: muckrock_celerybeat
+      image: muckrock_celerybeat
+      essential: false
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
+      environment:
+        <<: *base_env # apply env from django
+    - name: muckrock_celeryworker
+      image: muckrock_celeryworker
+      port: 5555 # For flower celery task monitoring
+      essential: false
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
+      environment:
+        <<: *base_env # apply env from django
+
+params:
+  # define the cluster name to run the service on
+  ClusterName: foia-dev

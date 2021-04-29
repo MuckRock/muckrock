@@ -3,6 +3,9 @@ FROM python:3.8
 
 ENV PYTHONUNBUFFERED 1
 
+ARG MIGRATE
+ENV MIGRATE $MIGRATE
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
   # psycopg2 dependencies
   #&& apt-get install build-deps gcc python2-dev musl-dev \
@@ -23,8 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   #&& apt-get install openblas-dev gfortran g++ \
   # memcahced
   libmemcached-dev
-  # for imagediet
-  #&& apt-get install libmagic
+# for imagediet
+#&& apt-get install libmagic
 
 # heroku cli
 RUN curl https://cli-assets.heroku.com/install.sh | sh
@@ -35,10 +38,10 @@ ENV NODE_VERSION 5.6.0
 
 RUN mkdir $NVM_DIR
 RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash \
-    && . $NVM_DIR/nvm.sh \
-    && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION \
-    && nvm use default
+  && . $NVM_DIR/nvm.sh \
+  && nvm install $NODE_VERSION \
+  && nvm alias default $NODE_VERSION \
+  && nvm use default
 
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
@@ -48,21 +51,9 @@ COPY ./pip /pip
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
 
-COPY ./compose/production/django/entrypoint /entrypoint
+COPY ./compose/local/django/entrypoint /entrypoint
 RUN sed -i 's/\r//' /entrypoint
 RUN chmod +x /entrypoint
-
-COPY ./compose/local/django/start /start
-RUN sed -i 's/\r//' /start
-RUN chmod +x /start
-
-COPY ./compose/local/django/celery/worker/start /start-celeryworker
-RUN sed -i 's/\r//' /start-celeryworker
-RUN chmod +x /start-celeryworker
-
-COPY ./compose/local/django/celery/beat/start /start-celerybeat
-RUN sed -i 's/\r//' /start-celerybeat
-RUN chmod +x /start-celerybeat
 
 WORKDIR /app
 

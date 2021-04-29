@@ -5,7 +5,7 @@ URL mappings for muckrock project
 # Django
 import django.contrib.sitemaps.views
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include, url,re_path
 from django.contrib import admin
 from django.views import static
 from django.views.generic.base import RedirectView, TemplateView
@@ -141,6 +141,7 @@ urlpatterns = [
     url(r"^hijack/", include("hijack.urls")),
     url(r"^opensearch/", include("opensearch.urls")),
     url(r"^dashboard/", include(dashing_router.urls)),
+    re_path(r"^watchman/", include('watchman.urls'))
 ]
 
 if settings.DEBUG:

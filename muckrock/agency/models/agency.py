@@ -15,6 +15,7 @@ from django.utils.safestring import mark_safe
 
 # Standard Library
 import logging
+from uuid import uuid4
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -244,15 +245,26 @@ class Agency(models.Model, RequestHelper):
         try:
             return self.profile.user
         except Profile.DoesNotExist:
-            data = {
+            # This is a temporary work around for not writing back to squarelet
+            uuid = uuid4()
+            user_json = {
+                "preferred_username": self.name[:150],
                 "name": self.name,
-                "preferred_username": self.name,
-                "is_agency": True,
+                "agency": self,
+                "email": "",
+                "uuid": uuid,
+                "organizations": [
+                    {
+                        "name": self.name,
+                        "slug": slugify(self.name),
+                        "entitlements": [],
+                        "max_users": 1,
+                        "individual": True,
+                        "uuid": uuid,
+                        "admin": True,
+                    }
+                ],
             }
-            # error handling?
-            resp = squarelet_post("/api/users/", data=data)
-            user_json = resp.json()
-            user_json["agency"] = self
             user, _ = Profile.objects.squarelet_update_or_create(
                 user_json["uuid"], user_json
             )

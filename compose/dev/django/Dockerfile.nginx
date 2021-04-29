@@ -1,4 +1,4 @@
-FROM nginx:latest
-ADD nginx.conf /etc/nginx/nginx.conf
+FROM public.ecr.aws/nginx/nginx:latest
 
-EXPOSE 8000 80/tcp
+ARG DEPLOYMENT_ENV=dev
+ADD compose/$DEPLOYMENT_ENV/django/nginx.conf /etc/nginx/nginx.conf

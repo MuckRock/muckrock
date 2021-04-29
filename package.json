@@ -52,7 +52,6 @@
   "dependencies": {
     "autonumeric": "^1.9.43",
     "axios": "^0.13.1",
-    "fine-uploader": "5.14.1",
     "formBuilder": "^2.9.8",
     "jquery-ui": "1.10.x",
     "jquery.tabulator": "^3.3.2",
