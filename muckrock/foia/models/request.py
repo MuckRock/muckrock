@@ -760,7 +760,7 @@ class FOIARequest(models.Model):
                 from_email=str(from_email),
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
-                #  bcc=["diagnostics@muckrock.com"],
+                bcc=["diagnostics@muckrock.com"],
                 headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
                 connection=email_connection,
             )

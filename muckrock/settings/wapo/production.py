@@ -16,6 +16,11 @@ BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
 
+CONSTANCE_REDIS_CONNECTION = {
+    'host': os.environ.get("REDIS_HOST"),
+    'port': 6379,
+}
+
 # This gets the IP address of the EC2 instance the task is
 # running on and adds it to allowed_hosts so the health
 # check will work
