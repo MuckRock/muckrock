@@ -31,7 +31,7 @@ context:
   # Required
   service:
     # Initial number of tasks to run, defaults to 2
-    default_scale: 2
+    default_scale: 1 # TODO we will want more for prod but this makes debugging easier
 
     # Health check, defaults to "/"
     health_check_path: /
@@ -44,13 +44,20 @@ context:
     # Not required, additional cloudformation properties
     # cfn_properties:
     # Not required, only needed if you access AWS resources with the task
-    # task_role:
-    #   policies:
-    #     - actions:
-    #         - s3:*
-    #         - ssm:GetParameter
-    #       resources:
-    #         - arn:aws:s3:::wapo-muckrock-dev/*
+    task_role:
+      policies:
+        - actions:
+            - s3:*
+          resources:
+            - arn:aws:s3:::wp-muckrock-dev
+            - arn:aws:s3:::wp-muckrock-dev/*
+            - arn:aws:s3:::wp-muckrock-uploads-dev
+            - arn:aws:s3:::wp-muckrock-uploads-dev/*
+        - actions:
+            - cloudfront:ListDistributions
+            - cloudfront:CreateInvalidation
+          resources:
+            - "*"
 
   # Required
   container:
@@ -76,25 +83,42 @@ context:
       image: muckrock_django
       port: 5000
       hostname: muckrock_django
-      environment:
-        AWS_STORAGE_BUCKET_NAME: wapo-muckrock-dev
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
+          Timeout: 20
+      environment: &base_env # below is also applied to celery containers
+        ALLOWED_HOSTS: "127.0.0.1,muckrock-dev.news-engineering.aws.wapo.pub"
+        BANDIT_EMAIL: news-engineering-qa@washpost.com
+        BANDIT_WHITELIST: "washpost.com,pm.me" # TODO remove me testing with personal email
+        AWS_STORAGE_BUCKET_NAME: wp-muckrock-dev
+        AWS_MEDIA_BUCKET_NAME: wp-muckrock-uploads-dev
+        AWS_MEDIA_QUERYSTRING_AUTH: true
+        AWS_STORAGE_DEFAULT_ACL: "private"
+        CLOUDFRONT_DOMAIN: wp-muckrock-dev.news-engineering.aws.wapo.pub
+        DJANGO_SETTINGS_MODULE: muckrock.settings.wapo.staging
+        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
+        POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
-        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
-        ALLOWED_HOSTS: "*"
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
 
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
       essential: false
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
-        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
-        ALLOWED_HOSTS: "*"
+        <<: *base_env # apply env from django
     - name: muckrock_celeryworker
       image: muckrock_celeryworker
+      port: 5555 # For flower celery task monitoring
       essential: false
+      cfn_properties:
+        HealthCheck:
+          Command: ["CMD-SHELL", "celery inspect ping -A muckrock.core.celery || exit 1"]
       environment:
-        DJANGO_SETTINGS_MODULE: muckrock.settings.staging
-        ALLOWED_HOSTS: "*"
+        <<: *base_env # apply env from django
 
 params:
   # define the cluster name to run the service on

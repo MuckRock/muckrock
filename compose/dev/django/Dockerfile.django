@@ -1,41 +1,8 @@
 # syntax = docker/dockerfile:experimental
-FROM public.ecr.aws/bitnami/python:3.8
+FROM 912288704264.dkr.ecr.us-east-1.amazonaws.com/shared/python:3.8
 
 ENV PYTHONUNBUFFERED 1
 ARG DEPLOYMENT_ENV=dev
-
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY_ID
-
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY $AWS_SECRET_ACCESS_KEY
-
-ARG REDIS_URL
-ENV REDIS_URL $REDIS_URL
-
-ARG POSTGRES_USER
-ENV POSTGRES_USER $POSTGRES_USER
-
-ARG POSTGRES_DB
-ENV POSTGRES_DB $POSTGRES_DB
-
-ARG POSTGRES_PASSWORD
-ENV POSTGRES_PASSWORD $POSTGRES_PASSWORD
-
-ARG POSTGRES_HOST
-ENV POSTGRES_HOST $POSTGRES_HOST
-
-ARG POSTGRES_PORT
-ENV POSTGRES_PORT $POSTGRES_PORT
-
-ARG SQUARELET_KEY
-ENV SQUARELET_KEY $SQUARELET_KEY
-
-ARG SQUARELET_SECRET
-ENV SQUARELET_SECRET $SQUARELET_SECRET
-
-ARG SQUARELET_URL
-ENV SQUARELET_URL $SQUARELET_URL
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
@@ -57,18 +24,16 @@ ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 COPY . /app/
+WORKDIR /app
+
+RUN pip install -r pip/requirements.txt
 
 # Compile front-end dependencies
 RUN npm install
 RUN npm run build
 
-# Requirements are installed here to ensure they will be cached.
-RUN pip install -r pip/requirements.txt
-WORKDIR /app
-
 RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
 RUN chmod +x entrypoint
 
 EXPOSE 5000/tcp
-
 ENTRYPOINT ["/app/entrypoint"]

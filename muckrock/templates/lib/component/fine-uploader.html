@@ -74,6 +74,9 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
     if (dataAttr) {
       pk = element.getAttribute(dataAttr);
     }
+
+    // Build client-side validation options based on user perms
+    // (Server validation is handled separately)
     {% has_perm 'foia.unlimited_attachment_size' request.user as unlimited_attachment %}
     {% if unlimited_attachment %}
       var limitAttachments = false;
@@ -108,37 +111,21 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       template: 'qq-simple-thumbnails-template',
       validation: validation,
       request: {
-        endpoint: 'https://{{settings.AWS_STORAGE_BUCKET_NAME}}.s3.amazonaws.com',
-        accessKey: '{{settings.AWS_ACCESS_KEY_ID}}',
+        inputName: 'file',
+        filenameParam: 'filename',
+        endpoint: ' ' // Replaced in onUpload handler
       },
-      objectProperties: {
-        acl: 'public-read',
-        key: function(fileId) {
-          var keyRetrieval = new qq.Promise();
-          var filename = encodeURIComponent(uploader.getName(fileId));
-          $.post(
-            urls.key,
-            {name: filename, id: pk}
-          )
-            .done(function(data) {keyRetrieval.success(data.key);})
-            .fail(function() {keyRetrieval.failure();});
-          return keyRetrieval;
-        },
+      credentials: {
+        accessKey: " ",
+        secretKey: " ",
+        expiration: new Date("2100-01-01") // far into the future
       },
       signature: {
-        endpoint: '{% url "fine-uploader-sign" %}',
-        customHeaders: {
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
+        // intentionally invalid, because we're managing signing ourselves
+        version: -1
       },
-      uploadSuccess: {
-        endpoint: urls.success,
-        customHeaders: {
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
-        params: {
-          'id': pk,
-        },
+      key: function(id){
+        return uploader._s3FileKeys[id];
       },
       iframeSupport: {
         localBlankPagePath: '{% url "fine-uploader-blank" %}',
@@ -149,68 +136,173 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       chunking: {
         enabled: true,
         concurrent: {
-          enabled: true,
-        },
-        success: {
-          endpoint: urls.success,
-          customHeaders: {
-            'X-CSRFToken': '{{ csrf_token }}',
-          },
-          params: {
-            'id': pk,
-          },
+          enabled: true
         }
       },
       resume: {
         enabled: true,
       },
+      callbacks: {
+        onUpload: function(id, filename){
+          var isChunked = uploader._handler.isUploadChunked(id);
+          var promise = new qq.Promise();
+
+          // Check if this upload has already begun (i.e. its being retried)
+          if(uploader._s3FileKeys[id]){
+            // We don't want to prefetch again, or it will overwrite the uploadId
+            return promise.success();
+          }
+
+          // Fetch S3 path and presigned URLs from the server
+          $.ajax({
+            type: 'POST',
+            url: urls.pre,
+            data: { 
+              name: filename, 
+              id: pk,
+              type: uploader.getFile(id).type,
+              chunked: isChunked
+            },
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .fail(function(res) { 
+            promise.failure(res.responseText); 
+          })
+          .done(function(data) {
+            // Overide upload endpoint and params with values from AWS signature
+            uploader.setEndpoint(data.url, id);
+            uploader.setParams(data.fields, id);
+
+            // Store the uploadId from chunked uploads inside the library
+            if(data.fields.uploadid){
+              uploader._handler.getPersistableData(id).uploadId = data.fields.uploadid;
+            }
+
+            // Cache S3 key onComplete handler to use
+            uploader._s3FileKeys[id] = data.fields.key;
+
+            // Resolve with success so upload begins
+            promise.success();
+          });
+
+          return promise;
+        },
+        onUploadChunk: function(id, filename, chunkData){
+          var uploadId = uploader._handler.getPersistableData(id).uploadId;
+          var promise = new qq.Promise();
+
+          // Fetch S3 path and presigned URLs from the server
+          $.ajax({
+            type: 'POST',
+            url: '{% url "fine-uploader-chunk" %}',
+            data: {
+              key: uploader._s3FileKeys[id],
+              id: uploadId,
+              index: chunkData.partIndex
+            },
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .fail(function(res) { 
+            promise.failure(res.responseText); 
+          })
+          .done(function(data) {
+            // Overide upload endpoint and params with values from AWS signature
+            uploader.setEndpoint(data.url, id);
+            uploader.setParams(data.fields, id);
+            
+            // Resolve with success so upload begins
+            promise.success();
+          });
+
+          return promise;
+        },
+        onComplete: function(id, filename, req){
+          if(req.success === false){
+            console.log("Request failed, skipping onComplete hook...");
+            return;
+          }
+          var chunking = uploader._handler.getPersistableData(id);
+          var promise = new qq.Promise();
+
+          // Notify server on successful upload so it can create DB records
+          $.ajax({
+            type: 'POST',
+            url: urls.success,
+            data: { 
+              key: uploader._s3FileKeys[id], 
+              id: pk,
+              chunked: chunking.enabled,
+              etags: JSON.stringify(chunking.etags),
+              uploadId: chunking.uploadId
+            },
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .fail(function(res){ 
+            promise.failure(res.responseText);
+          })
+          .done(function(created){ 
+            // Update internal uuid with id of new DB entry
+            uploader.setUuid(id, created.id);
+            promise.success();
+          });
+
+          return promise;
+        }
+      }
     };
+
     if (urls.session) {
       options['session'] = {
         endpoint: urls.session,
         params: {
           'id': pk,
         },
+        customHeaders: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
       };
     }
+    
     if (urls.delete_) {
       options['deleteFile'] = {
         enabled: true,
-        method: 'POST',
+        method: 'DELETE',
         endpoint: urls.delete_,
         customHeaders: {
           'X-CSRFToken': '{{ csrf_token }}',
         },
       };
     }
-    const uploader = new qq.s3.FineUploader(options);
+    
+    var uploader = new qq.s3.FineUploader(options);
+    uploader._s3FileKeys = {};
   };
 };
 
 var createUploaderRequest = createCreateUploader(
   'data-foia-pk',
   {
-    key: '{% url "fine-uploader-key-name-request" %}',
+    pre: '{% url "fine-uploader-preupload-request" %}',
     success: '{% url "fine-uploader-success-request" %}',
     session: '{% url "fine-uploader-session-request" %}',
-    delete_: '{% url "fine-uploader-delete-request" %}',
+    delete_: '{% url "fine-uploader-delete-request" "" %}',
   },
   false
   );
 var createUploaderComposer = createCreateUploader(
   'data-composer-pk',
   {
-    key: '{% url "fine-uploader-key-name-composer" %}',
+    pre: '{% url "fine-uploader-preupload-composer" %}',
     success: '{% url "fine-uploader-success-composer" %}',
     session: '{% url "fine-uploader-session-composer" %}',
-    delete_: '{% url "fine-uploader-delete-composer" %}',
+    delete_: '{% url "fine-uploader-delete-composer" "" %}',
   },
   false
   );
 var createUploaderComm = createCreateUploader(
   'data-comm-pk',
   {
-    key: '{% url "fine-uploader-key-name-comm" %}',
+    pre: '{% url "fine-uploader-preupload-comm" %}',
     success: '{% url "fine-uploader-success-comm" %}',
   },
   false

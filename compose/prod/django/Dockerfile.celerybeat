@@ -2,7 +2,7 @@
 FROM 912288704264.dkr.ecr.us-east-1.amazonaws.com/shared/python:3.8
 
 ENV PYTHONUNBUFFERED 1
-ARG DEPLOYMENT_ENV=dev
+ARG DEPLOYMENT_ENV=prod
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
@@ -30,5 +30,4 @@ RUN pip install -r /pip/requirements.txt
 COPY . /app/
 WORKDIR /app
 
-EXPOSE 5555/tcp
-ENTRYPOINT ["celery", "-A", "muckrock.core.celery", "worker", "-l", "INFO"]
+ENTRYPOINT ["celery", "-A", "muckrock.core.celery", "beat", "-l", "INFO"]

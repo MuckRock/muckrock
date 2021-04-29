@@ -2,7 +2,7 @@
 FROM 912288704264.dkr.ecr.us-east-1.amazonaws.com/shared/python:3.8
 
 ENV PYTHONUNBUFFERED 1
-ARG DEPLOYMENT_ENV=dev
+ARG DEPLOYMENT_ENV=prod
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   postgresql-client \
@@ -23,12 +23,17 @@ RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.37.2/install.sh | b
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-# Requirements are installed here to ensure they will be cached.
-COPY ./pip /pip
-RUN pip install -r /pip/requirements.txt
-
 COPY . /app/
 WORKDIR /app
 
-EXPOSE 5555/tcp
-ENTRYPOINT ["celery", "-A", "muckrock.core.celery", "worker", "-l", "INFO"]
+RUN pip install -r pip/requirements.txt
+
+# Compile front-end dependencies
+RUN npm install
+RUN npm run build
+
+RUN mv compose/$DEPLOYMENT_ENV/django/entrypoint entrypoint
+RUN chmod +x entrypoint
+
+EXPOSE 5000/tcp
+ENTRYPOINT ["/app/entrypoint"]
