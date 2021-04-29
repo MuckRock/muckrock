@@ -237,16 +237,14 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     # pylint: disable=unused-argument
     logger.info(
-        "Starting a composer_delayed_submit: (%s, %s, %s, %s)",
+        "Starting composer_delayed_submit: (%s, %s, %s, %s)",
         composer_pk,
         approve,
         contact_info,
         kwargs,
     )
     try:
-        logger.info("trying to fetch composer with pk: %s", composer_pk)
         composer = FOIAComposer.objects.get(pk=composer_pk)
-        logger.info("FOIAComposer: %s", composer)
     except FOIAComposer.DoesNotExist:
         # If the composer was deleted, just return
         logger.info("could not fetch composer %s from db", composer_pk)
@@ -868,7 +866,6 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     try:
         foia = FOIARequest.objects.get(pk=foia_pk)
         comm = FOIACommunication.objects.get(pk=comm_pk)
-        logger.info("starting delayed email for foia: %s, comm: %s", foia, comm)
         foia.send_delayed_email(comm, **options)
     except IOError as exc:
         countdown = (2 ** foia_send_email.request.retries) * 60 + randint(0, 300)
@@ -896,7 +893,6 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
-    logger.info("comm: %s", comm)
     # amount may be a string if it was JSON serialized from a Decimal
     amount = float(extra.get("amount", 0))
 
@@ -918,7 +914,6 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
     else:
         address = comm.foia.address
-    logger.info("sending mail to %s", address)
     for test, reason in [
         (not config.AUTO_LOB and not force, "auto"),
         (not address, "addr"),

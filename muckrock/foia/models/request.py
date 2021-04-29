@@ -763,9 +763,6 @@ class FOIARequest(models.Model):
         from_email, _ = EmailAddress.objects.get_or_create(
             email=self.get_request_email()
         )
-        logger.info(
-            "starting delayed email send to: %s from: %s", self.email, from_email
-        )
 
         body = self.render_msg_body(
             comm=comm,
