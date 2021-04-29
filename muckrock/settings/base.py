@@ -49,6 +49,9 @@ ADDRESS_STATE = os.environ.get("ADDRESS_STATE", "MA")
 ADDRESS_ZIP = os.environ.get("ADDRESS_ZIP", "02144-2516")
 
 PHONE_NUMBER = os.environ.get("PHONE_NUMBER", "(617) 299-1832")
+PHONE_NUMBER_LINK = os.environ.get(
+    "PHONE_NUMBER_LINK", "+1" + PHONE_NUMBER.translate({ord(i): None for i in "()- "})
+)
 
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None

@@ -169,7 +169,7 @@ class AgencyRequestForm(models.Model):
     def _phone(self, comm):
         """MuckRock's phone number"""
         # pylint: disable=unused-argument
-        return "(617) 299-1832"
+        return settings.PHONE_NUMBER
 
     _phone.value_choice = True
 

@@ -97,7 +97,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                 "request[request_text]": linebreaks(comm.communication),
                 "requester[email]": email,
                 "requester[name]": user.profile.full_name,
-                "requester[phone_number]": "(617) 299-1832",
+                "requester[phone_number]": settings.PHONE_NUMBER,
                 "requester[address]": f"{settings.ADDRESS_DEPT}, "
                 "{settings.ADDRESS_STREET}".format(pk=foia.pk),
                 "requester[city]": settings.ADDRESS_CITY,
