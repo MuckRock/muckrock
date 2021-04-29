@@ -27,7 +27,7 @@ context:
   # Required
   service:
     # Initial number of tasks to run, defaults to 2
-    default_scale: 2
+    default_scale: 1
 
     # Health check, defaults to "/"
     health_check_path: /watchman
@@ -60,7 +60,7 @@ context:
     name: muckrock_nginx
     image: muckrock_nginx
     essential: false
-    memory_reservation: 512
+    memory_reservation: 128
     # Not required, map of environment variables
     # Not required, additional cloudformation properties
     cfn_properties:
