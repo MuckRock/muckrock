@@ -31,7 +31,7 @@ context:
   # Required
   service:
     # Initial number of tasks to run, defaults to 2
-    default_scale: 2
+    default_scale: 1
 
     # Health check, defaults to "/"
     health_check_path: /
@@ -63,7 +63,7 @@ context:
   container:
     name: example
     port: 8080
-    memory_reservation: 512
+    memory_reservation: 128
     # Not required, map of environment variables
     # environment:
 

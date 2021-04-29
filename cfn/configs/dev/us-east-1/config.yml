@@ -57,7 +57,7 @@ context:
     name: muckrock_nginx
     image: muckrock_nginx
     essential: false
-    memory_reservation: 512
+    memory_reservation: 128
     # Not required, map of environment variables
     # Not required, additional cloudformation properties
     cfn_properties:
