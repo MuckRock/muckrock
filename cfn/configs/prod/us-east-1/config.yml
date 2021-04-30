@@ -85,8 +85,8 @@ context:
       hostname: muckrock_django
       cfn_properties:
         HealthCheck:
-          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
-          Timeout: 20
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman/ || exit 1"]
+          StartPeriod: 90
       environment: &base_env # below is also applied to celery containers
         ALLOWED_HOSTS: "127.0.0.1,muckrock-prod.news-engineering.aws.wapo.pub"
         BANDIT_EMAIL: news-engineering-qa@washpost.com
