@@ -32,7 +32,10 @@ context:
   service:
     # Initial number of tasks to run, defaults to 2
     default_scale: 1 # TODO we will want more for prod but this makes debugging easier
-
+    
+    # Append a random string to each service instance
+    # allowing creation of the replacement before destroying the previous generation
+    dynamic_service_name: true
     # Health check, defaults to "/"
     health_check_path: /
 
