@@ -2,7 +2,7 @@ template: cfn/templates/ecs-service.template.yml
 stack_name: muckrock-prod
 region: us-east-1
 context:
-  name: muckrock-foia
+  name: muckrock
   environment: prod
 
   # Not required, only required if the load balancer or target group
@@ -28,6 +28,10 @@ context:
   service:
     # Initial number of tasks to run, defaults to 2
     default_scale: 1
+    
+    # Append a random string to each service instance
+    # allowing creation of the replacement before destroying the previous generation
+    dynamic_service_name: true
 
     # Health check, defaults to "/"
     health_check_path: /watchman
