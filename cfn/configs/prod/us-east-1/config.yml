@@ -50,7 +50,7 @@ context:
 >>>>>>> f99c2aca8... enable dynamic service name
 
     # Health check, defaults to "/"
-    health_check_path: /watchman
+    health_check_path: /
 
     # health check info and defaults
     health_check_interval_seconds: 30
