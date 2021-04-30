@@ -10,5 +10,4 @@ workers = int(os.environ.get('GUNICORN_WORKERS', 3))
 max_requests = 50
 timeout = 120
 log_level = 'debug'
-accesslog = "/app/gunicorn.access.log"
 errorlog = "/app/gunicorn.error.log"
