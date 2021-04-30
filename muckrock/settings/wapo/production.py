@@ -21,6 +21,8 @@ CONSTANCE_REDIS_CONNECTION = {
     'port': 6379,
 }
 
+SECURE_SSL_REDIRECT = False
+
 # This gets the IP address of the EC2 instance the task is
 # running on and adds it to allowed_hosts so the health
 # check will work
