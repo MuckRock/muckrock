@@ -2,7 +2,7 @@ template: cfn/templates/ecs-service.template.yml
 stack_name: muckrock-prod
 region: us-east-1
 context:
-  name: muckrock
+  name: muckrock-foia
   environment: prod
 
   # Not required, only required if the load balancer or target group
