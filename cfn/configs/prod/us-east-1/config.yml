@@ -2,7 +2,7 @@ template: cfn/templates/ecs-service.template.yml
 stack_name: muckrock-prod
 region: us-east-1
 context:
-  name: muckrock-foia
+  name: muckrock
   environment: prod
 
   # Not required, only required if the load balancer or target group
@@ -30,6 +30,7 @@ context:
 <<<<<<< HEAD
 <<<<<<< HEAD
     default_scale: 1
+<<<<<<< HEAD
 ||||||| parent of 8d238ebdb... add prod refresh config, ALLOWED_HOSTS
     default_scale: 2
 =======
@@ -40,6 +41,13 @@ context:
 =======
     default_scale: 2
 >>>>>>> 970c41f33... fix mailgun server name, default scale
+||||||| parent of f99c2aca8... enable dynamic service name
+=======
+    
+    # Append a random string to each service instance
+    # allowing creation of the replacement before destroying the previous generation
+    dynamic_service_name: true
+>>>>>>> f99c2aca8... enable dynamic service name
 
     # Health check, defaults to "/"
     health_check_path: /watchman
