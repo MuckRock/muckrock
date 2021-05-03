@@ -412,10 +412,10 @@ MAILCHIMP_API_ROOT = "https://us2.api.mailchimp.com/3.0"
 MAILCHIMP_LIST_DEFAULT = "20aa4a931d"
 
 MAILGUN_ACCESS_KEY = os.environ.get("MAILGUN_ACCESS_KEY")
-MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME")
+MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME", "requests.muckrock.com")
 
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django_mailgun.MailgunBackend")
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 
 DOCUMENTCLOUD_USERNAME = os.environ.get("DOCUMENTCLOUD_USERNAME")
 DOCUMENTCLOUD_PASSWORD = os.environ.get("DOCUMENTCLOUD_PASSWORD")
@@ -583,10 +583,6 @@ DASHING = {
     "PERMISSION_CLASSES": ("dashing.permissions.IsAdminUser",),
 }
 
-CONSTANCE_REDIS_CONNECTION = {
-    'host': os.environ.get("REDIS_HOST"),
-    'port': 6379,
-}
 
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(

@@ -27,10 +27,14 @@ context:
   # Required
   service:
     # Initial number of tasks to run, defaults to 2
-    default_scale: 2
+    default_scale: 1
+    
+    # Append a random string to each service instance
+    # allowing creation of the replacement before destroying the previous generation
+    dynamic_service_name: true
 
     # Health check, defaults to "/"
-    health_check_path: /watchman
+    health_check_path: /
 
     # health check info and defaults
     health_check_interval_seconds: 30
@@ -60,7 +64,7 @@ context:
     name: muckrock_nginx
     image: muckrock_nginx
     essential: false
-    memory_reservation: 512
+    memory_reservation: 128
     # Not required, map of environment variables
     # Not required, additional cloudformation properties
     cfn_properties:
@@ -81,8 +85,8 @@ context:
       hostname: muckrock_django
       cfn_properties:
         HealthCheck:
-          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
-          Timeout: 20
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman/ || exit 1"]
+          StartPeriod: 90
       environment: &base_env # below is also applied to celery containers
         ALLOWED_HOSTS: "127.0.0.1,muckrock-prod.news-engineering.aws.wapo.pub"
         BANDIT_EMAIL: news-engineering-qa@washpost.com

@@ -41,6 +41,13 @@ echo >&2 'PostgreSQL is available'
 
 exec "$@"
 
+echo "Beginning collect static files" >&2
 python /app/manage.py collectstatic --noinput
+echo "Finished collect static files" >&2
+
+echo "Starting file compression" >&2
 python /app/manage.py compress
-gunicorn -c file:config/gunicorn.conf.py muckrock.wsgi:application
+echo "Finishing file compression" >&2
+
+echo "Starting gunicorn" >&2
+gunicorn -c file:config/gunicorn.conf.py muckrock.wsgi:application --access-logfile -

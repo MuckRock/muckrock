@@ -737,7 +737,6 @@ class FOIARequest(models.Model):
         from_email, _ = EmailAddress.objects.get_or_create(
             email=self.get_request_email()
         )
-        logger.info("starting delayed email send to: %s from: %s", self.email, from_email)
 
         body = self.render_msg_body(
             comm=comm,
@@ -761,7 +760,7 @@ class FOIARequest(models.Model):
                 from_email=str(from_email),
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
-                #  bcc=["diagnostics@muckrock.com"],
+                bcc=["diagnostics@muckrock.com"],
                 headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
                 connection=email_connection,
             )

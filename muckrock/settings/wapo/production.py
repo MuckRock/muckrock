@@ -10,11 +10,19 @@ import requests
 from muckrock.settings.production import *
 
 # TODO Remove me once we've verified email sending in production
+INSTALLED_APPS += ("bandit",)
 EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
 BANDIT_EMAIL = os.environ.get("BANDIT_EMAIL", "staging@muckrock.com")
 BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
+
+CONSTANCE_REDIS_CONNECTION = {
+    'host': os.environ.get("REDIS_HOST"),
+    'port': 6379,
+}
+
+SECURE_SSL_REDIRECT = False
 
 # This gets the IP address of the EC2 instance the task is
 # running on and adds it to allowed_hosts so the health

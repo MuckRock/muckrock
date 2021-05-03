@@ -32,7 +32,10 @@ context:
   service:
     # Initial number of tasks to run, defaults to 2
     default_scale: 1 # TODO we will want more for prod but this makes debugging easier
-
+    
+    # Append a random string to each service instance
+    # allowing creation of the replacement before destroying the previous generation
+    dynamic_service_name: true
     # Health check, defaults to "/"
     health_check_path: /
 
@@ -64,7 +67,7 @@ context:
     name: muckrock_nginx
     image: muckrock_nginx
     essential: false
-    memory_reservation: 512
+    memory_reservation: 128
     # Not required, map of environment variables
     # Not required, additional cloudformation properties
     cfn_properties:
@@ -85,7 +88,7 @@ context:
       hostname: muckrock_django
       cfn_properties:
         HealthCheck:
-          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman || exit 1"]
+          Command: ["CMD-SHELL", "curl -f http://127.0.0.1:5000/watchman/ || exit 1"]
           Timeout: 20
       environment: &base_env # below is also applied to celery containers
         ALLOWED_HOSTS: "127.0.0.1,muckrock-dev.news-engineering.aws.wapo.pub"
