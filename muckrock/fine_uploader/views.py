@@ -358,18 +358,10 @@ def _preupload(request, model, id_name=None):
     return JsonResponse(response_data)
 
 
-<<<<<<< HEAD
 @login_required
 def preupload_request(request):
     """Generate upload info for a FOIA Request"""
     return _preupload(request, OutboundRequestAttachment, "foia_id")
-=======
-@login_or_agency_required
-def key_name_request(request):
-    """Generate the S3 key name for a FOIA Request"""
-    return _key_name(request, OutboundRequestAttachment, "foia_id")
->>>>>>> 89d63a51772fa3835ced1efb36301f798791d28b
-
 
 @login_required
 def preupload_composer(request):
