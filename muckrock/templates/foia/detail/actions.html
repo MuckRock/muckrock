@@ -1,0 +1,170 @@
+
+{% if user.is_authenticated or is_agency_user %}
+  <section class="actions">
+
+    {% if can_revoke %}
+      <div class="prompt">
+        <p>
+          Thank you for submitting this request.  Please review it now.
+          You will have until {{ revoke_deadline|time:"g:i a" }}
+          ({{ revoke_deadline|timeuntil }} from now) in order to make any changes
+          before it is sent to the agency.
+        </p>
+        <footer class="button-group">
+          {% if user.is_staff %}
+            <form
+              method="post"
+              action="{% url "foia-composer-detail" idx=foia.composer.pk slug=foia.composer.slug %}"
+            >
+              {% csrf_token %}
+              <button class="button" name="action" value="send-now">Send Now</button>
+            </form>
+          {% endif %}
+          <a class="primary button" href="{% url "foia-draft" idx=foia.composer.pk %}">
+            Edit
+          </a>
+        </footer>
+      </div>
+    {% endif %}
+
+    {% if user_can_pay %}
+      <div class="payment prompt">
+        <p>
+          This request requires a payment{% if foia.price %} of
+          ${{foia.price|floatformat:2}}{% endif %}.
+        </p>
+        <footer class="button-group">
+          <a class="success button" href="#pay">Pay</a>
+          {% if not foia.crowdfund %}
+            <a class="success button" href="#crowdfund">Crowdfund</a>
+          {% endif %}
+          {% if request.user.is_staff %}
+            <a href="#staff-pay" class="green button">Staff Pay</a>
+          {% endif %}
+        </footer>
+      </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for action in user_actions %}
+        {% if action.test %}
+          {% if action.link %}
+            <a
+              href="{{ action.link }}"
+              class="button{% if action.class_name %} {{ action.class_name }}{% endif %}"
+              title="{{ action.desc }}"
+            >{{ action.title }}</a>
+          {% endif %}
+
+          {% if action.modal %}
+            <span
+              data-modal="#{{action.action}}-modal"
+              class="text-area modal-button button {% if action.class_name %}{{ action.class_name }}{% endif %}"
+              >{{ action.title }}</span>
+            <div class="modal" id="{{action.action}}-modal">
+              <h1>{{ action.title }}</h1>
+              <h2>{{ action.desc }}</h2>
+              {% for field in action.form %}
+                {{ field }}
+                {% if field.help_text %}
+                  <p class="help-text">{{ field.help_text }}</p>
+                {% endif %}
+              {% endfor %}
+              <button
+                type="submit"
+                name="action"
+                value="{{ action.action }}"
+                class="primary button"
+              >{{ action.title }}</button>
+              <span class="close-modal button">Close</span>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </form>
+  </section>
+
+{% else %} {# unauthenticated #}
+
+  <div class="signup prompt">
+    <p>
+      MuckRock users can file, duplicate, track, and share public records requests
+      like this one. <a href="/about/muckrock-101/">Learn more.</a>
+    </p>
+    <footer>
+      <a href="{% url "foia-create" %}" class="primary button">
+        {% include "lib/component/icon/create-request.svg" %}
+        <span>File a Request</span>
+      </a>
+    </footer>
+  </div>
+
+{% endif %}
+
+{% if is_agency_user %}
+  <section class="agency-info">
+    <p>
+      This request was filed by {{ foia.user.profile.full_name }} through
+      MuckRock, a non-profit organization that helps journalists, researchers,
+      and the public file, track, and share records requests. You may follow up
+      directly with the requester by following the prompts below. Should this
+      request be directed elsewhere? Have you already responded? Click Get Help
+      above and let us know, or reach our team directly at
+      <a href="tel:{{ settings.PHONE_NUMBER_LINK }}">{{ settings.PHONE_NUMBER }}</a>
+      or at
+      <a href="mailto:{{ settings.DEFAULT_FROM_EMAIL }}">
+        {{ settings.DEFAULT_FROM_EMAIL }}
+      </a>.
+      <a href="/agency-faq/">Frequently asked questions</a> about MuckRock.
+    </p>
+    <p>
+      Upload documents and update the status of the request below, or choose an
+      option to reach our team directly:
+    </p>
+    <ul>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category="already responded"
+          class="modal-link agency-flag"
+          >
+          I already responded to this request
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category="bad contact"
+          class="modal-link agency-flag"
+          >
+          I’m not the best contact for this
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category="wrong agency"
+          class="modal-link agency-flag"
+          >
+          This request should go to a different agency
+        </a>
+      </li>
+      <li>
+        <a
+          href="#"
+          data-modal="#flag-modal"
+          data-category=""
+          class="modal-link agency-flag"
+          >
+          Something else not covered here.
+        </a>
+      </li>
+    </ul>
+  </section>
+{% endif %}
+
+

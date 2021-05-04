@@ -644,10 +644,9 @@ class Check(models.Model):
         msg = EmailMessage(
             subject="[CHECK MAILED] Check #{}".format(self.number),
             body=body,
-            from_email="info@muckrock.com",
             to=[settings.CHECK_EMAIL],
-            cc=["info@muckrock.com"],
-            bcc=["diagnostics@muckrock.com"],
+            cc=[settings.DEFAULT_FROM_EMAIL],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         )
         msg.send(fail_silently=False)
 

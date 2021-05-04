@@ -13,9 +13,10 @@ In the event that there are fees, I would be grateful if you would inform me of 
 
 Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within {{ jurisdiction.get_days }}.
 {% if proxy %}
-Please note that I am a citizen of {{ jurisdiction.legal.name }}, and am using MuckRock's services to help manage and track my request.
-{% endif %}
+This request is filed by {{ proxy }}, a citizen of {{ jurisdiction.legal.name }}, in coordination with {{ user_name }}.
+{% else %}
 Sincerely,
 
 {{ user_name }}
+{% endif %}
 {% endautoescape %}

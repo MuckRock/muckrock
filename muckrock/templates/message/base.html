@@ -227,8 +227,8 @@
                                     <div class="footer">
                                         {% block settings %}{% endblock %}
                                         {% if user %}<p>This email was sent to <a href="mailto:{{user.email}}">{{user.email}}</a>.{% endif %}
-                                        <p>Add <a href="mailto:info@muckrock.com">info@muckrock.com</a> to your address book to prevent our emails from being marked as spam.</p>
-                                        <p>MuckRock, 411A Highland Avenue, Somerville, MA 02144</p>
+                                        <p>Add <a href="mailto:{{ settings.DEFAULT_FROM_EMAIL }}">{{ settings.DEFAULT_FROM_EMAIL }}</a> to your address book to prevent our emails from being marked as spam.</p>
+                                        <p>{{ settings.ADDRESS_NAME }}, {{ settings.ADDRESS_STREET}}, {{ settings.ADDRESS_CITY }}, {{ settings.ADDRESS_STATE }} {{ settings.ADDRESS_ZIP }}</p>
                                     </div>
                                 </div>
                             </td>

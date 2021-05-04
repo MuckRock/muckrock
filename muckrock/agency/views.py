@@ -3,6 +3,7 @@ Views for the Agency application
 """
 
 # Django
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
@@ -15,16 +16,23 @@ from django.utils.html import linebreaks
 from django.views.generic.edit import FormView
 
 # Standard Library
+import codecs
 import re
+from datetime import date
+from hashlib import md5
 from string import capwords
+from time import time
 
 # Third Party
 from fuzzywuzzy import fuzz, process
+from smart_open.smart_open_lib import smart_open
 
 # MuckRock
 from muckrock.agency.filters import AgencyFilterSet
-from muckrock.agency.forms import AgencyMergeForm
+from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
+from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
+from muckrock.agency.tasks import mass_import
 from muckrock.agency.utils import initial_communication_template
 from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
 from muckrock.jurisdiction.forms import FlagForm
@@ -420,3 +428,69 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
                 {"name": capwords(name), "jurisdiction": jurisdiction},
             )
         return create_option
+
+
+class MassImportAgency(PermissionRequiredMixin, FormView):
+    """View to do a mass import of new agencies"""
+
+    form_class = AgencyMassImportForm
+    template_name = "agency/mass_import.html"
+    permission_required = "agency.mass_import"
+
+    def form_valid(self, form):
+        """Import the data"""
+        if form.cleaned_data["email"]:
+            return self._import_email(form)
+        else:
+            return self._import_html(form)
+
+    def _import_email(self, form):
+        """Import the results asynchrnously"""
+        today = date.today()
+        file_path = (
+            "s3://{bucket}/agency_mass_import/{y:4d}/{m:02d}/{d:02d}/{md5}/"
+            "import.csv".format(
+                bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                y=today.year,
+                m=today.month,
+                d=today.day,
+                md5=md5(
+                    "{}{}{}".format(
+                        int(time()), settings.SECRET_KEY, self.request.user.pk
+                    ).encode("utf8")
+                ).hexdigest(),
+            )
+        )
+        with smart_open(file_path, "wb") as file_:
+            for chunk in self.request.FILES["csv"].chunks():
+                file_.write(chunk)
+
+        mass_import.delay(
+            self.request.user.pk,
+            file_path,
+            form.cleaned_data.get("match_or_import") == "match",
+            form.cleaned_data.get("dry_run"),
+        )
+        messages.success(
+            self.request,
+            "Importing agencies, results will be emailed to you when completed",
+        )
+        return self.render_to_response(self.get_context_data())
+
+    def _import_html(self, form):
+        """Return the import results via HTML"""
+        reader = CSVReader(codecs.iterdecode(self.request.FILES["csv"], "utf8"))
+        importer = Importer(reader)
+        if form.cleaned_data["match_or_import"] == "match":
+            context = {"data": importer.match(), "match": True}
+        elif form.cleaned_data["match_or_import"] == "import":
+            context = {
+                "data": importer.import_(dry=form.cleaned_data.get("dry_run")),
+                "import": True,
+            }
+        return self.render_to_response(context)
+
+    def handle_no_permission(self):
+        """What to do if the user does not have permisson to view this page"""
+        messages.error(self.request, "You do not have permission to view this page")
+        return redirect("index")

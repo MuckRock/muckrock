@@ -97,7 +97,10 @@ class JurisdictionAdmin(VersionAdmin):
         ),
         (
             "Options for states/federal",
-            {"classes": ("collapse",), "fields": ("observe_sat", "holidays")},
+            {
+                "classes": ("collapse",),
+                "fields": ("always_proxy", "observe_sat", "holidays"),
+            },
         ),
     )
     formats = ["xls", "csv"]

@@ -1,0 +1,7 @@
+{% extends "message/base.txt" %}
+{% load static %}
+{% block body %}
+Your agency import has completed and the output CSV file is ready to download.  It will be automatically deleted in 5 days.
+{% static file %}
+{% endblock %}
+

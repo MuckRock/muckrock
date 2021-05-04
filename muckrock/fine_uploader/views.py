@@ -21,6 +21,7 @@ import json
 # Third Party
 import boto3
 import botocore.exceptions
+from functools import wraps
 
 # MuckRock
 from muckrock.foia.models import (
@@ -45,6 +46,33 @@ def _complete_chunked_upload(key, uploadId, chunks):
         },
         UploadId=uploadId
     )
+
+def login_or_agency_required(function):
+    """Allow semi-authenticated agency users to upload files"""
+
+    @wraps(function)
+    def wrapper(request, *args, **kwargs):
+        """If the user has a valid passcode for the request, treat them as the
+        agency user for this view
+        """
+        if not request.user.is_authenticated:
+            try:
+                if request.method == "POST":
+                    data = request.POST
+                else:
+                    data = request.GET
+                foia = FOIARequest.objects.get(pk=data["id"])
+            except (FOIARequest.DoesNotExist, KeyError):
+                return HttpResponseForbidden()
+            if request.session.get(f"foiapasscode:{foia.pk}"):
+                request.user = foia.agency.get_user()
+            else:
+                return HttpResponseForbidden()
+
+        return function(request, *args, **kwargs)
+
+    return wrapper
+
 
 def _success(request, model, attachment_model, fk_name):
     """"File has been succesfully uploaded to a FOIA/composer"""
@@ -77,7 +105,7 @@ def _success(request, model, attachment_model, fk_name):
     return JsonResponse({ "id": attachment.id })
 
 
-@login_required
+@login_or_agency_required
 def success_request(request):
     """"File has been succesfully uploaded to a FOIA"""
     return _success(request, FOIARequest, OutboundRequestAttachment, "foia")
@@ -154,7 +182,7 @@ def _session(request, model):
     return JsonResponse(data, safe=False)
 
 
-@login_required
+@login_or_agency_required
 def session_request(request):
     """Get the initial file list for a request"""
     return _session(request, FOIARequest)
@@ -175,7 +203,17 @@ def _delete(request, model, idx):
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if not attm.attached_to.has_perm(request.user, "upload_attachment"):
+    if request.user.is_authenticated:
+        user = request.user
+    elif model is OutboundRequestAttachment and request.session.get(
+        f"foiapasscode:{attm.foia_id}"
+    ):
+        user = attm.foia.agency.get_user()
+
+    if attm.user != user:
+        return HttpResponseForbidden()
+
+    if not attm.attached_to.has_perm(user, "upload_attachment"):
         return HttpResponseForbidden()
 
     attm.delete()
@@ -225,7 +263,6 @@ def _build_presigned_url(key, content_type, user=None):
     url_data["fields"]["Content-Type"] = content_type
 
     return url_data
-
 
 def _start_chunked_upload(key, content_type):
     """
@@ -321,10 +358,17 @@ def _preupload(request, model, id_name=None):
     return JsonResponse(response_data)
 
 
+<<<<<<< HEAD
 @login_required
 def preupload_request(request):
     """Generate upload info for a FOIA Request"""
     return _preupload(request, OutboundRequestAttachment, "foia_id")
+=======
+@login_or_agency_required
+def key_name_request(request):
+    """Generate the S3 key name for a FOIA Request"""
+    return _key_name(request, OutboundRequestAttachment, "foia_id")
+>>>>>>> 89d63a51772fa3835ced1efb36301f798791d28b
 
 
 @login_required

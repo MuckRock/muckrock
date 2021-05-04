@@ -131,6 +131,8 @@
           </fieldset>
         {% endif %}
 
+        {% include "lib/pattern/new_request_field.html" with field=form.no_proxy only %}
+
         {% if user.is_authenticated %}
           <fieldset class="advanced">
             <span class="toggle-advanced">&#9654; Advanced Options</span>

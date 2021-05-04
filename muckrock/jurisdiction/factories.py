@@ -24,6 +24,7 @@ class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
         model = Jurisdiction
 
     name = "United States of America"
+    abbrev = "USA"
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     level = "f"
     law = factory.RelatedFactory(

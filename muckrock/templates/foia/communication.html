@@ -47,6 +47,16 @@
             {% endif %}
       </div>
     </header>
+    {% if show_foia %}
+      <section class="textbox__section communication-metadata">
+        <p class="foia-backlink">
+          Request:
+          <a href="{{ communication.foia.get_absolute_url }}">
+            {{ communication.foia }}
+          </a>
+        </p>
+      </section>
+    {% endif %}
     <section class="textbox__section communication-metadata">
       {% if communication.subject %}
         <p class="small subject">Subject: {{ communication.subject }}</p>

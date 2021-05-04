@@ -1,0 +1,48 @@
+<ul role="tablist" class="tab-list">
+  <li>
+    <a role="tab" class="tab" aria-controls="request" href="#comms">
+      {% with count=foia.communications.visible.count %}
+        <span class="counter">{{ count }}</span>
+        <span class="label">Communication{{ count|pluralize }}</span>
+      {% endwith %}
+    </a>
+  </li>
+  <li>
+    <a role="tab" class="tab" aria-controls="files" href="#files">
+      {% with foia.get_files.count as files_count %}
+        <span class="counter">{{ files_count }}</span>
+        <span class="label">File{{ files_count|pluralize }}</span>
+      {% endwith %}
+    </a>
+  </li>
+  {% if foia.user == user or user.is_staff %}
+    <li>
+      <a role="tab" class="tab" aria-controls="notes" href="#notes">
+        {% with notes|length as notes_count %}
+          <span class="counter">{{ notes_count }}</span>
+          <span class="label">Note{{ notes_count|pluralize }}</span>
+        {% endwith %}
+      </a>
+    </li>
+  {% endif %}
+  {% if user_can_edit and open_task_count or user.is_staff %}
+    <li>
+      <a
+        role="tab"
+        class="tab {% if open_task_count %}alert{% endif %}"
+        aria-controls="tasks"
+        href="#tasks"
+      >
+        <span class="counter">{{ open_task_count }}</span>
+        <span class="label">Task{{ open_task_count|pluralize }}</span>
+      </a>
+    </li>
+  {% endif %}
+  {% if user_can_edit %}
+    <li>
+      <a role="tab" class="tab" aria-controls="sharing" href="#sharing">
+        Sharing
+      </a>
+    </li>
+  {% endif %}
+</ul>

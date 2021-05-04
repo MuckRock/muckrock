@@ -32,7 +32,6 @@ from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.crowdsource import fields
-from muckrock.crowdsource.constants import DOCUMENT_URL_RE
 from muckrock.crowdsource.querysets import (
     CrowdsourceDataQuerySet,
     CrowdsourceQuerySet,
@@ -274,22 +273,6 @@ class Crowdsource(models.Model):
         )
 
 
-DOCCLOUD_EMBED = """
-<div class="DC-embed DC-embed-document DV-container">
-  <div style="position:relative;padding-bottom:129.42857142857142%;height:0;overflow:hidden;max-width:100%;">
-    <iframe
-        src="//www.documentcloud.org/documents/{doc_id}.html?
-            embed=true&amp;responsive=false&amp;sidebar=false"
-        title="{doc_id} (Hosted by DocumentCloud)"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-        frameborder="0"
-        style="position:absolute;top:0;left:0;width:100%;height:100%;border:1px solid #aaa;border-bottom:0;box-sizing:border-box;">
-    </iframe>
-  </div>
-</div>
-"""
-
-
 class CrowdsourceData(models.Model):
     """A source of data to show with the crowdsource questions"""
 
@@ -324,19 +307,10 @@ class CrowdsourceData(models.Model):
                     ).embed(self.url, max_height=400)
                 )
             except PyEmbedConsumerError:
-                # if this is a private document cloud document, it will not have
-                # an oEmbed, create the embed manually
-                doc_match = DOCUMENT_URL_RE.match(self.url)
-                if doc_match:
-                    return mark_safe(
-                        DOCCLOUD_EMBED.format(doc_id=doc_match.group("doc_id"))
-                    )
-                else:
-                    # fall back to a simple iframe
-                    return format_html(
-                        '<iframe src="{}" width="100%" height="400px"></iframe>',
-                        self.url,
-                    )
+                # fall back to a simple iframe
+                return format_html(
+                    '<iframe src="{}" width="100%" height="400px"></iframe>', self.url
+                )
         else:
             return ""
 
@@ -561,9 +535,9 @@ class CrowdsourceResponse(models.Model):
                 self.crowdsource.title, self.user.username if self.user else "Anonymous"
             ),
             body=text,
-            from_email="info@muckrock.com",
+            from_email=settings.ASSIGNMENTS_EMAIL,
             to=[email],
-            bcc=["diagnostics@muckrock.com"],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
     class Meta:

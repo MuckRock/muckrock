@@ -2,7 +2,7 @@
 {% block body %}
 We're very pleased to inform you that your project passed review and is now public! Now you can share it with the world.
 
-Public projects also support crowdfunding campaigns. If you have any questions about starting a crowdfund, contact us at info@muckrock.com.
+Public projects also support crowdfunding campaigns. If you have any questions about starting a crowdfund, contact us at {{ settings.DEFAULT_FROM_EMAIL }}.
 
 {% if message %}
 Review Notes

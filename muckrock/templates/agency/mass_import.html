@@ -1,0 +1,90 @@
+{% extends "forms/base_form.html" %}
+
+{% block form-title %}
+  <h1>Mass Import</h1>
+{% endblock %}
+
+{% block form-info %}
+  {% if data %}
+    <table>
+      <tr>
+        <th>agency</th>
+        <th>jurisdiction</th>
+        <th>matched agency</th>
+        {% if import %}
+          <th>email</th>
+          <th>phone</th>
+          <th>fax</th>
+          <th>address</th>
+          <th>portal</th>
+          <th>aliases</th>
+          <th>foia_website</th>
+          <th>website</th>
+          <th>requires_proxy</th>
+        {% endif %}
+      </tr>
+      {% for datum in data %}
+        <tr>
+          <td>{{ datum.agency }}</td>
+          <td>{{ datum.jurisdiction }} ({{datum.jurisdiction_status}})</td>
+          <td>
+            {% with agency=datum.match_agency %}
+              {% if agency %}
+                <a href="{{ agency.get_absolute_url }}">
+                  {{ agency.pk }} - {{ agency.name }}
+                </a>
+              {% endif %}
+            {% endwith %}
+            {% if datum.agency_status %}
+              ({{ datum.agency_status }}{% if datum.agency_status == "fuzzy match" %} {{ datum.match_agency_score }}{% endif %})
+            {% endif %}
+          </td>
+          {% if import %}
+            <td>
+              {{ datum.email }}
+              {% if datum.cc_emails %}[{{ datum.cc_emails }}]{% endif %}
+              {% if datum.email_status %}({{ datum.email_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.phone }}
+              {% if datum.phone_status %}({{ datum.phone_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.fax }}
+              {% if datum.fax_status %}({{ datum.fax_status }}){% endif %}
+            </td>
+            <td>
+              {% if datum.address_suite %}{{ datum.address_suite }},{% endif %}
+              {% if datum.address_street %}{{ datum.address_street }},{% endif %}
+              {{ datum.address_city }}
+              {{ datum.address_state }}
+              {{ datum.address_zip }}
+              {% if datum.address_status %}({{ datum.address_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.portal }}
+              {% if datum.portal_status %}({{ datum.portal_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.aliases }}
+              {% if datum.aliases_status %}({{ datum.aliases_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.foia_website }}
+              {% if datum.foia_website_status %}({{ datum.foia_website_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.website }}
+              {% if datum.website_status %}({{ datum.website_status }}){% endif %}
+            </td>
+            <td>
+              {{ datum.requires_proxy }}
+              {% if datum.requires_proxy_status %}({{ datum.requires_proxy_status }}){% endif %}
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </table>
+    <a href="{% url "agency-mass-import" %}">Import another spreadsheet</a>
+  {% endif %}
+{% endblock form-info %}

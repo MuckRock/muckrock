@@ -10,7 +10,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
-from django.core.mail import send_mail
 from django.core.mail.message import EmailMessage
 from django.db import transaction
 from django.db.models import DurationField, F
@@ -20,20 +19,14 @@ from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
-import base64
 import csv
-import json
 import logging
 import os
 import os.path
 import re
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 from datetime import date, datetime, time, timedelta
 from random import randint
-from urllib.parse import quote_plus
 
 # Third Party
 import dill as pickle
@@ -83,24 +76,15 @@ register_signal(client)
 lob.api_key = settings.LOB_SECRET_KEY
 
 
-def authenticate_documentcloud(request):
-    """This is just standard username/password encoding"""
-    username = settings.DOCUMENTCLOUD_USERNAME.encode()
-    password = settings.DOCUMENTCLOUD_PASSWORD.encode()
-    auth = base64.encodebytes(b"%s:%s" % (username, password))[:-1]
-    request.add_header("Authorization", "Basic %s" % auth.decode())
-    return request
-
-
 @task(
     ignore_result=True,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
-    autoretry_for=(DocumentCloudError,),
+    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
-def upload_document_cloud(ffile_pk, **kwargs):
+def upload_document_cloud(ffile_pk):
     """Upload a document to Document Cloud"""
 
     logger.info("Upload Doc Cloud: %s", ffile_pk)
@@ -117,10 +101,6 @@ def upload_document_cloud(ffile_pk, **kwargs):
 
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
-
-    if ffile.dc_legacy and settings.USE_DC_LEGACY:
-        upload_document_cloud_legacy(ffile, change, **kwargs)
-        return
 
     dc_client = DocumentCloud(
         username=settings.DOCUMENTCLOUD_BETA_USERNAME,
@@ -169,99 +149,6 @@ def upload_document_cloud(ffile_pk, **kwargs):
         )
 
 
-def upload_document_cloud_legacy(doc, change, **kwargs):
-    """Upload a document to legacy Document Cloud"""
-
-    logger.info("Upload Doc Cloud Legacy: %s", doc.pk)
-
-    if not doc.is_doccloud():
-        # not a file doc cloud supports, do not attempt to upload
-        return
-
-    params = {
-        "title": doc.title,
-        "source": doc.source,
-        "description": doc.description,
-        "access": doc.access,
-    }
-    foia = doc.get_foia()
-    if foia:
-        params["related_article"] = (
-            "https://www.muckrock.com" + doc.get_foia().get_absolute_url()
-        )
-    if change:
-        params["_method"] = "put"
-        url = "/documents/%s.json" % quote_plus(doc.doc_id)
-    else:
-        params["file"] = doc.ffile.url.replace("https", "http", 1)
-        url = "/upload.json"
-
-    params = urllib.parse.urlencode(params)
-    params = params.encode("utf8")
-    request = urllib.request.Request(
-        "https://www.documentcloud.org/api/%s" % url, params
-    )
-    request = authenticate_documentcloud(request)
-
-    try:
-        ret = urllib.request.urlopen(request).read()
-        if not change:
-            info = json.loads(ret)
-            doc.doc_id = info["id"]
-            doc.save()
-            set_document_cloud_pages_legacy.apply_async(args=[doc.pk], countdown=1800)
-    except (urllib.error.URLError, urllib.error.HTTPError) as exc:
-        logger.warning("Upload Doc Cloud error: %s %s", url, doc.pk)
-        countdown = (2 ** upload_document_cloud.request.retries) * 300 + randint(0, 300)
-        upload_document_cloud.retry(
-            args=[doc.pk], kwargs=kwargs, exc=exc, countdown=countdown
-        )
-
-
-@task(
-    ignore_result=True,
-    max_retries=10,
-    name="muckrock.foia.tasks.set_document_cloud_pages_legacy",
-)
-def set_document_cloud_pages_legacy(doc_pk, **kwargs):
-    """Get the number of pages from the document cloud server and save it locally"""
-
-    try:
-        doc = FOIAFile.objects.get(pk=doc_pk)
-    except FOIAFile.DoesNotExist:
-        return
-
-    if doc.pages or not doc.is_doccloud() or not doc.doc_id:
-        # already has pages set or not a doc cloud, just return
-        return
-
-    request = urllib.request.Request(
-        "https://www.documentcloud.org/api/documents/%s.json"
-        % quote_plus(doc.doc_id.encode("utf-8"))
-    )
-    request = authenticate_documentcloud(request)
-
-    try:
-        ret = urllib.request.urlopen(request).read()
-        info = json.loads(ret)
-        doc.pages = info["document"]["pages"]
-        doc.save()
-    except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            # if 404, this doc id is not on document cloud
-            # delete the doc_id which will cause it to get reuploaded by retry_stuck_documents
-            doc.doc_id = ""
-            doc.save()
-        else:
-            set_document_cloud_pages_legacy.retry(
-                args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
-            )
-    except urllib.error.URLError as exc:
-        set_document_cloud_pages_legacy.retry(
-            args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc
-        )
-
-
 class DocumentCloudRetryError(Exception):
     """Custom Error to trigger a retry if the document is not done processing"""
 
@@ -269,7 +156,7 @@ class DocumentCloudRetryError(Exception):
 @task(
     ignore_result=True,
     name="muckrock.foia.tasks.set_document_cloud_pages",
-    autoretry_for=(DocumentCloudError, DocumentCloudRetryError),
+    autoretry_for=(DocumentCloudError, DocumentCloudRetryError, requests.ReadTimeout),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
@@ -323,7 +210,7 @@ def retry_stuck_documents():
 @task(
     ignore_result=True, max_retries=10, name="muckrock.foia.tasks.composer_create_foias"
 )
-def composer_create_foias(composer_pk, contact_info, **kwargs):
+def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
     """Create all the foias for a composer"""
     # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
@@ -338,7 +225,7 @@ def composer_create_foias(composer_pk, contact_info, **kwargs):
             "jurisdiction__law", "jurisdiction__parent__law"
         ).iterator():
             logger.info("Creating the foia for agency (%s, %s)", agency.pk, agency.name)
-            FOIARequest.objects.create_new(composer=composer, agency=agency)
+            FOIARequest.objects.create_new(composer, agency, no_proxy)
         # mark all attachments as sent here, after all requests have been sent
         composer.pending_attachments.filter(user=composer.user, sent=False).update(
             sent=True
@@ -388,21 +275,21 @@ def classify_status(task_pk, **kwargs):
 
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
-        doc_cloud_url = "http://www.documentcloud.org/api/documents/%s.json"
-        resp = requests.get(doc_cloud_url % quote_plus(doc_id.encode("utf-8")))
+
+        dc_client = DocumentCloud(
+            username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+            password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+            base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+            auth_uri=f"{settings.SQUARELET_URL}/api/",
+        )
+
         try:
-            doc_cloud_json = resp.json()
-        except ValueError:
-            logger.warning("Doc Cloud error for %s: %s", doc_id, resp.content)
+            document = dc_client.documents.get(doc_id)
+        except DocumentCloudError as exc:
+            logger.warning("Doc Cloud error for %s: %s", doc_id, exc.error)
             return ""
-        if "error" in doc_cloud_json:
-            logger.warning(
-                "Doc Cloud error for %s: %s", doc_id, doc_cloud_json["error"]
-            )
-            return ""
-        text_url = doc_cloud_json["document"]["resources"]["text"]
-        resp = requests.get(text_url)
-        return resp.content.decode("utf-8")
+
+        return document.full_text
 
     def get_classifier():
         """Load the pickled classifier"""
@@ -473,8 +360,9 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     try:
         comm = FOIACommunication.objects.get(pk=comm_id)
     except FOIACommunication.DoesNotExist as exc:
+        logger.info("send_fax: retry for missing comm")
         send_fax.retry(
-            countdown=300,
+            countdown=10,
             args=[comm_id, subject, body, error_count],
             kwargs=kwargs,
             exc=exc,
@@ -483,6 +371,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
     # the fax number should always be set before calling this, if it is not
     # it is likely a race condition and we should retry
     if comm.foia.fax is None:
+        logger.info("send_fax: retry for missing fax")
         send_fax.retry(
             countdown=300, args=[comm_id, subject, body, error_count], kwargs=kwargs
         )
@@ -586,9 +475,8 @@ def embargo_warn():
             body=render_to_string(
                 "text/foia/embargo_will_expire.txt", {"request": foia}
             ),
-            from_email="info@muckrock.com",
             to=[foia.user.email],
-            bcc=["diagnostics@muckrock.com"],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
 
@@ -609,9 +497,8 @@ def embargo_expire():
             body=render_to_string(
                 "text/foia/embargo_did_expire.txt", {"request": foia}
             ),
-            from_email="info@muckrock.com",
             to=[foia.user.email],
-            bcc=["diagnostics@muckrock.com"],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
 
@@ -807,13 +694,13 @@ def autoimport():
         )
         log.append("End Time: %s" % timezone.now())
     finally:
-        send_mail(
-            "[AUTOIMPORT] %s Logs" % timezone.now(),
-            "\n".join(log),
-            "info@muckrock.com",
-            ["info@muckrock.com"],
-            fail_silently=False,
-        )
+        EmailMessage(
+            subject="[AUTOIMPORT] %s Logs" % timezone.now(),
+            body="\n".join(log),
+            from_email=settings.SCANS_EMAIL,
+            to=[settings.DEFAULT_FROM_EMAIL],
+            bcc=[settings.DIAGNOSTIC_EMAIL],
+        ).send(fail_silently=False)
 
 
 class ExportCsv(AsyncFileDownloadTask):
@@ -859,6 +746,8 @@ class ExportCsv(AsyncFileDownloadTask):
         super(ExportCsv, self).__init__(
             user_pk, "".join(str(pk) for pk in foia_pks[:100])
         )
+        if self.user.is_staff:
+            self.fields += ((lambda f: f.get_request_email(), "Request Email"),)
         self.foias = (
             FOIARequest.objects.filter(pk__in=foia_pks)
             .select_related("composer__user", "agency__jurisdiction__parent")
@@ -954,7 +843,7 @@ def clean_export_csv():
     """Clean up exported CSVs and request zips that are more than 5 days old"""
 
     p_csv = re.compile(
-        r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results)\.(?:csv|zip)"
+        r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results|agencies)\.(?:csv|zip)"
     )
     s3 = boto3.resource("s3")
     bucket = s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
@@ -1039,17 +928,11 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             return
 
     pdf = LobPDF(comm, category, switch, amount=amount)
-    prepared_pdf, page_count, files, mail = pdf.prepare(address)
-
-    if prepared_pdf:
-        # page count will be None if prepare_pdf is None
-        total_page_count = page_count + sum(f[2] for f in files)
-        file_error = any(f[1] in ("error", "skipped") for f in files)
+    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address)
 
     for test, reason in [
         (prepared_pdf is None, "pdf"),
         (total_page_count > 12, "page"),
-        (file_error, "attm"),
     ]:
         if test:
             create_snail_mail_task(reason)
@@ -1064,7 +947,8 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         mail.lob_id = lob_obj.id
         mail.save()
         comm.foia.status = comm.foia.sent_status(category == "a", comm.thanks)
-        comm.foia.save()
+        comm.foia.save(comment="sent via lob")
+        comm.foia.update()
     except lob.error.APIConnectionError as exc:
         prepare_snail_mail.retry(
             countdown=(2 ** prepare_snail_mail.request.retries) * 300 + randint(0, 300),
@@ -1083,12 +967,12 @@ def _lob_create_letter(comm, prepared_pdf, mail):
         description="Letter for communication {}".format(comm.pk),
         to_address=comm.foia.address.lob_format(comm.foia.agency),
         from_address={
-            "name": "MuckRock News",
-            "company": "DEPT MR {}".format(comm.foia.pk),
-            "address_line1": "411A Highland Ave",
-            "address_city": "Somerville",
-            "address_state": "MA",
-            "address_zip": "02144-2516",
+            "name": settings.ADDRESS_NAME,
+            "company": settings.ADDRESS_DEPT.format(comm.foia.pk),
+            "address_line1": settings.ADDRESS_STREET,
+            "address_city": settings.ADDRESS_CITY,
+            "address_state": settings.ADDRESS_STATE,
+            "address_zip": settings.ADDRESS_ZIP,
         },
         color=False,
         file=prepared_pdf,
@@ -1111,12 +995,12 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
         description="Check for communication {}".format(comm.pk),
         to_address=check_address.lob_format(comm.foia.agency),
         from_address={
-            "name": "MuckRock News",
-            "company": "DEPT MR {}".format(comm.foia.pk),
-            "address_line1": "411A Highland Ave",
-            "address_city": "Somerville",
-            "address_state": "MA",
-            "address_zip": "02144-2516",
+            "name": settings.ADDRESS_NAME,
+            "company": settings.ADDRESS_DEPT.format(comm.foia.pk),
+            "address_line1": settings.ADDRESS_STREET,
+            "address_city": settings.ADDRESS_CITY,
+            "address_state": settings.ADDRESS_STATE,
+            "address_zip": settings.ADDRESS_ZIP,
         },
         bank_account=settings.LOB_BANK_ACCOUNT_ID,
         amount=amount,
@@ -1133,3 +1017,40 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
     )
     mr_check.send_email()
     return check
+
+
+@task(
+    ignore_result=True,
+    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
+    name="muckrock.foia.tasks.import_doccloud_file",
+)
+def import_doccloud_file(file_pk):
+    """Import a file from DocumentCloud back into MuckRock"""
+    try:
+        ffile = FOIAFile.objects.get(pk=file_pk)
+    except FOIAFile.DoesNotExist:
+        return
+
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    document = dc_client.documents.get(ffile.doc_id)
+
+    ext = ffile.get_extension()
+    if ext != "pdf":
+        name = ffile.ffile.name[: -len(ext)] + "pdf"
+        ffile.ffile.delete(save=False)
+        ffile.ffile.name = name
+        ffile.save()
+
+    with ffile.ffile.open("wb") as out_file, requests.get(
+        document.pdf_url, stream=True
+    ) as response:
+        response.raise_for_status()
+        for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
+            out_file.write(chunk)

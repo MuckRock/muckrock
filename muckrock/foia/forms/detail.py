@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from muckrock.core import autocomplete
 from muckrock.foia.models import END_STATUS, FOIANote, FOIARequest, TrackingNumber
 from muckrock.organization.forms import StripeForm
-from muckrock.task.constants import PUBLIC_FLAG_CATEGORIES
+from muckrock.task.constants import AGENCY_FLAG_CATEGORIES, PUBLIC_FLAG_CATEGORIES
 
 
 class FOIAEstimatedCompletionDateForm(forms.ModelForm):
@@ -106,6 +106,21 @@ class FOIAFlagForm(forms.Form):
         required=False,
     )
     text = forms.CharField(widget=forms.Textarea, required=False)
+
+    def __init__(self, *args, **kwargs):
+        is_agency_user = kwargs.pop("is_agency_user", False)
+        all_choices = kwargs.pop("all_choices", False)
+        super().__init__(*args, **kwargs)
+        if is_agency_user:
+            self.fields["category"].choices = [
+                ("", "-- Choose a category if one is relevant")
+            ] + AGENCY_FLAG_CATEGORIES
+        if all_choices:
+            self.fields["category"].choices = (
+                [("", "-- Choose a category if one is relevant")]
+                + AGENCY_FLAG_CATEGORIES
+                + PUBLIC_FLAG_CATEGORIES
+            )
 
     def clean(self):
         """Must fill in one of the fields"""

@@ -2,7 +2,7 @@
 {% load tags %}
 {% block body %}
 <p>We're very pleased to inform you that your project passed review and is now public! Now you can share it with the world.</p>
-<p>Public projects also support crowdfunding campaigns. If you have any questions about starting a crowdfund, contact us at <a href="mailto:info@muckrock.com">info@muckrock.com</a>.</p>
+<p>Public projects also support crowdfunding campaigns. If you have any questions about starting a crowdfund, contact us at <a href="{{ settings.DEFAULT_FROM_EMAIL }}">{{ settings.DEFAULT_FROM_EMAIL }}</a>.</p>
 {% if message %}
 <h2>Review Notes</h2>
 <div>

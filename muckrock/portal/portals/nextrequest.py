@@ -4,6 +4,7 @@ Logic for interacting with NextRequest portals automatically
 """
 
 # Django
+from django.conf import settings
 from django.template.defaultfilters import linebreaks
 from django.utils import timezone
 
@@ -96,11 +97,12 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
                 "request[request_text]": linebreaks(comm.communication),
                 "requester[email]": email,
                 "requester[name]": user.profile.full_name,
-                "requester[phone_number]": "(617) 299-1832",
-                "requester[address]": "Dept MR {} 411A Highland Ave".format(foia.pk),
-                "requester[city]": "Somerville",
-                "requester[state]": "MA",
-                "requester[zipcode]": "02144-2516",
+                "requester[phone_number]": settings.PHONE_NUMBER,
+                "requester[address]": f"{settings.ADDRESS_DEPT}, "
+                "{settings.ADDRESS_STREET}".format(pk=foia.pk),
+                "requester[city]": settings.ADDRESS_CITY,
+                "requester[state]": settings.ADDRESS_STATE,
+                "requester[zipcode]": settings.ADDRESS_ZIP,
                 "requester[company]": "",
                 "utf8": "✓",
                 "authenticity_token": csrf_token,

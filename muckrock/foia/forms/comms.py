@@ -6,6 +6,9 @@ FOIA forms for dealing with communications
 from django import forms
 from django.contrib.auth.models import User
 
+# Standard Library
+from hmac import compare_digest
+
 # Third Party
 from phonenumber_field.formfields import PhoneNumberField
 
@@ -52,6 +55,9 @@ class FOIAAgencyReplyForm(forms.Form):
     )
     reply = forms.CharField(label="Message to the requester", widget=forms.Textarea())
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         """Make price required if status is set to payment"""
         cleaned_data = super(FOIAAgencyReplyForm, self).clean()
@@ -64,6 +70,23 @@ class FOIAAgencyReplyForm(forms.Form):
                 "You must set a price when setting the " "status to payment required",
             )
         return cleaned_data
+
+
+class AgencyPasscodeForm(forms.Form):
+    """A form for agencies to enter their passcode to view embargoed requests"""
+
+    passcode = forms.CharField(label="Passcode", max_length=8)
+
+    def __init__(self, *args, **kwargs):
+        self.foia = kwargs.pop("foia")
+        super().__init__(*args, **kwargs)
+
+    def clean_passcode(self):
+        """Compare the passcode"""
+        passcode = self.cleaned_data["passcode"].upper()
+        if not compare_digest(passcode, self.foia.get_passcode()):
+            raise forms.ValidationError("Incorrect passcode")
+        return self.cleaned_data["passcode"]
 
 
 class SendViaForm(forms.Form):

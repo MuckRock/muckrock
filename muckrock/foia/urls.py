@@ -21,6 +21,7 @@ urlpatterns = [
     url(
         r"^organization-list/$", views.MyOrgRequestList.as_view(), name="foia-org-list"
     ),
+    url(r"^proxy-list/$", views.MyProxyRequestList.as_view(), name="foia-proxy-list"),
     url(r"^agency-list/$", views.AgencyRequestList.as_view(), name="foia-agency-list"),
     url(
         r"^list/following/$",
@@ -33,6 +34,11 @@ urlpatterns = [
         name="foia-list-processing",
     ),
     url(r"^mylist/drafts/$", views.ComposerList.as_view(), name="foia-mylist-drafts"),
+    url(
+        r"^communications/$",
+        views.AdminCommunicationView.as_view(),
+        name="communication-list",
+    ),
     # Create and Draft Views
     url(r"^create/$", views.CreateComposer.as_view(), name="foia-create"),
     url(r"^(?P<idx>\d+)/draft/$", views.UpdateComposer.as_view(), name="foia-draft"),

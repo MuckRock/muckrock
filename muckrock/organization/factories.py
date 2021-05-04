@@ -73,19 +73,6 @@ class ProfessionalEntitlementFactory(EntitlementFactory):
     }
 
 
-class ProxyEntitlementFactory(EntitlementFactory):
-    """A proxy entitlement factory"""
-
-    name = "Proxy"
-    resources = {
-        "minimum_users": 1,
-        "base_requests": 20,
-        "requests_per_user": 0,
-        "feature_level": 1,
-        "proxy": True,
-    }
-
-
 class OrganizationEntitlementFactory(EntitlementFactory):
     """An organization entitlement factory"""
 
