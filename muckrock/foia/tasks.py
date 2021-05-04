@@ -970,7 +970,7 @@ def _lob_create_letter(comm, prepared_pdf, mail):
         to_address=comm.foia.address.lob_format(comm.foia.agency),
         from_address={
             "name": settings.ADDRESS_NAME,
-            "company": settings.ADDRESS_DEPT.format(comm.foia.pk),
+            "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
             "address_line1": settings.ADDRESS_STREET,
             "address_city": settings.ADDRESS_CITY,
             "address_state": settings.ADDRESS_STATE,
@@ -998,7 +998,7 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
         to_address=check_address.lob_format(comm.foia.agency),
         from_address={
             "name": settings.ADDRESS_NAME,
-            "company": settings.ADDRESS_DEPT.format(comm.foia.pk),
+            "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
             "address_line1": settings.ADDRESS_STREET,
             "address_city": settings.ADDRESS_CITY,
             "address_state": settings.ADDRESS_STATE,
