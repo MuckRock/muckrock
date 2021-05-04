@@ -35,19 +35,6 @@ from muckrock.foia.models import (
 )
 
 
-def _complete_chunked_upload(key, uploadId, chunks):
-    """
-    Merges all parts of a multipart upload into the final file
-    """
-    parts = [{"ETag": chunk["etag"], "PartNumber": chunk["part"]} for chunk in chunks]
-    boto3.client("s3").complete_multipart_upload(
-        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
-        Key=key,
-        MultipartUpload={"Parts": parts},
-        UploadId=uploadId,
-    )
-
-
 def login_or_agency_required(function):
     """Allow semi-authenticated agency users to upload files"""
 
@@ -73,6 +60,19 @@ def login_or_agency_required(function):
         return function(request, *args, **kwargs)
 
     return wrapper
+
+
+def _complete_chunked_upload(key, uploadId, chunks):
+    """
+    Merges all parts of a multipart upload into the final file
+    """
+    parts = [{"ETag": chunk["etag"], "PartNumber": chunk["part"]} for chunk in chunks]
+    boto3.client("s3").complete_multipart_upload(
+        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
+        Key=key,
+        MultipartUpload={"Parts": parts},
+        UploadId=uploadId,
+    )
 
 
 def _success(request, model, attachment_model, fk_name):
@@ -372,7 +372,7 @@ def preupload_comm(request):
     return _preupload(request, FOIAFile)
 
 
-@login_required
+@login_or_agency_required
 def upload_chunk(request):
     """Generate an upload URL for a chunk"""
     key = request.POST.get("key")
@@ -389,7 +389,7 @@ def upload_chunk(request):
     return JsonResponse(response)
 
 
-@login_required
+@login_or_agency_required
 def blank(request):
     """Workaround for IE9 and older"""
     # pylint: disable=unused-argument
