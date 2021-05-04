@@ -292,6 +292,9 @@ class Importer:
                 city=datum.get("address_city", ""),
                 state=datum.get("address_state", ""),
                 zip_code=datum.get("address_zip", ""),
+                agency_override="",
+                attn_override="",
+                address="",
             )
             if datum["agency_status"] == "created":
                 request_type = "primary"
