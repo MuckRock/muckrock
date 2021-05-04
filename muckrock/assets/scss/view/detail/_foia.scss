@@ -93,6 +93,19 @@ $request-breakpoint: 768px;
         background-color: $color-green-light;
     }
 
+    .confirmation.prompt {
+        color: $color-green-dark;
+        border-color: $color-green;
+        background-color: $color-green-light;
+        font-weight: inherit;
+        p {
+            max-width: inherit;
+        }
+        ul {
+          margin-top: $vr;
+        }
+    }
+
     .filter {
         margin-bottom: 0;
         input {

@@ -3,24 +3,74 @@
   <section class="actions">
 
     {% if can_revoke %}
-      <div class="prompt">
+      <div class="confirmation prompt">
         <p>
-          Thank you for submitting this request.  Please review it now.
-          You will have until {{ revoke_deadline|time:"g:i a" }}
-          ({{ revoke_deadline|timeuntil }} from now) in order to make any changes
-          before it is sent to the agency.
+          {% with contact_info=foia.get_contact_info %}
+            Thank you for submitting your request! You have
+            {{ revoke_deadline|timeuntil }} to make changes before we
+            {% if contact_info.0 %}
+              send it via <strong>{{ contact_info.0 }}</strong> to 
+              <strong>{{ contact_info.1 }}</strong>, the best contact
+              information we have on file.
+            {% else %}
+              work on sending it. We don't yet have contact information for
+              this agency, so we're starting to research it. If you know the
+              best contact, feel free to click on the "<a href="#tasks">Tasks</a>"
+              Tab and fill it out if you see it.
+            {% endif %}
+            On average,
+            <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a>
+            takes <strong>{{ foia.agency.average_response_time }}</strong>
+            days to complete requests.  You can read more — including additional
+            stats and requests by other users — on
+            <a href="{{ foia.agency.get_absolute_url }}">the agency's profile page</a>
+            as well as on our page for
+            {% if foia.jurisdiction.level == "f" %}the{% endif %}
+            <a href="{{ foia.jurisdiction.get_absolute_url }}">
+              {{ foia.jurisdiction.name }}
+            </a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %},
+            <a href="{{ foia.jurisdiction.parent.get_absolute_url }}">
+              {{ foia.jurisdiction.parent.abbrev }}
+            </a>{% endif %}
+          {% endwith %}
         </p>
+        <ul>
+          <li>
+            <strong>Not where this request should go?</strong> Click
+            "<a href="{% url "foia-draft" idx=foia.composer.pk %}">Edit</a>"
+            and then "See where this request will be sent" on the bottom of the
+            submission page.
+          </li>
+          <li>
+            <strong>Want a second opinion?</strong> Click
+            "<a href="{% url "foia-draft" idx=foia.composer.pk %}">Edit</a>"
+            and then copy the URL and send it to us at
+            <a href="mailto:info@muckrock.com">info@muckrock.com</a>
+            and we're happy to take a look at your request language. Or
+            <a href="/slack/">join our FOIA Slack</a> and get real time help
+            from other requesters.
+          </li>
+          <li>
+            <strong>Other ideas how we can improve the request page?</strong>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdm-eL55TNFATQDiwB359ouNb1_ffD98tcDEbajFnoSejzpoQ/viewform">
+              Take our quick survey!
+            </a>
+          </li>
+        </ul>
         <footer class="button-group">
           {% if user.is_staff %}
             <form
               method="post"
               action="{% url "foia-composer-detail" idx=foia.composer.pk slug=foia.composer.slug %}"
+              id="send-now"
             >
               {% csrf_token %}
-              <button class="button" name="action" value="send-now">Send Now</button>
             </form>
+            <button class="button" name="action" value="send-now" form="send-now">
+              Send Now
+            </button>
           {% endif %}
-          <a class="primary button" href="{% url "foia-draft" idx=foia.composer.pk %}">
+          <a class="success button" href="{% url "foia-draft" idx=foia.composer.pk %}">
             Edit
           </a>
         </footer>

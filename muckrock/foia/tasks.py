@@ -225,7 +225,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
             "jurisdiction__law", "jurisdiction__parent__law"
         ).iterator():
             logger.info("Creating the foia for agency (%s, %s)", agency.pk, agency.name)
-            FOIARequest.objects.create_new(composer, agency, no_proxy)
+            FOIARequest.objects.create_new(composer, agency, no_proxy, contact_info)
         # mark all attachments as sent here, after all requests have been sent
         composer.pending_attachments.filter(user=composer.user, sent=False).update(
             sent=True

@@ -161,7 +161,6 @@ class GenericComposer(BuyRequestsMixin):
         except InsufficientRequestsError:
             messages.warning(self.request, "You need to purchase more requests")
         else:
-            messages.success(self.request, "Request submitted")
             self.request.session["ga"] = "request_submitted"
             mixpanel_event(
                 self.request,

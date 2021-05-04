@@ -202,7 +202,7 @@ class FOIARequestQuerySet(models.QuerySet):
         """Exclude requests made by org users"""
         return self.filter(composer__organization__individual=True)
 
-    def create_new(self, composer, agency, no_proxy):
+    def create_new(self, composer, agency, no_proxy, contact_info):
         """Create a new request and submit it"""
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.message import notify_proxy_user
@@ -242,6 +242,7 @@ class FOIARequestQuerySet(models.QuerySet):
         if proxy_user:
             notify_proxy_user(foia)
         foia.process_attachments(composer.user, composer=True)
+        foia.set_address(agency, appeal=False, contact_info=contact_info, clear=False)
 
     def get_stale(self):
         """Get stale requests"""

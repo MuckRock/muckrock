@@ -452,13 +452,9 @@ class FOIARequest(models.Model):
         else:
             agency = self.agency
 
-        if kwargs.get("contact_info"):
-            needs_review = self.update_address_from_info(
-                agency, appeal, kwargs.get("contact_info")
-            )
-        else:
-            needs_review = False
-            self.update_address_from_agency(agency, appeal, kwargs.get("clear"))
+        needs_review = self.set_address(
+            agency, appeal, kwargs.get("contact_info"), kwargs.get("clear")
+        )
 
         # check for a pdf form that needs to be filled out on the initial submission
         initial_submit = self.communications.count() == 1 and "comm" not in kwargs
@@ -480,6 +476,17 @@ class FOIARequest(models.Model):
             self._send_msg(appeal=appeal, **kwargs)
             self.update_dates()
             self.save()
+
+    def set_address(self, agency, appeal, contact_info, clear):
+        """Set the correct contact info upon request submission"""
+        # Return signifies a need to review
+        if contact_info:
+            needs_review = self.update_address_from_info(agency, appeal, contact_info)
+        else:
+            self.update_address_from_agency(agency, appeal, clear)
+            needs_review = False
+        self.save(comment="set address")
+        return needs_review
 
     def update_address_from_info(self, agency, appeal, contact_info):
         """Update the contact information manually"""
@@ -560,7 +567,6 @@ class FOIARequest(models.Model):
             self.cc_emails.set(agency.get_emails(request_type, "cc"))
             self.fax = agency.get_faxes(request_type).first()
             self.address = agency.get_addresses(request_type).first()
-        self.save(comment="update address from agency")
 
     def update_address(self, via, email, fax, other_emails=None):
         """Update the current address"""
@@ -717,6 +723,19 @@ class FOIARequest(models.Model):
         # unblock incoming messages if we send one out
         self.block_incoming = False
         self.save()
+
+    def get_contact_info(self):
+        """Find the contact info to use, based on preference order"""
+        if self.portal and self.portal.status == "good":
+            return ("portal", self.portal)
+        elif self.email and self.email.status == "good":
+            return ("email", self.email)
+        elif self.fax and self.fax.status == "good":
+            return ("fax", self.fax)
+        elif self.address:
+            return ("mail", self.address)
+        else:
+            return (None, None)
 
     def _send_portal(self, comm, **kwargs):
         """Send the message via portal"""
