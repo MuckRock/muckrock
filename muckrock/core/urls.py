@@ -142,6 +142,7 @@ urlpatterns = [
     url(r"^hijack/", include("hijack.urls")),
     url(r"^opensearch/", include("opensearch.urls")),
     url(r"^dashboard/", include(dashing_router.urls)),
+    re_path(r"^watchman/", include("watchman.urls")),
     path(
         "respond/<int:idx>/",
         FOIACommunicationDirectAgencyView.as_view(),
