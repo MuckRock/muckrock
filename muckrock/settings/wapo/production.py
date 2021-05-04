@@ -8,6 +8,7 @@ import requests
 # pylint: disable=unused-wildcard-import
 
 from muckrock.settings.production import *
+from muckrock.settings.wapo.base import *
 
 # TODO Remove me once we've verified email sending in production
 INSTALLED_APPS += ("bandit",)
@@ -17,12 +18,15 @@ BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
 
-CONSTANCE_REDIS_CONNECTION = {
-    'host': os.environ.get("REDIS_HOST"),
-    'port': 6379,
-}
-
 SECURE_SSL_REDIRECT = False
+
+AWS_STORAGE_BUCKET_NAME="wp-muckrock-prod"
+AWS_MEDIA_BUCKET_NAME="wp-muckrock-uploads-prod"
+CLOUDFRONT_DOMAIN="wp-muckrock-prod.news-engineering.aws.wapo.pub"
+AWS_STORAGE_DEFAULT_ACL="private"
+AWS_MEDIA_QUERYSTRING_AUTH=True
+
+MAILGUN_DOMAIN = "foi-rquests.washpost.com"
 
 # This gets the IP address of the EC2 instance the task is
 # running on and adds it to allowed_hosts so the health
