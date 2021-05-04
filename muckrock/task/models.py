@@ -614,7 +614,9 @@ class FlaggedTask(Task):
         description += make_url(self.jurisdiction)
 
         email = (
-            self.user.email if self.user and self.user.email else "info@muckrock.com"
+            self.user.email
+            if self.user and self.user.email
+            else settings.DEFAULT_FROM_EMAIL
         )
 
         response = zoho_post(
@@ -699,12 +701,11 @@ class FlaggedTask(Task):
             "status": "new",
             "tags": tags,
         }
-        requester = {}
-        if self.user and self.user.profile.full_name:
-            requester["name"] = self.user.profile.full_name
-        if self.user and self.user.email:
-            requester["email"] = self.user.email
-        if not requester:
+        if self.user:
+            requester = {"name": self.user.profile.full_name or self.user.username}
+            if self.user.email:
+                requester["email"] = self.user.email
+        else:
             requester = {"name": "Anonymous User"}
         request["requester"] = ZenUser(**requester)
         request = client.requests.create(Request(**request))
@@ -795,7 +796,6 @@ class NewAgencyTask(Task):
                     subject += ", and others"
                 TemplateEmail(
                     subject=subject,
-                    from_email="info@muckrock.com",
                     user=self.user,
                     text_template="task/email/agency_rejected.txt",
                     html_template="task/email/agency_rejected.html",
@@ -835,10 +835,10 @@ class NewAgencyTask(Task):
                 comm = foia.communications.first()
                 comm.communication = initial_communication_template(
                     [foia.agency],
-                    comm.from_user.profile.full_name,
+                    foia.user.profile.full_name,
                     foia.composer.requested_docs,
                     edited_boilerplate=foia.composer.edited_boilerplate,
-                    proxy=proxy_info["proxy"],
+                    proxy=proxy_info.get("from_user"),
                 )
                 comm.save()
                 foia.submit(clear=True)
@@ -853,8 +853,8 @@ class NewAgencyTask(Task):
         self.agency.foiarequest_set.all().delete()
 
         send_mail(
-            "%s blocked as spammer" % self.user.username,
-            render_to_string(
+            subject="%s blocked as spammer" % self.user.username,
+            message=render_to_string(
                 "text/task/spam.txt",
                 {
                     "url": settings.MUCKROCK_URL + self.get_absolute_url(),
@@ -863,8 +863,8 @@ class NewAgencyTask(Task):
                     "agency": self.agency.name,
                 },
             ),
-            "info@muckrock.com",
-            ["info@muckrock.com"],
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.DEFAULT_FROM_EMAIL],
         )
 
 
@@ -1139,3 +1139,17 @@ class BlacklistDomain(models.Model):
         tasks_to_resolve = OrphanTask.objects.get_from_domain(self.domain)
         for task in tasks_to_resolve:
             task.resolve()
+
+
+class FileDownloadLink(models.Model):
+    """A URL to look for in communications which needs to be downloaded"""
+
+    name = models.CharField(max_length=255, help_text="The name of the download site")
+    url = models.CharField(
+        max_length=255,
+        help_text="The URL to look for in the communication text. "
+        "You may use * to match anything: 'https://*.sharefile.com'",
+    )
+
+    def __str__(self):
+        return self.name

@@ -11,7 +11,7 @@
 {% block explore_header_links %}
 <ul class="nostyle">
     <li><a class="bold" href="{% url 'news-archive' %}">Browse our archive &rarr;</a></li>
-    <li><a class="bold" href="mailto:info@muckrock.com">Send us a tip &rarr;</a></li>
+    <li><a class="bold" href="mailto:{{ settings.DEFAULT_FROM_EMAIL }}">Send us a tip &rarr;</a></li>
 </ul>
 {% endblock %}
 

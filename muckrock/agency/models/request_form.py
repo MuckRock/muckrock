@@ -6,6 +6,7 @@ https://medium.com/@zwinny/filling-pdf-forms-in-python-the-right-way-eb9592e03db
 """
 
 # Django
+from django.conf import settings
 from django.db import models
 
 # Standard Library
@@ -150,21 +151,25 @@ class AgencyRequestForm(models.Model):
 
     def _return_address_1(self, comm):
         """The street portion of the return address"""
-        return "Dept MR {} 411A Highland Ave".format(comm.foia.pk)
+        return f"{settings.ADDRESS_DEPT}, {settings.ADDRESS_STREET}".format(
+            pk=comm.foia.pk
+        )
 
     _return_address_1.value_choice = True
 
     def _return_address_2(self, comm):
         """City/State/Zip of the return address"""
         # pylint: disable=unused-argument
-        return "Somerville, MA 02144-2516"
+        return (
+            f"{settings.ADDRESS_CITY}, {settings.ADDRESS_STATE} {settings.ADDRESS_ZIP}"
+        )
 
     _return_address_2.value_choice = True
 
     def _phone(self, comm):
         """MuckRock's phone number"""
         # pylint: disable=unused-argument
-        return "(617) 299-1832"
+        return settings.PHONE_NUMBER
 
     _phone.value_choice = True
 

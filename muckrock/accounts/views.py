@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.http.response import (
@@ -28,6 +29,7 @@ import json
 import logging
 import sys
 from urllib.parse import urlencode
+from uuid import uuid4
 
 # Third Party
 import stripe
@@ -430,14 +432,13 @@ class ProxyList(MRFilterListView):
     def get_queryset(self):
         """Display all proxies"""
         objects = super(ProxyList, self).get_queryset()
-        return objects.filter(
-            organizations__entitlement__resources__proxy=True
-        ).select_related("profile")
+        return objects.filter(profile__proxy=True).select_related("profile")
 
 
 def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx):
     """View to redirect agency users to the correct page or offer to resend
     them their login token"""
+    # pylint: disable=too-many-locals
 
     agency = get_object_or_404(Agency, slug=agency_slug, pk=agency_idx)
     foia = get_object_or_404(FOIARequest, agency=agency, slug=foia_slug, pk=foia_idx)
@@ -445,11 +446,18 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
     if request.method == "POST":
         email = request.POST.get("email", "")
         # valid if this email is associated with the agency
-        valid = EmailAddress.objects.fetch(email).agencies.filter(id=agency.pk).exists()
+        email_addr = EmailAddress.objects.fetch(email)
+        valid = email_addr.agencies.filter(id=agency.pk).exists()
         if valid:
+            # rate limit to once per 5 minutes
+            new_uuid = uuid4()
+            old_uuid = cache.get_or_set(f"token:{email_addr.pk}", new_uuid, 300)
+            if new_uuid != old_uuid:
+                messages.error(request, "Please wait 5 minutes to try again")
+                return redirect(foia)
+
             msg = TemplateEmail(
                 subject="Login Token",
-                from_email="info@muckrock.com",
                 to=[email],
                 text_template="accounts/email/login_token.txt",
                 html_template="accounts/email/login_token.html",

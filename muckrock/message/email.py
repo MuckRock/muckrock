@@ -3,6 +3,7 @@ Provides a base email class for messages.
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -55,7 +56,7 @@ class TemplateEmail(EmailMultiAlternatives):
             "text": render_to_string(self.get_text_template(), context),
             "html": render_to_string(self.get_html_template(), context),
         }
-        self.bcc.append("diagnostics@muckrock.com")
+        self.bcc.append(settings.DIAGNOSTIC_EMAIL)
         self.body = content["text"]
         self.attach_alternative(content["html"], "text/html")
 

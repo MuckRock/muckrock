@@ -24,8 +24,6 @@ urlpatterns = [
         RedirectView.as_view(url="/questions/?sort=answer_date&order=desc"),
         name="question-recent",
     ),
-    url(r"^new/$", views.create_question, name="question-create"),
-    url(r"^follow-new/$", views.follow_new, name="question-follow-new"),
     url(
         r"^report-spam/(?P<model>(?:question)|(?:answer))/(?P<model_pk>\d+)/$",
         views.report_spam,
@@ -40,11 +38,6 @@ urlpatterns = [
         r"^(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$",
         views.Detail.as_view(template_name="qanda/detail.html"),
         name="question-detail",
-    ),
-    url(
-        r"^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/answer/$",
-        views.create_answer,
-        name="answer-create",
     ),
     url(
         r"^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/follow/$",

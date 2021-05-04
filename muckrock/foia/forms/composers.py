@@ -84,6 +84,14 @@ class BaseComposerForm(forms.ModelForm):
         widget=forms.HiddenInput(),
     )
 
+    no_proxy = forms.BooleanField(
+        initial=False,
+        required=False,
+        label="Do not use a proxy to file this request",
+        help_text="You will be repsonsible for proving any citizenship requirements "
+        "to the agency on your own",
+    )
+
     register_full_name = forms.CharField(
         label="Full Name or Handle (Public)", required=False
     )

@@ -21,7 +21,7 @@ Total: ${{total|floatformat:2}}
 {% block description %}
 This email confirms your payment to MuckRock.
 {% endblock %}
-For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081.
+For concerns or more information about this charge, please contact {{ settings.DEFAULT_FROM_EMAIL }} or call 1-857-488-3081.
 
 Thank you,
 The MuckRock Team

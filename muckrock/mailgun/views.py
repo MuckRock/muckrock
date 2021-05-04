@@ -40,6 +40,7 @@ from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.foia.tasks import classify_status
 from muckrock.mailgun.tasks import download_links
 from muckrock.task.models import (
+    FileDownloadLink,
     FlaggedTask,
     NewPortalTask,
     OrphanTask,
@@ -228,7 +229,7 @@ def _handle_request(request, mail_id):
                     body=render_to_string("text/foia/deleted_autoreply.txt"),
                     from_email=foia.get_request_email(),
                     to=[str(from_email)],
-                    bcc=["diagnostics@muckrock.com"],
+                    bcc=[settings.DIAGNOSTIC_EMAIL],
                 ).send(fail_silently=False)
             return HttpResponse("WARNING")
 
@@ -294,6 +295,8 @@ def _handle_request(request, mail_id):
 
         # attempt to autodetect a known portal
         _detect_portal(comm, from_email.email, post)
+        # attempt to find file download links
+        _detect_file_download_links(comm)
 
         # if agency isn't currently using an outgoing email or a portal, flag it
         if (
@@ -362,7 +365,7 @@ def _catch_all(request, address):
     else:
         foia = None
 
-    if from_email.allowed():
+    if from_email and from_email.allowed():
         comm = _make_orphan_comm(
             from_email, to_emails, cc_emails, subject, post, request.FILES, foia
         )
@@ -604,7 +607,7 @@ def _forward(post, files, title="", extra_content="", info=False):
 
     to_addresses = ["requests@muckrock.com"]
     if info:
-        to_addresses.append("info@muckrock.com")
+        to_addresses.append(settings.DEFAULT_FROM_EMAIL)
     email = EmailMessage(subject, body, post.get("From"), to_addresses)
     for file_ in files.values():
         email.attach(file_.name, file_.read(), file_.content_type)
@@ -619,10 +622,7 @@ def _log_mail(request):
         body.append("\n{}:".format(key))
         body.append(str(value))
     email = EmailMessage(
-        "[NEXTREQUEST LOG]",
-        "\n".join(body),
-        "info@muckrock.com",
-        ["mitch@muckrock.com"],
+        subject="[NEXTREQUEST LOG]", body="\n".join(body), to=["mitch@muckrock.com"]
     )
     email.send(fail_silently=False)
 
@@ -661,3 +661,24 @@ def _detect_portal(comm, email, post):
             return NewPortalTask.objects.create(communication=comm, portal_type=type_)
 
     return None
+
+
+def _detect_file_download_links(comm):
+    """Try to auto-detect known file download links"""
+
+    for link in FileDownloadLink.objects.all():
+        # escape the url for regex, but replace * with a regex for any number
+        # of non-whitespace characters
+        url = re.escape(link.url).replace(r"\*", r"[\S]*")
+        # match the base url, and then all text until the next whitespace
+        # angle bracket or quote (to capture the full url)
+        links = re.findall(url + "[^\\s<>\"']*", comm.communication)
+        if links:
+            FlaggedTask.objects.create(
+                foia=comm.foia,
+                category="download file",
+                text="A download link to {name} was found.  Please download the "
+                "file(s) and attach them to the request:\n{links}".format(
+                    name=link.name, links="\n".join(links)
+                ),
+            )

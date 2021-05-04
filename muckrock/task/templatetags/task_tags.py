@@ -274,6 +274,14 @@ class PortalTaskNode(TaskNode):
         extra_context = super(PortalTaskNode, self).get_extra_context()
         foia_ = self.task.communication.foia
 
+        extra_context["return_address"] = (
+            f"{settings.ADDRESS_NAME}\n"
+            f"{settings.ADDRESS_DEPT}\n"
+            f"{settings.ADDRESS_STREET}\n"
+            f"{settings.ADDRESS_CITY}, {settings.ADDRESS_STATE} "
+            f"{settings.ADDRESS_ZIP}".format(pk=foia_.pk if foia_ else "")
+        )
+
         if self.task.category == "i":
             if foia_:
                 form_initial = {
@@ -283,7 +291,9 @@ class PortalTaskNode(TaskNode):
                     "communication": self.task.communication.communication,
                     "word_to_pass": foia_.portal_password,
                 }
-                extra_context["previous_communications"] = foia_.reverse_communications
+                extra_context["previous_communications"] = foia_.reverse_communications[
+                    :10
+                ]
             else:
                 form_initial = {}
             extra_context["form"] = task.forms.IncomingPortalForm(initial=form_initial)

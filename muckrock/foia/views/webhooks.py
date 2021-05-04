@@ -31,26 +31,26 @@ logger = logging.getLogger(__name__)
 def lob_webhook(request):
     """Handle Lob Webhook"""
 
-    logger.info("Log webhook")
+    logger.info("Lob webhook")
 
     if not _validate_lob(
         request.META["HTTP_LOB_SIGNATURE"],
         request.META["HTTP_LOB_SIGNATURE_TIMESTAMP"],
         request.body,
     ):
-        logger.warning("Log webhook failed verification")
+        logger.warning("Lob webhook failed verification")
         return HttpResponseForbidden()
 
     try:
         data = json.loads(request.body)
     except ValueError:
-        logger.error("Log webhook JSON decode error")
+        logger.error("Lob webhook JSON decode error")
         return HttpResponseBadRequest("JSON decode error")
 
     try:
         mail_id = data["body"]["metadata"]["mail_id"]
     except KeyError:
-        logger.error("Log webhook JSON missing data")
+        logger.error("Lob webhook JSON missing data")
         return HttpResponseBadRequest("Missing JSON data")
 
     mail = MailCommunication.objects.filter(pk=mail_id).first()
@@ -70,8 +70,9 @@ def _validate_lob(signature, timestamp, body):
     """Verify the message is from Lob"""
     digest = hmac.new(
         key=settings.LOB_WEBHOOK_KEY.encode("utf8"),
-        msg="{}.{}".format(timestamp, body).encode("utf8"),
+        # timestamp is a string, body is already bytes
+        msg=timestamp.encode("utf8") + b"." + body,
         digestmod=hashlib.sha256,
     ).hexdigest()
     match = hmac.compare_digest(signature, digest)
-    return match and int(timestamp) + 300 > time.time()
+    return match and int(timestamp) / 1000 + 300 > time.time()

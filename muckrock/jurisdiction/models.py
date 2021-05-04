@@ -96,6 +96,8 @@ class Jurisdiction(models.Model, RequestHelper):
     public_notes = models.TextField(blank=True, help_text="May use html")
     aliases = models.TextField(blank=True)
 
+    always_proxy = models.BooleanField(default=False)
+
     # non local
     observe_sat = models.BooleanField(
         default=False,
@@ -188,15 +190,10 @@ class Jurisdiction(models.Model, RequestHelper):
             return Calendar()
 
     def get_proxy(self):
-        """Get a random proxy user for this jurisdiction"""
-        return (
-            User.objects.filter(
-                organizations__entitlement__resources__proxy=True,
-                profile__state=self.legal.abbrev,
-            )
-            .order_by("-profile__preferred_proxy")
-            .first()
-        )
+        """Get the proxy user for this jurisdiction"""
+        return User.objects.filter(
+            profile__proxy=True, profile__state=self.legal.abbrev
+        ).first()
 
     def get_requests(self):
         """State level jurisdictions should return requests from their localities as well."""

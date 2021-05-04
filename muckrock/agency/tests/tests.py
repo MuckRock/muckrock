@@ -28,7 +28,6 @@ from muckrock.core.factories import (
 )
 from muckrock.core.test_utils import http_get_response, mock_middleware
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
-from muckrock.organization.factories import ProxyEntitlementFactory
 
 
 class TestAgencyUnit(TestCase):
@@ -84,17 +83,15 @@ class TestAgencyUnit(TestCase):
         assert_not_in("from_user", proxy_info)
         assert_not_in("warning", proxy_info)
 
-        proxy_placeholder = UserFactory(username="Proxy")
         agency_ = AgencyFactory(requires_proxy=True)
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info["proxy"], True)
         eq_(proxy_info["missing_proxy"], True)
-        eq_(proxy_info["from_user"], proxy_placeholder)
+        assert_not_in("from_user", proxy_info)
         assert_in("warning", proxy_info)
 
         proxy = UserFactory(
-            membership__organization__entitlement=ProxyEntitlementFactory(),
-            profile__state=agency_.jurisdiction.legal.abbrev,
+            profile__proxy=True, profile__state=agency_.jurisdiction.legal.abbrev
         )
         proxy_info = agency_.get_proxy_info()
         eq_(proxy_info["proxy"], True)

@@ -27,6 +27,9 @@ function checkStatus() {
 }
 
 function receiveMessage(event) {
+  {% if request.user.is_staff %}
+    console.log(event);
+  {% endif %}
   if (event.origin !== targetOP) {
     // Origin did not come from the OP.
     return;

@@ -25,6 +25,7 @@ from datetime import timedelta
 from itertools import zip_longest
 
 # Third Party
+from constance import config
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -105,7 +106,7 @@ class FOIAComposer(models.Model):
             "foia-composer-detail", kwargs={"slug": self.slug, "idx": self.pk}
         )
 
-    def submit(self, contact_info=None):
+    def submit(self, contact_info=None, no_proxy=False):
         """Submit a composer to create the requests"""
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
@@ -116,22 +117,34 @@ class FOIAComposer(models.Model):
         self.num_monthly_requests = request_count["monthly"]
         self.status = "submitted"
         self.datetime_submitted = timezone.now()
+        self.save()
 
         if num_requests == 1:
             # if only one request, create it immediately so we can redirect there
-            composer_create_foias(self.pk, contact_info)
+            composer_create_foias(self.pk, contact_info, no_proxy)
         else:
             # otherwise do it delayed so the page doesn't risk timing out
-            composer_create_foias.delay(self.pk, contact_info)
+            composer_create_foias.delay(self.pk, contact_info, no_proxy)
 
         # if num_requests is less than the multi-review amount, we will approve
         # the request right away, other wise we create a multirequest task
-        approve = num_requests < settings.MULTI_REVIEW_AMOUNT
+        # if the request contains a moderated keyword, it will also not be
+        # approved
+        approve = (
+            num_requests < settings.MULTI_REVIEW_AMOUNT and not self.needs_moderation()
+        )
         result = composer_delayed_submit.apply_async(
             args=(self.pk, approve, contact_info), countdown=COMPOSER_SUBMIT_DELAY
         )
         self.delayed_id = result.id
         self.save()
+
+    def needs_moderation(self):
+        """Check for moderated keywords"""
+        for keyword in config.MODERATION_KEYWORDS.split("\n"):
+            if keyword in self.title or keyword in self.requested_docs:
+                return True
+        return False
 
     def approved(self, contact_info=None):
         """A pending composer is approved for sending to the agencies"""

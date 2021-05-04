@@ -6,8 +6,8 @@
 
 {% block settings %}{% endblock %}
 This email was sent to {{user.email}}.
-Add info@muckrock.com to your address book to prevent us from being marked as spam.
-We always welcome your feedback. Simply reply to this email or write to info@muckrock.com.
-MuckRock, 411A Highland Avenue, Somerville, MA 02144
+Add {{ settings.DEFAULT_FROM_EMAIL }} to your address book to prevent us from being marked as spam.
+We always welcome your feedback. Simply reply to this email or write to {{ settings.DEFAULT_FROM_EMAIL }}.
+{{ settings.ADDRESS_NAME }}, {{ settings.ADDRESS_STREET}}, {{ settings.ADDRESS_CITY }}, {{ settings.ADDRESS_STATE }} {{ settings.ADDRESS_ZIP }}
 
 ===

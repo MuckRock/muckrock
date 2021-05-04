@@ -9,10 +9,10 @@ from django.conf import settings
 # Standard Library
 import csv
 import logging
-from urllib.parse import quote_plus
 
 # Third Party
-import requests
+from documentcloud import DocumentCloud
+from documentcloud.exceptions import DocumentCloudError
 
 # MuckRock
 from muckrock.core.tasks import AsyncFileDownloadTask
@@ -21,70 +21,52 @@ from muckrock.crowdsource.models import Crowdsource
 logger = logging.getLogger(__name__)
 
 
-@task(name="muckrock.crowdsource.tasks.datum_per_page")
-def datum_per_page(crowdsource_pk, doc_id, metadata, **kwargs):
+@task(
+    name="muckrock.crowdsource.tasks.datum_per_page",
+    autoretry_for=(DocumentCloudError,),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 3},
+)
+def datum_per_page(crowdsource_pk, doc_id, metadata):
     """Create a crowdsource data item for each page of the document"""
 
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
-
-    doc_id = quote_plus(doc_id.encode("utf-8"))
-    resp = requests.get(
-        "https://www.documentcloud.org" "/api/documents/{}.json".format(doc_id)
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
-    try:
-        resp.raise_for_status()
-        resp_json = resp.json()
-    except (ValueError, requests.exceptions.HTTPError) as exc:
-        datum_per_page.retry(
-            args=[crowdsource_pk, doc_id, metadata],
-            countdown=300,
-            kwargs=kwargs,
-            exc=exc,
+    document = dc_client.documents.get(doc_id)
+    for i in range(1, document.pages + 1):
+        crowdsource.data.create(
+            url=f"{document.canonical_url}/pages/{i}", metadata=metadata
         )
-    pages = resp_json["document"]["pages"]
-    for i in range(1, pages + 1):
-        url = "https://www.documentcloud.org/documents/" "{}/pages/{}.html".format(
-            doc_id, i
-        )
-        crowdsource.data.create(url=url, metadata=metadata)
 
 
-@task(name="muckrock.crowdsource.tasks.import_doccloud_proj")
-def import_doccloud_proj(
-    crowdsource_pk, proj_id, metadata, doccloud_each_page, **kwargs
-):
+@task(
+    name="muckrock.crowdsource.tasks.import_doccloud_proj",
+    autoretry_for=(DocumentCloudError,),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 3},
+)
+def import_doccloud_proj(crowdsource_pk, proj_id, metadata, doccloud_each_page):
     """Import documents from a document cloud project"""
-
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
-    json_url = "https://www.documentcloud.org/api/projects/{}.json".format(proj_id)
 
-    resp = requests.get(
-        json_url,
-        auth=(settings.DOCUMENTCLOUD_USERNAME, settings.DOCUMENTCLOUD_PASSWORD),
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
-    try:
-        resp_json = resp.json()
-    except ValueError as exc:
-        import_doccloud_proj.retry(
-            args=[crowdsource_pk, proj_id, metadata],
-            countdown=300,
-            kwargs=kwargs,
-            exc=exc,
-        )
-    else:
-        if "error" in resp_json:
-            logger.warning("Error importing DocCloud project: %s", proj_id)
-            return
-        for doc_id in resp_json["project"]["document_ids"]:
-            if doccloud_each_page:
-                datum_per_page.delay(crowdsource.pk, doc_id, metadata)
-            else:
-                crowdsource.data.create(
-                    url="https://www.documentcloud.org/documents/{}.html".format(
-                        doc_id
-                    ),
-                    metadata=metadata,
-                )
+    project = dc_client.projects.get(proj_id)
+
+    for document in project.documents:
+        if doccloud_each_page:
+            datum_per_page.delay(crowdsource.pk, document.id, metadata)
+        else:
+            crowdsource.data.create(url=document.canonical_url, metadata=metadata)
 
 
 class ExportCsv(AsyncFileDownloadTask):

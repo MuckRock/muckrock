@@ -140,11 +140,8 @@ class Profile(models.Model):
         help_text="Let other members of my organization view my embargoed requests",
     )
 
-    preferred_proxy = models.BooleanField(
-        default=False,
-        help_text="This user will be used over other proxies in the same "
-        "state.  The account must still be set to type proxy for this to "
-        "take affect",
+    proxy = models.BooleanField(
+        default=False, help_text="This user is a proxy filer for their home state"
     )
 
     # for agency users

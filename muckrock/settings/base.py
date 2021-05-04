@@ -31,7 +31,23 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-DEFAULT_FROM_EMAIL = "MuckRock <info@muckrock.com>"
+DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL", "info@muckrock.com")
+DIAGNOSTIC_EMAIL = os.environ.get("DIAGNOSTIC_EMAIL", "diagnostics@muckrock.com")
+SCANS_EMAIL = os.environ.get("SCANS_EMAIL", "scans@muckrock.com")
+ASSIGNMENTS_EMAIL = os.environ.get("ASSIGNMENTS_EMAIL", "assignments@muckrock.com")
+
+ADDRESS_NAME = os.environ.get("ADDRESS_NAME", "MuckRock News")
+ADDRESS_DEPT = os.environ.get("ADDRESS_DEPT", "DEPT MR {pk}")
+ADDRESS_STREET = os.environ.get("ADDRESS_STREET", "411A Highland Ave")
+ADDRESS_CITY = os.environ.get("ADDRESS_CITY", "Somerville")
+ADDRESS_STATE = os.environ.get("ADDRESS_STATE", "MA")
+ADDRESS_ZIP = os.environ.get("ADDRESS_ZIP", "02144-2516")
+
+PHONE_NUMBER = os.environ.get("PHONE_NUMBER", "(617) 299-1832")
+PHONE_NUMBER_LINK = os.environ.get(
+    "PHONE_NUMBER_LINK", "+1" + PHONE_NUMBER.translate({ord(i): None for i in "()- "})
+)
+
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
@@ -417,8 +433,6 @@ MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME", "requests.muckrock.c
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 
-DOCUMENTCLOUD_USERNAME = os.environ.get("DOCUMENTCLOUD_USERNAME")
-DOCUMENTCLOUD_PASSWORD = os.environ.get("DOCUMENTCLOUD_PASSWORD")
 DOCUMENTCLOUD_BETA_USERNAME = os.environ.get("DOCUMENTCLOUD_BETA_USERNAME")
 DOCUMENTCLOUD_BETA_PASSWORD = os.environ.get("DOCUMENTCLOUD_BETA_PASSWORD")
 
@@ -517,13 +531,10 @@ MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.muckrock.com")
 FOIAMACHINE_URL = os.environ.get(
     "FOIAMACHINE_URL", "http://dev.foiamachine.org")
 SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
-DOCCLOUD_URL = os.environ.get(
-    "DOCCLOUD_URL", "http://www.dev.documentcloud.org")
+DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "http://www.dev.documentcloud.org")
+DOCCLOUD_EMBED_URL = os.environ.get("DOCCLOUD_EMBED_URL", DOCCLOUD_URL)
 DOCCLOUD_API_URL = os.environ.get(
     "DOCCLOUD_API_URL", "http://api.dev.documentcloud.org"
-)
-DOCCLOUD_LEGACY_ASSET_URL = os.environ.get(
-    "DOCCLOUD_LEGACY_ASSET_URL", "https://assets.documentcloud.org/"
 )
 DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
@@ -611,6 +622,10 @@ CONSTANCE_CONFIG = OrderedDict(
             "FOLLOWUP_DAYS_OTHER",
             (15, "Number of days between auto followups for state and local requests"),
         ),
+        (
+            "MODERATION_KEYWORDS",
+            ("!\n?", "Keywords to trigger manual moderation - one per line"),
+        ),
         ("AUTO_LOB", (False, "Automatically send snail mail via Lob")),
         ("AUTO_LOB_PAY", (False, "Automatically send checks via Lob")),
         ("AUTO_LOB_APPEAL", (False, "Automatically send appeal snail mail via Lob")),
@@ -653,6 +668,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FOLLOWUP_DAYS_PORTAL",
         "FOLLOWUP_DAYS_FEDERAL",
         "FOLLOWUP_DAYS_OTHER",
+        "MODERATION_KEYWORDS",
     ),
     "Lob Options": ("AUTO_LOB", "AUTO_LOB_PAY", "AUTO_LOB_APPEAL"),
     "Machine Learning Options": ("ENABLE_ML", "CONFIDENCE_MIN"),
@@ -745,5 +761,4 @@ DOCCLOUD_EXTENSIONS = os.environ.get("DOCCLOUD_EXTENSIONS", ".pdf,.doc,.docx").s
 )
 DOCCLOUD_PROCESSING_WAIT = int(os.environ.get("DOCCLOUD_PROCESSING_WAIT", 60))
 
-USE_DC_LEGACY = boolcheck(os.environ.get("USE_DC_LEGACY", True))
-SECURE_SSL_REDIRECT = False
+AGENCY_SESSION_TIME = int(os.environ.get("AGENCY_SESSION_TIME", 7200))

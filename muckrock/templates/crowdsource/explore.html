@@ -1,5 +1,6 @@
 {% extends "base_explore.html" %}
 {% load humanize %}
+{% load rules %}
 
 {% block classes %}project{% endblock %}
 
@@ -37,11 +38,14 @@
     <li>
       <iframe width="215" height="121" src="https://www.youtube.com/embed/bKTpLlkLA10" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </li>
-    <li class="mb1">
-      <a class="blue button" href="{% url "crowdsource-create" %}">
-        Create Assignment
-      </a>
-    </li>
+    {% has_perm 'crowdsource.add_crowdsource' request.user as can_add %}
+    {% if can_add %}
+      <li class="mb1">
+        <a class="blue button" href="{% url "crowdsource-create" %}">
+          Create Assignment
+        </a>
+      </li>
+    {% endif %}
     <li>
       <a class="action" href="{% url "crowdsource-list" %}">
         Browse all assignments &rarr;

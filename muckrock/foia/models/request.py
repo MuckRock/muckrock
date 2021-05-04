@@ -77,7 +77,7 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(max_length=1024, db_index=True)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS, db_index=True)
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
@@ -170,6 +170,15 @@ class FOIARequest(models.Model):
         User, related_name="edit_access", blank=True
     )
     access_key = models.CharField(blank=True, max_length=255)
+    passcode = models.CharField(blank=True, max_length=8)
+
+    proxy = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="proxy_foias",
+        blank=True,
+        null=True,
+    )
 
     deleted = models.BooleanField(
         default=False,
@@ -304,6 +313,25 @@ class FOIARequest(models.Model):
         self.save()
         logger.info("New access key generated for %s", self)
         return key
+
+    def get_passcode(self):
+        """Get a passcode for agency users"""
+        logger.info("PASSCODE start: %s", self.pk)
+        if self.passcode:
+            logger.info("PASSCODE have: %s %s", self.pk, self.passcode)
+            return self.passcode
+
+        key = utils.generate_key(8, "ABCEFGHJKLMNPRUVWXY")
+        with transaction.atomic():
+            foia = FOIARequest.objects.select_for_update().get(pk=self.pk)
+            if foia.passcode:
+                logger.info("PASSCODE other: %s %s", self.pk, foia.passcode)
+                self.passcode = foia.passcode
+                return self.passcode
+            self.passcode = foia.passcode = key
+            foia.save()
+        logger.info("PASSCODE mine: %s %s", self.pk, key)
+        return self.passcode
 
     def get_files(self):
         """Get all files under this FOIA"""
@@ -442,10 +470,7 @@ class FOIARequest(models.Model):
         # it will be handled after agency is approved
         approved_agency = agency.status == "approved"
 
-        if self.missing_proxy:
-            self._flag_proxy_resubmit()
-            self.save()
-        elif not approved_agency or needs_review:
+        if not approved_agency or needs_review:
             # the request needs attention from staff before going out
             # the request is processing until the correpsonding task is completed
             self.status = "submitted"
@@ -570,24 +595,6 @@ class FOIARequest(models.Model):
             "address": agency.get_addresses("appeal").first(),
         }
 
-    def _flag_proxy_resubmit(self):
-        """Flag this request to be re-submitted with a proxy"""
-        self.status = "submitted"
-        self.date_processing = date.today()
-        task.models.FlaggedTask.objects.create(
-            foia=self,
-            category="no proxy",
-            text="This request was filed for an agency requiring a "
-            "proxy, but no proxy was available.  Please add a suitable "
-            "proxy for the state and refile it with a note that the "
-            "request is being filed by a state citizen. Make sure the "
-            "new request is associated with the original user's "
-            "account. To add someone as a proxy, change their user type "
-            'to "Proxy" and make sure they properly have their state '
-            "set on the backend.  This message should only appear when "
-            "a suitable proxy does not exist.",
-        )
-
     def process_attachments(self, user, composer=False):
         """Attach all outbound attachments to the last communication"""
         if composer:
@@ -649,7 +656,7 @@ class FOIARequest(models.Model):
             # we include the latest pdf here under the assumption
             # it is the rejection letter
             include_latest_pdf=True,
-            **kwargs
+            **kwargs,
         )
 
     def pay(self, user, amount):
@@ -740,7 +747,7 @@ class FOIARequest(models.Model):
 
         body = self.render_msg_body(
             comm=comm,
-            reply_link=True,
+            is_email=True,
             switch=kwargs.get("switch"),
             appeal=kwargs.get("appeal"),
         )
@@ -760,7 +767,7 @@ class FOIARequest(models.Model):
                 from_email=str(from_email),
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
-                bcc=["diagnostics@muckrock.com"],
+                bcc=[settings.DIAGNOSTIC_EMAIL],
                 headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
                 connection=email_connection,
             )
@@ -880,7 +887,7 @@ class FOIARequest(models.Model):
     def render_msg_body(
         self,
         comm,
-        reply_link=False,
+        is_email=False,
         switch=False,
         appeal=False,
         include_address=True,
@@ -893,6 +900,13 @@ class FOIARequest(models.Model):
             "switch": switch,
             "msg_comms": self.get_msg_comms(comm, short=payment),
         }
+        context["return_address"] = (
+            f"{settings.ADDRESS_NAME}\n"
+            f"{settings.ADDRESS_DEPT}\n"
+            f"{settings.ADDRESS_STREET}\n"
+            f"{settings.ADDRESS_CITY}, {settings.ADDRESS_STATE} "
+            f"{settings.ADDRESS_ZIP}".format(pk=self.pk)
+        )
         if payment and include_address:
             payment_address = self.agency.get_addresses("check").first()
             if payment_address:
@@ -903,8 +917,14 @@ class FOIARequest(models.Model):
             else:
                 agency = self.agency
             context["address"] = self.address.format(agency, appeal=appeal)
-        if reply_link:
+        if is_email:
             context["reply_link"] = self.get_agency_reply_link(self.email.email)
+        else:
+            context["reply_link"] = settings.MUCKROCK_URL + reverse(
+                "communication-direct-agency", kwargs={"idx": comm.pk}
+            )
+            context["passcode"] = comm.foia.get_passcode()
+        context["attachments"] = comm.files.values_list("title", flat=True)
         if switch:
             first_request = self.communications.all()[0]
             context["original"] = {
@@ -1016,7 +1036,7 @@ class FOIARequest(models.Model):
                     "foia_idx": self.pk,
                 },
             ),
-            **email_args
+            **email_args,
         )
 
     def update_tags(self, tags):
@@ -1027,7 +1047,7 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
-    def user_actions(self, user):
+    def user_actions(self, user, is_agency_user):
         """Provides action interfaces for users"""
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.forms import (
@@ -1037,7 +1057,6 @@ class FOIARequest(models.Model):
         )
 
         is_owner = self.created_by(user)
-        is_agency_user = user.is_authenticated and user.profile.is_agency_user
         can_follow = user.is_authenticated and not is_owner and not is_agency_user
         is_following = user.is_authenticated and user in followers(self)
         is_admin = user.is_staff
@@ -1074,14 +1093,14 @@ class FOIARequest(models.Model):
                 "class_name": "primary",
             },
             {
-                "test": self.has_perm(user, "flag"),
+                "test": self.has_perm(user, "flag") or is_agency_user,
                 "title": "Get Help",
                 "action": "flag",
                 "desc": "Something broken, buggy, or off?  "
                 "Let us know and we'll fix it",
                 "class_name": "failure",
                 "modal": True,
-                "form": FOIAFlagForm(),
+                "form": FOIAFlagForm(is_agency_user=is_agency_user),
             },
             {
                 "test": user.has_perm("foia.delete_foiarequest"),
