@@ -72,6 +72,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 QUERYCOUNT = {"DISPLAY_DUPLICATES": 10}
 
+COMPRESS_ENABLED = False
 CACHE_DEBUG = False
 if CACHE_DEBUG:
     CACHES["default"] = {
