@@ -487,6 +487,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
     ),
 }
+MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
 
 if "ALLOWED_HOSTS" in os.environ:
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
