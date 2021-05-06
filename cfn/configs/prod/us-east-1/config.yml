@@ -101,6 +101,7 @@ context:
         AWS_STORAGE_DEFAULT_ACL: "private"
         CLOUDFRONT_DOMAIN: wp-muckrock-prod.news-engineering.aws.wapo.pub
         MAILGUN_SERVER_NAME: foi-requests.washpost.com
+        MUCKROCK_URL: https://muckrock-prod.news-engineering.aws.wapo.pub/
 
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
