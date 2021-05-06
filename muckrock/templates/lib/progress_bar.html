@@ -8,6 +8,6 @@ When included, should be given three parameters as a dict:
 {% endcomment %}
 {% if percentage %}
 <object class="progress-bar" {% if id %}id="{{ id }}"{% endif %}>
-    <span class="{% if '100' in percentage or 100 == percentage %}completed{% endif %} {% if state %}{{ state }}{% endif %} meter" style="width: {% if percentage|last = '%' %}{{ percentage }}{% else %}{{ percentage }}%{% endif %};"></span>
+    <span class="{% if '100' in percentage or 100 == percentage %}completed{% endif %} {% if state %}{{ state }}{% endif %} meter" style="width: {% if percentage|last == '%' %}{{ percentage }}{% else %}{{ percentage }}%{% endif %};"></span>
 </object>
 {% endif %}

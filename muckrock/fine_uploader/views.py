@@ -33,20 +33,6 @@ from muckrock.foia.models import (
     OutboundRequestAttachment,
 )
 
-def _complete_chunked_upload(key, uploadId, chunks):
-    """
-    Merges all parts of a multipart upload into the final file
-    """
-    parts = [{ 'ETag': chunk['etag'], 'PartNumber': chunk['part'] } for chunk in chunks]
-    boto3.client("s3").complete_multipart_upload(
-        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
-        Key=key,
-        MultipartUpload={
-            'Parts': parts
-        },
-        UploadId=uploadId
-    )
-
 def login_or_agency_required(function):
     """Allow semi-authenticated agency users to upload files"""
 
@@ -73,6 +59,19 @@ def login_or_agency_required(function):
 
     return wrapper
 
+def _complete_chunked_upload(key, uploadId, chunks):
+    """
+    Merges all parts of a multipart upload into the final file
+    """
+    parts = [{ 'ETag': chunk['etag'], 'PartNumber': chunk['part'] } for chunk in chunks]
+    boto3.client("s3").complete_multipart_upload(
+        Bucket=settings.AWS_MEDIA_BUCKET_NAME,
+        Key=key,
+        MultipartUpload={
+            'Parts': parts
+        },
+        UploadId=uploadId
+    )
 
 def _success(request, model, attachment_model, fk_name):
     """"File has been succesfully uploaded to a FOIA/composer"""
@@ -197,9 +196,7 @@ def session_composer(request):
 def _delete(request, model, idx):
     """Delete a pending attachment"""
     try:
-        attm = model.objects.get(
-            pk=idx, user=request.user, sent=False
-        )
+        attm = model.objects.get(pk=idx, sent=False)
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
@@ -220,7 +217,7 @@ def _delete(request, model, idx):
     return HttpResponse()
 
 
-@login_required
+@login_or_agency_required
 def delete_request(request, idx):
     """Delete a pending attachment from a FOIA Request"""
     return _delete(request, OutboundRequestAttachment, idx)
@@ -358,7 +355,7 @@ def _preupload(request, model, id_name=None):
     return JsonResponse(response_data)
 
 
-@login_required
+@login_or_agency_required
 def preupload_request(request):
     """Generate upload info for a FOIA Request"""
     return _preupload(request, OutboundRequestAttachment, "foia_id")
@@ -375,7 +372,7 @@ def preupload_comm(request):
     return _preupload(request, FOIAFile)
 
 
-@login_required
+@login_or_agency_required
 def upload_chunk(request):
     """Generate an upload URL for a chunk"""
     key = request.POST.get("key")
@@ -389,7 +386,7 @@ def upload_chunk(request):
 
     return JsonResponse(response)
 
-@login_required
+@login_or_agency_required
 def blank(request):
     """Workaround for IE9 and older"""
     # pylint: disable=unused-argument

@@ -94,13 +94,7 @@ context:
         ALLOWED_HOSTS: "127.0.0.1,muckrock-dev.news-engineering.aws.wapo.pub"
         BANDIT_EMAIL: news-engineering-qa@washpost.com
         BANDIT_WHITELIST: "washpost.com,pm.me" # TODO remove me testing with personal email
-        AWS_STORAGE_BUCKET_NAME: wp-muckrock-dev
-        AWS_MEDIA_BUCKET_NAME: wp-muckrock-uploads-dev
-        AWS_MEDIA_QUERYSTRING_AUTH: true
-        AWS_STORAGE_DEFAULT_ACL: "private"
-        CLOUDFRONT_DOMAIN: wp-muckrock-dev.news-engineering.aws.wapo.pub
         DJANGO_SETTINGS_MODULE: muckrock.settings.wapo.staging
-        MAILGUN_SERVER_NAME: foia-requests-dev.news-engineering.aws.wapo.pub
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
