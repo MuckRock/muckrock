@@ -27,10 +27,7 @@
                 {% endwith %}
                 <dt>Return Address</dt>
                 <dd>
-                    MuckRock News<br>
-                    DEPT MR {{foia.pk}}<br>
-                    411A Highland Ave<br>
-                    Somerville, MA 02144
+                  {{ return_address|linebreaks }}
                 </dd>
                 {% with portal=foia.portal %}
                     <dt>Portal Link</dt>

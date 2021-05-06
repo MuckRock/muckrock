@@ -294,17 +294,16 @@ class Agency(models.Model, RequestHelper):
 
     def get_proxy_info(self):
         """Handle proxy users for request creation in this agency"""
-        if self.requires_proxy:
+        if self.requires_proxy or self.jurisdiction.legal.always_proxy:
             proxy_user = self.jurisdiction.get_proxy()
             if proxy_user is None:
                 return {
-                    "from_user": User.objects.get(username="Proxy"),
                     "proxy": True,
                     "missing_proxy": True,
                     "warning": "This agency and jurisdiction requires requestors to be "
                     "in-state citizens.  We do not currently have a citizen proxy "
-                    "requestor on file for this state, but will attempt to find "
-                    "one to submit this request on your behalf.",
+                    "requestor on file for this state, so we will file this request "
+                    "in your name.",
                 }
             else:
                 return {
@@ -420,4 +419,5 @@ class Agency(models.Model, RequestHelper):
         permissions = (
             ("view_emails", "Can view private contact information"),
             ("merge_agency", "Can merge two agencies together"),
+            ("mass_import", "Can mass import a CSV of agencies"),
         )

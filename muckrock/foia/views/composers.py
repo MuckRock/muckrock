@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
@@ -156,7 +157,7 @@ class GenericComposer(BuyRequestsMixin):
         else:
             contact_info = None
         try:
-            composer.submit(contact_info)
+            composer.submit(contact_info, form.cleaned_data.get("no_proxy"))
         except InsufficientRequestsError:
             messages.warning(self.request, "You need to purchase more requests")
         else:
@@ -186,16 +187,14 @@ class GenericComposer(BuyRequestsMixin):
                 "requestors to be in-state citizens.  We will file these "
                 "with volunteer filers in states in which we have a "
                 "volunteer available.  If we do not have a volunteer "
-                "available, your request will be filed once we find a "
-                "suitable volunteer."
+                "available, your request will be filed in your name."
             )
         elif proxies["missing"]:
             return (
                 "Some of the agencies you are requesting from require "
                 "requestors to be in-state citizens.  We do not currently "
                 "have a citizen proxy requestor on file for these "
-                "agencies, but will attempt to find one to submit these "
-                "requests on your behalf."
+                "agencies, so we will file this request in your name."
             )
         elif proxies["non-missing"]:
             return (
@@ -413,7 +412,21 @@ def autosave(request, idx):
     data["action"] = "save"
     form = BaseComposerForm(data, instance=composer, user=request.user, request=request)
     if form.is_valid():
-        composer = form.save(update_owners=False)
+        composer = form.save(update_owners=False, commit=False)
+        fields = {
+            f: getattr(composer, f)
+            for f in form.cleaned_data
+            if f not in ("agencies", "tags", "no_proxy", "action")
+        }
+        with transaction.atomic():
+            # ensure that the status is still started
+            # otherwise there is a race condition where the auto save is overriding
+            # the status back to started after it has been submitted
+            updated = FOIAComposer.objects.filter(
+                pk=composer.pk, status="started"
+            ).update(**fields)
+            if updated:
+                form.save_m2m()
         new_agencies = set(composer.agencies.all())
         removed_agencies = old_agencies - new_agencies
         # delete pending agencies which have been removed from composers and requests

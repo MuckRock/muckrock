@@ -1,13 +1,17 @@
-{% autoescape off %}Filed via MuckRock.com
-E-mail (Preferred): {{ request.get_request_email }}
-{% if reply_link %}Upload documents directly: {{ reply_link }}
-Is this email coming to the wrong contact?  Something else wrong?  Use the above link to let us know.
+{% load humanize%}{% autoescape off %}View request history, {% if attachments %}see {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}, {% endif %}upload responsive documents, and report problems here:
+{{ reply_link }}
+{% if passcode %}
+If prompted for a passcode, please enter:
+{{ passcode }}
 {% endif %}
+{% if attachments %}Attachments:{% endif %}{% for attachment in attachments %}
+• {{ attachment }}{% endfor %}
+
+Filed via MuckRock.com
+E-mail (Preferred): {{ request.get_request_email }}
+
 For mailed responses, please address (see note):
-MuckRock News
-DEPT MR {{ request.pk }}
-411A Highland Ave
-Somerville, MA 02144-2516
+{{ return_address }}
 
 {% if request.user.is_staff %}PLEASE NOTE: This request was filed by a MuckRock staff reporter. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% else %}PLEASE NOTE: This request is not filed by a MuckRock staff member, but is being sent through MuckRock by the above in order to better track, share, and manage public records requests. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% endif %}
 {% endautoescape %}

@@ -687,7 +687,6 @@ def message_response(request):
             return JsonResponse({"error": "no email"}, status=400)
         msg = TemplateEmail(
             subject=form.cleaned_data["subject"],
-            from_email="info@muckrock.com",
             reply_to=[request.user.email],
             user=response.user,
             text_template="crowdsource/email/message_user.txt",

@@ -66,6 +66,16 @@ def obj_link(obj):
         return "None"
 
 
+@register.simple_tag
+def cond_link(cond, url, text, **kwargs):
+    """Always show the text, but wrap in a link to URL conditionally"""
+    if cond:
+        attrs = " ".join(f'{attr}="{value}"' for attr, value in kwargs.items())
+        return format_html('<a href="{}"{}>{}</a>', url, attrs, text)
+    else:
+        return text
+
+
 @register.filter
 @stringfilter
 def company_title(companies):
@@ -82,9 +92,17 @@ def abs_filter(value):
     return abs(value)
 
 
+@register.filter(name="not")
+def not_filter(value):
+    """Boolean not"""
+    return not value
+
+
 email_re = re.compile(
     r"[a-zA-Z0-9._%+-]{1,64}@(?P<domain>[a-zA-Z0-9.-]{1,255}\.[a-zA-Z]{2,4})"
 )
+
+login_link = re.compile(r"https://accounts.muckrock.com/accounts/login/\?next=[\S]*")
 
 
 def email_redactor(match):
@@ -104,7 +122,8 @@ def fieldtype(field):
 @register.filter
 def redact_emails(text):
     """Redact emails from text"""
-    return email_re.sub(email_redactor, text)
+    text = email_re.sub(email_redactor, text)
+    return login_link.sub("https://www.muckrock.com/", text)
 
 
 # http://stackoverflow.com/questions/1278042/

@@ -123,7 +123,6 @@ export function displayFile(file) {
     var docId = file.data('doc-id');
     var title = file.data('title') || 'Untitled';
     var pages = file.data('pages') || 0;
-    var legacy = file.data('legacy') === 'True';
     var url = file.data('url');
     var iframe = $("#viewer-iframe");
     var viewer = $("#viewer");
@@ -135,24 +134,13 @@ export function displayFile(file) {
     files.parent('li').removeClass('active');
     files.filter(file).parent('li').addClass('active');
 
-    if (legacy) {
-        /* DV is defined by the external DocumentCloud script at runtime. */
-        DV.load(
-            'https://www.documentcloud.org/documents/' + docId + '.js',
-            {sidebar: false, container: "#viewer"}
-        );
-        iframe.attr("src", "");
-        iframe.hide();
-        viewer.show();
-    } else {
-        // load new embed in the iframe
-        iframe.attr(
-            "src",
-            url + "/documents/" + docId + "/?embed=1&amp;title=1"
-        );
-        viewer.hide();
-        iframe.show();
-    }
+    // load new embed in the iframe
+    iframe.attr(
+        "src",
+        url + "/documents/" + docId + "/?embed=1&amp;title=1"
+    );
+    viewer.hide();
+    iframe.show();
 
     activeFile.addClass('visible');
     window.scrollTo(0, 0);
@@ -181,6 +169,10 @@ $('.toggle-embed').click(function(){
     $(embed).children('.close-embed').click(function(){
         $(embed).removeClass('visible');
     });
+});
+
+$('.file-form').click(function(){
+    $(this).closest('form').submit();
 });
 
 /* Notes */
@@ -220,6 +212,13 @@ $('form.generate-private-link').submit(function(e){
 $('.text-area.modal-button').click(function(e){
     e.preventDefault();
     modal($(this).next());
+    return false;
+});
+
+$('.modal-link.agency-flag').click(function(e){
+    e.preventDefault();
+    $("#id_flag-category").val($(this).data("category"));
+    modal($($(this).data('modal')));
     return false;
 });
 

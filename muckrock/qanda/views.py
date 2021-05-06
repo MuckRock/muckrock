@@ -7,30 +7,22 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
-from django.db.models import Count, Prefetch
+from django.db.models import Count
 from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render
-from django.template.defaultfilters import slugify
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils import timezone
 from django.views.generic.detail import DetailView
 
 # Third Party
 import actstream
-import django_filters
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 # MuckRock
 from muckrock.accounts.models import Notification
 from muckrock.core.views import MRSearchFilterListView
 from muckrock.qanda.filters import QuestionFilterSet
-from muckrock.qanda.forms import AnswerForm, QuestionForm
+from muckrock.qanda.forms import AnswerForm
 from muckrock.qanda.models import Answer, Question
-from muckrock.qanda.serializers import QuestionPermissions, QuestionSerializer
 from muckrock.tags.models import Tag, normalize
 
 
@@ -59,11 +51,10 @@ class QuestionList(MRSearchFilterListView):
         """Adds an info message to the context"""
         context = super(QuestionList, self).get_context_data(**kwargs)
         info_msg = (
-            "Looking for FOIA advice? Post your questions here "
-            "to get invaluable insight from MuckRock's community "
-            "of public records pros. Have a technical support "
-            "or customer service issue? Those should be reported "
-            'either using the "Report" button on the request page '
+            "The Q&A forum is being retired.  You may browse "
+            "existing questions, but asking new questions has been disabled. "
+            "Have a technical support or customer service issue? Those should "
+            'be reported either using the "Report" button on the request page '
             'or simply by emailing <a href="mailto:info@muckrock.com">'
             "info@muckrock.com</a>."
         )
@@ -167,23 +158,6 @@ class Detail(DetailView):
         return context
 
 
-@permission_required("qanda.post")
-def create_question(request):
-    """Create a question"""
-    if request.method == "POST":
-        form = QuestionForm(user=request.user, data=request.POST)
-        if form.is_valid():
-            question = form.save(commit=False)
-            question.slug = slugify(question.title) or "untitled"
-            question.user = request.user
-            question.date = timezone.now()
-            question.save()
-            return redirect(question)
-    else:
-        form = QuestionForm(user=request.user)
-    return render(request, "forms/question.html", {"form": form})
-
-
 @login_required
 def follow(request, slug, idx):
     """Follow or unfollow a question"""
@@ -195,93 +169,6 @@ def follow(request, slug, idx):
         actstream.actions.follow(request.user, question, actor_only=False)
         messages.success(request, "You are now following this question.")
     return redirect(question)
-
-
-@login_required
-def follow_new(request):
-    """Follow or unfollow all new questions"""
-    profile = request.user.profile
-    if profile.new_question_notifications:
-        profile.new_question_notifications = False
-        profile.save()
-        messages.success(request, "You will not be notified of any new questions.")
-    else:
-        profile.new_question_notifications = True
-        profile.save()
-        messages.success(request, "You will be notified of all new questions.")
-    return redirect("question-index")
-
-
-@permission_required("qanda.post")
-def create_answer(request, slug, idx):
-    """Create an answer"""
-
-    question = get_object_or_404(Question, slug=slug, pk=idx)
-
-    if request.method == "POST":
-        form = AnswerForm(request.POST)
-        if form.is_valid():
-            answer = form.save(commit=False)
-            answer.user = request.user
-            answer.date = timezone.now()
-            answer.question = question
-            answer.save()
-            return redirect(answer.question)
-    else:
-        form = AnswerForm()
-
-    return render(request, "forms/answer.html", {"form": form, "question": question})
-
-
-class QuestionViewSet(viewsets.ModelViewSet):
-    """API views for Question"""
-
-    # pylint: disable=too-many-public-methods
-    queryset = Question.objects.select_related("user").prefetch_related(
-        "tags", Prefetch("answers", queryset=Answer.objects.select_related("user"))
-    )
-    serializer_class = QuestionSerializer
-    permission_classes = (QuestionPermissions,)
-
-    class Filter(django_filters.FilterSet):
-        """API Filter for Questions"""
-
-        foia = django_filters.NumberFilter(field_name="foia__id")
-
-        class Meta:
-            model = Question
-            fields = ("title", "foia")
-
-    filterset_class = Filter
-
-    def pre_save(self, obj):
-        """Auto fill fields on create"""
-        if not obj.pk:
-            obj.date = timezone.now()
-            obj.slug = slugify(obj.title)
-            obj.user = self.request.user
-        return super(QuestionViewSet, self).pre_save(obj)
-
-    @action(detail=True, permission_classes=(IsAuthenticated,))
-    def answer(self, request, pk=None):
-        """Answer a question"""
-        try:
-            question = Question.objects.get(pk=pk)
-            self.check_object_permissions(request, question)
-            Answer.objects.create(
-                user=request.user,
-                date=timezone.now(),
-                question=question,
-                answer=request.DATA["answer"],
-            )
-            return Response({"status": "Answer submitted"}, status=status.HTTP_200_OK)
-        except Question.DoesNotExist:
-            return Response({"status": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
-        except KeyError:
-            return Response(
-                {"status": "Missing data - Please supply answer"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
 
 @permission_required("qanda.block")
@@ -316,8 +203,8 @@ def _block_or_report(request, model, model_pk, block):
         subject = "%s reported as spam" % obj.user.username
 
     send_mail(
-        subject,
-        render_to_string(
+        subject=subject,
+        message=render_to_string(
             "text/qanda/spam.txt",
             {
                 "url": obj.get_absolute_url(),
@@ -327,8 +214,8 @@ def _block_or_report(request, model, model_pk, block):
                 "muckrock_url": settings.MUCKROCK_URL,
             },
         ),
-        "info@muckrock.com",
-        ["info@muckrock.com"],
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.DEFAULT_FROM_EMAIL],
     )
 
     if block:

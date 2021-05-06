@@ -3,7 +3,7 @@ Hi,
 
 Thank you for your follow up. The user who filed this request has withdrawn it and requested the request be deleted, so unfortunately we have limited information about it. If you are sure you have the request contact information correct and are not otherwise corresponding with the requester (such as through their direct email), you may consider this request closed, and we thank you for your help.
 
-If you have further questions, you may reach MuckRock's administrative staff at info@muckrock.com
+If you have further questions, you may reach MuckRock's administrative staff at {{ settings.DEFAULT_FROM_EMAIL }}
 
 Thank you for your important work helping keep government transparent.
 

@@ -285,9 +285,8 @@ class RequestList(MRSearchFilterListView):
                             datum_per_page.delay(crowdsource.pk, file_.doc_id, {})
                         elif file_.doc_id and not split:
                             crowdsource.data.create(
-                                url="https://www.documentcloud.org/documents/{}.html".format(
-                                    file_.doc_id
-                                )
+                                url="https://beta.documentcloud.org/documents/"
+                                f"{file_.doc_id}/"
                             )
         return "Files added to assignment"
 
@@ -462,6 +461,22 @@ class MyOrgRequestList(UserPassesTestMixin, RequestList):
         return queryset.filter(
             composer__organization=self.request.user.profile.organization
         )
+
+
+class MyProxyRequestList(UserPassesTestMixin, RequestList):
+    """View requests that you are the proxy for"""
+
+    filter_class = FOIARequestFilterSet
+    title = "My Proxy Requests"
+    template_name = "foia/list.html"
+
+    def test_func(self):
+        """User must be a proxy"""
+        return self.request.user.profile.proxy
+
+    def get_queryset(self):
+        """Limit to just requests the user is a proxy for"""
+        return super().get_queryset().filter(proxy=self.request.user)
 
 
 @class_view_decorator(

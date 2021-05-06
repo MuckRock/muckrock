@@ -8,7 +8,7 @@
 <header class="global-header {% if request|is_hijacked %}global-header-hijacked{% endif %}">
   <nav class="global-navigation space-between mb0" id="nav">
     <div class="nav-section align-center mb0" id="site-nav">
-      <a href="{% if user.profile.is_agency_user %}{% url "foia-agency-list" %}{% else %}{% url 'index'%}{% endif %}" class="nav-item brand" id="nav-brand">
+      <a href="{% if user.profile.is_agency_user %}{% url "foia-agency-list" %}{% elif is_agency_user %}#{% else %}{% url "index" %}{% endif %}" class="nav-item brand" id="nav-brand">
         <span class="logotype">
           {% include 'lib/component/icon/logotype.svg' %}
         </span>
@@ -28,13 +28,13 @@
       <span class="nav-item section-toggle" id="toggle-sections" data-for="#nav-list-sections">
         {% include 'lib/component/icon/sections-lines.svg' %}
       </span>
-      {% if not user.is_authenticated %}
+      {% if not user.is_authenticated and not is_agency_user %}
         <ul class="unauthenticated section-list" id="nav-list-sections">
           <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
           <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
           <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
           <li><a class="nav-item" href="{% url 'crowdsource-index' %}">Assignments</a></li>
-        {% elif not user.profile.is_agency_user %}
+        {% elif not user.profile.is_agency_user and not is_agency_user %}
           <ul class="authenticated section-list" id="nav-list-sections">
             <li class="dropdown">
               <a class="nav-item" href="{% url 'news-index' %}">News</a>
@@ -81,9 +81,13 @@
                 {% if user_organization and not user_organization.individual %}
                   <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
                 {% endif %}
+                {% if user.profile.proxy %}
+                  <li><a class="nav-item" class="nav-item" href="{% url 'foia-proxy-list' %}">Proxy&nbsp;Requests</a></li>
+                {% endif %}
                 <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
                 {% if user.is_staff %}
                   <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
+                  <li><a class="nav-item" href="{% url 'communication-list' %}">Communications</a></li>
                 {% endif %}
               </ul>
             </li>
@@ -110,13 +114,13 @@
               </li>
             {% endif %}
           {% endif %}
-          {% if not user.is_authenticated or not user.profile.is_agency_user %}
+          {% if not user.profile.is_agency_user and not is_agency_user %}
+
             <li class="dropdown" id="more-sections">
               <span class="nav-item">{% include 'lib/component/icon/sections-dots.svg' %} <span class="label">More</span></span>
               <ul>
                 <li><a class="nav-item" href="{% url 'jurisdiction-explore' %}">Jurisdictions</a></li>
-                <li><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
-                <li class="separator"><a class="nav-item" href="{% url 'question-index' %}">Q&amp;A Forum</a></li>
+                <li class="separator"><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
                 <li class="separator"><a class="nav-item" href="{% url 'donate' %}">Donate</a></li>
                 <li><a class="nav-item" href="/about/">About Us</a></li>
                 <li><a class="nav-item" href="/staff/">Staff</a></li>
@@ -126,21 +130,29 @@
             </li>
           </ul>
         {% endif %}
-        {% if user.profile.is_agency_user %}
-          <ul class="unauthenticated section-list" id="nav-list-sections">
-            <li><a class="nav-item" href="{% url 'foia-agency-list' %}">Requests</a></li>
-            <li><a class="nav-item" href="{% url 'acct-logout' %}" onclick="ga('send', 'event', 'Account', 'Logout', window.location.pathname)">Log&nbsp;Out</a>
-          </ul>
+        {% if user.profile.is_agency_user or is_agency_user %}
+          {% if user.profile.is_agency_user %}
+            <ul class="unauthenticated section-list" id="nav-list-sections">
+              <li><a class="nav-item" href="{% url 'foia-agency-list' %}">Requests</a></li>
+              <li><a class="nav-item" href="{% url 'acct-logout' %}" onclick="ga('send', 'event', 'Account', 'Logout', window.location.pathname)">Log&nbsp;Out</a>
+            </ul>
+          {% endif %}
           <span>
             &nbsp; &nbsp; &nbsp;
-            Need help?  Email us at &nbsp;<a href="mailto:info@muckrock.com">info@muckrock.com</a> or call at &nbsp;<a href="tel:+16172991832">(617) 299-1832</a>
+            Need help?  Email us at &nbsp;
+            <a href="mailto:{{ settings.DEFAULT_FROM_EMAIL }}">
+              {{ settings.DEFAULT_FROM_EMAIL }}
+            </a> or call at &nbsp;
+            <a href="tel:{{ settings.PHONE_NUMBER_LINK }}">
+              {{ settings.PHONE_NUMBER }}
+            </a>
           </span>
         {% endif %}
 
         {% comment %}
           This contains the toggle for the global search, which appears below the top header.
         {% endcomment %}
-        {% if not user.profile.is_agency_user %}
+        {% if not user.profile.is_agency_user  and not is_agency_user %}
           <div class="global-search">
             <span class="nav-item search-toggle" id="show-search">
               {% include 'lib/component/icon/search.svg' %}
@@ -160,7 +172,7 @@
 
     <div class="nav-section" id="user-nav">
       <ul>
-        {% if not user.profile.is_agency_user %}
+        {% if not user.profile.is_agency_user and not is_agency_user %}
           <li>
             <a class="blue nav-item" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
               {% include 'lib/component/icon/create-request.svg' %}
@@ -312,7 +324,7 @@
             <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
             <li><a href="{% url "acct-login" %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
           {% endif %}
-        {% else %} {# for agency users #}
+        {% elif user.profile.is_agency_user %} {# for agency users #}
           <li class="dropdown dropdown--right">
             <a href="{% url 'foia-agency-list' %}" class="black nav-item align-center avatar-container" data-for="#profile-dropdown">
               <span class="label">{{ user.profile.agency.name }}</span>

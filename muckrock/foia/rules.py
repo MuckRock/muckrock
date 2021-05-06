@@ -66,6 +66,12 @@ def is_owner(user, foia):
 
 
 @predicate
+@skip_if_not_obj
+def is_proxy(user, foia):
+    return foia.proxy and foia.proxy == user
+
+
+@predicate
 def no_foia(user, foia):
     return foia is None
 
@@ -185,7 +191,7 @@ can_embargo = has_feature_level(1)
 
 can_embargo_permananently = has_feature_level(2) | has_perm_embargo
 
-can_view = can_edit | is_viewer | is_from_agency | ~is_private
+can_view = can_edit | is_viewer | is_from_agency | is_proxy | ~is_private
 
 
 @predicate

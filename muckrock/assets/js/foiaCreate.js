@@ -104,7 +104,7 @@ $(document).ready(function(){
   });
   $("#id_num_requests").trigger("change");
 
-  agencyWidget.on("change.select2", function(){
+  agencyWidget.on("select2:select select2:unselect select2:clear", function(){
     // get boilerplate language for selected agencies
     $.ajax({
       url: "/agency/boilerplate/",
@@ -139,6 +139,7 @@ $(document).ready(function(){
     var requestCount = agencyWidget.val().length;
     var exemptCount = agencyField.find(".exempt").length;
     var uncoopCount = agencyField.find(".uncooperative").length;
+    var proxyCount = agencyField.find(".proxy").length;
     var allowedCount = requestCount - exemptCount - uncoopCount;
 
     updateRequestCount(allowedCount);
@@ -224,8 +225,14 @@ $(document).ready(function(){
       });
     }
 
+    if (proxyCount > 0) {
+      $("fieldset.no_proxy").show();
+    } else {
+      $("fieldset.no_proxy").hide();
+    }
+
   });
-  agencyWidget.trigger("change.select2");
+  agencyWidget.trigger("select2:select");
 
   $("form.create-request").submit(function(e){
     var email_regex = /\w+@\w+.\w+/;

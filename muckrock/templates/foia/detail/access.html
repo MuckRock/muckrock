@@ -1,0 +1,114 @@
+{% if user_can_edit %}
+
+  <section role="tabpanel" class="tab-panel access" id="sharing">
+    <h2 class="tab-panel-heading">Sharing</h2>
+
+    {% if foia.embargo %}
+      <form class="generate-private-link" method="post">
+        {% csrf_token %}
+        <h3>Private Link</h3>
+        {% if foia.access_key %}
+          <input
+            type="text"
+            value="{{ request.get_host }}{{ request.get_full_path }}?key={{ foia.access_key }}"
+            readonly />
+        {% else %}
+          <input type="text" value="No private link" readonly />
+        {% endif %}
+        <button class="button" type="submit" name="action" value="generate_key">
+          Create new link
+        </button>
+        <p class="help-text">
+          Share this private link with anyone you want to be able to see this request.
+          If you regenerate this link, it will break any that you have already given
+          out.
+        </p>
+      </form>
+    {% endif %}
+
+    <form class="grant-access" method="post">
+      {% csrf_token %}
+      <h3>Grant Access</h3>
+      <div class="picker">
+        <div class="user search input">
+          <label for="{{ access_form.users.id_for_label}}">
+            Search for MuckRock users
+          </label>
+          {{ access_form.users }}
+        </div>
+        {{ access_form.access }}
+      </div>
+      <button class="primary button" type="submit" name="action" value="grant_access">
+        Save
+      </button>
+    </form>
+
+    <table class="people with-access">
+      <h3>People with access</h3>
+      <tbody>
+        <tr class="person with-access">
+          <td class="name">
+            <p>
+              {{ foia.user.profile.full_name }}
+              <span class="small badge">Creator</span>
+            </p>
+          </td>
+          <td class="modify nostretch"></td>
+        </tr>
+        {% for user in foia.edit_collaborators.all %}
+          <tr class="person with-access">
+            <td class="name">
+              <p>
+                {{ user.profile.full_name }}
+                <span class="small badge">Editor</span>
+              </p>
+            </td>
+            <td class="modify nostretch">
+              <form class="modify-access" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user" value="{{ user.id }}" />
+                <button class="button" type="submit" name="action" value="demote">
+                  Demote
+                </button>
+                <button
+                  class="red button"
+                  type="submit"
+                  name="action"
+                  value="revoke_access"
+                >Revoke</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+
+        {% for user in foia.read_collaborators.all %}
+          <tr class="person with-access">
+            <td class="name">
+              <p>
+                {{ user.profile.full_name }}
+                <span class="small badge">Viewer</span>
+              </p>
+            </td>
+            <td class="modify nostretch">
+              <form class="modify-access" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user" value="{{ user.id }}" />
+                <button class="button" type="submit" name="action" value="promote">
+                  Promote
+                </button>
+                <button
+                  class="failure button"
+                  type="submit"
+                  name="action"
+                  value="revoke_access"
+                >Revoke</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </section>
+
+{% endif %}

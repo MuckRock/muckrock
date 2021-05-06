@@ -158,7 +158,6 @@ class TestFunctional(TestCase):
             "news",
             "orphantask",
             "photos",
-            "question",
             "responsetask",
             "snailmailtask",
             "statistics",

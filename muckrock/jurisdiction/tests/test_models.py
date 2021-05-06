@@ -21,7 +21,6 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
 )
 from muckrock.jurisdiction import factories
-from muckrock.organization.factories import ProxyEntitlementFactory
 
 
 class TestJurisdictionUnit(TestCase):
@@ -156,18 +155,8 @@ class TestJurisdictionUnit(TestCase):
     def test_get_proxy(self):
         """Test getting the proxy user for a state"""
         eq_(self.state.get_proxy(), None)
-        proxy = ProxyEntitlementFactory()
-        UserFactory(
-            membership__organization__entitlement=proxy,
-            profile__state=self.state.abbrev,
-            profile__preferred_proxy=False,
-        )
-        preferred_proxy = UserFactory(
-            membership__organization__entitlement=proxy,
-            profile__state=self.state.abbrev,
-            profile__preferred_proxy=True,
-        )
-        eq_(self.state.get_proxy(), preferred_proxy)
+        proxy = UserFactory(profile__state=self.state.abbrev, profile__proxy=True)
+        eq_(self.state.get_proxy(), proxy)
 
 
 class TestLawModel(TestCase):

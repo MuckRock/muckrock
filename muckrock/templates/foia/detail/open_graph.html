@@ -1,0 +1,17 @@
+{% load cache %}
+
+{% cache cache_timeout foia_detail_open_graph foia.pk request.user.pk %}
+  <meta property="og:title" content="{{ foia.title }}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+  <meta property="og:description" content="{{ foia.user.profile.full_name }}
+    {% if foia.datetime_done %}made{% else %}is making{% endif %}
+    this request
+    {% if foia.agency %}
+      to {{ foia.agency.name }} of
+      {% if foia.jurisdiction.name == "United States of America" %}the {% endif %}
+      {{ foia.jurisdiction.name }}.
+    {% endif %}"
+    />
+  <meta property="og:site_name" content="MuckRock" />
+{% endcache %}

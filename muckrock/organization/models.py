@@ -265,7 +265,6 @@ class Entitlement(models.Model):
         "feature_level": 0,
         "base_requests": 0,
         "requests_per_user": 0,
-        "proxy": False,
     }
 
     def __str__(self):

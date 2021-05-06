@@ -41,4 +41,5 @@ urlpatterns = [
         views.AgencyComposerAutocomplete.as_view(),
         name="agency-composer-autocomplete",
     ),
+    url(r"^import/$", views.MassImportAgency.as_view(), name="agency-mass-import"),
 ]

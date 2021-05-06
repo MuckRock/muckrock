@@ -85,7 +85,7 @@ class ProfileInline(admin.StackedInline):
         "new_question_notifications",
         "org_share",
         "state",
-        "preferred_proxy",
+        "proxy",
         "agency",
     )
     readonly_fields = ("org_link", "uuid", "full_name", "email_confirmed", "avatar_url")

@@ -12,6 +12,7 @@ from reversion.admin import VersionAdmin
 from muckrock.task.models import (
     BlacklistDomain,
     CrowdfundTask,
+    FileDownloadLink,
     FlaggedTask,
     MultiRequestTask,
     NewAgencyTask,
@@ -84,6 +85,12 @@ class PortalTaskAdmin(VersionAdmin):
     readonly_fields = ["communication"]
 
 
+class FileDownloadLinkAdmin(VersionAdmin):
+    """File Download Link Admin"""
+
+    list_display = ["name", "url"]
+
+
 admin.site.register(OrphanTask, OrphanTaskAdmin)
 admin.site.register(SnailMailTask, SnailMailTaskAdmin)
 admin.site.register(RejectedEmailTask, RejectedEmailTaskAdmin)
@@ -95,3 +102,4 @@ admin.site.register(CrowdfundTask, CrowdfundTaskAdmin)
 admin.site.register(MultiRequestTask, MultiRequestTaskAdmin)
 admin.site.register(PortalTask, PortalTaskAdmin)
 admin.site.register(BlacklistDomain)
+admin.site.register(FileDownloadLink, FileDownloadLinkAdmin)

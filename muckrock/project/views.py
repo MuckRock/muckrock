@@ -360,7 +360,9 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
             "Private": project.private,
             "Approved": project.approved,
             "Featured": project.featured,
-            "Created At": project.date_created.isoformat(),
+            "Created At": project.date_created.isoformat()
+            if project.date_created
+            else None,
         }
         if extra_data is not None:
             data.update(extra_data)
