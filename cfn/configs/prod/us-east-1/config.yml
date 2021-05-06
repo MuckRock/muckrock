@@ -95,6 +95,12 @@ context:
         POSTGRES_DB: muckrock
         POSTGRES_PORT: 5432
         SQUARELET_URL: https://accounts.muckrock.com # Using prod squarelet for dev+prod environments
+        AWS_STORAGE_BUCKET_NAME: wp-muckrock-prod
+        AWS_MEDIA_BUCKET_NAME: wp-muckrock-uploads-prod
+        AWS_MEDIA_QUERYSTRING_AUTH: true
+        AWS_STORAGE_DEFAULT_ACL: "private"
+        CLOUDFRONT_DOMAIN: wp-muckrock-prod.news-engineering.aws.wapo.pub
+        MAILGUN_SERVER_NAME: foi-requests.washpost.com
 
     - name: muckrock_celerybeat
       image: muckrock_celerybeat
