@@ -30,7 +30,7 @@
                     <li><a href="#status-{{communication.pk}}-form" class="option dropdown-list-item">Status</a></li>
                     <li><a href="#move-{{communication.pk}}-form" class="option dropdown-list-item">Move</a></li>
                     <li><a href="#resend-{{communication.pk}}-form" class="option dropdown-list-item">Resend</a></li>
-                    <li><a href="#delete-{{communication.pk}}-form" class="option dropdown-list-item">Delete</a></li>
+                    <li><a href="#hide-{{communication.pk}}-form" class="option dropdown-list-item">{% if communication.hidden %}Unhide{% else %}Hide{% endif %}</a></li>
                     <li><a href="#upload-{{communication.pk}}-form" class="option dropdown-list-item">Upload File</a></li>
                   </ul>
                 </div>
@@ -143,12 +143,12 @@
           <button type="submit" name="action" value="resend_comm" class="primary button">Resend</button>
           <button class="cancel button" id="cancel-resend-communication">Close</button>
         </form>
-        <form method="post" class="delete-communication communication-action" id="delete-{{communication.pk}}-form">
+        <form method="post" class="hide-communication communication-action" id="hide-{{communication.pk}}-form">
           {% csrf_token %}
           <input type="hidden" name="comm_pk" value="{{communication.pk}}" />
-          <p>This will delete the communication. Are you sure you want to do this?</p>
-          <button type="submit" name="action" value="delete_comm" class="failure button">Delete</button>
-          <button class="cancel button" id="cancel-delete-communication">Close</button>
+          <p>This will {% if communication.hidden %}unhide{% else %}hide{% endif %} the communication. Are you sure you want to do this?</p>
+          <button type="submit" name="action" value="hide_comm" class="failure button">{% if communication.hidden %}Unhide{% else %}Hide{% endif %}</button>
+          <button class="cancel button" id="cancel-hide-communication">Close</button>
         </form>
         <form method="post" class="upload-communication communication-action" id="upload-{{communication.pk}}-form">
           {% csrf_token %}

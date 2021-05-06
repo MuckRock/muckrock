@@ -631,16 +631,17 @@ def move_comm(request, foia):
     return _get_redirect(request, foia)
 
 
-def delete_comm(request, foia):
-    """Admin deletes a communication"""
+def hide_comm(request, foia):
+    """Admin hides or unhides a communication"""
     if request.user.is_staff:
         try:
             comm = FOIACommunication.objects.get(pk=request.POST["comm_pk"])
-            files = comm.files.all()
-            for file_ in files:
-                file_.delete()
-            comm.delete()
-            messages.success(request, "The communication was deleted.")
+            comm.hidden = not comm.hidden
+            comm.save()
+            if comm.hidden:
+                messages.success(request, "The communication was hidden.")
+            else:
+                messages.success(request, "The communication was unhidden.")
         except (KeyError, FOIACommunication.DoesNotExist):
             messages.error(request, "The communication does not exist.")
     return _get_redirect(request, foia)
