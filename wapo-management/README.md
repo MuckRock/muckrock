@@ -24,7 +24,7 @@ We have a forked version of the [Muckrock](https://github.com/MuckRock/muckrock)
 Locally, you'll want to load data from these fixtures into a postgres instance running inside of docker on your machine. To do this, follow these steps:
 
 1. Make sure that you have [invoke](https://pypi.org/project/invoke/) installed: `pip install invoke`
-2. Download the bzip2 file here: `s3://wp-muckrock-dev/fixtures/agency_jurisdiction.json.bz2` and move it inside the `wapo-management/` directory.
+2. Download the bzip2 file here: `s3://wp-muckrock-uploads-dev/fixtures/agency_jurisdiction.json.bz2` and move it inside the `wapo-management/` directory.
 3. If you haven't already run `python initialize_dotenvs.py` as stated in the root README, then do so. Ensure that your `.envs/.local/.postgres` so that you are using the local postgres container for your app. If you are unsure then make sure that this value is set: `POSTGRES_HOST=muckrock_postgres`
 4. `inv manage "loaddata -v3 wapo-management/agency_jurisdiction.json.bz2"`
 
