@@ -9,8 +9,8 @@ from django.conf.urls import url
 from muckrock.fine_uploader import views
 
 urlpatterns = [
-    url(r"^sign/$", views.sign, name="fine-uploader-sign"),
     url(r"^blank/$", views.blank, name="fine-uploader-blank"),
+    url(r"^upload_chunk/$", views.upload_chunk, name="fine-uploader-chunk"),
     url(
         r"^success_request/$",
         views.success_request,
@@ -23,19 +23,19 @@ urlpatterns = [
     ),
     url(r"^success_comm/$", views.success_comm, name="fine-uploader-success-comm"),
     url(
-        r"^key_request/$", views.key_name_request, name="fine-uploader-key-name-request"
+        r"^preupload_request/$", views.preupload_request, name="fine-uploader-preupload-request"
     ),
     url(
-        r"^key_composer/$",
-        views.key_name_composer,
-        name="fine-uploader-key-name-composer",
+        r"^preupload_composer/$",
+        views.preupload_composer,
+        name="fine-uploader-preupload-composer",
     ),
-    url(r"^key_comm/$", views.key_name_comm, name="fine-uploader-key-name-comm"),
+    url(r"^preupload_comm/$", views.preupload_comm, name="fine-uploader-preupload-comm"),
     url(
-        r"^delete_request/$", views.delete_request, name="fine-uploader-delete-request"
+        r"^delete_request/?(?P<idx>\d*)$", views.delete_request, name="fine-uploader-delete-request"
     ),
     url(
-        r"^delete_composer/$",
+        r"^delete_composer/?(?P<idx>\d*)$",
         views.delete_composer,
         name="fine-uploader-delete-composer",
     ),

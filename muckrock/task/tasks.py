@@ -14,8 +14,7 @@ from io import BytesIO
 from random import randint
 
 # Third Party
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
+import boto3
 from fpdf import FPDF
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from requests.exceptions import RequestException
@@ -96,12 +95,11 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     bulk_merger.write(bulk_pdf)
     bulk_pdf.seek(0)
 
-    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
-    bucket = conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
-    key = Key(bucket)
-    key.key = pdf_name
-    key.set_contents_from_file(bulk_pdf)
-    key.set_canned_acl("public-read")
+    s3 = boto3.client("s3")
+    s3.upload_fileobj(
+        bulk_pdf, settings.AWS_MEDIA_BUCKET_NAME, pdf_name,
+        ExtraArgs={'ACL': settings.AWS_DEFAULT_ACL}
+    )
 
 
 @task(ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_ticket")

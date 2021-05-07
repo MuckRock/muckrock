@@ -20,6 +20,8 @@ import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
 import '../vendor/stacktable';
+import qq from '../vendor/fine-uploader';
+window.qq = qq;
 
 import './account';
 import './checkout';
@@ -40,9 +42,6 @@ import './selectAll';
 import './stripe';
 import './tabs';
 import './task';
-
-import qq from 'fine-uploader/lib/s3';
-window.qq = qq;
 
 import 'jquery.tabulator';
 

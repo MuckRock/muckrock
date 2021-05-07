@@ -12,21 +12,6 @@ from muckrock.settings.base import *
 INSTALLED_APPS = ("scout_apm.django",) + INSTALLED_APPS
 USE_SCOUT = True
 
-# media and static asset handling
-DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
-THUMBNAIL_DEFAULT_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
-COMPRESS_STORAGE = STATICFILES_STORAGE
-AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
-if AWS_S3_CUSTOM_DOMAIN:
-    STATIC_URL = "https://" + AWS_S3_CUSTOM_DOMAIN + "/"
-else:
-    STATIC_URL = "https://" + AWS_STORAGE_BUCKET_NAME + ".s3.amazonaws.com/"
-COMPRESS_URL = STATIC_URL
-MEDIA_URL = STATIC_URL + "media/"
-CLEAN_S3_ON_FOIA_DELETE = True
-COMPRESS_ENABLED = True
-
 TEMPLATES[0]["OPTIONS"]["loaders"] = [
     (
         "django.template.loaders.cached.Loader",
