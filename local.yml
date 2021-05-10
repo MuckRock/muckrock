@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 
 volumes:
   postgres_data_local: {}
@@ -16,14 +16,12 @@ services:
     volumes:
       - .:/app
       - ~/.netrc:/root/.netrc
-      - ~/.aws:/root/.aws
     environment:
       - IPYTHONDIR=/app/.ipython
-      - AWS_PROFILE
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
-    command: ["python", "manage.py", "runserver", "0.0.0.0:80"]
+    command: /start
     networks:
       default:
         aliases:
@@ -33,25 +31,19 @@ services:
         aliases:
           - dev.muckrock.com
           - dev.foiamachine.org
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://127.0.0.1:80/watchman || exit 1"]
 
   muckrock_postgres:
     build:
       context: .
-      dockerfile: ./compose/local/postgres/Dockerfile
-    image: muckrock_local_postgres
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: muckrock_production_postgres
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
       - postgres_backup_local:/backups
     env_file:
       - ./.envs/.local/.postgres
-    ports:
-      - 5434:5432
 
   muckrock_redis:
-    ports:
-      - 6379:6379
     image: redis:3.2
 
   muckrock_celeryworker:
@@ -60,37 +52,28 @@ services:
     depends_on:
       - muckrock_redis
       - muckrock_postgres
-    command: ["celery", "-A", "muckrock.core.celery", "worker", "-l", "INFO"]
+    command: /start-celeryworker
     environment:
       - C_FORCE_ROOT=true
-      - AWS_PROFILE
     networks:
       default:
         aliases: []
       squarelet_default:
         aliases: []
-    ports:
-      - 8001:8001 # this is dumb, just needs a dummy port that is different than 80 since it inherits the django properties
-    healthcheck:
-      test: celery inspect ping -A muckrock.core.celery || exit 1
+
   muckrock_celerybeat:
     <<: *django
     image: muckrock_local_celerybeat
     depends_on:
       - muckrock_redis
       - muckrock_postgres
-    command: ["celery", "-A", "muckrock.core.celery", "beat", "-l", "INFO"]
-    environment:
-      - AWS_PROFILE 
+    command: /start-celerybeat
     networks:
       default:
         aliases: []
       squarelet_default:
         aliases: []
-    ports:
-      - 8002:8002
-    healthcheck: 
-      test: celery inspect ping -A muckrock.core.celery || exit 1
+
 networks:
   squarelet_default:
     external: true

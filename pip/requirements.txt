@@ -14,8 +14,6 @@ appnope==0.1.2
     # via ipython
 asgiref==3.2.10
     # via scout-apm
-autopep8==1.5.5
-    # via django-silk
 babel==2.5.1
     # via django-phonenumber-field
 backcall==0.2.0
@@ -46,7 +44,6 @@ celery==4.4.6
     # via
     #   -r pip/requirements.in
     #   django-celery-email
-    #   flower
 certifi==2017.4.17
     # via
     #   requests
@@ -89,7 +86,7 @@ django-compat==1.0.15
     # via django-hijack
 django-compressor==2.4
     # via -r pip/requirements.in
-django-constance[database,redis]==2.7.0
+django-constance[database]==2.7.0
     # via -r pip/requirements.in
 django-cors-headers==3.4.0
     # via -r pip/requirements.in
@@ -117,7 +114,7 @@ django-opensearch==0.4.2
     # via -r pip/requirements.in
 django-phonenumber-field==1.3.0
     # via -r pip/requirements.in
-django-picklefield==3.0.1
+django-picklefield==3.0.0
     # via django-constance
 django-premailer==0.2.0
     # via -r pip/requirements.in
@@ -129,15 +126,11 @@ django-reversion==2.0.13
     # via -r pip/requirements.in
 django-robots==4.0
     # via -r pip/requirements.in
-django-silk==4.1.0
-    # via -r pip/requirements.in
 django-sslify==0.2.7
     # via -r pip/requirements.in
 django-storages==1.5.1
     # via -r pip/requirements.in
 django-taggit==1.3.0
-    # via -r pip/requirements.in
-django-watchman==1.2.0
     # via -r pip/requirements.in
 django-watson==1.5.5
     # via -r pip/requirements.in
@@ -159,10 +152,8 @@ django==2.2.15
     #   django-picklefield
     #   django-redis
     #   django-reversion
-    #   django-silk
     #   django-sslify
     #   django-taggit
-    #   django-watchman
     #   djangorestframework
     #   dogslow
     #   drf-nested-routers
@@ -182,11 +173,9 @@ drf-nested-routers==0.91
     # via -r pip/requirements.in
 easy-thumbnails==2.7
     # via -r pip/requirements.in
-ecdsa==0.14.1
+ecdsa==0.15
     # via python-jose
 emoji==0.6.0
-    # via -r pip/requirements.in
-flower==0.9.7
     # via -r pip/requirements.in
 fpdf==1.7.2
     # via -r pip/requirements.in
@@ -201,31 +190,20 @@ fuzzywuzzy==0.18.0
     # via -r pip/requirements.in
 google-api-python-client==1.6.5
     # via -r pip/requirements.in
-gprof2dot==2021.2.21
-    # via django-silk
-gunicorn==20.0.4
+gunicorn==19.6.0
     # via -r pip/requirements.in
 httplib2==0.18.1
     # via
     #   google-api-python-client
     #   oauth2client
-humanize==3.3.0
-    # via flower
 idna==2.5
     # via requests
-importlib-metadata==3.10.0
-    # via
-    #   kombu
-    #   markdown
-    #   scout-apm
 ipython-genutils==0.2.0
     # via traitlets
 ipython==7.16.1
     # via -r pip/requirements.in
 jedi==0.17.1
     # via ipython
-jinja2==2.11.3
-    # via django-silk
 jmespath==0.10.0
     # via
     #   boto3
@@ -246,8 +224,6 @@ markdown==3.2.2
     # via
     #   -r pip/requirements.in
     #   pymdown-extensions
-markupsafe==1.1.1
-    # via jinja2
 memoize==1.0.0
     # via -r pip/requirements.in
 newrelic==2.70.0.51
@@ -288,8 +264,6 @@ plaid-python==3.4.0
     # via -r pip/requirements.in
 premailer==3.0.0
     # via django-premailer
-prometheus-client==0.8.0
-    # via flower
 prompt-toolkit==3.0.5
     # via ipython
 psutil==5.7.2
@@ -306,8 +280,6 @@ pyasn1==0.4.2
     #   pyasn1-modules
     #   python-jose
     #   rsa
-pycodestyle==2.6.0
-    # via autopep8
 pycparser==2.20
     # via cffi
 pycryptodomex==3.6.4
@@ -315,12 +287,10 @@ pycryptodomex==3.6.4
 pyembed==1.3.3
     # via -r pip/requirements.in
 pygments==2.2.0
-    # via
-    #   django-silk
-    #   ipython
+    # via ipython
 pyjwkest==1.4.0
     # via -r pip/requirements.in
-pyjwt==2.0.1
+pyjwt==1.6.4
     # via social-auth-core
 pylibmc==1.5.1
     # via django-pylibmc
@@ -336,10 +306,9 @@ python-dateutil==2.8.1
     # via
     #   -r pip/requirements.in
     #   botocore
-    #   django-silk
     #   documentcloud
     #   zenpy
-python-jose==3.2.0
+python-jose==3.1.0
     # via social-auth-core
 python-levenshtein==0.12.0
     # via -r pip/requirements.in
@@ -354,8 +323,6 @@ pytz==2020.1
     #   babel
     #   celery
     #   django
-    #   django-silk
-    #   flower
     #   zenpy
 ratelimit==2.2.1
     # via documentcloud
@@ -366,7 +333,6 @@ rcssmin==1.0.6
 redis==3.5.3
     # via
     #   -r pip/requirements.in
-    #   django-constance
     #   django-redis
     #   python-redis-lock
 reportlab==3.5.47
@@ -377,7 +343,6 @@ requests==2.21.0
     # via
     #   -r pip/requirements.in
     #   django-mailgun
-    #   django-silk
     #   documentcloud
     #   lob
     #   plaid-python
@@ -430,6 +395,7 @@ six==1.15.0
     #   python-dateutil
     #   python-jose
     #   social-auth-app-django
+    #   social-auth-core
     #   traitlets
     #   zenpy
 smart-open==1.6.0
@@ -438,7 +404,7 @@ smartypants==1.8.6
     # via -r pip/requirements.in
 social-auth-app-django==4.0.0
     # via -r pip/requirements.in
-social-auth-core[openidconnect]==4.0.3
+social-auth-core[openidconnect]==3.3.3
     # via
     #   -r pip/requirements.in
     #   social-auth-app-django
@@ -448,19 +414,12 @@ sqlparse==0.2.4
     # via
     #   django
     #   django-debug-toolbar
-    #   django-silk
 stripe==1.75.0
     # via -r pip/requirements.in
 threadpoolctl==2.1.0
     # via scikit-learn
-toml==0.10.2
-    # via autopep8
-tornado==6.1
-    # via flower
 traitlets==4.3.2
     # via ipython
-typing-extensions==3.7.4.3
-    # via importlib-metadata
 unidecode==0.4.19
     # via -r pip/requirements.in
 uritemplate==3.0.0
@@ -475,7 +434,6 @@ vine==1.3.0
     # via
     #   amqp
     #   celery
-    #   flower
 wcwidth==0.1.7
     # via prompt-toolkit
 webencodings==0.5.1
@@ -486,8 +444,6 @@ xlrd==1.1.0
     # via -r pip/requirements.in
 zenpy==2.0.20
     # via -r pip/requirements.in
-zipp==3.4.1
-    # via importlib-metadata
 zipstream==1.1.4
     # via -r pip/requirements.in
 
