@@ -12,7 +12,6 @@ django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
 django-compressor # Compress all JS and CSS assets into a single file
 django-constance[database] # Use for dynamic settings
-django-constance[redis] # Use for redis backend
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-dashing # Used to create the dashboard
 django-debug-toolbar # Toolbar for debugging
@@ -30,11 +29,9 @@ django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
 django-reversion # Version history for models
 django-robots # Manage robots.txt file
-django-silk # Profiler (from dev requirements)
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
-django-watchman # Used for health check
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
 django<3.0 # Django is kinda important...
@@ -44,7 +41,6 @@ dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF
 easy-thumbnails # Used for thumbnailing images
 emoji # Stripe emoji's for pdf generation
-flower # For inspecting celery tasks
 fpdf # Used to generate PDFs
 furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
