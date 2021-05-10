@@ -284,7 +284,6 @@ INSTALLED_APPS = (
     "muckrock.portal",
     "muckrock.crowdsource",
     "actstream",
-    "watchman",
 )
 
 
