@@ -3,6 +3,7 @@
 # pylint: disable=missing-docstring, unused-argument, invalid-unary-operand-type
 
 # Django
+from django.conf import settings
 from django.contrib.auth import load_backend
 
 # Standard Library
@@ -232,6 +233,10 @@ add_perm("foia.followup_foiarequest", can_edit)
 add_perm("foia.agency_reply_foiarequest", is_from_agency)
 add_perm("foia.upload_attachment_foiarequest", can_edit | is_from_agency)
 add_perm("foia.pay_foiarequest", can_edit & is_payable)
+if settings.FOIA_TASKS_STAFF_ONLY:
+    add_perm("foia.tasks_foiarequest", is_staff)
+else:
+    add_perm("foia.tasks_foiarequest", can_edit)
 
 add_perm("foia.view_foiacomposer", can_view_composer)
 add_perm("foia.delete_foiacomposer", can_edit_composer & has_status("started"))
