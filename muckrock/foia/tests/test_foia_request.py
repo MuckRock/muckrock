@@ -35,6 +35,7 @@ from muckrock.foia.factories import (
     FOIAComposerFactory,
     FOIAFileFactory,
     FOIARequestFactory,
+    FOIATemplateFactory,
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
 from muckrock.task.models import PaymentInfoTask, SnailMailTask
@@ -239,6 +240,8 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
         """
         # pylint: disable=too-many-statements
         # pylint: disable=protected-access
+
+        FOIATemplateFactory.create()
 
         mock_squarelet(mock_request)
         mail.outbox = []

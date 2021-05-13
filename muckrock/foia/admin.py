@@ -39,6 +39,7 @@ from muckrock.foia.models import (
     FOIAFile,
     FOIANote,
     FOIARequest,
+    FOIATemplate,
     OutboundComposerAttachment,
     OutboundRequestAttachment,
     TrackingNumber,
@@ -48,6 +49,7 @@ from muckrock.foia.tasks import (
     set_document_cloud_pages,
     upload_document_cloud,
 )
+from muckrock.jurisdiction.models import Jurisdiction
 
 
 class FOIAFileAdminForm(forms.ModelForm):
@@ -682,8 +684,41 @@ class OutboundComposerAttachmentAdmin(VersionAdmin):
     form = OutboundComposerAttachmentAdminForm
 
 
+class FOIATemplateAdminForm(forms.ModelForm):
+    """Form for the FOIA template admin"""
+
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
+        ),
+    )
+    jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(hidden=False),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Jurisdiction?", "data-width": None},
+        ),
+    )
+
+    class Meta:
+        model = FOIATemplate
+        fields = "__all__"
+
+
+class FOIATemplateAdmin(VersionAdmin):
+    """FOIA Template admin"""
+
+    list_display = ("name", "user", "jurisdiction")
+    search_fields = ["name", "template"]
+    form = FOIATemplateAdminForm
+
+
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
 admin.site.register(FOIAComposer, FOIAComposerAdmin)
+admin.site.register(FOIATemplate, FOIATemplateAdmin)
 admin.site.register(OutboundRequestAttachment, OutboundRequestAttachmentAdmin)
 admin.site.register(OutboundComposerAttachment, OutboundComposerAttachmentAdmin)

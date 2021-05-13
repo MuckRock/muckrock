@@ -392,3 +392,49 @@ class FOIAFileQuerySet(models.QuerySet):
         for ext in settings.DOCCLOUD_EXTENSIONS:
             is_doccloud |= Q(ffile__iendswith=ext)
         return self.filter(is_doccloud)
+
+
+class FOIATemplateQuerySet(models.QuerySet):
+    """Custom Queryset for FOIA Templates"""
+
+    def render(self, agencies, user, requested_docs, **kwargs):
+        """Render the template language for the given agencies"""
+
+        if kwargs.get("split"):
+            requested_docs = "$split$"
+
+        if len(agencies) == 1:
+            template = self._render_single(agencies[0], user, requested_docs, **kwargs)
+        elif kwargs.get("jurisdiction"):
+            template = self._render_single(None, user, requested_docs, **kwargs)
+        else:
+            template = self._render_generic(user, requested_docs, **kwargs)
+
+        if kwargs.get("split"):
+            return template.split(requested_docs, 1)
+
+        return template
+
+    def _render_single(self, agency, user, requested_docs, **kwargs):
+        """Render the template for a single agency"""
+        if kwargs.get("edited_boilerplate"):
+            # if they edited the boilerplate, make a temporary template
+            template = self.model(template=requested_docs)
+        else:
+            jurisdiction = kwargs.get(
+                "jurisdiction", agency.jurisdiction if agency else None
+            )
+            template = self.filter(jurisdiction=jurisdiction).order_by("pk").first()
+            if template is None:
+                template = self.filter(jurisdiction=None).order_by("pk").first()
+
+        return template.render(agency, user, requested_docs, **kwargs)
+
+    def _render_generic(self, user, requested_docs, **kwargs):
+        """Render the template in a generic way, suitable for more than one agency"""
+        if kwargs.get("edited_boilerplate"):
+            # if they edited the boilerplate, make a temporary template
+            template = self.model(template=requested_docs)
+        else:
+            template = self.filter(jurisdiction=None).order_by("pk").first()
+        return template.render_generic(user, requested_docs, **kwargs)

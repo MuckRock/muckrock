@@ -20,6 +20,7 @@ from muckrock.foia.models import (
     FOIAComposer,
     FOIAFile,
     FOIARequest,
+    FOIATemplate,
     OutboundRequestAttachment,
     RawEmail,
 )
@@ -124,3 +125,23 @@ class OutboundRequestAttachmentFactory(factory.django.DjangoModelFactory):
     ffile = factory.django.FileField(filename=factory.Faker("file_name"))
     date_time_stamp = factory.LazyAttribute(lambda obj: timezone.now())
     sent = False
+
+
+class FOIATemplateFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIATemplate test objects"""
+
+    class Meta:
+        model = FOIATemplate
+
+    name = factory.Sequence("FOIA Template #{}".format)
+    user = factory.SubFactory("muckrock.core.factories.UserFactory")
+    template = (
+        "To Whom It May Concern:\r\n\r\nPursuant to the { law name }, I "
+        "hereby request the following records:\r\n\r\n{ requested docs }\r\n\r\n"
+        "{ waiver }\r\n\r\nIn the event that there are fees, I would be grateful if "
+        "you would inform me of the total charges in advance of fulfilling my request. "
+        "I would prefer the request filled electronically, by e-mail attachment if "
+        "available or CD-ROM if not.\r\n\r\nThank you in advance for your anticipated "
+        "cooperation in this matter. I look forward to receiving your response to this "
+        "request within { days }.\r\n\r\n{ closing }"
+    )

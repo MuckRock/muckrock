@@ -35,7 +35,6 @@ from taggit.managers import TaggableManager
 # MuckRock
 from muckrock import task
 from muckrock.accounts.models import Notification
-from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import (
     EmailAddress,
     EmailCommunication,
@@ -48,6 +47,7 @@ from muckrock.core.utils import (
     clear_cloudfront_cache,
     get_s3_storage_bucket,
 )
+from muckrock.foia.models.templates import FOIATemplate
 from muckrock.foia.querysets import FOIARequestQuerySet
 from muckrock.tags.models import Tag, TaggedItemBase, normalize
 
@@ -1260,9 +1260,9 @@ class FOIARequest(models.Model):
 
     def create_initial_communication(self, from_user, proxy):
         """Create the initial request communication"""
-        text = initial_communication_template(
+        text = FOIATemplate.objects.render(
             [self.agency],
-            from_user.profile.full_name,
+            from_user,
             self.composer.requested_docs,
             edited_boilerplate=self.composer.edited_boilerplate,
             proxy=proxy,

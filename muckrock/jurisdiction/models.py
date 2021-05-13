@@ -214,6 +214,16 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return "10 business days"
 
+    def get_waiver(self):
+        """Get waiver phrase for request language"""
+        if self.waiver:
+            return self.waiver
+        else:
+            return (
+                "The requested documents will be made available to the general "
+                "public, and this request is not being made for commercial purposes."
+            )
+
     class Meta:
         ordering = ["name"]
         unique_together = ("slug", "parent")

@@ -49,6 +49,7 @@ from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
     FOIARequestFactory,
+    FOIATemplateFactory,
 )
 from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.foia.views import (
@@ -1046,6 +1047,7 @@ class TestFOIAComposerViews(TestCase):
         mock_squarelet(self.mocker)
         self.mocker.start()
         self.addCleanup(self.mocker.stop)
+        FOIATemplateFactory.create()
 
     def test_get_create_composer(self):
         """Get the create composer form"""
