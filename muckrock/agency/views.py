@@ -33,8 +33,8 @@ from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
 from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.tasks import mass_import
-from muckrock.agency.utils import initial_communication_template
 from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
+from muckrock.foia.models import FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -138,34 +138,15 @@ def redirect_flag(request, jurisdiction, jidx, slug, idx):
 def boilerplate(request):
     """Return the boilerplate language for requests to the given agency"""
 
-    p_new = re.compile(r"\$new\$[^$]+\$[0-9]+\$")
     p_int = re.compile(r"[0-9]+")
     agency_pks = request.GET.getlist("agencies")
-    new_agency_pks = [a for a in agency_pks if p_new.match(a)]
     other_agency_pks = [a for a in agency_pks if p_int.match(a)]
 
     agencies = Agency.objects.filter(pk__in=other_agency_pks)
-    extra_jurisdictions = Jurisdiction.objects.filter(
-        pk__in=[i.split("$")[3] for i in new_agency_pks]
+
+    intro, outro = FOIATemplate.objects.render(
+        agencies, request.user, None, split=True, html=True
     )
-    if request.user.is_authenticated:
-        user_name = request.user.profile.full_name
-    else:
-        user_name = (
-            '<abbr class="tooltip" title="This will be replaced by your full '
-            'name">{ name }</abbr>'
-        )
-    split_token = "$split$"
-    text = initial_communication_template(
-        agencies,
-        user_name,
-        split_token,
-        extra_jurisdictions=extra_jurisdictions,
-        edited_boilerplate=False,
-        proxy=False,
-        html=True,
-    )
-    intro, outro = text.split(split_token)
     return JsonResponse(
         {"intro": linebreaks(intro.strip()), "outro": linebreaks(outro.strip())}
     )

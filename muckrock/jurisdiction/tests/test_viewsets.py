@@ -12,7 +12,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
 from muckrock.core.factories import UserFactory
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIARequestFactory, FOIATemplateFactory
 from muckrock.jurisdiction.factories import ExemptionFactory, StateJurisdictionFactory
 from muckrock.jurisdiction.serializers import ExemptionSerializer
 from muckrock.jurisdiction.viewsets import ExemptionViewSet, JurisdictionViewSet
@@ -140,6 +140,7 @@ class TestTemplateEndpoint(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.view = JurisdictionViewSet.as_view({"get": "template"})
+        FOIATemplateFactory.create()
 
     def test_template(self):
         """Get the default language for a given jurisdiction"""
