@@ -148,7 +148,9 @@ AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get(
     "AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH
 )
 AWS_MEDIA_CUSTOM_DOMAIN = os.environ.get("MEDIA_CLOUDFRONT_DOMAIN")
-AWS_MEDIA_EXPIRATION_SECONDS = os.environ.get("AWS_MEDIA_EXPIRATION_SECONDS", 432000) # Default is 5 days
+AWS_MEDIA_EXPIRATION_SECONDS = os.environ.get(
+    "AWS_MEDIA_EXPIRATION_SECONDS", 432000
+)  # Default is 5 days
 
 if AWS_MEDIA_BUCKET_NAME == AWS_STORAGE_BUCKET_NAME:
     # Inherit bucket/cloudfront settings from static data if they match
@@ -285,14 +287,7 @@ INSTALLED_APPS = (
     "muckrock.communication",
     "muckrock.portal",
     "muckrock.crowdsource",
-<<<<<<< HEAD
     "actstream",
-||||||| parent of 45cae585f... changes from #75, #76, #78
-    "actstream"
-=======
-    "actstream",
-    "watchman"
->>>>>>> 45cae585f... changes from #75, #76, #78
 )
 
 
