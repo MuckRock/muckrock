@@ -1,6 +1,5 @@
 {% extends 'message/base.html' %}
-{% load static %}
 {% block body %}
-  <p>Your zip archive for the request "{{ foia }}" is ready to download.  It will be automatically deleted in 5 days.</p>
-  <p><a href="{% static file %}">{% static file %}</a></p>
+  <p>Your zip archive for the request "{{ foia }}" is ready to download.  It will be automatically deleted in {{ expiration_in_days }} days.</p>
+  <p><a href="{{ presigned_url }}">Click to Download File</a></p>
 {% endblock %}

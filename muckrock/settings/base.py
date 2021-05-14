@@ -122,6 +122,7 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get(
 AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
     "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
 )
+AWS_AUTOIMPORT_PATH = os.environ.get("AWS_AUTOIMPORT_PATH", "scans/")
 AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
 STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/" if AWS_S3_CUSTOM_DOMAIN else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
 COMPRESS_URL = STATIC_URL
@@ -142,6 +143,7 @@ AWS_S3_MIN_PART_SIZE = int(os.environ.get(
 AWS_MEDIA_BUCKET_NAME = os.environ.get("AWS_MEDIA_BUCKET_NAME", AWS_STORAGE_BUCKET_NAME)
 AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get("AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH)
 AWS_MEDIA_CUSTOM_DOMAIN = os.environ.get("MEDIA_CLOUDFRONT_DOMAIN")
+AWS_MEDIA_EXPIRATION_SECONDS = os.environ.get("AWS_MEDIA_EXPIRATION_SECONDS", 432000) # Default is 5 days
 
 if AWS_MEDIA_BUCKET_NAME == AWS_STORAGE_BUCKET_NAME:
     # Inherit bucket/cloudfront settings from static data if they match
@@ -274,7 +276,8 @@ INSTALLED_APPS = (
     "muckrock.communication",
     "muckrock.portal",
     "muckrock.crowdsource",
-    "actstream"
+    "actstream",
+    "watchman"
 )
 
 

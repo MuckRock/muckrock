@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from datetime import date
 from hashlib import md5
 from time import time
+import logging
 
 # Third Party
 import boto3
@@ -17,6 +18,7 @@ from smart_open.smart_open_lib import smart_open
 # MuckRock
 from muckrock.message.email import TemplateEmail
 
+logger = logging.getLogger(__name__)
 
 class AsyncFileDownloadTask:
     """Base behavior for asynchrnously generating large files for downloading
@@ -52,7 +54,23 @@ class AsyncFileDownloadTask:
 
     def get_context(self):
         """Get context for the notification email"""
-        return {"file": self.file_key}
+
+        s3_client = boto3.client('s3')
+        user_media_expiration = int(settings.AWS_MEDIA_EXPIRATION_SECONDS)
+        user_media_expiration_days = user_media_expiration // (24 * 3600)
+        try:
+            response = s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': settings.AWS_MEDIA_BUCKET_NAME,
+                    'Key': self.file_key
+                },
+                ExpiresIn = user_media_expiration
+            )
+        except ClientError as e:
+            logger.error(e)
+            return None
+        return {"presigned_url": response, "expiration_in_days": user_media_expiration_days}
 
     def send_notification(self):
         """Send the user the link to their file"""
