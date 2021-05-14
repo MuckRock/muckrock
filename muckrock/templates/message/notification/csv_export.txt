@@ -1,6 +1,5 @@
 {% extends 'message/base.txt' %}
-{% load static %}
 {% block body %}
-Your exported CSV file is ready to download.  It will be automatically deleted in 5 days.
-{% static file %}
+Your exported CSV file is ready to download.  It will be automatically deleted in {{ expiration_in_days }} days.
+{{ presigned_url }}
 {% endblock %}

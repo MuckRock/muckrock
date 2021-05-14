@@ -522,7 +522,7 @@ def autoimport():
     def s3_copy(bucket, key_or_pre, dest_name):
         """Copy an s3 key or prefix"""
         if key_or_pre.endswith("/"):
-            for obj in bucket.objects.filter(prefix=key_or_pre):
+            for obj in bucket.objects.filter(Prefix=key_or_pre):
                 if obj.key == key_or_pre:
                     bucket.Object(dest_name).copy_from(
                         CopySource={"Bucket": bucket.name, "Key": obj.key}
@@ -531,7 +531,7 @@ def autoimport():
                 s3_copy(
                     bucket,
                     obj.key,
-                    "%s/%s" % (dest_name, os.path.basename(os.path.normpath(key.name))),
+                    "%s/%s" % (dest_name, os.path.basename(os.path.normpath(obj.key))),
                 )
         else:
             bucket.Object(dest_name).copy_from(
@@ -541,11 +541,11 @@ def autoimport():
     def s3_delete(bucket, key_or_pre):
         """Delete an s3 key or prefix"""
         if key_or_pre.endswith("/"):
-            for obj in bucket.objects.filter(prefix=key_or_pre):
+            for obj in bucket.objects.filter(Prefix=key_or_pre):
                 if obj.key == key_or_pre:
                     obj.delete()
                     continue
-                s3_delete(bucket, key)
+                s3_delete(bucket, obj.key)
         else:
             bucket.Object(key_or_pre).delete()
 
@@ -584,12 +584,13 @@ def autoimport():
 
         new_obj = storage_bucket.Object(full_file_name)
         new_obj.copy_from(
-            CopySource={"Bucket": bucket.name, "Key": key}, ACL="public-read"
+            CopySource={"Bucket": bucket.name, "Key": key}, ACL=settings.AWS_DEFAULT_ACL
         )
 
         foia_file = comm.attach_file(path=full_file_name, name=file_name, now=False)
 
-        if key.size != foia_file.ffile.size:
+        oldfile = bucket.Object(key)
+        if oldfile.content_length != foia_file.ffile.size:
             raise SizeError(key.size, foia_file.ffile.size, foia_file)
 
         log.append(
@@ -599,24 +600,32 @@ def autoimport():
 
     def import_prefix(prefix, bucket, storage_bucket, comm, log):
         """Import a prefix (folder) full of documents"""
-        for obj in bucket.objects.filter(prefix=prefix):
+        for obj in bucket.objects.filter(Prefix=prefix):
             if obj.key == prefix:
                 continue
             if obj.key.endswith("/"):
                 log.append(
                     "ERROR: nested directories not allowed: %s in %s"
-                    % (key.name, prefix.name)
+                    % (obj.key, prefix)
                 )
                 continue
             try:
                 import_key(obj.key, bucket, storage_bucket, comm, log)
             except SizeError as exc:
-                s3_copy(bucket, obj.key, "review/%s" % obj.key[6:])
+                s3_copy(
+                    bucket,
+                    obj.key,
+                    "review/%s" % obj.key.replace(settings.AWS_AUTOIMPORT_PATH, ""),
+                )
                 exc.args[2].delete()  # delete the foia file
                 comm.delete()
                 log.append(
                     "ERROR: %s was %s bytes and after uploaded was %s bytes - retry"
-                    % (obj.key[6:], exc.args[0], exc.args[1])
+                    % (
+                        obj.key.replace(settings.AWS_AUTOIMPORT_PATH, ""),
+                        exc.args[0],
+                        exc.args[1],
+                    )
                 )
 
     def process(log):
@@ -625,11 +634,11 @@ def autoimport():
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(settings.AWS_AUTOIMPORT_BUCKET_NAME)
         storage_bucket = s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
-        for obj in bucket.objects.filter(prefix="scans/"):
-            if obj.key == "scans/":
+        for obj in bucket.objects.filter(Prefix=settings.AWS_AUTOIMPORT_PATH):
+            if obj.key == settings.AWS_AUTOIMPORT_PATH:
                 continue
             # strip off 'scans/'
-            file_name = obj.key[6:]
+            file_name = obj.key.replace(settings.AWS_AUTOIMPORT_PATH, "")
 
             try:
                 foia_pks, file_datetime = parse_name(file_name)
@@ -835,28 +844,6 @@ def zip_request(foia_pk, user_pk):
     ZipRequest(user_pk, foia_pk).run()
 
 
-@periodic_task(
-    run_every=crontab(hour=1, minute=0), name="muckrock.foia.tasks.clean_export_csv"
-)
-def clean_export_csv():
-    """Clean up exported CSVs and request zips that are more than 5 days old"""
-
-    p_csv = re.compile(
-        r"(\d{4})/(\d{2})/(\d{2})/[0-9a-f]+/(?:requests?|results|agencies)\.(?:csv|zip)"
-    )
-    s3 = boto3.resource("s3")
-    bucket = s3.Bucket(settings.AWS_MEDIA_BUCKET_NAME)
-    older_than = date.today() - timedelta(5)
-    for prefix in ["exported_csv/", "zip_request/", "agency_mass_import/"]:
-        for key in bucket.list(prefix=prefix):
-            file_name = key.name[len(prefix) :]
-            m_csv = p_csv.match(file_name)
-            if m_csv:
-                file_date = date(*(int(i) for i in m_csv.groups()))
-                if file_date < older_than:
-                    obj.delete()
-
-
 @task(max_retries=10, name="muckrock.foia.tasks.foia_send_email")
 def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     """Send outgoing request emails asynchrnously"""
@@ -907,6 +894,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             error_msg=error_msg,
             **extra,
         )
+
     if category == "p":
         address = comm.foia.agency.get_addresses("check").first()
         if address is None:
