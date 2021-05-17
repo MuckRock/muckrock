@@ -87,10 +87,10 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
         if not self.files:
             return []
         files = self.files.getlist("files")
-        for _file in files:
-            content_type = _file.content_type.split("/")[0]
+        for file_ in files:
+            content_type = file_.content_type.split("/")[0]
             if content_type in ALLOWED_CONTENT_TYPES:
-                if _file._size > MAX_UPLOAD_SIZE:
+                if file_.size > MAX_UPLOAD_SIZE:
                     raise forms.ValidationError("This file is too large.")
             else:
                 raise forms.ValidationError("Unsupported filetype.")
