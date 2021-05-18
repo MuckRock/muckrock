@@ -273,6 +273,9 @@ class Detail(DetailView):
         context["cc_emails"] = json.dumps([str(e) for e in self.foia.cc_emails.all()])
         context["files"] = self.foia.get_files().select_related("comm__foia")[:50]
 
+        communications = [
+            (c.datetime, "communication", c) for c in self.foia.communications.all()
+        ]
         notes = [
             (n.datetime, "note", n)
             for n in self.foia.notes.select_related("author").all()
@@ -283,6 +286,7 @@ class Detail(DetailView):
             .select_related("user__profile")
             .prefetch_related("communication__mails__events")
         ]
+        context["communications"] = [(t, v) for _, t, v in merge(communications, notes)]
         context["notes"] = [(t, v) for _, t, v in merge(notes, checks)]
 
     def _get_date_context_data(self, context):

@@ -288,7 +288,7 @@ $request-breakpoint: 768px;
     }
 }
 
-.request .notes {
+.request .notes, .request .communications {
 
     .notes-controls {
         @include display(flex);
