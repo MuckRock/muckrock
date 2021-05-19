@@ -3,8 +3,8 @@ Cache classes that extend S3, for asset compression
 """
 
 # Django
-from django.core.files.storage import get_storage_class
 from django.conf import settings
+from django.core.files.storage import get_storage_class
 
 # Third Party
 from storages.backends.s3boto3 import S3Boto3Storage
@@ -37,6 +37,7 @@ class MediaRootS3BotoStorage(S3Boto3Storage):
     S3 storage backend for user-uploaded media files. 
     (It may or may not use the same bucket as static files.)
     """
+
     file_overwrite = False
     bucket_name = settings.AWS_MEDIA_BUCKET_NAME
     querystring_auth = settings.AWS_MEDIA_QUERYSTRING_AUTH

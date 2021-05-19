@@ -29,11 +29,11 @@ from datetime import date, datetime, time, timedelta
 from random import randint
 
 # Third Party
+import boto3
 import dill as pickle
 import lob
 import numpy as np
 import requests
-import boto3
 from constance import config
 from django_mailgun import MailgunAPIError
 from documentcloud import DocumentCloud
@@ -233,8 +233,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
 
 
 @task(
-    max_retries=10,
-    name="muckrock.foia.tasks.composer_delayed_submit",
+    max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit",
 )
 def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
@@ -528,7 +527,7 @@ def autoimport():
             for obj in bucket.objects.filter(Prefix=key_or_pre):
                 if obj.key == key_or_pre:
                     bucket.Object(dest_name).copy_from(
-                        CopySource={ 'Bucket': bucket.name, 'Key': obj.key }
+                        CopySource={"Bucket": bucket.name, "Key": obj.key}
                     )
                     continue
                 s3_copy(
@@ -538,7 +537,7 @@ def autoimport():
                 )
         else:
             bucket.Object(dest_name).copy_from(
-                CopySource={ 'Bucket': bucket.name, 'Key': key_or_pre }
+                CopySource={"Bucket": bucket.name, "Key": key_or_pre}
             )
 
     def s3_delete(bucket, key_or_pre):
@@ -586,7 +585,9 @@ def autoimport():
         full_file_name = default_storage.get_available_name(full_file_name)
 
         new_obj = storage_bucket.Object(full_file_name)
-        new_obj.copy_from(CopySource={ 'Bucket': bucket.name, 'Key': key}, ACL=settings.AWS_DEFAULT_ACL)
+        new_obj.copy_from(
+            CopySource={"Bucket": bucket.name, "Key": key}, ACL=settings.AWS_DEFAULT_ACL
+        )
 
         foia_file = comm.attach_file(path=full_file_name, name=file_name, now=False)
 
@@ -613,12 +614,20 @@ def autoimport():
             try:
                 import_key(obj.key, bucket, storage_bucket, comm, log)
             except SizeError as exc:
-                s3_copy(bucket, obj.key, "review/%s" % obj.key.replace(settings.AWS_AUTOIMPORT_PATH, ""))
+                s3_copy(
+                    bucket,
+                    obj.key,
+                    "review/%s" % obj.key.replace(settings.AWS_AUTOIMPORT_PATH, ""),
+                )
                 exc.args[2].delete()  # delete the foia file
                 comm.delete()
                 log.append(
                     "ERROR: %s was %s bytes and after uploaded was %s bytes - retry"
-                    % (obj.key.replace(settings.AWS_AUTOIMPORT_PATH, ""), exc.args[0], exc.args[1])
+                    % (
+                        obj.key.replace(settings.AWS_AUTOIMPORT_PATH, ""),
+                        exc.args[0],
+                        exc.args[1],
+                    )
                 )
 
     def process(log):
@@ -836,6 +845,7 @@ def zip_request(foia_pk, user_pk):
     """Send a user a zip download of their request"""
     ZipRequest(user_pk, foia_pk).run()
 
+
 @task(max_retries=10, name="muckrock.foia.tasks.foia_send_email")
 def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     """Send outgoing request emails asynchrnously"""
@@ -886,6 +896,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             error_msg=error_msg,
             **extra,
         )
+
     if category == "p":
         address = comm.foia.agency.get_addresses("check").first()
         if address is None:

@@ -23,16 +23,22 @@ urlpatterns = [
     ),
     url(r"^success_comm/$", views.success_comm, name="fine-uploader-success-comm"),
     url(
-        r"^preupload_request/$", views.preupload_request, name="fine-uploader-preupload-request"
+        r"^preupload_request/$",
+        views.preupload_request,
+        name="fine-uploader-preupload-request",
     ),
     url(
         r"^preupload_composer/$",
         views.preupload_composer,
         name="fine-uploader-preupload-composer",
     ),
-    url(r"^preupload_comm/$", views.preupload_comm, name="fine-uploader-preupload-comm"),
     url(
-        r"^delete_request/?(?P<idx>\d*)$", views.delete_request, name="fine-uploader-delete-request"
+        r"^preupload_comm/$", views.preupload_comm, name="fine-uploader-preupload-comm"
+    ),
+    url(
+        r"^delete_request/?(?P<idx>\d*)$",
+        views.delete_request,
+        name="fine-uploader-delete-request",
     ),
     url(
         r"^delete_composer/?(?P<idx>\d*)$",

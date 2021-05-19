@@ -266,18 +266,18 @@ def clear_cloudfront_cache(file_names):
     # find the current distribution
     distributions = [
         d
-        for d in cloudfront.list_distributions()['DistributionList']['Items']
-        if settings.AWS_S3_CUSTOM_DOMAIN in d['Aliases']['Items']
+        for d in cloudfront.list_distributions()["DistributionList"]["Items"]
+        if settings.AWS_S3_CUSTOM_DOMAIN in d["Aliases"]["Items"]
     ]
     if distributions:
         cloudfront.create_invalidation(
-            DistributionId=distributions[0]['Id'], 
+            DistributionId=distributions[0]["Id"],
             InvalidationBatch={
-                'Paths': {
-                    'Quantity': len(file_names),
-                    'Items': [ '/'+file for file in file_names ]
+                "Paths": {
+                    "Quantity": len(file_names),
+                    "Items": ["/" + file for file in file_names],
                 },
-                'CallerReference': str(int(time.time()))
+                "CallerReference": str(int(time.time())),
             },
         )
 

@@ -10,8 +10,8 @@ import csv
 import re
 
 # Third Party
-from smart_open.smart_open_lib import smart_open
 from localflavor.us.us_states import STATE_CHOICES
+from smart_open.smart_open_lib import smart_open
 
 # MuckRock
 from muckrock.communication.models import Address

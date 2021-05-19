@@ -6,10 +6,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 # Standard Library
+import logging
 from datetime import date
 from hashlib import md5
 from time import time
-import logging
 
 # Third Party
 import boto3
@@ -19,6 +19,7 @@ from smart_open.smart_open_lib import smart_open
 from muckrock.message.email import TemplateEmail
 
 logger = logging.getLogger(__name__)
+
 
 class AsyncFileDownloadTask:
     """Base behavior for asynchrnously generating large files for downloading
@@ -55,22 +56,22 @@ class AsyncFileDownloadTask:
     def get_context(self):
         """Get context for the notification email"""
 
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client("s3")
         user_media_expiration = int(settings.AWS_MEDIA_EXPIRATION_SECONDS)
         user_media_expiration_days = user_media_expiration // (24 * 3600)
         try:
             response = s3_client.generate_presigned_url(
-                'get_object',
-                Params={
-                    'Bucket': settings.AWS_MEDIA_BUCKET_NAME,
-                    'Key': self.file_key
-                },
-                ExpiresIn = user_media_expiration
+                "get_object",
+                Params={"Bucket": settings.AWS_MEDIA_BUCKET_NAME, "Key": self.file_key},
+                ExpiresIn=user_media_expiration,
             )
         except ClientError as e:
             logger.error(e)
             return None
-        return {"presigned_url": response, "expiration_in_days": user_media_expiration_days}
+        return {
+            "presigned_url": response,
+            "expiration_in_days": user_media_expiration_days,
+        }
 
     def send_notification(self):
         """Send the user the link to their file"""
@@ -89,8 +90,8 @@ class AsyncFileDownloadTask:
             self.key, self.mode, s3_min_part_size=settings.AWS_S3_MIN_PART_SIZE
         ) as out_file:
             self.generate_file(out_file)
-        
-        s3 = boto3.resource('s3')
+
+        s3 = boto3.resource("s3")
         obj = s3.ObjectAcl(self.bucket, self.file_key)
         obj.put(ACL=settings.AWS_DEFAULT_ACL)
         self.send_notification()

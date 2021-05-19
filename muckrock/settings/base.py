@@ -12,12 +12,14 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+
 def boolcheck(setting):
     """Turn env var into proper bool"""
     if isinstance(setting, str):
         return setting.lower() in ("yes", "true", "t", "1")
     else:
         return bool(setting)
+
 
 # monkey patch celery to prevent Timed out waiting for UP message errors
 asynpool.PROC_ALIVE_TIMEOUT = 60.0
@@ -117,14 +119,17 @@ COMPRESS_STORAGE = STATICFILES_STORAGE
 CLEAN_S3_ON_FOIA_DELETE = True
 
 # Settings for static bucket storage
-AWS_STORAGE_BUCKET_NAME = os.environ.get(
-    "AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
 AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
     "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
 )
 AWS_AUTOIMPORT_PATH = os.environ.get("AWS_AUTOIMPORT_PATH", "scans/")
 AWS_S3_CUSTOM_DOMAIN = os.environ.get("CLOUDFRONT_DOMAIN")
-STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/" if AWS_S3_CUSTOM_DOMAIN else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
+STATIC_URL = (
+    f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+    if AWS_S3_CUSTOM_DOMAIN
+    else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
+)
 COMPRESS_URL = STATIC_URL
 COMPRESS_ENABLED = True
 AWS_QUERYSTRING_AUTH = False
@@ -134,16 +139,18 @@ AWS_HEADERS = {
     "Cache-Control": "max-age=94608000",
 }
 AWS_DEFAULT_ACL = os.environ.get("AWS_STORAGE_DEFAULT_ACL", "public-read")
-AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get(
-    "AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
-AWS_S3_MIN_PART_SIZE = int(os.environ.get(
-    "AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
+AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get("AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
+AWS_S3_MIN_PART_SIZE = int(os.environ.get("AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
 
 # Set these ENV vars for a separate user-data storage bucket (otherwise matches storage settings above)
 AWS_MEDIA_BUCKET_NAME = os.environ.get("AWS_MEDIA_BUCKET_NAME", AWS_STORAGE_BUCKET_NAME)
-AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get("AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH)
+AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get(
+    "AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH
+)
 AWS_MEDIA_CUSTOM_DOMAIN = os.environ.get("MEDIA_CLOUDFRONT_DOMAIN")
-AWS_MEDIA_EXPIRATION_SECONDS = os.environ.get("AWS_MEDIA_EXPIRATION_SECONDS", 432000) # Default is 5 days
+AWS_MEDIA_EXPIRATION_SECONDS = os.environ.get(
+    "AWS_MEDIA_EXPIRATION_SECONDS", 432000
+)  # Default is 5 days
 
 if AWS_MEDIA_BUCKET_NAME == AWS_STORAGE_BUCKET_NAME:
     # Inherit bucket/cloudfront settings from static data if they match
@@ -151,7 +158,11 @@ if AWS_MEDIA_BUCKET_NAME == AWS_STORAGE_BUCKET_NAME:
     AWS_MEDIA_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN
 else:
     # Infer the media url from the custom domain or bucket name settings
-    MEDIA_URL = f"https://{AWS_MEDIA_CUSTOM_DOMAIN}/" if AWS_MEDIA_CUSTOM_DOMAIN else f"https://{AWS_MEDIA_BUCKET_NAME}.s3.amazonaws.com/"
+    MEDIA_URL = (
+        f"https://{AWS_MEDIA_CUSTOM_DOMAIN}/"
+        if AWS_MEDIA_CUSTOM_DOMAIN
+        else f"https://{AWS_MEDIA_BUCKET_NAME}.s3.amazonaws.com/"
+    )
 
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -211,7 +222,7 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 
 ROOT_URLCONF = "muckrock.core.urls"
 
-INSTALLED_APPS = (  
+INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -276,7 +287,7 @@ INSTALLED_APPS = (
     "muckrock.communication",
     "muckrock.portal",
     "muckrock.crowdsource",
-    "actstream"
+    "actstream",
 )
 
 
@@ -289,8 +300,7 @@ def show_toolbar(request):
     return False
 
 
-DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": show_toolbar, "JQUERY_URL": ""}
+DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, "JQUERY_URL": ""}
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
@@ -432,7 +442,9 @@ MAILGUN_ACCESS_KEY = os.environ.get("MAILGUN_ACCESS_KEY")
 MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME", "requests.muckrock.com")
 
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
 
 DOCUMENTCLOUD_BETA_USERNAME = os.environ.get("DOCUMENTCLOUD_BETA_USERNAME")
 DOCUMENTCLOUD_BETA_PASSWORD = os.environ.get("DOCUMENTCLOUD_BETA_PASSWORD")
@@ -512,8 +524,7 @@ SOUTH_MIGRATION_MODULES = {
 ROBOTS_CACHE_TIMEOUT = 60 * 60 * 24
 ROBOTS_SITE_BY_REQUEST = True
 
-PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(
-    SITE_ROOT, "../requirements.txt")
+PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(SITE_ROOT, "../requirements.txt")
 
 TAGGIT_CASE_INSENSITIVE = True
 TAGGIT_TAGS_FROM_STRING = "muckrock.tags.models.parse_tags"
@@ -529,8 +540,7 @@ ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
 MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.muckrock.com")
-FOIAMACHINE_URL = os.environ.get(
-    "FOIAMACHINE_URL", "http://dev.foiamachine.org")
+FOIAMACHINE_URL = os.environ.get("FOIAMACHINE_URL", "http://dev.foiamachine.org")
 SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
 DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "http://www.dev.documentcloud.org")
 DOCCLOUD_EMBED_URL = os.environ.get("DOCCLOUD_EMBED_URL", DOCCLOUD_URL)
@@ -544,8 +554,7 @@ DOCCLOUD_ASSET_URL = os.environ.get(
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r"^/api(_v\d)?/.*$"
 # Limit CORS origin to just FOIA machine
-CORS_ORIGIN_REGEX_WHITELIST = (
-    r"^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$",)
+CORS_ORIGIN_REGEX_WHITELIST = (r"^(https?://)?(\w+\.)?foiamachine\.org(:\d+)?$",)
 CORS_ALLOW_CREDENTIALS = True
 
 # Django Filter settings
@@ -569,11 +578,22 @@ ALLOWED_FILE_MIMES = [
     "text/plain",
     "text/csv",
     "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ]
-ALLOWED_FILE_EXTS = ["pdf", "jpg", "png", "tif", 
-                     "doc", "docx", "odt", "html", "txt",
-                     "csv", "xls", "xlsx"]
+ALLOWED_FILE_EXTS = [
+    "pdf",
+    "jpg",
+    "png",
+    "tif",
+    "doc",
+    "docx",
+    "odt",
+    "html",
+    "txt",
+    "csv",
+    "xls",
+    "xlsx",
+]
 
 # for django-phonenumber-field
 PHONENUMBER_DB_FORMAT = "INTERNATIONAL"
@@ -691,8 +711,7 @@ HIJACK_AUTHORIZE_STAFF_TO_HIJACK_STAFF = True
 
 MULTI_REVIEW_AMOUNT = 2
 
-MIXPANEL_TOKEN = os.environ.get(
-    "MIXPANEL_TOKEN", "f0342a5341ddad56dfa73505aa604c74")
+MIXPANEL_TOKEN = os.environ.get("MIXPANEL_TOKEN", "f0342a5341ddad56dfa73505aa604c74")
 
 ZOHO_TOKEN = os.environ.get("ZOHO_TOKEN")
 ZOHO_URL = os.environ.get("ZOHO_URL", "https://desk.zoho.com/api/v1/")
@@ -705,8 +724,7 @@ ZOHO_DEPT_IDS = {
 
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_SQUARELET_KEY = os.environ.get("SQUARELET_KEY")
-SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get(
-    "SQUARELET_SECRET")
+SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get("SQUARELET_SECRET")
 SOCIAL_AUTH_SQUARELET_SCOPE = ["uuid", "organizations", "preferences"]
 SOCIAL_AUTH_SQUARELET_AUTH_EXTRA_ARGUMENTS = {"intent": "muckrock"}
 SOCIAL_AUTH_TRAILING_SLASH = False
@@ -737,8 +755,7 @@ THUMBNAIL_PRESERVE_FORMAT = True
 THUMBNAIL_PRESERVE_EXTENSIONS = ("png",)
 
 # Google Tag Manager
-USE_GOOGLE_TAG_MANAGER = boolcheck(
-    os.environ.get("USE_GOOGLE_TAG_MANAGER", False))
+USE_GOOGLE_TAG_MANAGER = boolcheck(os.environ.get("USE_GOOGLE_TAG_MANAGER", False))
 
 # Plaid allows programtic access to our bank account transactions
 PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")

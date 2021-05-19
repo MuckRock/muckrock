@@ -666,7 +666,7 @@ class PaymentInfoTaskList(TaskList):
             address, _created = Address.objects.get_or_create(
                 # set address override to blank for uniqueness purposes
                 address="",
-                **form.cleaned_data
+                **form.cleaned_data,
             )
             AgencyAddress.objects.create(
                 agency=agency, address=address, request_type="check"
@@ -737,15 +737,12 @@ def snail_mail_bulk_pdf(request):
 
     # Generate GET/HEAD presigned URLs for the client
     urls = {}
-    s3 = boto3.client('s3')
-    for action in ['head', 'get']:
-        urls[f'{action}_url'] = s3.generate_presigned_url(
-            ClientMethod=f'{action}_object', 
-            Params={
-                'Bucket': settings.AWS_MEDIA_BUCKET_NAME, 
-                'Key': pdf_name
-            },
-            ExpiresIn=3600
+    s3 = boto3.client("s3")
+    for action in ["head", "get"]:
+        urls[f"{action}_url"] = s3.generate_presigned_url(
+            ClientMethod=f"{action}_object",
+            Params={"Bucket": settings.AWS_MEDIA_BUCKET_NAME, "Key": pdf_name},
+            ExpiresIn=3600,
         )
 
     return JsonResponse(urls)
