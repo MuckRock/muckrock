@@ -278,7 +278,6 @@ def _start_chunked_upload(key, content_type):
     # Return a subset of keys from boto3 response to the client
     response_keys = ["Key", "Bucket", "UploadId"]
     return {"fields": {key.lower(): response[key] for key in response_keys}}
-    return {"fields": {new: response[old] for old, new in key_map.items()}}
 
 
 def _build_presigned_chunk(key, upload_id, chunk_index):

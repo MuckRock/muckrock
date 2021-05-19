@@ -13,15 +13,20 @@ from django_mailgun import MailgunBackend
 # MuckRock
 from muckrock.settings.heroku import *
 
-INSTALLED_APPS += ("bandit","silk",)
+INSTALLED_APPS += (
+    "bandit",
+    "silk",
+)
 
 BANDIT_EMAIL = os.environ.get("BANDIT_EMAIL", "staging@muckrock.com")
 BANDIT_WHITELIST = [
     e.strip() for e in os.environ.get("BANDIT_WHITELIST", "").split(",") if e.strip()
 ]
 
+
 class HijackMailgunBackend(HijackBackendMixin, MailgunBackend):
     """This backend hijacks all emails and sends them via Mailgun"""
+
 
 EMAIL_BACKEND = "muckrock.settings.staging.HijackMailgunBackend"
 
