@@ -131,10 +131,10 @@ class TestFineUploaderDeleteView(TestCase):
 
         request_factory = RequestFactory()
         request = request_factory.post(
-            reverse("fine-uploader-delete-request"), {"key": attm.ffile.name}
+            reverse("fine-uploader-delete-request", kwargs={"idx": attm.pk})
         )
         request.user = attm.user
-        response = views.delete_request(request)
+        response = views.delete_request(request, attm.pk)
         eq_(response.status_code, 200)
         assert_false(OutboundRequestAttachment.objects.filter(pk=attm.pk).exists())
 
@@ -142,10 +142,10 @@ class TestFineUploaderDeleteView(TestCase):
         """Test a post to the delete view with a non-existent file"""
         request_factory = RequestFactory()
         request = request_factory.post(
-            reverse("fine-uploader-delete-request"), {"key": "foobar"}
+            reverse("fine-uploader-delete-request", kwargs={"idx": 123456})
         )
         request.user = UserFactory()
-        response = views.delete_request(request)
+        response = views.delete_request(request, 123456)
         eq_(response.status_code, 400)
 
     def test_delete_bad_user(self):
@@ -153,12 +153,12 @@ class TestFineUploaderDeleteView(TestCase):
         attm = OutboundRequestAttachmentFactory()
         request_factory = RequestFactory()
         request = request_factory.post(
-            reverse("fine-uploader-success-request"), {"key": attm.ffile.name}
+            reverse("fine-uploader-delete-request", kwargs={"idx": attm.pk})
         )
         request.user = UserFactory()
         attm.user = request.user
         attm.save()
-        response = views.delete_request(request)
+        response = views.delete_request(request, attm.pk)
         eq_(response.status_code, 403)
 
 
