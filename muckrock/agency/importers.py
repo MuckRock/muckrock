@@ -50,6 +50,7 @@ LAST_UPDATE = 21
 
 def import_schools(file_name):
     """Import schools from spreadsheet"""
+    # pylint: disable=too-many-locals
     s3_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{file_name}"
     school_district = AgencyType.objects.get(name="School District")
     with smart_open(s3_path) as tmp_file:

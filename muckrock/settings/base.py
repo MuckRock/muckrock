@@ -142,7 +142,8 @@ AWS_DEFAULT_ACL = os.environ.get("AWS_STORAGE_DEFAULT_ACL", "public-read")
 AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get("AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
 AWS_S3_MIN_PART_SIZE = int(os.environ.get("AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
 
-# Set these ENV vars for a separate user-data storage bucket (otherwise matches storage settings above)
+# Set these ENV vars for a separate user-data storage bucket
+# (otherwise matches storage settings above)
 AWS_MEDIA_BUCKET_NAME = os.environ.get("AWS_MEDIA_BUCKET_NAME", AWS_STORAGE_BUCKET_NAME)
 AWS_MEDIA_QUERYSTRING_AUTH = os.environ.get(
     "AWS_MEDIA_QUERYSTRING_AUTH", AWS_QUERYSTRING_AUTH

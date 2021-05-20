@@ -25,7 +25,7 @@ import os
 import os.path
 import re
 import sys
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time
 from random import randint
 
 # Third Party

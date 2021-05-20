@@ -34,7 +34,7 @@ class CachedS3Boto3Storage(S3Boto3Storage):
 
 class MediaRootS3BotoStorage(S3Boto3Storage):
     """
-    S3 storage backend for user-uploaded media files. 
+    S3 storage backend for user-uploaded media files.
     (It may or may not use the same bucket as static files.)
     """
 
