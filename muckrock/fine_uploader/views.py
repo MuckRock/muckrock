@@ -3,7 +3,6 @@
 # Django
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.http import (
     HttpResponse,
@@ -61,7 +60,7 @@ def login_or_agency_required(function):
     return wrapper
 
 
-def _complete_chunked_upload(key, uploadId, chunks):
+def _complete_chunked_upload(key, upload_id, chunks):
     """
     Merges all parts of a multipart upload into the final file
     """
@@ -70,7 +69,7 @@ def _complete_chunked_upload(key, uploadId, chunks):
         Bucket=settings.AWS_MEDIA_BUCKET_NAME,
         Key=key,
         MultipartUpload={"Parts": parts},
-        UploadId=uploadId,
+        UploadId=upload_id,
     )
 
 
@@ -88,12 +87,12 @@ def _success(request, model, attachment_model, fk_name):
         return HttpResponseBadRequest()
 
     if request.POST.get("chunked") == "true":
-        uploadId = request.POST.get("uploadId")
+        upload_id = request.POST.get("uploadId")
         chunks = json.loads(request.POST.get("etags"))
-        if not (key and uploadId and chunks):
+        if not (key and upload_id and chunks):
             return HttpResponseBadRequest()
         # Merge all the chunks into the final file
-        _complete_chunked_upload(key, uploadId, chunks)
+        _complete_chunked_upload(key, upload_id, chunks)
 
     attachment = attachment_model(
         user=request.user, date_time_stamp=timezone.now(), **{fk_name: foia}
@@ -132,12 +131,12 @@ def success_comm(request):
         return HttpResponseBadRequest()
 
     if request.POST.get("chunked") == "true":
-        uploadId = request.POST.get("uploadId")
+        upload_id = request.POST.get("uploadId")
         chunks = json.loads(request.POST.get("etags"))
-        if not (key and uploadId and chunks):
+        if not (key and upload_id and chunks):
             return HttpResponseBadRequest()
         # Merge all the chunks into the final file
-        _complete_chunked_upload(key, uploadId, chunks)
+        _complete_chunked_upload(key, upload_id, chunks)
 
     attachment = comm.attach_file(
         path=request.POST["key"],

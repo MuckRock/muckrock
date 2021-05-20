@@ -25,7 +25,7 @@ import os
 import os.path
 import re
 import sys
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time
 from random import randint
 
 # Third Party
@@ -232,9 +232,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
         )
 
 
-@task(
-    max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit",
-)
+@task(max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit")
 def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     # pylint: disable=unused-argument

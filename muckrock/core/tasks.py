@@ -7,12 +7,14 @@ from django.contrib.auth.models import User
 
 # Standard Library
 import logging
+import sys
 from datetime import date
 from hashlib import md5
 from time import time
 
 # Third Party
 import boto3
+from botocore.exceptions import ClientError
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -65,8 +67,8 @@ class AsyncFileDownloadTask:
                 Params={"Bucket": settings.AWS_MEDIA_BUCKET_NAME, "Key": self.file_key},
                 ExpiresIn=user_media_expiration,
             )
-        except ClientError as e:
-            logger.error(e)
+        except ClientError as exc:
+            logger.error(exc, exc_info=sys.exc_info())
             return None
         return {
             "presigned_url": response,
