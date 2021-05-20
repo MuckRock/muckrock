@@ -264,6 +264,7 @@ INSTALLED_APPS = (
     "opensearch",
     "dashing",
     "constance",
+    "constance.backends.database",
     "django_extensions",
     "social_django",
     "muckrock.accounts",
@@ -616,6 +617,7 @@ DASHING = {
 }
 
 
+CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
     [
