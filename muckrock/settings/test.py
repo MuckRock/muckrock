@@ -49,3 +49,5 @@ warnings.filterwarnings(
     RuntimeWarning,
     r"django\.db\.models\.fields",
 )
+
+CLEAN_S3_ON_FOIA_DELETE = False

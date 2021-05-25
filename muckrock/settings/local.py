@@ -13,16 +13,16 @@ DEBUG = True
 # Loads static files locally
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 STATIC_URL = "/static/"
-COMPRESS_ENABLED = False
 
 MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
 MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
 
 INSTALLED_APPS += ("silk",)
 
-SILKY_PYTHON_PROFILER = False
-SILKY_PYTHON_PROFILER_BINARY = False
-SILKY_META = False
+USE_SILKY = boolcheck(os.environ.get("USE_SILKY", True))
+SILKY_PYTHON_PROFILER = USE_SILKY
+SILKY_PYTHON_PROFILER_BINARY = USE_SILKY
+SILKY_META = USE_SILKY
 
 DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.versions.VersionsPanel",
@@ -72,7 +72,6 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 QUERYCOUNT = {"DISPLAY_DUPLICATES": 10}
 
-COMPRESS_ENABLED = False
 CACHE_DEBUG = False
 if CACHE_DEBUG:
     CACHES["default"] = {
