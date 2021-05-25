@@ -465,9 +465,6 @@ SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 PUBLICATION_NAME = "MuckRock"
 PUBLICATION_TIME_ZONE = "-05:00"
 
-# Register database schemes in URLs.
-# urllib.parse.uses_netloc.append("postgres")
-
 url = urllib.parse.urlparse(
     os.environ.get("DATABASE_URL", "postgres://vagrant@localhost/muckrock")
 )
