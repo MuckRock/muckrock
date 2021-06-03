@@ -431,10 +431,6 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "muckrock-devel2")
-AWS_AUTOIMPORT_BUCKET_NAME = os.environ.get(
-    "AWS_AUTOIMPORT_BUCKET_NAME", "muckrock-autoimprot-devel"
-)
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")
