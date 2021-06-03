@@ -23,7 +23,6 @@ import boto3
 import botocore.exceptions
 
 # MuckRock
-from muckrock.core.storage import MediaRootS3BotoStorage
 from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
