@@ -114,7 +114,7 @@ pycryptodomex==3.6.4      # via pyjwkest
 pyembed==1.3.3
 pygments==2.2.0           # via ipython
 pyjwkest==1.4.0
-pyjwt==1.6.4              # via social-auth-core
+pyjwt==1.7.1              # via social-auth-core
 pylibmc==1.5.1            # via django-pylibmc
 pymdown-extensions==7.1
 pyparsing==2.4.7          # via packaging
