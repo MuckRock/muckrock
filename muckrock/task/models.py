@@ -673,7 +673,15 @@ class FlaggedTask(Task):
         )
 
         description = self.text
-        tags = ["flag", self.category.replace(" ", "_")]
+        tag = self.category.replace(" ", "_")
+        # automatically extend no response tags with the acknowledgment
+        # status of the foia request
+        if tag == "no_response" and self.foia:
+            if foia.has_ack():
+                tag += "_ack"
+            else:
+                tag += "_no_ack"
+        tags = ["flag", tag]
 
         for obj_name in ["foia", "agency", "jurisdiction"]:
             obj = getattr(self, obj_name)

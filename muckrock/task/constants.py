@@ -16,8 +16,12 @@ PUBLIC_FLAG_CATEGORIES = [
         "The agency has indicated that this request should be directed to "
         "another agency.",
     ),
-    ("missing documents", "I should have received documents for this request."),
-    ("form", "The agency has asked that you use a form."),
+    (
+        "missing documents",
+        "The agency mailed documents but I do not see them on this request",
+    ),
+    ("portal help", "I need help with a portal, link or login"),
+    ("form", "The agency has asked that I fill out or sign a PDF form."),
     ("follow-up complaints", "Agency is complaining about follow-up messages."),
     ("appeal", "Should I appeal this response?"),
     ("proxy", "The agency denied the request due to an in-state citzenship law."),
