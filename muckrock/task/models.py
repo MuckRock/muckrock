@@ -677,7 +677,7 @@ class FlaggedTask(Task):
         # automatically extend no response tags with the acknowledgment
         # status of the foia request
         if tag == "no_response" and self.foia:
-            if foia.has_ack():
+            if self.foia.has_ack():
                 tag += "_ack"
             else:
                 tag += "_no_ack"
