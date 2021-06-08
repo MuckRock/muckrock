@@ -346,7 +346,7 @@ def _preupload(request, model, id_name=None):
         not (request.user and request.user.has_perm("foia.unlimited_attachment_size"))
         and not content_type in settings.ALLOWED_FILE_MIMES
     ):
-        return JsonResponse({ "error": "Invalid file type" }, status=400)
+        return JsonResponse({"error": "Invalid file type"}, status=400)
 
     if request.POST.get("chunked") == "true":
         response_data = _start_chunked_upload(key, content_type)
