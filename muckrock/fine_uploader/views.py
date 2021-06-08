@@ -340,7 +340,11 @@ def _preupload(request, model, id_name=None):
 
     # Validate MIME type
     content_type = request.POST.get("type")
-    if not content_type in settings.ALLOWED_FILE_MIMES:
+    # those with unlimited attachment size permission may upload any file type
+    if (
+        not request.user.has_perm("foia.unlimited_attachment_size")
+        and not content_type in settings.ALLOWED_FILE_MIMES
+    ):
         return JsonResponse({"error": "Invalid file type"}, status=400)
 
     if request.POST.get("chunked") == "true":
