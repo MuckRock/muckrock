@@ -12,6 +12,7 @@ from reversion.admin import VersionAdmin
 # MuckRock
 from muckrock.communication.models import (
     Address,
+    Check,
     EmailAddress,
     EmailCommunication,
     EmailError,
@@ -230,9 +231,41 @@ class AddressAdmin(VersionAdmin):
     )
 
 
+class CheckAdmin(CommunicationLinkMixin, VersionAdmin):
+    """Check admin"""
+
+    search_fields = ["number"]
+    list_display = [
+        "number",
+        "agency",
+        "amount",
+        "user",
+        "created_datetime",
+        "deposit_date",
+    ]
+    fields = [
+        "number",
+        "agency",
+        "amount",
+        "comm_link",
+        "user",
+        "created_datetime",
+        "deposit_date",
+    ]
+    readonly_fields = [
+        "number",
+        "agency",
+        "amount",
+        "comm_link",
+        "user",
+        "created_datetime",
+    ]
+
+
 admin.site.register(EmailCommunication, EmailCommunicationAdmin)
 admin.site.register(FaxCommunication, FaxCommunicationAdmin)
 admin.site.register(MailCommunication, MailCommunicationAdmin)
 admin.site.register(EmailAddress, EmailAddressAdmin)
 admin.site.register(PhoneNumber, PhoneNumberAdmin)
 admin.site.register(Address, AddressAdmin)
+admin.site.register(Check, CheckAdmin)
