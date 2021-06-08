@@ -239,14 +239,14 @@ def _build_presigned_url(key, content_type, user=None):
         {"bucket": bucket},
         {"key": key},
         {"success_action_status": "200"},
-        {"Content-Type": content_type},
         # Whitelist metadata headers
         ["starts-with", "$x-amz-meta-filename", ""],
-        ["starts-with", "$x-amz-meta-content-type", ""],
     ]
 
     if not user or not user.has_perm("foia.unlimited_attachment_size"):
         conditions.append(["content-length-range", "0", settings.MAX_ATTACHMENT_SIZE])
+        conditions.append({"Content-Type": content_type})
+        conditions.append(["starts-with", "$x-amz-meta-content-type", ""])
 
     s3 = boto3.client("s3")
     url_data = s3.generate_presigned_post(
@@ -255,7 +255,8 @@ def _build_presigned_url(key, content_type, user=None):
 
     url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
     url_data["fields"]["success_action_status"] = 200
-    url_data["fields"]["Content-Type"] = content_type
+    if not user or not user.has_perm("foia.unlimited_attachment_size"):
+        url_data["fields"]["Content-Type"] = content_type
 
     return url_data
 
