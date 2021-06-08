@@ -239,14 +239,14 @@ def _build_presigned_url(key, content_type, user=None):
         {"bucket": bucket},
         {"key": key},
         {"success_action_status": "200"},
+        {"Content-Type": content_type},
         # Whitelist metadata headers
         ["starts-with", "$x-amz-meta-filename", ""],
+        ["starts-with", "$x-amz-meta-content-type", ""],
     ]
 
     if not user or not user.has_perm("foia.unlimited_attachment_size"):
         conditions.append(["content-length-range", "0", settings.MAX_ATTACHMENT_SIZE])
-        conditions.append({"Content-Type": content_type})
-        conditions.append(["starts-with", "$x-amz-meta-content-type", ""])
 
     s3 = boto3.client("s3")
     url_data = s3.generate_presigned_post(
@@ -343,10 +343,10 @@ def _preupload(request, model, id_name=None):
     content_type = request.POST.get("type")
     # those with unlimited attachment size permission may upload any file type
     if (
-        not request.user.has_perm("foia.unlimited_attachment_size")
+        not (request.user and request.user.has_perm("foia.unlimited_attachment_size"))
         and not content_type in settings.ALLOWED_FILE_MIMES
     ):
-        return JsonResponse({"error": "Invalid file type"}, status=400)
+        return JsonResponse({ "error": "Invalid file type" }, status=400)
 
     if request.POST.get("chunked") == "true":
         response_data = _start_chunked_upload(key, content_type)

@@ -3854,7 +3854,12 @@
                 return localStorageId;
             },
             _getMimeType: function(id) {
-                return handler.getFile(id).type;
+                // Custom handling to fall back on unknown mime types
+                var mimeType = handler.getFile(id).type;
+                if(!mimeType || mimeType == ""){
+                    mimeType = spec.options.defaultMimeType;
+                }
+                return mimeType;
             },
             _getPersistableData: function(id) {
                 return handler._getFileState(id).chunking;

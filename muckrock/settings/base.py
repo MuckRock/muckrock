@@ -566,6 +566,7 @@ MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024
 MAX_ATTACHMENT_NUM = 3
 # maximum for outgoing messages, including staff
 MAX_ATTACHMENT_TOTAL_SIZE = 20 * 1024 * 1024
+DEFAULT_UPLOAD_MIME_UNKNOWN = "application/octet-stream"
 ALLOWED_FILE_MIMES = [
     "application/pdf",
     "image/jpeg",

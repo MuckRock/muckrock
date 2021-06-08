@@ -113,7 +113,8 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
       request: {
         inputName: 'file',
         filenameParam: 'filename',
-        endpoint: ' ' // Replaced in onUpload handler
+        endpoint: ' ', // Replaced in onUpload handler
+        defaultMimeType: "{{settings.DEFAULT_UPLOAD_MIME_UNKNOWN}}"
       },
       credentials: {
         accessKey: " ",
@@ -147,6 +148,11 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
           var isChunked = uploader._handler.isUploadChunked(id);
           var promise = new qq.Promise();
 
+          var mimeType = uploader.getFile(id).type;
+          if(!mimeType || mimeType == ""){
+            mimeType = "{{settings.DEFAULT_UPLOAD_MIME_UNKNOWN}}";
+          }
+
           // Check if this upload has already begun (i.e. its being retried)
           if(uploader._s3FileKeys[id]){
             // We don't want to prefetch again, or it will overwrite the uploadId
@@ -160,7 +166,7 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             data: { 
               name: filename, 
               id: pk,
-              type: uploader.getFile(id).type,
+              type: mimeType,
               chunked: isChunked
             },
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
