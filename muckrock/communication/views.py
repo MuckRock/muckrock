@@ -122,6 +122,8 @@ class CheckListView(MRFilterListView):
         return context
 
     def post(self, request, *args, **kwargs):
+        """Handle updating checks deposit dates"""
+        # pylint: disable=unused-argument
         for key in request.POST:
             if "-" in key:
                 prefix = key.split("-", 1)[0]
