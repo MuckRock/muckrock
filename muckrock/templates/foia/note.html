@@ -1,7 +1,7 @@
 {% load tags %}
 
 {% if note %}
-<div class="note" id="note-{{ note.id }}">
+<div class="note textbox" id="note-{{ note.id }}">
     <header class="note-header">
         <p class="note-author">{% if note.author %}{{ note.author.profile.full_name }}{% if note.author.is_staff %}&nbsp;<span class="small blue badge">Staff</span>{% endif %}{% else %}{{ note.foia.user.profile.full_name }}{% endif %}</p>
         {% if foia_url %}
@@ -12,6 +12,9 @@
             <time datetime="{{note.datetime|date:'c'}}" title="{{note.datetime|date:'c'}}" class="note-date">{{note.datetime|date}}</time>
         </a>
     </header>
+    <section class="note-metadata textbox__section">
+      <p class="small">Notes are visible to you and other editors of this request.</p>
+    </section>
     <main class="note-body">
         {{ note.note|markdown }}
     </main>

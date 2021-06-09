@@ -352,20 +352,28 @@ $request-breakpoint: 768px;
             @include justify-content(space-between);
             margin-bottom: 0;
             padding: $vr/2;
-            background-color: $color-grey;
-            color: $color-white;
+            background-color: $color-yellow;
+            color: $color-black;
             p {
                 margin-bottom: 0;
             }
             a {
-                color: $color-white;
+                color: $color-black;
             }
             .note-author {
                 font-weight: $bold;
             }
         }
+        .note-metadata {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+            margin-bottom: 0;
+            background: $color-grey-7;
+        }
         .note-body {
             padding: $vr/2;
+            background-color: $color-yellow-light;
             br {
               margin-bottom: 0;
             }
