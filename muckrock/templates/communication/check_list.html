@@ -1,4 +1,5 @@
 {% extends 'base_list.html' %}
+{% load tags %}
 
 {% block list-sections %}
   <p>Amount outstanding: ${{ outstanding|floatformat:2|default:"0.00" }}</p>
@@ -14,6 +15,13 @@
   <th width="10%" data-sort="deposit_date">Cashed</th>
 {% endblock list-table-head %}
 
+{% block list-actions %}
+  <form id="check-form" method="POST">
+    {% csrf_token %}
+    <button class="primary button">Set Check Deposit Dates</button>
+  </form>
+{% endblock list-actions %}
+
 {% block list-table-row %}
   {% with object as check %}
     <td>{{ check.number }}</td>
@@ -26,6 +34,14 @@
     </td>
     <td><a href="{{ check.user.get_absolute_url }}">{{ check.user }}</a></td>
     <td>{{ check.created_datetime|date:"m/d/Y" }}</td>
-    <td>{{ check.deposit_date|date:"m/d/Y"|default:"Outstanding" }}</td>
+    <td>
+      {% if check.deposit_date %}
+        {{ check.deposit_date|date:"m/d/Y" }}
+      {% else %}
+        {% with form=forms|get_item:check.pk %}
+          {{ form.deposit_date }}
+        {% endwith %}
+      {% endif %}
+    </td>
   {% endwith %}
 {% endblock list-table-row %}

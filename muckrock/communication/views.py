@@ -4,11 +4,13 @@ Views for the communication app
 
 # Django
 from django import http
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import F, Q
 from django.db.models.aggregates import Sum
 from django.db.models.query import Prefetch
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic.detail import DetailView
 
@@ -17,6 +19,7 @@ from dal_select2.views import Select2ListView
 
 # MuckRock
 from muckrock.communication.filters import CheckFilterSet
+from muckrock.communication.forms import CheckDateForm
 from muckrock.communication.models import (
     Check,
     EmailAddress,
@@ -111,7 +114,34 @@ class CheckListView(MRFilterListView):
         context["outstanding"] = Check.objects.filter(deposit_date=None).aggregate(
             total=Sum("amount")
         )["total"]
+        context["forms"] = {
+            c.pk: CheckDateForm(instance=c, prefix=c.pk)
+            for c in context["object_list"]
+            if c.deposit_date is None
+        }
         return context
+
+    def post(self, request, *args, **kwargs):
+        for key in request.POST:
+            if "-" in key:
+                prefix = key.split("-", 1)[0]
+                try:
+                    check = Check.objects.get(pk=prefix)
+                except (Check.DoesNotExist, ValueError):
+                    messages.error(request, f"Error for {prefix}: Does not exist")
+                else:
+                    form = CheckDateForm(
+                        data=request.POST, instance=check, prefix=prefix
+                    )
+                    if form.is_valid():
+                        form.save()
+                    else:
+                        messages.error(
+                            request,
+                            f"Error for {check.number}: {form.errors['deposit_date']}",
+                        )
+        messages.success(request, "Check deposit dates updated")
+        return redirect("check-list")
 
 
 class CommunicationAutocomplete(MRAutocompleteView):

@@ -8,7 +8,7 @@ from localflavor.us.forms import USZipCodeField
 from localflavor.us.us_states import STATE_CHOICES
 
 # MuckRock
-from muckrock.communication.models import Address
+from muckrock.communication.models import Address, Check
 
 
 class AddressForm(forms.ModelForm):
@@ -64,3 +64,23 @@ class AddressForm(forms.ModelForm):
                 "Must supply a name since the agency name is over 40 characters long"
             )
         return agency_override
+
+
+class CheckDateForm(forms.ModelForm):
+    """Form to set the deposit date for a check"""
+
+    deposit_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(
+            format="%m/%d/%Y", attrs={"placeholder": "mm/dd/yyyy", "form": "check-form"}
+        ),
+        input_formats=[
+            "%Y-%m-%d",  # '2006-10-25'
+            "%m/%d/%Y",  # '10/25/2006'
+            "%m/%d/%y",  # '10/25/06'
+        ],
+    )
+
+    class Meta:
+        model = Check
+        fields = ["deposit_date"]

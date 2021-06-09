@@ -14,6 +14,14 @@ from muckrock.core.filters import NULL_BOOLEAN_CHOICES, RangeWidget
 class CheckFilterSet(django_filters.FilterSet):
     """Filtering for checks"""
 
+    check_number = django_filters.NumberFilter(
+        field_name="number", label="Check #", widget=forms.NumberInput()
+    )
+
+    mr_number = django_filters.NumberFilter(
+        field_name="communication__foia__pk", label="MR #", widget=forms.NumberInput()
+    )
+
     date_range = django_filters.DateFromToRangeFilter(
         field_name="created_datetime",
         label="Date Range",
@@ -46,4 +54,10 @@ class CheckFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = Check
-        fields = ["date_range", "outstanding"]
+        fields = [
+            "check_number",
+            "mr_number",
+            "date_range",
+            "outstanding",
+            "minimum_amount",
+        ]
