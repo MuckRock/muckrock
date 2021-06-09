@@ -255,8 +255,7 @@ def _build_presigned_url(key, content_type, user=None):
 
     url_data["fields"]["acl"] = settings.AWS_DEFAULT_ACL
     url_data["fields"]["success_action_status"] = 200
-    if not user or not user.has_perm("foia.unlimited_attachment_size"):
-        url_data["fields"]["Content-Type"] = content_type
+    url_data["fields"]["Content-Type"] = content_type
 
     return url_data
 
