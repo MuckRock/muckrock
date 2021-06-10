@@ -323,14 +323,6 @@ $('document').ready(function(){
 
 /* Contact Info */
 
-function formatCC(ccEmails) {
-  if (ccEmails.length == 1) {
-    return ccEmails[0];
-  } else {
-    return ccEmails.slice(0, -1).join(" ,") + " and " + ccEmails[ccEmails.length - 1];
-  }
-}
-
 export default function showOrigContactInfo() {
   $(".contact-info").each(function() {
     var
