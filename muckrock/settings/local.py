@@ -13,6 +13,9 @@ DEBUG = True
 # Loads static files locally
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 STATIC_URL = "/static/"
+COMPRESS_STORAGE = STATICFILES_STORAGE
+COMPRESS_URL = STATIC_URL
+COMPRESS_ENABLED = False
 
 MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
 MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
