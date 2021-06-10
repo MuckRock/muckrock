@@ -480,10 +480,12 @@ class FOIARequest(models.Model):
     def set_address(self, agency, appeal, contact_info, clear):
         """Set the correct contact info upon request submission"""
         # Return signifies a need to review
-        if contact_info:
+        if contact_info and "via" in contact_info:
+            # if via is set, set via contact info, otherwise contact info may
+            # contain cc_emails to restrict
             needs_review = self.update_address_from_info(agency, appeal, contact_info)
         else:
-            self.update_address_from_agency(agency, appeal, clear)
+            self.update_address_from_agency(agency, appeal, clear, contact_info)
             needs_review = False
         self.save(comment="set address")
         return needs_review
@@ -544,7 +546,7 @@ class FOIARequest(models.Model):
         # Does not need review
         return False
 
-    def update_address_from_agency(self, agency, appeal, clear):
+    def update_address_from_agency(self, agency, appeal, clear, contact_info):
         """Update the current address for the request"""
         # if this is an appeal, clear the current addresses and get them
         # from the appeal agency
@@ -564,9 +566,15 @@ class FOIARequest(models.Model):
             if not appeal:
                 self.portal = agency.portal
             self.email = agency.get_emails(request_type, "to").first()
-            self.cc_emails.set(agency.get_emails(request_type, "cc"))
             self.fax = agency.get_faxes(request_type).first()
             self.address = agency.get_addresses(request_type).first()
+
+            if contact_info is not None:
+                for email in agency.get_emails(request_type, "cc"):
+                    if email.email in contact_info["cc_emails"]:
+                        self.cc_emails.add(email)
+            else:
+                self.cc_emails.set(agency.get_emails(request_type, "cc"))
 
     def update_address(self, via, email, fax, other_emails=None):
         """Update the current address"""

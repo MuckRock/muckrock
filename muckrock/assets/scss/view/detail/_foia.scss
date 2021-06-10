@@ -551,6 +551,9 @@ $request-breakpoint: 768px;
   .info {
     display: none;
     margin-bottom: 0;
+    div {
+      margin-bottom: 0.5em;
+    }
   }
   .form {
     display: none;

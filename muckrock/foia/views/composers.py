@@ -155,7 +155,9 @@ class GenericComposer(BuyRequestsMixin):
                 k: form.cleaned_data.get(k) for k in ContactInfoForm.base_fields
             }
         else:
-            contact_info = None
+            cc_emails = self.request.POST.getlist("cc_emails")
+            contact_info = {"cc_emails": cc_emails}
+
         try:
             composer.submit(contact_info, form.cleaned_data.get("no_proxy"))
         except InsufficientRequestsError:
