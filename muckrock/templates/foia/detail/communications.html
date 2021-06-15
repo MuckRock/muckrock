@@ -12,8 +12,12 @@
 
   <div class="communications-list">
     {% with foia_url=foia.get_absolute_url %}
-      {% for comm in foia.communications.all %}
-        {% include "foia/communication.html" with communication=comm %}
+      {% for type, comm in communications %}
+        {% if type == "communication" %}
+          {% include "foia/communication.html" with communication=comm %}
+        {% elif type == "note" and user_can_edit %}
+          {% include "foia/note.html" with note=comm %}
+        {% endif %}
       {% endfor %}
     {% endwith %}
   </div>
