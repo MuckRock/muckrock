@@ -25,11 +25,10 @@ from zenpy import Zenpy
 from zenpy.lib.api_objects import Comment, Request, User as ZenUser
 
 # MuckRock
-from muckrock.agency.utils import initial_communication_template
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import zoho_get, zoho_post
-from muckrock.foia.models import STATUS
+from muckrock.foia.models import STATUS, FOIATemplate
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
@@ -862,9 +861,9 @@ class NewAgencyTask(Task):
             if foia.communications.exists():
                 # regenerate communication text in case jurisdiction changed
                 comm = foia.communications.first()
-                comm.communication = initial_communication_template(
+                comm.communication = FOIATemplate.objects.render(
                     [foia.agency],
-                    foia.user.profile.full_name,
+                    foia.user,
                     foia.composer.requested_docs,
                     edited_boilerplate=foia.composer.edited_boilerplate,
                     proxy=proxy_info.get("from_user"),

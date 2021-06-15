@@ -29,7 +29,7 @@ from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
-from muckrock.foia.models import FOIAComposer, FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIARequest, FOIATemplate
 
 
 def format_org_list(organizations):
@@ -129,6 +129,11 @@ class GenericComposer(BuyRequestsMixin):
                 "stripe_pk": settings.STRIPE_PUB_KEY,
             }
         )
+        intro, outro = FOIATemplate.objects.render(
+            [], self.request.user, None, split=True, html=True
+        )
+        context["intro"] = intro
+        context["outro"] = outro
         return context
 
     def get_initial(self):

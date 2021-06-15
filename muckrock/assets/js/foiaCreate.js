@@ -287,19 +287,9 @@ $(document).ready(function(){
   $("#id_edited_boilerplate").change(function(){
     if (this.checked) {
       var requestedDocs = $("#id_requested_docs").val();
-      var newText = "To Whom It May Concern:\n\nPursuant to the { law name }, " +
-        "I hereby request the following records:\n\n" + requestedDocs + "\n\n" +
-        "The requested documents will be made available to the general public, " +
-        "and this request is not being made for commercial purposes.\n\n" +
-        "In the event that there are fees, I would be grateful if you would " +
-        "inform me of the total charges in advance of fulfilling my request. " +
-        "I would prefer the request filled electronically, by e-mail attachment " +
-        "if available or CD-ROM if not.\n\nThank you in advance for your " +
-        "anticipated cooperation in this matter.\n\n" +
-        "I look forward to receiving your response to this request within " +
-        "{ days }.\n\n" +
-        "Sincerely,\n\n" +
-        "{ name }";
+      var intro = $(".document-boilerplate.intro").text();
+      var outro = $(".document-boilerplate.outro").text();
+      var newText = intro + "\n\n" + requestedDocs + "\n\n" + outro;
       $("#id_requested_docs").val(newText);
       $("#id_requested_docs").change();
       $("form.create-request").addClass("edited-boilerplate");

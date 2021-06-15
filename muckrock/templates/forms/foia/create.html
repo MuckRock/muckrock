@@ -82,22 +82,11 @@
         {% include "lib/pattern/new_request_field.html" with field=form.title only %}
         {% include "lib/pattern/new_request_field.html" with field=form.agencies only %}
         <div class="document-boilerplate intro">
-          <p>To Whom It May Concern:</p>
-          <p>Pursuant to the { law name }, I hereby request the following records:</p>
+          {{ intro|safe|linebreaks }}
         </div>
         {% include "lib/pattern/new_request_field.html" with field=form.requested_docs only %}
         <div class="document-boilerplate outro">
-          <p>The requested documents will be made available to the general public,
-          and this request is not being made for commercial purposes.</p>
-          <p>In the event that there are fees, I would be grateful if you would
-          inform me of the total charges in advance of fulfilling my request.
-          I would prefer the request filled electronically, by e-mail attachment
-          if available or CD-ROM if not.</p>
-          <p>Thank you in advance for your anticipated cooperation in this matter.
-          I look forward to receiving your response to this request within
-          { days }.</p>
-          <p>Sincerely,</p>
-          <p>{{ user.profile.full_name|default:"{ name }" }}</p>
+          {{ outro|safe|linebreaks }}
         </div>
         <div class="tags-explanation">
           <p>Words in { brackets } are automatically replaced based on the agency and jurisdiction. You can use the following variables:</p>
@@ -108,8 +97,12 @@
             <dd>Inserts the abbreviation of the relevant transparency law, i.e., FOIA.</dd>
             <dt>{ days }</dt>
             <dd>Inserts the number of days the law permits before a response is required, or a default of 10 days if no requirement.</dd>
+            <dt>{ waiver }</dt>
+            <dd>Inserts the jurisdiction appropriate fee waiver language if available, or generic fee waiver language otherwise</dd>
             <dt>{ name }</dt>
             <dd>Inserts your name. <a href="{% url "acct-settings" %}">Change that here.</a></dd>
+            <dt>{ closing }</dt>
+            <dd>This will be replaced with a suitable closing for the letter.</dd>
             <dt>{ agency name }</dt>
             <dd>Inserts the name of the agency.</dd>
           </dl>

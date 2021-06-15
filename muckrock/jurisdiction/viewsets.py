@@ -5,7 +5,6 @@ Provides Jurisdiction application API views
 # Django
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.template.loader import get_template
 
 # Third Party
 import django_filters
@@ -16,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 # MuckRock
+from muckrock.foia.models import FOIATemplate
 from muckrock.jurisdiction.forms import ExemptionSubmissionForm
 from muckrock.jurisdiction.models import Exemption, Jurisdiction
 from muckrock.jurisdiction.serializers import (
@@ -54,18 +54,13 @@ class JurisdictionViewSet(ModelViewSet):
     @action(detail=True)
     def template(self, request, pk=None):
         """API view to get the template language for a jurisdiction"""
+
         jurisdiction = get_object_or_404(Jurisdiction, pk=pk)
-        template = get_template("text/foia/request.txt")
-        if request.user.is_authenticated:
-            user_name = request.user.profile.full_name
-        else:
-            user_name = "Anonymous User"
-        context = {
-            "document_request": "<insert requested documents here>",
-            "jurisdiction": jurisdiction,
-            "user_name": user_name,
-        }
-        text = template.render(context)
+
+        text = FOIATemplate.objects.render(
+            [], request.user, "<insert requested docs here>", jurisdiction=jurisdiction
+        )
+
         return Response({"text": text})
 
 

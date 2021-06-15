@@ -27,7 +27,11 @@ from muckrock.core.factories import (
     UserFactory,
 )
 from muckrock.core.test_utils import http_get_response, mock_middleware
-from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
+from muckrock.foia.factories import (
+    FOIAComposerFactory,
+    FOIARequestFactory,
+    FOIATemplateFactory,
+)
 
 
 class TestAgencyUnit(TestCase):
@@ -248,6 +252,7 @@ class TestAgencyViews(TestCase):
 
     def test_boilerplate(self):
         """Test the boilerplate ajax view"""
+        FOIATemplateFactory.create()
         agencies = AgencyFactory.create_batch(2)
         request = RequestFactory().get(
             reverse("agency-boilerplate"), {"agencies": [a.pk for a in agencies]}

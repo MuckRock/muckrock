@@ -24,6 +24,7 @@ from muckrock.core.factories import (
     UserFactory,
 )
 from muckrock.core.test_utils import mock_squarelet
+from muckrock.foia.factories import FOIATemplateFactory
 from muckrock.foia.models import FOIAComposer
 
 
@@ -35,6 +36,7 @@ class TestFOIAViewsetCreate(TestCase):
         mock_squarelet(self.mocker)
         self.mocker.start()
         self.addCleanup(self.mocker.stop)
+        FOIATemplateFactory.create()
 
     def api_call(
         self, data=None, user_type=None, number_requests=5, code=201, status=None
