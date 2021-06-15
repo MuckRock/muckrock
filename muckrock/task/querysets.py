@@ -32,7 +32,7 @@ class TaskQuerySet(models.QuerySet):
     def filter_by_foia(self, foia, user):
         """
         Get tasks that relate to the provided FOIA request.
-        If user is staff, get all tasks.
+        If user has permission to view tasks, get all tasks.
         For all users, get new agency task.
         """
         tasks = []
@@ -43,14 +43,15 @@ class TaskQuerySet(models.QuerySet):
             task.models.PaymentInfoTask,
             task.models.PortalTask,
         ]
-        if user.is_staff:
+        has_perm = foia.has_perm(user, "tasks")
+        if has_perm:
             for task_type in communication_task_types:
                 tasks += list(
                     task_type.objects.filter(communication__foia=foia).preload_list()
                 )
         # tasks that point to a foia
         foia_task_types = [task.models.FlaggedTask, task.models.StatusChangeTask]
-        if user.is_staff:
+        if has_perm:
             for task_type in foia_task_types:
                 tasks += list(task_type.objects.filter(foia=foia).preload_list())
         # tasks that point to an agency
@@ -60,6 +61,7 @@ class TaskQuerySet(models.QuerySet):
                     agency=foia.agency
                 ).preload_list()
             )
+        # review agency tasks are still staff only
         if foia.agency and user.is_staff:
             tasks += list(
                 task.models.ReviewAgencyTask.objects.filter(

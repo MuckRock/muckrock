@@ -108,6 +108,12 @@ class Task(models.Model):
         self.date_deferred = date_deferred
         self.save()
 
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        # by default, only staff can manage requests
+        # some tasks will override this to allow the foia owner to manage as well
+        return user.is_staff
+
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
@@ -183,6 +189,10 @@ class PaymentInfoTask(Task):
 
     def __str__(self):
         return "Payment Info Task"
+
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        return self.communication.foia.has_perm(user, "tasks")
 
 
 class SnailMailTask(Task):
@@ -262,6 +272,10 @@ class SnailMailTask(Task):
             user=user,
         )
         check.send_email()
+
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        return self.communication.foia.has_perm(user, "tasks")
 
 
 class ReviewAgencyTask(Task):
@@ -719,6 +733,13 @@ class FlaggedTask(Task):
         request = client.requests.create(Request(**request))
         return request.id
 
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        if self.foia:
+            return self.foia.has_perm(user, "tasks")
+        else:
+            return super().check_permission(user)
+
 
 class ProjectReviewTask(Task):
     """Created when a project is published and needs approval."""
@@ -907,6 +928,10 @@ class ResponseTask(Task):
         form = ResponseTaskForm(task=self)
         form.set_status(status, set_foia=True, comms=[self.communication])
 
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        return self.communication.foia.has_perm(user, "tasks")
+
 
 class StatusChangeTask(Task):
     """A user has changed the status on a request"""
@@ -923,6 +948,10 @@ class StatusChangeTask(Task):
 
     def get_absolute_url(self):
         return reverse("status-change-task", kwargs={"pk": self.pk})
+
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        return self.foia.has_perm(user, "tasks")
 
 
 class CrowdfundTask(Task):
@@ -1012,6 +1041,10 @@ class PortalTask(Task):
         comm.foia.status = status
         comm.foia.save(comment="portal task")
         comm.foia.update()
+
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        return self.communication.foia.has_perm(user, "tasks")
 
 
 class NewPortalTask(Task):

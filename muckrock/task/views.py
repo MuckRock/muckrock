@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Count
 from django.http import (
@@ -103,6 +104,7 @@ def count_tasks():
     return count
 
 
+@method_decorator(user_passes_test(lambda u: u.is_staff), name="get")
 class TaskList(MRFilterListView):
     """List of tasks"""
 
@@ -156,11 +158,6 @@ class TaskList(MRFilterListView):
         context["settings"] = settings
         return context
 
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
-    def dispatch(self, *args, **kwargs):
-        """Dispatch overriden to limit access"""
-        return super(TaskList, self).dispatch(*args, **kwargs)
-
     def get_redirect_url(self):
         """Returns the url to redirect to"""
         resolved_url = resolve(self.request.path)
@@ -176,6 +173,9 @@ class TaskList(MRFilterListView):
             raise ValueError("No tasks were selected, so there's nothing to do!")
         task_model = self.get_model()
         tasks = task_model.objects.filter(pk__in=task_pks)
+        for task in tasks:
+            if not task.check_permission(self.request.user):
+                raise PermissionDenied
         return tasks
 
     def task_post_helper(self, request, task, form_data=None):
@@ -205,6 +205,12 @@ class TaskList(MRFilterListView):
                 return HttpResponseBadRequest(exception.args[0])
             else:
                 messages.warning(self.request, exception)
+                return redirect(self.get_redirect_url())
+        except PermissionDenied:
+            if request.is_ajax():
+                return HttpResponseForbidden("You do not have permission")
+            else:
+                messages.error(self.request, "You do not have permission")
                 return redirect(self.get_redirect_url())
         if request.is_ajax():
             return HttpResponse("OK")

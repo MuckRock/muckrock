@@ -1404,6 +1404,7 @@ class FOIARequest(models.Model):
                 "zip_download_foiarequest",
                 "Can download a zip file of all communications and files",
             ),
+            ("tasks_foiarequest", "Can manage tasks associated with this request"),
         )
 
 
