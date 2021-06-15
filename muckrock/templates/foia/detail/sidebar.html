@@ -35,10 +35,7 @@
           {% endif %}
           of
           {% if foia.jurisdiction.level == "f" %}the{% endif %}
-          {% cond_link is_agency_user|not foia.jurisdiction.get_absolute_url foia.jurisdiction.name %}{% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %},
-            {% cond_link is_agency_user|not foia.jurisdiction.parent.get_absolute_url foia.jurisdiction.parent.abbrev title=foia.jurisdiction.parent.name %}
-          {% endif %}
-        {% endif %}.
+          {% cond_link is_agency_user|not foia.jurisdiction.get_absolute_url foia.jurisdiction.name %}{% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %}, {% cond_link is_agency_user|not foia.jurisdiction.parent.get_absolute_url foia.jurisdiction.parent.abbrev title=foia.jurisdiction.parent.name %}{% endif %}{% endif %}.
       </summary>
 
       {% if foia.composer.parent and not is_agency_user and view_parent %}
