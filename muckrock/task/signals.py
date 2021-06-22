@@ -33,7 +33,7 @@ def domain_blacklist(sender, instance, created, **kwargs):
         return
     logger.info("Checking domain %s against blacklist", domain)
     if BlacklistDomain.objects.filter(domain=domain).exists():
-        instance.resolve()
+        instance.resolve(form_data={"reject": True, "reason": "blacklist"})
     return
 
 
