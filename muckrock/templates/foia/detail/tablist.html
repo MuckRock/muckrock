@@ -1,7 +1,7 @@
 <ul role="tablist" class="tab-list">
   <li>
     <a role="tab" class="tab" aria-controls="request" href="#comms">
-      {% with count=foia.communications.visible.count %}
+      {% with communications|length as count %}
         <span class="counter">{{ count }}</span>
         <span class="label">Communication{{ count|pluralize }}</span>
       {% endwith %}

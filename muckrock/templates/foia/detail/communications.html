@@ -17,6 +17,8 @@
           {% include "foia/communication.html" with communication=comm %}
         {% elif type == "note" and user_can_edit %}
           {% include "foia/note.html" with note=comm %}
+        {% elif type == "check" %}
+          {% include "foia/check.html" with check=comm %}
         {% endif %}
       {% endfor %}
     {% endwith %}

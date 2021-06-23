@@ -659,14 +659,19 @@ class Check(models.Model):
             return ""
         return mail.to_address.format(self.agency)
 
-    def mail_status(self):
+    def mail_events(self):
         """The latest Lob event for this checks mailing"""
         mails = self.communication.mails.all()
         if mails:
             mail = mails[0]
         else:
-            return ""
-        event = mail.events.last()
-        if not event:
-            return ""
-        return event.event
+            return {}
+
+        events = {}
+        for event in mail.events.all():
+            if "." not in event.event:
+                continue
+            events[event.event.split(".")[1]] = event.datetime
+        if self.deposit_date:
+            events["deposited"] = self.deposit_date
+        return events

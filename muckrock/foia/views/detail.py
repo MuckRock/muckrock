@@ -286,7 +286,9 @@ class Detail(DetailView):
             .select_related("user__profile")
             .prefetch_related("communication__mails__events")
         ]
-        context["communications"] = [(t, v) for _, t, v in merge(communications, notes)]
+        context["communications"] = [
+            (t, v) for _, t, v in merge(communications, notes, checks)
+        ]
         context["notes"] = [(t, v) for _, t, v in merge(notes, checks)]
 
     def _get_date_context_data(self, context):

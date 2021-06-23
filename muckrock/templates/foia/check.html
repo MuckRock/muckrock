@@ -1,10 +1,10 @@
 {% load tags %}
 
 {% if check %}
-  <div class="note" id="check-{{ check.id }}">
+  <div class="check note" id="check-{{ check.id }}">
     <header class="note-header">
       <p class="note-author">
-        {{ check.user.profile.full_name }}
+        Check sent by {{ check.user.profile.full_name }}
         {% if check.user.is_staff %}
           &nbsp;<span class="small blue badge">Staff</span>
         {% endif %}
@@ -19,9 +19,49 @@
       </a>
     </header>
     <main class="note-body">
-      <p>Check #{{ check.number }}</p>
-      <p>Amount: ${{ check.amount }}</p>
-      <p>To:<br>{{ check.mailed_to|linebreaks }}</p>
+      <div class="payto">Pay to the order of: {{ check.mailed_to|linebreaks }}</div>
+      <div class="info">
+        <div class="number">#{{ check.number }}</div>
+        <div class="amount">Amount of: <span>${{ check.amount }}</span></div>
+      </div>
+
+      {% with events=check.mail_events %}
+        <ul class="progressbar">
+          <li {% if events.created %}class="active"{% endif %}>
+            Created
+            {% if events.created %}
+              &mdash;
+            {{ events.created|date:"SHORT_DATE_FORMAT" }}{% endif%}
+          </li>
+          <li {% if events.in_transit %}class="active"{% endif %}>
+            In Transit
+            {% if events.in_transit %}
+              &mdash; {{ events.in_transit|date:"SHORT_DATE_FORMAT" }}
+            {% endif%}
+          </li>
+          <li {% if events.in_local_area %}class="active"{% endif %}>
+            In Local Area
+            {% if events.in_local_area %}
+              &mdash; {{ events.in_local_area|date:"SHORT_DATE_FORMAT" }}
+            {% endif%}
+          </li>
+          <li {% if events.processed_for_delivery %}class="active"{% endif %}>
+            Processed For Delivery
+            {% if events.processed_for_delivery %}
+              &mdash; {{ events.processed_for_delivery|date:"SHORT_DATE_FORMAT" }}
+            {% endif%}
+          </li>
+          <li {% if events.deposited %}class="active"{% endif %}>
+            Deposited
+            {% if events.deposited %}
+              &mdash; {{ events.deposited|date:"SHORT_DATE_FORMAT" }}
+            {% endif%}
+          </li>
+        </ul>
+      {% endwith %}
+
+
+      {% comment %}
       <p>Status: {{ check.mail_status|default:"Unknown" }}</p>
       <p>
         Deposited:
@@ -31,6 +71,7 @@
           No
         {% endif %}
       </p>
+      {% endcomment %}
     </main>
   </div>
 {% endif %}
