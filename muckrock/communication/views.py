@@ -31,6 +31,7 @@ from muckrock.communication.models import (
     PhoneNumber,
 )
 from muckrock.communication.utils import get_email_or_fax
+from muckrock.core.utils import new_action
 from muckrock.core.views import (
     MRAutocompleteView,
     MRFilterListView,
@@ -137,6 +138,9 @@ class CheckListView(MRFilterListView):
                     )
                     if form.is_valid():
                         form.save()
+                        foia = check.communication.foia
+                        action = new_action(foia.agency, "check deposited", target=foia)
+                        foia.notify(action)
                     else:
                         messages.error(
                             request,

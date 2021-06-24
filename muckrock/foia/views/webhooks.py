@@ -23,6 +23,7 @@ import dateutil.parser
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
+from muckrock.core.utils import new_action
 
 logger = logging.getLogger(__name__)
 
@@ -58,10 +59,16 @@ def lob_webhook(request):
     if mail is None:
         logger.error("Missing mail communication for mail_id: %s", mail_id)
     elif mail is not None:
-        mail.events.create(
+        event = mail.events.create(
             datetime=dateutil.parser.parse(data["date_created"]),
             event=data["event_type"]["id"],
         )
+        if event.event == "check.processed_for_delivery":
+            foia = mail.communication.foia
+            action = new_action(
+                foia.agency, "check processed for delivery", target=foia, public=False
+            )
+            foia.notify(action)
 
     return HttpResponse("OK")
 
