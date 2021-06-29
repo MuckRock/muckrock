@@ -70,7 +70,7 @@ class CheckDateForm(forms.ModelForm):
     """Form to set the deposit date for a check"""
 
     status_date = forms.DateField(
-        required=False,  # XXX verify only pending can have empty date
+        required=False,
         widget=forms.DateInput(
             format="%m/%d/%Y", attrs={"placeholder": "mm/dd/yyyy", "form": "check-form"}
         ),

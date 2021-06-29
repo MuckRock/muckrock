@@ -8,7 +8,7 @@ import django_filters
 
 # MuckRock
 from muckrock.communication.models import CHECK_STATUS, Check
-from muckrock.core.filters import NULL_BOOLEAN_CHOICES, RangeWidget
+from muckrock.core.filters import RangeWidget
 
 
 class CheckFilterSet(django_filters.FilterSet):
