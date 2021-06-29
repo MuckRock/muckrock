@@ -139,7 +139,11 @@ class CheckListView(MRFilterListView):
                     if form.is_valid():
                         form.save()
                         foia = check.communication.foia
-                        action = new_action(foia.agency, "check deposited", target=foia)
+                        action = new_action(
+                            foia.agency,
+                            f"check {form.cleaned_data['status']}",
+                            target=foia,
+                        )
                         foia.notify(action)
                     else:
                         messages.error(
