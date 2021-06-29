@@ -457,6 +457,16 @@ $request-breakpoint: 768px;
             li.active + li:after {
                 background-color: $color-blue;
             }
+            li.error {
+                color: $color-red;
+            }
+            li.error:before {
+                border-color: $color-red;
+                background-color: $color-red-light;
+            }
+            li.error + li:after {
+                background-color: $color-red;
+            }
         }
     }
 

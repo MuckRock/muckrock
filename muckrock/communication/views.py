@@ -112,13 +112,13 @@ class CheckListView(MRFilterListView):
 
     def get_context_data(self, **kwargs):
         context = super(CheckListView, self).get_context_data(**kwargs)
-        context["outstanding"] = Check.objects.filter(deposit_date=None).aggregate(
+        context["outstanding"] = Check.objects.filter(status="pending").aggregate(
             total=Sum("amount")
         )["total"]
         context["forms"] = {
             c.pk: CheckDateForm(instance=c, prefix=c.pk)
             for c in context["object_list"]
-            if c.deposit_date is None
+            if c.status == "pending"
         }
         return context
 
@@ -126,7 +126,7 @@ class CheckListView(MRFilterListView):
         """Handle updating checks deposit dates"""
         # pylint: disable=unused-argument
         for key in request.POST:
-            if "-" in key:
+            if key.endswith("-status"):
                 prefix = key.split("-", 1)[0]
                 try:
                     check = Check.objects.get(pk=prefix)
@@ -143,8 +143,7 @@ class CheckListView(MRFilterListView):
                         foia.notify(action)
                     else:
                         messages.error(
-                            request,
-                            f"Error for {check.number}: {form.errors['deposit_date']}",
+                            request, f"Error for {check.number}: {form.errors}"
                         )
         messages.success(request, "Check deposit dates updated")
         return redirect("check-list")

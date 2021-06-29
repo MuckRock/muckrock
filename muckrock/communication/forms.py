@@ -69,8 +69,8 @@ class AddressForm(forms.ModelForm):
 class CheckDateForm(forms.ModelForm):
     """Form to set the deposit date for a check"""
 
-    deposit_date = forms.DateField(
-        required=False,
+    status_date = forms.DateField(
+        required=False,  # XXX verify only pending can have empty date
         widget=forms.DateInput(
             format="%m/%d/%Y", attrs={"placeholder": "mm/dd/yyyy", "form": "check-form"}
         ),
@@ -83,4 +83,21 @@ class CheckDateForm(forms.ModelForm):
 
     class Meta:
         model = Check
-        fields = ["deposit_date"]
+        fields = ["status_date", "status"]
+        widgets = {"status": forms.Select(attrs={"form": "check-form"})}
+
+    def clean(self):
+        """Status date must be set in not pending"""
+        cleaned_data = super().clean()
+        if cleaned_data.get("status") != "pending" and not cleaned_data.get(
+            "status_date"
+        ):
+            raise forms.ValidationError(
+                "Must set a date if setting to non-pending status"
+            )
+        if cleaned_data.get("status") == "pending" and cleaned_data.get("status_date"):
+            raise forms.ValidationError(
+                "Must set a non-pending status if setting a date"
+            )
+
+        return cleaned_data

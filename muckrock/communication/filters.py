@@ -7,7 +7,7 @@ from django import forms
 import django_filters
 
 # MuckRock
-from muckrock.communication.models import Check
+from muckrock.communication.models import CHECK_STATUS, Check
 from muckrock.core.filters import NULL_BOOLEAN_CHOICES, RangeWidget
 
 
@@ -36,28 +36,8 @@ class CheckFilterSet(django_filters.FilterSet):
         widget=forms.NumberInput(),
     )
 
-    outstanding = django_filters.BooleanFilter(
-        label="Outstanding",
-        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
-        method="filter_outstanding",
-    )
-
-    def filter_outstanding(self, queryset, name, value):
-        """Outstanding checks"""
-        # pylint: disable=unused-argument
-        if value is None:
-            return queryset
-        elif value:
-            return queryset.filter(deposit_date=None)
-        else:
-            return queryset.exclude(deposit_date=None)
+    status = django_filters.ChoiceFilter(choices=CHECK_STATUS)
 
     class Meta:
         model = Check
-        fields = [
-            "check_number",
-            "mr_number",
-            "date_range",
-            "outstanding",
-            "minimum_amount",
-        ]
+        fields = ["check_number", "mr_number", "date_range", "status", "minimum_amount"]

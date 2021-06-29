@@ -479,7 +479,7 @@ class StaffDigest(Digest):
         yesterday = date.today() - timedelta(1)
         checks = {}
         checks["created"] = Check.objects.filter(created_datetime__date=yesterday)
-        checks["deposited"] = Check.objects.filter(deposit_date=yesterday)
+        checks["deposited"] = Check.objects.filter(status_date=yesterday)
         return checks
 
     def get_context_data(self, *args):

@@ -7,12 +7,13 @@
 
 {% block list-table-head %}
   <th width="10%" data-sort="number">Number</th>
-  <th width="25%" data-sort="agency">Agency</th>
+  <th width="20%" data-sort="agency">Agency</th>
   <th width="10%" data-sort="amount">Amount</th>
-  <th width="25%">FOIA Request</th>
+  <th width="20%">FOIA Request</th>
   <th width="10%" data-sort="user">User</th>
   <th width="10%" data-sort="created_datetime">Created</th>
-  <th width="10%" data-sort="deposit_date">Cashed</th>
+  <th width="10%" data-sort="status">Status</th>
+  <th width="10%" data-sort="status_date">Final Date</th>
 {% endblock list-table-head %}
 
 {% block list-actions %}
@@ -35,11 +36,20 @@
     <td><a href="{{ check.user.get_absolute_url }}">{{ check.user }}</a></td>
     <td>{{ check.created_datetime|date:"m/d/Y" }}</td>
     <td>
-      {% if check.deposit_date %}
-        {{ check.deposit_date|date:"m/d/Y" }}
+      {% if check.status_date %}
+        {{ check.get_status_display }}
       {% else %}
         {% with form=forms|get_item:check.pk %}
-          {{ form.deposit_date }}
+          {{ form.status }}
+        {% endwith %}
+      {% endif %}
+    </td>
+    <td>
+      {% if check.status_date %}
+        {{ check.status_date|date:"m/d/Y" }}
+      {% else %}
+        {% with form=forms|get_item:check.pk %}
+          {{ form.status_date }}
         {% endwith %}
       {% endif %}
     </td>

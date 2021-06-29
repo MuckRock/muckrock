@@ -51,27 +51,21 @@
               &mdash; {{ events.processed_for_delivery|date:"SHORT_DATE_FORMAT" }}
             {% endif%}
           </li>
-          <li {% if events.deposited %}class="active"{% endif %}>
-            Deposited
-            {% if events.deposited %}
-              &mdash; {{ events.deposited|date:"SHORT_DATE_FORMAT" }}
+
+          <li {% if check.status == "deposited" %}class="active"{% elif check.status != "pending" %}class="error"{% endif %}>
+            {% if check.status == "pending" %}
+              Deposited
+            {% else %}
+              {{ check.get_status_display }}
+            {% endif %}
+            {% if check.status_date %}
+              &mdash; {{ check.status_date|date:"SHORT_DATE_FORMAT" }}
             {% endif%}
           </li>
+
         </ul>
       {% endwith %}
 
-
-      {% comment %}
-      <p>Status: {{ check.mail_status|default:"Unknown" }}</p>
-      <p>
-        Deposited:
-        {% if check.deposit_date %}
-          {{ check.deposit_date|date }}
-        {% else %}
-          No
-        {% endif %}
-      </p>
-      {% endcomment %}
     </main>
   </div>
 {% endif %}

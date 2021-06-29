@@ -26,6 +26,13 @@ from phonenumber_field.modelfields import PhoneNumberField
 from muckrock.mailgun.models import WhitelistDomain
 
 PHONE_TYPES = (("fax", "Fax"), ("phone", "Phone"))
+CHECK_STATUS = (
+    ("pending", "Pending"),
+    ("deposited", "Deposited"),
+    ("returned", "Returned"),
+    ("cancelled", "Cancelled"),
+    ("lost", "Lost"),
+)
 
 # Address models
 
@@ -615,7 +622,10 @@ class Check(models.Model):
         "auth.User", on_delete=models.PROTECT, related_name="checks"
     )
     created_datetime = models.DateTimeField(auto_now_add=True)
-    deposit_date = models.DateField(blank=True, null=True)
+    # status date indicates when the check entered its final status.
+    # it should be null if and only if the status is pending
+    status_date = models.DateField(blank=True, null=True)
+    status = models.CharField(max_length=9, choices=CHECK_STATUS, default="pending")
 
     class Meta:
         ordering = ["created_datetime"]
@@ -672,6 +682,6 @@ class Check(models.Model):
             if "." not in event.event:
                 continue
             events[event.event.split(".")[1]] = event.datetime
-        if self.deposit_date:
-            events["deposited"] = self.deposit_date
+        if self.status_date:
+            events[self.status] = self.status_date
         return events

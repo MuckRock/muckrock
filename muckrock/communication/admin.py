@@ -241,8 +241,10 @@ class CheckAdmin(CommunicationLinkMixin, VersionAdmin):
         "amount",
         "user",
         "created_datetime",
-        "deposit_date",
+        "status_date",
+        "status",
     ]
+    list_filter = ["status"]
     fields = [
         "number",
         "agency",
@@ -250,7 +252,8 @@ class CheckAdmin(CommunicationLinkMixin, VersionAdmin):
         "comm_link",
         "user",
         "created_datetime",
-        "deposit_date",
+        "status_date",
+        "status",
     ]
     readonly_fields = [
         "number",
