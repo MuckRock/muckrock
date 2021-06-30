@@ -51,7 +51,7 @@ class ProjectExploreView(TemplateView):
         context = super(ProjectExploreView, self).get_context_data(**kwargs)
         user = self.request.user
         featured_projects = (
-            Project.objects.get_visible(user).filter(featured=True).optimize()
+            Project.objects.get_viewable(user).filter(featured=True).optimize()
         )
         context.update({"featured_projects": featured_projects})
         return context
@@ -73,7 +73,7 @@ class ProjectListView(MRSearchFilterListView):
         if user.is_anonymous:
             queryset = queryset.get_public()
         else:
-            queryset = queryset.get_visible(user)
+            queryset = queryset.get_viewable(user)
         return queryset.optimize()
 
 
@@ -89,7 +89,7 @@ class ProjectContributorView(ProjectListView):
     def get_queryset(self):
         """Returns all the contributor's projects that are visible to the user."""
         queryset = super(ProjectContributorView, self).get_queryset()
-        queryset = queryset.get_for_contributor(self.get_contributor()).get_visible(
+        queryset = queryset.get_for_contributor(self.get_contributor()).get_viewable(
             self.request.user
         )
         return queryset
@@ -384,6 +384,6 @@ class ProjectAutocomplete(MRAutocompleteView):
         if manager:
             queryset = queryset.get_manager(self.request.user)
         else:
-            queryset = queryset.get_visible(self.request.user)
+            queryset = queryset.get_viewable(self.request.user)
 
         return queryset

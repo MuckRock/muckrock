@@ -25,6 +25,7 @@ import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
+import muckrock.project.viewsets
 import muckrock.qanda.views
 import muckrock.task.viewsets
 from muckrock.agency.sitemap import AgencySitemap
@@ -92,6 +93,7 @@ router.register(
     muckrock.crowdsource.viewsets.CrowdsourceResponseViewSet,
     "api-crowdsource-response",
 )
+router.register(r"project", muckrock.project.viewsets.ProjectViewSet, "api-project")
 
 urlpatterns = [
     url(r"^$", views.homepage, name="index"),

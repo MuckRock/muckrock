@@ -37,7 +37,7 @@ class ProjectQuerySet(models.QuerySet):
         """Only return projects which the user is a contributor on"""
         return self.filter(contributors=user)
 
-    def get_visible(self, user):
+    def get_viewable(self, user):
         """Only return projects which the user is permitted to see"""
         projects = self.all()
         if not user.is_authenticated:

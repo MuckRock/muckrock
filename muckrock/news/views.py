@@ -147,7 +147,7 @@ class NewsExploreView(TemplateView):
             600,
         )
         context["featured_projects"] = (
-            Project.objects.get_visible(self.request.user)
+            Project.objects.get_viewable(self.request.user)
             .filter(featured=True)
             .prefetch_related(
                 Prefetch(

@@ -225,7 +225,7 @@ class ProfileView(BuyRequestsMixin, FormView):
         recent_requests = requests.order_by("-composer__datetime_submitted")[:5]
         recent_completed = requests.filter(status="done").order_by("-datetime_done")[:5]
         articles = Article.objects.get_published().filter(authors=self.user)[:5]
-        projects = Project.objects.get_for_contributor(self.user).get_visible(
+        projects = Project.objects.get_for_contributor(self.user).get_viewable(
             self.request.user
         )[:3]
         context_data.update(

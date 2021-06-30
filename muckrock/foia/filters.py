@@ -73,7 +73,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
     )
     projects = django_filters.ModelMultipleChoiceFilter(
         field_name="projects",
-        queryset=lambda request: Project.objects.get_visible(request.user),
+        queryset=lambda request: Project.objects.get_viewable(request.user),
         widget=autocomplete.ModelSelect2Multiple(
             url="project-autocomplete", attrs={"data-placeholder": "Search projects"}
         ),

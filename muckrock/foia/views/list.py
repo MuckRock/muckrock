@@ -80,7 +80,7 @@ class RequestExploreView(TemplateView):
             .order_by("-pub_date")
         )[:3]
         context["featured_projects"] = (
-            Project.objects.get_visible(user)
+            Project.objects.get_viewable(user)
             .filter(featured=True)
             .prefetch_related(
                 Prefetch(

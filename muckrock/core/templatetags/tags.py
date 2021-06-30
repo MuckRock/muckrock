@@ -190,7 +190,7 @@ def project_manager(context, mr_object):
     """Template tag to insert a project manager component"""
     user = context["user"]
     try:
-        projects = mr_object.projects.get_visible(user)
+        projects = mr_object.projects.get_viewable(user)
     except AttributeError:
         projects = None
     try:

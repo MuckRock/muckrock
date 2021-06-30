@@ -63,7 +63,7 @@ class TagDetailView(DetailView):
         self._get_and_count(
             context,
             "tagged_projects",
-            Project.objects.get_visible(user).filter(tags=this_tag).optimize(),
+            Project.objects.get_viewable(user).filter(tags=this_tag).optimize(),
         )
         self._get_and_count(
             context,
