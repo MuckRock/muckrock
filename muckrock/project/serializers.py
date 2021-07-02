@@ -27,3 +27,4 @@ class ProjectSerializer(serializers.ModelSerializer):
             "date_created",
             "date_approved",
         ]
+        extra_kwargs = {"contributors": {"style": {"base_template": "input.html"}}}

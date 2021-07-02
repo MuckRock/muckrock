@@ -65,6 +65,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         jurisdiction = django_filters.NumberFilter(
             field_name="agency__jurisdiction__id", label="Jurisdiction ID"
         )
+        projects = django_filters.NumberFilter(
+            field_name="projects", label="Project ID"
+        )
         user = django_filters.CharFilter(
             field_name="composer__user__username", label="User"
         )

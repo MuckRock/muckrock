@@ -1,6 +1,7 @@
 """Viewsets for projects"""
 
 # Third Party
+import django_filters
 from rest_framework import mixins, viewsets
 
 # MuckRock
@@ -21,3 +22,14 @@ class ProjectViewSet(
         return Project.objects.get_viewable(self.request.user).prefetch_related(
             "contributors", "articles", "requests"
         )
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for Projects"""
+
+        contributors = django_filters.NumberFilter(field_name="contributors")
+
+        class Meta:
+            model = Project
+            fields = ["contributors"]
+
+    filterset_class = Filter
