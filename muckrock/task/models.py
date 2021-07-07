@@ -558,8 +558,11 @@ class FlaggedTask(Task):
     type = "FlaggedTask"
     text = models.TextField()
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.PROTECT)
+    # Allow FOIA to be set null, in the case that they add custom contact information,
+    # which creates a flag task, and they try to edit the request before it is sent,
+    # which will delete the request and return you to the composer
     foia = models.ForeignKey(
-        "foia.FOIARequest", blank=True, null=True, on_delete=models.PROTECT
+        "foia.FOIARequest", blank=True, null=True, on_delete=models.SET_NULL
     )
     agency = models.ForeignKey(
         "agency.Agency", blank=True, null=True, on_delete=models.PROTECT
