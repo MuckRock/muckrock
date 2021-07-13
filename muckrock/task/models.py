@@ -707,6 +707,12 @@ class FlaggedTask(Task):
                 )
                 tags.append("{}_flag".format(obj_name))
 
+        if self.foia:
+            description += (
+                "\nNOTE: If the FOIA does not exist, "
+                "the user may have deleted it, and you may safely close this ticket."
+            )
+
         if self.user:
             entitlements = list(
                 self.user.organizations.values_list(
