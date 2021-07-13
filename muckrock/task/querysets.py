@@ -54,6 +54,13 @@ class TaskQuerySet(models.QuerySet):
         if has_perm:
             for task_type in foia_task_types:
                 tasks += list(task_type.objects.filter(foia=foia).preload_list())
+        # tasks that point to a composer
+        foia_task_types = [task.models.MultiRequestTask]
+        if has_perm:
+            for task_type in foia_task_types:
+                tasks += list(
+                    task_type.objects.filter(composer=foia.composer).preload_list()
+                )
         # tasks that point to an agency
         if foia.agency:
             tasks += list(
