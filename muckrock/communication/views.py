@@ -4,6 +4,7 @@ Views for the communication app
 
 # Django
 from django import http
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -138,13 +139,14 @@ class CheckListView(MRFilterListView):
                     )
                     if form.is_valid():
                         form.save()
-                        foia = check.communication.foia
-                        action = new_action(
-                            foia.agency,
-                            f"check {form.cleaned_data['status']}",
-                            target=foia,
-                        )
-                        foia.notify(action)
+                        if settings.CHECK_NOTIFICATIONS:
+                            foia = check.communication.foia
+                            action = new_action(
+                                foia.agency,
+                                f"check {form.cleaned_data['status']}",
+                                target=foia,
+                            )
+                            foia.notify(action)
                     else:
                         messages.error(
                             request, f"Error for {check.number}: {form.errors}"

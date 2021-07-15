@@ -610,6 +610,7 @@ FONT_PATH = "/usr/share/fonts/truetype/dejavu/"
 
 CHECK_EMAIL = os.environ.get("CHECK_EMAIL", "")
 CHECK_LIMIT = int(os.environ.get("CHECK_LIMIT", 200))
+CHECK_NOTIFICATIONS = boolcheck(os.environ.get("CHECK_NOTIFICATIONS", False))
 
 DASHING = {
     "INSTALLED_WIDGETS": ("number", "list", "graph", "requestlist"),

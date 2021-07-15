@@ -63,7 +63,10 @@ def lob_webhook(request):
             datetime=dateutil.parser.parse(data["date_created"]),
             event=data["event_type"]["id"],
         )
-        if event.event == "check.processed_for_delivery":
+        if (
+            event.event == "check.processed_for_delivery"
+            and settings.CHECK_NOTIFICATIONS
+        ):
             foia = mail.communication.foia
             action = new_action(
                 foia.agency, "check processed for delivery", target=foia, public=False
