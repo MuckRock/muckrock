@@ -74,6 +74,9 @@
   {% else %}
     <dd>Never</dd>
   {% endif %}
+
+  <dt>Source</dt>
+  <dd>{{ task.get_source_display }}</dd>
 </dl>
 
 {% for data in review_data %}

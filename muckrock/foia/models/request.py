@@ -819,7 +819,7 @@ class FOIARequest(models.Model):
                 self.email.status = "error"
                 self.email.save()
                 task.models.ReviewAgencyTask.objects.ensure_one_created(
-                    agency=self.agency, resolved=False
+                    agency=self.agency, resolved=False, source="email"
                 )
 
         email_comm.set_raw_email(msg.message())

@@ -282,7 +282,14 @@ class ReviewAgencyTask(Task):
     and new contact information is required"""
 
     type = "ReviewAgencyTask"
+    sources = (
+        ("staff", "Staff Review"),
+        ("stale", "Stale Request"),
+        ("email", "Bad Email"),
+        ("fax", "Bad Fax"),
+    )
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
+    source = models.CharField(max_length=5, choices=sources, blank=True, null=True)
 
     objects = ReviewAgencyTaskQuerySet.as_manager()
 

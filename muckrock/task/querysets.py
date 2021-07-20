@@ -325,17 +325,17 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             ),
         )
 
-    def ensure_one_created(self, **kwargs):
+    def ensure_one_created(self, source=None, **kwargs):
         """Ensure exactly one model exists in the database as specified"""
         try:
-            task_, _ = self.get_or_create(**kwargs)
+            task_, _ = self.get_or_create(**kwargs, defaults={"source": source})
             return task_
         except task.models.ReviewAgencyTask.MultipleObjectsReturned:
             # if there are multiples, delete all but the first one
             # then try again
             to_delete = self.filter(**kwargs).order_by("date_created")[1:]
             self.filter(pk__in=to_delete).delete()
-            self.ensure_one_created(**kwargs)
+            self.ensure_one_created(source=source, **kwargs)
 
 
 class ResponseTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):

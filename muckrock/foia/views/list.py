@@ -295,7 +295,7 @@ class RequestList(MRSearchFilterListView):
         foias = foias.get_viewable(user)
         for foia in foias:
             ReviewAgencyTask.objects.ensure_one_created(
-                agency=foia.agency, resolved=False
+                agency=foia.agency, resolved=False, source="staff"
             )
         return "Review agency tasks created"
 

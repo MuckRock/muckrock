@@ -224,6 +224,8 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
         method="filter_complicated", label="Complicated Tasks", choices=BOOLEAN_CHOICES
     )
 
+    source = django_filters.ChoiceFilter(choices=ReviewAgencyTask.sources)
+
     class Meta:
         model = ReviewAgencyTask
         fields = ["jurisdiction", "agency", "resolved", "resolved_by"]

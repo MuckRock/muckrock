@@ -96,7 +96,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
                 return redirect(agency)
         elif action == "review" and request.user.is_staff:
             task = ReviewAgencyTask.objects.ensure_one_created(
-                agency=agency, resolved=False
+                agency=agency, resolved=False, source="staff"
             )
             messages.success(request, "Agency marked for review.")
             return redirect(reverse("review-agency-task", kwargs={"pk": task.pk}))

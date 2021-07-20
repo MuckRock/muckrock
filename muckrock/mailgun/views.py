@@ -422,7 +422,7 @@ def bounces(request, email_comm, timestamp):
     recipient.status = "error"
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
-        agency=email_comm.communication.foia.agency, resolved=False
+        agency=email_comm.communication.foia.agency, resolved=False, source="email"
     )
 
     # ensure we don't create an infinite loop of emails
@@ -551,7 +551,9 @@ def phaxio_callback(request):
                     number.status = "error"
                     number.save()
                     ReviewAgencyTask.objects.ensure_one_created(
-                        agency=fax_comm.communication.foia.agency, resolved=False
+                        agency=fax_comm.communication.foia.agency,
+                        resolved=False,
+                        source="fax",
                     )
                     fax_comm.communication.foia.submit(switch=True)
 

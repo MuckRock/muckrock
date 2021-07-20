@@ -31,7 +31,9 @@ register_signal(client)
 def stale():
     """Record all stale agencies once a week"""
     for foia in FOIARequest.objects.get_stale():
-        ReviewAgencyTask.objects.ensure_one_created(agency=foia.agency, resolved=False)
+        ReviewAgencyTask.objects.ensure_one_created(
+            agency=foia.agency, resolved=False, source="stale"
+        )
 
 
 class MassImport(AsyncFileDownloadTask):

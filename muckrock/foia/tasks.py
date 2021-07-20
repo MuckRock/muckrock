@@ -411,7 +411,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             comm.foia.fax.status = "error"
             comm.foia.fax.save()
             ReviewAgencyTask.objects.ensure_one_created(
-                agency=comm.foia.agency, resolved=False
+                agency=comm.foia.agency, resolved=False, source="fax"
             )
         else:
             logger.error("Send fax error, will retry: %s", exc, exc_info=sys.exc_info())
