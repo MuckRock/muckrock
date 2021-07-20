@@ -321,7 +321,6 @@ CELERY_TASK_IGNORE_RESULTS = True
 CELERY_IMPORTS = (
     "muckrock.accounts.tasks",
     "muckrock.agency.tasks",
-    "muckrock.communication.tasks",
     "muckrock.crowdsource.tasks",
     "muckrock.foia.tasks",
     "muckrock.portal.tasks",
