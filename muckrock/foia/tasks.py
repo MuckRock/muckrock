@@ -424,7 +424,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
 
 
 @periodic_task(
-    run_every=crontab(hour=5, minute=0),
+    run_every=crontab(hour=1, minute=0),
     time_limit=10 * 60,
     soft_time_limit=570,
     name="muckrock.foia.tasks.followup_requests",
