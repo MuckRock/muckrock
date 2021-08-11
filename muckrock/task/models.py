@@ -22,7 +22,12 @@ from itertools import groupby
 # Third Party
 import bleach
 from zenpy import Zenpy
-from zenpy.lib.api_objects import Comment, Request, User as ZenUser
+from zenpy.lib.api_objects import (
+    Comment,
+    Organization as ZenOrganization,
+    Ticket,
+    User as ZenUser,
+)
 
 # MuckRock
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
@@ -730,7 +735,7 @@ class FlaggedTask(Task):
                 entitlements.remove("free")
             tags.extend(entitlements)
 
-        request = {
+        ticket_data = {
             "subject": self.get_category_display() or "Generic Flag",
             "comment": Comment(body=description),
             "type": "task",
@@ -739,14 +744,28 @@ class FlaggedTask(Task):
             "tags": tags,
         }
         if self.user:
-            requester = {"name": self.user.profile.full_name or self.user.username}
+            user_data = {
+                "name": self.user.profile.full_name or self.user.username,
+                "external_id": str(self.user.profile.uuid),
+            }
             if self.user.email:
-                requester["email"] = self.user.email
+                user_data["email"] = self.user.email
+            org_data = {
+                "name": self.user.profile.organization.name,
+                "external_id": str(self.user.profile.organization.uuid),
+            }
         else:
-            requester = {"name": "Anonymous User"}
-        request["requester"] = ZenUser(**requester)
-        request = client.requests.create(Request(**request))
-        return request.id
+            user_data = {"name": "Anonymous User"}
+            org_data = {}
+
+        if org_data:
+            org = client.organizations.create_or_update(ZenOrganization(**org_data))
+            user_data["organization_id"] = org.id
+            ticket_data["organization_id"] = org.id
+        user = client.users.create_or_update(ZenUser(**user_data))
+        ticket_data["requester_id"] = user.id
+        ticket_audit = client.tickets.create(Ticket(**ticket_data))
+        return ticket_audit.ticket.id
 
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
