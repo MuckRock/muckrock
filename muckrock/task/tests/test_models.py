@@ -246,8 +246,16 @@ class FlaggedTaskTests(TestCase):
     def test_create_zend_ticket(self, mock_requests):
         """Test the creation of a zendesk help ticket when a flag is created"""
         mock_requests.post(
-            "https://muckrock.zendesk.com/api/v2/requests.json",
-            json={"request": {"id": "ticket_id"}},
+            "https://muckrock.zendesk.com/api/v2/organizations/create_or_update.json",
+            json={"organization": {"id": "org_id"}},
+        )
+        mock_requests.post(
+            "https://muckrock.zendesk.com/api/v2/users/create_or_update.json",
+            json={"user": {"id": "user_id"}},
+        )
+        mock_requests.post(
+            "https://muckrock.zendesk.com/api/v2/tickets.json",
+            json={"ticket": {"id": "ticket_id"}, "audit": {}},
         )
         flagged_task = FlaggedTaskFactory(
             user__email="flag@example.com", text="Example flag text"
