@@ -48,6 +48,7 @@ from zipstream import ZIP_DEFLATED, ZipFile
 # MuckRock
 from muckrock.communication.models import (
     Check,
+    EmailCommunication,
     FaxCommunication,
     FaxError,
     MailCommunication,
@@ -56,7 +57,13 @@ from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import read_in_chunks
 from muckrock.foia.exceptions import SizeError
-from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
+from muckrock.foia.models import (
+    FOIACommunication,
+    FOIAComposer,
+    FOIAFile,
+    FOIARequest,
+    RawEmail,
+)
 from muckrock.task.models import (
     PaymentInfoTask,
     ResponseTask,
@@ -1041,3 +1048,19 @@ def import_doccloud_file(file_pk):
         response.raise_for_status()
         for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
             out_file.write(chunk)
+
+
+@task(
+    ignore_result=True,
+    autoretry_for=(requests.exceptions.RequestException,),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
+    name="muckrock.foia.tasks.fetch_raw_email",
+)
+def fetch_raw_email(message_id):
+    """Asynchrnously fetch the raw email from MailGun servers for the email
+    with the given message ID
+    """
+    emails = EmailCommunication.objects.filter(message_id=message_id, rawemail=None)
+    if emails:
+        RawEmail.objects.make_async(emails)

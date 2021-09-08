@@ -19,10 +19,11 @@ import re
 import chardet
 
 # MuckRock
+from muckrock.core.storage import PrivateMediaRootS3BotoStorage
 from muckrock.core.utils import UnclosableFile, new_action
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import STATUS, FOIARequest
-from muckrock.foia.querysets import FOIACommunicationQuerySet
+from muckrock.foia.querysets import FOIACommunicationQuerySet, RawEmailQuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -459,10 +460,31 @@ class RawEmail(models.Model):
     email = models.OneToOneField(
         "communication.EmailCommunication", null=True, on_delete=models.CASCADE
     )
-    raw_email = models.TextField(blank=True)
+    raw_email_db = models.TextField(blank=True)
+    raw_email_file = models.FileField(
+        upload_to="raw_emails/%Y/%m/%d",
+        storage=PrivateMediaRootS3BotoStorage(),
+        blank=True,
+    )
+
+    objects = RawEmailQuerySet.as_manager()
 
     def __str__(self):
         return "Raw Email: %d" % self.pk
+
+    @property
+    def raw_email(self):
+        """Get the raw email content"""
+        # check S3 first, preferred storage destination
+        if self.raw_email_file:
+            return self.raw_email_file.read().decode("utf8")
+        else:
+            return self.raw_email_db
+
+    @raw_email.setter
+    def raw_email(self, value):
+        """Set the raw email value"""
+        self.raw_email_file = ContentFile(value.encode("utf8"), name=f"{self.pk}.eml")
 
     class Meta:
         app_label = "foia"

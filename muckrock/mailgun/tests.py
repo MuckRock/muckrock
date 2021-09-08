@@ -8,6 +8,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 # Standard Library
 import hashlib
@@ -20,10 +21,12 @@ from io import StringIO
 # Third Party
 import nose.tools
 import pytz
+import requests_mock
 from freezegun import freeze_time
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
+from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
 from muckrock.mailgun.views import bounces, delivered, opened, route_mailgun
@@ -68,6 +71,7 @@ class TestMailgunViews(TestCase):
             "stripped-text": text,
             "stripped-signature": signature,
             "body-plain": body or "%s\n%s" % (text, signature),
+            "Message-ID": "message_id",
         }
         for i, attachment in enumerate(attachments):
             data["attachment-%d" % (i + 1)] = attachment
@@ -77,7 +81,7 @@ class TestMailgunViews(TestCase):
         return route_mailgun(request)
 
 
-class TestMailgunViewHandleRequest(TestMailgunViews):
+class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
     """Tests for _handle_request"""
 
     def setUp(self):
@@ -85,8 +89,15 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         self.factory = RequestFactory()
         mail.outbox = []
 
-    def test_normal(self):
+    @requests_mock.Mocker()
+    def test_normal(self, mock_requests):
         """Test a normal succesful response"""
+        url = "https://www.example.com/raw_email/"
+        mock_requests.get(
+            settings.MAILGUN_API_URL + "/events",
+            json={"items": [{"storage": {"url": url}}]},
+        )
+        mock_requests.get(url, json={"body-mime": "Raw email"})
 
         foia = FOIARequestFactory(status="ack")
         from_name = "Smith, Bob"
@@ -107,7 +118,8 @@ class TestMailgunViewHandleRequest(TestMailgunViews):
         nose.tools.eq_(last_comm.to_user, foia.user)
         nose.tools.eq_(last_comm.response, True)
         nose.tools.eq_(last_comm.full_html, False)
-        nose.tools.ok_(last_comm.get_raw_email())
+        self.run_commit_hooks()
+        nose.tools.eq_(last_comm.get_raw_email().raw_email, "Raw email")
         nose.tools.eq_(last_comm.responsetask_set.count(), 1)
         nose.tools.eq_(foia.email, EmailAddress.objects.fetch(from_email))
         nose.tools.eq_(

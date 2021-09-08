@@ -441,6 +441,10 @@ MAILCHIMP_LIST_DEFAULT = "20aa4a931d"
 
 MAILGUN_ACCESS_KEY = os.environ.get("MAILGUN_ACCESS_KEY")
 MAILGUN_SERVER_NAME = os.environ.get("MAILGUN_SERVER_NAME", "requests.muckrock.com")
+MAILGUN_API_URL = os.environ.get(
+    "MAILGUN_API_URL", f"https://api.mailgun.net/v3/{MAILGUN_SERVER_NAME}"
+)
+
 
 EMAIL_SUBJECT_PREFIX = "[Muckrock]"
 EMAIL_BACKEND = os.environ.get(

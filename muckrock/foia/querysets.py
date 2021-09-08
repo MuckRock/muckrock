@@ -14,6 +14,9 @@ from django.utils.text import slugify
 from datetime import date, datetime, time
 from itertools import groupby
 
+# Third Party
+import requests
+
 # MuckRock
 from muckrock.agency.constants import STALE_REPLIES
 
@@ -438,3 +441,52 @@ class FOIATemplateQuerySet(models.QuerySet):
         else:
             template = self.filter(jurisdiction=None).order_by("pk").first()
         return template.render_generic(user, requested_docs, **kwargs)
+
+
+class RawEmailQuerySet(models.QuerySet):
+    """Custom query set for Raw Emails"""
+
+    def make(self, message_id):
+        """Store a raw email fetched from mailgun's API
+
+        Launch celery task
+        """
+        # pylint: disable=import-outside-toplevel
+        from muckrock.foia.tasks import fetch_raw_email
+
+        if message_id:
+            fetch_raw_email.delay(message_id)
+
+    def make_async(self, emails):
+        """Store a raw email fetched from mailgun's API
+
+        Perform retrieval, called from celery task
+        All emails should have the same message ID
+        """
+
+        if not emails:
+            return
+        message_id = emails[0].message_id
+        response = requests.get(
+            settings.MAILGUN_API_URL + "/events",
+            auth=("api", settings.MAILGUN_ACCESS_KEY),
+            params={"event": "stored", "message-id": message_id},
+        )
+        response.raise_for_status()
+        items = response.json()["items"]
+        if not items:
+            return
+        url = items[0]["storage"]["url"]
+        response = requests.get(
+            url,
+            auth=("api", settings.MAILGUN_ACCESS_KEY),
+            headers={"Accept": "message/rfc2822"},
+        )
+        response.raise_for_status()
+
+        raw_email_content = response.json()["body-mime"]
+        for email in emails:
+            raw_email = self.create(email=email)
+            # set explicitly to store in S3 (raw_email is a property)
+            raw_email.raw_email = raw_email_content
+            raw_email.save()

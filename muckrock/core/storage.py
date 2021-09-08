@@ -44,5 +44,11 @@ class MediaRootS3BotoStorage(S3Boto3Storage):
     custom_domain = settings.AWS_MEDIA_CUSTOM_DOMAIN
 
 
+class PrivateMediaRootS3BotoStorage(MediaRootS3BotoStorage):
+    """S3 storage backend that always uploads files as private"""
+
+    default_acl = "private"
+
+
 class QueuedS3DietStorage:
     """Left here for old migrations to reference"""

@@ -50,7 +50,9 @@ from muckrock.task.models import (
 logger = logging.getLogger(__name__)
 
 
-def _make_orphan_comm(from_email, to_emails, cc_emails, subject, post, files, foia):
+def _make_orphan_comm(
+    from_email, to_emails, cc_emails, subject, message_id, post, files, foia
+):
     """Make an orphan communication"""
     # pylint: disable=too-many-arguments
     if from_email:
@@ -61,25 +63,26 @@ def _make_orphan_comm(from_email, to_emails, cc_emails, subject, post, files, fo
         from_user = agencies[0].get_user()
     else:
         from_user = None
-    comm = FOIACommunication.objects.create(
-        from_user=from_user,
-        response=True,
-        subject=subject[:255],
-        datetime=timezone.now(),
-        communication=_get_mail_body(post),
-        likely_foia=foia,
-    )
-    email_comm = EmailCommunication.objects.create(
-        communication=comm, sent_datetime=timezone.now(), from_email=from_email
-    )
-    email_comm.to_emails.set(to_emails)
-    email_comm.cc_emails.set(cc_emails)
-    RawEmail.objects.create(
-        email=email_comm,
-        raw_email="%s\n%s"
-        % (post.get("message-headers", ""), post.get("body-plain", "")),
-    )
-    comm.process_attachments(files)
+
+    with transaction.atomic():
+        comm = FOIACommunication.objects.create(
+            from_user=from_user,
+            response=True,
+            subject=subject[:255],
+            datetime=timezone.now(),
+            communication=_get_mail_body(post),
+            likely_foia=foia,
+        )
+        email_comm = EmailCommunication.objects.create(
+            communication=comm,
+            sent_datetime=timezone.now(),
+            from_email=from_email,
+            message_id=message_id,
+        )
+        email_comm.to_emails.set(to_emails)
+        email_comm.cc_emails.set(cc_emails)
+        comm.process_attachments(files)
+        transaction.on_commit(lambda: RawEmail.objects.make(message_id))
 
     return comm
 
@@ -168,7 +171,7 @@ def route_mailgun(request):
     # cause duplicate messages if one email is sent to or CC'd to multiple
     # addresses @requests.muckrock.com.  To try and avoid this, we will cache
     # the message id, which should be a unique identifier for the message.
-    # If it exists int he cache, we will stop processing this email.  The
+    # If it exists in the cache, we will stop processing this email.  The
     # ID will be cached for 5 minutes - duplicates should normally be processed
     # within seconds of each other.
     message_id = (
@@ -216,6 +219,9 @@ def _handle_request(request, mail_id):
     post = request.POST
     from_email, to_emails, cc_emails = _parse_email_headers(post)
     subject = post.get("Subject") or post.get("subject", "")
+    message_id = (
+        post.get("Message-ID") or post.get("Message-Id") or post.get("message-id", "")
+    ).strip("<>")
 
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
@@ -246,7 +252,14 @@ def _handle_request(request, mail_id):
         if not email_allowed or foia.block_incoming:
             logger.warning("%s: %s", msg, from_email)
             comm = _make_orphan_comm(
-                from_email, to_emails, cc_emails, subject, post, request.FILES, foia
+                from_email,
+                to_emails,
+                cc_emails,
+                subject,
+                message_id,
+                post,
+                request.FILES,
+                foia,
             )
             OrphanTask.objects.create(
                 reason=reason, communication=comm, address=mail_id
@@ -272,15 +285,14 @@ def _handle_request(request, mail_id):
                 hidden=hidden,
             )
             email_comm = EmailCommunication.objects.create(
-                communication=comm, sent_datetime=timezone.now(), from_email=from_email
+                communication=comm,
+                sent_datetime=timezone.now(),
+                from_email=from_email,
+                message_id=message_id,
             )
             email_comm.to_emails.set(to_emails)
             email_comm.cc_emails.set(cc_emails)
-            RawEmail.objects.create(
-                email=email_comm,
-                raw_email="%s\n%s"
-                % (post.get("message-headers", ""), post.get("body-plain", "")),
-            )
+            transaction.on_commit(lambda: RawEmail.objects.make(message_id))
             comm.process_attachments(request.FILES)
             transaction.on_commit(lambda: download_links(comm.pk))
 
@@ -339,7 +351,14 @@ def _handle_request(request, mail_id):
         except FOIARequest.DoesNotExist:
             foia = None
         comm = _make_orphan_comm(
-            from_email, to_emails, cc_emails, subject, post, request.FILES, foia
+            from_email,
+            to_emails,
+            cc_emails,
+            subject,
+            message_id,
+            post,
+            request.FILES,
+            foia,
         )
         OrphanTask.objects.create(reason="ia", communication=comm, address=mail_id)
         return HttpResponse("WARNING")
@@ -361,6 +380,9 @@ def _catch_all(request, address):
     post = request.POST
     from_email, to_emails, cc_emails = _parse_email_headers(post)
     subject = post.get("Subject") or post.get("subject", "")
+    message_id = (
+        post.get("Message-ID") or post.get("Message-Id") or post.get("message-id", "")
+    ).strip("<>")
 
     if any(to_email.email.startswith("bounce+") for to_email in to_emails):
         foia = _find_likely_bounce(subject)
@@ -369,7 +391,14 @@ def _catch_all(request, address):
 
     if from_email and from_email.allowed():
         comm = _make_orphan_comm(
-            from_email, to_emails, cc_emails, subject, post, request.FILES, foia
+            from_email,
+            to_emails,
+            cc_emails,
+            subject,
+            message_id,
+            post,
+            request.FILES,
+            foia,
         )
         OrphanTask.objects.create(reason="ia", communication=comm, address=address)
 

@@ -750,7 +750,7 @@ class FOIARequest(models.Model):
         self.portal.send_msg(comm, **kwargs)
 
     def send_email(self, comm, **kwargs):
-        """Send the message as an email - asynchrnously"""
+        """Send the message as an email - asynchronously"""
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.tasks import foia_send_email
 
@@ -822,7 +822,7 @@ class FOIARequest(models.Model):
                     agency=self.agency, resolved=False, source="email"
                 )
 
-        email_comm.set_raw_email(msg.message())
+        email_comm.set_raw_email(str(msg.message()))
 
     def _send_fax(self, comm, **kwargs):
         """Send the message as a fax"""

@@ -100,7 +100,7 @@ class RawEmailFactory(factory.django.DjangoModelFactory):
     email = factory.SubFactory(
         "muckrock.communication.factories.EmailCommunicationFactory"
     )
-    raw_email = factory.Faker("paragraph")
+    raw_email_db = factory.Faker("paragraph")
 
 
 class FOIAFileFactory(factory.django.DjangoModelFactory):
