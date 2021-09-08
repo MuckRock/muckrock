@@ -183,7 +183,9 @@ def route_mailgun(request):
     tos = post.get("To", "") or post.get("to", "")
     ccs = post.get("Cc", "") or post.get("cc", "")
     name_emails = getaddresses([tos.lower(), ccs.lower()])
-    logger.info("Incoming email: %s - %s", name_emails, post.get("Subject", ""))
+    logger.info(
+        "Incoming email: %s - %s - %s", name_emails, post.get("Subject", ""), message_id
+    )
     for _, email in name_emails:
         m_request_email = p_request_email.match(email)
         if m_request_email:
