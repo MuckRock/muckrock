@@ -8,7 +8,6 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.utils import timezone
 
 # Standard Library
 import hashlib
