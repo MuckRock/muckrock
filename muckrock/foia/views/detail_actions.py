@@ -143,7 +143,7 @@ def flag(request, foia):
                 foia=foia,
                 author=request.user,
                 datetime=timezone.now(),
-                note=form.cleaned_data["text"],
+                note="Submitted help request:\n\n" + form.cleaned_data["text"],
             )
 
     return _get_redirect(request, foia)
