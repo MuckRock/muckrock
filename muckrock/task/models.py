@@ -696,6 +696,7 @@ class FlaggedTask(Task):
             return None
 
     def create_zendesk_ticket(self):
+        # pylint: disable=too-many-branches
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
             subdomain=settings.ZENDESK_SUBDOMAIN,
