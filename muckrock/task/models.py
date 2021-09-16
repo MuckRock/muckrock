@@ -65,6 +65,8 @@ logger = logging.getLogger(__name__)
 # pylint: disable=missing-docstring
 # pylint: disable=too-many-lines
 
+MR_NUMBER_FIELD = 1500004565182
+
 
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
@@ -743,6 +745,10 @@ class FlaggedTask(Task):
             "status": "new",
             "tags": tags,
         }
+        if self.foia:
+            ticket_data["custom_fields"] = [
+                {"id": MR_NUMBER_FIELD, "value": self.foia.pk}
+            ]
         if self.user:
             user_data = {
                 "name": self.user.profile.full_name or self.user.username,
