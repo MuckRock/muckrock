@@ -651,6 +651,7 @@ class TestRawEmail(TestCase):
         free_user = UserFactory()
         pro_user = self.comm.foia.user
         request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
         request.user = free_user
         response = self.view(request, self.comm.id)
         eq_(response.status_code, 302, "Free users should be denied access.")
