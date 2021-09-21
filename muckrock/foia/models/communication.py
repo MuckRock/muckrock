@@ -14,9 +14,12 @@ import logging
 import mimetypes
 import os
 import re
+from email import policy
+from email.parser import BytesParser
 
 # Third Party
 import chardet
+from memoize import mproperty
 
 # MuckRock
 from muckrock.core.storage import PrivateMediaRootS3BotoStorage
@@ -472,7 +475,7 @@ class RawEmail(models.Model):
     def __str__(self):
         return "Raw Email: %d" % self.pk
 
-    @property
+    @mproperty
     def raw_email(self):
         """Get the raw email content"""
         # check S3 first, preferred storage destination
@@ -485,6 +488,22 @@ class RawEmail(models.Model):
     def raw_email(self, value):
         """Set the raw email value"""
         self.raw_email_file = ContentFile(value.encode("utf8"), name=f"{self.pk}.eml")
+
+    def get_text_html(self):
+        """Decode the text and html from this raw email"""
+        msg = BytesParser(policy=policy.default).parsebytes(
+            self.raw_email.encode("utf8")
+        )
+        text = self._get_body(msg, "plain")
+        html = self._get_body(msg, "html")
+        return text, html
+
+    def _get_body(self, msg, type_):
+        """Get the decoded body for the given type from the message"""
+        body = msg.get_body(preferencelist=(type_))
+        if body:
+            return body.get_content()
+        return ""
 
     class Meta:
         app_label = "foia"

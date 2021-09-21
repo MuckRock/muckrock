@@ -7,9 +7,13 @@ from django.contrib.auth.decorators import permission_required
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+# Third Party
+import bleach
+
 # MuckRock
 from muckrock.core.views import MRAutocompleteView
 from muckrock.foia.codes import CODES
+from muckrock.foia.constants import EMAIL_ATTRIBUTES, EMAIL_STYLES, EMAIL_TAGS
 from muckrock.foia.models import STATUS, FOIACommunication, FOIARequest
 
 
@@ -47,12 +51,22 @@ def raw(request, idx):
     comm = get_object_or_404(FOIACommunication, pk=idx)
     raw_email = comm.get_raw_email()
     permission = request.user.is_staff or request.user == comm.foia.user
-    if raw_email and permission:
-        return HttpResponse(
-            raw_email.raw_email, content_type="text/plain; charset=utf-8"
-        )
-    else:
+    if not raw_email or not permission:
         raise Http404
+    text, html = raw_email.get_text_html()
+    data = {
+        "raw": raw_email.raw_email,
+        "text": text,
+        "html": bleach.clean(
+            html,
+            tags=EMAIL_TAGS,
+            attributes=EMAIL_ATTRIBUTES,
+            styles=EMAIL_STYLES,
+            strip=True,
+        ),
+        "html_src": html,
+    }
+    return render(request, "foia/communication/raw.html", data)
 
 
 class FOIARequestAutocomplete(MRAutocompleteView):

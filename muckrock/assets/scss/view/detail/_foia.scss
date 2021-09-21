@@ -673,3 +673,15 @@ $request-breakpoint: 768px;
 article.passcode-form {
   margin-bottom: 5em;
 }
+
+.raw-content {
+  width: 80%;
+  height: 60vh;
+  padding: 7px;
+  border: 1px solid black;
+  font-size: $size-2;
+  overflow: auto;
+  &.hide {
+    display: none;
+  }
+}

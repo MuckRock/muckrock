@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}MuckRock &bull; Raw Email Viewer{% endblock %}
+
+{% block content %}
+  <div class="detail">
+    <div class="button-group">
+      <a class="primary button raw-content-button" href="#raw-raw">Raw</a>
+      <a class="primary button raw-content-button" href="#raw-text">Text</a>
+      <a class="primary button raw-content-button" href="#raw-html">HTML</a>
+      <a class="primary button raw-content-button" href="#raw-html-src">HTML Source</a>
+    </div>
+    <br>
+    <pre id="raw-raw" class="raw-content">{{ raw }}</pre>
+    <pre id="raw-text" class="raw-content hide">{{ text }}</pre>
+    <div id="raw-html" class="raw-content hide">{{ html|safe }}</div>
+    <pre id="raw-html-src" class="raw-content hide">{{ html_src }}</pre>
+  </div>
+{% endblock content %}

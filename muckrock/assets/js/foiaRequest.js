@@ -522,3 +522,10 @@ $('document').ready(function(){
   });
 
 });
+
+$(".raw-content-button").click(function(e) {
+  $(".raw-content").hide();
+  $(e.target.attributes.href.value).show();
+  e.preventDefault();
+});
+
