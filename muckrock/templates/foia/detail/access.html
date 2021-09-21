@@ -109,6 +109,41 @@
 
       </tbody>
     </table>
+
+    <form class="change-owner" method="post">
+      {% csrf_token %}
+      <h3>Change Owner</h3>
+      <p class="help-text error">
+        Warning: This will give control of this request to another user.  You
+        will lose access to this request.  Please be sure you are selecting the
+        correct user.
+      </p>
+      {% if foia.composer.foias.count > 1 %}
+      <p class="help-text error">
+        The following requests were filed with this request, and will also have
+        their owner changed:
+        <ul>
+          {% for sibling in foia.composer.foias.all %}
+            {% if sibling != foia %}
+              <li><a href="{{ sibling.get_absolute_url }}">{{ sibling.title }}</a>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </p>
+      {% endif %}
+      <div class="picker">
+        <div class="user search input">
+          <label for="{{ owner_form.user.id_for_label}}">
+            Search for MuckRock users
+          </label>
+          {{ owner_form.user }}
+        </div>
+      </div>
+      <button class="failure button" type="submit" name="action" value="change_owner">
+        Change Owner
+      </button>
+    </form>
+
   </section>
 
 {% endif %}

@@ -40,6 +40,7 @@ from muckrock.foia.forms import (
     FOIAEmbargoForm,
     FOIAEstimatedCompletionDateForm,
     FOIANoteForm,
+    FOIAOwnerForm,
     RequestFeeForm,
     ResendForm,
     TrackingNumberForm,
@@ -214,6 +215,7 @@ class Detail(DetailView):
     def _get_form_context_data(self, context):
         """Get context data about forms"""
         context["access_form"] = FOIAAccessForm()
+        context["owner_form"] = FOIAOwnerForm()
         context["admin_fix_form"] = self.admin_fix_form
         context["agency_passcode_form"] = self.agency_passcode_form
         context["agency_reply_form"] = self.agency_reply_form

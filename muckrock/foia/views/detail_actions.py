@@ -33,6 +33,7 @@ from muckrock.foia.forms import (
     FOIAEstimatedCompletionDateForm,
     FOIAFlagForm,
     FOIANoteForm,
+    FOIAOwnerForm,
     FOIASoftDeleteForm,
     RequestFeeForm,
     ResendForm,
@@ -463,6 +464,24 @@ def promote(request, foia):
         messages.success(
             request, "%s can now edit this request." % user.profile.full_name
         )
+    return _get_redirect(request, foia)
+
+
+def change_owner(request, foia):
+    """Change the owner of the request"""
+    form = FOIAOwnerForm(request.POST)
+    has_perm = foia.has_perm(request.user, "change")
+    if not has_perm or not form.is_valid():
+        return _get_redirect(request, foia)
+
+    user = form.cleaned_data["user"]
+    foia.composer.user = user
+    foia.composer.save()
+    messages.success(
+        request,
+        f"Request has been succesfully transferred to {user.profile.full_name} "
+        f"({user.username})",
+    )
     return _get_redirect(request, foia)
 
 

@@ -473,7 +473,7 @@ $request-breakpoint: 768px;
 }
 
 .request .access {
-    .generate-private-link, .grant-access {
+    .generate-private-link, .grant-access, .change-owner {
         padding: $vr;
         @include border;
         h3 {
@@ -505,7 +505,7 @@ $request-breakpoint: 768px;
             padding-left: $vr;
         }
     }
-    .grant-access .picker {
+    .grant-access .picker, .change-owner .picker {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(flex-end);
@@ -592,6 +592,9 @@ $request-breakpoint: 768px;
                 margin: 0 0 4px;
             }
         }
+    }
+    .change-owner h3 {
+      color: $color-red;
     }
 }
 

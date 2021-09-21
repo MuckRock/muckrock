@@ -87,6 +87,18 @@ class FOIAAccessForm(forms.Form):
         self.fields["access"].required = required
 
 
+class FOIAOwnerForm(forms.Form):
+    """Form to change the owner of a request"""
+
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+        ),
+        required=True,
+    )
+
+
 class TrackingNumberForm(forms.ModelForm):
     """Form for adding a tracking number"""
 
