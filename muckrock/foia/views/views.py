@@ -4,7 +4,7 @@ Miscellaneous Views for the FOIA application
 
 # Django
 from django.contrib.auth.decorators import permission_required
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 # Third Party
