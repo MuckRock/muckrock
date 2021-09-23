@@ -474,13 +474,12 @@ def change_owner(request, foia):
     if not has_perm or not form.is_valid():
         return _get_redirect(request, foia)
 
-    user = form.cleaned_data["user"]
-    foia.composer.user = user
-    foia.composer.save()
+    form.change_owner(request.user, [foia])
+    new_user = form.cleaned_data["user"]
     messages.success(
         request,
-        f"Request has been succesfully transferred to {user.profile.full_name} "
-        f"({user.username})",
+        f"Request has been succesfully transferred to {new_user.profile.full_name} "
+        f"({new_user.username})",
     )
     return _get_redirect(request, foia)
 

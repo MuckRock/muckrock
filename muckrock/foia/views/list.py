@@ -308,23 +308,15 @@ class RequestList(MRSearchFilterListView):
 
     def _change_owner(self, foias, user, post):
         """Change the owner of the request"""
-        print(foias)
-        foias = [f for f in foias if f.has_perm(user, "change")]
-        print(foias)
         form = FOIAOwnerForm(post)
         if form.is_valid():
-            print("valid")
-            user = form.cleaned_data["user"]
-            for foia in foias:
-                foia.composer.user = user
-                foia.composer.save()
+            form.change_owner(user, foias)
+            new_user = form.cleaned_data["user"]
             return (
                 "Requests have been succesfully transferred to "
-                f"{user.profile.full_name} ({user.username})"
+                f"{new_user.profile.full_name} ({new_user.username})"
             )
         else:
-            print("invalid")
-            print(form.errors)
             return None
 
     def get(self, request, *args, **kwargs):

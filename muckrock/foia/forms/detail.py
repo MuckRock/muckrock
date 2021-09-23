@@ -102,6 +102,21 @@ class FOIAOwnerForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["user"].required = required
 
+    def change_owner(self, user, foias):
+        """Perform the owner change"""
+        foias = [f for f in foias if f.has_perm(user, "change")]
+        new_user = self.cleaned_data["user"]
+        for foia in foias:
+            old_user = foia.composer.user
+            foia.composer.user = new_user
+            foia.composer.save()
+            foia.notes.create(
+                author=user,
+                note=f"{user.username} ({user.pk}) changed ownership of this request "
+                f"from {old_user.username} ({old_user.pk}) "
+                f"to {new_user.username} ({new_user.pk})",
+            )
+
 
 class TrackingNumberForm(forms.ModelForm):
     """Form for adding a tracking number"""
