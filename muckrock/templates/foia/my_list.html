@@ -24,6 +24,7 @@
       <option value="crowdsource" data-help="Add these requests' files to your assignment">Add files to assignment</option>
       <option value="crowdsource_page" data-help="Add these requests' files to your assignment, split per page">Add files' pages to assignment</option>
     {% endif %}
+    <option value="change-owner" data-help="Transfer ownships of these requests to another user.  WARNING: this will cause you to lose access to these documents">Change Owner</option>
   </select>
   <button class="blue button" disabled>Go</button>
   <p class="help"></p>
@@ -36,6 +37,9 @@
   <div class="share-form">
     {{ share_form.users }}
     {{ share_form.access }}
+  </div>
+  <div class="owner-form">
+    {{ owner_form.user }}
   </div>
   {% if can_crowdsource %}
     <div class="crowdsource-form">

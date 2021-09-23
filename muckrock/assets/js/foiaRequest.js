@@ -295,9 +295,12 @@ $("#id_admin_fix-via").trigger("change");
 
 $('document').ready(function(){
   $("#request-actions .bulk").change(function() {
+    $("#request-actions .help").removeClass("error");
+    $("#request-actions button").removeClass("failure");
     $("#request-actions .project-form").hide();
     $("#request-actions .tag-form").hide();
     $("#request-actions .share-form").hide();
+    $("#request-actions .owner-form").hide();
     $("#request-actions .crowdsource-form").hide();
     $("#request-actions .help").text($(this).find(":selected").data("help") || "");
     switch($(this).val()) {
@@ -309,6 +312,11 @@ $('document').ready(function(){
         break;
       case "share":
         $("#request-actions .share-form").show();
+        break;
+      case "change-owner":
+        $("#request-actions .owner-form").show();
+        $("#request-actions .help").addClass("error");
+        $("#request-actions button").addClass("failure");
         break;
       case "crowdsource":
       case "crowdsource_page":

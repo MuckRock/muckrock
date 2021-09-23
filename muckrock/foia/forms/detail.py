@@ -82,7 +82,7 @@ class FOIAAccessForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         required = kwargs.pop("required", True)
-        super(FOIAAccessForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["users"].required = required
         self.fields["access"].required = required
 
@@ -95,8 +95,12 @@ class FOIAOwnerForm(forms.Form):
         widget=autocomplete.ModelSelect2(
             url="user-autocomplete", attrs={"data-placeholder": "User?"}
         ),
-        required=True,
     )
+
+    def __init__(self, *args, **kwargs):
+        required = kwargs.pop("required", True)
+        super().__init__(*args, **kwargs)
+        self.fields["user"].required = required
 
 
 class TrackingNumberForm(forms.ModelForm):

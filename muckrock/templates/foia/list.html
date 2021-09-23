@@ -63,7 +63,8 @@
             <option value="crowdsource_page" data-help="Add these requests' files to your assignment, split per page">Add files' pages to assignment</option>
           {% endif %}
           {% if user.is_staff %}
-            <option value="review_agency" data-help="Create a review agency task for the selected requests' agencies">Review agencies</option>
+            <option value="review-agency" data-help="Create a review agency task for the selected requests' agencies">Review agencies</option>
+            <option value="change-owner" data-help="Transfer ownships of these requests to another user.  WARNING: this will cause you to lose access to these documents">Change Owner</option>
           {% endif %}
         </select>
         <button class="blue button" disabled>Go</button>
@@ -71,6 +72,11 @@
         {% if can_crowdsource %}
           <div class="crowdsource-form">
             {{ crowdsource_form.crowdsource }}
+          </div>
+        {% endif %}
+        {% if user.is_staff %}
+          <div class="owner-form">
+            {{ owner_form.user }}
           </div>
         {% endif %}
       {% endif %}
