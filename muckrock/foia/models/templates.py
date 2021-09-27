@@ -50,14 +50,18 @@ class FOIATemplate(models.Model):
         proxy = kwargs.get("proxy")
         if proxy:
             jurisdiction_name = (
-                jurisdiction.name if jurisdiction else "{ jurisdiction }"
+                jurisdiction.legal.name if jurisdiction else "{ jurisdiction }"
+            )
+            coordination_clause = (
+                ""
+                if proxy == user
+                else ", in coorindatation with {user.profile.full_name}"
             )
             tags.append(
                 (
                     "{ closing }",
                     f"This request is filed by {proxy.profile.full_name}, a citizen of "
-                    f"{jurisdiction_name}, in coordination with "
-                    f"{user.profile.full_name}.",
+                    f"{jurisdiction_name}{coordination_clause}.",
                 )
             )
         elif user.is_authenticated:
