@@ -74,6 +74,9 @@
     </section>
     {% if communication.communication %}
       <section class="textbox__section communication-body">
+        {% if communication.download %}
+          {% include "foia/detail/file_download.html" %}
+        {% endif %}
         {% if communication.full_html %}
           {{ communication.communication|redact_emails|safe }}
         {% else %}

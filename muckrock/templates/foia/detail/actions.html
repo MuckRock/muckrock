@@ -95,6 +95,10 @@
       </div>
     {% endif %}
 
+    {% if download_files %}
+      {% include "foia/detail/file_download.html" %}
+    {% endif %}
+
     <form method="post" novalidate>
       {% csrf_token %}
       {% for action in user_actions %}

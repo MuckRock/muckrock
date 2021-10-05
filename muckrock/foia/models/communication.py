@@ -71,6 +71,9 @@ class FOIACommunication(models.Model):
     full_html = models.BooleanField(default=False)
     communication = models.TextField(blank=True)
     hidden = models.BooleanField(default=False)
+    download = models.BooleanField(
+        default=False, help_text="This communication has pending files to download"
+    )
 
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)

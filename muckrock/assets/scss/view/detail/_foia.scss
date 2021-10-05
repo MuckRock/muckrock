@@ -93,6 +93,14 @@ $request-breakpoint: 768px;
         background-color: $color-green-light;
     }
 
+    .file-download.prompt {
+        border-color: $color-yellow;
+        @include justify-content(flex-start);
+        p {
+          margin-left: $vr;
+        }
+    }
+
     .confirmation.prompt {
         color: $color-green-dark;
         border-color: $color-green;

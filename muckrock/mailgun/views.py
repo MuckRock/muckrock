@@ -715,3 +715,5 @@ def _detect_file_download_links(comm):
                     name=link.name, links="\n".join(links)
                 ),
             )
+            comm.download = True
+            comm.save()

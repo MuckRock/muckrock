@@ -4,6 +4,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
+from django.db import transaction
 from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -138,11 +139,14 @@ def success_comm(request):
         # Merge all the chunks into the final file
         _complete_chunked_upload(key, upload_id, chunks)
 
-    attachment = comm.attach_file(
-        path=request.POST["key"],
-        name=os.path.basename(request.POST["key"]),
-        source=request.user.profile.full_name,
-    )
+    with transaction.atomic():
+        attachment = comm.attach_file(
+            path=request.POST["key"],
+            name=os.path.basename(request.POST["key"]),
+            source=request.user.profile.full_name,
+        )
+        comm.download = False
+        comm.save()
 
     return JsonResponse({"id": attachment.id})
 

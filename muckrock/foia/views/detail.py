@@ -274,6 +274,9 @@ class Detail(DetailView):
         context["all_tags"] = Tag.objects.all()
         context["cc_emails"] = json.dumps([str(e) for e in self.foia.cc_emails.all()])
         context["files"] = self.foia.get_files().select_related("comm__foia")[:50]
+        context["download_files"] = self.foia.communications.filter(
+            download=True
+        ).exists()
 
         communications = [
             (c.datetime, "communication", c) for c in self.foia.communications.all()
