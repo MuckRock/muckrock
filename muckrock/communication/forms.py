@@ -24,7 +24,7 @@ class AddressForm(forms.ModelForm):
         "is greater than 40 characters for Lob compatibility",
     )
     attn_override = forms.CharField(
-        max_length=40,
+        max_length=34,
         label="Attention of",
         required=False,
         help_text="Who the letter should be to the attention of.  If left blank, "

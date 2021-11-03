@@ -276,7 +276,7 @@ class Address(models.Model):
         else:
             lob["name"] = agency.name
         if self.attn_override:
-            lob["company"] = self.attn_override
+            lob["company"] = f"ATTN: {self.attn_override}"
         else:
             lob["company"] = "{} Office".format(
                 agency.jurisdiction.get_law_name(abbrev=True)
