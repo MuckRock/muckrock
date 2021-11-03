@@ -1062,5 +1062,10 @@ def fetch_raw_email(message_id):
     with the given message ID
     """
     emails = EmailCommunication.objects.filter(message_id=message_id, rawemail=None)
+    logger.info(
+        "Fetching raw emails: message_id: %s, emails: %s",
+        message_id,
+        ",".join(str(e.pk) for e in emails),
+    )
     if emails:
         RawEmail.objects.make_async(emails)
