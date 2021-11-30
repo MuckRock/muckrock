@@ -95,7 +95,7 @@ class CrowdsourceResponseAdminSerializer(CrowdsourceResponseBaseSerializer):
             for tag in parse_tags(",".join(tags)):
                 new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
-            instance.tags.set(*tag_set)
+            instance.tags.set(tag_set)
 
     class Meta:
         model = CrowdsourceResponse

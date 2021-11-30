@@ -387,13 +387,13 @@ def update_new_agency(request, foia):
 def generate_key(request, foia):
     """Generate and return an access key, with support for AJAX."""
     if not foia.has_perm(request.user, "change"):
-        if request.is_ajax():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return PermissionDenied
         else:
             return _get_redirect(request, foia)
     else:
         key = foia.generate_access_key()
-        if request.is_ajax():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"key": key})
         else:
             messages.success(request, "New private link created.")

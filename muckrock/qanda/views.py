@@ -114,7 +114,7 @@ class Detail(DetailView):
             for tag in tags:
                 new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
                 tag_set.add(new_tag)
-            question.tags.set(*tag_set)
+            question.tags.set(tag_set)
             messages.success(request, "Your tags have been saved to this question.")
 
         return redirect(question)

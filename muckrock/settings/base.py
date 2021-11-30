@@ -263,7 +263,6 @@ INSTALLED_APPS = (
     "compat",  # for hijack
     "django_filters",
     "opensearch",
-    "dashing",
     "constance",
     "constance.backends.database",
     "django_extensions",
@@ -484,6 +483,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
     }
 }
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
@@ -615,12 +615,6 @@ CHECK_EMAIL = os.environ.get("CHECK_EMAIL", "")
 CHECK_LIMIT = int(os.environ.get("CHECK_LIMIT", 200))
 CHECK_NOTIFICATIONS = boolcheck(os.environ.get("CHECK_NOTIFICATIONS", False))
 
-DASHING = {
-    "INSTALLED_WIDGETS": ("number", "list", "graph", "requestlist"),
-    "PERMISSION_CLASSES": ("dashing.permissions.IsAdminUser",),
-}
-
-
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
@@ -728,7 +722,7 @@ ZOHO_DEPT_IDS = {
     "foiamachine": os.environ.get("ZOHO_DEPT_ID_FM", "280313000000194669"),
 }
 
-SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 SOCIAL_AUTH_SQUARELET_KEY = os.environ.get("SQUARELET_KEY")
 SOCIAL_AUTH_SQUARELET_SECRET = SQUARELET_SECRET = os.environ.get("SQUARELET_SECRET")
 SOCIAL_AUTH_SQUARELET_SCOPE = ["uuid", "organizations", "preferences"]

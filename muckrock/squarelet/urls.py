@@ -1,9 +1,9 @@
 """URL mappings for squarelet app"""
 
 # Django
-from django.conf.urls import url
+from django.urls import re_path
 
 # MuckRock
 from muckrock.squarelet import views
 
-urlpatterns = [url(r"^webhook/$", views.webhook, name="squarelet-webhook")]
+urlpatterns = [re_path(r"^webhook/$", views.webhook, name="squarelet-webhook")]

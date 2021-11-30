@@ -9,4 +9,4 @@ from django.apps import AppConfig
 class CommunicationConfig(AppConfig):
     """Communication app config"""
 
-    name = "communication"
+    name = "muckrock.communication"

@@ -368,7 +368,8 @@ class InvokedExemption(models.Model):
         blank=True,
         help_text="What language did the aguency use to invoke the exemption?",
     )
-    properly_invoked = models.NullBooleanField(
+    properly_invoked = models.BooleanField(
+        null=True,
         default=None,
         help_text="Did the agency properly invoke the exemption to the request?",
     )

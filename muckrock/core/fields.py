@@ -10,7 +10,7 @@ from django import forms
 from django.core.validators import EmailValidator, ValidationError, validate_email
 from django.db.models import CharField, FileField
 from django.forms.models import ModelChoiceField, ModelChoiceIterator
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 # Standard Library
 import os

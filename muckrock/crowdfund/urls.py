@@ -3,15 +3,15 @@ URL mappings for the crowdfund application
 """
 
 # Django
-from django.conf.urls import url
+from django.urls import re_path
 
 # MuckRock
 from muckrock.crowdfund import views
 
 urlpatterns = [
-    url(r"^$", views.CrowdfundListView.as_view(), name="crowdfund-list"),
-    url(r"^(?P<pk>\d+)/$", views.CrowdfundDetailView.as_view(), name="crowdfund"),
-    url(
+    re_path(r"^$", views.CrowdfundListView.as_view(), name="crowdfund-list"),
+    re_path(r"^(?P<pk>\d+)/$", views.CrowdfundDetailView.as_view(), name="crowdfund"),
+    re_path(
         r"^(?P<pk>\d+)/embed/$",
         views.CrowdfundEmbedView.as_view(),
         name="crowdfund-embed",

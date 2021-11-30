@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView
 
@@ -261,7 +261,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
             raise Http404()
         initial_data = {
             "title": composer.title,
-            "requested_docs": smart_text(composer.requested_docs),
+            "requested_docs": smart_str(composer.requested_docs),
             "agencies": composer.agencies.all(),
             "tags": composer.tags.all(),
             "edited_boilerplate": composer.edited_boilerplate,

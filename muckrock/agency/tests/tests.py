@@ -69,7 +69,7 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_get_faxes(self):
         """Test the ganecy get faces method"""
-        eq_(self.agency2.get_faxes().first().number, "19876543210")
+        eq_(self.agency2.get_faxes().first().number.as_national, "(987) 654-3210")
 
     def test_agency_get_emails(self):
         """Test get emails method"""

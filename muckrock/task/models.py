@@ -4,7 +4,6 @@ Models for the Task application
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.core.mail import send_mail
 from django.db import models, transaction
 from django.db.models import Case, Count, Max, When
@@ -89,7 +88,7 @@ class Task(models.Model):
         related_name="resolved_tasks",
         on_delete=models.PROTECT,
     )
-    form_data = JSONField(blank=True, null=True)
+    form_data = models.JSONField(blank=True, null=True)
 
     objects = TaskQuerySet.as_manager()
 

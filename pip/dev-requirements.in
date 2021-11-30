@@ -2,7 +2,7 @@ coverage # Used to generate coverage reports in dev
 dj-inmemorystorage # in memory file storage for faster testing
 django-debug-toolbar-request-history # Use DDT for non-html requests
 django-nose # Used for testing
-django<3.0 # django
+django<4.0 # django
 fabric<2.0 # Used for dev scripts
 factory-boy # Used for creating test data
 freezegun # Control time during testing

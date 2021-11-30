@@ -10,7 +10,8 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Third Party
-from news_sitemaps import NewsSitemap, register
+from news_sitemaps import register
+from news_sitemaps.sitemaps import NewsSitemap
 
 # MuckRock
 from muckrock.news.models import Article

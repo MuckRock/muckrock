@@ -165,6 +165,7 @@ class TestFunctional(TestCase):
             "user",
         ]
         for obj in api_objs:
+            print(obj)
             get_allowed(self.client, reverse("api-%s-list" % obj))
 
 

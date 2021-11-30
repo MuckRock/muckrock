@@ -18,11 +18,12 @@ COMPRESS_URL = STATIC_URL
 COMPRESS_ENABLED = False
 
 MIDDLEWARE += ("muckrock.settings.local.ExceptionLoggingMiddleware",)
-MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
+# MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
 
-INSTALLED_APPS += ("silk",)
+# INSTALLED_APPS += ("silk",)
 
 USE_SILKY = boolcheck(os.environ.get("USE_SILKY", True))
+USE_SILKY = False
 SILKY_PYTHON_PROFILER = USE_SILKY
 SILKY_PYTHON_PROFILER_BINARY = USE_SILKY
 SILKY_META = USE_SILKY

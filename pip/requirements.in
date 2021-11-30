@@ -1,5 +1,5 @@
 -e git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun # Mail backend used directly (on production)
--e git://github.com/theatlantic/django-news-sitemaps.git@v1.3.0#egg=django_news_sitemaps # For generating news sitemaps
+-e git://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
@@ -10,20 +10,20 @@ django-activity-stream # Used for notifications
 django-autocomplete-light==3.7.0.dev0 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
+django-compat # ?
 django-compressor # Compress all JS and CSS assets into a single file
 django-constance[database] # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
-django-dashing # Used to create the dashboard
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
 django-extensions # Nicer shell
 django-filter # Used for filtering in viewsets
-django-hijack # Allows admins to log in to other user accounts
+django-hijack<3 # Allows admins to log in to other user accounts
 django-hosts # Used for multi-domain routing
 django-ipware # Used to get user's IP address
-django-localflavor<3 # Used for phone numbers and state list
+django-localflavor # Used for phone numbers and state list
 django-mathfilters # Mathematical template filters
-django-opensearch<0.5 # Enables opensearch
+django-opensearch # Enables opensearch
 django-phonenumber-field # for storing phone numbers in the database
 django-premailer # Styles HTML emails
 django-pylibmc # Interface to memcache
@@ -34,7 +34,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
-django<3.0 # Django is kinda important...
+django<4.0 # Django is kinda important...
 djangorestframework # The API framework
 documentcloud # for uploading to documentcloud
 dogslow # Monitors slow requests

@@ -1085,7 +1085,7 @@ class FOIARequest(models.Model):
         for tag in tags:
             new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
             tag_set.add(new_tag)
-        self.tags.set(*tag_set)
+        self.tags.set(tag_set)
 
     def user_actions(self, user, is_agency_user):
         """Provides action interfaces for users"""

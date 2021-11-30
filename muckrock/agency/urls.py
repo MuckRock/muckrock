@@ -3,7 +3,7 @@ URL mappings for the Agency application
 """
 
 # Django
-from django.conf.urls import url
+from django.urls import re_path
 
 # MuckRock
 from muckrock.agency import views
@@ -17,29 +17,29 @@ agency_url = (
 old_agency_url = r"(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)"
 
 urlpatterns = [
-    url(r"^$", views.AgencyList.as_view(), name="agency-list"),
-    url(r"^%s/$" % agency_url, views.detail, name="agency-detail"),
-    url(r"^(?P<action>\w+)/%s/$" % old_agency_url, views.redirect_old),
-    url(
+    re_path(r"^$", views.AgencyList.as_view(), name="agency-list"),
+    re_path(r"^%s/$" % agency_url, views.detail, name="agency-detail"),
+    re_path(r"^(?P<action>\w+)/%s/$" % old_agency_url, views.redirect_old),
+    re_path(
         r"^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$",
         jurisdiction,
         name="agency-jurisdiction",
     ),
-    url(r"^%s/flag/$" % agency_url, views.redirect_flag, name="agency-flag"),
-    url(r"^boilerplate/$", views.boilerplate, name="agency-boilerplate"),
-    url(
+    re_path(r"^%s/flag/$" % agency_url, views.redirect_flag, name="agency-flag"),
+    re_path(r"^boilerplate/$", views.boilerplate, name="agency-boilerplate"),
+    re_path(
         r"^contact-info/(?P<idx>\d+)/$", views.contact_info, name="agency-contact-info"
     ),
-    url(r"^merge/$", views.MergeAgency.as_view(), name="agency-merge"),
-    url(
+    re_path(r"^merge/$", views.MergeAgency.as_view(), name="agency-merge"),
+    re_path(
         r"^agency-autocomplete/$",
         views.AgencyAutocomplete.as_view(),
         name="agency-autocomplete",
     ),
-    url(
+    re_path(
         r"^agency-composer-autocomplete/$",
         views.AgencyComposerAutocomplete.as_view(),
         name="agency-composer-autocomplete",
     ),
-    url(r"^import/$", views.MassImportAgency.as_view(), name="agency-mass-import"),
+    re_path(r"^import/$", views.MassImportAgency.as_view(), name="agency-mass-import"),
 ]

@@ -4,14 +4,13 @@ Admin registration for FOIA models
 
 # Django
 from django import forms
-from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Count, Max
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.urls import re_path, reverse
 from django.utils.safestring import mark_safe
 
 # Standard Library
@@ -514,17 +513,17 @@ class FOIARequestAdmin(VersionAdmin):
         """Add custom URLs here"""
         urls = super(FOIARequestAdmin, self).get_urls()
         my_urls = [
-            url(
+            re_path(
                 r"^send_update/(?P<idx>\d+)/$",
                 self.admin_site.admin_view(self.send_update),
                 name="foia-admin-send-update",
             ),
-            url(
+            re_path(
                 r"^retry_pages/(?P<idx>\d+)/$",
                 self.admin_site.admin_view(self.retry_pages),
                 name="foia-admin-retry-pages",
             ),
-            url(
+            re_path(
                 r"^autoimport/$",
                 self.admin_site.admin_view(self.autoimport),
                 name="foia-admin-autoimport",

@@ -240,7 +240,7 @@ class FOIARequestQuerySet(models.QuerySet):
             proxy=proxy_user,
             missing_proxy=missing_proxy,
         )
-        foia.tags.set(*composer.tags.all())
+        foia.tags.set(composer.tags.all())
         foia.create_initial_communication(composer.user, proxy=proxy_user)
         if proxy_user:
             notify_proxy_user(foia)

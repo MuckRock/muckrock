@@ -34,6 +34,9 @@ class AgencyViewSet(viewsets.ModelViewSet):
         Agency.objects.order_by("id")
         .select_related("jurisdiction", "parent", "appeal_agency")
         .prefetch_related(
+            "agencyemail_set__email",
+            "agencyphone_set__phone",
+            "agencyaddress_set__address",
             Prefetch(
                 "emails",
                 queryset=EmailAddress.objects.filter(
@@ -72,6 +75,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
                 * CountWhen(foiarequest__price__gt=0, output_field=FloatField())
                 / NullIf(Count("foiarequest"), Value(0), output_field=FloatField()),
                 Value(0),
+                output_field=FloatField(),
             ),
             success_rate_=Coalesce(
                 100
@@ -81,6 +85,7 @@ class AgencyViewSet(viewsets.ModelViewSet):
                 )
                 / NullIf(Count("foiarequest"), Value(0), output_field=FloatField()),
                 Value(0),
+                output_field=FloatField(),
             ),
             number_requests=Count("foiarequest"),
             number_requests_completed=CountWhen(foiarequest__status="done"),

@@ -4,7 +4,6 @@
 # Django
 from django.conf import settings
 from django.contrib.postgres.aggregates import StringAgg
-from django.contrib.postgres.fields import JSONField
 from django.core.mail.message import EmailMessage
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
@@ -280,7 +279,7 @@ class CrowdsourceData(models.Model):
         Crowdsource, related_name="data", on_delete=models.CASCADE
     )
     url = models.URLField(max_length=255, verbose_name="Data URL", blank=True)
-    metadata = JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
 
     objects = CrowdsourceDataQuerySet.as_manager()
 

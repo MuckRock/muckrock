@@ -96,7 +96,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
             "There was an error making your contribution. "
             "Your card has not been charged."
         )
-        if request.is_ajax():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"message": error_msg, "error": str(error)}, status=400)
         else:
             messages.error(request, error_msg)
@@ -158,7 +158,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
                     },
                     **kwargs
                 )
-            if request.is_ajax():
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
                 data = {
                     "authenticated": user.is_authenticated if user else False,
                     "registered": registered,

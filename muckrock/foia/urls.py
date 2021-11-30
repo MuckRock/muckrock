@@ -3,7 +3,7 @@ URL mappings for the FOIA application
 """
 
 # Django
-from django.conf.urls import url
+from django.urls import re_path
 from django.views.generic.base import RedirectView
 
 # MuckRock
@@ -14,159 +14,173 @@ foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<i
 old_foia_url = r"(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)"
 
 urlpatterns = [
-    url(r"^$", views.RequestExploreView.as_view(), name="foia-root"),
+    re_path(r"^$", views.RequestExploreView.as_view(), name="foia-root"),
     # List Views
-    url(r"^list/$", views.RequestList.as_view(), name="foia-list"),
-    url(r"^mylist/$", views.MyRequestList.as_view(), name="foia-mylist"),
-    url(
+    re_path(r"^list/$", views.RequestList.as_view(), name="foia-list"),
+    re_path(r"^mylist/$", views.MyRequestList.as_view(), name="foia-mylist"),
+    re_path(
         r"^organization-list/$", views.MyOrgRequestList.as_view(), name="foia-org-list"
     ),
-    url(r"^proxy-list/$", views.MyProxyRequestList.as_view(), name="foia-proxy-list"),
-    url(r"^agency-list/$", views.AgencyRequestList.as_view(), name="foia-agency-list"),
-    url(
+    re_path(
+        r"^proxy-list/$", views.MyProxyRequestList.as_view(), name="foia-proxy-list"
+    ),
+    re_path(
+        r"^agency-list/$", views.AgencyRequestList.as_view(), name="foia-agency-list"
+    ),
+    re_path(
         r"^list/following/$",
         views.FollowingRequestList.as_view(),
         name="foia-list-following",
     ),
-    url(
+    re_path(
         r"^list/processing/$",
         views.ProcessingRequestList.as_view(),
         name="foia-list-processing",
     ),
-    url(r"^mylist/drafts/$", views.ComposerList.as_view(), name="foia-mylist-drafts"),
-    url(
+    re_path(
+        r"^mylist/drafts/$", views.ComposerList.as_view(), name="foia-mylist-drafts"
+    ),
+    re_path(
         r"^communications/$",
         views.AdminCommunicationView.as_view(),
         name="communication-list",
     ),
     # Create and Draft Views
-    url(r"^create/$", views.CreateComposer.as_view(), name="foia-create"),
-    url(r"^(?P<idx>\d+)/draft/$", views.UpdateComposer.as_view(), name="foia-draft"),
-    url(r"^(?P<idx>\d+)/$", RedirectView.as_view(pattern_name="foia-draft")),
-    url(r"^composer-autosave/(?P<idx>\d+)/$", views.autosave, name="foia-autosave"),
+    re_path(r"^create/$", views.CreateComposer.as_view(), name="foia-create"),
+    re_path(
+        r"^(?P<idx>\d+)/draft/$", views.UpdateComposer.as_view(), name="foia-draft"
+    ),
+    re_path(r"^(?P<idx>\d+)/$", RedirectView.as_view(pattern_name="foia-draft")),
+    re_path(r"^composer-autosave/(?P<idx>\d+)/$", views.autosave, name="foia-autosave"),
     # Detail View
-    url(
+    re_path(
         r"^%s/$" % foia_url,
         views.Detail.as_view(template_name="foia/detail.html"),
         name="foia-detail",
     ),
-    url(
+    re_path(
         r"^multirequest/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/$",
         views.ComposerDetail.as_view(),
         name="foia-composer-detail",
     ),
-    url(r"^%s/crowdfund/$" % foia_url, views.crowdfund_request, name="foia-crowdfund"),
-    url(r"^%s/files/$" % foia_url, views.FOIAFileListView.as_view(), name="foia-files"),
-    url(r"^%s/follow/$" % foia_url, views.follow, name="foia-follow"),
-    url(r"^%s/embargo/$" % foia_url, views.embargo, name="foia-embargo"),
-    url(
+    re_path(
+        r"^%s/crowdfund/$" % foia_url, views.crowdfund_request, name="foia-crowdfund"
+    ),
+    re_path(
+        r"^%s/files/$" % foia_url, views.FOIAFileListView.as_view(), name="foia-files"
+    ),
+    re_path(r"^%s/follow/$" % foia_url, views.follow, name="foia-follow"),
+    re_path(r"^%s/embargo/$" % foia_url, views.embargo, name="foia-embargo"),
+    re_path(
         r"^%s/toggle-followups/$" % foia_url,
         views.toggle_autofollowups,
         name="foia-toggle-followups",
     ),
     # This just redirects to the composer
-    url(
+    re_path(
         r"^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$",
         views.MultiDetail.as_view(),
         name="foia-multi-detail",
     ),
     # Misc Views
-    url(r"^acronyms/$", views.acronyms, name="foia-acronyms"),
-    url(r"^raw_email/(?P<idx>\d+)/$", views.raw, name="foia-raw"),
-    url(
+    re_path(r"^acronyms/$", views.acronyms, name="foia-acronyms"),
+    re_path(r"^raw_email/(?P<idx>\d+)/$", views.raw, name="foia-raw"),
+    re_path(
         r"^foiarequest-autocomplete/$",
         views.FOIARequestAutocomplete.as_view(),
         name="foia-request-autocomplete",
     ),
     # Feeds
-    url(
+    re_path(
         r"^feeds/submitted/$",
         feeds.LatestSubmittedRequests(),
         name="foia-submitted-feed",
     ),
-    url(r"^feeds/completed/$", feeds.LatestDoneRequests(), name="foia-done-feed"),
-    url(r"^feeds/(?P<idx>\d+)/$", feeds.FOIAFeed(), name="foia-feed"),
-    url(
+    re_path(r"^feeds/completed/$", feeds.LatestDoneRequests(), name="foia-done-feed"),
+    re_path(r"^feeds/(?P<idx>\d+)/$", feeds.FOIAFeed(), name="foia-feed"),
+    re_path(
         r"^feeds/submitted/(?P<username>[\w\-.@ ]+)/$",
         feeds.UserSubmittedFeed(),
         name="foia-user-submitted-feed",
     ),
-    url(
+    re_path(
         r"^feeds/completed/(?P<username>[\w\-.@ ]+)/$",
         feeds.UserDoneFeed(),
         name="foia-user-done-feed",
     ),
-    url(
+    re_path(
         r"^feeds/agency/(?P<idx>\d+)/$",
         feeds.AgencySubmittedFeed(),
         name="foia-agency-feed",
     ),
-    url(
+    re_path(
         r"^feeds/jurisdiction/(?P<idx>\d+)/$",
         feeds.JurisdictionSubmittedFeed(),
         name="foia-jurisdiction-feed",
     ),
-    url(
+    re_path(
         r"^feeds/(?P<username>[\w\-.@ ]+)/$",
         feeds.UserUpdateFeed(),
         name="foia-user-feed",
     ),
     # Files
-    url(r"^file/(?P<pk>\d+)/embed/$", views.FileEmbedView.as_view(), name="file-embed"),
+    re_path(
+        r"^file/(?P<pk>\d+)/embed/$", views.FileEmbedView.as_view(), name="file-embed"
+    ),
     # Webhooks
-    url(r"^lob/$", views.lob_webhook, name="lob-webhook"),
+    re_path(r"^lob/$", views.lob_webhook, name="lob-webhook"),
     # Old URLS
-    url(r"^multi/$", RedirectView.as_view(url="/foi/create/")),
-    url(
+    re_path(r"^multi/$", RedirectView.as_view(url="/foi/create/")),
+    re_path(
         r"^create_multi/$",
         RedirectView.as_view(url="/foi/create/"),
         name="foia-create-multi",
     ),
-    url(
+    re_path(
         r"^mylist/multirequest/$",
         RedirectView.as_view(url="/foi/mylist/"),
         name="foia-mymulti",
     ),
-    url(
+    re_path(
         r"^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$",
         jurisdiction,
         name="foia-jurisdiction",
     ),
-    url(
+    re_path(
         r"^list/user/(?P<user_name>[\w\d_.@ ]+)/$",
         RedirectView.as_view(url="/foi/list/user-%(user_name)s"),
     ),
-    url(
+    re_path(
         r"^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$",
         RedirectView.as_view(url="/foi/list/tag-%(tag_slug)s"),
     ),
-    url(r"^(?P<action>[\w_-]+)/%s/$" % old_foia_url, views.redirect_old),
-    url(
+    re_path(r"^(?P<action>[\w_-]+)/%s/$" % old_foia_url, views.redirect_old),
+    re_path(
         r"^list/user-(?P<user_pk>[\w\d_.@ -]+)/$",
         RedirectView.as_view(url="/foi/list/?user=%(user_pk)s"),
         name="foia-list-user",
     ),
-    url(
+    re_path(
         r"^list/agency-(?P<agency>[\w\d_.@ -]+)-(?P<idx>\d+)/$",
         RedirectView.as_view(url="/foi/list/?agency=%(idx)s"),
         name="foia-list-agency",
     ),
-    url(
+    re_path(
         r"^list/place-(?P<jurisdiction>[\w\d_.@ -]+)-(?P<idx>\d+)/$",
         RedirectView.as_view(url="/foi/list/?jurisdiction=%(idx)s"),
         name="foia-list-jurisdiction",
     ),
-    url(
+    re_path(
         r"^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$",
         RedirectView.as_view(url="/foi/list/?tags=%(tag_slug)s"),
         name="foia-list-tag",
     ),
-    url(
+    re_path(
         r"^list/status-(?P<status>[\w\d_.@ -]+)/$",
         RedirectView.as_view(url="/foi/list/?status=%(status)s"),
         name="foia-list-status",
     ),
-    url(
+    re_path(
         r"^mylist/(?P<view>\w+)/$",
         RedirectView.as_view(url="foi/mylist/"),
         name="foia-mylist-old",

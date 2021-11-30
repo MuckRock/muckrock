@@ -7,4 +7,4 @@ from django.apps import AppConfig
 class FineUploaderConfig(AppConfig):
     """App config for fine uploader"""
 
-    name = "fine_uploader"
+    name = "muckrock.fine_uploader"

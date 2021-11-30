@@ -4,7 +4,6 @@ Models for the organization application
 
 # Django
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
 from django.db.models.expressions import F
 from django.db.models.functions import Greatest
@@ -259,7 +258,7 @@ class Entitlement(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField()
 
-    resources = JSONField(default=dict)
+    resources = models.JSONField(default=dict)
     resource_fields = {
         "minimum_users": 1,
         "feature_level": 0,

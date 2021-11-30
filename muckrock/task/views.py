@@ -201,18 +201,18 @@ class TaskList(MRFilterListView):
             for task in tasks:
                 self.task_post_helper(request, task)
         except ValueError as exception:
-            if request.is_ajax():
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
                 return HttpResponseBadRequest(exception.args[0])
             else:
                 messages.warning(self.request, exception)
                 return redirect(self.get_redirect_url())
         except PermissionDenied:
-            if request.is_ajax():
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
                 return HttpResponseForbidden("You do not have permission")
             else:
                 messages.error(self.request, "You do not have permission")
                 return redirect(self.get_redirect_url())
-        if request.is_ajax():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return HttpResponse("OK")
         else:
             return redirect(self.get_redirect_url())

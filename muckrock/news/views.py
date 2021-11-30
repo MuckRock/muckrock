@@ -68,12 +68,12 @@ class NewsDetail(DateDetailView):
             .only("image", "title", "slug", "pub_date")
             .exclude(pk=article.pk)
             .order_by()
+            .prefetch_authors()
         )
         related_articles = (
             published.filter(project_filter)
             .union(published.filter(tag_filter), published.filter(project_tag_filter))
             .order_by("-pub_date")
-            .prefetch_authors()
         )
         return related_articles[:4]
 
@@ -122,7 +122,7 @@ class NewsDetail(DateDetailView):
             for tag in tags:
                 new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
                 tag_set.add(new_tag)
-            article.tags.set(*tag_set)
+            article.tags.set(tag_set)
             clear_cache = True
         if clear_cache:
             article.clear_cache()

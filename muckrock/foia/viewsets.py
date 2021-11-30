@@ -353,7 +353,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     def post_save(self, obj, created=False):
         """Save tags"""
         if "tags" in self.request.DATA:
-            obj.tags.set(*self.request.DATA["tags"])
+            obj.tags.set(self.request.DATA["tags"])
         return super(FOIARequestViewSet, self).post_save(obj, created=created)
 
 

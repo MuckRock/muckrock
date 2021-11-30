@@ -2,14 +2,14 @@
 URLs for tag pages
 """
 # Django
-from django.conf.urls import url
+from django.urls import re_path
 
 from . import views
 
 urlpatterns = [
-    url(r"^$", views.TagListView.as_view(), name="tag-list"),
-    url(
+    re_path(r"^$", views.TagListView.as_view(), name="tag-list"),
+    re_path(
         r"^tag-autocomplete/$", views.TagAutocomplete.as_view(), name="tag-autocomplete"
     ),
-    url(r"^(?P<slug>[\w-]+)/$", views.TagDetailView.as_view(), name="tag-detail"),
+    re_path(r"^(?P<slug>[\w-]+)/$", views.TagDetailView.as_view(), name="tag-detail"),
 ]
