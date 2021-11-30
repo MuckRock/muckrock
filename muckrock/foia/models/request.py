@@ -240,6 +240,18 @@ class FOIARequest(models.Model):
         """The request's jurisdiction is its agency's jurisdiction"""
         return self.agency.jurisdiction
 
+    @property
+    def datetime_first_communication(self):
+        """The datetime the first communication was actually sent"""
+        first_communication = self.communications.first()
+        if not first_communication:
+            return None
+        subcomm = first_communication.get_subcomm()
+        if subcomm:
+            return subcomm.sent_datetime
+        else:
+            return first_communication.datetime
+
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
         return int(self.price * 100)
