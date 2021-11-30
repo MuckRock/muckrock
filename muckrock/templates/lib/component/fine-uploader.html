@@ -78,7 +78,8 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
     // Build client-side validation options based on user perms
     // (Server validation is handled separately)
     {% has_perm 'foia.unlimited_attachment_size' request.user as unlimited_attachment %}
-    {% if unlimited_attachment %}
+    {% if unlimited_attachment or can_agency_reply %}
+    {# add check for can_agency_reply to catch passcode authenticated agencies #}
       var limitAttachments = false;
     {% else %}
       var limitAttachments = true;
