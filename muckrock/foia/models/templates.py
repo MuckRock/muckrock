@@ -55,7 +55,7 @@ class FOIATemplate(models.Model):
             coordination_clause = (
                 ""
                 if proxy == user
-                else ", in coorindatation with {user.profile.full_name}"
+                else f", in coordination with {user.profile.full_name}"
             )
             tags.append(
                 (
