@@ -31,7 +31,7 @@ dill==0.3.2
 django-activity-stream==0.10.0
 django-appconf==1.0.4     # via django-celery-email, django-compressor, django-opensearch
 django-autocomplete-light==3.7.0.dev0
-django-celery-email==1.1.5
+django-celery-email==3.0.0
 django-choices==1.6.1
 django-compat==1.0.15
 django-compressor==2.4
