@@ -24,36 +24,44 @@ TEMPLATES[0]["OPTIONS"]["loaders"] = [
 del TEMPLATES[0]["APP_DIRS"]
 
 if "MEMCACHIER_SERVERS" in os.environ:
-    os.environ["MEMCACHE_SERVERS"] = os.environ.get("MEMCACHIER_SERVERS", "").replace(
-        ",", ";"
-    )
-    os.environ["MEMCACHE_USERNAME"] = os.environ.get("MEMCACHIER_USERNAME", "")
-    os.environ["MEMCACHE_PASSWORD"] = os.environ.get("MEMCACHIER_PASSWORD", "")
+    servers = os.environ.get("MEMCACHIER_SERVERS", "").replace(",", ";")
+    os.environ["MEMCACHE_SERVERS"] = servers
+    username = os.environ.get("MEMCACHIER_USERNAME", "")
+    os.environ["MEMCACHE_USERNAME"] = username
+    password = os.environ.get("MEMCACHIER_PASSWORD", "")
+    os.environ["MEMCACHE_PASSWORD"] = password
 
     CACHES["default"] = {
         # Use pylibmc
-        "BACKEND": "django_pylibmc.memcached.PyLibMCCache",
-        # Use binary memcache protocol (needed for authentication)
-        "BINARY": True,
+        "BACKEND": "django.core.cache.backends.memcached.PyLibMCCache",
         # TIMEOUT is not the connection timeout! It's the default expiration
         # timeout that should be applied to keys! Setting it to `None`
         # disables expiration.
         "TIMEOUT": None,
+        "LOCATION": servers,
+        "BINARY": True,
         "OPTIONS": {
-            # Enable faster IO
-            "no_block": True,
-            "tcp_nodelay": True,
-            # Keep connection alive
-            "tcp_keepalive": True,
-            # Timeout for set/get requests
-            "_poll_timeout": 2000,
-            # Use consistent hashing for failover
-            "ketama": True,
-            # Configure failover timings
-            "connect_timeout": 2000,
-            "remove_failed": 4,
-            "retry_timeout": 2,
-            "dead_timeout": 10,
+            # Use binary memcache protocol (needed for authentication)
+            "binary": True,
+            "username": username,
+            "password": password,
+            "behaviors": {
+                # Enable faster IO
+                "no_block": True,
+                "tcp_nodelay": True,
+                # Keep connection alive
+                "tcp_keepalive": True,
+                # Timeout settings
+                "connect_timeout": 2000,  # ms
+                "send_timeout": 750 * 1000,  # us
+                "receive_timeout": 750 * 1000,  # us
+                "_poll_timeout": 2000,  # ms
+                # Better failover
+                "ketama": True,
+                "remove_failed": 1,
+                "retry_timeout": 2,
+                "dead_timeout": 30,
+            },
         },
     }
 
