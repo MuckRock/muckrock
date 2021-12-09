@@ -19,6 +19,7 @@ import requests
 
 # MuckRock
 from muckrock.agency.constants import STALE_REPLIES
+from muckrock.core.models import ExtractDay
 
 
 class PreloadFileQuerysetMixin:
@@ -188,8 +189,9 @@ class FOIARequestQuerySet(models.QuerySet):
         return (
             self.filter(status="submitted")
             .exclude(date_processing=None)
-            .aggregate(days=Sum(date.today() - F("date_processing")))["days"]
-            .days
+            .aggregate(days=ExtractDay(Sum(date.today() - F("date_processing"))))[
+                "days"
+            ]
         )
 
     def get_submitted_range(self, start, end):
