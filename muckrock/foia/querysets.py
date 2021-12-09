@@ -189,6 +189,7 @@ class FOIARequestQuerySet(models.QuerySet):
             self.filter(status="submitted")
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F("date_processing")))["days"]
+            .days
         )
 
     def get_submitted_range(self, start, end):
