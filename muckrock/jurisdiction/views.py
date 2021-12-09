@@ -131,7 +131,7 @@ def collect_stats(obj, context):
     context["num_submitted"] = requests.count()
 
 
-def detail(request, fed_slug, state_slug, local_slug):
+def detail(request, fed_slug, state_slug=None, local_slug=None):
     """Details for a jurisdiction"""
     if local_slug:
         jurisdiction = get_object_or_404(
