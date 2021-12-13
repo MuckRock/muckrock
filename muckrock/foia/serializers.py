@@ -161,6 +161,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         read_only=True, source="composer.datetime_submitted"
     )
     datetime_done = DateTimeField()
+    datetime_updated = DateTimeField()
 
     def __init__(self, *args, **kwargs):
         super(FOIARequestSerializer, self).__init__(*args, **kwargs)
@@ -226,6 +227,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "days_until_due",
             "date_followup",
             "datetime_done",
+            "datetime_updated",
             "date_embargo",
             # processing details
             "mail_id",
