@@ -54,6 +54,11 @@ def raw(request, idx):
     if not raw_email or not permission:
         raise Http404
     text, html = raw_email.get_text_html()
+    if comm.response:
+        email = raw_email.email.from_email.email
+    else:
+        email = ", ".join(e.email for e in raw_email.email.to_emails.all())
+
     data = {
         "raw": raw_email.raw_email,
         "text": text,
@@ -65,6 +70,8 @@ def raw(request, idx):
             strip=True,
         ),
         "html_src": html,
+        "response": comm.response,
+        "email": email,
     }
     return render(request, "foia/communication/raw.html", data)
 

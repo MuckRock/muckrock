@@ -3,6 +3,37 @@
 
 {% block content %}
   <div class="detail">
+    {% if response %}
+      <p>
+        The following email was sent from {{email}}. To follow up,
+        please go back to the request page and use the "Follow Up" button —
+        please do not email the agency from your email directly as that will
+        cause issues tracking your request properly.
+      </p>
+      <p>
+        You can use this raw email information to see who sent the message and
+        when, as well as the original text of their email.
+      </p>
+      <p>
+        Do you see text here that is missing from the communication on your
+        request page? Click "Get Help" at the top or bottom of the page and our
+        support team will assist.
+      </p>
+    {% else %}
+      <p>
+        The following email was sent to {{email}}. Please do not email
+        the agency from your email directly as that will cause issues tracking
+        your request properly.
+      </p>
+      <p>
+        You can use this raw email information to see when and to whom your
+        email was sent. 
+      </p>
+      <p>
+        Think your messages should go somewhere else? Click "Follow Up", then
+        "See where this followup will be sent" to change the contact method. 
+      </p>
+    {% endif %}
     <div class="button-group">
       <a class="primary button raw-content-button" href="#raw-raw">Raw</a>
       <a class="primary button raw-content-button" href="#raw-text">Text</a>

@@ -34,7 +34,7 @@
                     <li><a href="#upload-{{communication.pk}}-form" class="option dropdown-list-item">Upload File</a></li>
                   </ul>
                 </div>
-              {% elif request.user.profile.is_advanced and request.user == communication.foia.user and communication.raw_emails %}
+              {% elif request.user == communication.foia.user and communication.raw_emails %}
                 <div class="options dropdown">
                   <span class="dropdown-trigger">
                     {% include 'lib/component/icon/options.svg' %}

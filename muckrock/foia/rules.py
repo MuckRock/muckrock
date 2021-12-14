@@ -243,7 +243,7 @@ add_perm("foia.delete_foiacomposer", can_edit_composer & has_status("started"))
 add_perm("foia.upload_attachment_foiacomposer", can_edit_composer)
 add_perm("foia.change_foiacomposer", can_edit_composer)
 
-add_perm("foia.view_rawemail", has_feature_level(1))
+add_perm("foia.view_rawemail", is_authenticated)
 add_perm("foia.file_multirequest", has_feature_level(1))
 add_perm("foia.export_csv", has_feature_level(1))
 add_perm("foia.zip_download_foiarequest", can_edit)
