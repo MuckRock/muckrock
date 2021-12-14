@@ -1,5 +1,0 @@
-{% extends 'message/base.txt' %}
-
-{% block body %}
-Thank you for requesting a new login token.  Upload documents directly: {{ reply_link }}
-{% endblock body %}

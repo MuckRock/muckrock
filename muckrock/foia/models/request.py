@@ -963,7 +963,7 @@ class FOIARequest(models.Model):
             context["reply_link"] = settings.MUCKROCK_URL + reverse(
                 "communication-direct-agency", kwargs={"idx": comm.pk}
             )
-            context["passcode"] = comm.foia.get_passcode()
+        context["passcode"] = comm.foia.get_passcode()
         context["attachments"] = comm.files.values_list("title", flat=True)
         if switch:
             first_request = self.communications.all()[0]

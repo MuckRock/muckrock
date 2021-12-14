@@ -8,7 +8,6 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.http.response import (
@@ -29,7 +28,6 @@ import json
 import logging
 import sys
 from urllib.parse import urlencode
-from uuid import uuid4
 
 # Third Party
 import stripe
@@ -47,7 +45,6 @@ from muckrock.accounts.mixins import BuyRequestsMixin
 from muckrock.accounts.models import Notification, RecurringDonation
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
-from muckrock.communication.models import EmailAddress
 from muckrock.core.views import MRAutocompleteView, MRFilterListView
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.foia.models import FOIARequest
@@ -443,46 +440,9 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
     agency = get_object_or_404(Agency, slug=agency_slug, pk=agency_idx)
     foia = get_object_or_404(FOIARequest, agency=agency, slug=foia_slug, pk=foia_idx)
 
-    if request.method == "POST":
-        email = request.POST.get("email", "")
-        # valid if this email is associated with the agency
-        email_addr = EmailAddress.objects.fetch(email)
-        valid = email_addr.agencies.filter(id=agency.pk).exists()
-        if valid:
-            # rate limit to once per 5 minutes
-            new_uuid = uuid4()
-            old_uuid = cache.get_or_set(f"token:{email_addr.pk}", new_uuid, 300)
-            if new_uuid != old_uuid:
-                messages.error(request, "Please wait 5 minutes to try again")
-                return redirect(foia)
-
-            msg = TemplateEmail(
-                subject="Login Token",
-                to=[email],
-                text_template="accounts/email/login_token.txt",
-                html_template="accounts/email/login_token.html",
-                extra_context={"reply_link": foia.get_agency_reply_link(email=email)},
-            )
-            msg.send(fail_silently=False)
-            messages.success(
-                request,
-                "Fresh login token succesfully sent to %s.  "
-                "Please check your email" % email,
-            )
-        else:
-            messages.error(request, "Invalid email")
-        return redirect(foia)
-
     authed = request.user.is_authenticated
     agency_user = authed and request.user.profile.is_agency_user
     agency_match = agency_user and request.user.profile.agency == agency
-    email = request.GET.get("email", "")
-    # valid if this email is associated with the agency
-    email_address = EmailAddress.objects.fetch(email)
-    valid = (
-        email_address is not None
-        and email_address.agencies.filter(id=agency.pk).exists()
-    )
 
     if agency_match:
         return redirect(foia.get_absolute_url() + "#agency-reply")
@@ -491,10 +451,8 @@ def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx)
     elif authed:
         return redirect("index")
     else:
-        return render(
-            request,
-            "accounts/agency_redirect_login.html",
-            {"email": email, "valid": valid},
+        return redirect(
+            "communication-direct-agency", idx=foia.communications.last().pk
         )
 
 
