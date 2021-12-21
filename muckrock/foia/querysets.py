@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 # Standard Library
+import logging
 from datetime import date, datetime, time
 from itertools import groupby
 
@@ -20,6 +21,8 @@ import requests
 # MuckRock
 from muckrock.agency.constants import STALE_REPLIES
 from muckrock.core.models import ExtractDay
+
+logger = logging.getLogger(__name__)
 
 
 class PreloadFileQuerysetMixin:
@@ -478,7 +481,11 @@ class RawEmailQuerySet(models.QuerySet):
         response.raise_for_status()
         items = response.json()["items"]
         if not items:
-            return
+            logger.info(
+                "Fetching raw emails: message_id: %s - items not found, will retry",
+                message_id,
+            )
+            raise ValueError
         url = items[0]["storage"]["url"]
         response = requests.get(
             url,
@@ -487,6 +494,9 @@ class RawEmailQuerySet(models.QuerySet):
         )
         response.raise_for_status()
 
+        logger.info(
+            "Fetching raw emails: message_id: %s - saving raw email", message_id
+        )
         raw_email_content = response.json()["body-mime"]
         for email in emails:
             raw_email = self.create(email=email)

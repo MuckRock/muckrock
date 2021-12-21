@@ -1052,7 +1052,7 @@ def import_doccloud_file(file_pk):
 
 @task(
     ignore_result=True,
-    autoretry_for=(requests.exceptions.RequestException,),
+    autoretry_for=(requests.exceptions.RequestException, ValueError),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
     name="muckrock.foia.tasks.fetch_raw_email",
