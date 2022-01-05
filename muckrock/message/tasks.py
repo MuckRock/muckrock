@@ -172,6 +172,7 @@ def send_charge_receipt(charge_id):
         return
     # we should expect charges to have metadata attached when they are made
     try:
+        logger.info("Charge Receipt metadata %s", charge.metadata)
         user_email = charge.metadata["email"]
         user_action = charge.metadata["action"]
     except KeyError:
@@ -195,8 +196,11 @@ def send_charge_receipt(charge_id):
         # squarelet charges will be handled on squarelet
         logger.warning("Unrecognized charge: %s", user_action)
         receipt_function = receipts.generic_receipt
+    logger.info("Charge Receipt generating")
     receipt = receipt_function(user, charge)
+    logger.info("Charge Receipt generated: %s %s", receipt.user, receipt.to)
     receipt.send(fail_silently=False)
+    logger.info("Charge Receipt sent")
 
 
 def get_subscription_type(invoice):
