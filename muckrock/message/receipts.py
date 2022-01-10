@@ -59,7 +59,7 @@ class Receipt(TemplateEmail):
         if not self.user and "email" in self.charge.metadata:
             user_email = self.charge.metadata["email"]
             self.to.append(user_email)
-        else:
+        elif not self.user and "email" not in self.charge.metadata:
             raise ValueError("No user or email provided to receipt.")
 
     def get_context_data(self, *args):
