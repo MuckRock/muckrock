@@ -30,7 +30,7 @@ defusedxml==0.7.0rc1      # via python3-openid, social-auth-core
 dill==0.3.2
 django-activity-stream==0.10.0
 django-appconf==1.0.4     # via django-celery-email, django-compressor, django-opensearch
-django-autocomplete-light==3.7.0.dev0
+django-autocomplete-light==3.9.0rc5
 django-celery-email==3.0.0
 django-choices==1.6.1
 django-compat==1.0.15

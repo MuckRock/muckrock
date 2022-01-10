@@ -7,7 +7,7 @@ celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
-django-autocomplete-light==3.7.0.dev0 # Autocomplete drop down inputs
+django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
 django-compat # ?
