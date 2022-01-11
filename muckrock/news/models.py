@@ -73,7 +73,7 @@ class Article(models.Model):
         upload_to="news_images/%Y/%m/%d",
         blank=True,
         null=True,
-        resize_source={"size": (1600, 1200), "crop": "smart"},
+        resize_source={"size": (2400, 800), "crop": "smart"},
     )
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)

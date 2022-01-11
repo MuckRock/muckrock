@@ -25,10 +25,10 @@
       <meta itemscope itemprop="mainEntityOfPage" itemType="https://schema.org/WebPage" itemid="https://www.muckrock.com{{ article.get_absolute_url }}">
       {% if article.image %}
         <div class="news__image" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
-          <img src="{% thumbnail article.image 1200x400 crop %}" alt="{{ article.title }}">
-          <meta itemprop="url" content="https://www.muckrock.com{% thumbnail article.image 1200x400 crop %}">
-          <meta itemprop="width" content="1200">
-          <meta itemprop="height" content="400">
+          <img src="{% thumbnail article.image 2400x800 crop %}" alt="{{ article.title }}">
+          <meta itemprop="url" content="https://www.muckrock.com{% thumbnail article.image 2400x800 crop %}">
+          <meta itemprop="width" content="2400">
+          <meta itemprop="height" content="800">
         </div>
       {% endif %}
       <article class="news__article">
@@ -106,7 +106,7 @@
   <meta property="og:type" content="article" />
   <meta property="og:url" content="{{ request.build_absolute_uri }}" />
   {% if article.image %}
-    <meta property="og:image" content="{% thumbnail article.image 1200x400 %}" />
+    <meta property="og:image" content="{% thumbnail article.image 2400x800 %}" />
   {% else %}
     <meta property="og:image" content="{% static 'icons/logo.png' %}" />
   {% endif %}
@@ -126,7 +126,7 @@
   <meta name="twitter:title" content="{{ article.title }}" />
   <meta name="twitter:description" content="{{ article.summary }}" />
   {% if article.image %}
-    <meta name="twitter:image:src" content="{% thumbnail article.image 1200x400 %}" />
+    <meta name="twitter:image:src" content="{% thumbnail article.image 2400x800 %}" />
   {% else %}
     <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
   {% endif %}
