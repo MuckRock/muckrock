@@ -4,8 +4,8 @@
 #
 #    pip-compile --output-file pip/requirements.txt pip/requirements.in
 #
--e git+git://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun
--e git+git://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps
+-e git+https://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun
+-e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps
 amqp==2.6.0               # via kombu
 asgiref==3.4.1            # via django, scout-apm
 backcall==0.2.0           # via ipython
