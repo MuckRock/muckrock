@@ -1072,6 +1072,18 @@ class TestFOIAComposerViews(TestCase):
         response = CreateComposer.as_view()(request)
         eq_(response.status_code, 200)
 
+    def test_get_create_composer_clone_anonymous(self):
+        """Test cloning a composer as an anonymous user"""
+        clone = FOIARequestFactory()
+        request = self.request_factory.get(
+            reverse("foia-create") + "?clone={}".format(clone.composer.pk)
+        )
+        request.user = AnonymousUser()
+        request = mock_middleware(request)
+        response = CreateComposer.as_view()(request)
+        eq_(response.status_code, 200)
+        eq_(response.context_data["form"].initial["title"], clone.composer.title)
+
     def test_post_create_composer_anonymous(self):
         """Create a new composer as an anonymous user"""
         agency = AgencyFactory()

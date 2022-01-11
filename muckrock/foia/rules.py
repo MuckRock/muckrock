@@ -197,7 +197,6 @@ can_view = can_edit | is_viewer | is_from_agency | is_proxy | ~is_private
 
 @predicate
 @skip_if_not_obj
-@user_authenticated
 def can_view_composer_child(user, composer):
     for foia in composer.foias.all():
         if foia.has_perm(user, "view"):
