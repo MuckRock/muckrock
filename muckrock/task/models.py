@@ -27,6 +27,7 @@ from zenpy.lib.api_objects import (
     Ticket,
     User as ZenUser,
 )
+from zenpy.lib.exception import APIException
 
 # MuckRock
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
@@ -765,7 +766,12 @@ class FlaggedTask(Task):
             org_data = {}
 
         if org_data:
-            org = client.organizations.create_or_update(ZenOrganization(**org_data))
+            try:
+                org = client.organizations.create_or_update(ZenOrganization(**org_data))
+            except APIException:
+                # De-duplicate name
+                org_data["name"] += "_" + org_data["external_id"][:6]
+                org = client.organizations.create_or_update(ZenOrganization(**org_data))
             user_data["organization_id"] = org.id
             ticket_data["organization_id"] = org.id
         user = client.users.create_or_update(ZenUser(**user_data))

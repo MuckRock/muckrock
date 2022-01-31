@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Standard Library
+import logging
+import sys
 from io import BytesIO
 from random import randint
 
@@ -25,6 +27,8 @@ from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.filters import SnailMailTaskFilterSet
 from muckrock.task.models import FlaggedTask, SnailMailTask
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
+
+logger = logging.getLogger(__name__)
 
 
 @task(ignore_result=True, name="muckrock.task.tasks.submit_review_update")
@@ -124,6 +128,7 @@ def create_ticket(flag_pk, **kwargs):
             zoho_id = flag.create_zoho_ticket()
             flag.resolve(form_data={"zoho_id": zoho_id})
     except (RequestException, ZenpyException, APIException) as exc:
+        logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
         raise create_ticket.retry(
             countdown=(2 ** create_ticket.request.retries) * 300 + randint(0, 300),
             args=[flag_pk],
