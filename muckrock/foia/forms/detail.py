@@ -93,7 +93,8 @@ class FOIAOwnerForm(forms.Form):
     user = forms.ModelChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="user-autocomplete", attrs={"data-placeholder": "User?"}
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "id": "id_owner"},
         ),
     )
 
