@@ -12,11 +12,11 @@
     {% if not hide_image and image %}
     <a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article__image">
         {% if small %}
-        <img src="{% thumbnail article.image 300x100 crop %}" alt="{{article.title}}" />
+        <img src="{% thumbnail article.image 900x300 crop %}" alt="{{article.title}}" />
         {% elif large %}
-        <img src="{% thumbnail article.image 900x300 %}" alt="{{article.title}}" />
+        <img src="{% thumbnail article.image 1800x600 %}" alt="{{article.title}}" />
         {% else %}
-        <img src="{% thumbnail article.image 400x300 crop %}" alt="{{article.title}}" />
+        <img src="{% thumbnail article.image 800x600 crop %}" alt="{{article.title}}" />
         {% endif %}
     </a>
     {% endif %}
