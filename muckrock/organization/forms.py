@@ -56,7 +56,7 @@ class StripeForm(forms.Form):
                 del self.fields["use_card_on_file"]
                 self.fields["stripe_token"].required = True
 
-        # if auth user no no org are given
+        # if auth user but no org are given
         elif self._user.is_authenticated and self._organization is None:
             queryset = self._user.organizations.filter(
                 memberships__admin=True
@@ -64,17 +64,14 @@ class StripeForm(forms.Form):
             if len(queryset) == 1:
                 self.fields["organization"].widget = forms.HiddenInput()
             self.fields["organization"].queryset = queryset
-            self.fields[
-                "organization"
-            ].initial = self._user.profile.individual_organization
-            if self._user.profile.individual_organization.card:
-                self.fields["use_card_on_file"].choices = (
-                    (True, self._user.profile.individual_organization.card),
-                    (False, "New Card"),
-                )
-            else:
-                del self.fields["use_card_on_file"]
-                self.fields["stripe_token"].required = True
+            # get the active org if you are an admin,
+            # otherwise default to your individual org
+            active_membership = self._user.memberships.filter(active=True, admin=True)
+            self.fields["organization"].initial = (
+                active_membership[0].organization
+                if active_membership
+                else self._user.profile.individual_organization
+            )
 
         # if anonymous user is given
         elif not self._user.is_authenticated:

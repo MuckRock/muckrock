@@ -244,6 +244,10 @@ class Detail(DetailView):
             }
         )
         context["fee_form"] = self.fee_form
+        if context["user_can_pay"]:
+            context["admin_organizations"] = self.request.user.organizations.filter(
+                memberships__admin=True
+            )
         context["note_form"] = FOIANoteForm()
         context["portal_form"] = PortalForm(foia=self.foia)
         context["resend_forms"] = self.resend_forms

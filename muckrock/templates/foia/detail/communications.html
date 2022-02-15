@@ -295,7 +295,11 @@
           {% endif %}
 
           {% if user_can_pay %}
-            <div class="composer" id="pay">
+            <div class="composer buy-request-form" id="pay"
+                {% for org in admin_organizations %}
+                  data-org-card-{{ org.pk }}="{{ org.card }}"
+                {% endfor %}
+            >
               <form class="composer-input" method="post">
                 <input type="hidden" name="action" value="pay_fee">
                 <header>
