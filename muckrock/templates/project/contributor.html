@@ -15,9 +15,6 @@
     {% empty %}
         <div class="empty">
             <h2>No Projects</h2>
-            {% if user_is_contributor %}
-            <a class="blue button" href="{% url 'project-create' %}">Create Project</a>
-            {% endif %}
         </div>
     {% endfor %}
     </div>

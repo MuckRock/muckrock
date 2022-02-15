@@ -130,8 +130,8 @@ class TestProjectCreateView(TestCase):
         self.url = reverse("project-create")
 
     def test_basic(self):
-        """Basic users should be able to GET the ProjectCreateView."""
-        user = UserFactory()
+        """Staff users should be able to GET the ProjectCreateView."""
+        user = UserFactory(is_staff=True)
         response = http_get_response(self.url, self.view, user)
         eq_(
             response.status_code,

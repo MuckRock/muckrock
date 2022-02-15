@@ -61,8 +61,6 @@
                       <p>{{project.title}}</p>
                     </a>
                   </li>
-                {% empty %}
-                  <li><a class="nav-item" href="{% url 'project-create' %}">Create&nbsp;a&nbsp;Project</a></li>
                 {% endfor %}
                 {% if user.is_authenticated %}
                   <li><a class="nav-item" href="{% url 'project-contributor' username=user.username %}">Your&nbsp;Projects</a></li>

@@ -4,7 +4,7 @@ Views for the project application
 
 # Django
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db.models import Prefetch
 from django.http import Http404
@@ -116,7 +116,7 @@ class ProjectCreateView(CreateView):
     initial = {"private": True}
     template_name = "project/create.html"
 
-    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)

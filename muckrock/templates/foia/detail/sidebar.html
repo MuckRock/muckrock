@@ -195,7 +195,9 @@
       {% include "foia/component/status.html" %}
       {% if not is_agency_user %}
         {% include "foia/component/embargo.html" %}
-        {% project_manager foia %}
+        {% if request.user.is_staff %}
+          {% project_manager foia %}
+        {% endif %}
         {% tag_manager foia %}
       {% endif %}
     </section>
