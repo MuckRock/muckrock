@@ -107,10 +107,12 @@ class FOIARequestQuerySet(models.QuerySet):
                 composer__user__profile__org_share=True,
                 composer__organization__in=user.organizations.all(),
             )
-            return self.filter(query)
+            return self.exclude(deleted=True).filter(query)
         else:
             # anonymous user, filter out embargoes and noindex requests
-            return self.exclude(embargo=True).exclude(noindex=True)
+            return (
+                self.exclude(embargo=True).exclude(noindex=True).exclude(deleted=True)
+            )
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""

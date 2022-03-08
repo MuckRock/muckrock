@@ -157,6 +157,12 @@ def match_agency(user, foia):
     return bool(user.profile.agency and user.profile.agency == foia.agency)
 
 
+@predicate
+@skip_if_not_obj
+def is_deleted(user, foia):
+    return foia.deleted
+
+
 # User predicates
 
 
@@ -192,7 +198,9 @@ can_embargo = has_feature_level(1)
 
 can_embargo_permananently = has_feature_level(2) | has_perm_embargo
 
-can_view = can_edit | is_viewer | is_from_agency | is_proxy | ~is_private
+can_view = (can_edit | is_viewer | is_from_agency | is_proxy | ~is_private) & (
+    ~is_deleted | is_staff
+)
 
 
 @predicate
