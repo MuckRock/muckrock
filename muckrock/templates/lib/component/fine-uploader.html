@@ -204,7 +204,8 @@ function createCreateUploader(dataAttr, urls, spreadsheetsOnly) {
             url: '{% url "fine-uploader-chunk" %}',
             data: {
               key: uploader._s3FileKeys[id],
-              id: uploadId,
+              id: pk,
+              uploadId: uploadId,
               index: chunkData.partIndex
             },
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }

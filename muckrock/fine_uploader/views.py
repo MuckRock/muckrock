@@ -381,7 +381,7 @@ def preupload_comm(request):
 def upload_chunk(request):
     """Generate an upload URL for a chunk"""
     key = request.POST.get("key")
-    upload_id = request.POST.get("id")
+    upload_id = request.POST.get("uploadId")
     chunk_index = request.POST.get("index")
 
     if not (key and upload_id and chunk_index):
