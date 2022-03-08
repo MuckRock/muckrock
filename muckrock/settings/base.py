@@ -36,6 +36,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 DEFAULT_FROM_EMAIL = os.environ.get("FROM_EMAIL", "info@muckrock.com")
 DIAGNOSTIC_EMAIL = os.environ.get("DIAGNOSTIC_EMAIL", "diagnostics@muckrock.com")
 SCANS_EMAIL = os.environ.get("SCANS_EMAIL", "scans@muckrock.com")
+SCANS_SLACK_EMAIL = os.environ.get("SCANS_SLACK_EMAIL", SCANS_EMAIL)
 ASSIGNMENTS_EMAIL = os.environ.get("ASSIGNMENTS_EMAIL", "assignments@muckrock.com")
 
 ADDRESS_NAME = os.environ.get("ADDRESS_NAME", "MuckRock News")

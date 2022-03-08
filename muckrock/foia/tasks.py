@@ -713,7 +713,7 @@ def autoimport():
             subject="[AUTOIMPORT] %s Logs" % timezone.now(),
             body="\n".join(log),
             from_email=settings.SCANS_EMAIL,
-            to=[settings.DEFAULT_FROM_EMAIL],
+            to=[settings.SCANS_SLACK_EMAIL],
             bcc=[settings.DIAGNOSTIC_EMAIL],
         ).send(fail_silently=False)
 
