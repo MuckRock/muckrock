@@ -35,7 +35,7 @@ django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
 django<4.0 # Django is kinda important...
 djangorestframework # The API framework
-documentcloud # for uploading to documentcloud
+python-documentcloud # for uploading to documentcloud
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF
 easy-thumbnails # Used for thumbnailing images
