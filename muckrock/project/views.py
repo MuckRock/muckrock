@@ -6,7 +6,6 @@ Views for the project application
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -160,9 +159,7 @@ class ProjectDetailView(DetailView):
         )
         context["visible_requests"] = visible_requests.get_public_file_count(limit=6)
         context["visible_requests_count"] = visible_requests.count()
-        articles = project.articles.get_published().prefetch_related(
-            Prefetch("authors", queryset=User.objects.select_related("profile"))
-        )
+        articles = project.articles.get_published().prefetch_authors()
         context["articles"] = articles[:3]
         context["articles_count"] = articles.count()
         context["followers"] = followers(project)

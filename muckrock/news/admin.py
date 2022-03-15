@@ -13,7 +13,7 @@ from reversion.admin import VersionAdmin
 # MuckRock
 from muckrock.core import autocomplete
 from muckrock.foia.models import FOIARequest
-from muckrock.news.models import Article, Photo
+from muckrock.news.models import Article, Authorship, Photo
 
 
 class AuthorListFilter(admin.SimpleListFilter):
@@ -39,16 +39,34 @@ class AuthorListFilter(admin.SimpleListFilter):
             return None
 
 
-class ArticleAdminForm(forms.ModelForm):
-    """Form with autocompletes"""
+class AuthorshipAdminForm(forms.ModelForm):
+    """Admin form for Authorship"""
 
-    authors = forms.ModelMultipleChoiceField(
+    author = forms.ModelChoiceField(
         queryset=User.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(
+        widget=autocomplete.ModelSelect2(
             url="user-autocomplete",
             attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
+
+    class Meta:
+        model = Authorship
+        fields = "__all__"
+
+
+class AuthorInline(admin.TabularInline):
+    """Authorship Admin Inline"""
+
+    model = Authorship
+    form = AuthorshipAdminForm
+    extra = 1
+    fields = ["author", "order"]
+
+
+class ArticleAdminForm(forms.ModelForm):
+    """Form with autocompletes"""
+
     editors = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
@@ -68,7 +86,19 @@ class ArticleAdminForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = "__all__"
+        fields = [
+            "pub_date",
+            "title",
+            "kicker",
+            "slug",
+            "summary",
+            "body",
+            "editors",
+            "publish",
+            "foias",
+            "image",
+            "tags",
+        ]
 
 
 class ArticleAdmin(VersionAdmin):
@@ -82,6 +112,7 @@ class ArticleAdmin(VersionAdmin):
     date_hierarchy = "pub_date"
     search_fields = ["title", "body"]
     save_on_top = True
+    inlines = [AuthorInline]
 
     def get_queryset(self, request):
         """Prefetch authors"""

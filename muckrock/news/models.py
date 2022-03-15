@@ -33,19 +33,22 @@ class ArticleQuerySet(models.QuerySet):
         """Get all draft news articles"""
         return self.filter(publish=False)
 
-    def _prefetch_users(self, field):
-        """Prefetch authors or editors"""
-        return self.prefetch_related(
-            Prefetch(field, queryset=User.objects.select_related("profile"))
-        )
-
     def prefetch_authors(self):
         """Prefetch authors"""
-        return self._prefetch_users("authors")
+        return self.prefetch_related(
+            Prefetch(
+                "authors",
+                queryset=User.objects.select_related("profile").order_by(
+                    "authorship__order"
+                ),
+            )
+        )
 
     def prefetch_editors(self):
         """Prefetch editors"""
-        return self._prefetch_users("editors")
+        return self.prefetch_related(
+            Prefetch("editors", queryset=User.objects.select_related("profile"))
+        )
 
 
 class Article(models.Model):
@@ -61,7 +64,9 @@ class Article(models.Model):
         help_text="A single paragraph summary or preview of the article."
     )
     body = models.TextField("Body text")
-    authors = models.ManyToManyField(User, related_name="authored_articles")
+    authors = models.ManyToManyField(
+        User, through="authorship", related_name="authored_articles"
+    )
     editors = models.ManyToManyField(User, related_name="edited_articles", blank=True)
     publish = models.BooleanField(
         "Publish on site",
@@ -108,7 +113,11 @@ class Article(models.Model):
 
     def get_authors_names(self):
         """Get all authors names for a byline"""
-        authors = list(self.authors.values_list("profile__full_name", flat=True))
+        authors = list(
+            self.authors.order_by("authorship__order").values_list(
+                "profile__full_name", flat=True
+            )
+        )
         if not authors:
             return ""
         names = ", ".join(a for a in authors[:-1])
@@ -123,6 +132,17 @@ class Article(models.Model):
     class Meta:
         ordering = ["-pub_date"]
         get_latest_by = "pub_date"
+
+
+class Authorship(models.Model):
+    """Through model for article to user M2M"""
+
+    article = models.ForeignKey("Article", on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.PROTECT)
+    order = models.PositiveSmallIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
 
 
 class Photo(models.Model):

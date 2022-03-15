@@ -97,7 +97,11 @@ class NewsDetail(DateDetailView):
             context["news_cache_timeout"] = 0
         else:
             context["news_cache_timeout"] = settings.DEFAULT_CACHE_TIMEOUT
-        context["authors"] = context["object"].authors.select_related("profile")
+        context["authors"] = (
+            context["object"]
+            .authors.select_related("profile")
+            .order_by("authorship__order")
+        )
         context["editors"] = context["object"].editors.select_related("profile")
         return context
 
