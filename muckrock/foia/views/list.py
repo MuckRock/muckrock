@@ -132,23 +132,26 @@ class RequestList(MRSearchFilterListView):
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
-        objects = objects.select_related(
-            "agency__jurisdiction__parent", "composer__user__profile", "crowdfund"
-        ).only(
-            "title",
-            "slug",
-            "status",
-            "embargo",
-            "datetime_updated",
-            "agency__name",
-            "agency__jurisdiction__name",
-            "agency__jurisdiction__slug",
-            "agency__jurisdiction__level",
-            "agency__jurisdiction__parent__abbrev",
-            "crowdfund__date_due",
-            "crowdfund__closed",
-            "composer__user__profile__full_name",
-            "composer__datetime_submitted",
+        objects = (
+            objects.select_related(
+                "agency__jurisdiction__parent", "composer__user__profile"
+            )
+            .only(
+                "title",
+                "slug",
+                "status",
+                "embargo",
+                "datetime_updated",
+                "agency__name",
+                "agency__jurisdiction__name",
+                "agency__jurisdiction__slug",
+                "agency__jurisdiction__level",
+                "agency__jurisdiction__parent__abbrev",
+                "composer__user__profile__full_name",
+                "composer__datetime_submitted",
+                "crowdfund_id",
+            )
+            .prefetch_related("crowdfund")
         )
         return objects.get_viewable(self.request.user)
 

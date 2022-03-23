@@ -91,6 +91,7 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
     )
     has_crowdfund = django_filters.BooleanFilter(
         field_name="crowdfund",
+        label="Has Crowdfund",
         lookup_expr="isnull",
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
