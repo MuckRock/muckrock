@@ -18,7 +18,7 @@ $request-breakpoint: 768px;
             }
         }
     }
-    .numbers, .dates, .portal-info {
+    .numbers, .dates, .portal-info, .upload-info {
         font-size: $size-2;
         tr {
             background-color: $color-white;
@@ -56,7 +56,7 @@ $request-breakpoint: 768px;
             @include flex-direction(row-reverse);
         }
     }
-    .portal-info {
+    .portal-info, .upload-info {
         display: none;
         &.visible {
             display: table;

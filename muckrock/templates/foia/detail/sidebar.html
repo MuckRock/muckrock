@@ -178,6 +178,20 @@
         </form>
       {% endif %}
 
+      {% if request.user.is_staff %}
+        <div id="show-upload-info" class="action">Show Direct Upload Info</div>
+        <table class="upload-info">
+          <tr>
+            <td>Upload Link</td>
+            <td>{{ reply_link|urlize }}</td>
+          </tr>
+          <tr>
+            <td>Passcode</td>
+            <td>{{ foia.get_passcode }}</td>
+          </tr>
+        </table>
+      {% endif %}
+
       {% if user_can_edit %}
         <form class="change-date hidden-form" method="post">
           {% csrf_token %}

@@ -326,6 +326,12 @@ class Detail(DetailView):
         context["meta_noindex"] = self.foia.noindex
         context["enable_followup"] = config.ENABLE_FOLLOWUP
         context["disabled_followup_message"] = config.DISABLED_FOLLOWUP_MESSAGE
+        if self.request.user.is_staff:
+            last_comm = self.foia.communications.last()
+            if last_comm:
+                context["reply_link"] = settings.MUCKROCK_URL + reverse(
+                    "communication-direct-agency", kwargs={"idx": last_comm.pk}
+                )
 
     def _get_revoke_context_data(self, context):
         """Get context data about revoking the request"""

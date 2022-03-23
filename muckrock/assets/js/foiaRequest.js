@@ -62,6 +62,11 @@ $('#show-portal-info').click(function(){
     $('.portal-info').addClass('visible');
 });
 
+$('#show-upload-info').click(function(){
+    $(this).hide();
+    $('.upload-info').addClass('visible');
+});
+
 /* Communications */
 
 $('#toggle-communication-collapse').click(function(){
