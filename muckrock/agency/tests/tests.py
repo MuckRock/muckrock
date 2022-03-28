@@ -264,7 +264,7 @@ class TestAgencyViews(TestCase):
         data = json.loads(response.content)
         assert_in("{ law name }", data["intro"])
         assert_in("{ days }", data["outro"])
-        assert_in("John Doe", data["outro"])
+        assert_in("{ closing }", data["outro"])
 
     def test_contact_info_anonymous(self):
         """Test the contact_info ajax view"""
