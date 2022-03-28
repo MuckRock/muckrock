@@ -42,13 +42,20 @@ class FOIATemplate(models.Model):
 
     def _handle_users(self, tags, user, jurisdiction, **kwargs):
         """Handle user names and proxies"""
-        if user.is_authenticated:
-            tags.append(("{ name }", user.profile.full_name))
-        elif kwargs.get("html"):
+        if kwargs.get("html"):
             tags.append(make_tag("{ name }", "This will be replaced by your full name"))
+        elif user.is_authenticated:
+            tags.append(("{ name }", user.profile.full_name))
 
         proxy = kwargs.get("proxy")
-        if proxy:
+        if kwargs.get("html"):
+            tags.append(
+                make_tag(
+                    "{ closing }",
+                    "This will be replaced by a suitable closing for the letter",
+                )
+            )
+        elif proxy:
             jurisdiction_name = (
                 jurisdiction.legal.name if jurisdiction else "{ jurisdiction }"
             )
@@ -66,13 +73,6 @@ class FOIATemplate(models.Model):
             )
         elif user.is_authenticated:
             tags.append(("{ closing }", f"Sincerely,\n\n{user.profile.full_name}"))
-        elif kwargs.get("html"):
-            tags.append(
-                make_tag(
-                    "{ closing }",
-                    "This will be replaced by a suitable closing for the letter",
-                )
-            )
 
     def render(self, agency, user, requested_docs, **kwargs):
         """Render this template for a given agency"""
