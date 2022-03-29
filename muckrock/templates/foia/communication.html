@@ -78,9 +78,9 @@
           {% include "foia/detail/file_download.html" %}
         {% endif %}
         {% if communication.full_html %}
-          {{ communication.communication|redact_emails|safe }}
+          {{ communication.communication|redact_emails:foia.passcode|safe }}
         {% else %}
-          {{ communication.communication|redact_emails|urlize|linebreaks }}
+          {{ communication.communication|redact_emails:foia.passcode|urlize|linebreaks }}
         {% endif %}
       </section>
     {% endif %}
