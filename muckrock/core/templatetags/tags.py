@@ -103,6 +103,7 @@ email_re = re.compile(
 )
 
 login_link = re.compile(r"https://accounts.muckrock.com/accounts/login/\?next=[\S]*")
+upload_link = re.compile(r"https://www.muckrock.com/respond/[0-9]+/")
 
 
 def email_redactor(match):
@@ -123,7 +124,9 @@ def fieldtype(field):
 def redact_emails(text):
     """Redact emails from text"""
     text = email_re.sub(email_redactor, text)
-    return login_link.sub("https://www.muckrock.com/", text)
+    text = login_link.sub("https://www.muckrock.com/", text)
+    text = upload_link.sub("https://www.muckrock.com/", text)
+    return text
 
 
 # http://stackoverflow.com/questions/1278042/
