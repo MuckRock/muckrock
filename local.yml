@@ -1,4 +1,4 @@
-version: '2'
+version: '3.8'
 
 volumes:
   postgres_data_local: {}
@@ -9,6 +9,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
+      network: host
     image: muckrock_local_django
     depends_on:
       - muckrock_redis
@@ -25,12 +26,12 @@ services:
     networks:
       default:
         aliases:
-          - dev.muckrock.com
-          - dev.foiamachine.org
+          - internal.dev.muckrock.com
+          - internal.dev.foiamachine.org
       squarelet_default:
         aliases:
-          - dev.muckrock.com
-          - dev.foiamachine.org
+          - internal.dev.muckrock.com
+          - internal.dev.foiamachine.org
 
   muckrock_postgres:
     build:

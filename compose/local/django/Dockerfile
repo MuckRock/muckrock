@@ -26,6 +26,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   # for imagediet
   #&& apt-get install libmagic
 
+# set up makecert root CA
+RUN curl http://localhost/rootCA.pem > /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates
+
 # heroku cli
 RUN curl https://cli-assets.heroku.com/install.sh | sh
 

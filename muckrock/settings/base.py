@@ -543,13 +543,13 @@ ORG_PRICE_PER_SEAT = 2000
 ORG_REQUESTS_PER_SEAT = 10
 
 # development urls
-MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "http://dev.muckrock.com")
-FOIAMACHINE_URL = os.environ.get("FOIAMACHINE_URL", "http://dev.foiamachine.org")
-SQUARELET_URL = os.environ.get("SQUARELET_URL", "http://dev.squarelet.com")
-DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "http://www.dev.documentcloud.org")
+MUCKROCK_URL = os.environ.get("MUCKROCK_URL", "https://dev.muckrock.com")
+FOIAMACHINE_URL = os.environ.get("FOIAMACHINE_URL", "https://dev.foiamachine.org")
+SQUARELET_URL = os.environ.get("SQUARELET_URL", "https://dev.squarelet.com")
+DOCCLOUD_URL = os.environ.get("DOCCLOUD_URL", "https://www.dev.documentcloud.org")
 DOCCLOUD_EMBED_URL = os.environ.get("DOCCLOUD_EMBED_URL", DOCCLOUD_URL)
 DOCCLOUD_API_URL = os.environ.get(
-    "DOCCLOUD_API_URL", "http://api.dev.documentcloud.org"
+    "DOCCLOUD_API_URL", "https://api.dev.documentcloud.org"
 )
 DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
