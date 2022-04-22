@@ -584,6 +584,7 @@ def pay_fee(request, foia):
                     ),
                     token=form.cleaned_data["stripe_token"],
                     save_card=form.cleaned_data["save_card"],
+                    metadata={"action": "Request Fee", "foia": foia.pk},
                 )
             except requests.exceptions.RequestException as exc:
                 locked_foia.status = "payment"

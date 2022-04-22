@@ -53,12 +53,13 @@ def validate_stripe_email(email):
     return email
 
 
-def stripe_get_customer(email, description):
+def stripe_get_customer(email, description, name):
     """Get a customer for an authenticated or anonymous user"""
     return stripe_retry_on_error(
         stripe.Customer.create,
         description=description,
         email=email,
+        name=name,
         idempotency_key=True,
     )
 

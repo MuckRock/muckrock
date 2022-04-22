@@ -10,6 +10,7 @@ from django.db.models.functions import Greatest
 from django.urls import reverse
 
 # Standard Library
+import json
 import logging
 from uuid import uuid4
 
@@ -189,7 +190,7 @@ class Organization(models.Model):
         self.number_requests = F("number_requests") + amount
         self.save()
 
-    def pay(self, amount, description, token, save_card, fee_amount=0):
+    def pay(self, amount, description, token, save_card, metadata, fee_amount=0):
         """Pay via Squarelet API"""
         # pylint: disable=too-many-arguments
         resp = squarelet_post(
@@ -201,6 +202,7 @@ class Organization(models.Model):
                 "description": description,
                 "token": token,
                 "save_card": save_card,
+                "metadata": json.dumps(metadata),
             },
         )
         logger.info("Squarelet response: %s %s", resp.status_code, resp.content)

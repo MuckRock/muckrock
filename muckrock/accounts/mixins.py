@@ -103,6 +103,7 @@ class BuyRequestsMixin:
                 description="Purchase {} requests".format(num_requests),
                 token=form.cleaned_data["stripe_token"],
                 save_card=form.cleaned_data["save_card"],
+                metadata={"action": "Request Purchase"},
             )
             organization.add_requests(num_requests)
         except requests.exceptions.RequestException as exc:

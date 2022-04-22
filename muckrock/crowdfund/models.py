@@ -142,15 +142,22 @@ class Crowdfund(models.Model):
         # Try processing the payment using Stripe.
         # If the payment fails, do not catch the error.
         # Stripe represents currency as smallest-unit integers.
+        customer = stripe_get_customer(
+            email,
+            user.username if user else email,
+            user.profile.full_name if user else "Anonymous",
+        )
+        stripe_retry_on_error(customer.sources.create, source=token)
         stripe_amount = int(float(amount) * 100)
         charge = stripe_retry_on_error(
             stripe.Charge.create,
             amount=stripe_amount,
-            source=token,
+            customer=customer,
             currency="usd",
+            statement_descriptor_suffix="Crowdfund",
             metadata={
                 "email": email,
-                "action": "crowdfund-payment",
+                "action": "Crowdfund Payment",
                 "crowdfund_id": self.id,
                 "crowdfund_name": self.name,
             },
@@ -179,13 +186,16 @@ class Crowdfund(models.Model):
         # pylint: disable=too-many-arguments
         plan = self._get_stripe_plan()
         customer = stripe_get_customer(
-            email, "Crowdfund {} for {}".format(self.pk, email)
+            email,
+            user.username if user else email,
+            user.profile.full_name if user else "Anonymous",
         )
         subscription = stripe_retry_on_error(
             customer.subscriptions.create,
             plan=plan,
             source=token,
             quantity=amount,
+            metadata={"action": "Crowdfund Payment"},
             idempotency_key=True,
         )
         RecurringCrowdfundPayment.objects.create(

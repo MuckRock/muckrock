@@ -429,14 +429,25 @@ class DonationFormView(StripeFormMixin, FormView):
         """Make a Stripe charge and catch any errors."""
         charge = None
         error_msg = None
+        if self.request.user.is_authenticated:
+            user = self.request.user
+        else:
+            user = None
+        customer = stripe_get_customer(
+            email,
+            user.username if user else email,
+            user.profile.full_name if user else "Anonymous",
+        )
         try:
+            stripe_retry_on_error(customer.sources.create, source=token)
             charge = stripe_retry_on_error(
                 stripe.Charge.create,
                 amount=amount,
+                customer=customer,
                 currency="usd",
-                source=token,
                 description="Donation from %s" % email,
-                metadata={"email": email, "action": "donation"},
+                statement_descriptor_suffix="Donation",
+                metadata={"email": email, "action": "Donation"},
                 idempotency_key=True,
             )
         except stripe.error.CardError:
@@ -471,18 +482,23 @@ class DonationFormView(StripeFormMixin, FormView):
     def make_subscription(self, token, amount, email):
         """Start a subscription for recurring donations"""
         subscription = None
-        quantity = amount / 100
-        customer = stripe_get_customer(email, "Donation for {}".format(email))
+        quantity = int(amount / 100)
         if self.request.user.is_authenticated:
             user = self.request.user
         else:
             user = None
+        customer = stripe_get_customer(
+            email,
+            user.username if user else email,
+            user.profile.full_name if user else "Anonymous",
+        )
         try:
             subscription = stripe_retry_on_error(
                 customer.subscriptions.create,
                 plan="donate",
                 source=token,
                 quantity=quantity,
+                metadata={"action": "Donation (Recurring)"},
                 idempotency_key=True,
             )
         except stripe.error.CardError:
