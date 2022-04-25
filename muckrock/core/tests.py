@@ -299,6 +299,7 @@ class TestNotify(TestCase):
 
 
 @patch("stripe.Charge", Mock())
+@patch("stripe.Customer", Mock())
 class TestDonations(TestCase):
     """Tests donation functionality"""
 

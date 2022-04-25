@@ -28,6 +28,7 @@ from muckrock.project.models import ProjectCrowdfunds
 
 
 @patch("stripe.Charge", Mock(create=Mock(return_value=Mock(id="stripe-charge-id"))))
+@patch("stripe.Customer", Mock())
 class TestCrowdfundView(TestCase):
     """
     The Crowdfund Detail View should be handle all the contributons made to the crowdfund.

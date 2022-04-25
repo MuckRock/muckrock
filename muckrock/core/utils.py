@@ -131,10 +131,13 @@ def cache_get_or_set(key, update, timeout):
 
 def retry_on_error(error, func, *args, **kwargs):
     """Retry a function on error"""
+    MAX_RETRIES = 10
     times = kwargs.pop("times", 0) + 1
     try:
         return func(*args, **kwargs)
     except error as exc:
+        if times > MAX_RETRIES:
+            raise exc
         logger.warning(
             "Error, retrying #%d:\n\n%s", times, exc, exc_info=sys.exc_info()
         )

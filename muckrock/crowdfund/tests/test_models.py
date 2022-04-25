@@ -76,6 +76,7 @@ class TestCrowdfund(TestCase):
 
 
 @patch("stripe.Charge", Mock(create=Mock(return_value=Mock(id="stripe-charge-id"))))
+@patch("stripe.Customer", Mock())
 class TestCrowdfundPayment(TestCase):
     """Test making a payment to a crowdfund"""
 
