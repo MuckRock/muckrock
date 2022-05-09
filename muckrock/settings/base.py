@@ -41,10 +41,10 @@ ASSIGNMENTS_EMAIL = os.environ.get("ASSIGNMENTS_EMAIL", "assignments@muckrock.co
 
 ADDRESS_NAME = os.environ.get("ADDRESS_NAME", "MuckRock News")
 ADDRESS_DEPT = os.environ.get("ADDRESS_DEPT", "DEPT MR {pk}")
-ADDRESS_STREET = os.environ.get("ADDRESS_STREET", "411A Highland Ave")
-ADDRESS_CITY = os.environ.get("ADDRESS_CITY", "Somerville")
+ADDRESS_STREET = os.environ.get("ADDRESS_STREET", "263 Huntington Ave")
+ADDRESS_CITY = os.environ.get("ADDRESS_CITY", "Boston")
 ADDRESS_STATE = os.environ.get("ADDRESS_STATE", "MA")
-ADDRESS_ZIP = os.environ.get("ADDRESS_ZIP", "02144-2516")
+ADDRESS_ZIP = os.environ.get("ADDRESS_ZIP", "02115")
 
 PHONE_NUMBER = os.environ.get("PHONE_NUMBER", "(617) 299-1832")
 PHONE_NUMBER_LINK = os.environ.get(

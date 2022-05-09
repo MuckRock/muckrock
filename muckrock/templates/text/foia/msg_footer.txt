@@ -10,6 +10,7 @@ If prompted for a passcode, please enter:
 Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_request_email }}
 
+PLEASE NOTE OUR NEW ADDRESS
 For mailed responses, please address (see note):
 {{ return_address }}
 
