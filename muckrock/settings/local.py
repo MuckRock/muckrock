@@ -70,7 +70,7 @@ DEBUG_TOOLBAR_CONFIG = {
     "JQUERY_URL": "",
 }
 
-EMAIL_HOST = "dev.mailhog.com"
+EMAIL_HOST = "internal.dev.mailhog.com"
 EMAIL_PORT = 1025
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
