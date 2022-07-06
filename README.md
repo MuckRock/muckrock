@@ -55,7 +55,9 @@ All systems can be brought up using `inv up`.  You can rebuild all images using 
 
 ### Squarelet Integration
 
-If you have not yet created an RSA key on squarelet, please run: `manage.py creatersakey` from the squarelet command line.
+If you have not yet created an RSA key on Squarelet, please do so using the following procedure:
+1. Open a terminal in the directory containing the Squarelet project
+2. Run `inv manage creatersakey`
 
 Create the client on Squarelet by going to the Admin site - OpenID Connect Provider - Clients and adding a client.
 * Name - set this to `MuckRock Dev`
