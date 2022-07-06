@@ -25,7 +25,7 @@ MuckRock depends on Squarelet for user authentication.  As the services need to 
 This will create files with the environment variables needed to run the development environment.
 4. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
 5. Start the docker images - `inv up`
-This will build and start all of the docker images using docker-compose.  The invoke tasks specify the `local.yml` configuration file for docker-compose.  If you would like to run docker-compose commands directly, set the environment variable `export COMPSE_FILE=local.yml`.
+This will build and start all of the docker images using docker-compose.  The invoke tasks specify the `local.yml` configuration file for docker-compose.  If you would like to run docker-compose commands directly, set the environment variable `export COMPOSE_FILE=local.yml`.
 6. Set `dev.muckrock.com` to point to localhost - `echo "127.0.0.1   dev.muckrock.com" | sudo tee -a /etc/hosts`
 7. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
 
