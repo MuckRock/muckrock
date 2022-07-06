@@ -13,6 +13,7 @@ MuckRock is a non-profit collaborative news site that gives you the tools to kee
 2. [docker-compose][docker-compose-install]
 3. [python][python-install]
 4. [invoke][invoke-install]
+5. [git][git-install]
 
 ### Installation Steps
 
@@ -142,6 +143,7 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 [docker-compose-install]: https://docs.docker.com/compose/install/
 [invoke-install]: http://www.pyinvoke.org/installing.html
 [python-install]: https://www.python.org/downloads/
+[git-install]: https://git-scm.com/downloads
 [codeship]: https://app.codeship.com/projects/296009
 [pylint]:  https://www.pylint.org/
 [pip-tools]: https://github.com/jazzband/pip-tools
