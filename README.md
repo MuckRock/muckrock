@@ -13,6 +13,7 @@ MuckRock is a non-profit collaborative news site that gives you the tools to kee
 2. [docker-compose][docker-compose-install]
 3. [python][python-install]
 4. [invoke][invoke-install]
+5. [git][git-install]
 
 ### Installation Steps
 
@@ -22,11 +23,12 @@ MuckRock depends on Squarelet for user authentication.  As the services need to 
 2. Enter the directory - `cd muckrock`
 3. Run the dotenv initialization script - `python initialize_dotenvs.py`
 This will create files with the environment variables needed to run the development environment.
-4. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
-5. Start the docker images - `inv up`
-This will build and start all of the docker images using docker-compose.  The invoke tasks specify the `local.yml` configuration file for docker-compose.  If you would like to run docker-compose commands directly, set the environment variable `export COMPSE_FILE=local.yml`.
-6. Set `dev.muckrock.com` to point to localhost - `sudo echo "127.0.0.1   dev.muckrock.com" >> /etc/hosts`
-7. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
+4. Set an environment variable that directs `docker-compose` to use the `local.yml` file - `export COMPOSE_FILE=local.yml`
+5. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
+6. Start the docker images - `inv up`
+This will build and start all of the docker images using docker-compose.
+7. Set `dev.muckrock.com` to point to localhost - `echo "127.0.0.1   dev.muckrock.com" | sudo tee -a /etc/hosts`
+8. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
 
 ## Docker info
 
@@ -53,7 +55,9 @@ All systems can be brought up using `inv up`.  You can rebuild all images using 
 
 ### Squarelet Integration
 
-If you have not yet created an RSA key on squarelet, please run: `manage.py creatersakey` from the squarelet command line.
+If you have not yet created an RSA key on Squarelet, please do so using the following procedure:
+1. Open a terminal in the directory containing the Squarelet project
+2. Run `inv manage creatersakey`
 
 Create the client on Squarelet by going to the Admin site - OpenID Connect Provider - Clients and adding a client.
 * Name - set this to `MuckRock Dev`
@@ -142,6 +146,7 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 [docker-compose-install]: https://docs.docker.com/compose/install/
 [invoke-install]: http://www.pyinvoke.org/installing.html
 [python-install]: https://www.python.org/downloads/
+[git-install]: https://git-scm.com/downloads
 [codeship]: https://app.codeship.com/projects/296009
 [pylint]:  https://www.pylint.org/
 [pip-tools]: https://github.com/jazzband/pip-tools
