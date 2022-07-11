@@ -1,4 +1,5 @@
 # MuckRock
+**MuckRock** &middot; [Squarelet][squarelet] &middot; [DocumentCloud][documentcloud] &middot; [DocumentCloud-Frontend][documentcloudfrontend]
 
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
 [![codecov.io][codecov-img]][codecov]
