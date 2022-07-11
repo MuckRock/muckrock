@@ -179,3 +179,5 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 [squarelet]: https://github.com/muckrock/squarelet/
 [yapf]: https://github.com/google/yapf
 [watson]: https://github.com/etianen/django-watson
+[documentcloudfrontend]: https://github.com/MuckRock/documentcloud-frontend
+[documentcloud]: https://github.com/MuckRock/documentcloud
