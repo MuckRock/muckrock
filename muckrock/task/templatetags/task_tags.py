@@ -7,6 +7,9 @@ from django import template
 from django.conf import settings
 from django.urls import reverse
 
+# Third Party
+from botocore.exceptions import ClientError
+
 # MuckRock
 from muckrock import agency, foia, task
 from muckrock.communication.forms import AddressForm
@@ -245,11 +248,11 @@ class SnailMailTaskNode(TaskNode):
 
         def get_file_size(file_):
             """We will sometimes get an AttributeError when checking file sizes on S3
-            This may be able to be changed when upgrading to the latest djang-storages
+            This may be able to be changed when upgrading to the latest django-storages
             """
             try:
                 return file_.size
-            except AttributeError:
+            except (AttributeError, ClientError):
                 return None
 
         files = list(self.task.communication.files.all())
