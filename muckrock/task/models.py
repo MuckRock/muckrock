@@ -1052,9 +1052,11 @@ class MultiRequestTask(Task):
 
     def reject(self):
         """Reject the composer and return the user their requests"""
-        self.composer.return_requests()
-        self.composer.status = "started"
-        self.composer.save()
+        with transaction.atomic():
+            self.composer.foias.all().delete()
+            self.composer.return_requests()
+            self.composer.status = "started"
+            self.composer.save()
 
 
 class PortalTask(Task):

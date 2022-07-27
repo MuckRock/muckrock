@@ -24,8 +24,10 @@ from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAComposerFactory,
     FOIARequestFactory,
+    FOIATemplateFactory,
 )
 from muckrock.foia.models import FOIARequest
+from muckrock.foia.tasks import composer_create_foias
 from muckrock.jurisdiction.factories import StateJurisdictionFactory
 from muckrock.task.factories import FlaggedTaskFactory, ProjectReviewTaskFactory
 from muckrock.task.forms import ResponseTaskForm
@@ -587,6 +589,9 @@ class MultiRequestTaskTests(TestCase):
 
     def test_reject(self):
         """Test rejecting the request"""
+        FOIATemplateFactory.create()
+        composer_create_foias(self.composer.pk, None, False)
+        eq_(FOIARequest.objects.filter(composer=self.composer).count(), 6)
         self.task.reject()
         eq_(set(self.composer.agencies.all()), set(self.agencies))
         eq_(self.composer.status, "started")
