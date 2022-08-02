@@ -92,6 +92,7 @@ class ModelFilterMixin:
     """
 
     filter_class = None
+    distinct = True
 
     def get_filter(self):
         """Initializes and returns the filter, if a filter_class is defined."""
@@ -110,9 +111,7 @@ class ModelFilterMixin:
         """
         filter_ = self.get_filter()
         queryset = filter_.qs
-        print("filter", filter_.data)
-        if any(filter_.data.values()):
-            print("distinct on!")
+        if self.distinct and any(filter_.data.values()):
             queryset = queryset.distinct()
 
         context = super(ModelFilterMixin, self).get_context_data(

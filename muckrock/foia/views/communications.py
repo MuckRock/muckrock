@@ -25,6 +25,7 @@ class AdminCommunicationView(MRFilterListView):
     title = "All Communications"
     template_name = "foia/communication/list.html"
     filter_class = FOIACommunicationFilterSet
+    distinct = False
 
     def get_queryset(self):
         """Sort by reverse datetime"""
