@@ -373,6 +373,14 @@ class EmailCommunication(models.Model):
         """Who was this email sent from?"""
         return self.from_email
 
+    def verified(self):
+        """Get information on the verified status of this communication"""
+        opens = list(self.opens.all())
+        if opens:
+            return {"datetime": opens[0].datetime, "type": "open"}
+
+        return None
+
 
 class FaxCommunication(models.Model):
     """A fax sent to deliver a communication"""
@@ -402,6 +410,12 @@ class FaxCommunication(models.Model):
 
     def sent_from(self):
         """Who was this fax sent from?"""
+        return None
+
+    def verified(self):
+        """Get information on the verified status of this communication"""
+        if self.confirmed_datetime:
+            return {"datetime": self.confirmed_datetime, "type": "confirmed"}
         return None
 
 
@@ -448,6 +462,16 @@ class MailCommunication(models.Model):
         """Who was this mail sent from?"""
         return self.from_address
 
+    def verified(self)
+        """Get information on the verified status of this communication"""
+        events = list(self.events.all())
+        if any(e.event.endswith(".returned_to_sender") for e in events):
+            return None
+        for event in events:
+            if event.event.endswith(".processed_for_delivery"):
+                return {"datetime": event.datetime, "type": "processed_for_delivery"}
+        return None
+
 
 class WebCommunication(models.Model):
     """A communication posted to our site directly through our web form"""
@@ -469,6 +493,10 @@ class WebCommunication(models.Model):
     def sent_from(self):
         """Who was web comm sent from?"""
         return None
+
+    def verified(self)
+        """Get information on the verified status of this communication"""
+        return {"datetime": self.sent_datetime, "type": "processed_for_delivery"}
 
 
 class PortalCommunication(models.Model):
@@ -503,6 +531,10 @@ class PortalCommunication(models.Model):
             return self.portal
         else:
             return None
+
+    def verified(self)
+        """Get information on the verified status of this communication"""
+        return None
 
 
 # Error models
