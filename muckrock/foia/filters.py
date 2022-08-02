@@ -257,11 +257,7 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
         field_name="response",
         label="Direction",
         widget=forms.Select(
-            choices=[
-                (None, "----------"),
-                (True, "Inbound"),
-                (False, "Outbound"),
-            ]
+            choices=[(None, "----------"), (True, "Inbound"), (False, "Outbound")]
         ),
     )
     agency = django_filters.ModelMultipleChoiceFilter(

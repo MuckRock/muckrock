@@ -80,6 +80,7 @@ def generate_status_action(foia):
 def notify(users, action):
     """Notify a set of users about an action and return the list of notifications."""
     # pylint: disable=import-outside-toplevel
+    # MuckRock
     from muckrock.accounts.models import Notification
 
     notifications = []

@@ -348,6 +348,7 @@ class FOIARequest(models.Model):
     def get_files(self):
         """Get all files under this FOIA"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models.file import FOIAFile
 
         return FOIAFile.objects.filter(comm__foia=self)
@@ -764,6 +765,7 @@ class FOIARequest(models.Model):
     def send_email(self, comm, **kwargs):
         """Send the message as an email - asynchronously"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import foia_send_email
 
         # set status and mail id here to avoid altering the request in the
@@ -839,6 +841,7 @@ class FOIARequest(models.Model):
     def _send_fax(self, comm, **kwargs):
         """Send the message as a fax"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import send_fax
 
         switch = kwargs.get("switch") or (
@@ -867,6 +870,7 @@ class FOIARequest(models.Model):
     def _send_snail_mail(self, comm, **kwargs):
         """Send the message as a snail mail"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import prepare_snail_mail
 
         category, extra = self.process_manual_send(**kwargs)
@@ -1090,9 +1094,10 @@ class FOIARequest(models.Model):
     def user_actions(self, user, is_agency_user):
         """Provides action interfaces for users"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.forms import (
-            FOIAFlagForm,
             FOIAContactUserForm,
+            FOIAFlagForm,
             FOIASoftDeleteForm,
         )
 
@@ -1329,6 +1334,7 @@ class FOIARequest(models.Model):
         sensitive data without destroying the history that a request existed with
         this MR number"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models.communication import RawEmail
 
         self.delete_files()
@@ -1350,6 +1356,7 @@ class FOIARequest(models.Model):
         cloudfront to avoid throttle errors
         """
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models.file import FOIAFile
         from muckrock.foia.signals import foia_file_delete_s3
 

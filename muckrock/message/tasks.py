@@ -283,6 +283,7 @@ def failed_payment(invoice_id):
 def support(user_id, message, task_id):
     """Send a response to a user about a flag task."""
     # pylint: disable=import-outside-toplevel
+    # MuckRock
     from muckrock.task.models import FlaggedTask
 
     user = User.objects.get(id=user_id)
@@ -302,6 +303,7 @@ def support(user_id, message, task_id):
 def notify_project_contributor(user_id, project_id, added_by_id):
     """Notify a user that they were added as a contributor to a project."""
     # pylint: disable=import-outside-toplevel
+    # MuckRock
     from muckrock.project.models import Project
 
     user = User.objects.get(id=user_id)

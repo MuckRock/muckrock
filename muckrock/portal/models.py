@@ -35,10 +35,11 @@ class Portal(models.Model):
     def portal_type(self):
         """Get an instance of the portal type logic"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.portal.portals import (
+            FBIPortal,
             ManualPortal,
             NextRequestPortal,
-            FBIPortal,
             WebFormPortal,
         )
 

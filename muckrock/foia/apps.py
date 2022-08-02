@@ -14,11 +14,17 @@ class FOIAConfig(AppConfig):
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
         # pylint: disable=invalid-name, import-outside-toplevel
-        from actstream import registry as action
-
-        from watson import search
+        # Django
         import django.utils.html
+
+        # Standard Library
         import re
+
+        # Third Party
+        from actstream import registry as action
+        from watson import search
+
+        # MuckRock
         import muckrock.foia.signals  # pylint: disable=unused-import,unused-variable
 
         FOIARequest = self.get_model("FOIARequest")

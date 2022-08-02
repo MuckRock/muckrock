@@ -110,6 +110,7 @@ class FOIAFile(models.Model):
     def clone(self, new_comm):
         """Clone this file to a new communication"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import upload_document_cloud
 
         original_id = self.pk

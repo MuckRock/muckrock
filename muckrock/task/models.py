@@ -495,6 +495,7 @@ class ReviewAgencyTask(Task):
     def update_contact(self, email_or_fax, foia_list, update_info, snail):
         """Updates the contact info on the agency and the provided requests."""
         # pylint: disable=too-many-branches, import-outside-toplevel
+        # MuckRock
         from muckrock.agency.models import AgencyEmail, AgencyPhone
 
         is_email = isinstance(email_or_fax, EmailAddress) and not snail
@@ -553,6 +554,7 @@ class ReviewAgencyTask(Task):
     def latest_response(self):
         """Returns the latest response from the agency"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models import FOIACommunication
 
         latest_communication = (
@@ -969,6 +971,7 @@ class ResponseTask(Task):
     def set_status(self, status):
         """Forward to form logic, for use in classify_status task"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.task.forms import ResponseTaskForm
 
         form = ResponseTaskForm(task=self)
@@ -1034,6 +1037,7 @@ class MultiRequestTask(Task):
     def submit(self, agency_list):
         """Submit the composer"""
         # pylint: disable=not-callable, import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import composer_delayed_submit
 
         return_requests = 0

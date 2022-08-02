@@ -155,7 +155,8 @@ class SnailMailTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         # pylint: disable=import-outside-toplevel
-        from muckrock.agency.models import AgencyEmail, AgencyPhone, AgencyAddress
+        # MuckRock
+        from muckrock.agency.models import AgencyAddress, AgencyEmail, AgencyPhone
 
         return (
             self.select_related(
@@ -265,7 +266,8 @@ class NewAgencyTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         # pylint: disable=import-outside-toplevel
-        from muckrock.agency.models import AgencyEmail, AgencyPhone, AgencyAddress
+        # MuckRock
+        from muckrock.agency.models import AgencyAddress, AgencyEmail, AgencyPhone
 
         return self.select_related(
             "agency__jurisdiction__parent",
@@ -306,7 +308,8 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         # pylint: disable=import-outside-toplevel
-        from muckrock.agency.models import AgencyEmail, AgencyPhone, AgencyAddress
+        # MuckRock
+        from muckrock.agency.models import AgencyAddress, AgencyEmail, AgencyPhone
 
         return self.select_related(
             "agency__jurisdiction", "agency__portal", "resolved_by__profile"
