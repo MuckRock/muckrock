@@ -14,6 +14,7 @@ class OrganizationConfig(AppConfig):
     def ready(self):
         """Registers requests and communications with the activity streams plugin"""
         # pylint: disable=import-outside-toplevel
+        # Third Party
         from actstream import registry
 
         registry.register(self.get_model("Organization"))

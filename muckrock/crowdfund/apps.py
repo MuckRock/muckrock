@@ -14,6 +14,7 @@ class CrowdfundConfig(AppConfig):
     def ready(self):
         """Registers the application with the activity streams plugin"""
         # pylint: disable=import-outside-toplevel
+        # Third Party
         from actstream import registry
 
         registry.register(self.get_model("Crowdfund"))

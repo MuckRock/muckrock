@@ -112,6 +112,7 @@ class EmailAddress(models.Model):
     def allowed(self, foia=None):
         """Is this email address allowed to post to this FOIA request?"""
         # pylint: disable=too-many-return-statements, import-outside-toplevel
+        # MuckRock
         from muckrock.agency.models import AgencyEmail
 
         allowed_tlds = [
@@ -357,6 +358,7 @@ class EmailCommunication(models.Model):
     def set_raw_email(self, msg):
         """Set the raw email for this communication"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models import RawEmail
 
         raw_email = RawEmail.objects.get_or_create(email=self)[0]

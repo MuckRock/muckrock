@@ -14,6 +14,7 @@ class TagConfig(AppConfig):
     def ready(self):
         """Registers the application with the watson plugin"""
         # pylint: disable=invalid-name, import-outside-toplevel
+        # Third Party
         from watson import search
 
         Tag = self.get_model("Tag")

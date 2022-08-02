@@ -14,6 +14,7 @@ class NewsConfig(AppConfig):
     def ready(self):
         """Registers articles with the activity streams plugin"""
         # pylint: disable=invalid-name, import-outside-toplevel
+        # Third Party
         from actstream import registry as action
         from watson import search
 

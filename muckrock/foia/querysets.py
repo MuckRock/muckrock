@@ -54,6 +54,7 @@ class PreloadFileQuerysetMixin:
     def _do_preload_files(self):
         """Do the preloading of the files lazily"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models.file import FOIAFile
 
         comm_ids = [getattr(i, self.comm_id) for i in self._result_cache]
@@ -216,6 +217,7 @@ class FOIARequestQuerySet(models.QuerySet):
     def create_new(self, composer, agency, no_proxy, contact_info):
         """Create a new request and submit it"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.message import notify_proxy_user
 
         if composer.agencies.count() > 1:
@@ -258,6 +260,7 @@ class FOIARequestQuerySet(models.QuerySet):
     def get_stale(self):
         """Get stale requests"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.models import FOIACommunication
 
         with_response = (
@@ -460,6 +463,7 @@ class RawEmailQuerySet(models.QuerySet):
         Launch celery task
         """
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import fetch_raw_email
 
         if message_id:

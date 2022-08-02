@@ -14,8 +14,13 @@ class TaskConfig(AppConfig):
     def ready(self):
         """Sets global options for FPDF"""
         # pylint: disable=unused-import, unused-variable, import-outside-toplevel
-        from fpdf import set_global
+        # Standard Library
         from tempfile import mkdtemp
+
+        # Third Party
+        from fpdf import set_global
+
+        # MuckRock
         import muckrock.task.signals
 
         # cache in a temp directory since the font

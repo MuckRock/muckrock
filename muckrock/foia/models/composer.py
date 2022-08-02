@@ -109,6 +109,7 @@ class FOIAComposer(models.Model):
     def submit(self, contact_info=None, no_proxy=False):
         """Submit a composer to create the requests"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
         num_requests = self.agencies.count()
@@ -216,6 +217,7 @@ class FOIAComposer(models.Model):
     def revoke(self):
         """Revoke a submitted composer"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.signals import foia_file_delete_s3
 
         current_app.control.revoke(self.delayed_id)

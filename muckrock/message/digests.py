@@ -410,10 +410,11 @@ class StaffDigest(Digest):
     def get_stale_tasks(self):
         """Get stale tasks"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.task.models import (
+            FlaggedTask,
             NewAgencyTask,
             OrphanTask,
-            FlaggedTask,
             PortalTask,
             SnailMailTask,
         )
@@ -462,6 +463,7 @@ class StaffDigest(Digest):
     def get_projects(self):
         """Get project information"""
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.project.models import Project
 
         project_info = OrderedDict()
