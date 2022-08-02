@@ -11,18 +11,20 @@ from django.views.generic.edit import FormView
 from furl import furl
 
 # MuckRock
-from muckrock.core.views import MRListView, class_view_decorator
+from muckrock.core.views import MRFilterListView, MRListView, class_view_decorator
+from muckrock.foia.filters import FOIACommunicationFilterSet
 from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import FOIACommunication
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
-class AdminCommunicationView(MRListView):
+class AdminCommunicationView(MRFilterListView):
     """View for admins to see the latest communications"""
 
     model = FOIACommunication
     title = "All Communications"
     template_name = "foia/communication/list.html"
+    filter_class = FOIACommunicationFilterSet
 
     def get_queryset(self):
         """Sort by reverse datetime"""

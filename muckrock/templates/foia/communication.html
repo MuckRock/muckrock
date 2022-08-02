@@ -72,15 +72,37 @@
         {% endif %}
       </span>
     </section>
+    {% if request.user.is_staff and show_addrs %}
+      <section class="textbox__section communication-metadata">
+        {% with from=communication.sent_from %}
+          {% if from %}
+            <p class="small subject">From: {{ from }}</p>
+          {% endif %}
+        {% endwith %}
+        {% with to=communication.sent_to %}
+          {% if to %}
+            <p class="small subject">To: {{ to }}</p>
+          {% endif %}
+        {% endwith %}
+      </section>
+    {% endif %}
     {% if communication.communication %}
       <section class="textbox__section communication-body">
         {% if communication.download %}
           {% include "foia/detail/file_download.html" %}
         {% endif %}
-        {% if communication.full_html %}
-          {{ communication.communication|redact_emails:communication.foia.passcode|safe }}
+        {% if communication.foia %}
+          {% if communication.full_html %}
+            {{ communication.communication|redact_emails:communication.foia.passcode|safe }}
+          {% else %}
+            {{ communication.communication|redact_emails:communication.foia.passcode|urlize|linebreaks }}
+          {% endif %}
         {% else %}
-          {{ communication.communication|redact_emails:communication.foia.passcode|urlize|linebreaks }}
+          {% if communication.full_html %}
+            {{ communication.communication|safe }}
+          {% else %}
+            {{ communication.communication|urlize|linebreaks }}
+          {% endif %}
         {% endif %}
       </section>
     {% endif %}

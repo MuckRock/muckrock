@@ -133,11 +133,9 @@ class FOIAFlagForm(forms.Form):
     prefix = "flag"
 
     category = forms.ChoiceField(
-        choices=[("", "-- Choose a category if one is relevant")]
-        + PUBLIC_FLAG_CATEGORIES,
-        required=False,
+        choices=[("", "-- Choose a category")] + PUBLIC_FLAG_CATEGORIES, required=True
     )
-    text = forms.CharField(widget=forms.Textarea, required=False)
+    text = forms.CharField(widget=forms.Textarea, required=True)
 
     def __init__(self, *args, **kwargs):
         is_agency_user = kwargs.pop("is_agency_user", False)

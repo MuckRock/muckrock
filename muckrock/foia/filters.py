@@ -15,6 +15,7 @@ import django_filters
 
 # MuckRock
 from muckrock.agency.models import Agency
+from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.models import FOIARequest
@@ -247,3 +248,70 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIARequest
         fields = ["user"]
+
+
+class FOIACommunicationFilterSet(django_filters.FilterSet):
+    """Filters for communications"""
+
+    response = django_filters.BooleanFilter(
+        field_name="response",
+        label="Direction",
+        widget=forms.Select(
+            choices=[
+                (None, "----------"),
+                (True, "Inbound"),
+                (False, "Outbound"),
+            ]
+        ),
+    )
+    agency = django_filters.ModelMultipleChoiceFilter(
+        queryset=Agency.objects.get_approved(),
+        field_name="foia__agency",
+        label="Agency",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
+        ),
+    )
+    from_email = django_filters.ModelMultipleChoiceFilter(
+        queryset=EmailAddress.objects.all(),
+        field_name="emails__from_email",
+        label="From Email",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="email-autocomplete", attrs={"data-placeholder": "Search emails"}
+        ),
+    )
+    to_email = django_filters.ModelMultipleChoiceFilter(
+        queryset=EmailAddress.objects.all(),
+        field_name="emails__to_emails",
+        label="To Email",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="email-autocomplete", attrs={"data-placeholder": "Search emails"}
+        ),
+    )
+    fax = django_filters.ModelMultipleChoiceFilter(
+        queryset=PhoneNumber.objects.filter(type="fax"),
+        field_name="faxes__to_number",
+        label="Fax Number",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="fax-autocomplete", attrs={"data-placeholder": "Search fax numbers"}
+        ),
+    )
+
+    type = django_filters.ChoiceFilter(
+        label="Type",
+        method="filter_type",
+        choices=[
+            ("emails", "Email"),
+            ("faxes", "Fax"),
+            ("mails", "Mail"),
+            ("web_comms", "Web"),
+            ("portals", "Portal"),
+        ],
+    )
+
+    def filter_type(self, queryset, name, value):
+        """Filter communications with certain types"""
+        if value is None:
+            return queryset
+
+        return queryset.exclude(**{value: None})
