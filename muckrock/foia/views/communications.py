@@ -11,7 +11,7 @@ from django.views.generic.edit import FormView
 from furl import furl
 
 # MuckRock
-from muckrock.core.views import MRFilterListView, MRListView, class_view_decorator
+from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.filters import FOIACommunicationFilterSet
 from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import FOIACommunication

@@ -311,6 +311,7 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
 
     def filter_type(self, queryset, name, value):
         """Filter communications with certain types"""
+        # pylint: disable=unused-argument
         if value is None:
             return queryset
 
