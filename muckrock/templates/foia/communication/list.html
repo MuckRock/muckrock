@@ -3,7 +3,7 @@
 {% block list-objects %}
   <div class="communications-list">
     {% for communication in object_list %}
-      {% include "foia/communication.html" with hide_options=True show_foia=True %}
+      {% include "foia/communication.html" with hide_options=True show_foia=True show_addrs=True %}
     {% endfor %}
   </div>
 {% endblock list-objects %}

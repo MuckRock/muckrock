@@ -159,6 +159,7 @@ class FOIACommunication(models.Model):
         """
         # avoid circular imports
         # pylint: disable=import-outside-toplevel
+        # MuckRock
         from muckrock.foia.tasks import upload_document_cloud
 
         foias = FOIARequest.objects.filter(pk__in=foia_pks)
@@ -320,6 +321,7 @@ class FOIACommunication(models.Model):
         # * content and name_
         # * path and name_ (for files already uploaded to s3)
         # pylint: disable=import-outside-toplevel, too-many-arguments
+        # MuckRock
         from muckrock.foia.tasks import upload_document_cloud
 
         assert (
