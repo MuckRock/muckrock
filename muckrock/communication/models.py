@@ -496,7 +496,7 @@ class WebCommunication(models.Model):
 
     def verified(self):
         """Get information on the verified status of this communication"""
-        return {"datetime": self.sent_datetime, "type": "processed_for_delivery"}
+        return {"datetime": self.sent_datetime, "type": "web"}
 
 
 class PortalCommunication(models.Model):

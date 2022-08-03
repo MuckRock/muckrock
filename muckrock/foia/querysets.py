@@ -342,7 +342,13 @@ class FOIAComposerQuerySet(models.QuerySet):
 class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
     """Object manager for FOIA Communications"""
 
-    prefetch_fields = ("emails", "faxes", "mails", "web_comms", "portals")
+    prefetch_fields = (
+        "emails__opens",
+        "faxes",
+        "mails__events",
+        "web_comms",
+        "portals",
+    )
 
     def visible(self):
         """Hide hidden communications"""
