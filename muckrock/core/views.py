@@ -10,7 +10,6 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import F, Q, Sum
-from django.http.response import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -157,6 +156,7 @@ class CursorPaginationMixin(PaginationMixin):
     """
 
     def paginate_queryset(self, queryset, page_size):
+        """Paginate using the Rest Framework Cursor Paginator"""
         paginator = CursorPagination()
         paginator.page_size = page_size
         paginator.ordering = "-datetime"
