@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# # syntax = docker/dockerfile:experimental
 FROM python:3.8
 
 ENV PYTHONUNBUFFERED 1
@@ -48,8 +48,10 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./pip /pip
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
+#RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
+#RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
+RUN pip install -r /pip/requirements.txt
+RUN pip install -r /pip/dev-requirements.txt
 
 COPY ./compose/production/django/entrypoint /entrypoint
 RUN sed -i 's/\r//' /entrypoint

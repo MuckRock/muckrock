@@ -6,35 +6,49 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormView
+from django.views.generic.list import ListView
 
 # Third Party
 from furl import furl
 
 # MuckRock
-from muckrock.core.views import MRFilterListView, class_view_decorator
+from muckrock.core.views import (
+    CursorPaginationMixin,
+    ModelFilterMixin,
+    class_view_decorator,
+)
 from muckrock.foia.filters import FOIACommunicationFilterSet
 from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import FOIACommunication
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
-class AdminCommunicationView(MRFilterListView):
+class AdminCommunicationView(ModelFilterMixin, CursorPaginationMixin, ListView):
     """View for admins to see the latest communications"""
 
     model = FOIACommunication
     title = "All Communications"
     template_name = "foia/communication/list.html"
     filter_class = FOIACommunicationFilterSet
+    distinct = False
 
     def get_queryset(self):
         """Sort by reverse datetime"""
         return (
             super()
             .get_queryset()
-            .order_by("-datetime")
+            .order_by("-pk")
             .preload_list()
-            .select_related("foia__agency__jurisdiction", "from_user__profile__agency")
+            .prefetch_related(
+                "foia__agency__jurisdiction", "from_user__profile__agency"
+            )
         )
+
+    def get_context_data(self, **kwargs):
+        """Adds title to the context data."""
+        context = super().get_context_data(**kwargs)
+        context["title"] = self.title
+        return context
 
 
 class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):

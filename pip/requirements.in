@@ -35,7 +35,6 @@ django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
 django<4.0 # Django is kinda important...
 djangorestframework # The API framework
-python-documentcloud # for uploading to documentcloud
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF
 easy-thumbnails # Used for thumbnailing images
@@ -65,6 +64,7 @@ pypdf2 # Used to manipulate PDFs
 pyphaxio # For sending faxes through Phaxio
 python-Levenshtein # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
+python-documentcloud # for uploading to documentcloud
 python-redis-lock[django] # use a redis cache with a locking mechanism
 raven # Sentry integration
 redis # Redis integration - for use with celery
