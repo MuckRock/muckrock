@@ -94,7 +94,6 @@ class ModelFilterMixin:
     """
 
     filter_class = None
-    distinct = True
 
     def get_filter(self):
         """Initializes and returns the filter, if a filter_class is defined."""
@@ -113,7 +112,7 @@ class ModelFilterMixin:
         """
         filter_ = self.get_filter()
         queryset = filter_.qs
-        if self.distinct and any(filter_.data.values()):
+        if any(filter_.data.values()):
             queryset = queryset.distinct()
 
         context = super(ModelFilterMixin, self).get_context_data(
@@ -159,7 +158,12 @@ class CursorPaginationMixin(PaginationMixin):
         """Paginate using the Rest Framework Cursor Paginator"""
         paginator = CursorPagination()
         paginator.page_size = page_size
-        paginator.ordering = "-datetime"
+        paginator.ordering = "-pk"
+        if queryset.query.distinct:
+            # if we need distinct, do it only on the pk field
+            # in order to take advantage of the index
+            queryset = queryset.distinct("pk")
+
         object_list = paginator.paginate_queryset(queryset, Request(self.request))
 
         return (paginator, None, object_list, None)
