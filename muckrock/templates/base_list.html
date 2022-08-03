@@ -58,7 +58,9 @@
       {% block list-content %}
         {% block list-actions %}{% endblock %}
         {% if object_list %}
-          {% include 'lib/component/pagination.html' %}
+          {% block list-paginator %}
+            {% include 'lib/component/pagination.html' %}
+          {% endblock %}
           {% block list-objects %}
             <table class="sortable cardtable" data-sort-by="{{sort}}" data-order-by="{{order}}">
               {% block list-table %}

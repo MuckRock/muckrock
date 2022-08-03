@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import F, Q, Sum
+from django.http.response import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -26,6 +27,8 @@ from functools import reduce
 # Third Party
 import stripe
 from dal import autocomplete
+from rest_framework.pagination import CursorPagination
+from rest_framework.request import Request
 from watson import search as watson
 from watson.views import SearchMixin
 
@@ -146,6 +149,20 @@ class PaginationMixin:
         context = super(PaginationMixin, self).get_context_data(**kwargs)
         context["per_page"] = self.get_paginate_by(self.get_queryset())
         return context
+
+
+class CursorPaginationMixin(PaginationMixin):
+    """
+    Use cursor pagination for increased efficiency
+    """
+
+    def paginate_queryset(self, queryset, page_size):
+        paginator = CursorPagination()
+        paginator.page_size = page_size
+        paginator.ordering = "-datetime"
+        object_list = paginator.paginate_queryset(queryset, Request(self.request))
+
+        return (paginator, None, object_list, None)
 
 
 class ModelSearchMixin:

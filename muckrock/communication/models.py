@@ -462,7 +462,7 @@ class MailCommunication(models.Model):
         """Who was this mail sent from?"""
         return self.from_address
 
-    def verified(self)
+    def verified(self):
         """Get information on the verified status of this communication"""
         events = list(self.events.all())
         if any(e.event.endswith(".returned_to_sender") for e in events):
@@ -494,7 +494,7 @@ class WebCommunication(models.Model):
         """Who was web comm sent from?"""
         return None
 
-    def verified(self)
+    def verified(self):
         """Get information on the verified status of this communication"""
         return {"datetime": self.sent_datetime, "type": "processed_for_delivery"}
 
@@ -532,7 +532,7 @@ class PortalCommunication(models.Model):
         else:
             return None
 
-    def verified(self)
+    def verified(self):
         """Get information on the verified status of this communication"""
         return None
 
