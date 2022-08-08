@@ -7,7 +7,9 @@ from django import forms
 import django_filters
 
 # MuckRock
+from muckrock.agency.models import Agency
 from muckrock.communication.models import CHECK_STATUS, Check
+from muckrock.core import autocomplete
 from muckrock.core.filters import RangeWidget
 
 
@@ -41,3 +43,16 @@ class CheckFilterSet(django_filters.FilterSet):
     class Meta:
         model = Check
         fields = ["check_number", "mr_number", "date_range", "status", "minimum_amount"]
+
+
+class EmailAddressFilterSet(django_filters.FilterSet):
+    """Filtering for email addresses"""
+
+    agency = django_filters.ModelMultipleChoiceFilter(
+        queryset=Agency.objects.get_approved(),
+        field_name="agencies",
+        label="Agency",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
+        ),
+    )

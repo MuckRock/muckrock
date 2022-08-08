@@ -201,17 +201,20 @@ class ModelSearchMixin:
         return context
 
 
-class MRListView(PaginationMixin, ListView):
-    """Defines a title and base template for our list views."""
-
+class TitleMixin:
     title = ""
-    template_name = "base_list.html"
 
     def get_context_data(self, **kwargs):
         """Adds title to the context data."""
-        context = super(MRListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["title"] = self.title
         return context
+
+
+class MRListView(PaginationMixin, TitleMixin, ListView):
+    """Defines a title and base template for our list views."""
+
+    template_name = "base_list.html"
 
 
 class MROrderedListView(OrderedSortMixin, MRListView):
@@ -220,6 +223,12 @@ class MROrderedListView(OrderedSortMixin, MRListView):
 
 class MRFilterListView(OrderedSortMixin, ModelFilterMixin, MRListView):
     """Adds ordered sorting and filtering to a MRListView."""
+
+
+class MRFilterCursorListView(
+    ModelFilterMixin, CursorPaginationMixin, TitleMixin, ListView
+):
+    """A Filter list view for cursor paginated models"""
 
 
 class MRSearchFilterListView(

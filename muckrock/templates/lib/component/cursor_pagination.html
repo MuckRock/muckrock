@@ -1,0 +1,20 @@
+<nav class="pagination small">
+  <div class="pagination__links">
+    <span>
+      {% if paginator.has_previous %}
+        <a class="pagination__link" href="{{ paginator.get_previous_link }}">
+          Previous Page
+        </a>
+      {% else %}
+        <span class="pagination__link">Previous Page</span>
+      {% endif %}
+    </span>
+    <span>
+      {% if paginator.has_next %}
+        <a class="pagination__link" href="{{ paginator.get_next_link }}">Next Page</a>
+      {% else %}
+        <span class="pagination__link">Next Page</span>
+      {% endif %}
+    </span>
+  </div>
+</nav>

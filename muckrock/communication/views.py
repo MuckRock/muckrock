@@ -19,7 +19,7 @@ from django.views.generic.detail import DetailView
 from dal_select2.views import Select2ListView
 
 # MuckRock
-from muckrock.communication.filters import CheckFilterSet
+from muckrock.communication.filters import CheckFilterSet, EmailAddressFilterSet
 from muckrock.communication.forms import CheckDateForm
 from muckrock.communication.models import (
     Check,
@@ -35,11 +35,13 @@ from muckrock.communication.utils import get_email_or_fax
 from muckrock.core.utils import new_action
 from muckrock.core.views import (
     MRAutocompleteView,
+    MRFilterCursorListView,
     MRFilterListView,
     class_view_decorator,
 )
 
 
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class EmailDetailView(DetailView):
     """Show message open and error detail for an email address"""
 
@@ -73,6 +75,21 @@ class EmailDetailView(DetailView):
         return context
 
 
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+class EmailListView(MRFilterCursorListView):
+    """A view for admins to view all email addresses"""
+
+    model = EmailAddress
+    title = "All Email Addresses"
+    template_name = "communication/email_list.html"
+    filter_class = EmailAddressFilterSet
+
+    def get_queryset(self):
+        """Sort by reverse primary key"""
+        return super().get_queryset().order_by("-pk")
+
+
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
 class PhoneDetailView(DetailView):
     """Show message error detail for a fax number"""
 
@@ -156,8 +173,7 @@ class CheckListView(MRFilterListView):
 
 
 class CommunicationAutocomplete(MRAutocompleteView):
-    """Base class for shared functionality between email and phone number autocompletes
-    """
+    """Base class for shared functionality between email and phone number autocompletes"""
 
     def has_add_permission(self, request):
         """Staff only"""
