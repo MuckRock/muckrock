@@ -38,9 +38,5 @@ urlpatterns = [
         views.EmailOrFaxAutocomplete.as_view(),
         name="email-fax-autocomplete",
     ),
-    re_path(
-        r"^emails/$",
-        views.EmailListView.as_view(),
-        name="email-list",
-    ),
+    re_path(r"^emails/$", views.EmailListView.as_view(), name="email-list"),
 ]
