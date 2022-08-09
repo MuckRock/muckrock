@@ -87,7 +87,7 @@ class EmailAddress(models.Model):
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
 
-    sources = models.ManyToManyField(Source, related_name="emails")
+    sources = models.ManyToManyField("Source", related_name="emails")
 
     objects = EmailAddressQuerySet.as_manager()
 
@@ -179,6 +179,8 @@ class PhoneNumber(models.Model):
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
 
+    sources = models.ManyToManyField("Source", related_name="phones")
+
     objects = PhoneNumberQuerySet.as_manager()
 
     def __str__(self):
@@ -221,6 +223,8 @@ class Address(models.Model):
 
     # This will become the override field for non-conforming addresses
     address = models.TextField(blank=True)
+
+    sources = models.ManyToManyField("Source", related_name="addresses")
 
     def __str__(self):
         if self.zip_code:
