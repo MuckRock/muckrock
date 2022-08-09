@@ -202,6 +202,8 @@ class ModelSearchMixin:
 
 
 class TitleMixin:
+    """Adds a title to the context data"""
+
     title = ""
 
     def get_context_data(self, **kwargs):
