@@ -377,7 +377,7 @@ class EmailCommunication(models.Model):
         """Get information on the verified status of this communication"""
         opens = list(self.opens.all())
         if opens:
-            return {"datetime": opens[0].datetime, "type": "open"}
+            return {"datetime": opens[0].datetime, "type": opens[0].event}
 
         return None
 
