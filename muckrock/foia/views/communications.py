@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormView
-from django.views.generic.list import ListView
 
 # Third Party
 from furl import furl
