@@ -7,6 +7,7 @@ from django.db.models.signals import post_delete, pre_save
 
 # Third Party
 from documentcloud import DocumentCloud
+from documentcloud.exceptions import DoesNotExistError
 
 # MuckRock
 from muckrock.core.utils import clear_cloudfront_cache, get_s3_storage_bucket
@@ -52,7 +53,10 @@ def foia_file_delete_dc(sender, **kwargs):
             base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
             auth_uri=f"{settings.SQUARELET_URL}/api/",
         )
-        dc_client.documents.delete(foia_file.doc_id)
+        try:
+            dc_client.documents.delete(foia_file.doc_id)
+        except DoesNotExistError:
+            pass
 
 
 def attachment_delete_s3(sender, **kwargs):
