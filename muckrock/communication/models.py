@@ -87,8 +87,6 @@ class EmailAddress(models.Model):
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
 
-    sources = models.ManyToManyField("Source", related_name="emails")
-
     objects = EmailAddressQuerySet.as_manager()
 
     def __str__(self):
@@ -156,7 +154,7 @@ class EmailAddress(models.Model):
 
 
 class PhoneNumberQuerySet(models.QuerySet):
-    """QuerySet for PhoneNumner"""
+    """QuerySet for PhoneNumber"""
 
     def fetch(self, number, type_="fax"):
         """Fetch a number from the database, or create it if it doesn't exist"""
@@ -178,8 +176,6 @@ class PhoneNumber(models.Model):
     status = models.CharField(
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
-
-    sources = models.ManyToManyField("Source", related_name="phones")
 
     objects = PhoneNumberQuerySet.as_manager()
 
@@ -223,8 +219,6 @@ class Address(models.Model):
 
     # This will become the override field for non-conforming addresses
     address = models.TextField(blank=True)
-
-    sources = models.ManyToManyField("Source", related_name="addresses")
 
     def __str__(self):
         if self.zip_code:
@@ -743,3 +737,21 @@ class Source(models.Model):
         choices=(("phone", "Phone"), ("web", "Web"), ("user", "User")),
     )
     url = models.URLField(max_length=255, blank=True)
+
+    email_address = models.ForeignKey(
+        EmailAddress,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="sources",
+    )
+    phone_number = models.ForeignKey(
+        PhoneNumber,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="sources",
+    )
+    address = models.ForeignKey(
+        Address, on_delete=models.CASCADE, blank=True, null=True, related_name="sources"
+    )
