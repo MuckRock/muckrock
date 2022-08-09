@@ -87,6 +87,8 @@ class EmailAddress(models.Model):
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
 
+    sources = models.ManyToManyField(Source, related_name="emails")
+
     objects = EmailAddressQuerySet.as_manager()
 
     def __str__(self):
@@ -723,3 +725,17 @@ class Check(models.Model):
         if self.status_date:
             events[self.status] = self.status_date
         return events
+
+
+class Source(models.Model):
+    """Track the source of communication methods in the system"""
+
+    datetime = models.DateTimeField()
+    user = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT, related_name="sources"
+    )
+    type = models.CharField(
+        max_length=5,
+        choices=(("phone", "Phone"), ("web", "Web"), ("user", "User")),
+    )
+    url = models.URLField(max_length=255, blank=True)
