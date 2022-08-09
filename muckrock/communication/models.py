@@ -593,7 +593,7 @@ class FaxError(models.Model):
 
 
 class EmailOpen(models.Model):
-    """An email has been opened"""
+    """An email has been opened or clicked"""
 
     email = models.ForeignKey(
         "communication.EmailCommunication",
@@ -601,6 +601,9 @@ class EmailOpen(models.Model):
         on_delete=models.CASCADE,
     )
     datetime = models.DateTimeField()
+
+    # opened or clicked
+    event = models.CharField(max_length=10)
 
     recipient = models.ForeignKey(
         "communication.EmailAddress", related_name="opens", on_delete=models.PROTECT
