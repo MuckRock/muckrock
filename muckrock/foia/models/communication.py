@@ -416,10 +416,18 @@ class FOIACommunication(models.Model):
             return None
 
     def sent_from(self):
-        """Who was this communication sent to?"""
+        """Who was this communication sent from?"""
         subcomm = self.get_subcomm()
         if subcomm:
             return subcomm.sent_from()
+        else:
+            return None
+
+    def verified(self):
+        """Was this communication verified?"""
+        subcomm = self.get_subcomm()
+        if subcomm:
+            return subcomm.verified()
         else:
             return None
 

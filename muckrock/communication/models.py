@@ -496,7 +496,7 @@ class WebCommunication(models.Model):
 
     def verified(self):
         """Get information on the verified status of this communication"""
-        return {"datetime": self.sent_datetime, "type": "processed_for_delivery"}
+        return {"datetime": self.sent_datetime, "type": "web"}
 
 
 class PortalCommunication(models.Model):
@@ -593,7 +593,7 @@ class FaxError(models.Model):
 
 
 class EmailOpen(models.Model):
-    """An email has been opened"""
+    """An email has been opened or clicked"""
 
     email = models.ForeignKey(
         "communication.EmailCommunication",
@@ -601,6 +601,9 @@ class EmailOpen(models.Model):
         on_delete=models.CASCADE,
     )
     datetime = models.DateTimeField()
+
+    # opened or clicked
+    event = models.CharField(max_length=10)
 
     recipient = models.ForeignKey(
         "communication.EmailAddress", related_name="opens", on_delete=models.PROTECT

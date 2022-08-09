@@ -482,12 +482,13 @@ def bounces(request, email_comm, timestamp):
 @csrf_exempt
 @get_common_webhook_params()
 def opened(request, email_comm, timestamp):
-    """Notify when an email has been opened"""
+    """Notify when an email has been opened or clicked"""
     recipient = EmailAddress.objects.fetch(request.POST.get("recipient", ""))
     EmailOpen.objects.create(
         email=email_comm,
         datetime=timestamp,
         recipient=recipient,
+        event=request.POST.get("event", ""),
         city=request.POST.get("city", ""),
         region=request.POST.get("region", ""),
         country=request.POST.get("country", ""),

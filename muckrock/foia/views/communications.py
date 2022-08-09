@@ -12,28 +12,23 @@ from django.views.generic.list import ListView
 from furl import furl
 
 # MuckRock
-from muckrock.core.views import (
-    CursorPaginationMixin,
-    ModelFilterMixin,
-    class_view_decorator,
-)
+from muckrock.core.views import MRFilterCursorListView, class_view_decorator
 from muckrock.foia.filters import FOIACommunicationFilterSet
 from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import FOIACommunication
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
-class AdminCommunicationView(ModelFilterMixin, CursorPaginationMixin, ListView):
+class AdminCommunicationView(MRFilterCursorListView):
     """View for admins to see the latest communications"""
 
     model = FOIACommunication
     title = "All Communications"
     template_name = "foia/communication/list.html"
     filter_class = FOIACommunicationFilterSet
-    distinct = False
 
     def get_queryset(self):
-        """Sort by reverse datetime"""
+        """Sort by reverse primary key"""
         return (
             super()
             .get_queryset()
@@ -43,12 +38,6 @@ class AdminCommunicationView(ModelFilterMixin, CursorPaginationMixin, ListView):
                 "foia__agency__jurisdiction", "from_user__profile__agency"
             )
         )
-
-    def get_context_data(self, **kwargs):
-        """Adds title to the context data."""
-        context = super().get_context_data(**kwargs)
-        context["title"] = self.title
-        return context
 
 
 class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):

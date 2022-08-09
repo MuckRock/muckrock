@@ -305,6 +305,13 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
         ],
     )
 
+    date_range = django_filters.DateFromToRangeFilter(
+        field_name="datetime",
+        label="Date Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
+
     def filter_type(self, queryset, name, value):
         """Filter communications with certain types"""
         # pylint: disable=unused-argument

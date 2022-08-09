@@ -94,7 +94,6 @@ class ModelFilterMixin:
     """
 
     filter_class = None
-    distinct = True
 
     def get_filter(self):
         """Initializes and returns the filter, if a filter_class is defined."""
@@ -113,7 +112,7 @@ class ModelFilterMixin:
         """
         filter_ = self.get_filter()
         queryset = filter_.qs
-        if self.distinct and any(filter_.data.values()):
+        if any(filter_.data.values()):
             queryset = queryset.distinct()
 
         context = super(ModelFilterMixin, self).get_context_data(
@@ -159,7 +158,12 @@ class CursorPaginationMixin(PaginationMixin):
         """Paginate using the Rest Framework Cursor Paginator"""
         paginator = CursorPagination()
         paginator.page_size = page_size
-        paginator.ordering = "-datetime"
+        paginator.ordering = "-pk"
+        if queryset.query.distinct:
+            # if we need distinct, do it only on the pk field
+            # in order to take advantage of the index
+            queryset = queryset.distinct("pk")
+
         object_list = paginator.paginate_queryset(queryset, Request(self.request))
 
         return (paginator, None, object_list, None)
@@ -197,17 +201,20 @@ class ModelSearchMixin:
         return context
 
 
-class MRListView(PaginationMixin, ListView):
-    """Defines a title and base template for our list views."""
-
+class TitleMixin:
     title = ""
-    template_name = "base_list.html"
 
     def get_context_data(self, **kwargs):
         """Adds title to the context data."""
-        context = super(MRListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["title"] = self.title
         return context
+
+
+class MRListView(PaginationMixin, TitleMixin, ListView):
+    """Defines a title and base template for our list views."""
+
+    template_name = "base_list.html"
 
 
 class MROrderedListView(OrderedSortMixin, MRListView):
@@ -216,6 +223,12 @@ class MROrderedListView(OrderedSortMixin, MRListView):
 
 class MRFilterListView(OrderedSortMixin, ModelFilterMixin, MRListView):
     """Adds ordered sorting and filtering to a MRListView."""
+
+
+class MRFilterCursorListView(
+    ModelFilterMixin, CursorPaginationMixin, TitleMixin, ListView
+):
+    """A Filter list view for cursor paginated models"""
 
 
 class MRSearchFilterListView(

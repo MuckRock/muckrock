@@ -68,7 +68,15 @@
           <span class="small badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
         {% endif %}
         {% if communication.get_delivered %}
-          <span class="small badge">{{communication.get_delivered|capfirst}}</span>
+          <span class="small badge">
+            {% if request.user.is_staff and communication.verified %}
+              &check;
+            {% endif %}
+            {{ communication.get_delivered|capfirst }}
+            {% if request.user.is_staff and communication.verified %}
+              (Verified on {{ communication.verified.datetime|date }})
+            {% endif %}
+          </span>
         {% endif %}
       </span>
     </section>
