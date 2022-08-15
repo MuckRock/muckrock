@@ -268,6 +268,7 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
             url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
+    status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
     from_email = django_filters.ModelMultipleChoiceFilter(
         queryset=EmailAddress.objects.all(),
         field_name="emails__from_email",
