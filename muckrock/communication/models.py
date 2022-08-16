@@ -154,7 +154,7 @@ class EmailAddress(models.Model):
 
 
 class PhoneNumberQuerySet(models.QuerySet):
-    """QuerySet for PhoneNumner"""
+    """QuerySet for PhoneNumber"""
 
     def fetch(self, number, type_="fax"):
         """Fetch a number from the database, or create it if it doesn't exist"""
@@ -377,7 +377,7 @@ class EmailCommunication(models.Model):
         """Get information on the verified status of this communication"""
         opens = list(self.opens.all())
         if opens:
-            return {"datetime": opens[0].datetime, "type": "open"}
+            return {"datetime": opens[0].datetime, "type": opens[0].event}
 
         return None
 
@@ -723,3 +723,35 @@ class Check(models.Model):
         if self.status_date:
             events[self.status] = self.status_date
         return events
+
+
+class Source(models.Model):
+    """Track the source of communication methods in the system"""
+
+    datetime = models.DateTimeField()
+    user = models.ForeignKey(
+        "auth.User", on_delete=models.PROTECT, related_name="sources"
+    )
+    type = models.CharField(
+        max_length=5,
+        choices=(("phone", "Phone"), ("web", "Web"), ("user", "User")),
+    )
+    url = models.URLField(max_length=255, blank=True)
+
+    email_address = models.ForeignKey(
+        EmailAddress,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="sources",
+    )
+    phone_number = models.ForeignKey(
+        PhoneNumber,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="sources",
+    )
+    address = models.ForeignKey(
+        Address, on_delete=models.CASCADE, blank=True, null=True, related_name="sources"
+    )
