@@ -23,6 +23,7 @@ from muckrock.communication.models import (
     MailEvent,
     PhoneNumber,
     PortalCommunication,
+    Source,
     WebCommunication,
 )
 
@@ -182,11 +183,22 @@ class PortalCommunicationInline(ReadOnlyMixin, admin.StackedInline):
     extra = 0
 
 
+class SourceInline(admin.StackedInline):
+    """Source Inline admin"""
+
+    model = Source
+    fields = ["datetime", "user", "type", "url"]
+    autocomplete_fields = ["user"]
+    extra = 1
+
+
 class EmailAddressAdmin(VersionAdmin):
     """Email address admin"""
 
     search_fields = ["email", "name"]
     list_filter = ["status"]
+    fields = ["email", "name", "status"]
+    inlines = [SourceInline]
 
 
 class PhoneNumberAdmin(VersionAdmin):
@@ -195,6 +207,7 @@ class PhoneNumberAdmin(VersionAdmin):
     search_fields = ["number"]
     list_display = ["__str__", "type"]
     list_filter = ["type", "status"]
+    inlines = [SourceInline]
 
 
 class AddressAdmin(VersionAdmin):
@@ -229,6 +242,7 @@ class AddressAdmin(VersionAdmin):
             },
         ),
     )
+    inlines = [SourceInline]
 
 
 class CheckAdmin(CommunicationLinkMixin, VersionAdmin):
