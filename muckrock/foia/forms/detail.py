@@ -133,7 +133,7 @@ class FOIAFlagForm(forms.Form):
     prefix = "flag"
 
     category = forms.ChoiceField(
-        choices=[("", "-- Choose a category")] + PUBLIC_FLAG_CATEGORIES, required=True
+        choices=[("", "-- Choose a category")] + PUBLIC_FLAG_CATEGORIES, required=False
     )
     text = forms.CharField(widget=forms.Textarea, required=True)
 
