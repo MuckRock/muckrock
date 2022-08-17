@@ -733,8 +733,7 @@ class Source(models.Model):
         "auth.User", on_delete=models.PROTECT, related_name="sources"
     )
     type = models.CharField(
-        max_length=5,
-        choices=(("phone", "Phone"), ("web", "Web"), ("user", "User")),
+        max_length=5, choices=(("phone", "Phone"), ("web", "Web"), ("user", "User")),
     )
     url = models.URLField(max_length=255, blank=True)
 
