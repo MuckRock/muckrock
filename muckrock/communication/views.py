@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import F, Q
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Max, Sum
 from django.db.models.query import Prefetch
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -83,10 +83,22 @@ class EmailListView(MRFilterCursorListView):
     title = "All Email Addresses"
     template_name = "communication/email_list.html"
     filter_class = EmailAddressFilterSet
+    # we cannot do a distinct("pk") for this queryset
+    # because we also use annotate
+    distinct_id = False
 
     def get_queryset(self):
         """Sort by reverse primary key"""
-        return super().get_queryset().order_by("-pk")
+        return (
+            super()
+            .get_queryset()
+            .order_by("-pk")
+            .annotate(
+                last_from=Max("from_emails__sent_datetime"),
+                last_to=Max("to_emails__sent_datetime"),
+            )
+            .prefetch_related("sources")
+        )
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
