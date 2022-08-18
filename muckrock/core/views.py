@@ -154,12 +154,14 @@ class CursorPaginationMixin(PaginationMixin):
     Use cursor pagination for increased efficiency
     """
 
+    distinct_id = True
+
     def paginate_queryset(self, queryset, page_size):
         """Paginate using the Rest Framework Cursor Paginator"""
         paginator = CursorPagination()
         paginator.page_size = page_size
         paginator.ordering = "-pk"
-        if queryset.query.distinct:
+        if queryset.query.distinct and self.distinct_id:
             # if we need distinct, do it only on the pk field
             # in order to take advantage of the index
             queryset = queryset.distinct("pk")
