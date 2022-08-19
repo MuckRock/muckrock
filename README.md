@@ -10,7 +10,6 @@ MuckRock is a non-profit collaborative news site that gives you the tools to kee
 ### Software required
 
 1. [docker][docker-install]
-2. [docker-compose][docker-compose-install]
 3. [python][python-install]
 4. [invoke][invoke-install]
 
@@ -24,13 +23,13 @@ MuckRock depends on Squarelet for user authentication.  As the services need to 
 This will create files with the environment variables needed to run the development environment.
 4. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
 5. Start the docker images - `inv up`
-This will build and start all of the docker images using docker-compose.  The invoke tasks specify the `local.yml` configuration file for docker-compose.  If you would like to run docker-compose commands directly, set the environment variable `export COMPSE_FILE=local.yml`.
+This will build and start all of the docker images using docker compose.  The invoke tasks specify the `local.yml` configuration file for docker compose.  If you would like to run docker compose commands directly, set the environment variable `export COMPSE_FILE=local.yml`.
 6. Set `dev.muckrock.com` to point to localhost - `sudo echo "127.0.0.1   dev.muckrock.com" >> /etc/hosts`
 7. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
 
 ## Docker info
 
-The development environment is managed via [docker][docker] and [docker compose][docker-compose].  Please read up on them if you are unfmiliar with them.  The docker compose file is `local.yml`.  If you would like to run `docker-compose` commands directly, please run `export COMPOSE_FILE=local.yml` so you don't need to specify it in every command.
+The development environment is managed via [docker][docker] and [docker compose][docker compose].  Please read up on them if you are unfmiliar with them.  The docker compose file is `local.yml`.  If you would like to run `docker compose` commands directly, please run `export COMPOSE_FILE=local.yml` so you don't need to specify it in every command.
 
 The containers which are run include the following:
 
@@ -132,14 +131,12 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 
 
 [docker]: https://docs.docker.com/
-[docker-compose]: https://docs.docker.com/compose/
 [django]: https://www.djangoproject.com/
 [postgres]: https://www.postgresql.org/
 [redis]: https://redis.io/
 [celery]: https://docs.celeryproject.org/en/latest/
 [invoke]: http://www.pyinvoke.org/
 [docker-install]: https://docs.docker.com/install/
-[docker-compose-install]: https://docs.docker.com/compose/install/
 [invoke-install]: http://www.pyinvoke.org/installing.html
 [python-install]: https://www.python.org/downloads/
 [codeship]: https://app.codeship.com/projects/296009
