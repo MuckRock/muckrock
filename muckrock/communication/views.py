@@ -150,9 +150,7 @@ class PhoneListView(MRFilterCursorListView):
             super()
             .get_queryset()
             .order_by("-pk")
-            .annotate(
-                last_to=Max("faxes__sent_datetime"),
-            )
+            .annotate(last_to=Max("faxes__sent_datetime"),)
             .prefetch_related("sources")
         )
 
