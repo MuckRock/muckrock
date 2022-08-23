@@ -19,7 +19,11 @@ from django.views.generic.detail import DetailView
 from dal_select2.views import Select2ListView
 
 # MuckRock
-from muckrock.communication.filters import CheckFilterSet, EmailAddressFilterSet
+from muckrock.communication.filters import (
+    CheckFilterSet,
+    EmailAddressFilterSet,
+    PhoneNumberFilterSet,
+)
 from muckrock.communication.forms import CheckDateForm
 from muckrock.communication.models import (
     Check,
@@ -126,6 +130,31 @@ class PhoneDetailView(DetailView):
             "admin:communication_phonenumber_change", args=(phone_number.pk,)
         )
         return context
+
+
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+class PhoneListView(MRFilterCursorListView):
+    """A view for admins to view all fax numbers"""
+
+    model = PhoneNumber
+    title = "All Phone Numbers"
+    template_name = "communication/phone_list.html"
+    filter_class = PhoneNumberFilterSet
+    # we cannot do a distinct("pk") for this queryset
+    # because we also use annotate
+    distinct_id = False
+
+    def get_queryset(self):
+        """Sort by reverse primary key"""
+        return (
+            super()
+            .get_queryset()
+            .order_by("-pk")
+            .annotate(
+                last_to=Max("faxes__sent_datetime"),
+            )
+            .prefetch_related("sources")
+        )
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))

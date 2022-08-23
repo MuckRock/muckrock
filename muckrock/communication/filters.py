@@ -8,7 +8,7 @@ import django_filters
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.communication.models import CHECK_STATUS, Check
+from muckrock.communication.models import CHECK_STATUS, PHONE_TYPES, Check
 from muckrock.core import autocomplete
 from muckrock.core.filters import RangeWidget
 
@@ -56,3 +56,20 @@ class EmailAddressFilterSet(django_filters.FilterSet):
             url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
+    status = django_filters.ChoiceFilter(choices=(("good", "Good"), ("error", "Error")))
+
+
+class PhoneNumberFilterSet(django_filters.FilterSet):
+    """Filtering for phone numbers"""
+
+    agency = django_filters.ModelMultipleChoiceFilter(
+        queryset=Agency.objects.get_approved(),
+        field_name="agencies",
+        label="Agency",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
+        ),
+    )
+
+    type = django_filters.ChoiceFilter(choices=PHONE_TYPES)
+    status = django_filters.ChoiceFilter(choices=(("good", "Good"), ("error", "Error")))
