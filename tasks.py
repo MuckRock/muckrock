@@ -1,7 +1,7 @@
 # Third Party
 from invoke import task
 
-DOCKER_COMPOSE_RUN_OPT = "docker-compose -f local.yml run {opt} --rm {service} {cmd}"
+DOCKER_COMPOSE_RUN_OPT = "docker compose -f local.yml run {opt} --rm {service} {cmd}"
 DOCKER_COMPOSE_RUN_OPT_USER = DOCKER_COMPOSE_RUN_OPT.format(
     opt="-u $(id -u):$(id -g) {opt}", service="{service}", cmd="{cmd}"
 )
@@ -127,7 +127,7 @@ def format_check(c):
 @task
 def up(c):
     """Start the docker images"""
-    c.run("docker-compose up -d")
+    c.run("docker compose up -d")
 
 
 @task
@@ -246,7 +246,7 @@ def pip_compile(c, upgrade=False, package=None):
 @task
 def build(c):
     """Build the docker images"""
-    c.run("docker-compose build")
+    c.run("docker compose build")
 
 
 # Database populating

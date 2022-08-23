@@ -14,7 +14,6 @@ MuckRock depends on Squarelet for user authentication. As the services need to c
 ### Software required
 
 1. [docker][docker-install]
-2. [docker-compose][docker-compose-install]
 3. [python][python-install]
 4. [invoke][invoke-install]
 5. [git][git-install]
@@ -41,7 +40,7 @@ You should now be able to log in to MuckRock using your Squarelet account.
 
 ## Docker info
 
-The development environment is managed via [docker][docker] and [docker compose][docker-compose].  Please read up on them if you are unfmiliar with them.  The docker compose file is `local.yml`.  If you would like to run `docker-compose` commands directly, please run `export COMPOSE_FILE=local.yml` so you don't need to specify it in every command.
+The development environment is managed via [docker][docker] and [docker compose][docker compose].  Please read up on them if you are unfmiliar with them.  The docker compose file is `local.yml`.  If you would like to run `docker compose` commands directly, please run `export COMPOSE_FILE=local.yml` so you don't need to specify it in every command.
 
 The containers which are run include the following:
 
@@ -118,14 +117,12 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 
 
 [docker]: https://docs.docker.com/
-[docker-compose]: https://docs.docker.com/compose/
 [django]: https://www.djangoproject.com/
 [postgres]: https://www.postgresql.org/
 [redis]: https://redis.io/
 [celery]: https://docs.celeryproject.org/en/latest/
 [invoke]: http://www.pyinvoke.org/
 [docker-install]: https://docs.docker.com/install/
-[docker-compose-install]: https://docs.docker.com/compose/install/
 [invoke-install]: http://www.pyinvoke.org/installing.html
 [python-install]: https://www.python.org/downloads/
 [git-install]: https://git-scm.com/downloads

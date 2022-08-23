@@ -372,11 +372,15 @@ export default function showOrigContactInfo() {
       if (ccEmails.length > 0) {
         html += ", as well as CCed to:";
         for (var i = 0; i < ccEmails.length; i++) {
+          var $input = $("<div />").append($('<input />',
+            { type: "checkbox", name: "cc_emails", value: ccEmails[i], checked: true }
+          )).html();
+          var $text = $("<div />").text(ccEmails[i]).html();
           html += `
             <div class="">
               <label>
-                <input type="checkbox" name="cc_emails" value="${ccEmails[i]}" checked>
-                ${ccEmails[i]}
+                ${$input}
+                ${$text}
               </label>
             </div>
           `;
