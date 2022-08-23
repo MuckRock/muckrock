@@ -1,0 +1,23 @@
+{% extends "base_list.html" %}
+
+{% block list-paginator %}
+  {% include "lib/component/cursor_pagination.html" %}
+{% endblock %}
+
+{% block list-table-head %}
+  <th>Phone Number</th>
+  <th>Last To</th>
+  <th>Verified By</th>
+  <th>Last Verified</th>
+  <th>Verified Via</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+  <td><a href="{{ object.get_absolute_url }}">{{ object }}</a></td>
+  <td>{{ object.last_to|time }} {{ object.last_to|date }}</td>
+  <td>{{ object.sources.all.0.user }}</td>
+  <td>
+    {{ object.sources.all.0.datetime|date }} {{ object.sources.all.0.datetime|time }}
+  </td>
+  <td>{{ object.sources.all.0.type|capfirst }}</td>
+{% endblock list-table-row %}
