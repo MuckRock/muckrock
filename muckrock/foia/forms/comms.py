@@ -321,3 +321,10 @@ class ContactInfoForm(SendViaForm):
             return self.cleaned_data["fax"].number.as_international
         else:
             return self.cleaned_data["fax"]
+
+    def clean_other_fax(self):
+        """Turn phone number model into a string for serializing"""
+        if self.cleaned_data["other_fax"]:
+            return self.cleaned_data["other_fax"].as_international
+        else:
+            return self.cleaned_data["other_fax"]
