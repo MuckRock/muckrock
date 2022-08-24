@@ -328,7 +328,7 @@ def slack(payload):
         notification.send(fail_silently=False)
     except RequestException as exc:
         slack.retry(
-            countdown=2 ** slack.request.retries * 30 + randint(0, 30),
+            countdown=2**slack.request.retries * 30 + randint(0, 30),
             args=[payload],
             exc=exc,
         )

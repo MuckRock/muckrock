@@ -31,9 +31,13 @@ class TestAgencyImporter(TestCase):
             email=None,
             fax=None,
         )
-        self.governor = AgencyFactory(name="Governor's Office", jurisdiction=state,)
+        self.governor = AgencyFactory(
+            name="Governor's Office",
+            jurisdiction=state,
+        )
         self.police = AgencyFactory(
-            name="Boston Police Department", jurisdiction=local,
+            name="Boston Police Department",
+            jurisdiction=local,
         )
 
     def test_match(self):
@@ -125,7 +129,7 @@ class TestAgencyImporter(TestCase):
                     "aliases": "CIA",
                     "foia_website": "https://www.cia.gov/foia/",
                     "website": "https://www.cia.gov/",
-                },
+                }
             ]
         )
         importer = Importer(reader)
@@ -204,7 +208,7 @@ class TestAgencyImporter(TestCase):
                     "email": self.police.email.email,
                     "fax": self.police.fax.number.as_national,
                     "phone": agency_phone.phone.number.as_national,
-                },
+                }
             ]
         )
         importer = Importer(reader)
@@ -217,10 +221,14 @@ class TestAgencyImporter(TestCase):
     def test_import_update_redundant(self):
         """Test an update with data different from the data already on the agency"""
         AgencyAddress.objects.create(
-            agency=self.police, address=AddressFactory(), request_type="primary",
+            agency=self.police,
+            address=AddressFactory(),
+            request_type="primary",
         )
         self.police.portal = Portal.objects.create(
-            url="https://www.example.com", name="Test Portal", type="other",
+            url="https://www.example.com",
+            name="Test Portal",
+            type="other",
         )
         self.police.save()
         reader = PyReader(
@@ -321,7 +329,7 @@ class TestAgencyImporter(TestCase):
     def test_create_minimal(self):
         """Test a creation with minimal contact information supplied"""
         reader = PyReader(
-            [{"agency": "Foobar", "jurisdiction": "united states of america",},]
+            [{"agency": "Foobar", "jurisdiction": "united states of america"}]
         )
         importer = Importer(reader)
         data = list(importer.import_())
@@ -332,7 +340,7 @@ class TestAgencyImporter(TestCase):
 
     def test_create_bad_jurisdiction(self):
         """Test creating an agency in a bad jurisdiction"""
-        reader = PyReader([{"agency": "Foobar", "jurisdiction": "Foobar",},])
+        reader = PyReader([{"agency": "Foobar", "jurisdiction": "Foobar"}])
         importer = Importer(reader)
         data = list(importer.import_())
 

@@ -23,7 +23,7 @@ email_separator_re = re.compile(r"[^\w\.\-\+\&@_]+")
 # https://code.djangoproject.com/ticket/11027
 # edited - only filename is stored in db
 def filefield_maxlength_validator(value):
-    """"Check if absolute file path can fit in database table"""
+    """Check if absolute file path can fit in database table"""
 
     if not hasattr(value, "field"):
         # images sent in via API do not have a field

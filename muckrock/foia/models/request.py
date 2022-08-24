@@ -379,7 +379,7 @@ class FOIARequest(models.Model):
                 ).hexdigest(),
                 16,
             )
-            % 10 ** 8
+            % 10**8
         )
         mail_id = "%s-%08d" % (self.pk, uid)
         cursor = connection.cursor()

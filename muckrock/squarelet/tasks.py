@@ -34,7 +34,7 @@ def pull_data(type_, uuid, **kwargs):
             args=(type_, uuid),
             kwargs=kwargs,
             exc=exc,
-            countdown=2 ** pull_data.request.retries,
+            countdown=2**pull_data.request.retries,
         )
     else:
         model = types_model[type_]

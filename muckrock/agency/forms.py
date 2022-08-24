@@ -214,7 +214,10 @@ class AgencyMassImportForm(forms.Form):
     csv = forms.FileField()
     match_or_import = forms.ChoiceField(
         required=True,
-        choices=(("match", "Match"), ("import", "Import"),),
+        choices=(
+            ("match", "Match"),
+            ("import", "Import"),
+        ),
         help_text="Match will just match the jurisdiction and agency without "
         "changing anything.  Import will create unmatched agencies and set or "
         "update supplied contact information",

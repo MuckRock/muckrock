@@ -383,7 +383,7 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         )
 
     def has_add_permission(self, request):
-        """Everyone may add a new agency during """
+        """Everyone may add a new agency during"""
         return True
 
     def create_object(self, text):

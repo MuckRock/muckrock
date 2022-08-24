@@ -130,7 +130,7 @@ def create_ticket(flag_pk, **kwargs):
     except (RequestException, ZenpyException, APIException) as exc:
         logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
         raise create_ticket.retry(
-            countdown=(2 ** create_ticket.request.retries) * 300 + randint(0, 300),
+            countdown=(2**create_ticket.request.retries) * 300 + randint(0, 300),
             args=[flag_pk],
             kwargs=kwargs,
             exc=exc,

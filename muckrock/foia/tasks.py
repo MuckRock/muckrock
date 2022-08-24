@@ -862,7 +862,7 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
         comm = FOIACommunication.objects.get(pk=comm_pk)
         foia.send_delayed_email(comm, **options)
     except IOError as exc:
-        countdown = (2 ** foia_send_email.request.retries) * 60 + randint(0, 300)
+        countdown = (2**foia_send_email.request.retries) * 60 + randint(0, 300)
         logger.error(
             "foia_send_email error, will retry in %d minutes: %s",
             countdown,
@@ -945,7 +945,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         comm.foia.update()
     except lob.error.APIConnectionError as exc:
         prepare_snail_mail.retry(
-            countdown=(2 ** prepare_snail_mail.request.retries) * 300 + randint(0, 300),
+            countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
             args=[comm_pk, category, switch, extra, force],
             kwargs=kwargs,
             exc=exc,
