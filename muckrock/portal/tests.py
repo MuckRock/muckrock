@@ -34,7 +34,7 @@ class TestManualPortal(TestCase):
 
     def test_send_msg(self):
         """Sending a message should create a portal task"""
-        comm = FOIACommunicationFactory()
+        comm = FOIACommunicationFactory(category="n")
         self.portal.send_msg(comm)
         ok_(PortalTask.objects.filter(category="n", communication=comm).exists())
 

@@ -329,6 +329,7 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
                 datetime=timezone.now(),
                 response=False,
                 communication="Test communication",
+                category="u",
             )
             foia.status = "submitted"
             foia.save()

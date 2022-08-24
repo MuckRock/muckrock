@@ -20,9 +20,9 @@ class ManualPortal:
 
     def send_msg(self, comm, **kwargs):
         """Send a message via the portal"""
-        category, _ = comm.foia.process_manual_send(**kwargs)
+        comm.foia.process_manual_send(**kwargs)
         PortalTask.objects.create(
-            category=category, communication=comm, reason=kwargs.get("reason", "")
+            category=comm.category, communication=comm, reason=kwargs.get("reason", "")
         )
 
     def receive_msg(self, comm, **kwargs):
