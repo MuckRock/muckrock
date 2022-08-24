@@ -27,6 +27,7 @@ from muckrock.core.utils import UnclosableFile, new_action
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import STATUS, FOIARequest
 from muckrock.foia.querysets import FOIACommunicationQuerySet, RawEmailQuerySet
+from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,7 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for
     # machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+    category = models.CharField(max_length=1, choices=SNAIL_MAIL_CATEGORIES, blank=True)
 
     # only used for orphans
     likely_foia = models.ForeignKey(
