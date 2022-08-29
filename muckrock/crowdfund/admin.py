@@ -107,9 +107,7 @@ class RecurringCrowdfundPaymentAdmin(VersionAdmin):
         """Cancel the subscription if manually deactivated"""
         if not obj.active:
             obj.cancel()
-        return super(RecurringCrowdfundPaymentAdmin, self).save_model(
-            request, obj, form, change
-        )
+        return super().save_model(request, obj, form, change)
 
 
 admin.site.register(models.Crowdfund, CrowdfundAdmin)

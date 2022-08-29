@@ -2,7 +2,6 @@
 Models for the tags application
 """
 
-# pylint: disable=model-missing-unicode
 
 # Django
 from django.db import models
@@ -37,7 +36,7 @@ class Tag(TaggitTag):
     def save(self, *args, **kwargs):
         """Normalize name before saving"""
         self.name = normalize(self.name)
-        super(Tag, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["name"]

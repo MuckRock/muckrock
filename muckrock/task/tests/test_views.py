@@ -56,8 +56,6 @@ from muckrock.task.views import (
 
 mock_send = mock.Mock()
 
-# pylint: disable=missing-docstring
-
 
 def n_plus_one_query(client, url, factory):
     """Should make the same number of SQL queries regardless of amount of data"""
@@ -120,7 +118,8 @@ class TaskListViewTests(TestCase):
         ok_(expected in actual, "Task list should inherit from MRFilterListView class")
 
     def test_render_task_list(self):
-        """The list should have rendered task widgets in its object_list context variable"""
+        """The list should have rendered task widgets in its object_list
+        context variable"""
         response = http_get_response(self.url, self.view, self.user, follow=True)
         obj_list = response.context_data["object_list"]
         ok_(obj_list, "Object list should not be empty.")
@@ -635,7 +634,8 @@ class ResponseTaskListViewTests(TestCase):
         assert_false(task.communication.hidden)
 
     def test_post_set_comm_status(self):
-        """Setting the status on just the communication should not influence its request."""
+        """Setting the status on just the communication should not influence
+        its request."""
         status_change = "done"
         existing_foia_status = self.task.communication.foia.status
         data = {

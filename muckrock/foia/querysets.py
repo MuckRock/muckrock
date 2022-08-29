@@ -32,14 +32,14 @@ class PreloadFileQuerysetMixin:
     comm_id = "id"
 
     def __init__(self, *args, **kwargs):
-        super(PreloadFileQuerysetMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._preload_files_amt = 0
         self._preload_files_done = False
 
     def _clone(self):
         """Add _preload_files_amt to vlaues to copy over in a clone"""
         # pylint: disable=protected-access
-        clone = super(PreloadFileQuerysetMixin, self)._clone()
+        clone = super()._clone()
         clone._preload_files_amt = self._preload_files_amt
         return clone
 
@@ -47,7 +47,6 @@ class PreloadFileQuerysetMixin:
         """Preload up to limit files for the communications
         Mark as needing to be preloaded - actually preloading will be done lazily
         """
-        # pylint: disable=protected-access
         self._preload_files_amt = limit
         return self
 
@@ -70,15 +69,13 @@ class PreloadFileQuerysetMixin:
 
     def _fetch_all(self):
         """Override fetch all to lazily preload files if needed"""
-        super(PreloadFileQuerysetMixin, self)._fetch_all()
+        super()._fetch_all()
         if self._preload_files_amt > 0 and not self._preload_files_done:
             self._do_preload_files()
 
 
 class FOIARequestQuerySet(models.QuerySet):
     """Object manager for FOIA requests"""
-
-    # pylint: disable=too-many-public-methods
 
     def get_done(self):
         """Get all FOIA requests with responses"""

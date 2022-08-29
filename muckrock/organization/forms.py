@@ -42,7 +42,7 @@ class StripeForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self._organization = kwargs.pop("organization", None)
         self._user = kwargs.pop("user")
-        super(StripeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # if auth user and org are given
         if self._user.is_authenticated and self._organization is not None:
@@ -81,7 +81,7 @@ class StripeForm(forms.Form):
 
     def clean(self):
         """Validate using card on file and supplying new card"""
-        data = super(StripeForm, self).clean()
+        data = super().clean()
 
         if data.get("use_card_on_file") and data.get("stripe_token"):
             self.add_error(

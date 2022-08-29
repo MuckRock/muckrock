@@ -28,11 +28,10 @@ class PortalAutoReceiveMixin:
             (re.compile(pattern), getattr(self, method))
             for pattern, method in self.router
         ]
-        super(PortalAutoReceiveMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def receive_msg(self, comm, **kwargs):
         """Route incoming messages"""
-        # pylint: disable=unused-argument
 
         for pattern, handler in self._router:
             match = pattern.search(comm.subject)
@@ -40,7 +39,7 @@ class PortalAutoReceiveMixin:
                 handler(comm, **match.groupdict())
                 break
         else:
-            super(PortalAutoReceiveMixin, self).receive_msg(comm, reason=self.error_msg)
+            super().receive_msg(comm, reason=self.error_msg)
 
     def _accept_comm(self, comm, text):
         """Accept a communication onto the site"""

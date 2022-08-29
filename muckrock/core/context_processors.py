@@ -13,7 +13,6 @@ def domain(request):
 
 def settings(request):
     """Add settings to the context"""
-    # pylint: disable=unused-argument
     return {"settings": django_settings}
 
 
@@ -41,5 +40,4 @@ def mixpanel(request):
 
 def cache_timeout(request):
     """Cache timeout settings"""
-    # pylint: disable=unused-argument
     return {"cache_timeout": django_settings.DEFAULT_CACHE_TIMEOUT}

@@ -32,7 +32,7 @@ class TagListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Adds all tags to context data"""
-        context = super(TagListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["tags_length"] = list_all_tags().count()
         context["popular_tags"] = list_all_tags().order_by("-num_times")[:10]
         context["form"] = TagForm()
@@ -54,7 +54,7 @@ class TagDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """Adds all tags to context data"""
-        context = super(TagDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["tags_length"] = list_all_tags().count()
         context["form"] = TagForm()
         user = self.request.user

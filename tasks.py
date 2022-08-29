@@ -86,7 +86,7 @@ def coverage(c, settings="test", reuse="0", codeship=False):
 @task
 def pylint(c, codeship=False):
     """Run the linter"""
-    cmd = "pylint muckrock --rcfile=config/pylint.conf"
+    cmd = "pylint muckrock"
     if codeship:
         c.run(cmd)
     else:

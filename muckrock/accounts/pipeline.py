@@ -37,7 +37,6 @@ def save_profile(backend, user, response, *args, **kwargs):
 
 def save_session_data(strategy, request, response, *args, **kwargs):
     """Save some data in the session"""
-    # pylint: disable=unused-argument
     # session_state and id_token are used for universal logout functionality
     session_state = strategy.request_data().get("session_state")
     if session_state:

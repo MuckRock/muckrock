@@ -136,7 +136,8 @@ def redact_emails(text, passcode):
 
 
 # http://stackoverflow.com/questions/1278042/
-# in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507
+# in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ
+# /1278507#1278507
 
 
 @register.tag(name="evaluate")
@@ -158,7 +159,6 @@ class EvaluateNode(template.Node):
     """Node for do_evaluate"""
 
     def __init__(self, variable):
-        # pylint: disable=super-init-not-called
         self.variable = template.Variable(variable)
 
     def render(self, context):
@@ -356,7 +356,6 @@ class CacheNode(Node):
         cache_name,
         compress=False,
     ):
-        # pylint: disable=too-many-arguments
         self.nodelist = nodelist
         self.expire_time_var = expire_time_var
         self.fragment_name = fragment_name

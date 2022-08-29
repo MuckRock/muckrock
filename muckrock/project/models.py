@@ -146,9 +146,8 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         """Autogenerates the slug based on the title"""
-        # pylint: disable=signature-differs
         self.slug = slugify(self.title) or "project"
-        super(Project, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         """Returns the project URL as a string"""
@@ -209,6 +208,5 @@ class Project(models.Model):
 class ProjectCrowdfunds(models.Model):
     """Project to Crowdfund through model"""
 
-    # pylint: disable=model-missing-unicode
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     crowdfund = models.OneToOneField("crowdfund.Crowdfund", on_delete=models.CASCADE)

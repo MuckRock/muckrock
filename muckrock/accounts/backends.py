@@ -16,6 +16,7 @@ class SquareletBackend(OpenIdConnectAuth):
     """Authentication Backend for Squarelet OpenId"""
 
     # pylint: disable=abstract-method
+
     name = "squarelet"
     OIDC_ENDPOINT = settings.SQUARELET_URL + "/openid"
 
@@ -40,17 +41,17 @@ class SquareletBackend(OpenIdConnectAuth):
             params.update(self.get_scope_argument())
             return params
         else:
-            return super(SquareletBackend, self).auth_complete_params(state)
+            return super().auth_complete_params(state)
 
     # We do not have nonce's in the password grant flow
     def get_nonce(self, nonce):
         if hasattr(self, "password_grant_auth") and self.password_grant_auth:
             return namedtuple("FakeNonce", ["id"])(id=True)
         else:
-            return super(SquareletBackend, self).get_nonce(nonce)
+            return super().get_nonce(nonce)
 
     def remove_nonce(self, nonce_id):
         if hasattr(self, "password_grant_auth") and self.password_grant_auth:
             return None
         else:
-            return super(SquareletBackend, self).remove_nonce(nonce_id)
+            return super().remove_nonce(nonce_id)

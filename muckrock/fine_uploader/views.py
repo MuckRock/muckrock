@@ -397,5 +397,4 @@ def upload_chunk(request):
 @login_or_agency_required
 def blank(request):
     """Workaround for IE9 and older"""
-    # pylint: disable=unused-argument
     return HttpResponse()

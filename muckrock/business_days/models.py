@@ -25,7 +25,6 @@ class Holiday(models.Model):
         ("election", "Election"),
     )
 
-    # pylint: disable=bad-whitespace
     months = (
         (1, "January"),
         (2, "February"),
@@ -40,7 +39,6 @@ class Holiday(models.Model):
         (11, "November"),
         (12, "December"),
     )
-    # pylint: enable=bad-whitespace
 
     weekdays = (
         (0, "Monday"),

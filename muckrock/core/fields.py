@@ -54,13 +54,11 @@ FileField.default_validators = FileField.default_validators[:] + [
 class EmailsListField(CharField):
     """Multi email field"""
 
-    # pylint: disable=too-many-public-methods
-
     widget = forms.Textarea
 
     def clean(self, value, model_instance):
         """Validates list of email addresses"""
-        super(EmailsListField, self).clean(value, model_instance)
+        super().clean(value, model_instance)
 
         emails = email_separator_re.split(value)
 
@@ -81,11 +79,11 @@ class FullEmailValidator(EmailValidator):
     def __call__(self, value):
         # pylint: disable=unused-variable
         try:
-            super(FullEmailValidator, self).__call__(value)
+            super().__call__(value)
         except ValidationError:
             # Trivial case failed. Try for possible Full Name <email@address>
             fullname, email = parseaddr(value)
-            super(FullEmailValidator, self).__call__(email)
+            super().__call__(email)
 
 
 validate_full_email = FullEmailValidator()
@@ -100,7 +98,7 @@ class FullEmailField(forms.EmailField):
         """Accept full name emails - only store the email part"""
         # pylint: disable=unused-variable
 
-        super(FullEmailField, self).clean(value)
+        super().clean(value)
         fullname, email = parseaddr(value)
         return email
 
@@ -110,7 +108,7 @@ class EmptyLastModelChoiceIterator(ModelChoiceIterator):
 
     def __iter__(self):
         # pylint: disable=stop-iteration-return
-        iter_self = super(EmptyLastModelChoiceIterator, self).__iter__()
+        iter_self = super().__iter__()
         empty = next(iter_self)
         for obj in iter_self:
             yield obj

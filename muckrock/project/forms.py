@@ -104,5 +104,5 @@ class ProjectManagerForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user")
-        super(ProjectManagerForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["projects"].queryset = Project.objects.get_manager(user)

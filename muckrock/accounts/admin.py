@@ -197,9 +197,7 @@ class RecurringDonationAdmin(VersionAdmin):
         """Cancel the subscription if manually deactivated"""
         if not obj.active:
             obj.cancel()
-        return super(RecurringDonationAdmin, self).save_model(
-            request, obj, form, change
-        )
+        return super().save_model(request, obj, form, change)
 
 
 admin.site.register(Statistics, StatisticsAdmin)

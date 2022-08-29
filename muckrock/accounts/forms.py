@@ -37,7 +37,7 @@ class BuyRequestForm(StripeForm):
     num_requests = forms.IntegerField(label="Number of requests to buy", min_value=1)
 
     def __init__(self, *args, **kwargs):
-        super(BuyRequestForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self._user.is_authenticated and self._user.profile.is_advanced():
             limit_val = 1
         else:

@@ -103,7 +103,6 @@ class ProfileSettings(TemplateView):
 
     def post(self, request, **kwargs):
         """Handle form processing"""
-        # pylint: disable=unused-argument
         settings_forms = {"email": EmailSettingsForm, "org": OrgPreferencesForm}
         action = request.POST.get("action")
         receipt_form = None
@@ -155,7 +154,7 @@ class ProfileSettings(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Returns context for the template"""
-        context = super(ProfileSettings, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         user_profile = self.request.user.profile
         email_initial = {"email": self.request.user.email}
         email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
@@ -183,7 +182,6 @@ class ProfileView(BuyRequestsMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         """Get the user and redirect if neccessary"""
-        # pylint: disable=attribute-defined-outside-init
         username = kwargs.get("username")
         if username is None:
             return redirect("acct-profile", username=request.user.username)
@@ -195,11 +193,11 @@ class ProfileView(BuyRequestsMixin, FormView):
         ):
             raise Http404
 
-        return super(ProfileView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Get data for the profile page"""
-        context_data = super(ProfileView, self).get_context_data(**kwargs)
+        context_data = super().get_context_data(**kwargs)
         queryset = self.user.organizations.order_by("name")
         if self.request.user.is_staff:
             organizations = queryset
@@ -248,7 +246,7 @@ class ProfileView(BuyRequestsMixin, FormView):
 
     def get_form_kwargs(self):
         """Give the form the current user"""
-        kwargs = super(ProfileView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
 
@@ -358,7 +356,7 @@ class NotificationList(ListView):
     def get_queryset(self):
         """Return all notifications for the user making the request."""
         return (
-            super(NotificationList, self)
+            super()
             .get_queryset()
             .for_user(self.request.user)
             .order_by("-datetime")
@@ -378,7 +376,7 @@ class NotificationList(ListView):
 
     def get_context_data(self, **kwargs):
         """Add the title to the context"""
-        context = super(NotificationList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["title"] = self.title
         return context
 
@@ -407,7 +405,7 @@ class UnreadNotificationList(NotificationList):
 
     def get_queryset(self):
         """Only return unread notifications."""
-        notifications = super(UnreadNotificationList, self).get_queryset()
+        notifications = super().get_queryset()
         return notifications.get_unread()
 
 
@@ -424,18 +422,17 @@ class ProxyList(MRFilterListView):
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
         """Staff only"""
-        return super(ProxyList, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
         """Display all proxies"""
-        objects = super(ProxyList, self).get_queryset()
+        objects = super().get_queryset()
         return objects.filter(profile__proxy=True).select_related("profile")
 
 
 def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx):
     """View to redirect agency users to the correct page or offer to resend
     them their login token"""
-    # pylint: disable=too-many-locals
 
     agency = get_object_or_404(Agency, slug=agency_slug, pk=agency_idx)
     foia = get_object_or_404(FOIARequest, agency=agency, slug=foia_slug, pk=foia_idx)

@@ -13,7 +13,7 @@ class AccountsConfig(AppConfig):
 
     def ready(self):
         """Registers users with the activity streams plugin"""
-        # pylint: disable=too-many-locals, import-outside-toplevel
+        # pylint: disable=import-outside-toplevel
         # Third Party
         from actstream import registry
 

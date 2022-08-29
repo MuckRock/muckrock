@@ -20,7 +20,7 @@ class TagManagerForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         required = kwargs.pop("required", True)
-        super(TagManagerForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["tags"].required = required
 
 
@@ -37,7 +37,6 @@ class NewsletterSignupForm(forms.Form):
 class SearchForm(forms.Form):
     """A form for searching a single model."""
 
-    # pylint: disable=invalid-name
     q = forms.CharField(
         required=False, label="Search", widget=forms.TextInput(attrs={"type": "search"})
     )

@@ -36,7 +36,8 @@ class CrowdfundForm(forms.ModelForm):
 
     payment_required = forms.IntegerField(
         label="Amount",
-        help_text="We will add 15% to this amount, which goes towards our operating costs.",
+        help_text="We will add 15% to this amount, which goes towards our "
+        "operating costs.",
         widget=NumberInput(attrs={"class": "currency-field"}),
     )
 
@@ -44,7 +45,8 @@ class CrowdfundForm(forms.ModelForm):
         label="Limit Amount",
         initial=True,
         required=False,
-        help_text="If checked, this prevents you from collecting more than your stated amount.",
+        help_text="If checked, this prevents you from collecting more than your "
+        "stated amount.",
         widget=forms.CheckboxInput(),
     )
 

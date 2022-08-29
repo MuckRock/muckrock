@@ -18,7 +18,6 @@ from rest_framework.routers import DefaultRouter
 # MuckRock
 import muckrock.accounts.viewsets
 import muckrock.agency.viewsets
-import muckrock.core.views as views
 import muckrock.crowdsource.viewsets
 import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
@@ -28,6 +27,7 @@ import muckrock.project.viewsets
 import muckrock.qanda.views
 import muckrock.task.viewsets
 from muckrock.agency.sitemap import AgencySitemap
+from muckrock.core import views
 from muckrock.core.sitemap import FlatPageSitemap
 from muckrock.core.views import handler500  # pylint: disable=unused-import
 from muckrock.foia.sitemap import FoiaSitemap

@@ -71,7 +71,7 @@ class ReviewAgencyTaskForm(forms.Form):
 
     def clean(self):
         """Make email_or_fax required if snail mail is not checked"""
-        cleaned_data = super(ReviewAgencyTaskForm, self).clean()
+        cleaned_data = super().clean()
         email_or_fax = cleaned_data.get("email_or_fax")
         snail_mail = cleaned_data.get("snail_mail")
 
@@ -116,7 +116,7 @@ class ResponseTaskForm(forms.Form):
     def __init__(self, *args, **kwargs):
         if self.check_scans:
             task = kwargs.pop("task")
-        super(ResponseTaskForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.check_scans and task.scan:
             del self.fields["status"]
         else:
@@ -210,7 +210,6 @@ class ResponseTaskForm(forms.Form):
 
     def set_status(self, status, set_foia, comms, title=None, body=None):
         """Sets status of comm and foia"""
-        # pylint: disable=too-many-arguments
         # check that status is valid
         if status is not None and status not in [
             status_set[0] for status_set in STATUS

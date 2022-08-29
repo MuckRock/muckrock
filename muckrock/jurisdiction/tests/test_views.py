@@ -14,7 +14,8 @@ from muckrock.jurisdiction import factories, views
 
 
 class TestExemptionDetailView(TestCase):
-    """The exemption detail view provides information about the exemption at a standalone url."""
+    """The exemption detail view provides information about the exemption at a
+    standalone url."""
 
     def setUp(self):
         self.view = views.ExemptionDetailView.as_view()

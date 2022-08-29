@@ -107,7 +107,7 @@ class CommunicationTaskMixin(PreloadFileQuerysetMixin):
 
     def preload_files(self, limit=11):
         """Add communication select related"""
-        queryset = super(CommunicationTaskMixin, self).preload_files(limit=limit)
+        queryset = super().preload_files(limit=limit)
         return queryset.select_related("communication")
 
     def _process_preloaded_files(self, obj, files):
@@ -338,7 +338,7 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             # then try again
             to_delete = self.filter(**kwargs).order_by("date_created")[1:]
             self.filter(pk__in=to_delete).delete()
-            self.ensure_one_created(source=source, **kwargs)
+            return self.ensure_one_created(source=source, **kwargs)
 
 
 class ResponseTaskQuerySet(CommunicationTaskMixin, TaskQuerySet):

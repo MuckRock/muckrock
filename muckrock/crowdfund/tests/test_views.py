@@ -31,20 +31,23 @@ from muckrock.project.models import ProjectCrowdfunds
 @patch("stripe.Customer", Mock())
 class TestCrowdfundView(TestCase):
     """
-    The Crowdfund Detail View should be handle all the contributons made to the crowdfund.
+    The Crowdfund Detail View should be handle all the contributons made to the
+    crowdfund.
 
     Contributions can be made:
     - anonymously while logged out
     - anonymously while logged in
     - onymously while logged in
 
-    If a logged out user wants to make an onymous contribution, they need to register an account.
-    We provide them with a method for registering for an account at the time of contribution.
+    If a logged out user wants to make an onymous contribution, they need to
+    register an account. We provide them with a method for registering for an
+    account at the time of contribution.
 
-    Crowdfund contributions should normally be made with Javascript via AJAX, and the crowdfund
-    view should handle and respond with JSON when an AJAX request is made. The response to a
-    successful contribution should include the user's current logged-in state and whether they
-    were registered as a user at the time the contribution was made.
+    Crowdfund contributions should normally be made with Javascript via AJAX,
+    and the crowdfund view should handle and respond with JSON when an AJAX
+    request is made. The response to a successful contribution should include
+    the user's current logged-in state and whether they were registered as a
+    user at the time the contribution was made.
     """
 
     def setUp(self):
@@ -102,8 +105,8 @@ class TestCrowdfundView(TestCase):
 
     def test_anonymous_unauthenticated(self):
         """
-        After posting the payment, the email, and the token, the server should process the
-        payment before creating and returning a payment object.
+        After posting the payment, the email, and the token, the server should
+        process the payment before creating and returning a payment object.
         """
         self.post(self.data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
@@ -211,7 +214,8 @@ class TestCrowdfundView(TestCase):
     @requests_mock.Mocker()
     def test_registered_ajax(self, mock_requests):
         """
-        A contribution made via AJAX while logged out, but registering, should report that:
+        A contribution made via AJAX while logged out, but registering, should
+        report that:
         - the user is authenticated
         - the user was registered
         """
@@ -236,7 +240,8 @@ class TestCrowdfundView(TestCase):
         eq_(payment.amount, amount)
 
     def test_contributors(self):
-        """The crowdfund can get a list of all its contibutors by parsing its list of payments."""
+        """The crowdfund can get a list of all its contibutors by parsing its
+        list of payments."""
         # anonymous logged out payment
         self.post(self.data)
         # anonymous logged in payment
@@ -278,7 +283,8 @@ class TestCrowdfundView(TestCase):
         )
 
     def test_limit_amount(self):
-        """No more than the amount required should be paid if the crowdfund is capped."""
+        """No more than the amount required should be paid if the crowdfund is
+        capped."""
         self.crowdfund.payment_capped = True
         self.crowdfund.save()
         data = self.data

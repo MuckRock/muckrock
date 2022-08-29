@@ -61,17 +61,18 @@ class Digest(TemplateEmail):
     def __init__(self, interval=None, **kwargs):
         """Saves interval attribute if provided."""
         if interval:
-            # we use relativedelta in addition to timedelta because it gives us a greater
-            # flexibility in the kinds of intervals we can define, e.g. weeks and months
+            # we use relativedelta in addition to timedelta because it gives us
+            # a greater flexibility in the kinds of intervals we can define,
+            # e.g. weeks and months
             if isinstance(interval, (relativedelta, timedelta)):
                 self.interval = interval
             else:
                 raise TypeError("Interval must be relativedelta or timedelta")
-        super(Digest, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def get_context_data(self, *args):
         """Adds time-based salutation and signature context"""
-        context = super(Digest, self).get_context_data(*args)
+        context = super().get_context_data(*args)
         context["salutation"] = get_salutation()
         context["signoff"] = get_signoff()
         context["last"] = self.get_duration()
@@ -82,7 +83,8 @@ class Digest(TemplateEmail):
         return timezone.now() - self.get_interval()
 
     def get_interval(self):
-        """Gets the interval or raises an error if it is missing or an unexpected type."""
+        """Gets the interval or raises an error if it is missing or an
+        unexpected type."""
         if not self.interval:
             raise NotImplementedError(
                 "Interval must be provided by subclass or when initialized."
@@ -134,12 +136,12 @@ class ActivityDigest(Digest):
 
     def __init__(self, **kwargs):
         """Initialize the digest with a dynamic subject."""
-        super(ActivityDigest, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.subject = self.get_subject()
 
     def get_context_data(self, *args):
         """Adds classified activity to the context."""
-        context = super(ActivityDigest, self).get_context_data(*args)
+        context = super().get_context_data(*args)
         context["activity"] = self.get_activity()
         context["subject"] = self.get_subject()
         return context
@@ -245,7 +247,7 @@ class ActivityDigest(Digest):
         """Don't send the email if there's no activity."""
         if self.activity["count"] < 1:
             return 0
-        return super(ActivityDigest, self).send(fail_silently)
+        return super().send(fail_silently)
 
 
 class StaffDigest(Digest):
@@ -268,7 +270,6 @@ class StaffDigest(Digest):
             growth=True,
         ):
             """Initialize the statistical object"""
-            # pylint: disable=too-many-arguments
             self.name = name
             self.current = current_value
             if self.current and previous_value is not None:
@@ -486,7 +487,7 @@ class StaffDigest(Digest):
 
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
-        context = super(StaffDigest, self).get_context_data(*args)
+        context = super().get_context_data(*args)
         end = timezone.now() - self.interval
         start = end - self.interval
         context["stats"] = self.get_data(start, end)
@@ -504,4 +505,4 @@ class StaffDigest(Digest):
         user = self.get_user()
         if not user.is_staff:
             return 0
-        return super(StaffDigest, self).send(fail_silently)
+        return super().send(fail_silently)

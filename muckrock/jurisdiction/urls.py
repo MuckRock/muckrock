@@ -9,7 +9,10 @@ from django.urls import re_path
 from muckrock.core.views import jurisdiction
 from muckrock.jurisdiction import views
 
-jur_url = r"(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?(?:/(?P<local_slug>[\w\d_-]+))?"
+jur_url = (
+    r"(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?"
+    r"(?:/(?P<local_slug>[\w\d_-]+))?"
+)
 old_jur_url = r"(?P<slug>[\w\d_-]+)/(?P<idx>\d+)"
 
 urlpatterns = [

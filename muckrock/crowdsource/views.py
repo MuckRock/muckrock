@@ -65,7 +65,7 @@ class CrowdsourceExploreView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Data for the explore page"""
-        context = super(CrowdsourceExploreView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["crowdsource_users"] = CrowdsourceResponse.objects.get_user_count()
         context["crowdsource_data"] = CrowdsourceResponse.objects.count()
         context["crowdsource_count"] = Crowdsource.objects.exclude(
@@ -109,7 +109,7 @@ class CrowdsourceDetailView(DetailView):
             return redirect(
                 "crowdsource-assignment", slug=crowdsource.slug, idx=crowdsource.pk
             )
-        return super(CrowdsourceDetailView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         """Handle CSV downloads"""
@@ -124,7 +124,7 @@ class CrowdsourceDetailView(DetailView):
                 "Your CSV is being processed.  It will be emailed to you when "
                 "it is ready.",
             )
-        return super(CrowdsourceDetailView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *_args, **_kwargs):
         """Handle actions on the crowdsource"""
@@ -152,7 +152,7 @@ class CrowdsourceDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """Admin link"""
-        context = super(CrowdsourceDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["sidebar_admin_url"] = reverse(
             "admin:crowdsource_crowdsource_change", args=(self.object.pk,)
         )
@@ -178,7 +178,6 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
-        # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
         edit_perm = request.user.has_perm("crowdsource.change_crowdsource", self.object)
         form_perm = request.user.has_perm("crowdsource.form_crowdsource", self.object)
@@ -187,11 +186,10 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
         if not form_perm:
             messages.error(request, "That crowdsource is private")
             return redirect("crowdsource-list")
-        return super(CrowdsourceFormView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Cache the object for POST requests"""
-        # pylint: disable=attribute-defined-outside-init
         crowdsource = self.get_object()
         data_id = self.request.POST.get("data_id")
         if data_id:
@@ -204,7 +202,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             return redirect(crowdsource)
         if request.POST.get("submit") == "Skip":
             return self.skip()
-        return super(CrowdsourceFormView, self).post(request, args, kwargs)
+        return super().post(request, args, kwargs)
 
     def get(self, request, *args, **kwargs):
         """Check if there is a valid assignment"""
@@ -213,7 +211,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             self.get_object(), self.request.user, ip_address
         )
         if has_assignment:
-            return super(CrowdsourceFormView, self).get(request, args, kwargs)
+            return super().get(request, args, kwargs)
         else:
             messages.warning(
                 request,
@@ -224,7 +222,6 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
 
     def _has_assignment(self, crowdsource, user, ip_address):
         """Check if the user has a valid assignment to complete"""
-        # pylint: disable=attribute-defined-outside-init
         if user.is_anonymous:
             user = None
         else:
@@ -242,7 +239,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
 
     def get_form_kwargs(self):
         """Add the crowdsource object to the form"""
-        kwargs = super(CrowdsourceFormView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs.update(
             {
                 "crowdsource": self.get_object(),
@@ -265,7 +262,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             )
         else:
             kwargs["number"] = 1
-        return super(CrowdsourceFormView, self).get_context_data(**kwargs)
+        return super().get_context_data(**kwargs)
 
     def get_initial(self):
         """Fetch the crowdsource data item to show with this form,
@@ -378,20 +375,17 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
-        # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
         edit_perm = request.user.has_perm(
             "crowdsource.change_crowdsource", self.object.crowdsource
         )
         if not edit_perm:
             raise Http404
-        return super(CrowdsourceEditResponseView, self).dispatch(
-            request, *args, **kwargs
-        )
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         """Add the user and crowdsource object to the form"""
-        kwargs = super(CrowdsourceEditResponseView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs.update(
             {"crowdsource": self.get_object().crowdsource, "user": self.request.user}
         )
@@ -420,7 +414,7 @@ class CrowdsourceEditResponseView(BaseDetailView, FormView):
 
     def get_context_data(self, **kwargs):
         """Set the crowdsource and data in the context"""
-        return super(CrowdsourceEditResponseView, self).get_context_data(
+        return super().get_context_data(
             crowdsource=self.object.crowdsource, data=self.object.data, edit=True
         )
 
@@ -481,7 +475,7 @@ class CrowdsourceEmbededFormView(CrowdsourceFormView):
 
     def form_valid(self, form):
         """Redirect to embedded confirmation page"""
-        super(CrowdsourceEmbededFormView, self).form_valid(form)
+        super().form_valid(form)
         return redirect("crowdsource-embed-confirm")
 
 
@@ -503,7 +497,7 @@ class CrowdsourceEmbededGallery(DetailView):
 
     def get_context_data(self, **kwargs):
         """Get gallery fields"""
-        context = super(CrowdsourceEmbededGallery, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         gallery_responses = self.object.responses.filter(gallery=True)
         context["values"] = CrowdsourceValue.objects.filter(
             response__in=gallery_responses, field__gallery=True
@@ -521,7 +515,7 @@ class CrowdsourceListView(MRFilterListView):
 
     def get_queryset(self):
         """Get all open crowdsources and all crowdsources you own"""
-        queryset = super(CrowdsourceListView, self).get_queryset()
+        queryset = super().get_queryset()
         queryset = (
             queryset.select_related("user__profile", "project")
             .prefetch_related("data", "responses")
@@ -531,7 +525,7 @@ class CrowdsourceListView(MRFilterListView):
 
     def get_context_data(self, **kwargs):
         """Remove filter for non-staff users"""
-        context_data = super(CrowdsourceListView, self).get_context_data()
+        context_data = super().get_context_data()
         if not self.request.user.is_staff:
             context_data.pop("filter", None)
         return context_data
@@ -547,7 +541,7 @@ class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         """Add the data formset to the context"""
-        data = super(CrowdsourceCreateView, self).get_context_data(**kwargs)
+        data = super().get_context_data(**kwargs)
         if self.request.POST:
             data["data_formset"] = CrowdsourceDataFormset(self.request.POST)
         else:
@@ -582,7 +576,7 @@ class CrowdsourceCreateView(PermissionRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         """Add user to form kwargs"""
-        kwargs = super(CrowdsourceCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
 
@@ -599,7 +593,6 @@ class CrowdsourceUpdateView(UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         """Check permissions"""
-        # pylint: disable=attribute-defined-outside-init
         crowdsource = self.get_object()
         user_allowed = request.user.has_perm(
             "crowdsource.change_crowdsource", crowdsource
@@ -612,7 +605,7 @@ class CrowdsourceUpdateView(UpdateView):
             messages.info(
                 self.request, "A CSV of the results so far will be emailed to you"
             )
-        return super(CrowdsourceUpdateView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
         """Set the form JSON in the initial form data"""
@@ -626,7 +619,7 @@ class CrowdsourceUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         """Add the data formset to the context"""
-        data = super(CrowdsourceUpdateView, self).get_context_data(**kwargs)
+        data = super().get_context_data(**kwargs)
         CrowdsourceDataFormset.can_delete = True
         if self.request.POST:
             data["data_formset"] = CrowdsourceDataFormset(
@@ -660,7 +653,7 @@ class CrowdsourceUpdateView(UpdateView):
 
     def get_form_kwargs(self):
         """Add user to form kwargs"""
-        kwargs = super(CrowdsourceUpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
 

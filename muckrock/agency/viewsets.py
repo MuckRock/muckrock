@@ -29,7 +29,6 @@ def CountWhen(output_field=None, **kwargs):
 class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
 
-    # pylint: disable=too-many-public-methods
     queryset = (
         Agency.objects.order_by("id")
         .select_related("jurisdiction", "parent", "appeal_agency")

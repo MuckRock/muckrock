@@ -3,7 +3,6 @@ Feeds for the News application
 """
 
 # Django
-# pylint: disable=no-name-in-module
 from django.contrib.syndication.views import Feed
 from django.template.defaultfilters import escape, linebreaks
 

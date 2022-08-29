@@ -408,7 +408,8 @@ class CrowdsourceResponse(models.Model):
     )
     public = models.BooleanField(
         default=False,
-        help_text="Publically credit the user who submitted this response in the gallery",
+        help_text="Publically credit the user who submitted this response in "
+        "the gallery",
     )
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     datetime = models.DateTimeField(default=timezone.now)

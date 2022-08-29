@@ -35,7 +35,7 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
         """Allow authenticated users to submit requests and update their own requests"""
         if request.user.is_authenticated and request.method in ["POST", "PATCH"]:
             return True
-        return super(FOIAPermissions, self).has_permission(request, view)
+        return super().has_permission(request, view)
 
     def has_object_permission(self, request, view, obj):
         """Grant permission?"""
@@ -44,7 +44,7 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
             return True
 
         # check non-object has permission here if the user doesn't own the object
-        return super(FOIAPermissions, self).has_permission(request, view)
+        return super().has_permission(request, view)
 
 
 class IsOwner(permissions.BasePermission):
@@ -91,7 +91,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     datetime = DateTimeField()
 
     def __init__(self, *args, **kwargs):
-        super(FOIACommunicationSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         request = self.context.get("request", None)
         if request is None:
             self.fields.pop("resolved_by")
@@ -165,7 +165,7 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
     datetime_updated = DateTimeField()
 
     def __init__(self, *args, **kwargs):
-        super(FOIARequestSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.instance and isinstance(self.instance, FOIARequest):
             foia = self.instance
         else:

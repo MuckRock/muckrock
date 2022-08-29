@@ -1,6 +1,6 @@
 """Rules based permissions for the Organization app"""
 
-# pylint: disable=missing-docstring, unused-argument, invalid-unary-operand-type
+# pylint: disable=unused-argument, invalid-unary-operand-type
 
 # Third Party
 from rules import add_perm, predicate

@@ -25,9 +25,6 @@ STATUS = [("started", "Draft"), ("submitted", "Processing"), ("filed", "Filed")]
 class FOIAMultiRequest(models.Model):
     """A Freedom of Information Act request"""
 
-    # pylint: disable=too-many-public-methods
-    # pylint: disable=too-many-instance-attributes
-
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)

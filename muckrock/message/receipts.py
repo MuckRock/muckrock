@@ -54,7 +54,7 @@ class Receipt(TemplateEmail):
             if not isinstance(item, LineItem):
                 raise TypeError("Each item in the list should be a receipt LineItem.")
         self.items = items
-        super(Receipt, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         # if no user provided, send the email to the address on the charge
         if not self.user and "email" in self.charge.metadata:
             user_email = self.charge.metadata["email"]
@@ -64,7 +64,7 @@ class Receipt(TemplateEmail):
 
     def get_context_data(self, *args):
         """Returns a dictionary of context for the template, given the charge object"""
-        context = super(Receipt, self).get_context_data(*args)
+        context = super().get_context_data(*args)
         total = self.charge.amount / 100.0  # Stripe uses smallest-unit formatting
         context.update(
             {

@@ -1,6 +1,6 @@
 """Rules based permissions for the FOIA app"""
 
-# pylint: disable=missing-docstring, unused-argument, invalid-unary-operand-type
+# pylint: disable=unused-argument, invalid-unary-operand-type
 
 # Django
 from django.conf import settings

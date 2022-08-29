@@ -93,7 +93,7 @@ class JurisdictionExploreView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Return the states and data for the map"""
-        context = super(JurisdictionExploreView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         states = {
             state.abbrev: state
             for state in Jurisdiction.objects.filter(level__in=["s", "f"])
@@ -230,7 +230,7 @@ class List(MRFilterListView):
 
     def get_queryset(self):
         """Hides hidden jurisdictions from list"""
-        objects = super(List, self).get_queryset()
+        objects = super().get_queryset()
         objects = objects.exclude(hidden=True).select_related(
             "parent", "parent__parent"
         )
@@ -239,7 +239,6 @@ class List(MRFilterListView):
 
 def redirect_flag(request, **kwargs):
     """Redirect flag urls to base agency"""
-    # pylint: disable=unused-argument
     # filter None from kwargs
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
     return redirect("jurisdiction-detail", **kwargs)
@@ -248,7 +247,6 @@ def redirect_flag(request, **kwargs):
 class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""
 
-    # pylint: disable=too-many-public-methods
     queryset = Jurisdiction.objects.select_related("parent__parent").order_by()
     serializer_class = JurisdictionSerializer
     filter_fields = ("name", "abbrev", "level", "parent")
@@ -262,7 +260,7 @@ class ExemptionDetailView(DetailView):
 
     def get_queryset(self):
         """Adds some database optimizations for getting the Exemption queryset."""
-        _queryset = super(ExemptionDetailView, self).get_queryset()
+        _queryset = super().get_queryset()
         _queryset = _queryset.select_related(
             "jurisdiction__parent__parent"
         ).prefetch_related("requests", "requests__agency")
@@ -272,7 +270,7 @@ class ExemptionDetailView(DetailView):
         """Adds a flag form to the context."""
         # crowdsource to link to on exemption pages
         crowdsource_pk = 20
-        context = super(ExemptionDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         admin_url = reverse(
             "admin:jurisdiction_exemption_change", args=(self.object.pk,)
         )
@@ -312,7 +310,6 @@ class JurisdictionAutocomplete(MRAutocompleteView):
 
     def get_queryset(self):
         """Extra filters"""
-        # pylint: disable=attribute-defined-outside-init
 
         # treat commas as whitespace for splitting
         self.q = self.q.replace(",", " ")

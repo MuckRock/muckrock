@@ -127,7 +127,7 @@ class BaseComposerForm(forms.ModelForm):
         if not hasattr(self, "_user"):
             self._user = kwargs.pop("user")
         self.request = kwargs.pop("request")
-        super(BaseComposerForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self._user.is_authenticated:
             del self.fields["register_full_name"]
             del self.fields["register_email"]
@@ -148,11 +148,10 @@ class BaseComposerForm(forms.ModelForm):
 
     def save(self, commit=True, update_owners=True):
         """Update the composer's user and organization"""
-        # pylint: disable=arguments-differ
         if update_owners:
             self.instance.user = self.request.user
             self.instance.organization = self.request.user.profile.organization
-        return super(BaseComposerForm, self).save(commit)
+        return super().save(commit)
 
     def clean_register_email(self):
         """Do a case insensitive uniqueness check"""
@@ -181,7 +180,7 @@ class BaseComposerForm(forms.ModelForm):
 
     def clean(self):
         """Check cross field dependencies"""
-        cleaned_data = super(BaseComposerForm, self).clean()
+        cleaned_data = super().clean()
         if cleaned_data.get("action") == "submit":
             for field in ["title", "requested_docs", "agencies"]:
                 if not self.cleaned_data.get(field):
@@ -218,7 +217,7 @@ class ComposerForm(ContactInfoForm, BuyRequestForm, BaseComposerForm):
     """Composer form, including optional subforms"""
 
     def __init__(self, *args, **kwargs):
-        super(ComposerForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Make sub-form fields non-required
         self.fields["num_requests"].required = False
         self.fields["stripe_token"].required = False

@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 @task(ignore_result=True, name="muckrock.task.tasks.submit_review_update")
 def submit_review_update(foia_pks, reply_text, **kwargs):
     """Submit all the follow ups after updating agency contact information"""
-    # pylint: disable=unused-argument
     foias = FOIARequest.objects.filter(pk__in=foia_pks)
     muckrock_staff = User.objects.get(username="MuckrockStaff")
     for foia in foias:
@@ -57,8 +56,6 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
 def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     """Save a PDF file for all open snail mail tasks"""
     # pylint: disable=too-many-locals
-    # pylint: disable=unused-argument
-    # pylint: disable=too-many-statements
     cover_info = []
     bulk_merger = PdfFileMerger(strict=False)
 

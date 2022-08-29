@@ -60,7 +60,7 @@ class CrowdfundTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds the crowdfund object to context."""
-        extra_context = super(CrowdfundTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         extra_context["crowdfund_object"] = self.task.crowdfund.get_crowdfund_object()
         return extra_context
 
@@ -75,7 +75,7 @@ class FlaggedTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds a form for replying to the user"""
-        extra_context = super(FlaggedTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         extra_context["flag_form"] = task.forms.FlaggedTaskForm()
         return extra_context
 
@@ -90,7 +90,7 @@ class ProjectReviewTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds a form for replying to the user"""
-        extra_context = super(ProjectReviewTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         extra_context["form"] = task.forms.ProjectReviewTaskForm()
         return extra_context
 
@@ -114,7 +114,7 @@ class NewAgencyTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds an approval form, other agencies, and relevant requests to context"""
-        extra_context = super(NewAgencyTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         emails = [
             e
             for e in self.task.agency.agencyemail_set.all()
@@ -175,7 +175,7 @@ class OrphanTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds sender domain to the context"""
-        extra_context = super(OrphanTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         extra_context["domain"] = self.task.get_sender_domain()
         extra_context["attachments"] = self.task.communication.files.all()
         return extra_context
@@ -191,7 +191,7 @@ class ResponseTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds ResponseTask-specific context"""
-        extra_context = super(ResponseTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         form_initial = {}
         communication = self.task.communication
         predicted_status = self.task.predicted_status
@@ -219,7 +219,7 @@ class SnailMailTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds status to the context"""
-        extra_context = super(SnailMailTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         extra_context["status"] = foia.models.STATUS
         # if this is an appeal and their is a specific appeal agency, display
         # that agency, else display the standard agency
@@ -274,7 +274,7 @@ class PortalTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Get extra context"""
-        extra_context = super(PortalTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         foia_ = self.task.communication.foia
 
         extra_context["return_address"] = (
@@ -322,7 +322,7 @@ class NewPortalTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Get extra context"""
-        extra_context = super(NewPortalTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
 
         extra_context["form"] = PortalForm(
             foia=self.task.communication.foia, initial={"type": self.task.portal_type}
@@ -341,7 +341,7 @@ class ReviewAgencyTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds a form for updating the email"""
-        extra_context = super(ReviewAgencyTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         email = [
             e.email
             for e in self.task.agency.agencyemail_set.all()
@@ -401,7 +401,7 @@ class PaymentInfoTaskNode(TaskNode):
     def get_extra_context(self):
         """Adds status to the context"""
         foia_ = self.task.communication.foia
-        extra_context = super(PaymentInfoTaskNode, self).get_extra_context()
+        extra_context = super().get_extra_context()
         extra_context["form"] = AddressForm(agency=foia_.agency)
         extra_context["previous_communications"] = foia_.reverse_communications
         return extra_context

@@ -79,7 +79,7 @@ class ExportCsv(AsyncFileDownloadTask):
     subject = "Your CSV Export"
 
     def __init__(self, user_pk, crowdsource_pk):
-        super(ExportCsv, self).__init__(user_pk, crowdsource_pk)
+        super().__init__(user_pk, crowdsource_pk)
         self.crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
 
     def generate_file(self, out_file):

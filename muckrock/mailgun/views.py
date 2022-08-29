@@ -54,7 +54,6 @@ def _make_orphan_comm(
     from_email, to_emails, cc_emails, subject, message_id, post, files, foia
 ):
     """Make an orphan communication"""
-    # pylint: disable=too-many-arguments
     if from_email:
         agencies = from_email.agencies.all()
     else:
@@ -513,7 +512,6 @@ def delivered(_request, email_comm, timestamp):
 @csrf_exempt
 def phaxio_callback(request):
     """Handle Phaxio callbacks"""
-    # pylint: disable=too-many-branches
     url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"))
     if not _validate_phaxio(
         settings.PHAXIO_CALLBACK_TOKEN,

@@ -53,7 +53,7 @@ class LoginRequiredMixin:
                 + reverse_host("foiamachine")
                 + self.request.get_full_path()
             )
-        return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class RequestOwnerRequiredMixin(LoginRequiredMixin):
@@ -75,7 +75,7 @@ class RequestOwnerRequiredMixin(LoginRequiredMixin):
         if self.request.user.is_authenticated and self.request.user != self.foi.user:
             messages.error(self.request, "You do not have permission to do that.")
             return redirect(self.foi.get_absolute_url())
-        return super(RequestOwnerRequiredMixin, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class CommunicationOwnerRequiredMixin(RequestOwnerRequiredMixin):
@@ -93,7 +93,7 @@ class Homepage(TemplateView):
         """If the user is authenticated, redirect to their profile."""
         if self.request.user.is_authenticated:
             return redirect(reverse("profile", host="foiamachine"))
-        return super(Homepage, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class Profile(LoginRequiredMixin, TemplateView):
@@ -123,11 +123,11 @@ class Profile(LoginRequiredMixin, TemplateView):
                 "status": dict(STATUS)[status]
             }
             messages.success(self.request, success_msg)
-        return super(Profile, self).get(*args, **kwargs)
+        return super().get(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Gets context data for the profile."""
-        context = super(Profile, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         requests = (
             FoiaMachineRequest.objects.filter(user=self.request.user)
             .order_by("-date_created")
@@ -200,7 +200,7 @@ class FoiaMachineRequestDetailView(DetailView):
             sharing_code = self.request.GET.get("sharing")
             if sharing_code != foi.sharing_code:
                 raise Http404()
-        return super(FoiaMachineRequestDetailView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class FoiaMachineRequestUpdateView(RequestOwnerRequiredMixin, UpdateView):
@@ -212,7 +212,7 @@ class FoiaMachineRequestUpdateView(RequestOwnerRequiredMixin, UpdateView):
 
     def get_success_url(self):
         messages.success(self.request, "Your edits to this request were saved.")
-        return super(FoiaMachineRequestUpdateView, self).get_success_url()
+        return super().get_success_url()
 
 
 class FoiaMachineRequestDeleteView(RequestOwnerRequiredMixin, DeleteView):
@@ -235,7 +235,7 @@ class FoiaMachineCommunicationCreateView(CommunicationOwnerRequiredMixin, Create
 
     def get_initial(self):
         """Adds foi to initial form data."""
-        initial = super(FoiaMachineCommunicationCreateView, self).get_initial()
+        initial = super().get_initial()
         initial["request"] = self.foi
         initial["status"] = self.foi.status
         return initial
@@ -252,7 +252,7 @@ class FoiaMachineCommunicationCreateView(CommunicationOwnerRequiredMixin, Create
             FoiaMachineFile.objects.create(
                 communication=comm, file=_file, name=_file.name
             )
-        return super(FoiaMachineCommunicationCreateView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         """Upon success, return to the request."""
@@ -261,9 +261,7 @@ class FoiaMachineCommunicationCreateView(CommunicationOwnerRequiredMixin, Create
 
     def get_context_data(self, **kwargs):
         """Add the jurisdiction to the context for exemption filtering."""
-        context = super(FoiaMachineCommunicationCreateView, self).get_context_data(
-            **kwargs
-        )
+        context = super().get_context_data(**kwargs)
         context["jurisdiction"] = self.foi.jurisdiction
         return context
 
@@ -277,12 +275,12 @@ class FoiaMachineCommunicationUpdateView(CommunicationOwnerRequiredMixin, Update
 
     def get_queryset(self):
         """Only include communications on the request in the queryset."""
-        _queryset = super(FoiaMachineCommunicationUpdateView, self).get_queryset()
+        _queryset = super().get_queryset()
         return _queryset.filter(request=self.foi)
 
     def get_initial(self):
         """Adds foi to initial form data."""
-        initial = super(FoiaMachineCommunicationUpdateView, self).get_initial()
+        initial = super().get_initial()
         initial["files"] = self.object.files.all()
         initial["request"] = self.foi
         initial["status"] = self.foi.status
@@ -300,7 +298,7 @@ class FoiaMachineCommunicationUpdateView(CommunicationOwnerRequiredMixin, Update
             FoiaMachineFile.objects.create(
                 communication=comm, file=_file, name=_file.name
             )
-        return super(FoiaMachineCommunicationUpdateView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         """Upon success, return to the request."""
@@ -316,7 +314,7 @@ class FoiaMachineCommunicationDeleteView(CommunicationOwnerRequiredMixin, Delete
 
     def get_queryset(self):
         """Only include communications on the request in the queryset."""
-        _queryset = super(FoiaMachineCommunicationDeleteView, self).get_queryset()
+        _queryset = super().get_queryset()
         return _queryset.filter(request=self.foi)
 
     def get_success_url(self):
@@ -336,7 +334,6 @@ class FoiaMachineRequestShareView(RequestOwnerRequiredMixin, SingleObjectMixin, 
 
     def get_redirect_url(self, *args, **kwargs):
         """Redirect the user to the correct view."""
-        # pylint: disable=unused-argument
         return reverse("foi-detail", host="foiamachine", kwargs=kwargs) + "#share"
 
     def get(self, *args, **kwargs):
@@ -365,13 +362,11 @@ class FoiaMachineRequestShareView(RequestOwnerRequiredMixin, SingleObjectMixin, 
 
 def agency_detail(request, **kwargs):
     """Redirect to muckrock agency detail page"""
-    # pylint: disable=unused-argument
     return redirect(reverse("agency-detail", host="default", kwargs=kwargs))
 
 
 def jurisdiction_detail(request, **kwargs):
     """Redirect to muckrock jurisdiction detail page"""
-    # pylint: disable=unused-argument
     # remove kwargs that were not filled in
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
     return redirect(reverse("jurisdiction-detail", host="default", kwargs=kwargs))

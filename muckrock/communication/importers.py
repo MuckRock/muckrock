@@ -40,7 +40,6 @@ p_zip = re.compile(r"^\d{5}(?:-\d{4})?$")
 
 def import_addresses(file_name):
     """Import addresses from spreadsheet"""
-    # pylint: disable=too-many-locals
     s3_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{file_name}"
     with smart_open(s3_path) as tmp_file:
         reader = csv.reader(tmp_file)

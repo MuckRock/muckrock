@@ -44,7 +44,6 @@ class Portal(models.Model):
         )
 
         # pylint: disable=access-member-before-definition
-        # pylint: disable=attribute-defined-outside-init
         portal_classes = {
             # disabling next request integration for now,
             # as it is causing issues

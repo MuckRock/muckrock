@@ -2,7 +2,8 @@
 
 
 def validate_date_order(begin_field, end_field):
-    """Creates a clean method to be added to forms to validate one date comes before another"""
+    """Creates a clean method to be added to forms to validate one date comes
+    before another"""
 
     def clean(self):
         """Validate end date comes after begin date"""

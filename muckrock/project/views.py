@@ -47,7 +47,7 @@ class ProjectExploreView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Gathers and returns a dictionary of context."""
-        context = super(ProjectExploreView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         user = self.request.user
         featured_projects = (
             Project.objects.get_viewable(user).filter(featured=True).optimize()
@@ -67,7 +67,7 @@ class ProjectListView(MRSearchFilterListView):
 
     def get_queryset(self):
         """Only returns projects that are visible to the current user."""
-        queryset = super(ProjectListView, self).get_queryset()
+        queryset = super().get_queryset()
         user = self.request.user
         if user.is_anonymous:
             queryset = queryset.get_public()
@@ -87,7 +87,7 @@ class ProjectContributorView(ProjectListView):
 
     def get_queryset(self):
         """Returns all the contributor's projects that are visible to the user."""
-        queryset = super(ProjectContributorView, self).get_queryset()
+        queryset = super().get_queryset()
         queryset = queryset.get_for_contributor(self.get_contributor()).get_viewable(
             self.request.user
         )
@@ -95,7 +95,7 @@ class ProjectContributorView(ProjectListView):
 
     def get_context_data(self, **kwargs):
         """Gathers and returns the project and the contributor as context."""
-        context = super(ProjectContributorView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         contributor = self.get_contributor()
         context.update(
             {
@@ -118,11 +118,11 @@ class ProjectCreateView(CreateView):
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
         """At the moment, only staff are allowed to create a project."""
-        return super(ProjectCreateView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
         """Saves the current user as a contributor to the project."""
-        redirection = super(ProjectCreateView, self).form_valid(form)
+        redirection = super().form_valid(form)
         project = self.object
         project.contributors.add(self.request.user)
         project.save()
@@ -137,18 +137,18 @@ class ProjectDetailView(DetailView):
 
     def __init__(self, *args, **kwargs):
         self._obj = None
-        super(ProjectDetailView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_object(self, queryset=None):
         """Cache getting the object"""
         if self._obj is not None:
             return self._obj
-        self._obj = super(ProjectDetailView, self).get_object(queryset=queryset)
+        self._obj = super().get_object(queryset=queryset)
         return self._obj
 
     def get_context_data(self, **kwargs):
         """Adds visible requests and followers to project context"""
-        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         project = context["object"]
         user = self.request.user
         context["sidebar_admin_url"] = reverse(
@@ -188,7 +188,7 @@ class ProjectDetailView(DetailView):
         public = not project.private and project.approved
         if not public and not contributor_or_staff:
             raise Http404()
-        return super(ProjectDetailView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class ProjectPermissionsMixin:
@@ -208,7 +208,7 @@ class ProjectPermissionsMixin:
         self.object = get_object_or_404(Project, pk=kwargs.get("pk", None))
         if not self.object.editable_by(self.request.user):
             raise Http404()
-        return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class ProjectEditView(ProjectPermissionsMixin, UpdateView):
@@ -226,7 +226,7 @@ class ProjectEditView(ProjectPermissionsMixin, UpdateView):
         messages.success(self.request, "Your edits were saved.")
         # clear the template cache for the project after its been edited
         self.object.clear_cache()
-        return super(ProjectEditView, self).form_valid(form)
+        return super().form_valid(form)
 
     def notify_new_contributors(self, existing, new):
         """Notify all newly added contributors."""
@@ -257,10 +257,10 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
                         "This project is already published and awaiting approval.",
                     )
                 return redirect(project)
-        return super(ProjectPublishView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(ProjectPublishView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["project"] = self.object
         return context
 
@@ -268,7 +268,7 @@ class ProjectPublishView(ProjectPermissionsMixin, FormView):
         """Call the Project.publish method using the valid form data."""
         notes = form.cleaned_data["notes"]
         self.object.publish(notes)
-        return super(ProjectPublishView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         """Return the project url"""
@@ -284,7 +284,7 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
 
     def dispatch(self, *args, **kwargs):
         """Crowdfunds may only be started on public projects."""
-        return_value = super(ProjectCrowdfundView, self).dispatch(*args, **kwargs)
+        return_value = super().dispatch(*args, **kwargs)
         project = self.get_project()
         if project.editable_by(self.request.user):
             if project.private or not project.approved:
@@ -307,7 +307,7 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
 
     def form_valid(self, form):
         """Saves relationship and sends action before returning URL"""
-        redirection = super(ProjectCrowdfundView, self).form_valid(form)
+        redirection = super().form_valid(form)
         crowdfund = self.object
         project = self.get_project()
         relationship = ProjectCrowdfunds.objects.create(
@@ -341,7 +341,7 @@ class ProjectCrowdfundView(ProjectPermissionsMixin, CreateView):
         return project.get_absolute_url()
 
     def get(self, request, *args, **kwargs):
-        response = super(ProjectCrowdfundView, self).get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
         mixpanel_event(
             request,
             "Start Project Crowdfund",

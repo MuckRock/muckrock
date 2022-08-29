@@ -40,7 +40,7 @@ class QuestionList(MRSearchFilterListView):
     def get_queryset(self):
         """Hide inactive users and prefetch"""
         return (
-            super(QuestionList, self)
+            super()
             .get_queryset()
             .filter(user__is_active=True)
             .select_related("user")
@@ -49,7 +49,7 @@ class QuestionList(MRSearchFilterListView):
 
     def get_context_data(self, **kwargs):
         """Adds an info message to the context"""
-        context = super(QuestionList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         info_msg = (
             "The Q&A forum is being retired.  You may browse "
             "existing questions, but asking new questions has been disabled. "
@@ -66,7 +66,7 @@ class UnansweredQuestionList(QuestionList):
     """List of unanswered questions"""
 
     def get_queryset(self):
-        objects = super(UnansweredQuestionList, self).get_queryset()
+        objects = super().get_queryset()
         return objects.annotate(num_answers=Count("answers")).filter(num_answers=0)
 
 
@@ -91,11 +91,10 @@ class Detail(DetailView):
             )
             for notification in notifications:
                 notification.mark_read()
-        return super(Detail, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""
-        # pylint: disable=unused-argument
 
         question = self.get_object()
         obj_type = request.POST.get("object")
@@ -139,7 +138,7 @@ class Detail(DetailView):
             messages.error(request, "You may only edit your own answers.")
 
     def get_context_data(self, **kwargs):
-        context = super(Detail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["sidebar_admin_url"] = reverse(
             "admin:qanda_question_change", args=(context["object"].pk,)
         )

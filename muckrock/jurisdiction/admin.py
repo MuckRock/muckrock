@@ -26,9 +26,6 @@ from muckrock.jurisdiction.models import (
 
 logger = logging.getLogger(__name__)
 
-# These inhereit more than the allowed number of public methods
-# pylint: disable=too-many-public-methods
-
 
 class LawInline(admin.StackedInline):
     """Law admin options"""

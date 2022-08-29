@@ -218,7 +218,8 @@ class TestNotificationRead(TestCase):
         UserFactory(username="MuckrockStaff")
 
     def test_get_foia(self):
-        """Try getting the detail page for a FOIA Request with an unread notification."""
+        """Try getting the detail page for a FOIA Request with an unread
+        notification."""
         agency = AgencyFactory()
         foia = FOIARequestFactory(agency=agency)
         view = FOIARequestDetail.as_view()

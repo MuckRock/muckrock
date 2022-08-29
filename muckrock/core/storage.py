@@ -20,7 +20,7 @@ class CachedS3Boto3Storage(S3Boto3Storage):
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
     def __init__(self, *args, **kwargs):
-        super(CachedS3Boto3Storage, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.local_storage = get_storage_class(
             "compressor.storage.CompressorFileStorage"
         )()
@@ -28,7 +28,7 @@ class CachedS3Boto3Storage(S3Boto3Storage):
     def save(self, name, content):
         # pylint: disable=protected-access, arguments-differ
         self.local_storage._save(name, content)
-        super(CachedS3Boto3Storage, self).save(name, self.local_storage._open(name))
+        super().save(name, self.local_storage._open(name))
         return name
 
 

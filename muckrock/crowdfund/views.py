@@ -40,13 +40,13 @@ class CrowdfundListView(ListView):
 
     def get_context_data(self, **kwargs):
         """Add title and other data to context"""
-        context = super(CrowdfundListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["title"] = "Crowdfund campaigns needing funding"
         return context
 
     def get_queryset(self):
         """Only list open crowdfunds on unembargoed requests"""
-        queryset = super(CrowdfundListView, self).get_queryset()
+        queryset = super().get_queryset()
         queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
         user = self.request.user
         if not user.is_staff and user.is_authenticated:
@@ -76,7 +76,7 @@ class CrowdfundDetailView(MiniregMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
-        context = super(CrowdfundDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["stripe_pk"] = settings.STRIPE_PUB_KEY
         return context
 

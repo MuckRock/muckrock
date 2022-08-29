@@ -104,7 +104,6 @@ class ArticleAdminForm(forms.ModelForm):
 class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""
 
-    # pylint: disable=too-many-public-methods
     form = ArticleAdminForm
     prepopulated_fields = {"slug": ("title",)}
     list_display = ("title", "get_authors_names", "pub_date", "publish")
@@ -116,9 +115,7 @@ class ArticleAdmin(VersionAdmin):
 
     def get_queryset(self, request):
         """Prefetch authors"""
-        return (
-            super(ArticleAdmin, self).get_queryset(request).prefetch_related("authors")
-        )
+        return super().get_queryset(request).prefetch_related("authors")
 
 
 admin.site.register(Article, ArticleAdmin)

@@ -33,7 +33,7 @@ class FOIAFileListView(PaginationMixin, ListView):
         foia = self.get_foia()
         if not foia.has_perm(request.user, "view"):
             raise Http404()
-        return super(FOIAFileListView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_foia(self):
         """Returns the FOIA Request for the files. Caches it as an attribute."""
@@ -44,10 +44,10 @@ class FOIAFileListView(PaginationMixin, ListView):
     def get_queryset(self):
         """Only files for one FOIA request"""
         foia = self.get_foia()
-        queryset = super(FOIAFileListView, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.filter(comm__foia=foia)
 
     def get_context_data(self, **kwargs):
-        context = super(FOIAFileListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["foia"] = self.get_foia()
         return context

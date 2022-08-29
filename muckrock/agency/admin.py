@@ -32,9 +32,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 logger = logging.getLogger(__name__)
 
-# These inhereit more than the allowed number of public methods
-# pylint: disable=too-many-public-methods
-
 
 class AgencyTypeAdmin(VersionAdmin):
     """AgencyType admin options"""
@@ -245,9 +242,7 @@ class AgencyRequestFormMapperInline(admin.TabularInline):
 
     def get_formset(self, request, obj=None, **kwargs):
         """Set choices based on the pdf file"""
-        formset = super(AgencyRequestFormMapperInline, self).get_formset(
-            request, obj, **kwargs
-        )
+        formset = super().get_formset(request, obj, **kwargs)
         if obj is None:
             return formset
         obj.form.seek(0)

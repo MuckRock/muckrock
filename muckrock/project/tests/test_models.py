@@ -164,7 +164,8 @@ class TestProject(TestCase):
         test_article = ArticleFactory()
         test_article.authors.add(user)
         test_article.tags.add(tags)
-        # since they have the same user and tags, the project should suggest the article.
+        # since they have the same user and tags, the project should suggest
+        # the article.
         ok_(test_article in self.project.suggest_articles())
         # add the article to the project, then try again. it should not be suggested
         self.project.articles.add(test_article)

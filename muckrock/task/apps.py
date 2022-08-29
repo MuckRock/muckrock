@@ -13,7 +13,7 @@ class TaskConfig(AppConfig):
 
     def ready(self):
         """Sets global options for FPDF"""
-        # pylint: disable=unused-import, unused-variable, import-outside-toplevel
+        # pylint: disable=unused-import, import-outside-toplevel
         # Standard Library
         from tempfile import mkdtemp
 

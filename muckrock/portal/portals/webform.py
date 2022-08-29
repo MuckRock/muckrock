@@ -15,6 +15,6 @@ class WebFormPortal(ManualPortal):
         """The initial message should create a portal task, all others will use
         any other contact info available
         """
-        super(WebFormPortal, self).send_msg(comm, **kwargs)
+        super().send_msg(comm, **kwargs)
         comm.foia.portal = None
         comm.foia.save(comment="web form portal self removing")

@@ -13,7 +13,8 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 
 class FoiaMachineRequestFilter(django_filters.FilterSet):
-    """Allows FOIA Machine Requests to be filtered by their status, jurisdiction, or agency."""
+    """Allows FOIA Machine Requests to be filtered by their status, jurisdiction,
+    or agency."""
 
     jurisdiction = django_filters.ModelChoiceFilter(
         queryset=Jurisdiction.objects.filter(hidden=False),

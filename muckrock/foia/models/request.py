@@ -182,7 +182,8 @@ class FOIARequest(models.Model):
 
     deleted = models.BooleanField(
         default=False,
-        help_text='This request has been "deleted" and should reject new communications',
+        help_text='This request has been "deleted" and should reject new '
+        "communications",
     )
     noindex = models.BooleanField(
         default=False,
@@ -210,7 +211,6 @@ class FOIARequest(models.Model):
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving and set the embargo expiration if necessary"""
-        # pylint: disable=signature-differs
         self.slug = slugify(self.slug)
         self.title = self.title.strip()
         if self.embargo:
@@ -228,7 +228,7 @@ class FOIARequest(models.Model):
             comment = kwargs.pop("comment")
             if reversion.is_active():
                 reversion.set_comment(comment)
-        super(FOIARequest, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     @property
     def user(self):
@@ -938,7 +938,6 @@ class FOIARequest(models.Model):
         payment=False,
     ):
         """Render the message body for outgoing messages"""
-        # pylint: disable=too-many-arguments
         context = {
             "request": self,
             "switch": switch,
@@ -1036,7 +1035,8 @@ class FOIARequest(models.Model):
                 self.date_followup = new_date
 
         except IndexError:
-            # This request has no communications at the moment, cannot asign a follow up date
+            # This request has no communications at the moment, cannot asign a
+            # follow up date
             pass
 
     def _followup_days(self):
@@ -1295,8 +1295,6 @@ class FOIARequest(models.Model):
 
     def current_tracking_id(self):
         """Get the current tracking ID"""
-        # pylint: disable=access-member-before-definition
-        # pylint: disable=attribute-defined-outside-init
         if hasattr(self, "_tracking_id"):
             return self._tracking_id
         tracking_ids = self.tracking_ids.all()
@@ -1308,7 +1306,6 @@ class FOIARequest(models.Model):
 
     def add_tracking_id(self, tracking_id, reason=None):
         """Add a new tracking ID"""
-        # pylint: disable=attribute-defined-outside-init
         if tracking_id == self.current_tracking_id():
             return
         if reason is None:

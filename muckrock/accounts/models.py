@@ -51,9 +51,6 @@ PAYMENT_FEE = 0.05
 class Profile(models.Model):
     """User profile information for muckrock"""
 
-    # pylint: disable=too-many-public-methods
-    # pylint: disable=too-many-instance-attributes
-
     objects = ProfileQuerySet.as_manager()
 
     email_prefs = (
@@ -337,7 +334,6 @@ class Notification(models.Model):
 class Statistics(models.Model):
     """Nightly statistics"""
 
-    # pylint: disable=invalid-name
     date = models.DateField()
 
     # FOIA Requests

@@ -9,8 +9,6 @@ from django.urls import re_path
 from muckrock.agency import views
 from muckrock.core.views import jurisdiction
 
-# pylint: disable=bad-whitespace
-
 agency_url = (
     r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 )

@@ -31,7 +31,8 @@ class TestHomepage(TestCase):
         eq_(response.status_code, 200)
 
     def test_authenticated(self):
-        """If the user is authenticated, the homepage should redirect to their profile."""
+        """If the user is authenticated, the homepage should redirect to their
+        profile."""
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
         eq_(response.status_code, 302)
@@ -327,7 +328,8 @@ class TestFoiaMachineCommunicationCreateView(TestCase):
 
 
 class TestFoiaMachineCommunicationUpdateView(TestCase):
-    """The owner of the request should be able to update a communication on the request."""
+    """The owner of the request should be able to update a communication on the
+    request."""
 
     def setUp(self):
         self.comm = factories.FoiaMachineCommunicationFactory()
@@ -368,7 +370,8 @@ class TestFoiaMachineCommunicationUpdateView(TestCase):
 
 
 class TestFoiaMachineCommunicationDeleteView(TestCase):
-    """The owner of the request should be able to delete a communication on the request."""
+    """The owner of the request should be able to delete a communication on the
+    request."""
 
     def setUp(self):
         self.comm = factories.FoiaMachineCommunicationFactory()

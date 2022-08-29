@@ -29,9 +29,7 @@ class OrganizationListView(MROrderedListView):
 
     def get_queryset(self):
         """Filter out individual orgs and private orgs for non-staff"""
-        queryset = (
-            super(OrganizationListView, self).get_queryset().filter(individual=False)
-        )
+        queryset = super().get_queryset().filter(individual=False)
         if not self.request.user.is_staff:
             queryset = queryset.filter(private=False)
         return queryset
@@ -47,7 +45,7 @@ class OrganizationDetailView(DetailView):
 
     def get_object(self, queryset=None):
         """Get the org"""
-        org = super(OrganizationDetailView, self).get_object(queryset=queryset)
+        org = super().get_object(queryset=queryset)
         user = self.request.user
         is_member = user.is_authenticated and org.has_member(user)
         if org.private and not is_member and not user.is_staff:
@@ -56,7 +54,7 @@ class OrganizationDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
-        context = super(OrganizationDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         organization = context["organization"]
         user = self.request.user
         context["is_staff"] = user.is_staff

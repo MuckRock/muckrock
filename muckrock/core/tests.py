@@ -44,8 +44,6 @@ from muckrock.task.factories import (
     SnailMailTaskFactory,
 )
 
-# pylint: disable=too-many-public-methods
-
 logging.disable(logging.CRITICAL)
 
 ok_ = nose.tools.ok_
@@ -218,7 +216,8 @@ class TestNewsletterSignupView(TestCase):
 
     @patch("muckrock.core.views.mailchimp_subscribe")
     def test_post_other_list(self, mock_subscribe):
-        """Posting to a list other than the default should optionally subscribe to the default."""
+        """Posting to a list other than the default should optionally subscribe
+        to the default."""
         form = NewsletterSignupForm(
             {"email": "test@muckrock.com", "default": True, "list": "other"}
         )

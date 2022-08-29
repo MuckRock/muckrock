@@ -65,7 +65,7 @@ class CrowdsourceResponseAdminSerializer(CrowdsourceResponseBaseSerializer):
     show_all = True
 
     def __init__(self, *args, **kwargs):
-        super(CrowdsourceResponseAdminSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         request = self.context.get("request", None)
         if request is None or not request.user.is_staff:
             self.fields.pop("ip_address")
@@ -73,18 +73,14 @@ class CrowdsourceResponseAdminSerializer(CrowdsourceResponseBaseSerializer):
     def create(self, validated_data):
         """Handle tags"""
         tags = validated_data.pop("tags", None)
-        instance = super(CrowdsourceResponseAdminSerializer, self).create(
-            validated_data
-        )
+        instance = super().create(validated_data)
         self._set_tags(instance, tags)
         return instance
 
     def update(self, instance, validated_data):
         """Handle tags"""
         tags = validated_data.pop("tags", None)
-        instance = super(CrowdsourceResponseAdminSerializer, self).update(
-            instance, validated_data
-        )
+        instance = super().update(instance, validated_data)
         self._set_tags(instance, tags)
         return instance
 

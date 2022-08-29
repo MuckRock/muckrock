@@ -82,7 +82,7 @@ class MassImport(AsyncFileDownloadTask):
     ]
 
     def __init__(self, user_pk, file_path, match, dry):
-        super(MassImport, self).__init__(user_pk, file_path)
+        super().__init__(user_pk, file_path)
         self.file_path = file_path
         self.match = match
         self.dry = dry

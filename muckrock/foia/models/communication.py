@@ -75,7 +75,8 @@ class FOIACommunication(models.Model):
         default=False, help_text="This communication has pending files to download"
     )
 
-    # what status this communication should set the request to - used for machine learning
+    # what status this communication should set the request to - used for
+    # machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
 
     # only used for orphans
@@ -120,7 +121,6 @@ class FOIACommunication(models.Model):
 
     def save(self, *args, **kwargs):
         """Remove controls characters from text before saving"""
-        # pylint: disable=signature-differs
         remove_control = dict.fromkeys(
             list(range(0, 9)) + list(range(11, 13)) + list(range(14, 32))
         )
@@ -136,7 +136,7 @@ class FOIACommunication(models.Model):
         ):
             self.foia.datetime_updated = self.datetime
             self.foia.save(comment="update datetime_updated due to new comm")
-        super(FOIACommunication, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def anchor(self):
         """Anchor name"""
@@ -200,7 +200,6 @@ class FOIACommunication(models.Model):
         the clone will be cloned along with its data, and so on. Same thing
         goes for each file attached to the communication.
         """
-        # pylint: disable=too-many-locals
         if not foias:
             raise ValueError("No valid request(s) provided for cloning.")
         cloned_comms = []
@@ -226,7 +225,8 @@ class FOIACommunication(models.Model):
                     comm.pk = None
                     comm.communication = clone
                     comm.save()
-            # for each clone, self gets overwritten. each clone needs to be stored explicitly.
+            # for each clone, self gets overwritten. each clone needs to be
+            # stored explicitly.
             cloned_comms.append(clone)
             logger.info(
                 "Communication #%d cloned to request #%d", original_pk, clone.foia.id
@@ -320,7 +320,7 @@ class FOIACommunication(models.Model):
         # * a file_
         # * content and name_
         # * path and name_ (for files already uploaded to s3)
-        # pylint: disable=import-outside-toplevel, too-many-arguments
+        # pylint: disable=import-outside-toplevel
         # MuckRock
         from muckrock.foia.tasks import upload_document_cloud
 

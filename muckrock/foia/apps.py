@@ -25,7 +25,7 @@ class FOIAConfig(AppConfig):
         from watson import search
 
         # MuckRock
-        import muckrock.foia.signals  # pylint: disable=unused-import,unused-variable
+        import muckrock.foia.signals  # pylint: disable=unused-import
 
         FOIARequest = self.get_model("FOIARequest")
         FOIACommunication = self.get_model("FOIACommunication")

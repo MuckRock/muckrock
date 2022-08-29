@@ -42,7 +42,6 @@ class FOIAComposerFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def agencies(self, create, extracted, **kwargs):
         """Adds M2M agencies"""
-        # pylint: disable=unused-argument
         if create and extracted:
             # A list of agencies were passed in, use them
             for agency in extracted:
@@ -51,8 +50,6 @@ class FOIAComposerFactory(factory.django.DjangoModelFactory):
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
-
-    # pylint: disable=too-many-instance-attributes
 
     class Meta:
         model = FOIARequest
@@ -69,7 +66,6 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def cc_emails(self, create, extracted, **kwargs):
         """Adds M2M cc emails"""
-        # pylint: disable=unused-argument
         if create and extracted:
             # A list of emails were passed in, use them
             self.cc_emails.set(EmailAddress.objects.fetch_many(extracted))

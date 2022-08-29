@@ -3,7 +3,6 @@ Feeds for the FOIA application
 """
 
 # Django
-# pylint: disable=no-name-in-module
 from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
 from django.http import Http404

@@ -78,7 +78,6 @@ class UserFactory(factory.django.DjangoModelFactory):
 class ProfessionalUserFactory(UserFactory):
     """A professional user"""
 
-    # pylint: disable=invalid-name
     membership__organization__entitlement = factory.SubFactory(
         "muckrock.organization.factories.ProfessionalEntitlementFactory"
     )
@@ -87,7 +86,6 @@ class ProfessionalUserFactory(UserFactory):
 class OrganizationUserFactory(UserFactory):
     """An organization user"""
 
-    # pylint: disable=invalid-name
     membership__organization__entitlement = factory.SubFactory(
         "muckrock.organization.factories.OrganizationEntitlementFactory"
     )
@@ -129,7 +127,6 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def other_emails(self, create, extracted, **kwargs):
         """Adds M2M other emails"""
-        # pylint: disable=unused-argument
         if create and extracted:
             # A list of emails were passed in, use them
             for email in EmailAddress.objects.fetch_many(extracted):
@@ -232,7 +229,6 @@ class ArticleFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def authors(self, create, extracted, **kwargs):
         """Adds M2M authors"""
-        # pylint: disable=unused-argument
         if not create:
             # Simple build, do nothing.
             return

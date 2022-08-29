@@ -29,8 +29,6 @@ stripe.api_version = "2015-10-16"
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
 
-    # pylint: disable=too-many-instance-attributes
-
     objects = OrganizationQuerySet.as_manager()
 
     uuid = models.UUIDField(
@@ -57,8 +55,9 @@ class Organization(models.Model):
     )
     monthly_requests = models.IntegerField(
         default=0,
-        help_text="How many recurring monthly requests are left for this month - these do "
-        "not roll over and are just reset to `requests_per_month` on `date_update`",
+        help_text="How many recurring monthly requests are left for this month - "
+        "these do not roll over and are just reset to `requests_per_month` on "
+        "`date_update`",
     )
     number_requests = models.IntegerField(
         default=0,
@@ -192,7 +191,6 @@ class Organization(models.Model):
 
     def pay(self, amount, description, token, save_card, metadata, fee_amount=0):
         """Pay via Squarelet API"""
-        # pylint: disable=too-many-arguments
         resp = squarelet_post(
             "/api/charges/",
             data={

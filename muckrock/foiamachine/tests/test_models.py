@@ -64,7 +64,8 @@ class TestFoiaMachineRequest(TestCase):
         eq_(actual_url, expected_url)
 
     def test_generate_letter(self):
-        """Using default information, the request should be able to generate a letter."""
+        """Using default information, the request should be able to generate a
+        letter."""
         template = "text/foia/request.txt"
         context = {
             "jurisdiction": self.foi.jurisdiction,
@@ -85,7 +86,8 @@ class TestFoiaMachineRequest(TestCase):
         eq_(self.foi.date_submitted, comm.date)
 
     def test_date_due(self):
-        """The date due should be the date submitted plus the jurisdiction's response time."""
+        """The date due should be the date submitted plus the jurisdiction's
+        response time."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
         expected_date_due = comm.date + timedelta(self.foi.jurisdiction.days)
         eq_(self.foi.date_due, expected_date_due)
@@ -147,7 +149,8 @@ class TestFoiaMachineCommunication(TestCase):
         ok_(comm)
 
     def test_unicode(self):
-        """The string representation of a communication includes sender and receiver info."""
+        """The string representation of a communication includes sender and
+        receiver info."""
         eq_(
             str(self.comm),
             "Communication from %s to %s" % (self.comm.sender, self.comm.receiver),
@@ -162,7 +165,8 @@ class TestFoiaMachineFile(TestCase):
         self.file = factories.FoiaMachineFileFactory(communication=self.comm)
 
     def test_create(self):
-        """A communication, a file, and a filename should be required to create a new file."""
+        """A communication, a file, and a filename should be required to create
+        a new file."""
         _file = models.FoiaMachineFile(
             communication=self.comm,
             file=SimpleUploadedFile("filename.txt", b"Test file contents"),

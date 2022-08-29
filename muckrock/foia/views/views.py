@@ -47,7 +47,6 @@ def acronyms(request):
 @permission_required("foia.view_rawemail")
 def raw(request, idx):
     """Get the raw email for a communication"""
-    # pylint: disable=unused-argument
     comm = get_object_or_404(FOIACommunication, pk=idx)
     raw_email = comm.get_raw_email()
     permission = request.user.is_staff or request.user == comm.foia.user

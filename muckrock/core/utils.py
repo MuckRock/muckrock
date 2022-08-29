@@ -26,7 +26,8 @@ import stripe
 
 logger = logging.getLogger(__name__)
 
-# From http://stackoverflow.com/questions/2687173/django-how-can-i-get-a-block-from-a-template
+# From http://stackoverflow.com/questions/2687173/
+# django-how-can-i-get-a-block-from-a-template
 
 
 class BlockNotFound(Exception):
@@ -47,7 +48,6 @@ def new_action(
     actor, verb, action_object=None, target=None, public=True, description=None
 ):
     """Wrapper to send a new action and return the generated Action object."""
-    # pylint: disable=too-many-arguments
     action_signal = actstream.action.send(
         actor,
         verb=verb,

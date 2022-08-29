@@ -125,7 +125,8 @@ class FOIATemplate(models.Model):
             ),
             make_tag(
                 "{ days }",
-                "Number of says statue requires or default of 10 days if no requirement",
+                "Number of says statue requires or default of 10 days if no "
+                "requirement",
             ),
             make_tag(
                 "{ agency name }", "This will be replaced by the name of the agency"
