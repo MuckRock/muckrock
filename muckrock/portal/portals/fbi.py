@@ -88,6 +88,6 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
                 # do not send email to bad email addresses
                 comm.foia.send_email(comm, **kwargs)
             else:
-                super(FBIPortal, self).send_msg(comm, **kwargs)
+                super().send_msg(comm, **kwargs)
         else:
-            super(FBIPortal, self).send_msg(comm, **kwargs)
+            super().send_msg(comm, **kwargs)

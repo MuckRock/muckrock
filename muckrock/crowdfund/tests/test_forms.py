@@ -40,7 +40,8 @@ class TestCrowdfundForm(TestCase):
         }
 
     def test_prefilled_request_form(self):
-        """An empty crowdfund form should prefill with everything it needs to validate."""
+        """An empty crowdfund form should prefill with everything it needs to
+        validate."""
         form = CrowdfundForm(initial=self.data)
         ok_(form)
 

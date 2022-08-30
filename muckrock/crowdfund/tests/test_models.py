@@ -104,7 +104,8 @@ class TestCrowdfundPayment(TestCase):
         )
 
     def test_limit_amount(self):
-        """No more than the amount required should be paid if the crowdfund is capped."""
+        """No more than the amount required should be paid if the crowdfund is
+        capped."""
         self.crowdfund.payment_capped = True
         self.crowdfund.save()
         amount = Decimal(100)

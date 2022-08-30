@@ -2,7 +2,6 @@
 Tests for the FOIA views
 """
 
-# pylint: disable=invalid-name
 # pylint: disable=too-many-lines
 
 # Django
@@ -233,7 +232,8 @@ class TestRequestDetailView(TestCase):
         ok_("bar" in [tag.name for tag in self.foia.tags.all()])
 
     def test_add_projects(self):
-        """Posting a collection of projects to a request should add it to those projects."""
+        """Posting a collection of projects to a request should add it to those
+        projects."""
         project = ProjectFactory()
         project.contributors.add(self.foia.user)
         form = ProjectManagerForm({"projects": [project.pk]}, user=self.foia.user)
@@ -769,7 +769,8 @@ class TestFOIACrowdfunding(TestCase):
         )
 
     def test_crowdfund_view_crowdfund_already_exists(self):
-        """A crowdfund cannot be created for a request that already has one, even if expired."""
+        """A crowdfund cannot be created for a request that already has one,
+        even if expired."""
         date_due = timezone.now() + datetime.timedelta(30)
         self.foia.crowdfund = Crowdfund.objects.create(date_due=date_due)
         self.foia.save()
@@ -847,8 +848,8 @@ class TestRequestSharingViews(TestCase):
 
     def test_access_key_allowed(self):
         """
-        A POST request for a private share link should generate and return an access key.
-        Editors and staff should be allowed to do this.
+        A POST request for a private share link should generate and return an
+        access key. Editors and staff should be allowed to do this.
         """
         self.reset_access_key()
         data = {"action": "generate_key"}

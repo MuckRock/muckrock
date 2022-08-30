@@ -60,14 +60,14 @@ class FOIAAgencyReplyForm(forms.Form):
 
     def clean(self):
         """Make price required if status is set to payment"""
-        cleaned_data = super(FOIAAgencyReplyForm, self).clean()
+        cleaned_data = super().clean()
         status = cleaned_data.get("status")
         price = cleaned_data.get("price")
 
         if status == "payment" and price is None:
             self.add_error(
                 "price",
-                "You must set a price when setting the " "status to payment required",
+                "You must set a price when setting the status to payment required",
             )
         return cleaned_data
 
@@ -120,7 +120,7 @@ class SendViaForm(forms.Form):
                     via = addr
                     break
         initial.update({"via": via, "email": obj and obj.email, "fax": obj and obj.fax})
-        super(SendViaForm, self).__init__(*args, initial=initial, **kwargs)
+        super().__init__(*args, initial=initial, **kwargs)
         # remove portal choice if the agency does not use a portal
         if agency and not agency.portal:
             self.fields["via"].choices = (
@@ -154,7 +154,7 @@ class SendCommunicationForm(SendViaForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super(SendCommunicationForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # create auto complete fields for creating new instances
         # these are created here since they have invalid identifier names
         # only add them if the field is bound, as we do not want to add them
@@ -171,7 +171,7 @@ class SendCommunicationForm(SendViaForm):
         """Ensure the selected method is ok for this foia and the correct
         corresponding information is provided"""
 
-        cleaned_data = super(SendCommunicationForm, self).clean()
+        cleaned_data = super().clean()
         if cleaned_data.get("via") == "email" and not cleaned_data.get("email"):
             self.add_error("email", "An email address is required if sending via email")
         elif cleaned_data.get("via") == "fax" and not cleaned_data.get("fax"):
@@ -211,7 +211,7 @@ class FOIAAdminFixForm(SendCommunicationForm):
     def __init__(self, *args, **kwargs):
         request = kwargs.pop("request")
         self.foia = kwargs.pop("foia")
-        super(FOIAAdminFixForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         muckrock_staff = User.objects.get(username="MuckrockStaff")
         self.fields["from_user"].queryset = User.objects.filter(
             pk__in=[muckrock_staff.pk, request.user.pk, self.foia.user.pk]
@@ -235,7 +235,7 @@ class ResendForm(SendCommunicationForm):
             self.foia = None
         initial = kwargs.pop("initial", {})
         initial.update({"communication": comm})
-        super(ResendForm, self).__init__(*args, initial=initial, **kwargs)
+        super().__init__(*args, initial=initial, **kwargs)
         self.fields["via"].widget.attrs.update({"class": "resend-via"})
         self.fields["email"].widget.attrs.update({"class": "resend-email"})
         self.fields["fax"].widget.attrs.update({"class": "resend-fax"})
@@ -244,7 +244,7 @@ class ResendForm(SendCommunicationForm):
         """Set self.foia during cleaning"""
         if "communication" in self.cleaned_data:
             self.foia = self.cleaned_data["communication"].foia
-        return super(ResendForm, self).clean()
+        return super().clean()
 
 
 class ContactInfoForm(SendViaForm):
@@ -266,7 +266,7 @@ class ContactInfoForm(SendViaForm):
         self.foia = kwargs.pop("foia", None)
         self.agency = kwargs.pop("agency", None)
         appeal = kwargs.pop("appeal", False)
-        super(ContactInfoForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["via"].required = False
         # add class we can reference from javascript
         for field in self.fields:
@@ -289,7 +289,7 @@ class ContactInfoForm(SendViaForm):
 
     def clean(self):
         """Make other fields required if chosen"""
-        cleaned_data = super(ContactInfoForm, self).clean()
+        cleaned_data = super().clean()
         if not cleaned_data.get("use_contact_information"):
             return cleaned_data
         if not cleaned_data.get("via"):

@@ -95,7 +95,7 @@ class AgencySerializer(serializers.ModelSerializer):
         """After initializing the serializer,
         check that the current user has permission
         to view agency email data."""
-        super(AgencySerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         request = self.context.get("request", None)
         if not (
             request is not None

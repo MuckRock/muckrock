@@ -11,14 +11,15 @@ from django.template.loader import render_to_string
 
 class TemplateEmail(EmailMultiAlternatives):
     """
-    The TemplateEmail class provides a base for our transactional emails.
-    It supports sending a templated email to a user and providing extra template context.
-    It always adds the MuckRock diagnostic email as a BCC'd address.
-    Both a HTML and a text template should be provided by subclasses or instances.
-    The summary attribute is blank by default and is a hack to populate the "email preview"
-    display within some (not all) email clients.
-    Subjects are expected to be provided at initialization, however a subclass may provide
-    a static subject attribute if it is provided to the super __init__ method as as kwarg.
+    The TemplateEmail class provides a base for our transactional emails. It
+    supports sending a templated email to a user and providing extra template
+    context. It always adds the MuckRock diagnostic email as a BCC'd address.
+    Both a HTML and a text template should be provided by subclasses or
+    instances. The summary attribute is blank by default and is a hack to
+    populate the "email preview" display within some (not all) email clients.
+    Subjects are expected to be provided at initialization, however a subclass
+    may provide a static subject attribute if it is provided to the super
+    __init__ method as as kwarg.
     """
 
     user = None
@@ -34,7 +35,7 @@ class TemplateEmail(EmailMultiAlternatives):
         html_template = kwargs.pop("html_template", None)
         summary = kwargs.pop("summary", None)
         # Initialize the base class
-        super(TemplateEmail, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         # Set the fields for the TemplateEmail
         if user:
             if isinstance(user, User):

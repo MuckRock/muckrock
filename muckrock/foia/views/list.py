@@ -55,7 +55,7 @@ class RequestExploreView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Adds interesting data to the context for rendering."""
-        context = super(RequestExploreView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         user = self.request.user
         visible_requests = FOIARequest.objects.get_viewable(user)
         context["top_agencies"] = (
@@ -131,7 +131,7 @@ class RequestList(MRSearchFilterListView):
 
     def get_queryset(self):
         """Limits requests to those visible by current user"""
-        objects = super(RequestList, self).get_queryset()
+        objects = super().get_queryset()
         objects = (
             objects.select_related(
                 "agency__jurisdiction__parent", "composer__user__profile"
@@ -157,7 +157,7 @@ class RequestList(MRSearchFilterListView):
 
     def get_context_data(self, **kwargs):
         """Add download link for downloading csv"""
-        context = super(RequestList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         url = furl(self.request.get_full_path())
         url.args["content_type"] = "csv"
         context["csv_link"] = url.url
@@ -189,12 +189,10 @@ class RequestList(MRSearchFilterListView):
                 "it is ready.",
             )
 
-        return super(RequestList, self).render_to_response(context, **kwargs)
+        return super().render_to_response(context, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Allow saving a search/filter"""
-        # pylint: disable=unused-argument
-
         actions = self.get_actions()
 
         if request.user.is_anonymous:
@@ -330,14 +328,14 @@ class RequestList(MRSearchFilterListView):
                     title=request.GET.get("load"), user=request.user
                 )
             except FOIASavedSearch.DoesNotExist:
-                return super(RequestList, self).get(request, *args, **kwargs)
+                return super().get(request, *args, **kwargs)
             return redirect(
                 "{}?{}".format(
                     reverse(request.resolver_match.view_name), search.urlencode()
                 )
             )
         else:
-            return super(RequestList, self).get(request, *args, **kwargs)
+            return super().get(request, *args, **kwargs)
 
 
 @class_view_decorator(login_required)
@@ -350,12 +348,12 @@ class MyRequestList(RequestList):
 
     def get_queryset(self):
         """Limit to just requests owned by the current user."""
-        queryset = super(MyRequestList, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.filter(composer__user=self.request.user)
 
     def get_context_data(self, **kwargs):
         """Add forms for bulk actions"""
-        context = super(MyRequestList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["project_form"] = ProjectManagerForm(user=self.request.user)
         # set auto_id to avoid clashing IDs with the tag filter
         context["tag_form"] = TagManagerForm(required=False, auto_id="id_tm_%s")
@@ -367,7 +365,7 @@ class MyRequestList(RequestList):
 
     def get_actions(self):
         """Get available actions for this view"""
-        actions = super(MyRequestList, self).get_actions()
+        actions = super().get_actions()
         actions.update(
             {
                 "extend-embargo": self._extend_embargo,
@@ -482,7 +480,7 @@ class MyOrgRequestList(UserPassesTestMixin, RequestList):
 
     def get_queryset(self):
         """Limit to just requests owned by the current organization."""
-        queryset = super(MyOrgRequestList, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.filter(
             composer__organization=self.request.user.profile.organization
         )
@@ -516,7 +514,7 @@ class AgencyRequestList(RequestList):
 
     def get_queryset(self):
         """Requests owned by the current agency that they can respond to."""
-        queryset = super(AgencyRequestList, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.filter(
             agency=self.request.user.profile.agency,
             status__in=("ack", "processed", "appealing", "fix", "payment", "partial"),
@@ -531,7 +529,7 @@ class FollowingRequestList(RequestList):
 
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        queryset = super(FollowingRequestList, self).get_queryset()
+        queryset = super().get_queryset()
         followed = [
             f.pk for f in following(self.request.user, FOIARequest) if f is not None
         ]
@@ -556,11 +554,11 @@ class ProcessingRequestList(RequestList):
         """Only staff can see the list of processing requests."""
         if not self.request.user.is_staff:
             raise Http404()
-        return super(ProcessingRequestList, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
         """Apply select and prefetch related"""
-        objects = super(ProcessingRequestList, self).get_queryset()
+        objects = super().get_queryset()
         return objects.prefetch_related("communications").filter(status="submitted")
 
 
@@ -578,7 +576,7 @@ class ComposerList(MRListView):
     def get_queryset(self):
         """Only show the current user's drafts"""
         return (
-            super(ComposerList, self)
+            super()
             .get_queryset()
             .filter(user=self.request.user, status="started")
             .prefetch_related("agencies")

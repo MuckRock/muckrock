@@ -135,7 +135,6 @@ class Crowdfund(models.Model):
 
     def make_payment(self, token, email, amount, show=False, user=None):
         """Creates a payment for the crowdfund"""
-        # pylint: disable=too-many-arguments
         amount = Decimal(amount)
         if self.payment_capped and amount > self.amount_remaining():
             amount = self.amount_remaining()
@@ -167,7 +166,6 @@ class Crowdfund(models.Model):
 
     def log_payment(self, amount, user, show, charge, recurring=None):
         """Log a payment that was made"""
-        # pylint: disable=too-many-arguments
         payment = CrowdfundPayment.objects.create(
             amount=amount,
             crowdfund=self,
@@ -183,7 +181,6 @@ class Crowdfund(models.Model):
 
     def make_recurring_payment(self, token, email, amount, show, user):
         """Make a recurring payment for the crowdfund"""
-        # pylint: disable=too-many-arguments
         plan = self._get_stripe_plan()
         customer = stripe_get_customer(
             email,
@@ -248,7 +245,6 @@ class Crowdfund(models.Model):
         """Get the project for this crowdfund if it exists"""
         # there will never be more than one project due to unique constraint
         # pylint: disable=access-member-before-definition
-        # pylint: disable=attribute-defined-outside-init
         if hasattr(self, "_project"):
             return self._project
         projects = self.projects.all()

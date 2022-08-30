@@ -140,7 +140,8 @@ class TestNotifications(TestCase):
         )
         ok_(
             self.notification not in object_notifications,
-            "A notification not including the object should not be in the set returned.",
+            "A notification not including the object should not be in the set "
+            "returned.",
         )
 
     def test_get_unread(self):

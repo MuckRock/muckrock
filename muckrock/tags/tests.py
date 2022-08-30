@@ -26,14 +26,16 @@ class TestTagModel(test.TestCase):
         eq_(clean_string, expected_clean_string, "The tag should lowercase its name.")
 
     def test_strip_whitespace(self):
-        """The tag should strip extra whitespace from the beginning and end of the name."""
+        """The tag should strip extra whitespace from the beginning and end of
+        the name."""
         dirty_string = " hello "
         expected_clean_string = "hello"
         clean_string = normalize(dirty_string)
         eq_(
             clean_string,
             expected_clean_string,
-            "The tag should strip extra whitespace from the beginning and end of the name.",
+            "The tag should strip extra whitespace from the beginning and end of "
+            "the name.",
         )
 
     def test_collapse_whitespace(self):

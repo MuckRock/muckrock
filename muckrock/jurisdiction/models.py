@@ -141,10 +141,9 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
-        # pylint: disable=signature-differs
         self.slug = slugify(self.slug)
         self.name = self.name.strip()
-        super(Jurisdiction, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_url_flag(self):
         """So we can call from template"""
@@ -196,7 +195,8 @@ class Jurisdiction(models.Model, RequestHelper):
         ).first()
 
     def get_requests(self):
-        """State level jurisdictions should return requests from their localities as well."""
+        """State level jurisdictions should return requests from their
+        localities as well."""
         if self.level == "s":
             requests = FOIARequest.objects.filter(
                 Q(agency__jurisdiction=self) | Q(agency__jurisdiction__parent=self)
@@ -297,7 +297,8 @@ class LawYear(models.Model):
 
 
 class Exemption(models.Model):
-    """An exemption describes a reason for not releasing documents or information inside them."""
+    """An exemption describes a reason for not releasing documents or
+    information inside them."""
 
     # Required fields
     name = models.CharField(max_length=255)
@@ -320,15 +321,18 @@ class Exemption(models.Model):
     contributors = models.ManyToManyField(User, related_name="exemptions", blank=True)
     proper_use = models.TextField(
         blank=True,
-        help_text="An editorialized description of cases when the exemption is properly used.",
+        help_text="An editorialized description of cases when the exemption is "
+        "properly used.",
     )
     improper_use = models.TextField(
         blank=True,
-        help_text="An editorialized description of cases when the exemption is improperly used.",
+        help_text="An editorialized description of cases when the exemption is "
+        "improperly used.",
     )
     key_citations = models.TextField(
         blank=True,
-        help_text="Significant references to the exemption in caselaw or previous appeals.",
+        help_text="Significant references to the exemption in caselaw or previous "
+        "appeals.",
     )
 
     def __str__(self):
@@ -339,9 +343,8 @@ class Exemption(models.Model):
 
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
-        # pylint: disable=signature-differs
         self.slug = slugify(self.name)
-        super(Exemption, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         """Return the url for the exemption detail page"""
@@ -352,9 +355,10 @@ class Exemption(models.Model):
 
 
 class InvokedExemption(models.Model):
-    """An invoked exemption tracks the use of an exemption in the course of fulfilling
-    (or rejecting!) a FOIA request. It should connect a request to an exemption and contain
-    information particular to the invocation of the exemption to the request.
+    """An invoked exemption tracks the use of an exemption in the course of
+    fulfilling (or rejecting!) a FOIA request. It should connect a request to
+    an exemption and contain information particular to the invocation of the
+    exemption to the request.
 
     It augments the Exemption model by providing specific examples of situations
     where the exemption was invoked, i.e. there should only ever be 1 exemption
@@ -444,7 +448,8 @@ class Appeal(models.Model):
         return self.communication.get_absolute_url()
 
     def is_successful(self):
-        """Evaluate the FOIARequest communications to judge whether the appeal is successful."""
+        """Evaluate the FOIARequest communications to judge whether the appeal
+        is successful."""
         foia = self.communication.foia
         subsequent_comms = foia.communications.filter(
             datetime__gt=self.communication.datetime
@@ -457,7 +462,8 @@ class Appeal(models.Model):
         return successful
 
     def is_finished(self):
-        """Evaluate the FOIARequest communications to judge whether the appeal is finished."""
+        """Evaluate the FOIARequest communications to judge whether the appeal
+        is finished."""
         foia = self.communication.foia
         subsequent_comms = foia.communications.filter(
             datetime__gt=self.communication.datetime

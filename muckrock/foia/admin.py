@@ -55,7 +55,7 @@ class FOIAFileAdminForm(forms.ModelForm):
     """Form to validate document only has ASCII characters in it"""
 
     def __init__(self, *args, **kwargs):
-        super(FOIAFileAdminForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.clean_title = self._validate("title")
         self.clean_source = self._validate("source")
         self.clean_description = self._validate("description")
@@ -208,12 +208,9 @@ class FOIACommunicationAdmin(VersionAdmin):
     @transaction.atomic
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline files"""
-        # pylint: disable=unused-argument
 
         if formset.model != FOIAFile:
-            super(FOIACommunicationAdmin, self).save_formset(
-                request, form, formset, change
-            )
+            super().save_formset(request, form, formset, change)
             return
 
         instances = formset.save(commit=False)
@@ -298,7 +295,7 @@ class FOIACommunicationInline(admin.StackedInline):
 
     def get_queryset(self, request):
         return (
-            super(FOIACommunicationInline, self)
+            super()
             .get_queryset(request)
             .preload_files(limit=20)
             .prefetch_related("emails", "faxes", "mails", "web_comms", "portals")
@@ -461,7 +458,6 @@ class FOIARequestAdmin(VersionAdmin):
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
-        # pylint: disable=unused-argument
 
         # If changing to completed and embargoed, set embargo date to 30 days out
         if obj.status in ["done", "partial"] and obj.embargo and not obj.date_embargo:
@@ -474,7 +470,6 @@ class FOIARequestAdmin(VersionAdmin):
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""
-        # pylint: disable=unused-argument
 
         if formset.model == FOIANote:
             formset.save()
@@ -511,7 +506,7 @@ class FOIARequestAdmin(VersionAdmin):
 
     def get_urls(self):
         """Add custom URLs here"""
-        urls = super(FOIARequestAdmin, self).get_urls()
+        urls = super().get_urls()
         my_urls = [
             re_path(
                 r"^send_update/(?P<idx>\d+)/$",
@@ -582,11 +577,7 @@ class FOIARequestInline(admin.TabularInline):
     get_jurisdiction.short_description = "Jurisdiction"
 
     def get_queryset(self, request):
-        return (
-            super(FOIARequestInline, self)
-            .get_queryset(request)
-            .select_related("agency__jurisdiction")
-        )
+        return super().get_queryset(request).select_related("agency__jurisdiction")
 
 
 class FOIAComposerAdminForm(forms.ModelForm):

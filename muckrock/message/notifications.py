@@ -15,10 +15,11 @@ import requests
 class SlackNotification:
     """
     Sends a Slack notification, conforming to the platform's specification.
-    Slack notifications should be initialized with a payload that contains the notification.
-    If they aren't, you still have a chance to update the payload before sending the message.
-    Notifications with empty payloads will be rejected by Slack.
-    Payload should be a dictionary, and the API is described by Slack here:
+    Slack notifications should be initialized with a payload that contains the
+    notification. If they aren't, you still have a chance to update the payload
+    before sending the message. Notifications with empty payloads will be
+    rejected by Slack. Payload should be a dictionary, and the API is described
+    by Slack here:
     https://api.slack.com/docs/formatting
     https://api.slack.com/docs/attachments
     """

@@ -90,7 +90,8 @@ class TestRequestSharing(TestCase):
         assert_false(embargoed_foia.has_perm(editor, "change"))
 
     def test_access_key(self):
-        """Editors should be able to generate a secure access key to view an embargoed request."""
+        """Editors should be able to generate a secure access key to view an
+        embargoed request."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         access_key = embargoed_foia.generate_access_key()
         assert_true(

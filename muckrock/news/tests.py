@@ -214,7 +214,8 @@ class TestNewsArticleViews(TestCase):
         ok_("baz" in [tag.name for tag in self.article.tags.all()])
 
     def test_set_projects(self):
-        """Posting a group of projects to an article should set that article's projects."""
+        """Posting a group of projects to an article should set that article's
+        projects."""
         project1 = ProjectFactory()
         project2 = ProjectFactory()
         staff = UserFactory(is_staff=True)

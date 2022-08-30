@@ -27,7 +27,7 @@ class PortalForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.foia = kwargs.pop("foia")
-        super(PortalForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["portal"].queryset = Portal.objects.filter(
             agencies__jurisdiction=self.foia.agency.jurisdiction
         ).distinct()
@@ -41,7 +41,7 @@ class PortalForm(forms.Form):
 
     def clean(self):
         """If no portal selected, must supply data for a new one"""
-        data = super(PortalForm, self).clean()
+        data = super().clean()
         if not (
             data.get("portal")
             or (data.get("url") and data.get("name") and data.get("type"))

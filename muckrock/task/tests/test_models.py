@@ -47,9 +47,6 @@ from muckrock.task.signals import domain_blacklist
 
 mock_send = mock.Mock()
 
-# pylint: disable=missing-docstring
-# pylint: disable=protected-access
-
 
 class TaskTests(TestCase):
     """Test the Task base class"""
@@ -112,7 +109,8 @@ class OrphanTaskTests(TestCase):
     def test_task_creates_successfully(self):
         ok_(
             self.task,
-            "Orphan tasks given reason and communication arguments should create successfully",
+            "Orphan tasks given reason and communication arguments should"
+            "create successfully",
         )
 
     def test_move(self):
@@ -161,7 +159,8 @@ class OrphanTaskTests(TestCase):
         ok_(self.task.resolved and other_task.resolved)
 
     def test_create_blacklist_sender(self):
-        """An orphan created from a blacklisted sender should be automatically resolved."""
+        """An orphan created from a blacklisted sender should be automatically
+        resolved."""
         self.task.blacklist()
         self.task.refresh_from_db()
         ok_(self.task.resolved)
@@ -322,7 +321,8 @@ class SnailMailTaskTests(TestCase):
     def test_task_creates_successfully(self):
         ok_(
             self.task,
-            "Snail mail tasks should create successfully given a category and a communication",
+            "Snail mail tasks should create successfully given a category and a "
+            "communication",
         )
 
     def test_set_status(self):
@@ -336,7 +336,8 @@ class SnailMailTaskTests(TestCase):
         eq_(
             self.task.communication.foia.status,
             new_status,
-            "Setting status should update status of associated communication's foia request",
+            "Setting status should update status of associated communication's "
+            "foia request",
         )
 
     def test_update_text(self):
@@ -449,7 +450,8 @@ class ResponseTaskTests(TestCase):
         eq_(
             self.task.communication.foia.datetime_done,
             None,
-            "The FOIA should not be set to done if the status does not indicate it is done.",
+            "The FOIA should not be set to done if the status does not indicate "
+            "it is done.",
         )
         eq_(
             self.task.communication.status,
@@ -488,7 +490,8 @@ class ResponseTaskTests(TestCase):
         eq_(
             foia.datetime_done is None,
             True,
-            "The FOIA should not be set to done because we are not settings its status.",
+            "The FOIA should not be set to done because we are not settings its "
+            "status.",
         )
         eq_(foia.status, existing_status, "The FOIA status should not be changed.")
         eq_(

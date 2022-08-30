@@ -42,7 +42,6 @@ class TestFOIAViewsetCreate(TestCase):
         self, data=None, user_type=None, number_requests=5, code=201, status=None
     ):
         """Helper for API calls"""
-        # pylint: disable=too-many-arguments
         if data is None:
             data = {}
         if "agency" not in data:
@@ -224,9 +223,8 @@ class TestFOIAViewsetCreate(TestCase):
         self.api_call(
             {"attachments": [url]},
             code=400,
-            status="Attachment: {} is not of a valid mime type.  Valid types include: {}".format(
-                url, ", ".join(settings.ALLOWED_FILE_MIMES)
-            ),
+            status="Attachment: {} is not of a valid mime type.  Valid types "
+            "include: {}".format(url, ", ".join(settings.ALLOWED_FILE_MIMES)),
         )
 
     def test_attachments_bad_url(self):

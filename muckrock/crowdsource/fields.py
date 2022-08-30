@@ -49,7 +49,7 @@ class CheckboxField(Field):
 
     def get_form_field(self, field, **kwargs):
         """Checkboxes should never be required"""
-        form_field = super(CheckboxField, self).get_form_field(field)
+        form_field = super().get_form_field(field)
         form_field.required = False
         return form_field
 
@@ -72,7 +72,7 @@ class DateField(Field):
 
     def get_form_field(self, field, **kwargs):
         """Set a class for date fields"""
-        form_field = super(DateField, self).get_form_field(field)
+        form_field = super().get_form_field(field)
         form_field.widget.attrs["class"] = "datepicker-simple"
         return form_field
 
@@ -89,7 +89,7 @@ class NumberField(Field):
             kwargs["min_value"] = field.min
         if field.max is not None:
             kwargs["max_value"] = field.max
-        return super(NumberField, self).get_form_field(field, **kwargs)
+        return super().get_form_field(field, **kwargs)
 
 
 class TextareaField(Field):
@@ -102,7 +102,7 @@ class TextareaField(Field):
         """Set a max length for text areas"""
         kwargs["widget"] = forms.Textarea
         kwargs["max_length"] = 2000
-        return super(TextareaField, self).get_form_field(field, **kwargs)
+        return super().get_form_field(field, **kwargs)
 
 
 class StaticWidget(forms.widgets.Widget):
@@ -112,7 +112,7 @@ class StaticWidget(forms.widgets.Widget):
 
     def get_context(self, name, value, attrs):
         """Add the tag to the context"""
-        context = super(StaticWidget, self).get_context(name, value, attrs)
+        context = super().get_context(name, value, attrs)
         context["widget"]["tag"] = self.tag
         return context
 

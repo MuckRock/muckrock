@@ -2,7 +2,6 @@
 Tests for the FOIA Composer
 """
 
-# pylint: disable=invalid-name
 # pylint: disable=protected-access
 
 # Django

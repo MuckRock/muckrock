@@ -39,7 +39,8 @@ class TestCommunication(test.TestCase):
         eq_(self.comm.files.count(), 1)
 
     def test_primary_contact(self):
-        """Makes the primary email of the FOIA to the email the communication was sent from."""
+        """Makes the primary email of the FOIA to the email the communication was
+        sent from."""
         self.comm.make_sender_primary_contact()
         self.foia.refresh_from_db()
         eq_(self.foia.email, self.comm.emails.first().from_email)
@@ -48,9 +49,9 @@ class TestCommunication(test.TestCase):
         """Test attaching a file with an actual file"""
         try:
             comm = FOIACommunicationFactory()
-            with open("tmp.txt", "w") as file_:
+            with open("tmp.txt", "w", encoding="utf8") as file_:
                 file_.write("The file contents")
-            with open("tmp.txt", "r") as file_:
+            with open("tmp.txt", "r", encoding="utf8") as file_:
                 comm.attach_file(file_=file_)
             eq_(comm.files.count(), 1)
             foia_file = comm.files.first()

@@ -15,7 +15,7 @@ class ExtractDay(Func):
     def __init__(self, expression, output_field=None, **extra):
         if output_field is None:
             output_field = IntegerField()
-        super(ExtractDay, self).__init__(expression, output_field=output_field, **extra)
+        super().__init__(expression, output_field=output_field, **extra)
 
 
 class NullIf(Func):

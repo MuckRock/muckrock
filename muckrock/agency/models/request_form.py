@@ -45,7 +45,8 @@ class AgencyRequestForm(models.Model):
             FlaggedTask.objects.create(
                 foia=comm.foia,
                 category="manual form",
-                text="This request requires a form to be manually filled out before being "
+                text="This request requires a form to be manually filled out "
+                "before being "
                 "sent.  Please fill it out, attach to the initial communication, and "
                 "send it.\n\n{}".format(self.form.url),
             )

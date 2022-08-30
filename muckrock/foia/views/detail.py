@@ -2,8 +2,6 @@
 Detail view for a FOIA request
 """
 
-# pylint: disable=too-many-lines
-
 # Django
 from celery import current_app
 from django.conf import settings
@@ -88,7 +86,7 @@ class Detail(DetailView):
         self.resend_forms = None
         self.fee_form = None
         self.valid_passcode = False
-        super(Detail, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         """Handle forms"""
@@ -122,12 +120,10 @@ class Detail(DetailView):
                     setattr(self, exc.form_name, exc.form)
                 return self.get(request, *args, **kwargs)
 
-        return super(Detail, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
-        # pylint: disable=unused-argument
-        # pylint: disable=unsubscriptable-object
         # this is called twice in dispatch, so cache to not actually run twice
         if self.foia:
             return self.foia
@@ -180,8 +176,7 @@ class Detail(DetailView):
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
-        # pylint: disable=too-many-statements, too-many-locals
-        context = super(Detail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         self._get_agency_context_data(context)
         self._get_permission_context_data(context)
@@ -339,9 +334,10 @@ class Detail(DetailView):
             self.foia.composer.status == "submitted"
             and self.foia.composer.datetime_submitted is not None
         ):
-            context["revoke_deadline"] = (
-                self.foia.composer.datetime_submitted
-                + timedelta(seconds=COMPOSER_EDIT_DELAY)
+            context[
+                "revoke_deadline"
+            ] = self.foia.composer.datetime_submitted + timedelta(
+                seconds=COMPOSER_EDIT_DELAY
             )
             context["can_revoke"] = (
                 context["user_can_edit"] and self.foia.composer.revokable()
@@ -384,7 +380,7 @@ class Detail(DetailView):
         if self.foia.sidebar_html:
             messages.info(request, self.foia.sidebar_html)
 
-        return super(Detail, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request):
         """Handle form submissions"""
@@ -429,7 +425,6 @@ class ComposerDetail(DetailView):
 
     def get(self, request, *args, **kwargs):
         """If composer is a draft, then redirect to drafting interface"""
-        # pylint: disable=attribute-defined-outside-init
         composer = self.get_object()
         can_edit = composer.has_perm(self.request.user, "change")
         if composer.status == "started" and can_edit:
@@ -443,11 +438,11 @@ class ComposerDetail(DetailView):
             raise Http404
         if len(self.foias) == 1:
             return redirect(self.foias[0])
-        return super(ComposerDetail, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
-        context = super(ComposerDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         composer = context["composer"]
         context["foias"] = self.foias
         context["sidebar_admin_url"] = reverse(
@@ -474,7 +469,6 @@ class ComposerDetail(DetailView):
         composer_delayed_submit task, revoke it, and then call it immediately with the
         correct args
         """
-        # pylint: disable=unused-argument
         composer = self.get_object()
         if (
             request.POST.get("action") == "send-now"

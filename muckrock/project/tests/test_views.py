@@ -239,7 +239,8 @@ class TestProjectEditView(TestCase):
 
     @mock.patch("muckrock.message.tasks.notify_project_contributor.delay")
     def test_add_contributors(self, mock_notify):
-        """When adding contributors, each new contributor should get an email notification."""
+        """When adding contributors, each new contributor should get an email
+        notification."""
         new_contributor = UserFactory()
         data = {
             "title": self.project.title,

@@ -267,7 +267,6 @@ def thanks(request, foia):
 
 def _new_comm(request, foia, test, success_msg, **kwargs):
     """Helper function for sending a new comm"""
-    # pylint: disable=too-many-arguments
     text = request.POST.get("text")
     comm_sent = False
     if text and test:

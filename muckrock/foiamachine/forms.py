@@ -48,7 +48,7 @@ class FoiaMachineRequestForm(forms.ModelForm):
 
     def clean(self):
         """Ensures the agency belongs to the jurisdiction."""
-        cleaned_data = super(FoiaMachineRequestForm, self).clean()
+        cleaned_data = super().clean()
         jurisdiction = cleaned_data.get("jurisdiction")
         agency = cleaned_data.get("agency")
         if agency and agency.jurisdiction != jurisdiction:
@@ -65,7 +65,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     """
 
     def __init__(self, *args, **kwargs):
-        super(FoiaMachineCommunicationForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if "message" in list(self.initial.keys()):
             self.initial["message"] = self.initial["message"].replace("<div>", "")
             self.initial["message"] = self.initial["message"].replace("</div>", "\n")
@@ -83,7 +83,6 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
 
     def clean_files(self):
         """Enforces a size and filetype limit on uploaded files."""
-        # pylint: disable=protected-access
         if not self.files:
             return []
         files = self.files.getlist("files")

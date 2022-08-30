@@ -154,7 +154,7 @@ class FOIAFlagForm(forms.Form):
 
     def clean(self):
         """Must fill in one of the fields"""
-        cleaned_data = super(FOIAFlagForm, self).clean()
+        cleaned_data = super().clean()
         if not cleaned_data.get("category") and not cleaned_data.get("text"):
             raise forms.ValidationError("Must select a category or provide text")
 
@@ -182,7 +182,7 @@ class FOIASoftDeleteForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         foia = kwargs.pop("foia")
-        super(FOIASoftDeleteForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if foia.status in END_STATUS:
             self.fields.pop("final_message")
 

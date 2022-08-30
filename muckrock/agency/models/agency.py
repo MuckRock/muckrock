@@ -43,8 +43,6 @@ class AgencyType(models.Model):
 class AgencyQuerySet(models.QuerySet):
     """Object manager for Agencies"""
 
-    # pylint: disable=too-many-public-methods
-
     def get_approved(self):
         """Get all approved agencies"""
         return self.filter(status="approved")
@@ -184,8 +182,8 @@ class Agency(models.Model, RequestHelper):
     )
     exempt = models.BooleanField(
         default=False,
-        help_text="Mark agencies as exempt from public record laws.  Use the exempt note "
-        "for further explanation",
+        help_text="Mark agencies as exempt from public record laws.  Use the "
+        "exempt note for further explanation",
     )
     uncooperative = models.BooleanField(
         default=False,
@@ -215,10 +213,9 @@ class Agency(models.Model, RequestHelper):
 
     def save(self, *args, **kwargs):
         """Save the agency"""
-        # pylint: disable=signature-differs
         self.slug = slugify(self.slug)
         self.name = self.name.strip()
-        super(Agency, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def link_display(self):
         """Returns link if approved"""
@@ -236,7 +233,8 @@ class Agency(models.Model, RequestHelper):
         )
 
     def get_requests(self):
-        """Just returns the foiareqest_set value. Used for compatability with RequestHeper mixin"""
+        """Just returns the foiareqest_set value. Used for compatability with
+        RequestHeper mixin"""
         return self.foiarequest_set
 
     def get_user(self):

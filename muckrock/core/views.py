@@ -63,7 +63,6 @@ class OrderedSortMixin:
         We need to make sure the field to sort by is allowed.
         If the field isn't allowed, return the default order queryset.
         """
-        # pylint:disable=protected-access
         sort = self.request.GET.get("sort", self.default_sort)
         order = self.request.GET.get("order", self.default_order)
         sort = self.sort_map.get(sort, self.default_sort)
@@ -75,11 +74,11 @@ class OrderedSortMixin:
 
     def get_queryset(self):
         """Sorts the queryset before returning it."""
-        return self.sort_queryset(super(OrderedSortMixin, self).get_queryset())
+        return self.sort_queryset(super().get_queryset())
 
     def get_context_data(self, **kwargs):
         """Adds sort and order data to the context."""
-        context = super(OrderedSortMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["sort"] = self.request.GET.get("sort", self.default_sort)
         context["order"] = self.request.GET.get("order", self.default_order)
         return context
@@ -115,9 +114,7 @@ class ModelFilterMixin:
         if any(filter_.data.values()):
             queryset = queryset.distinct()
 
-        context = super(ModelFilterMixin, self).get_context_data(
-            object_list=queryset, **kwargs
-        )
+        context = super().get_context_data(object_list=queryset, **kwargs)
         context["filter"] = filter_
 
         return context
@@ -144,7 +141,7 @@ class PaginationMixin:
 
     def get_context_data(self, **kwargs):
         """Adds per_page to the context"""
-        context = super(PaginationMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["per_page"] = self.get_paginate_by(self.get_queryset())
         return context
 
@@ -188,7 +185,7 @@ class ModelSearchMixin:
         If there is a search query provided in the request,
         then filter the queryset with a search.
         """
-        queryset = super(ModelSearchMixin, self).get_queryset()
+        queryset = super().get_queryset()
         query = self.get_query()
         if query:
             queryset = watson.filter(queryset.model, query)
@@ -196,7 +193,7 @@ class ModelSearchMixin:
 
     def get_context_data(self, **kwargs):
         """Adds the query to the context."""
-        context = super(ModelSearchMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         query = self.get_query()
         context["query"] = query
         context["search_form"] = self.search_form(initial={"q": query})
@@ -250,19 +247,15 @@ class SearchView(SearchMixin, MRListView):
 
     def get_queryset(self):
         """Select related content types"""
-        return (
-            super(SearchView, self)
-            .get_queryset()
-            .order_by("id")
-            .select_related("content_type")
-        )
+        return super().get_queryset().order_by("id").select_related("content_type")
 
 
 class NewsletterSignupView(View):
     """Allows users to signup for our MailChimp newsletter."""
 
     def redirect_url(self, request):
-        """If a next url is provided, redirect there. Otherwise, redirect to the index."""
+        """If a next url is provided, redirect there. Otherwise, redirect to
+        the index."""
         next_ = request.GET.get("next", "index")
         return redirect(next_)
 
@@ -291,7 +284,8 @@ class NewsletterSignupView(View):
         return self.redirect_url(request)
 
     def form_valid(self, request, form):
-        """If the form is valid, try subscribing the email to our MailChimp newsletters."""
+        """If the form is valid, try subscribing the email to our MailChimp
+        newsletters."""
         email = form.cleaned_data["email"]
         list_ = form.cleaned_data["list"]
         default = form.cleaned_data["default"]
@@ -396,7 +390,6 @@ def homepage(request):
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
-    # pylint: disable=unused-argument
 
     template_keys = ("homepage_top", "homepage_bottom", "dropdown_recent_articles")
     for key in template_keys:
@@ -410,7 +403,7 @@ class StripeFormMixin:
 
     def get_initial(self):
         """Add initial data to the form."""
-        initial = super(StripeFormMixin, self).get_initial()
+        initial = super().get_initial()
         initial["stripe_pk"] = settings.STRIPE_PUB_KEY
         initial["stripe_label"] = "Buy"
         initial["stripe_description"] = ""
@@ -452,7 +445,7 @@ class DonationFormView(StripeFormMixin, FormView):
             subscription = self.make_subscription(token, amount, email)
             if subscription is None:
                 return self.form_invalid(form)
-        return super(DonationFormView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         """Return a redirection the donation page, always."""

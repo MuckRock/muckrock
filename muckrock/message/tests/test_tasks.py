@@ -36,7 +36,8 @@ class TestDailyTask(TestCase):
 
     @mock.patch("muckrock.message.tasks.send_activity_digest.delay")
     def test_when_no_unread(self, mock_send):
-        """The send method should not be called when a user does not have unread notifications."""
+        """The send method should not be called when a user does not have
+        unread notifications."""
         tasks.daily_digest()
         mock_send.assert_not_called()
 

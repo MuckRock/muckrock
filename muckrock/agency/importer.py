@@ -330,7 +330,7 @@ class Importer:
                 url=portal_url,
                 defaults={
                     "type": portal_type,
-                    "name": u"%s %s" % (agency, dict(PORTAL_TYPES)[portal_type]),
+                    "name": "%s %s" % (agency, dict(PORTAL_TYPES)[portal_type]),
                 },
             )
             agency.portal = portal

@@ -10,7 +10,7 @@ from django.urls import re_path, reverse_lazy
 from django.views.generic import RedirectView
 
 # MuckRock
-import muckrock.accounts.views as views
+from muckrock.accounts import views
 
 urlpatterns = [
     re_path(r"^$", views.AccountsView.as_view(), name="accounts"),

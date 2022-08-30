@@ -31,7 +31,8 @@ class TestFoiaMachineRequestForm(TestCase):
         )
 
     def test_basic(self):
-        """A form should validate when given a title, a status, a request, and a jurisdiction."""
+        """A form should validate when given a title, a status, a request, and
+        a jurisdiction."""
         form = forms.FoiaMachineRequestForm(
             {
                 "title": self.title,
@@ -56,7 +57,8 @@ class TestFoiaMachineRequestForm(TestCase):
         ok_(form.is_valid())
 
     def test_agency_mismatch(self):
-        """The form should not validate if the agency is from a different jurisdiction."""
+        """The form should not validate if the agency is from a different
+        jurisdiction."""
         jurisdiction = StateJurisdictionFactory()
         form = forms.FoiaMachineRequestForm(
             {

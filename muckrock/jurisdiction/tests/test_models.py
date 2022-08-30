@@ -99,7 +99,8 @@ class TestJurisdictionUnit(TestCase):
     def test_average_response_time(self):
         """
         Jurisdictions should report their average response time.
-        State jurisdictions should include avg. response time of their local jurisdictions.
+        State jurisdictions should include avg. response time of their local
+        jurisdictions.
         """
         now = timezone.now()
         state_duration = 12
@@ -161,7 +162,8 @@ class TestJurisdictionUnit(TestCase):
 
 class TestLawModel(TestCase):
     """
-    The Law model contains information about a jurisdiction's law concerning public records.
+    The Law model contains information about a jurisdiction's law concerning
+    public records.
     It should contain outside references to information on the law.
     """
 
@@ -195,15 +197,18 @@ class TestExemptionModel(TestCase):
         self.exemption = factories.ExemptionFactory()
 
     def test_unicode(self):
-        """The text representation should be the name of the exemption and its jurisdiction."""
+        """The text representation should be the name of the exemption and its
+        jurisdiction."""
         eq_(
             str(self.exemption),
             "%s exemption of %s" % (self.exemption.name, self.exemption.jurisdiction),
-            "Should include the name of the exemption and the name of the jurisdiction.",
+            "Should include the name of the exemption and the name of the "
+            "jurisdiction.",
         )
 
     def test_absolute_url(self):
-        """The absolute url of the exemption should be a standalone exemption detail page."""
+        """The absolute url of the exemption should be a standalone exemption
+        detail page."""
         kwargs = self.exemption.jurisdiction.get_slugs()
         kwargs["slug"] = self.exemption.slug
         kwargs["pk"] = self.exemption.pk
@@ -231,7 +236,8 @@ class TestInvokedExemptionModel(TestCase):
         self.invoked_exemption = factories.InvokedExemptionFactory()
 
     def test_unicode(self):
-        """The text representation should be the names of the exemption and the request."""
+        """The text representation should be the names of the exemption and the
+        request."""
         actual = str(self.invoked_exemption)
         expected = "%s exemption of %s" % (
             self.invoked_exemption.exemption.name,
@@ -272,7 +278,8 @@ class TestInvokedExemptionModel(TestCase):
 class TestExampleAppealModel(TestCase):
     """
     The ExampleAppeal model should contain sample language for appealing an exemption.
-    Additionally, it should contain the context in which this language is most effective.
+    Additionally, it should contain the context in which this language is most
+    effective.
     """
 
     def setUp(self):
@@ -295,8 +302,8 @@ class TestExampleAppealModel(TestCase):
         )
 
     def test_absolute_url(self):
-        """The absolute url of the appeal language should be the absolute url of the exemption
-        with the appeal pk appeneded as a target."""
+        """The absolute url of the appeal language should be the absolute url
+        of the exemption with the appeal pk appeneded as a target."""
         exemption = self.example_appeal.exemption
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs["slug"] = exemption.slug
@@ -335,7 +342,8 @@ class TestAppealModel(TestCase):
         eq_(actual, expected)
 
     def test_absolute_url(self):
-        """The absolute url for the appeal should be the absolute url of the communication."""
+        """The absolute url for the appeal should be the absolute url of the
+        communication."""
         expected = self.appeal.communication.get_absolute_url()
         actual = self.appeal.get_absolute_url()
         eq_(expected, actual)
@@ -345,12 +353,14 @@ class TestAppealModel(TestCase):
         eq_(self.appeal.is_successful(), False)
 
     def test_successful(self):
-        """The appeal was successful if a subsequent communication has a 'Completed' status."""
+        """The appeal was successful if a subsequent communication has a
+        'Completed' status."""
         FOIACommunicationFactory(foia=self.appeal.communication.foia, status="done")
         eq_(self.appeal.is_successful(), True)
 
     def test_another_appeal(self):
-        """The appeal was unsuccessful if a subsequent communication has an Appeal as well."""
+        """The appeal was unsuccessful if a subsequent communication has an
+        Appeal as well."""
         subsequent_communication = FOIACommunicationFactory(
             foia=self.appeal.communication.foia, status="done"
         )
@@ -362,6 +372,7 @@ class TestAppealModel(TestCase):
         eq_(self.appeal.is_finished(), False)
 
     def test_finished(self):
-        """The appeal was finished if a subsequent communication has a terminal status."""
+        """The appeal was finished if a subsequent communication has a terminal
+        status."""
         FOIACommunicationFactory(foia=self.appeal.communication.foia, status="rejected")
         eq_(self.appeal.is_finished(), True)

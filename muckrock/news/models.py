@@ -23,8 +23,6 @@ from muckrock.tags.models import TaggedItemBase
 class ArticleQuerySet(models.QuerySet):
     """Object manager for news articles"""
 
-    # pylint: disable=too-many-public-methods
-
     def get_published(self):
         """Get all published news articles"""
         return self.filter(publish=True, pub_date__lte=timezone.now())
@@ -99,12 +97,11 @@ class Article(models.Model):
 
     def save(self, *args, **kwargs):
         """Save the news article"""
-        # pylint: disable=signature-differs
         # epiceditor likes to stick non breaking spaces in here for some reason
         self.body = self.body.replace("\xa0", " ")
         # invalidate the template cache for the page on a save
         self.clear_cache()
-        super(Article, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def clear_cache(self):
         """Clear the template cache"""

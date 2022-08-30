@@ -78,7 +78,7 @@ class GenericComposer(BuyRequestsMixin):
 
     def get_form_kwargs(self):
         """Add request to the form kwargs"""
-        kwargs = super(GenericComposer, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         kwargs["request"] = self.request
         _, payer = self._get_organizations(self.request.user)
@@ -97,7 +97,7 @@ class GenericComposer(BuyRequestsMixin):
 
     def get_context_data(self, **kwargs):
         """Extra context"""
-        context = super(GenericComposer, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
             foias_filed = self.request.user.composers.exclude(status="started").count()
             organization, payer = self._get_organizations(self.request.user)
@@ -142,7 +142,6 @@ class GenericComposer(BuyRequestsMixin):
 
     def _submit_composer(self, composer, form):
         """Submit a composer"""
-        # pylint: disable=not-an-iterable
         if composer.attachments_over_size_limit(self.request.user):
             messages.error(self.request, "Total attachment size must be less than 20MB")
             return
@@ -232,8 +231,6 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
     minireg_source = "Composer"
     field_map = {"email": "register_email", "name": "register_full_name"}
 
-    # pylint: disable=attribute-defined-outside-init
-
     def get_initial(self):
         """Get initial data from clone, if there is one"""
         self.clone = None
@@ -282,7 +279,7 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
                 user=self.request.user,
                 organization=self.request.user.profile.organization,
             )
-        context = super(CreateComposer, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context.update(
             {
                 "clone": self.clone,
@@ -338,7 +335,6 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
 class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
     """Update a composer"""
 
-    # pylint: disable=attribute-defined-outside-init
     pk_url_kwarg = "idx"
 
     def get_queryset(self):
@@ -354,7 +350,7 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
 
     def get_object(self, queryset=None):
         """Convert object back to draft if it has been submitted recently"""
-        composer = super(UpdateComposer, self).get_object(queryset)
+        composer = super().get_object(queryset)
         if composer.revokable():
             composer.revoke()
             messages.warning(
@@ -377,7 +373,7 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
                     self.request, "You do not have permission to delete that draft"
                 )
                 return redirect("foia-mylist-drafts")
-        return super(UpdateComposer, self).post(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         """Redirect if this composer is not a draft"""

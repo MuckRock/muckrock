@@ -34,7 +34,7 @@ class TestManualPortal(TestCase):
 
     def test_send_msg(self):
         """Sending a message should create a portal task"""
-        comm = FOIACommunicationFactory()
+        comm = FOIACommunicationFactory(category="n")
         self.portal.send_msg(comm)
         ok_(PortalTask.objects.filter(category="n", communication=comm).exists())
 
@@ -63,8 +63,8 @@ class _TestNextRequestPortal(TestCase):
         """Test receiving a confirmation message"""
         comm = FOIACommunicationFactory(
             subject="Your first record request 17-1 has been opened.",
-            communication=" -- Write ABOVE THIS LINE to post a message that will be sent "
-            "to staff. --\n\n"
+            communication=" -- Write ABOVE THIS LINE to post a message that will "
+            "be sent to staff. --\n\n"
             "Your first Evanston record request (request number 17-764) "
             "has been submitted. It is currently unpublished and is not "
             "available for the general public to view.\n\n"

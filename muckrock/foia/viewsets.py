@@ -51,7 +51,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     * tags, by name
     """
 
-    # pylint: disable=too-many-public-methods
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
     # remove default ordering backend as it does not work well with fields stored
@@ -354,7 +353,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         """Save tags"""
         if "tags" in self.request.DATA:
             obj.tags.set(self.request.DATA["tags"])
-        return super(FOIARequestViewSet, self).post_save(obj, created=created)
+        return super().post_save(obj, created=created)
 
 
 DELIVERED_CHOICES = (
@@ -369,7 +368,6 @@ DELIVERED_CHOICES = (
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIACommunication"""
 
-    # pylint: disable=too-many-public-methods
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 

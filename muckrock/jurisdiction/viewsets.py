@@ -29,7 +29,6 @@ from muckrock.task.serializers import FlaggedTaskSerializer
 class JurisdictionViewSet(ModelViewSet):
     """API views for Jurisdiction"""
 
-    # pylint: disable=too-many-public-methods
     queryset = Jurisdiction.objects.order_by("id").select_related("parent__parent")
     serializer_class = JurisdictionSerializer
     # don't allow ordering by computed fields
@@ -73,7 +72,7 @@ class ExemptionPermissions(DjangoModelPermissionsOrAnonReadOnly):
         """Allow authenticated users to submit exemptions."""
         if request.user.is_authenticated and request.method in ["POST"]:
             return True
-        return super(ExemptionPermissions, self).has_permission(request, view)
+        return super().has_permission(request, view)
 
 
 class ExemptionViewSet(ModelViewSet):
@@ -101,7 +100,7 @@ class ExemptionViewSet(ModelViewSet):
 
     filter_class = Filter
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         """
         Allows filtering against the collection of exemptions.
         Query is an optional filter.

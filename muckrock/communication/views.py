@@ -68,7 +68,7 @@ class EmailDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """Add all email messages"""
-        context = super(EmailDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         email_address = self.object
         context["emails"] = email_address.from_emails.union(
             email_address.to_emails.all(), email_address.cc_emails.all()
@@ -123,7 +123,7 @@ class PhoneDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """Add all email messages"""
-        context = super(PhoneDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         phone_number = self.object
         context["faxes"] = phone_number.faxes.order_by("sent_datetime")
         context["sidebar_admin_url"] = reverse(
@@ -150,7 +150,7 @@ class PhoneListView(MRFilterCursorListView):
             super()
             .get_queryset()
             .order_by("-pk")
-            .annotate(last_to=Max("faxes__sent_datetime"),)
+            .annotate(last_to=Max("faxes__sent_datetime"))
             .prefetch_related("sources")
         )
 
@@ -168,7 +168,7 @@ class CheckListView(MRFilterListView):
     )
 
     def get_context_data(self, **kwargs):
-        context = super(CheckListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["outstanding"] = Check.objects.filter(status="pending").aggregate(
             total=Sum("amount")
         )["total"]
@@ -181,7 +181,6 @@ class CheckListView(MRFilterListView):
 
     def post(self, request, *args, **kwargs):
         """Handle updating checks deposit dates"""
-        # pylint: disable=unused-argument
         for key in request.POST:
             if key.endswith("-status"):
                 prefix = key.split("-", 1)[0]
@@ -212,7 +211,8 @@ class CheckListView(MRFilterListView):
 
 
 class CommunicationAutocomplete(MRAutocompleteView):
-    """Base class for shared functionality between email and phone number autocompletes"""
+    """Base class for shared functionality between email and phone number
+    autocompletes"""
 
     def has_add_permission(self, request):
         """Staff only"""
@@ -270,8 +270,6 @@ class PhoneNumberAutocomplete(CommunicationAutocomplete):
 
     def get_queryset(self):
         """Pre process the query"""
-        # pylint: disable=attribute-defined-outside-init
-
         # phone number is stored as ###-###-#### in the database
         # remove parens and convert spaces to dashes so that the user
         # can enter numbers in (###) ###-#### format as well

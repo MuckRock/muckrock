@@ -75,7 +75,7 @@ def _complete_chunked_upload(key, upload_id, chunks):
 
 
 def _success(request, model, attachment_model, fk_name):
-    """"File has been succesfully uploaded to a FOIA/composer"""
+    """File has been succesfully uploaded to a FOIA/composer"""
     try:
         foia = model.objects.get(pk=request.POST.get("id"))
     except model.DoesNotExist:
@@ -107,19 +107,19 @@ def _success(request, model, attachment_model, fk_name):
 
 @login_or_agency_required
 def success_request(request):
-    """"File has been succesfully uploaded to a FOIA"""
+    """File has been succesfully uploaded to a FOIA"""
     return _success(request, FOIARequest, OutboundRequestAttachment, "foia")
 
 
 @login_required
 def success_composer(request):
-    """"File has been succesfully uploaded to a composer"""
+    """File has been succesfully uploaded to a composer"""
     return _success(request, FOIAComposer, OutboundComposerAttachment, "composer")
 
 
 @login_required
 def success_comm(request):
-    """"File has been succesfully uploaded directly to a communication"""
+    """File has been succesfully uploaded directly to a communication"""
     try:
         comm = FOIACommunication.objects.get(pk=request.POST.get("id"))
     except FOIACommunication.DoesNotExist:
@@ -152,7 +152,7 @@ def success_comm(request):
 
 
 def _session(request, model):
-    """"Get the initial file list"""
+    """Get the initial file list"""
     try:
         foia = model.objects.get(pk=request.GET.get("id"))
     except model.DoesNotExist:
@@ -397,5 +397,4 @@ def upload_chunk(request):
 @login_or_agency_required
 def blank(request):
     """Workaround for IE9 and older"""
-    # pylint: disable=unused-argument
     return HttpResponse()

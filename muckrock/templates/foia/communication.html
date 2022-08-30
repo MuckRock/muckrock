@@ -67,6 +67,9 @@
         {% if communication.status and request.user.is_staff %}
           <span class="small badge {{communication.status|classify_status}}">{{communication.get_status_display}}</span>
         {% endif %}
+        {% if communication.category and request.user.is_staff %}
+          <span class="small badge">{{ communication.get_category_display }}</span>
+        {% endif %}
         {% if communication.get_delivered %}
           <span class="small badge">
             {% if request.user.is_staff and communication.verified %}

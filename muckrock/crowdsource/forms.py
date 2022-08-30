@@ -47,7 +47,7 @@ class CrowdsourceAssignmentForm(forms.Form):
         datum = kwargs.pop("datum")
         metadata = datum.metadata if datum else None
         user = kwargs.pop("user")
-        super(CrowdsourceAssignmentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         def sub(text, metadata):
             if text is None:
@@ -94,7 +94,7 @@ class CrowdsourceAssignmentForm(forms.Form):
 
     def clean(self):
         """Must supply both name and email, or neither"""
-        data = super(CrowdsourceAssignmentForm, self).clean()
+        data = super().clean()
 
         if data.get("email") and not data.get("full_name"):
             self.add_error("full_name", "Name is required if registering with an email")
@@ -189,7 +189,7 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user")
-        super(CrowdsourceForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields["data_csv"].required = False
         if not user.profile.is_advanced:
@@ -264,7 +264,7 @@ class CrowdsourceDataFormset(CrowdsourceDataFormsetBase):
 
     def save(self, commit=True, doccloud_each_page=False):
         """Apply special cases to Document Cloud URLs"""
-        instances = super(CrowdsourceDataFormset, self).save(commit=False)
+        instances = super().save(commit=False)
         return_instances = []
         for instance in instances:
             doc_match = DOCUMENT_URL_RE.match(instance.url)
@@ -299,7 +299,7 @@ class CrowdsourceChoiceForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user")
-        super(CrowdsourceChoiceForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["crowdsource"].queryset = Crowdsource.objects.filter(
             status="draft", user=user
         )

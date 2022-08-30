@@ -2,11 +2,6 @@
 Tests using nose for the FOIA application
 """
 
-# allow methods that could be functions and too many public methods in tests
-# pylint: disable=too-many-public-methods
-# pylint: disable=too-many-lines
-# pylint: disable=invalid-name
-
 # Django
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
@@ -179,7 +174,8 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         nose.tools.eq_(foia._followup_days(), 15)
 
     def test_foia_followup_estimated(self):
-        """If request has an estimated date, returns number of days until the estimated date"""
+        """If request has an estimated date, returns number of days until the
+        estimated date"""
         # pylint: disable=protected-access
         num_days = 365
         foia = FOIARequestFactory(date_estimate=date.today() + timedelta(num_days))
@@ -333,6 +329,7 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
                 datetime=timezone.now(),
                 response=False,
                 communication="Test communication",
+                category="u",
             )
             foia.status = "submitted"
             foia.save()
@@ -430,9 +427,9 @@ class TestFOIARequestAppeal(RunCommitHooksMixin, TestCase):
         ok_(appeal_comm.emails.exists())
 
     def test_mailed_appeal(self):
-        """Sending an appeal to an agency via mail should set the request to 'submitted',
-        create a snail mail task with the 'a' category, and set the appeal communication
-        delivery method to 'mail'."""
+        """Sending an appeal to an agency via mail should set the request to
+        'submitted', create a snail mail task with the 'a' category, and set
+        the appeal communication delivery method to 'mail'."""
         # Make the appeal agency unreceptive to emails
         self.appeal_agency.emails.clear()
         # Create the appeal message and submit it
@@ -451,7 +448,8 @@ class TestFOIARequestAppeal(RunCommitHooksMixin, TestCase):
         eq_(
             appeal_comm.communication,
             appeal_message,
-            "The appeal message parameter should be used as the body of the communication.",
+            "The appeal message parameter should be used as the body of the "
+            "communication.",
         )
         eq_(
             appeal_comm.from_user,
@@ -566,7 +564,8 @@ class TestRequestSharing(TestCase):
         nose.tools.assert_false(embargoed_foia.has_perm(editor, "change"))
 
     def test_access_key(self):
-        """Editors should be able to generate a secure access key to view an embargoed request."""
+        """Editors should be able to generate a secure access key to view an
+        embargoed request."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         access_key = embargoed_foia.generate_access_key()
         nose.tools.assert_true(
@@ -683,7 +682,8 @@ class TestFOIANotification(TestCase):
         )
 
     def test_idential_different_requests(self):
-        """An identical action on a different request should not mark anything as read."""
+        """An identical action on a different request should not mark anything
+        as read."""
         other_request = FOIARequestFactory(
             composer__user=self.owner, agency=self.request.agency
         )

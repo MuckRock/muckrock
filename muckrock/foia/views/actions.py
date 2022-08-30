@@ -144,7 +144,6 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
 @login_required
 def crowdfund_request(request, idx, **kwargs):
     """Crowdfund a request"""
-    # pylint: disable=unused-argument
     # select for update locks this request in order to prevent a race condition
     # allowing multiple crowdfunds to be created for it
     foia = get_object_or_404(

@@ -76,9 +76,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             # Payments are still always mailed
             prepare_snail_mail.delay(comm.pk, category, False, extra)
         else:
-            super(NextRequestPortal, self).send_msg(
-                comm, reason="Unknown category of send message", **kwargs
-            )
+            super().send_msg(comm, reason="Unknown category of send message", **kwargs)
 
     def send_new_msg_task(self, comm_pk, **kwargs):
         """Send an initial request as a task"""
@@ -144,7 +142,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         except PortalError as exc:
             # if we have any problems sending the message, fall back to a
             # manual send, with an error message explaining what went wrong
-            super(NextRequestPortal, self).send_msg(comm, reason=exc.args[0], **kwargs)
+            super().send_msg(comm, reason=exc.args[0], **kwargs)
 
     def send_followup_msg_task(self, comm_pk, **kwargs):
         """Send a followup message as a task"""
@@ -179,19 +177,19 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         except PortalError as exc:
             # if we have any problems sending the message, fall back to a
             # manual send, with an error message explaining what went wrong
-            super(NextRequestPortal, self).send_msg(comm, reason=exc.args[0], **kwargs)
+            super().send_msg(comm, reason=exc.args[0], **kwargs)
 
     def _get_request_id(self, comm):
         """Get the request id for sending followup messages"""
         if not comm.foia:
-            raise PortalError("Communication has no FOIA\n" "Fetching Request ID")
+            raise PortalError("Communication has no FOIA\nFetching Request ID")
         if not comm.foia.current_tracking_id():
-            raise PortalError("FOIA has no tracking ID\n" "Fetching Request ID")
+            raise PortalError("FOIA has no tracking ID\nFetching Request ID")
         pattern = re.compile("[0-9]+-([0-9]+)")
         match = pattern.match(comm.foia.current_tracking_id())
         if not match:
             raise PortalError(
-                "FOIA tracking ID not in expected format\n" "Fetching Request ID"
+                "FOIA tracking ID not in expected format\nFetching Request ID"
             )
         return match.groups(1)
 
@@ -229,7 +227,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             match = location_pattern.search(reply.content)
             if not match:
                 raise PortalError(
-                    "While uploading documents\n" "Could not parse location from XML"
+                    "While uploading documents\nCould not parse location from XML"
                 )
             location = match.group(1).replace("%2F", "/")
             documents.append((file_.name(), location))
@@ -492,7 +490,6 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
 
     def _request(self, type_, session, url, msg, expected_status=200, **kwargs):
         """Make a request and check the status code"""
-        # pylint: disable=too-many-arguments
         method = getattr(session, type_)
         reply = method(url, **kwargs)
         if reply.status_code != expected_status:
@@ -505,12 +502,10 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
 
     def _get(self, session, url, msg, expected_status=200, **kwargs):
         """Make a get request with error handling"""
-        # pylint: disable=too-many-arguments
         return self._request("get", session, url, msg, expected_status, **kwargs)
 
     def _post(self, session, url, msg, expected_status=200, **kwargs):
         """Make a post request with error handling"""
-        # pylint: disable=too-many-arguments
         return self._request("post", session, url, msg, expected_status, **kwargs)
 
     def _find_tag_attr(self, soup, find_kwargs, attr_name, msg):

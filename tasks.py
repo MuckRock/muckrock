@@ -86,7 +86,7 @@ def coverage(c, settings="test", reuse="0", codeship=False):
 @task
 def pylint(c, codeship=False):
     """Run the linter"""
-    cmd = "pylint muckrock --rcfile=config/pylint.conf"
+    cmd = "pylint muckrock"
     if codeship:
         c.run(cmd)
     else:
@@ -104,7 +104,7 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black muckrock --exclude migrations\\|vendor && isort -rc muckrock"
+            cmd="black muckrock --exclude migrations\\|vendor && isort muckrock"
         )
     )
 
@@ -115,7 +115,7 @@ def format_check(c):
     c.run(
         DJANGO_RUN_USER.format(
             cmd="black --check muckrock --exclude migrations\\|vendor && "
-            "isort --check-only -rc muckrock"
+            "isort --check-only muckrock"
         )
     )
 

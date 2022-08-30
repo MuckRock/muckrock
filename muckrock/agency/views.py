@@ -53,7 +53,7 @@ class AgencyList(MRSearchFilterListView):
 
     def get_queryset(self):
         """Limit agencies to only approved ones."""
-        approved = super(AgencyList, self).get_queryset().get_approved()
+        approved = super().get_queryset().get_approved()
         approved = approved.select_related(
             "jurisdiction", "jurisdiction__parent", "jurisdiction__parent__parent"
         )
@@ -117,7 +117,6 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
-    # pylint: disable=unused-argument
     # some jurisdiction slugs changed, just ignore the jurisdiction slug passed in
     agency = get_object_or_404(Agency, pk=idx)
     jurisdiction = agency.jurisdiction.slug
@@ -130,7 +129,6 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
 
 def redirect_flag(request, jurisdiction, jidx, slug, idx):
-    # pylint: disable=unused-argument
     """Redirect flag urls to base agency"""
     return redirect("agency-detail", jurisdiction, jidx, slug, idx)
 
@@ -207,7 +205,7 @@ class MergeAgency(PermissionRequiredMixin, FormView):
 
     def get_initial(self):
         """Set initial choice based on get parameter"""
-        initial = super(MergeAgency, self).get_initial()
+        initial = super().get_initial()
         if "bad_agency" in self.request.GET:
             initial["bad_agency"] = self.request.GET["bad_agency"]
         return initial
@@ -383,7 +381,7 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         )
 
     def has_add_permission(self, request):
-        """Everyone may add a new agency during """
+        """Everyone may add a new agency during"""
         return True
 
     def create_object(self, text):
@@ -396,13 +394,12 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         """Show full template for selected label"""
         return self.get_result_label(result)
 
-    def get_create_option(self, context, query):
+    def get_create_option(self, context, q):
         """Split the jurisdiction out for the create option"""
-        # pylint: disable=arguments-differ
-        create_option = super().get_create_option(context, query)
-        if not query:
+        create_option = super().get_create_option(context, q)
+        if not q:
             return create_option
-        name, jurisdiction = self._split_jurisdiction(query)
+        name, jurisdiction = self._split_jurisdiction(q)
         if create_option:
             create_option[0]["text"] = render_to_string(
                 "autocomplete/create-agency.html",

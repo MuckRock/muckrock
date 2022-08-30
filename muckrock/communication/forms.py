@@ -50,7 +50,7 @@ class AddressForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.agency = kwargs.pop("agency")
-        super(AddressForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean_agency_override(self):
         """Require this field if the agency name is too long"""

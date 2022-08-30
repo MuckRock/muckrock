@@ -75,8 +75,7 @@ class AgencyForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         """Save email, phone, fax, and address models on save"""
-        # pylint: disable=signature-differs
-        agency = super(AgencyForm, self).save(*args, **kwargs)
+        agency = super().save(*args, **kwargs)
         if self.cleaned_data["email"]:
             email_address = EmailAddress.objects.fetch(self.cleaned_data["email"])
             AgencyEmail.objects.create(
@@ -193,14 +192,14 @@ class AgencyMergeForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         confirmed = kwargs.pop("confirmed", False)
-        super(AgencyMergeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if confirmed:
             self.fields["confirmed"].initial = True
             self.fields["good_agency"].widget = forms.HiddenInput()
             self.fields["bad_agency"].widget = forms.HiddenInput()
 
     def clean(self):
-        cleaned_data = super(AgencyMergeForm, self).clean()
+        cleaned_data = super().clean()
         good_agency = cleaned_data.get("good_agency")
         bad_agency = cleaned_data.get("bad_agency")
         if good_agency and good_agency == bad_agency:
@@ -214,7 +213,10 @@ class AgencyMassImportForm(forms.Form):
     csv = forms.FileField()
     match_or_import = forms.ChoiceField(
         required=True,
-        choices=(("match", "Match"), ("import", "Import"),),
+        choices=(
+            ("match", "Match"),
+            ("import", "Import"),
+        ),
         help_text="Match will just match the jurisdiction and agency without "
         "changing anything.  Import will create unmatched agencies and set or "
         "update supplied contact information",

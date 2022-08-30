@@ -60,7 +60,7 @@ class MailPDF(PDF):
             self.page_limit = 6
         else:
             self.page_limit = 12
-        super(MailPDF, self).__init__("P", "pt", "Letter")
+        super().__init__("P", "pt", "Letter")
 
     def header(self):
         """Add letterhead"""
@@ -209,7 +209,7 @@ class LobPDF(MailPDF):
     def header(self):
         """Add letterhead"""
         if self.page_no() > 1:
-            super(LobPDF, self).header()
+            super().header()
 
     def _extra_generate(self):
         """Add Lob only features to PDF"""
@@ -222,7 +222,7 @@ class CoverPDF(PDF):
 
     def __init__(self, info):
         self.info = info
-        super(CoverPDF, self).__init__("P", "pt", "Letter")
+        super().__init__("P", "pt", "Letter")
 
     def header(self):
         """Add letterhead"""

@@ -41,8 +41,6 @@ STATUS = [("started", "Draft"), ("submitted", "Processing"), ("filed", "Filed")]
 class FOIAComposer(models.Model):
     """A FOIA request composer"""
 
-    # pylint: disable=too-many-instance-attributes
-
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name="composers")
     # only null for initial migration
     organization = models.ForeignKey(
@@ -87,18 +85,16 @@ class FOIAComposer(models.Model):
 
     def save(self, *args, **kwargs):
         """Set title and slug on save"""
-        # pylint: disable=signature-differs
         self.title = self.title.strip() or "Untitled"
         self.slug = slugify(self.title) or "untitled"
-        super(FOIAComposer, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """Resolve any pending new agency tasks"""
-        # pylint: disable=signature-differs
         for agency in self.agencies.filter(status="pending"):
             if agency.composers.count() == 1:
                 agency.delete()
-        super(FOIAComposer, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     def get_absolute_url(self):
         """The url for this object"""

@@ -47,11 +47,10 @@ class FoiaMachineRequest(models.Model):
 
     def save(self, *args, **kwargs):
         """Automatically update the slug field."""
-        # pylint: disable=signature-differs
         autoslug = kwargs.pop("autoslug", True)
         if autoslug:
             self.slug = slugify(self.title)
-        super(FoiaMachineRequest, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.title)
@@ -73,7 +72,8 @@ class FoiaMachineRequest(models.Model):
         return render_to_string(template, context=context).strip()
 
     def generate_sharing_code(self):
-        """Generate a new sharing code, save it to the request, and then return a URL."""
+        """Generate a new sharing code, save it to the request, and then return
+        a URL."""
         self.sharing_code = generate_key(12)
         self.save()
         return self.sharing_code
@@ -94,7 +94,8 @@ class FoiaMachineRequest(models.Model):
 
     @property
     def date_due(self):
-        """Date due is the date of the last communication plus the jurisdiction response time."""
+        """Date due is the date of the last communication plus the jurisdiction
+        response time."""
         last_comm = self.sent_communications.last()
         if self.jurisdiction and self.jurisdiction.days is not None:
             response_time = self.jurisdiction.days
@@ -107,9 +108,11 @@ class FoiaMachineRequest(models.Model):
 
     @property
     def days_until_due(self):
-        """Compare the date of the last sent communication to the jurisdiction's response time."""
+        """Compare the date of the last sent communication to the
+        jurisdiction's response time."""
         try:
-            # this subtraction produces a timedelta object, so we need to get the days from it
+            # this subtraction produces a timedelta object, so we need to get
+            # the days from it
             days_until_due = self.date_due - timezone.now()
             return days_until_due.days
         except AttributeError:
@@ -128,7 +131,8 @@ class FoiaMachineRequest(models.Model):
 
 class FoiaMachineCommunication(models.Model):
     """
-    A FOIA Machine Communication stores information about an exchange between a user and an agency.
+    A FOIA Machine Communication stores information about an exchange between a
+    user and an agency.
     It is based on the MuckRock existing FOIACommunication object, and also
     loosely mimics the structure of an email.
     """
@@ -161,7 +165,8 @@ class FoiaMachineCommunication(models.Model):
 
 class FoiaMachineFile(models.Model):
     """
-    A FOIA Machine File stores files that are created in the course of fulfilling a request.
+    A FOIA Machine File stores files that are created in the course of
+    fulfilling a request.
     Files are uploaded by users and are attached to communications, like in an email.
     """
 

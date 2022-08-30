@@ -1,0 +1,25 @@
+
+[MASTER]
+load-plugins=pylint_django
+ignore=migrations
+# https://stackoverflow.com/a/39207275/10952222
+init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.join(os.path.dirname(find_pylintrc()), 'muckrock'))"
+
+[FORMAT]
+max-line-length=88
+
+[MESSAGES CONTROL]
+enable=useless-suppression
+disable=missing-docstring,too-many-ancestors,too-few-public-methods,no-else-return,no-member,attribute-defined-outside-init,too-many-instance-attributes,similarities,raise-missing-from,django-not-configured,wrong-import-order,consider-using-f-string,cyclic-import,imported-auth-user,hard-coded-auth-user,no-else-continue
+
+[TYPECHECK]
+generated-members=REQUEST,acl_users,aq_parent,"[a-zA-Z]+_set{1,2}",save,delete,objects
+
+[BASIC]
+const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
+good-names=i,j,pk,s3
+
+[DESIGN]
+
+# Maximum number of arguments for function / method
+max-args=8

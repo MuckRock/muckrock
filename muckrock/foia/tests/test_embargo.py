@@ -42,7 +42,8 @@ class TestEmbargo(TestCase):
         )
 
     def test_basic_embargo(self):
-        """The embargo should be accepted if the owner can embargo and edit the request."""
+        """The embargo should be accepted if the owner can embargo and edit the
+        request."""
         ok_(
             self.foia.has_perm(self.user, "change"),
             "The request should be editable by the user.",
@@ -61,7 +62,8 @@ class TestEmbargo(TestCase):
         ok_(self.foia.embargo, "An embargo should be set on the request.")
 
     def test_no_permission_to_edit(self):
-        """Users without permission to edit the request should not be able to change the embargo"""
+        """Users without permission to edit the request should not be able to
+        change the embargo"""
         user_without_permission = ProfessionalUserFactory()
         assert_false(self.foia.has_perm(user_without_permission, "change"))
         data = {"embargo": "create"}
@@ -73,7 +75,8 @@ class TestEmbargo(TestCase):
         ok_(not self.foia.embargo, "The embargo should not be set on the request.")
 
     def test_no_permission_to_embargo(self):
-        """Users without permission to embargo the request should not be allowed to do so."""
+        """Users without permission to embargo the request should not be
+        allowed to do so."""
         user_without_permission = UserFactory()
         self.foia.composer.user = user_without_permission
         self.foia.composer.save()
@@ -253,8 +256,9 @@ class TestEmbargo(TestCase):
 
     def test_set_date_exception(self):
         """
-        If the request is changed to an inactive state, it is embargoed, and there is no
-        previously set expiration date, then set the embargo expiration to its default value.
+        If the request is changed to an inactive state, it is embargoed, and
+        there is no previously set expiration date, then set the embargo
+        expiration to its default value.
         """
         extended_expiration_date = datetime.date.today() + datetime.timedelta(15)
         self.foia.embargo = True
@@ -270,7 +274,8 @@ class TestEmbargo(TestCase):
         )
 
     def test_remove_date(self):
-        """The embargo date should be removed if the request is changed to an active state."""
+        """The embargo date should be removed if the request is changed to an
+        active state."""
         default_expiration_date = datetime.date.today() + datetime.timedelta(30)
         self.foia.embargo = True
         self.foia.save()

@@ -34,7 +34,8 @@ from muckrock.task.models import (
 
 
 class TaskFilterSet(django_filters.FilterSet):
-    """Allows tasks to be filtered by whether they're resolved, and by who resolved them."""
+    """Allows tasks to be filtered by whether they're resolved, and by who resolved
+    them."""
 
     resolved = django_filters.BooleanFilter(
         label="Show Resolved", widget=forms.CheckboxInput()
@@ -255,7 +256,6 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
 class PortalTaskFilterSet(TaskFilterSet):
     """Allows portal tasks to be filtered by category"""
 
-    # pylint: disable=invalid-name
     category = django_filters.ChoiceFilter(choices=PORTAL_CATEGORIES)
     agency = django_filters.ModelMultipleChoiceFilter(
         field_name="communication__foia__agency",

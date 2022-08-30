@@ -1,9 +1,4 @@
 """Rules based permissions for the Q&A app"""
-
-# pylint: disable=missing-docstring
-
-# needed for rules
-
 # Third Party
 from rules import add_perm
 

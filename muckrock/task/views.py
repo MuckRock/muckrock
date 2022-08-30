@@ -117,7 +117,7 @@ class TaskList(MRFilterListView):
 
     def get_queryset(self):
         """Apply query parameters to the queryset"""
-        queryset = super(TaskList, self).get_queryset()
+        queryset = super().get_queryset()
         task_pk = self.kwargs.get("pk")
         if task_pk:
             queryset = queryset.filter(pk=task_pk)
@@ -131,7 +131,7 @@ class TaskList(MRFilterListView):
         if "pk" in self.kwargs:
             return FilterSet(queryset=self.get_queryset(), request=self.request)
         else:
-            return super(TaskList, self).get_filter()
+            return super().get_filter()
 
     def get_model(self):
         """Returns the model from the class"""
@@ -143,7 +143,7 @@ class TaskList(MRFilterListView):
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections and for processing requests."""
-        context = super(TaskList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["counters"] = count_tasks()
         context["bulk_actions"] = self.bulk_actions
         context["processing_count"] = FOIARequest.objects.filter(
@@ -180,7 +180,6 @@ class TaskList(MRFilterListView):
 
     def task_post_helper(self, request, task, form_data=None):
         """Specific actions to apply to the task"""
-        # pylint: disable=no-self-use
         if request.POST.get("defer"):
             date_deferred = request.POST.get("date_deferred")
             if not date_deferred:
@@ -248,7 +247,7 @@ class OrphanTaskList(TaskList):
             except Http404:
                 messages.error(request, "Tried to move to a nonexistant request.")
                 logging.debug("Tried to move to a nonexistant request.")
-        return super(OrphanTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class SnailMailTaskList(TaskList):
@@ -299,7 +298,7 @@ class SnailMailTaskList(TaskList):
                 task.record_check(check_number, request.user)
             task.communication.save()
             task.resolve(request.user, form_data)
-        return super(SnailMailTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class ReviewAgencyTaskList(TaskList):
@@ -345,10 +344,10 @@ class ReviewAgencyTaskList(TaskList):
             else:
                 messages.error(
                     request,
-                    "A valid email or fax is required if " "snail mail is not checked",
+                    "A valid email or fax is required if snail mail is not checked",
                 )
                 return None
-        return super(ReviewAgencyTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class FlaggedTaskList(TaskList):
@@ -375,9 +374,7 @@ class FlaggedTaskList(TaskList):
             else:
                 messages.error(request, "The form is invalid")
                 return None
-        return super(FlaggedTaskList, self).task_post_helper(
-            request, task, form_data=form_data
-        )
+        return super().task_post_helper(request, task, form_data=form_data)
 
 
 class ProjectReviewTaskList(TaskList):
@@ -401,7 +398,7 @@ class ProjectReviewTaskList(TaskList):
             elif action == "reject":
                 task.reject(text)
                 task.resolve(request.user, {"action": "reject"})
-        return super(ProjectReviewTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class NewAgencyTaskList(TaskList):
@@ -452,7 +449,7 @@ class NewAgencyTaskList(TaskList):
             task.spam(request.user)
             form_data = {"spam": True}
             task.resolve(request.user, form_data)
-        return super(NewAgencyTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class ResponseTaskList(TaskList):
@@ -486,7 +483,7 @@ class ResponseTaskList(TaskList):
                     task.communication.create_agency_notifications()
                     task.communication.save()
                 task.resolve(request.user, form.cleaned_data)
-        return super(ResponseTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class StatusChangeTaskList(TaskList):
@@ -520,7 +517,7 @@ class MultiRequestTaskList(TaskList):
             task.reject()
             task.resolve(request.user, {"action": "reject"})
             messages.error(request, "Multirequest rejected")
-        return super(MultiRequestTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class PortalTaskList(TaskList):
@@ -542,11 +539,10 @@ class PortalTaskList(TaskList):
                 self._outgoing_handler(request, task)
         elif request.POST.get("reject"):
             task.resolve(request.user, {"reject": "true"})
-        return super(PortalTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
     def _incoming_handler(self, request, task):
         """POST handler for incoming portal tasks"""
-        # pylint: disable=no-self-use
         form = IncomingPortalForm(request.POST)
         if not form.is_valid():
             messages.error(request, "Form is invalid")
@@ -589,7 +585,6 @@ class PortalTaskList(TaskList):
 
     def _outgoing_handler(self, request, task):
         """POST handler for outgoing portal tasks"""
-        # pylint: disable=no-self-use
         status = request.POST.get("status")
         if status and status not in dict(STATUS):
             messages.error(request, "Invalid status")
@@ -650,7 +645,7 @@ class NewPortalTaskList(TaskList):
         elif request.POST.get("reject"):
             task.resolve(request.user, {"reject": "true"})
             messages.error(request, "New portal rejected")
-        return super(NewPortalTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class PaymentInfoTaskList(TaskList):
@@ -698,7 +693,7 @@ class PaymentInfoTaskList(TaskList):
             )
             task.resolve(request.user, {"reject": "true"})
             messages.error(request, "Payment info task rejected")
-        return super(PaymentInfoTaskList, self).task_post_helper(request, task)
+        return super().task_post_helper(request, task)
 
 
 class RequestTaskList(TemplateView):
@@ -709,8 +704,6 @@ class RequestTaskList(TemplateView):
 
     def get_queryset(self):
         """Get tasks with related bjects preloaded"""
-        # pylint: disable=attribute-defined-outside-init
-        # pylint: disable=unsubscriptable-object
         self.foia_request = get_object_or_404(
             FOIARequest.objects.select_related(
                 "agency__jurisdiction__parent__parent", "composer__user__profile"
@@ -722,11 +715,7 @@ class RequestTaskList(TemplateView):
         return tasks
 
     def get_context_data(self, **kwargs):
-        # pylint: disable=bad-super-call
-        # we purposely call super on TaskList here, as we do want the generic
-        # list views method to be called, but we don't need any of the
-        # data calculated in the TaskList method, so using it just slows us down
-        context = super(RequestTaskList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["title"] = self.title
         context["object_list"] = self.get_queryset()
         context["foia"] = self.foia_request
@@ -737,7 +726,6 @@ class RequestTaskList(TemplateView):
 @user_passes_test(lambda u: u.is_staff)
 def snail_mail_bulk_pdf(request):
     """Generate the task asynchrnously"""
-    # pylint: disable=unused-argument
     pdf_name = timezone.now().strftime("snail_mail_pdfs/%Y/%m/%d/%H-%M-%S.pdf")
     snail_mail_bulk_pdf_task.delay(pdf_name, request.GET.dict())
 
@@ -757,7 +745,6 @@ def snail_mail_bulk_pdf(request):
 @user_passes_test(lambda u: u.is_staff)
 def snail_mail_pdf(request, pk):
     """Return a PDF file for a snail mail request"""
-    # pylint: disable=unused-argument
     snail = get_object_or_404(SnailMailTask.objects.preload_pdf(), pk=pk)
 
     # generate the pdf and merge all pdf attachments
@@ -823,7 +810,7 @@ class BulkNewAgency(FormView):
 
     def get_context_data(self, **kwargs):
         """Name the form formset"""
-        context = super(BulkNewAgency, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         formset = context.pop("form")
         context["formset"] = formset
         return context

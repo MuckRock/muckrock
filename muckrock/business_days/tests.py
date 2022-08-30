@@ -19,7 +19,6 @@ from muckrock.jurisdiction.factories import FederalJurisdictionFactory
 class TestBusinessDayUnit(TestCase):
     """Unit tests for business days"""
 
-    # pylint: disable=invalid-name
     # pylint: disable=too-many-instance-attributes
 
     def setUp(self):

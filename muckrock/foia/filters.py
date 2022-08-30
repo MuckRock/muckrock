@@ -21,6 +21,7 @@ from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidge
 from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
+from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
 
 
 class JurisdictionFilterSet(django_filters.FilterSet):
@@ -269,6 +270,7 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
         ),
     )
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
+    category = django_filters.ChoiceFilter(choices=SNAIL_MAIL_CATEGORIES)
     from_email = django_filters.ModelMultipleChoiceFilter(
         queryset=EmailAddress.objects.all(),
         field_name="emails__from_email",

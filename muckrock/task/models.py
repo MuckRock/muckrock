@@ -62,7 +62,6 @@ from muckrock.task.querysets import (
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=missing-docstring
 # pylint: disable=too-many-lines
 
 MR_NUMBER_FIELD = 1500004565182
@@ -608,7 +607,8 @@ class FlaggedTask(Task):
         return reverse("flagged-task", kwargs={"pk": self.pk})
 
     def flagged_object(self):
-        """Return the object that was flagged (should only ever be one, and never none)"""
+        """Return the object that was flagged (should only ever be one, and never
+        none)"""
         if self.foia:
             return self.foia
         elif self.agency:
@@ -1036,7 +1036,7 @@ class MultiRequestTask(Task):
 
     def submit(self, agency_list):
         """Submit the composer"""
-        # pylint: disable=not-callable, import-outside-toplevel
+        # pylint: disable=import-outside-toplevel
         # MuckRock
         from muckrock.foia.tasks import composer_delayed_submit
 

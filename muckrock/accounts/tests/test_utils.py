@@ -24,7 +24,8 @@ from muckrock.organization.factories import FreeEntitlementFactory
 
 
 class TestMiniregister(TestCase):
-    """Miniregistration allows a user to sign up for an account with their full name and email."""
+    """Miniregistration allows a user to sign up for an account with their full
+    name and email."""
 
     def setUp(self):
         self.full_name = "Lou Reed"

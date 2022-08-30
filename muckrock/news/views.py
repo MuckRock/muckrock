@@ -78,7 +78,7 @@ class NewsDetail(DateDetailView):
         return related_articles[:4]
 
     def get_context_data(self, **kwargs):
-        context = super(NewsDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["projects"] = context["object"].projects.all()
         context["foias"] = (
             context["object"]
@@ -107,7 +107,6 @@ class NewsDetail(DateDetailView):
 
     def post(self, request, **kwargs):
         """Handles POST requests on article pages"""
-        # pylint:disable=unused-argument
         article = self.get_object()
         authorized = self.request.user.is_staff
         action = request.POST.get("action")
@@ -140,7 +139,7 @@ class NewsExploreView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """Adds interesting articles to the explore page."""
-        context = super(NewsExploreView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         recent_articles = cache_get_or_set(
             "hp:articles",
             lambda: (
@@ -207,7 +206,7 @@ class NewsListView(MRSearchFilterListView):
 
     def get_context_data(self, **kwargs):
         """Add a list of all the years we've published to the context."""
-        context = super(NewsListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         articles_by_date = self.queryset.order_by("pub_date")
         if not articles_by_date.exists():
             raise Http404

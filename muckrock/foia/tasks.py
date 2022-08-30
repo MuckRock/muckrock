@@ -219,7 +219,6 @@ def retry_stuck_documents():
 )
 def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
     """Create all the foias for a composer"""
-    # pylint: disable=unused-argument
     composer = FOIAComposer.objects.get(pk=composer_pk)
     logger.info(
         "Starting composer_create_foias: (%s, %s, %s)",
@@ -242,7 +241,6 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
 @task(max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit")
 def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
-    # pylint: disable=unused-argument
     logger.info(
         "Starting composer_delayed_submit: (%s, %s, %s, %s)",
         composer_pk,
@@ -442,8 +440,8 @@ def followup_requests():
     # weekday returns 5 for sat and 6 for sun
     is_weekday = date.today().weekday() < 5
     if config.ENABLE_FOLLOWUP and (config.ENABLE_WEEKEND_FOLLOWUP or is_weekday):
+        num_requests = FOIARequest.objects.get_followup().count()
         try:
-            num_requests = FOIARequest.objects.get_followup().count()
             for foia in FOIARequest.objects.get_followup():
                 try:
                     foia.followup()
@@ -456,7 +454,7 @@ def followup_requests():
                     )
         except SoftTimeLimitExceeded:
             logger.warning(
-                "Follow ups did not complete in time. " "Completed %d out of %d",
+                "Follow ups did not complete in time. Completed %d out of %d",
                 num_requests - FOIARequest.objects.get_followup().count(),
                 num_requests,
             )
@@ -517,8 +515,6 @@ def embargo_expire():
 def autoimport():
     """Auto import documents from S3"""
     # pylint: disable=broad-except
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
     p_name = re.compile(
         r"(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) "
@@ -758,9 +754,7 @@ class ExportCsv(AsyncFileDownloadTask):
     )
 
     def __init__(self, user_pk, foia_pks):
-        super(ExportCsv, self).__init__(
-            user_pk, "".join(str(pk) for pk in foia_pks[:100])
-        )
+        super().__init__(user_pk, "".join(str(pk) for pk in foia_pks[:100]))
         if self.user.is_staff:
             self.fields += ((lambda f: f.get_request_email(), "Request Email"),)
         self.foias = (
@@ -820,12 +814,12 @@ class ZipRequest(AsyncFileDownloadTask):
     mode = "wb"
 
     def __init__(self, user_pk, foia_pk):
-        super(ZipRequest, self).__init__(user_pk, foia_pk)
+        super().__init__(user_pk, foia_pk)
         self.foia = FOIARequest.objects.get(pk=foia_pk)
 
     def get_context(self):
         """Add the foia title to the context"""
-        context = super(ZipRequest, self).get_context()
+        context = super().get_context()
         context.update({"foia": self.foia.title})
         return context
 
@@ -862,7 +856,7 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
         comm = FOIACommunication.objects.get(pk=comm_pk)
         foia.send_delayed_email(comm, **options)
     except IOError as exc:
-        countdown = (2 ** foia_send_email.request.retries) * 60 + randint(0, 300)
+        countdown = (2**foia_send_email.request.retries) * 60 + randint(0, 300)
         logger.error(
             "foia_send_email error, will retry in %d minutes: %s",
             countdown,
@@ -883,7 +877,7 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     rate_limit="15/s",
     name="muckrock.foia.tasks.prepare_snail_mail",
 )
-def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
+def prepare_snail_mail(comm_pk, switch, extra, force=False, **kwargs):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
@@ -893,7 +887,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
     def create_snail_mail_task(reason, error_msg=""):
         """Create a snail mail task for this communication"""
         SnailMailTask.objects.create(
-            category=category,
+            category=comm.category,
             communication=comm,
             user=comm.from_user,
             switch=switch,
@@ -902,7 +896,7 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
             **extra,
         )
 
-    if category == "p":
+    if comm.category == "p":
         address = comm.foia.agency.get_addresses("check").first()
         if address is None:
             PaymentInfoTask.objects.create(communication=comm, amount=amount)
@@ -913,15 +907,15 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
         (not config.AUTO_LOB and not force, "auto"),
         (not address, "addr"),
         (address and address.lob_errors(comm.foia.agency), "badadd"),
-        (category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
-        (category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
+        (comm.category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
+        (comm.category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
         (amount > settings.CHECK_LIMIT and not force, "limit"),
     ]:
         if test:
             create_snail_mail_task(reason)
             return
 
-    pdf = LobPDF(comm, category, switch, amount=amount)
+    pdf = LobPDF(comm, comm.category, switch, amount=amount)
     prepared_pdf, total_page_count, _files, mail = pdf.prepare(address)
 
     for test, reason in [
@@ -934,19 +928,19 @@ def prepare_snail_mail(comm_pk, category, switch, extra, force=False, **kwargs):
 
     # send via lob
     try:
-        if category == "p":
+        if comm.category == "p":
             lob_obj = _lob_create_check(comm, prepared_pdf, mail, address, amount)
         else:
             lob_obj = _lob_create_letter(comm, prepared_pdf, mail)
         mail.lob_id = lob_obj.id
         mail.save()
-        comm.foia.status = comm.foia.sent_status(category == "a", comm.thanks)
+        comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
         comm.foia.save(comment="sent via lob")
         comm.foia.update()
     except lob.error.APIConnectionError as exc:
         prepare_snail_mail.retry(
-            countdown=(2 ** prepare_snail_mail.request.retries) * 300 + randint(0, 300),
-            args=[comm_pk, category, switch, extra, force],
+            countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
+            args=[comm_pk, comm.category, switch, extra, force],
             kwargs=kwargs,
             exc=exc,
         )
