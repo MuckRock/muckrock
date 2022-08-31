@@ -64,17 +64,17 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
         # need to update communications to ensure we have the correct count
         # for figuring out if this is a new or update message
         comm.foia.communications.update()
-        category, extra = comm.foia.process_manual_send(**kwargs)
+        extra = comm.foia.process_manual_send(**kwargs)
 
-        if category == "n":
+        if comm.category == "n":
             portal_task.delay(self.portal.pk, "send_new_msg_task", [comm.pk], kwargs)
-        elif category in ("f", "u"):
+        elif comm.category in ("f", "u"):
             portal_task.delay(
                 self.portal.pk, "send_followup_msg_task", [comm.pk], kwargs
             )
-        elif category == "p":
+        elif comm.category == "p":
             # Payments are still always mailed
-            prepare_snail_mail.delay(comm.pk, category, False, extra)
+            prepare_snail_mail.delay(comm.pk, False, extra)
         else:
             super().send_msg(comm, reason="Unknown category of send message", **kwargs)
 

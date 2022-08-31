@@ -269,7 +269,6 @@ class SnailMailTaskList(TaskList):
             task.resolve(request.user, {"lob": True})
             prepare_snail_mail.delay(
                 task.communication.pk,
-                task.category,
                 task.switch,
                 {"amount": task.amount},
                 force=True,
@@ -680,7 +679,7 @@ class PaymentInfoTaskList(TaskList):
                 task_.resolve(request.user, form.cleaned_data)
                 transaction.on_commit(
                     lambda t=task_: prepare_snail_mail.delay(
-                        t.communication.pk, "p", False, {"amount": t.amount}
+                        t.communication.pk, False, {"amount": t.amount}
                     )
                 )
         elif request.POST.get("reject"):
