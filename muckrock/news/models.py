@@ -78,6 +78,11 @@ class Article(models.Model):
         null=True,
         resize_source={"size": (2400, 800), "crop": "smart"},
     )
+    scrollama = models.BooleanField(
+        "Use scrollama",
+        default=False,
+        help_text="Enable the scrollama javascript library for this article",
+    )
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

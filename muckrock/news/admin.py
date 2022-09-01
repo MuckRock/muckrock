@@ -98,6 +98,7 @@ class ArticleAdminForm(forms.ModelForm):
             "foias",
             "image",
             "tags",
+            "scrollama",
         ]
 
 
