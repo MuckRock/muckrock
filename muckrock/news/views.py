@@ -34,8 +34,14 @@ from muckrock.tags.models import Tag, normalize
 class NewsDetail(DateDetailView):
     """View for news detail"""
 
-    template_name = "news/detail.html"
     date_field = "pub_date"
+
+    def get_template_names(self):
+        """Use a different template for scrollama articles"""
+        if self.object.scrollama:
+            return ["news/detail_scrollama.html"]
+        else:
+            return ["news/detail.html"]
 
     def get_queryset(self):
         """Get articles for this view"""

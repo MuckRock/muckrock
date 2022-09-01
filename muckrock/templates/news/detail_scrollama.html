@@ -1,0 +1,85 @@
+{% extends "news/detail.html" %}
+
+{% block aside %}
+  {{ block.super }}
+  <div class="scrolly__infobox">
+    <iframe scrolling="no" src="about:blank"></iframe>
+  </div>
+{% endblock %}
+
+{% block styles %}
+  <style>
+    .scrolly__infobox {
+      position: sticky;
+      top: 20;
+      left: 0;
+      bottom: auto;
+      width: 100%;
+    }    
+
+    .scrolly__infobox iframe {
+      width: 100%;
+      height: 100%;
+      border: unset;
+    }
+
+    .container {
+      overflow: inherit;
+    }
+
+  </style>
+{% endblock styles %}
+
+
+{% block scripts %}
+  <script src="https://unpkg.com/scrollama"></script>
+	<script>
+    var infobox = document.querySelector(".scrolly__infobox"); 
+    var iframe = infobox.querySelector("iframe");
+    var steps = document.querySelectorAll(".scrolly__step");
+
+		// initialize the scrollama
+		var scroller = scrollama();
+
+		// generic window resize listener event
+		function handleResize() {
+			// 1. update height of step elements
+			var stepH = Math.floor(window.innerHeight * 0.75);
+      steps.forEach(step => { step.style.height = stepH + "px"; });
+
+			var infoboxHeight = window.innerHeight / 2;
+			var infoboxMarginTop = (window.innerHeight - infoboxHeight) / 2;
+
+			infobox.style.height = infoboxHeight + "px";
+			infobox.style.top = infoboxMarginTop + "px";
+
+			// 3. tell scrollama to update new element dimensions
+			scroller.resize();
+		}
+
+		// scrollama event handlers
+		function handleStepEnter(response) {
+      iframe.setAttribute("src", steps[response.index].dataset.src);
+		}
+		
+		function init() {
+
+			// 1. force a resize on load to ensure proper dimensions are sent to scrollama
+			handleResize();
+
+			// 2. setup the scroller passing options
+			// 		this will also initialize trigger observations
+			// 3. bind scrollama event handlers (this can be chained like below)
+			scroller
+				.setup({
+					step: ".scrolly__step",
+					offset: 0.33,
+					debug: false
+				})
+				.onStepEnter(handleStepEnter);
+		}
+
+		// kick things off
+		init();
+	</script>
+{% endblock scripts %}

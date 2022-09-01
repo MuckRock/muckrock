@@ -61,17 +61,19 @@
         </main>
       </article>
       <aside class="news__aside">
-        {% social title=article.title url=article.get_absolute_url %}
-        {% project_manager article %}
-        {% tag_manager article %}
-        {% if foias %}
-          <div class="related-requests">
-            <dfn>Related Requests</dfn>
-            {% for foia in foias %}
-              {% include 'lib/foia.html' with hide_actions=True %}
-            {% endfor %}
-          </div>
-        {% endif %}
+        {% block aside %}
+          {% social title=article.title url=article.get_absolute_url %}
+          {% project_manager article %}
+          {% tag_manager article %}
+          {% if foias %}
+            <div class="related-requests">
+              <dfn>Related Requests</dfn>
+              {% for foia in foias %}
+                {% include 'lib/foia.html' with hide_actions=True %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endblock %}
       </aside>
       <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
         <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
