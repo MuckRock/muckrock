@@ -135,6 +135,50 @@ def store_statistics():
         communication__datetime__range=(yesterday_midnight, today_midnight),
         communication__response=False,
     ).count()
+
+    range_max = 7
+    range_min = 2
+    kwargs["email_communications_weekly_total"] = EmailCommunication.objects.filter(
+        communication__response=False,
+        sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+        sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+    ).count()
+    kwargs["email_communications_weekly_confirmed"] = (
+        EmailCommunication.objects.filter(
+            communication__response=False,
+            sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+            sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+        )
+        .exclude(opens=None)
+        .count()
+    )
+    kwargs["fax_communications_weekly_total"] = FaxCommunication.objects.filter(
+        sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+        sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+    ).count()
+    kwargs["fax_communications_weekly_confirmed"] = (
+        FaxCommunication.objects.filter(
+            sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+            sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+        )
+        .exclude(confirmed_datetime=None)
+        .count()
+    )
+    kwargs["mail_communications_weekly_total"] = MailCommunication.objects.filter(
+        communication__response=False,
+        sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+        sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+    ).count()
+    kwargs["mail_communications_weekly_confirmed"] = (
+        MailCommunication.objects.filter(
+            communication__response=False,
+            sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+            sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+            events__event__endswith=".processed_for_delivery",
+        )
+        .distinct()
+        .count()
+    )
     kwargs["machine_requests"] = FoiaMachineRequest.objects.count()
     kwargs["machine_requests_success"] = FoiaMachineRequest.objects.filter(
         status="done"

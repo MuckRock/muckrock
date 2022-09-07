@@ -356,10 +356,18 @@ class Statistics(models.Model):
     total_composers_draft = models.IntegerField(null=True, blank=True)
     total_composers_submitted = models.IntegerField(null=True, blank=True)
     total_composers_filed = models.IntegerField(null=True, blank=True)
+
+    # Communications
     sent_communications_portal = models.IntegerField(null=True, blank=True)
     sent_communications_email = models.IntegerField(null=True, blank=True)
     sent_communications_fax = models.IntegerField(null=True, blank=True)
     sent_communications_mail = models.IntegerField(null=True, blank=True)
+    email_communications_weekly_total = models.IntegerField(null=True, blank=True)
+    email_communications_weekly_confirmed = models.IntegerField(null=True, blank=True)
+    fax_communications_weekly_total = models.IntegerField(null=True, blank=True)
+    fax_communications_weekly_confirmed = models.IntegerField(null=True, blank=True)
+    mail_communications_weekly_total = models.IntegerField(null=True, blank=True)
+    mail_communications_weekly_confirmed = models.IntegerField(null=True, blank=True)
 
     # FOIA Machine Requests
     machine_requests = models.IntegerField(null=True, blank=True)
