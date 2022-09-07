@@ -149,6 +149,39 @@
 </table>
 {% endwith %}
 {% endif %}
+{% if confirm %}
+  <h2>Confirmed Messages - 2 to 7 days
+  <table>
+    <thead>
+      <tr>
+        <td>Format</td>
+        <td>Confirmed</td>
+        <td>Total</td>
+        <td>Percent</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Email</td>
+        <td>{{ confirm.email_communications_weekly_confirmed }}</td>
+        <td>{{ confirm.email_communications_weekly_total }}</td>
+        <td>{% widthratio confirm.email_communications_weekly_confirmed confirm.email_communications_weekly_total 100 %}%</td>
+      </tr>
+      <tr>
+        <td>Fax</td>
+        <td>{{ confirm.fax_communications_weekly_confirmed }}</td>
+        <td>{{ confirm.fax_communications_weekly_total }}</td>
+        <td>{% widthratio confirm.fax_communications_weekly_confirmed confirm.fax_communications_weekly_total 100 %}%</td>
+      </tr>
+      <tr>
+        <td>Post</td>
+        <td>{{ confirm.mail_communications_weekly_confirmed }}</td>
+        <td>{{ confirm.mail_communications_weekly_total }}</td>
+        <td>{% widthratio confirm.mail_communications_weekly_confirmed confirm.mail_communications_weekly_total 100 %}%</td>
+      </tr>
+    </tbody>
+  </table>
+{% endif %}
 {% if stats %}
 <h1>Users</h1>
 <table>
