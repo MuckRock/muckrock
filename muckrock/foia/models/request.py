@@ -460,13 +460,8 @@ class FOIARequest(models.Model):
         not set the request status, unless the request requires a proxy.
         """
 
-        if appeal and self.agency.appeal_agency:
-            agency = self.agency.appeal_agency
-        else:
-            agency = self.agency
-
         needs_review = self.set_address(
-            agency, appeal, kwargs.get("contact_info"), kwargs.get("clear")
+            appeal, kwargs.get("contact_info"), kwargs.get("clear")
         )
 
         # check for a pdf form that needs to be filled out on the initial submission
@@ -490,8 +485,14 @@ class FOIARequest(models.Model):
             self.update_dates()
             self.save()
 
-    def set_address(self, agency, appeal, contact_info, clear):
+    def set_address(self, appeal, contact_info, clear):
         """Set the correct contact info upon request submission"""
+
+        if appeal and self.agency.appeal_agency:
+            agency = self.agency.appeal_agency
+        else:
+            agency = self.agency
+
         # Return signifies a need to review
         if contact_info and "via" in contact_info:
             # if via is set, set via contact info, otherwise contact info may

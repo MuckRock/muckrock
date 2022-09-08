@@ -252,7 +252,7 @@ class FOIARequestQuerySet(models.QuerySet):
         if proxy_user:
             notify_proxy_user(foia)
         foia.process_attachments(composer.user, composer=True)
-        foia.set_address(agency, appeal=False, contact_info=contact_info, clear=False)
+        foia.set_address(appeal=False, contact_info=contact_info, clear=False)
 
     def get_stale(self):
         """Get stale requests"""
