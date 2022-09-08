@@ -903,6 +903,13 @@ def prepare_snail_mail(comm_pk, switch, extra, force=False, **kwargs):
             return
     else:
         address = comm.foia.address
+
+    if not address:
+        comm.foia.set_address(
+            appeal=comm.category == "a", contact_info=None, clear=False
+        )
+        address = comm.foia.address
+
     for test, reason in [
         (not config.AUTO_LOB and not force, "auto"),
         (not address, "addr"),
