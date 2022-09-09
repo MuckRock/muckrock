@@ -150,14 +150,17 @@
 {% endwith %}
 {% endif %}
 {% if confirm %}
-  <h2>Confirmed Messages - 2 to 7 days
+  <h2>Confirmed Messages - 0 to 7 days and 7 to 14 days
   <table>
     <thead>
       <tr>
         <td>Format</td>
-        <td>Confirmed</td>
-        <td>Total</td>
-        <td>Percent</td>
+        <td>Confirmed - last week</td>
+        <td>Total - last week</td>
+        <td>Percent - last week</td>
+        <td>Confirmed - week before last</td>
+        <td>Total - week before last</td>
+        <td>Percent - week before last</td>
       </tr>
     </thead>
     <tbody>
@@ -166,18 +169,27 @@
         <td>{{ confirm.email_communications_weekly_confirmed }}</td>
         <td>{{ confirm.email_communications_weekly_total }}</td>
         <td>{% widthratio confirm.email_communications_weekly_confirmed confirm.email_communications_weekly_total 100 %}%</td>
+        <td>{{ confirm.email_communications_weekly2_confirmed }}</td>
+        <td>{{ confirm.email_communications_weekly2_total }}</td>
+        <td>{% widthratio confirm.email_communications_weekly2_confirmed confirm.email_communications_weekly_total 100 %}%</td>
       </tr>
       <tr>
         <td>Fax</td>
         <td>{{ confirm.fax_communications_weekly_confirmed }}</td>
         <td>{{ confirm.fax_communications_weekly_total }}</td>
         <td>{% widthratio confirm.fax_communications_weekly_confirmed confirm.fax_communications_weekly_total 100 %}%</td>
+        <td>{{ confirm.fax_communications_weekly2_confirmed }}</td>
+        <td>{{ confirm.fax_communications_weekly2_total }}</td>
+        <td>{% widthratio confirm.fax_communications_weekly2_confirmed confirm.fax_communications_weekly_total 100 %}%</td>
       </tr>
       <tr>
         <td>Post</td>
         <td>{{ confirm.mail_communications_weekly_confirmed }}</td>
         <td>{{ confirm.mail_communications_weekly_total }}</td>
         <td>{% widthratio confirm.mail_communications_weekly_confirmed confirm.mail_communications_weekly_total 100 %}%</td>
+        <td>{{ confirm.mail_communications_weekly2_confirmed }}</td>
+        <td>{{ confirm.mail_communications_weekly2_total }}</td>
+        <td>{% widthratio confirm.mail_communications_weekly2_confirmed confirm.mail_communications_weekly_total 100 %}%</td>
       </tr>
     </tbody>
   </table>

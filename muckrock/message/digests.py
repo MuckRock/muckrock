@@ -493,12 +493,10 @@ class StaffDigest(Digest):
             return None  # if statistics cannot be found, don't send anything
 
         keys = [
-            "email_communications_weekly_total",
-            "email_communications_weekly_confirmed",
-            "fax_communications_weekly_total",
-            "fax_communications_weekly_confirmed",
-            "mail_communications_weekly_total",
-            "mail_communications_weekly_confirmed",
+            f"{f}_communications_{w}_{p}"
+            for f in ["email", "fax", "mail"]
+            for w in ["weekly", "weekly2"]
+            for p in ["total", "confirmed"]
         ]
         return {k: getattr(stats, k) for k in keys}
 

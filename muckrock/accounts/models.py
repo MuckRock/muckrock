@@ -368,6 +368,12 @@ class Statistics(models.Model):
     fax_communications_weekly_confirmed = models.IntegerField(null=True, blank=True)
     mail_communications_weekly_total = models.IntegerField(null=True, blank=True)
     mail_communications_weekly_confirmed = models.IntegerField(null=True, blank=True)
+    email_communications_weekly2_total = models.IntegerField(null=True, blank=True)
+    email_communications_weekly2_confirmed = models.IntegerField(null=True, blank=True)
+    fax_communications_weekly2_total = models.IntegerField(null=True, blank=True)
+    fax_communications_weekly2_confirmed = models.IntegerField(null=True, blank=True)
+    mail_communications_weekly2_total = models.IntegerField(null=True, blank=True)
+    mail_communications_weekly2_confirmed = models.IntegerField(null=True, blank=True)
 
     # FOIA Machine Requests
     machine_requests = models.IntegerField(null=True, blank=True)
