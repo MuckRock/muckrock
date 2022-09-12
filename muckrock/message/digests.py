@@ -485,6 +485,21 @@ class StaffDigest(Digest):
         checks["deposited"] = Check.objects.filter(status_date=yesterday)
         return checks
 
+    def get_confirm(self, end):
+        """Get communication confirmation data"""
+        try:
+            stats = Statistics.objects.get(date=end)
+        except Statistics.DoesNotExist:
+            return None  # if statistics cannot be found, don't send anything
+
+        keys = [
+            f"{f}_communications_{w}_{p}"
+            for f in ["email", "fax", "mail"]
+            for w in ["weekly", "weekly2"]
+            for p in ["total", "confirmed"]
+        ]
+        return {k: getattr(stats, k) for k in keys}
+
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
         context = super().get_context_data(*args)
@@ -492,6 +507,7 @@ class StaffDigest(Digest):
         start = end - self.interval
         context["stats"] = self.get_data(start, end)
         context["comms"] = self.get_comms(start, end)
+        context["confirm"] = self.get_confirm(end)
         context["pro_users"] = self.get_pro_users(end - relativedelta(days=5), end)
         context["stale_tasks"] = self.get_stale_tasks()
         context["stale_tasks_show"] = any(i for i in context["stale_tasks"].values())
