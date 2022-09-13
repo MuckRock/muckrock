@@ -1,14 +1,18 @@
 {% extends 'base_list.html' %}
 
+{% block title %}
+  Files for {{ foia }}
+{% endblock %}
+
 {% block list-header %}
-<p><a href="{{foia.get_absolute_url}}">{{foia}}</a></p>
-<h1 class="list-title">Files</h1>
+  <p><a href="{{ foia_url }}">{{ foia }}</a></p>
+  <h1 class="list-title">Files</h1>
 {% endblock list-header %}
 
 {% block list-objects %}
-<ul class="nostyle">
+  <ul class="nostyle">
     {% for file in object_list %}
-    <li>{% include 'lib/file.html' %}</li>
+      <li>{% include "lib/file.html" with show_date=True %}</li>
     {% endfor %}
-</ul>
+  </ul>
 {% endblock list-objects %}

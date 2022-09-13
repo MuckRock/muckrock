@@ -24,7 +24,7 @@
     <ul class="files-list nostyle" id="all-files">
       {% with foia_url=foia.get_absolute_url %}
         {% for file in files %}
-          <li>{% include "lib/file.html" %}</li>
+          <li>{% include "lib/file.html" with show_date=True %}</li>
         {% endfor %}
       {% endwith %}
     </ul>
