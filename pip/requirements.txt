@@ -100,7 +100,7 @@ pickleshare==0.7.4        # via ipython
 pillow==7.2.0
 plaid-python==3.4.0
 premailer==3.0.0          # via django-premailer
-prompt-toolkit==3.0.5     # via ipython
+prompt-toolkit==3.0.31    # via ipython
 psutil==5.7.2             # via scout-apm
 psycopg2-binary==2.8.5
 ptyprocess==0.6.0         # via pexpect

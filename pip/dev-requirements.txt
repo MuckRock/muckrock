@@ -54,7 +54,7 @@ pexpect==4.6.0            # via ipython
 pickleshare==0.7.4        # via ipython
 pip-tools==2.0.2          # via -r pip/dev-requirements.in
 platformdirs==2.5.2       # via black, pylint
-prompt-toolkit==3.0.5     # via ipython
+prompt-toolkit==3.0.31    # via ipython
 ptyprocess==0.6.0         # via pexpect
 pure-eval==0.2.2          # via stack-data
 pyasn1==0.4.5             # via paramiko
