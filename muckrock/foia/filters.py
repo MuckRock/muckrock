@@ -322,3 +322,14 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
             return queryset
 
         return queryset.exclude(**{value: None})
+
+
+class FOIAFileFilterSet(django_filters.FilterSet):
+    """Filters for files"""
+
+    date_range = django_filters.DateFromToRangeFilter(
+        field_name="datetime",
+        label="Date Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
