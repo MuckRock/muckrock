@@ -76,9 +76,9 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         # need to update communications to ensure we have the correct count
         # for figuring out if this is a new or update message
         comm.foia.communications.update()
-        category, _ = comm.foia.process_manual_send(**kwargs)
+        comm.foia.process_manual_send(**kwargs)
 
-        if category in ("f", "u"):
+        if comm.category in ("f", "u"):
             # send to default email address if we do not have one on file or
             # if the last reply was from the portal email address
             if comm.foia.email is None or comm.foia.email.email == FBI_PORTAL_EMAIL:
