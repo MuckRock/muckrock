@@ -370,7 +370,7 @@ class FOIACommunication(models.Model):
 
     def get_raw_email(self):
         """Get the raw email associated with this communication, if there is one"""
-        return RawEmail.objects.filter(email__communication=self).first()
+        return RawEmail.objects.filter(email__communication=self).last()
 
     def from_line(self):
         """What to display for who this communication is from"""
