@@ -227,21 +227,6 @@ class FlaggedTaskTests(TestCase):
         flagged_task.reply(reply)
         mock_support.assert_called_with(flagged_task.user.pk, reply, flagged_task.pk)
 
-    @requests_mock.Mocker()
-    def test_create_zoho_ticket(self, mock_requests):
-        """Test the creation of a zoho help ticket when a flag is created"""
-        mock_requests.get(
-            settings.ZOHO_URL + "contacts/search",
-            json={"count": 1, "data": [{"id": "contact_id"}]},
-        )
-        mock_requests.post(settings.ZOHO_URL + "tickets", json={"id": "ticket_id"})
-        flagged_task = FlaggedTaskFactory(
-            user__email="flag@example.com", text="Example flag text"
-        )
-        flagged_task.refresh_from_db()
-        ok_(flagged_task.resolved)
-        eq_(flagged_task.form_data, {"zoho_id": "ticket_id"})
-
     @override_settings(USE_ZENDESK=True)
     @requests_mock.Mocker()
     def test_create_zend_ticket(self, mock_requests):

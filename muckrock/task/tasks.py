@@ -121,9 +121,6 @@ def create_ticket(flag_pk, **kwargs):
         if settings.USE_ZENDESK:
             zen_id = flag.create_zendesk_ticket()
             flag.resolve(form_data={"zen_id": zen_id})
-        else:
-            zoho_id = flag.create_zoho_ticket()
-            flag.resolve(form_data={"zoho_id": zoho_id})
     except (RequestException, ZenpyException, APIException) as exc:
         logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
         raise create_ticket.retry(
