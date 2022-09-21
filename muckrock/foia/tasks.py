@@ -14,6 +14,7 @@ from django.core.mail.message import EmailMessage
 from django.db import transaction
 from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now
+from django.db.models.query import Prefetch
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -52,6 +53,7 @@ from muckrock.communication.models import (
     FaxCommunication,
     FaxError,
     MailCommunication,
+    PortalCommunication,
 )
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
@@ -753,29 +755,74 @@ class ExportCsv(AsyncFileDownloadTask):
         (lambda f: f.datetime_done, "Date Done"),
     )
 
+    staff_fields = (
+        (lambda f: f.get_request_email(), "Request Email"),
+        (
+            lambda f: f.communications.all()[0].get_delivered()
+            if f.communications.all()
+            else "",
+            "Initial Communication Delivered",
+        ),
+        (
+            lambda f: f.communications.all()[0].sent_to()
+            if f.communications.all()
+            else "",
+            "Initial Communication Address",
+        ),
+        (
+            lambda f: inbound[0].get_delivered()
+            if (inbound := [c for c in f.communications.all() if c.response])
+            else "",
+            "First Inbound Communication Delivered",
+        ),
+        (
+            lambda f: inbound[0].sent_from()
+            if (inbound := [c for c in f.communications.all() if c.response])
+            else "",
+            "First Inbound Communication Address",
+        ),
+        (
+            lambda f: inbound[-1].get_delivered()
+            if (inbound := [c for c in f.communications.all() if c.response])
+            else "",
+            "Last Inbound Communication Delivered",
+        ),
+        (
+            lambda f: inbound[-1].sent_from()
+            if (inbound := [c for c in f.communications.all() if c.response])
+            else "",
+            "Last Inbound Communication Address",
+        ),
+    )
+
     def __init__(self, user_pk, foia_pks):
         super().__init__(user_pk, "".join(str(pk) for pk in foia_pks[:100]))
-        if self.user.is_staff:
-            self.fields += ((lambda f: f.get_request_email(), "Request Email"),)
         self.foias = (
             FOIARequest.objects.filter(pk__in=foia_pks)
             .select_related("composer__user", "agency__jurisdiction__parent")
+            .prefetch_related("tracking_ids")
             .only(
-                "composer__user__username",
-                "title",
-                "status",
-                "slug",
-                "agency__jurisdiction__name",
-                "agency__jurisdiction__slug",
-                "agency__jurisdiction__id",
-                "agency__jurisdiction__parent__name",
-                "agency__jurisdiction__parent__id",
-                "agency__name",
                 "agency__id",
-                "date_followup",
-                "date_estimate",
-                "embargo",
+                "agency__jurisdiction__id",
+                "agency__jurisdiction__level",
+                "agency__jurisdiction__name",
+                "agency__jurisdiction__parent__id",
+                "agency__jurisdiction__parent__name",
+                "agency__jurisdiction__slug",
+                "agency__name",
+                "composer__datetime_submitted",
                 "composer__requested_docs",
+                "composer__user__username",
+                "date_due",
+                "date_estimate",
+                "date_followup",
+                "datetime_done",
+                "embargo",
+                "mail_id",
+                "price",
+                "slug",
+                "status",
+                "title",
             )
             .annotate(
                 days_since_submitted=ExtractDay(
@@ -788,12 +835,32 @@ class ExportCsv(AsyncFileDownloadTask):
                 tag_names=StringAgg("tags__name", ",", distinct=True),
             )
         )
+        if self.user.is_staff:
+            self.fields += self.staff_fields
+            self.foias = self.foias.prefetch_related(
+                "communications__emails",
+                Prefetch(
+                    "communications__faxes",
+                    queryset=FaxCommunication.objects.select_related("to_number"),
+                ),
+                Prefetch(
+                    "communications__mails",
+                    queryset=MailCommunication.objects.select_related("to_address"),
+                ),
+                "communications__web_comms",
+                Prefetch(
+                    "communications__portals",
+                    queryset=PortalCommunication.objects.select_related("portal"),
+                ),
+            )
 
     def generate_file(self, out_file):
         """Export selected foia requests as a CSV file"""
         writer = csv.writer(out_file)
         writer.writerow(f[1] for f in self.fields)
-        for foia in self.foias.iterator():
+        # We may want to switch this back to .iterator() when upgrading to Django 4.1
+        # or higher, as they enable prefetchign with the iterator method
+        for foia in self.foias.all():
             writer.writerow(f[0](foia) for f in self.fields)
 
 
