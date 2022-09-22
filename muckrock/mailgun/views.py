@@ -553,9 +553,9 @@ def phaxio_callback(request):
                     fax=fax_comm,
                     datetime=date,
                     recipient=number,
-                    error_type=recipient["error_type"],
-                    error_code=recipient["error_code"],
-                    error_id=int(recipient["error_id"]),
+                    error_type=recipient.get("error_type", ""),
+                    error_code=recipient.get("error_code", ""),
+                    error_id=int(recipient.get("error_id", 0)),
                 )
                 # the following phaxio error IDs all correspond to
                 # Phone Number Not Operational - all other errors are considered
