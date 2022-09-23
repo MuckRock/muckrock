@@ -139,7 +139,10 @@ class FOIAComposer(models.Model):
     def needs_moderation(self):
         """Check for moderated keywords"""
         for keyword in config.MODERATION_KEYWORDS.split("\n"):
-            if keyword in self.title or keyword in self.requested_docs:
+            if (
+                keyword.lower() in self.title.lower()
+                or keyword.lower() in self.requested_docs.lower()
+            ):
                 return True
         return False
 
