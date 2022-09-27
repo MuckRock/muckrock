@@ -2145,11 +2145,9 @@ S2.define('select2/selection/search',[
   Search.prototype.resizeSearch = function () {
     this.$search.css('width', '25px');
 
-    var width = '';
+    var width = '100%';
 
-    if (this.$search.attr('placeholder') !== '') {
-      width = this.$selection.find('.select2-selection__rendered').innerWidth();
-    } else {
+    if (this.$search.attr('placeholder') === '') {
       var minimumWidth = this.$search.val().length + 1;
 
       width = (minimumWidth * 0.75) + 'em';
