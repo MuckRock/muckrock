@@ -94,4 +94,4 @@ def _validate_lob(signature, timestamp, body):
         match,
         time.time(),
     )
-    return match and int(timestamp) / 1000 + 300 > time.time()
+    return match and int(timestamp) + 300 > time.time()
