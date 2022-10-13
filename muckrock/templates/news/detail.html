@@ -60,21 +60,23 @@
         {% filter markdown:"safe" %}{% evaluate article.body %}{% endfilter %}
         </main>
       </article>
-      <aside class="news__aside">
-        {% block aside %}
-          {% social title=article.title url=article.get_absolute_url %}
-          {% project_manager article %}
-          {% tag_manager article %}
-          {% if foias %}
-            <div class="related-requests">
-              <dfn>Related Requests</dfn>
-              {% for foia in foias %}
-                {% include 'lib/foia.html' with hide_actions=True %}
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endblock %}
-      </aside>
+      {% if article.sidebar %}
+        <aside class="news__aside">
+          {% block aside %}
+            {% social title=article.title url=article.get_absolute_url %}
+            {% project_manager article %}
+            {% tag_manager article %}
+            {% if foias %}
+              <div class="related-requests">
+                <dfn>Related Requests</dfn>
+                {% for foia in foias %}
+                  {% include 'lib/foia.html' with hide_actions=True %}
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endblock %}
+        </aside>
+      {% endif %}
       <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
         <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
           <meta itemprop="url" content="https://cdn.muckrock.com/icons/logo.jpg">

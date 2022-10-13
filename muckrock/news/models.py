@@ -83,6 +83,10 @@ class Article(models.Model):
         default=False,
         help_text="Enable the scrollama javascript library for this article",
     )
+    sidebar = models.BooleanField(
+        "Show the sidebar",
+        default=True,
+    )
     objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

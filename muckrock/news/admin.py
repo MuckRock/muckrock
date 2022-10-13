@@ -99,6 +99,7 @@ class ArticleAdminForm(forms.ModelForm):
             "image",
             "tags",
             "scrollama",
+            "sidebar",
         ]
 
 
