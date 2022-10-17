@@ -73,7 +73,9 @@ class AgencyEmailInline(admin.TabularInline):
     """Inline for agency's email addresses"""
 
     model = AgencyEmail
-    form = AgencyEmailAdminForm
+    # form = AgencyEmailAdminForm
+    show_change_link = True
+    autocomplete_fields = ["email"]
     extra = 1
 
 
@@ -101,7 +103,9 @@ class AgencyPhoneInline(admin.TabularInline):
     """Inline for agency's phone numbers"""
 
     model = AgencyPhone
-    form = AgencyPhoneAdminForm
+    # form = AgencyPhoneAdminForm
+    show_change_link = True
+    autocomplete_fields = ["phone"]
     extra = 1
 
 
