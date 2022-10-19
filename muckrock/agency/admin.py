@@ -26,7 +26,6 @@ from muckrock.agency.models import (
     AgencyRequestFormMapper,
     AgencyType,
 )
-from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
 
