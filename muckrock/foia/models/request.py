@@ -534,7 +534,9 @@ class FOIARequest(models.Model):
         elif contact_info["via"] == "email" and contact_info["email"]:
             self.email = EmailAddress.objects.fetch(contact_info["email"])
         elif contact_info["via"] == "email":
-            self.email = EmailAddress.objects.fetch(contact_info["other_email"])
+            self.email = EmailAddress.objects.fetch(
+                contact_info["other_email"], user=self.user
+            )
             # Flag for review
             task.models.FlaggedTask.objects.create(
                 foia=self,
@@ -549,9 +551,15 @@ class FOIARequest(models.Model):
                 number=contact_info["fax"], defaults={"type": "fax"}
             )
         elif contact_info["via"] == "fax":
-            self.fax, _ = PhoneNumber.objects.update_or_create(
+            self.fax, created = PhoneNumber.objects.update_or_create(
                 number=contact_info["other_fax"], defaults={"type": "fax"}
             )
+            if created:
+                self.fax.sources.create(
+                    datetime=timezone.now(),
+                    user=self.user,
+                    type="user",
+                )
             # Flag for review
             task.models.FlaggedTask.objects.create(
                 foia=self,

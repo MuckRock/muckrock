@@ -11,6 +11,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 
 # Standard Library
 from datetime import date
@@ -40,14 +41,22 @@ CHECK_STATUS = (
 class EmailAddressQuerySet(models.QuerySet):
     """QuerySet for EmailAddresses"""
 
-    def fetch(self, address):
+    def fetch(self, address, user=None):
         """Fetch an email address object based on an email header"""
         name, email = parseaddr(address)
         try:
             email = self._normalize_email(email)
         except ValidationError:
             return None
-        email_address, _ = self.update_or_create(email=email, defaults={"name": name})
+        email_address, created = self.update_or_create(
+            email=email, defaults={"name": name}
+        )
+        if created and user:
+            email_address.sources.create(
+                datetime=timezone.now(),
+                user=user,
+                type="user",
+            )
         return email_address
 
     def fetch_many(self, *addresses, **kwargs):
@@ -733,8 +742,13 @@ class Source(models.Model):
         "auth.User", on_delete=models.PROTECT, related_name="sources"
     )
     type = models.CharField(
-        max_length=5,
-        choices=(("phone", "Phone"), ("web", "Web"), ("user", "User")),
+        max_length=7,
+        choices=(
+            ("phone", "Phone"),
+            ("web", "Web"),
+            ("user", "User"),
+            ("request", "Request"),
+        ),
     )
     url = models.URLField(max_length=255, blank=True)
 
