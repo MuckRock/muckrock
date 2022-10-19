@@ -49,59 +49,21 @@ class AgencyAddressInline(admin.TabularInline):
     extra = 1
 
 
-class AgencyEmailAdminForm(forms.ModelForm):
-    """AgencyEmail Inline admin form"""
-
-    email = forms.ModelChoiceField(
-        queryset=EmailAddress.objects.all(),
-        widget=autocomplete.ModelSelect2(
-            url="email-autocomplete",
-            attrs={
-                "data-placeholder": "Email?",
-                "data-width": None,
-                "data-html": False,
-            },
-        ),
-    )
-
-    class Meta:
-        model = AgencyEmail
-        fields = "__all__"
-
-
 class AgencyEmailInline(admin.TabularInline):
     """Inline for agency's email addresses"""
 
     model = AgencyEmail
-    form = AgencyEmailAdminForm
+    show_change_link = True
+    autocomplete_fields = ["email"]
     extra = 1
-
-
-class AgencyPhoneAdminForm(forms.ModelForm):
-    """AgencyPhone Inline admin form"""
-
-    phone = forms.ModelChoiceField(
-        queryset=PhoneNumber.objects.all(),
-        widget=autocomplete.ModelSelect2(
-            url="phone-autocomplete",
-            attrs={
-                "data-placeholder": "Phone Number?",
-                "data-width": None,
-                "data-html": False,
-            },
-        ),
-    )
-
-    class Meta:
-        model = AgencyPhone
-        fields = "__all__"
 
 
 class AgencyPhoneInline(admin.TabularInline):
     """Inline for agency's phone numbers"""
 
     model = AgencyPhone
-    form = AgencyPhoneAdminForm
+    show_change_link = True
+    autocomplete_fields = ["phone"]
     extra = 1
 
 
