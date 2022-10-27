@@ -18,7 +18,7 @@ from random import randint
 # Third Party
 import boto3
 from fpdf import FPDF
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfMerger, PdfReader
 from requests.exceptions import RequestException
 from zenpy.lib.exception import APIException, ZenpyException
 
@@ -57,7 +57,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     """Save a PDF file for all open snail mail tasks"""
     # pylint: disable=too-many-locals
     cover_info = []
-    bulk_merger = PdfFileMerger(strict=False)
+    bulk_merger = PdfMerger(strict=False)
 
     snails = SnailMailTaskFilterSet(
         get,
@@ -81,7 +81,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
             # append to the bulk pdf
             bulk_merger.append(prepared_pdf)
             # ensure we align for double sided printing
-            if PdfFileReader(prepared_pdf).getNumPages() % 2 == 1:
+            if PdfReader(prepared_pdf).getNumPages() % 2 == 1:
                 blank.seek(0)
                 bulk_merger.append(blank)
 

@@ -17,9 +17,8 @@ from itertools import groupby
 # Third Party
 import emoji
 from fpdf import FPDF
-from PyPDF2.merger import PdfFileMerger
-from PyPDF2.pdf import PdfFileReader
-from PyPDF2.utils import PdfReadError
+from PyPDF2 import PdfMerger, PdfReader
+from PyPDF2.errors import PdfReadError
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
@@ -114,40 +113,35 @@ class MailPDF(PDF):
 
     def _resize_pages(self, pages):
         """Resize the page if necessary and able"""
+        i = 0
         for page in pages:
-            width, height = page.pagedata.mediaBox.upperRight
+            i += 1
+            width = page.pagedata.mediabox.width
+            height = page.pagedata.mediabox.height
+            # account for rotations
+            rotation = page.pagedata.rotation
+            if rotation is not None and rotation % 180 == 90:
+                width, height = height, width
+            if width > height:
+                page.pagedata.rotate(-90)
+                # page.transfer_rotation_to_content()
+                width, height = height, width
             if (width, height) != (PDF_WIDTH, PDF_HEIGHT):
-                if (
-                    abs(PDF_WIDTH - width) < PDF_WIDTH // 10
-                    and abs(PDF_HEIGHT - height) < PDF_HEIGHT // 10
-                ):
-                    # if we are within 10% of the desired dimensions,
-                    # just scale it to the correct size
-                    page.pagedata.scaleTo(PDF_WIDTH, PDF_HEIGHT)
-                elif (
-                    width > height
-                    and abs(PDF_WIDTH - height) < PDF_WIDTH // 10
-                    and abs(PDF_HEIGHT - width) < PDF_HEIGHT // 10
-                ):
-                    # if we are in landscape mode and are within 10% of the
-                    # desired dimensions of the opposite dimension,
-                    # scale and rotate 90 degrees
-                    page.pagedata.scaleTo(PDF_HEIGHT, PDF_WIDTH)
-                    page.pagedata.rotateCounterClockwise(90)
+                page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
     def prepare(self, address_override=None):
         """Prepare the PDF to be sent by appending attachments"""
         # generate the pdf and merge all pdf attachments
         # keep track of any problematic attachments
         self.generate()
-        merger = PdfFileMerger(strict=False)
+        merger = PdfMerger(strict=False)
         merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
         total_pages = self.page
         files = []
         for file_ in self.comm.files.all():
             if file_.get_extension() == "pdf":
                 try:
-                    pages = PdfFileReader(file_.ffile).getNumPages()
+                    pages = len(PdfReader(file_.ffile).pages)
                     if pages + total_pages > self.page_limit:
                         # too long, skip
                         files.append((file_, "skipped", pages))
