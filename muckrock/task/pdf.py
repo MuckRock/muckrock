@@ -79,7 +79,7 @@ class MailPDF(PDF):
         self.line(72 / 2, 1.55 * 72, 8 * 72, 1.55 * 72)
         self.ln(38)
 
-    def generate(self):
+    def generate(self, short=False):
         """Generate a PDF for a given FOIA"""
         self.configure()
         self._extra_generate()
@@ -93,6 +93,7 @@ class MailPDF(PDF):
             switch=self.switch,
             include_address=self.include_address,
             payment=self.amount is not None and self.amount > 0,
+            short=short,
         )
         # remove emoji's, as they break pdf rendering
         msg_body = emoji.get_emoji_regexp().sub("", msg_body)
@@ -129,14 +130,30 @@ class MailPDF(PDF):
             if (width, height) != (PDF_WIDTH, PDF_HEIGHT):
                 page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
-    def prepare(self, address_override=None):
+    def prepare(self, address_override=None, short=False):
         """Prepare the PDF to be sent by appending attachments"""
         # generate the pdf and merge all pdf attachments
         # keep track of any problematic attachments
-        self.generate()
+        self.generate(short)
+        total_pages = self.page
+
+        payment = self.amount is not None and self.amount > 0
+        print("prepare", total_pages)
+        if total_pages > self.page_limit and not short and not payment:
+            # If we are over the page limit before adding any attachments,
+            # try rendering in short mode.  Payments are always in short mode so do
+            # not retry if it is a payment
+
+            # We need a new FPDF object since there is no easy way to undo writing
+            # to the PDF
+            new_pdf = type(self)(
+                self.comm, "a" if self.appeal else "", self.switch, self.amount
+            )
+            return new_pdf.prepare(address_override, short=True)
+
+        self.page = min(self.page, self.page_limit)
         merger = PdfMerger(strict=False)
         merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
-        total_pages = self.page
         files = []
         for file_ in self.comm.files.all():
             if file_.get_extension() == "pdf":
