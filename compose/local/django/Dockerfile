@@ -22,9 +22,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   # for numpy / scipy
   #&& apt-get install openblas-dev gfortran g++ \
   # memcahced
-  libmemcached-dev
+  libmemcached-dev \
   # for imagediet
   #&& apt-get install libmagic
+  ghostscript
 
 # set up makecert root CA
 RUN curl http://localhost/rootCA.pem > /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates

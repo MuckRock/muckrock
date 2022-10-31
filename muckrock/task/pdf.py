@@ -10,12 +10,15 @@ from django.utils import timezone
 
 # Standard Library
 import os.path
+import subprocess
 from datetime import date
 from io import BytesIO
 from itertools import groupby
+from tempfile import TemporaryDirectory
 
 # Third Party
 import emoji
+import PyPDF2
 from fpdf import FPDF
 from PyPDF2 import PdfMerger, PdfReader
 from PyPDF2.errors import PdfReadError
@@ -27,6 +30,132 @@ from muckrock.communication.models import MailCommunication
 # in whatever units PyPDF2 are using
 PDF_WIDTH = 612
 PDF_HEIGHT = 792
+
+# adopted from: https://gist.github.com/tiarno/8a2995e70cee42f01e79
+
+
+def walk(obj, fnt, emb):
+    """
+    If there is a key called 'BaseFont', that is a font that is used in the document.
+    If there is a key called 'FontName' and another key in the same dictionary object
+    that is called 'FontFilex' (where x is null, 2, or 3), then that fontname is
+    embedded.
+
+    We create and add to two sets, fnt = fonts used and emb = fonts embedded.
+    """
+
+    if isinstance(obj, PyPDF2.generic.IndirectObject):
+        # recurse on indirect objects
+        walk(obj.get_object(), fnt, emb)
+
+    if not isinstance(
+        obj, (PyPDF2.generic.DictionaryObject, PyPDF2.generic.ArrayObject)
+    ):
+        # cannot check non dictionary or array objects for properties
+        return
+
+    fontkeys = set(["/FontFile", "/FontFile2", "/FontFile3"])
+    if "/BaseFont" in obj:
+        fnt.add(obj["/BaseFont"])
+    if "/FontName" in obj:
+        if [x for x in fontkeys if x in obj]:  # test to see if there is FontFile
+            emb.add(obj["/FontName"])
+
+    # recurse on dictionaries
+    if isinstance(obj, PyPDF2.generic.DictionaryObject):
+        for key in obj.keys():
+            walk(obj[key], fnt, emb)
+
+    # recurse on arrays
+    elif isinstance(obj, PyPDF2.generic.ArrayObject):
+        for i in obj:
+            walk(i, fnt, emb)
+
+
+def get_fonts(pdf):
+    """Get all the fonts in the PDF and which are and are not embedded"""
+    fonts = set()
+    embedded = set()
+    for page in pdf.pages:
+        obj = page.get_object()
+        walk(obj["/Resources"], fonts, embedded)
+
+    unembedded = fonts - embedded
+    return fonts, embedded, unembedded
+
+
+# Fonts Lob allows to be unembedded
+# https://docs.lob.com/#section/Standard-PDF-Fonts
+ALLOWED_FONTS = [
+    "Arial",
+    "Arial,Bold",
+    "Arial,BoldItalic",
+    "Arial,Italic",
+    "ArialMT",
+    "Arial-BoldMT",
+    "Arial-BoldItalicMT",
+    "Arial-ItalicMT",
+    "ArialNarrow",
+    "ArialNarrow-Bold",
+    "Calibri",
+    "Calibri-Bold",
+    "Calibri-Italic",
+    "Courier",
+    "Courier-Oblique",
+    "Courier-Bold",
+    "Courier-BoldOblique",
+    "CourierNewPSMT",
+    "CourierNewPS-ItalicMT",
+    "CourierNewPS-BoldMT",
+    "Helvetica",
+    "Helvetica-Bold",
+    "Helvetica-BoldOblique",
+    "Helvetica-Oblique",
+    "LucidaConsole",
+    "MsSansSerif",
+    "MsSansSerif,Bold",
+    "Symbol",
+    "Tahoma",
+    "Tahoma-Bold",
+    "Times-Bold",
+    "Times-BoldItalic",
+    "Times-Italic",
+    "Times-Roman",
+    "TimesNewRomanPS-BoldItalicMT",
+    "TimesNewRomanPS-BoldMT",
+    "TimesNewRomanPS-ItalicMT",
+    "TimesNewRomanPSMT",
+    "TimesNewRomanPSMT,Bold",
+    "Verdana",
+    "Verdana-Bold",
+    "Verdana,Italic",
+    "ZapfDingbats",
+]
+
+
+def needs_embedding(pdf):
+    """We need to embed fonts if it contains a non-embedded font not in the list"""
+    fonts, _embedded, _unembedded = get_fonts(pdf)
+    return any(font.strip("/") not in ALLOWED_FONTS for font in fonts)
+
+
+def handle_embedding(file):
+    """Check if the file needs fonts embedded, and then embed them if it does"""
+    pdf = PdfReader(file.ffile)
+    if needs_embedding(pdf):
+        with TemporaryDirectory() as tmp:
+            input_path = os.path.join(tmp, "input.pdf")
+            with open(input_path, "wb") as input_file:
+                file.ffile.seek(0)
+                input_file.write(file.ffile.read())
+            output_path = os.path.join(tmp, "output.pdf")
+            subprocess.run(
+                "gs -q -dNOPAUSE -dBATCH -dPDFSETTINGS=/prepress -sDEVICE=pdfwrite "
+                f"-sOutputFile={output_path} {input_path}".split(),
+                check=True,
+            )
+            with open(output_path, "rb") as output_file:
+                file.ffile.save(file.name(), ContentFile(output_file.read()))
 
 
 class PDF(FPDF):
@@ -138,7 +267,6 @@ class MailPDF(PDF):
         total_pages = self.page
 
         payment = self.amount is not None and self.amount > 0
-        print("prepare", total_pages)
         if total_pages > self.page_limit and not short and not payment:
             # If we are over the page limit before adding any attachments,
             # try rendering in short mode.  Payments are always in short mode so do
@@ -158,6 +286,8 @@ class MailPDF(PDF):
         for file_ in self.comm.files.all():
             if file_.get_extension() == "pdf":
                 try:
+                    # detect un-embedded fonts
+                    handle_embedding(file_)
                     pages = len(PdfReader(file_.ffile).pages)
                     if pages + total_pages > self.page_limit:
                         # too long, skip
@@ -166,7 +296,7 @@ class MailPDF(PDF):
                         merger.append(file_.ffile)
                         files.append((file_, "attached", pages))
                         total_pages += pages
-                except (PdfReadError, ValueError):
+                except (PdfReadError, ValueError, subprocess.CalledProcessError):
                     files.append((file_, "error", 0))
             else:
                 files.append((file_, "skipped", 0))
