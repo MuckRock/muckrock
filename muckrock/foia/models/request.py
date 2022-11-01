@@ -953,12 +953,15 @@ class FOIARequest(models.Model):
         appeal=False,
         include_address=True,
         payment=False,
+        short=False,
     ):
         """Render the message body for outgoing messages"""
+        # payment implies short
+        short = short or payment
         context = {
             "request": self,
             "switch": switch,
-            "msg_comms": self.get_msg_comms(comm, short=payment),
+            "msg_comms": self.get_msg_comms(comm, short=short),
         }
         context["return_address"] = (
             f"{settings.ADDRESS_NAME}\n"

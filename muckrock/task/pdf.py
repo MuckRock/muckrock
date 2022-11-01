@@ -10,16 +10,18 @@ from django.utils import timezone
 
 # Standard Library
 import os.path
+import subprocess
 from datetime import date
 from io import BytesIO
 from itertools import groupby
+from tempfile import TemporaryDirectory
 
 # Third Party
 import emoji
+import PyPDF2
 from fpdf import FPDF
-from PyPDF2.merger import PdfFileMerger
-from PyPDF2.pdf import PdfFileReader
-from PyPDF2.utils import PdfReadError
+from PyPDF2 import PdfMerger, PdfReader
+from PyPDF2.errors import PdfReadError
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
@@ -28,6 +30,132 @@ from muckrock.communication.models import MailCommunication
 # in whatever units PyPDF2 are using
 PDF_WIDTH = 612
 PDF_HEIGHT = 792
+
+# adopted from: https://gist.github.com/tiarno/8a2995e70cee42f01e79
+
+
+def walk(obj, fnt, emb):
+    """
+    If there is a key called 'BaseFont', that is a font that is used in the document.
+    If there is a key called 'FontName' and another key in the same dictionary object
+    that is called 'FontFilex' (where x is null, 2, or 3), then that fontname is
+    embedded.
+
+    We create and add to two sets, fnt = fonts used and emb = fonts embedded.
+    """
+
+    if isinstance(obj, PyPDF2.generic.IndirectObject):
+        # recurse on indirect objects
+        walk(obj.get_object(), fnt, emb)
+
+    if not isinstance(
+        obj, (PyPDF2.generic.DictionaryObject, PyPDF2.generic.ArrayObject)
+    ):
+        # cannot check non dictionary or array objects for properties
+        return
+
+    fontkeys = set(["/FontFile", "/FontFile2", "/FontFile3"])
+    if "/BaseFont" in obj:
+        fnt.add(obj["/BaseFont"])
+    if "/FontName" in obj:
+        if [x for x in fontkeys if x in obj]:  # test to see if there is FontFile
+            emb.add(obj["/FontName"])
+
+    # recurse on dictionaries
+    if isinstance(obj, PyPDF2.generic.DictionaryObject):
+        for key in obj.keys():
+            walk(obj[key], fnt, emb)
+
+    # recurse on arrays
+    elif isinstance(obj, PyPDF2.generic.ArrayObject):
+        for i in obj:
+            walk(i, fnt, emb)
+
+
+def get_fonts(pdf):
+    """Get all the fonts in the PDF and which are and are not embedded"""
+    fonts = set()
+    embedded = set()
+    for page in pdf.pages:
+        obj = page.get_object()
+        walk(obj["/Resources"], fonts, embedded)
+
+    unembedded = fonts - embedded
+    return fonts, embedded, unembedded
+
+
+# Fonts Lob allows to be unembedded
+# https://docs.lob.com/#section/Standard-PDF-Fonts
+ALLOWED_FONTS = [
+    "Arial",
+    "Arial,Bold",
+    "Arial,BoldItalic",
+    "Arial,Italic",
+    "ArialMT",
+    "Arial-BoldMT",
+    "Arial-BoldItalicMT",
+    "Arial-ItalicMT",
+    "ArialNarrow",
+    "ArialNarrow-Bold",
+    "Calibri",
+    "Calibri-Bold",
+    "Calibri-Italic",
+    "Courier",
+    "Courier-Oblique",
+    "Courier-Bold",
+    "Courier-BoldOblique",
+    "CourierNewPSMT",
+    "CourierNewPS-ItalicMT",
+    "CourierNewPS-BoldMT",
+    "Helvetica",
+    "Helvetica-Bold",
+    "Helvetica-BoldOblique",
+    "Helvetica-Oblique",
+    "LucidaConsole",
+    "MsSansSerif",
+    "MsSansSerif,Bold",
+    "Symbol",
+    "Tahoma",
+    "Tahoma-Bold",
+    "Times-Bold",
+    "Times-BoldItalic",
+    "Times-Italic",
+    "Times-Roman",
+    "TimesNewRomanPS-BoldItalicMT",
+    "TimesNewRomanPS-BoldMT",
+    "TimesNewRomanPS-ItalicMT",
+    "TimesNewRomanPSMT",
+    "TimesNewRomanPSMT,Bold",
+    "Verdana",
+    "Verdana-Bold",
+    "Verdana,Italic",
+    "ZapfDingbats",
+]
+
+
+def needs_embedding(pdf):
+    """We need to embed fonts if it contains a non-embedded font not in the list"""
+    fonts, _embedded, _unembedded = get_fonts(pdf)
+    return any(font.strip("/") not in ALLOWED_FONTS for font in fonts)
+
+
+def handle_embedding(file):
+    """Check if the file needs fonts embedded, and then embed them if it does"""
+    pdf = PdfReader(file.ffile)
+    if needs_embedding(pdf):
+        with TemporaryDirectory() as tmp:
+            input_path = os.path.join(tmp, "input.pdf")
+            with open(input_path, "wb") as input_file:
+                file.ffile.seek(0)
+                input_file.write(file.ffile.read())
+            output_path = os.path.join(tmp, "output.pdf")
+            subprocess.run(
+                "gs -q -dNOPAUSE -dBATCH -dPDFSETTINGS=/prepress -sDEVICE=pdfwrite "
+                f"-sOutputFile={output_path} {input_path}".split(),
+                check=True,
+            )
+            with open(output_path, "rb") as output_file:
+                file.ffile.save(file.name(), ContentFile(output_file.read()))
 
 
 class PDF(FPDF):
@@ -80,7 +208,7 @@ class MailPDF(PDF):
         self.line(72 / 2, 1.55 * 72, 8 * 72, 1.55 * 72)
         self.ln(38)
 
-    def generate(self):
+    def generate(self, short=False):
         """Generate a PDF for a given FOIA"""
         self.configure()
         self._extra_generate()
@@ -94,6 +222,7 @@ class MailPDF(PDF):
             switch=self.switch,
             include_address=self.include_address,
             payment=self.amount is not None and self.amount > 0,
+            short=short,
         )
         # remove emoji's, as they break pdf rendering
         msg_body = emoji.get_emoji_regexp().sub("", msg_body)
@@ -114,40 +243,52 @@ class MailPDF(PDF):
 
     def _resize_pages(self, pages):
         """Resize the page if necessary and able"""
+        i = 0
         for page in pages:
-            width, height = page.pagedata.mediaBox.upperRight
+            i += 1
+            width = page.pagedata.mediabox.width
+            height = page.pagedata.mediabox.height
+            # account for rotations
+            rotation = page.pagedata.rotation
+            if rotation is not None and rotation % 180 == 90:
+                width, height = height, width
+            if width > height:
+                page.pagedata.rotate(-90)
+                # page.transfer_rotation_to_content()
+                width, height = height, width
             if (width, height) != (PDF_WIDTH, PDF_HEIGHT):
-                if (
-                    abs(PDF_WIDTH - width) < PDF_WIDTH // 10
-                    and abs(PDF_HEIGHT - height) < PDF_HEIGHT // 10
-                ):
-                    # if we are within 10% of the desired dimensions,
-                    # just scale it to the correct size
-                    page.pagedata.scaleTo(PDF_WIDTH, PDF_HEIGHT)
-                elif (
-                    width > height
-                    and abs(PDF_WIDTH - height) < PDF_WIDTH // 10
-                    and abs(PDF_HEIGHT - width) < PDF_HEIGHT // 10
-                ):
-                    # if we are in landscape mode and are within 10% of the
-                    # desired dimensions of the opposite dimension,
-                    # scale and rotate 90 degrees
-                    page.pagedata.scaleTo(PDF_HEIGHT, PDF_WIDTH)
-                    page.pagedata.rotateCounterClockwise(90)
+                page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
-    def prepare(self, address_override=None):
+    def prepare(self, address_override=None, short=False):
         """Prepare the PDF to be sent by appending attachments"""
         # generate the pdf and merge all pdf attachments
         # keep track of any problematic attachments
-        self.generate()
-        merger = PdfFileMerger(strict=False)
-        merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
+        self.generate(short)
         total_pages = self.page
+
+        payment = self.amount is not None and self.amount > 0
+        if total_pages > self.page_limit and not short and not payment:
+            # If we are over the page limit before adding any attachments,
+            # try rendering in short mode.  Payments are always in short mode so do
+            # not retry if it is a payment
+
+            # We need a new FPDF object since there is no easy way to undo writing
+            # to the PDF
+            new_pdf = type(self)(
+                self.comm, "a" if self.appeal else "", self.switch, self.amount
+            )
+            return new_pdf.prepare(address_override, short=True)
+
+        self.page = min(self.page, self.page_limit)
+        merger = PdfMerger(strict=False)
+        merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
         files = []
         for file_ in self.comm.files.all():
             if file_.get_extension() == "pdf":
                 try:
-                    pages = PdfFileReader(file_.ffile).getNumPages()
+                    # detect un-embedded fonts
+                    handle_embedding(file_)
+                    pages = len(PdfReader(file_.ffile).pages)
                     if pages + total_pages > self.page_limit:
                         # too long, skip
                         files.append((file_, "skipped", pages))
@@ -155,7 +296,7 @@ class MailPDF(PDF):
                         merger.append(file_.ffile)
                         files.append((file_, "attached", pages))
                         total_pages += pages
-                except (PdfReadError, ValueError):
+                except (PdfReadError, ValueError, subprocess.CalledProcessError):
                     files.append((file_, "error", 0))
             else:
                 files.append((file_, "skipped", 0))

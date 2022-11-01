@@ -115,7 +115,7 @@ pyjwt==2.3.0              # via social-auth-core
 pylibmc==1.6.1
 pymdown-extensions==7.1
 pyparsing==2.4.7          # via packaging
-pypdf2==1.26.0
+pypdf2==2.11.1
 pyphaxio==0.11
 python-dateutil==2.8.1
 python-documentcloud==3.0.0
@@ -152,6 +152,7 @@ svglib==1.1.0             # via easy-thumbnails
 threadpoolctl==2.1.0      # via scikit-learn
 tinycss2==1.1.1           # via cssselect2, svglib
 traitlets==4.3.2          # via ipython
+typing-extensions==4.4.0  # via pypdf2
 unidecode==0.4.19
 uritemplate==3.0.0        # via google-api-python-client
 urllib3[secure]==1.24.2   # via botocore, python-documentcloud, requests, scout-apm
