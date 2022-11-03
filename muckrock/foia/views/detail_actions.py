@@ -546,12 +546,13 @@ def staff_pay(request, foia):
     has_perm = request.user.is_staff
     if has_perm:
         amount = request.POST.get("amount")
+        include = request.POST.get("include", False)
         try:
             amount = int(amount)
         except (ValueError, TypeError):
             messages.error(request, "Not a valid amount")
         else:
-            foia.pay(request.user, amount / 100.0)
+            foia.pay(request.user, amount / 100.0, include)
     return _get_redirect(request, foia)
 
 

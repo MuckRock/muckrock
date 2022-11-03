@@ -944,7 +944,7 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     rate_limit="15/s",
     name="muckrock.foia.tasks.prepare_snail_mail",
 )
-def prepare_snail_mail(comm_pk, switch, extra, force=False, **kwargs):
+def prepare_snail_mail(comm_pk, switch, extra, force=False, num_msgs=5, **kwargs):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
@@ -990,7 +990,7 @@ def prepare_snail_mail(comm_pk, switch, extra, force=False, **kwargs):
             return
 
     pdf = LobPDF(comm, comm.category, switch, amount=amount)
-    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address)
+    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address, num_msgs)
 
     for test, reason in [
         (prepared_pdf is None, "pdf"),
