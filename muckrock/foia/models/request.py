@@ -700,7 +700,7 @@ class FOIARequest(models.Model):
             **kwargs,
         )
 
-    def pay(self, user, amount):
+    def pay(self, user, amount, include_latest_pdf=True):
         """
         Users can make payments for request fees.
         Upon payment, we create a snail mail task and we set the request to
@@ -711,6 +711,7 @@ class FOIARequest(models.Model):
         """
         # We create the payment communication and a snail mail task for it.
         text = render_to_string("message/communication/payment.txt", {"amount": amount})
+        num_msgs = 1 if include_latest_pdf else 0
 
         comm = self.create_out_communication(
             from_user=user,
@@ -720,8 +721,9 @@ class FOIARequest(models.Model):
             snail=True,
             amount=amount,
             # we include the latest pdf here under the assumption
-            # it is the invoice
-            include_latest_pdf=True,
+            # it is the invoice, unless told not to
+            include_latest_pdf=include_latest_pdf,
+            num_msgs=num_msgs,
         )
 
         # We perform some logging and activity generation
@@ -917,7 +919,9 @@ class FOIARequest(models.Model):
                 self.save()
 
             transaction.on_commit(
-                lambda: prepare_snail_mail.delay(comm.pk, switch, extra)
+                lambda: prepare_snail_mail.delay(
+                    comm.pk, switch, extra, num_msgs=kwargs.get("num_msgs", 5)
+                )
             )
 
     def process_manual_send(self, **kwargs):
@@ -953,15 +957,13 @@ class FOIARequest(models.Model):
         appeal=False,
         include_address=True,
         payment=False,
-        short=False,
+        num_msgs=5,
     ):
         """Render the message body for outgoing messages"""
-        # payment implies short
-        short = short or payment
         context = {
             "request": self,
             "switch": switch,
-            "msg_comms": self.get_msg_comms(comm, short=short),
+            "msg_comms": self.get_msg_comms(comm, num_msgs=num_msgs),
         }
         context["return_address"] = (
             f"{settings.ADDRESS_NAME}\n"
@@ -1235,12 +1237,10 @@ class FOIARequest(models.Model):
         else:
             return "%s Request: %s" % (law_name, self.title)
 
-    def get_msg_comms(self, comm, short=False):
+    def get_msg_comms(self, comm, num_msgs=5):
         """Get the communications to be displayed for outgoing messages"""
-        if short:
-            num_msgs = 1
-        else:
-            num_msgs = 5
+        if num_msgs == 0:
+            return [comm]
         msg_comms = []
         # filtering in python here to use pre-cached communications
         comms = list(c for c in self.communications.all() if not c.hidden)
@@ -1293,6 +1293,7 @@ class FOIARequest(models.Model):
             amount=kwargs.get("amount", 0),
             switch=kwargs.get("switch", False),
             contact_info=kwargs.get("contact_info"),
+            num_msgs=kwargs.get("num_msgs", 5),
         )
         return comm
 
