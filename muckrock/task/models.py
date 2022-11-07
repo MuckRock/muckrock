@@ -577,7 +577,7 @@ class FlaggedTask(Task):
     # which creates a flag task, and they try to edit the request before it is sent,
     # which will delete the request and return you to the composer
     foia = models.ForeignKey(
-        "foia.FOIARequest", blank=True, null=True, on_delete=models.SET_NULL
+        "foia.FOIARequest", blank=True, null=True, on_delete=models.CASCADE
     )
     agency = models.ForeignKey(
         "agency.Agency", blank=True, null=True, on_delete=models.PROTECT
