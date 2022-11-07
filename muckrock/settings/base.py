@@ -696,6 +696,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FOLLOWUP_DAYS_FEDERAL",
         "FOLLOWUP_DAYS_OTHER",
         "MODERATION_KEYWORDS",
+        "MODERATION_REGEX",
     ),
     "Lob Options": ("AUTO_LOB", "AUTO_LOB_PAY", "AUTO_LOB_APPEAL"),
     "Machine Learning Options": ("ENABLE_ML", "CONFIDENCE_MIN"),
