@@ -649,6 +649,10 @@ CONSTANCE_CONFIG = OrderedDict(
             "MODERATION_KEYWORDS",
             ("!\n?", "Keywords to trigger manual moderation - one per line"),
         ),
+        (
+            "MODERATION_REGEX",
+            (r"\d{3}-\d{2}-\d{4}", "Regex to trigger manual moderation - one per line"),
+        ),
         ("AUTO_LOB", (False, "Automatically send snail mail via Lob")),
         ("AUTO_LOB_PAY", (False, "Automatically send checks via Lob")),
         ("AUTO_LOB_APPEAL", (False, "Automatically send appeal snail mail via Lob")),

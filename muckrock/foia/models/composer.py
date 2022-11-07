@@ -21,6 +21,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 # Standard Library
+import re
 from datetime import timedelta
 from itertools import zip_longest
 
@@ -143,6 +144,9 @@ class FOIAComposer(models.Model):
                 keyword.lower() in self.title.lower()
                 or keyword.lower() in self.requested_docs.lower()
             ):
+                return True
+        for regex in config.MODERATION_REGEX.split("\n"):
+            if re.search(regex, self.title) or re.search(regex, self.requested_docs):
                 return True
         return False
 
