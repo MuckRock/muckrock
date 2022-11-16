@@ -24,6 +24,8 @@
       <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
       {% if user.is_staff %}
         <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
+        <li class="{% active request '^/foi/list/processing-portal/$' %}"><a href="{% url 'foia-list-processing-portal' %}">Portal</a></li>
+        <li class="{% active request '^/foi/list/processing-snailmail/$' %}"><a href="{% url 'foia-list-processing-snailmail' %}">Snail Mail</a></li>
       {% endif %}
     </ul>
   {% endif %}
