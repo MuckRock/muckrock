@@ -40,4 +40,7 @@ urlpatterns = [
     ),
     re_path(r"^emails/$", views.EmailListView.as_view(), name="email-list"),
     re_path(r"^phones/$", views.PhoneListView.as_view(), name="phone-list"),
+    re_path(
+        r"^bad-addresses/$", views.BadAddressListView.as_view(), name="bad-address-list"
+    ),
 ]
