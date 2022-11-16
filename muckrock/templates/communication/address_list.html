@@ -3,8 +3,9 @@
 
 {% block list-table-head %}
   <th width="5%">Admin</th>
-  <th width="15%">Street</th>
-  <th width="15%">Suite</th>
+  <th width="10%">Agencies</th>
+  <th width="10%">Street</th>
+  <th width="10%">Suite</th>
   <th width="15%">City</th>
   <th width="5%">State</th>
   <th width="10%">Zip Code</th>
@@ -19,6 +20,13 @@
       <a href="{% url "admin:communication_address_change" address.pk %}">
         Admin
       </a>
+    </td>
+    <td>
+      {% for agency in address.agencies.all %}
+        <a href="{% url "admin:agency_agency_change" agency.pk %}">
+          {{ agency.name }}
+        </a>
+      {% endfor %}
     </td>
     <td>
       {{ address.street }}
