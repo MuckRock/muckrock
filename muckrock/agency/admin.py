@@ -137,11 +137,12 @@ class AgencyAdmin(VersionAdmin):
         "name",
         "jurisdiction",
         "status",
-        "get_types",
         "exempt",
         "uncooperative",
     )
     list_filter = ["status", "exempt", "uncooperative", MailNameFilter, "types"]
+    list_select_related = ["jurisdiction__parent"]
+    list_prefetch_related = ["types"]
     search_fields = ["name", "aliases"]
     filter_horizontal = ("types",)
     form = AgencyAdminForm
@@ -190,12 +191,6 @@ class AgencyAdmin(VersionAdmin):
             },
         ),
     )
-
-    def get_types(self, obj):
-        """Return the types for display"""
-        return ", ".join(obj.types.values_list("name", flat=True))
-
-    get_types.short_description = "Types"
 
 
 class AgencyRequestFormMapperInline(admin.TabularInline):
