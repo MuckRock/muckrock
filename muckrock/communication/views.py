@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import F, Q
 from django.db.models.aggregates import Max, Sum
+from django.db.models.functions.text import Length
 from django.db.models.query import Prefetch
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -26,6 +27,7 @@ from muckrock.communication.filters import (
 )
 from muckrock.communication.forms import CheckDateForm
 from muckrock.communication.models import (
+    Address,
     Check,
     EmailAddress,
     EmailCommunication,
@@ -41,6 +43,7 @@ from muckrock.core.views import (
     MRAutocompleteView,
     MRFilterCursorListView,
     MRFilterListView,
+    MRListView,
     class_view_decorator,
 )
 
@@ -208,6 +211,35 @@ class CheckListView(MRFilterListView):
                         )
         messages.success(request, "Check deposit dates updated")
         return redirect("check-list")
+
+
+@class_view_decorator(user_passes_test(lambda u: u.is_staff))
+class BadAddressListView(MRListView):
+    """List of non-lob compatible addresses"""
+
+    model = Address
+    title = "Bad Addresses"
+    template_name = "communication/address_list.html"
+    queryset = Address.objects.annotate(
+        street_len=Length("street"),
+        suite_len=Length("suite"),
+        city_len=Length("city"),
+        agency_override_len=Length("agency_override"),
+        attn_override_len=Length("attn_override"),
+    ).filter(
+        # required fields
+        Q(street="")
+        | Q(city="")
+        | Q(state="")
+        | Q(zip_code="")
+        |
+        # length limits
+        Q(agency_override_len__gt=40)
+        | Q(attn_override_len__gt=34)
+        | Q(street_len__gt=64)
+        | Q(suite_len__gt=64)
+        | Q(city_len__gt=200)
+    )
 
 
 class CommunicationAutocomplete(MRAutocompleteView):

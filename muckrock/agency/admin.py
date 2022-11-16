@@ -7,6 +7,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
+from django.db.models.functions.text import Length
 
 # Standard Library
 import logging
@@ -111,7 +112,7 @@ class AgencyAdminForm(forms.ModelForm):
 class MailNameFilter(admin.SimpleListFilter):
     """Filter for empy mail name's"""
 
-    title = "Empty Mail Name"
+    title = "Empty Mail Name with Name Length > 40"
     parameter_name = "empty_mail_name"
 
     def lookups(self, request, model_admin):
@@ -121,7 +122,9 @@ class MailNameFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         """Filter for empty mail name"""
         if self.value():
-            return queryset.filter(mail_name="")
+            return queryset.annotate(name_len=Length("name")).filter(
+                mail_name="", name_len__gt=40
+            )
 
         return queryset
 

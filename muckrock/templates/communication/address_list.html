@@ -1,0 +1,75 @@
+{% extends "base_list.html" %}
+{% load tags %}
+
+{% block list-table-head %}
+  <th width="5%">Admin</th>
+  <th width="15%">Street</th>
+  <th width="15%">Suite</th>
+  <th width="15%">City</th>
+  <th width="5%">State</th>
+  <th width="10%">Zip Code</th>
+  <th width="10%">Agency Override</th>
+  <th width="10%">ATTN Override</th>
+  <th width="15%">Full Override</th>
+{% endblock list-table-head %}
+
+{% block list-table-row %}
+  {% with object as address %}
+    <td>
+      <a href="{% url "admin:communication_address_change" address.pk %}">
+        Admin
+      </a>
+    </td>
+    <td>
+      {{ address.street }}
+      {% if not address.street %}
+        <p class="small error">Required</p>
+      {% endif %}
+      {% if address.street|length > 64 %}
+        <p class="small error">64 character limit</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.suite }}
+      {% if address.suite|length > 64 %}
+        <p class="small error">64 character limit</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.city }}
+      {% if not address.city %}
+        <p class="small error">Required</p>
+      {% endif %}
+      {% if address.city|length > 200 %}
+        <p class="small error">200 character limit</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.state }}
+      {% if not address.state %}
+        <p class="small error">Required</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.zip_code }}
+      {% if not address.zip_code %}
+        <p class="small error">Required</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.agency_override }}
+      {% if address.agency_override|length > 40 %}
+        <p class="small error">40 character limit</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.attn_override }}
+      {% if address.attn_override|length > 34 %}
+        <p class="small error">34 character limit</p>
+      {% endif %}
+    </td>
+    <td>
+      {{ address.address }}
+    </td>
+  {% endwith %}
+{% endblock list-table-row %}
