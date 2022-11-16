@@ -249,18 +249,24 @@ class MailPDF(PDF):
         i = 0
         for page in pages:
             i += 1
+            rotated = False
             width = page.pagedata.mediabox.width
             height = page.pagedata.mediabox.height
             # account for rotations
             rotation = page.pagedata.rotation
             if rotation is not None and rotation % 180 == 90:
                 width, height = height, width
+                rotated = not rotated
             if width > height:
                 page.pagedata.rotate(-90)
                 # page.transfer_rotation_to_content()
                 width, height = height, width
+                rotated = not rotated
             if (width, height) != (PDF_WIDTH, PDF_HEIGHT):
-                page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
+                if rotated:
+                    page.pagedata.scale_to(PDF_HEIGHT, PDF_WIDTH)
+                else:
+                    page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
     def prepare(self, address_override=None, num_msgs=5):
         """Prepare the PDF to be sent by appending attachments"""
