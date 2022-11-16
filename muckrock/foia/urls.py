@@ -38,6 +38,16 @@ urlpatterns = [
         name="foia-list-processing",
     ),
     re_path(
+        r"^list/processing-portal/$",
+        views.PortalProcessingRequestList.as_view(),
+        name="foia-list-processing-portal",
+    ),
+    re_path(
+        r"^list/processing-snailmail/$",
+        views.SnailMailProcessingRequestList.as_view(),
+        name="foia-list-processing-snailmail",
+    ),
+    re_path(
         r"^mylist/drafts/$", views.ComposerList.as_view(), name="foia-mylist-drafts"
     ),
     re_path(

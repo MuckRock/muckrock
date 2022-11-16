@@ -10,6 +10,7 @@
   <th width="10%">Reason</th>
   <th width="10%">Error</th>
   <th width="10%">MR</th>
+  <th width="10%">Status</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
@@ -50,5 +51,6 @@
       {% endif %}
     </td>
     <td>{{ foia.pk }}</td>
+    <td>{{ foia.get_status_display }}</td>
   {% endwith %}
 {% endblock list-table-row %}

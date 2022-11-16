@@ -549,10 +549,9 @@ class FollowingRequestList(RequestList):
         return queryset.filter(pk__in=followed)
 
 
-class ProcessingRequestList(RequestList):
+class BaseProcessingRequestList(RequestList):
     """List all of the currently processing FOIA requests."""
 
-    title = "Processing Requests"
     filter_class = ProcessingFOIARequestFilterSet
     template_name = "foia/processing_list.html"
     default_sort = "date_processing"
@@ -594,8 +593,7 @@ class ProcessingRequestList(RequestList):
 
         objects = super().get_queryset()
         return (
-            objects.filter(status="submitted")
-            .only(
+            objects.only(
                 "title",
                 "slug",
                 "status",
@@ -624,6 +622,29 @@ class ProcessingRequestList(RequestList):
                     to_attr="open_newagencytasks",
                 ),
             )
+        )
+
+
+class ProcessingRequestList(BaseProcessingRequestList):
+    title = "Processing Requests"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(status="submitted")
+
+
+class PortalProcessingRequestList(BaseProcessingRequestList):
+    title = "Portal Requests"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(communications__portaltask__resolved=False)
+
+
+class SnailMailProcessingRequestList(BaseProcessingRequestList):
+    title = "Snail Mail Requests"
+
+    def get_queryset(self):
+        return (
+            super().get_queryset().filter(communications__snailmailtask__resolved=False)
         )
 
 
