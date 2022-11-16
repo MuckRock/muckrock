@@ -38,14 +38,27 @@ from muckrock.foia.forms import (
     SaveSearchForm,
     SaveSearchFormHandler,
 )
-from muckrock.foia.models import END_STATUS, FOIAComposer, FOIARequest, FOIASavedSearch
+from muckrock.foia.models import (
+    END_STATUS,
+    FOIACommunication,
+    FOIAComposer,
+    FOIARequest,
+    FOIASavedSearch,
+)
 from muckrock.foia.rules import can_embargo, can_embargo_permananently
 from muckrock.foia.tasks import export_csv
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag, normalize
-from muckrock.task.models import ReviewAgencyTask
+from muckrock.task.models import (
+    MultiRequestTask,
+    NewAgencyTask,
+    PaymentInfoTask,
+    PortalTask,
+    ReviewAgencyTask,
+    SnailMailTask,
+)
 
 
 class RequestExploreView(TemplateView):
@@ -558,8 +571,60 @@ class ProcessingRequestList(RequestList):
 
     def get_queryset(self):
         """Apply select and prefetch related"""
+
+        def make_prefetch(task):
+            """
+            Make a Prefetch object to get tasks from the communications for
+            the request
+            """
+            name = task.__name__.lower()
+            return Prefetch(
+                "communications",
+                queryset=FOIACommunication.objects.filter(
+                    **{f"{name}__resolved": False}
+                ).prefetch_related(
+                    Prefetch(
+                        f"{name}_set",
+                        queryset=task.objects.filter(resolved=False),
+                        to_attr=f"open_{name}s",
+                    ),
+                ),
+                to_attr=f"{name}_communications",
+            )
+
         objects = super().get_queryset()
-        return objects.prefetch_related("communications").filter(status="submitted")
+        return (
+            objects.filter(status="submitted")
+            .only(
+                "title",
+                "slug",
+                "status",
+                "agency__name",
+                "agency__jurisdiction__name",
+                "agency__jurisdiction__slug",
+                "agency__jurisdiction__level",
+                "agency__jurisdiction__parent__abbrev",
+                "composer__datetime_submitted",
+                "crowdfund_id",
+                "date_processing",
+            )
+            .select_related()
+            .prefetch_related(
+                make_prefetch(PortalTask),
+                make_prefetch(SnailMailTask),
+                make_prefetch(PaymentInfoTask),
+                Prefetch(
+                    "composer__multirequesttask_set",
+                    queryset=MultiRequestTask.objects.filter(resolved=False),
+                    to_attr="open_multirequesttasks",
+                ),
+                Prefetch(
+                    "agency__newagencytask_set",
+                    queryset=NewAgencyTask.objects.filter(resolved=False),
+                    to_attr="open_newagencytasks",
+                ),
+            )
+        )
 
 
 @class_view_decorator(login_required)

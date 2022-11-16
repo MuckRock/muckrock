@@ -1,16 +1,54 @@
-{% extends 'foia/list.html' %}
+{% extends "foia/list.html" %}
 {% load tags %}
 
 {% block list-table-head %}
-<th data-sort="title">Title</th>
-<th width="20%" data-sort="date_submitted">Created</th>
-<th width="20%" data-sort="date_processing">Processing</th>
+  <th data-sort="title">Title</th>
+  <th width="10%" data-sort="date_submitted">Created</th>
+  <th width="10%" data-sort="date_processing">Processing</th>
+  <th width="10%">Task</th>
+  <th width="10%">Category</th>
+  <th width="10%">Reason</th>
+  <th width="10%">Error</th>
+  <th width="10%">MR</th>
 {% endblock list-table-head %}
 
 {% block list-table-row %}
-{% with object as foia %}
-<td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
-<td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
-<td>{{ foia.processing_length }} days</td>
-{% endwith %}
+  {% with object as foia %}
+    <td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
+    <td>{{ foia.composer.datetime_submitted|date:"m/d/Y" }}</td>
+    <td>{{ foia.processing_length }} days</td>
+    <td>
+      {% if foia.portaltask_communications.0.open_portaltasks %}
+        Portal
+      {% elif foia.snailmailtask_communications.0.open_snailmailtasks %}
+        Snail Mail
+      {% elif foia.composer.open_multirequesttasks %}
+        Multirequest
+      {% elif foia.paymentinfotask_communications.0.open_paymentinfotasks %}
+        Payment Info
+      {% elif foia.agency.open_newagencytasks %}
+        New Agency
+      {% endif %}
+    </td>
+    <td>
+      {% if foia.portaltask_communications.0.open_portaltasks %}
+        {{ foia.portaltask_communications.0.open_portaltasks.0.get_category_display }}
+      {% elif foia.snailmailtask_communications.0.open_snailmailtasks %}
+        {{ foia.snailmailtask_communications.0.open_snailmailtasks.0.get_category_display }}
+      {% endif %}
+    </td>
+    <td>
+      {% if foia.portaltask_communications.0.open_portaltasks %}
+        {{ foia.portaltask_communications.0.open_portaltasks.0.reason }}
+      {% elif foia.snailmailtask_communications.0.open_snailmailtasks %}
+        {{ foia.snailmailtask_communications.0.open_snailmailtasks.0.get_reason_display }}
+      {% endif %}
+    </td>
+    <td>
+      {% if foia.snailmailtask_communications.0.open_snailmailtasks %}
+        {{ foia.snailmailtask_communications.0.open_snailmailtasks.0.error_msg }}
+      {% endif %}
+    </td>
+    <td>{{ foia.pk }}</td>
+  {% endwith %}
 {% endblock list-table-row %}
