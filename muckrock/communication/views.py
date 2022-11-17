@@ -230,19 +230,15 @@ class BadAddressListView(MRListView):
         )
         .filter(
             # required fields
-            Q(street="")
-            | Q(city="")
-            | Q(state="")
-            | Q(zip_code="")
-            |
+            Q(street="") | Q(city="") | Q(state="") | Q(zip_code="") |
             # length limits
             Q(agency_override_len__gt=40)
             | Q(attn_override_len__gt=34)
             | Q(street_len__gt=64)
             | Q(suite_len__gt=64)
-            | Q(city_len__gt=200)
+            | Q(city_len__gt=200),
+            agencies__status__in=["approved", "pending"],
         )
-        .exclude(agencies=None)
         .prefetch_related("agencies", "to_mails")
     )
 
