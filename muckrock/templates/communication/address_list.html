@@ -4,9 +4,10 @@
 {% block list-table-head %}
   <th width="5%">Admin</th>
   <th width="10%">Agencies</th>
+  <th width="5%">Usage</th>
   <th width="10%">Street</th>
   <th width="10%">Suite</th>
-  <th width="15%">City</th>
+  <th width="10%">City</th>
   <th width="5%">State</th>
   <th width="10%">Zip Code</th>
   <th width="10%">Agency Override</th>
@@ -27,6 +28,9 @@
           {{ agency.name }}
         </a>
       {% endfor %}
+    </td>
+    <td>
+      {{ address.to_mails|length }}
     </td>
     <td>
       {{ address.street }}

@@ -242,7 +242,8 @@ class BadAddressListView(MRListView):
             | Q(suite_len__gt=64)
             | Q(city_len__gt=200)
         )
-        .prefetch_related("agencies")
+        .exclude(agencies=None)
+        .prefetch_related("agencies", "to_mails")
     )
 
 
