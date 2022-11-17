@@ -2,11 +2,14 @@
 """Admin registration for communication models"""
 
 # Django
+from django import forms
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 # Third Party
+from localflavor.us.forms import USZipCodeField
+from localflavor.us.us_states import STATE_CHOICES
 from reversion.admin import VersionAdmin
 
 # MuckRock
@@ -210,6 +213,41 @@ class PhoneNumberAdmin(VersionAdmin):
     inlines = [SourceInline]
 
 
+class AddressAdminForm(forms.ModelForm):
+    # Character limits are for conforming to Lob's requirements
+    agency_override = forms.CharField(
+        max_length=40,
+        label="Name",
+        required=False,
+        help_text="Who the letter should be addressed to.  If left blank, will default "
+        "to the agency's name.",
+    )
+    attn_override = forms.CharField(
+        max_length=34,
+        label="Attention of",
+        required=False,
+        help_text="Who the letter should be to the attention of.  If left blank, "
+        "will default to the FOIA Office (or applicable law for states).",
+    )
+    street = forms.CharField(max_length=64)
+    suite = forms.CharField(max_length=64, required=False)
+    city = forms.CharField(max_length=200)
+    state = forms.ChoiceField(choices=(("", "---"),) + tuple(STATE_CHOICES))
+    zip_code = USZipCodeField()
+
+    class Meta:
+        model = Address
+        fields = [
+            "agency_override",
+            "attn_override",
+            "street",
+            "suite",
+            "city",
+            "state",
+            "zip_code",
+        ]
+
+
 class AddressAdmin(VersionAdmin):
     """Address admin"""
 
@@ -223,6 +261,8 @@ class AddressAdmin(VersionAdmin):
         "agency_override",
         "attn_override",
     ]
+    readonly_fields = ["address"]
+    form = AddressAdminForm
     fieldsets = (
         (None, {"fields": ("street", "suite", "city", "state", "zip_code")}),
         (
@@ -237,7 +277,10 @@ class AddressAdmin(VersionAdmin):
             "Full override",
             {
                 "classes": ("collapse",),
-                "description": "Override the entire address",
+                "description": "Override the entire address.  This field is "
+                "deprecated, as it is not compatible with Lob.  The address must "
+                "be made to fit the fields above in order to automatically mail "
+                "letters via Lob.",
                 "fields": ("address",),
             },
         ),

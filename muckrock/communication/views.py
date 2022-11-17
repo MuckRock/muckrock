@@ -220,25 +220,30 @@ class BadAddressListView(MRListView):
     model = Address
     title = "Bad Addresses"
     template_name = "communication/address_list.html"
-    queryset = Address.objects.annotate(
-        street_len=Length("street"),
-        suite_len=Length("suite"),
-        city_len=Length("city"),
-        agency_override_len=Length("agency_override"),
-        attn_override_len=Length("attn_override"),
-    ).filter(
-        # required fields
-        Q(street="")
-        | Q(city="")
-        | Q(state="")
-        | Q(zip_code="")
-        |
-        # length limits
-        Q(agency_override_len__gt=40)
-        | Q(attn_override_len__gt=34)
-        | Q(street_len__gt=64)
-        | Q(suite_len__gt=64)
-        | Q(city_len__gt=200)
+    queryset = (
+        Address.objects.annotate(
+            street_len=Length("street"),
+            suite_len=Length("suite"),
+            city_len=Length("city"),
+            agency_override_len=Length("agency_override"),
+            attn_override_len=Length("attn_override"),
+        )
+        .filter(
+            # required fields
+            Q(street="")
+            | Q(city="")
+            | Q(state="")
+            | Q(zip_code="")
+            |
+            # length limits
+            Q(agency_override_len__gt=40)
+            | Q(attn_override_len__gt=34)
+            | Q(street_len__gt=64)
+            | Q(suite_len__gt=64)
+            | Q(city_len__gt=200)
+        )
+        .exclude(agencies=None)
+        .prefetch_related("agencies", "to_mails")
     )
 
 
