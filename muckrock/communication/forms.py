@@ -20,8 +20,7 @@ class AddressForm(forms.ModelForm):
         label="Name",
         required=False,
         help_text="Who the letter should be addressed to.  If left blank, will default "
-        "to the agency's name.  This should be filled in if the agency name "
-        "is greater than 40 characters for Lob compatibility",
+        "to the agency's name.",
     )
     attn_override = forms.CharField(
         max_length=34,
