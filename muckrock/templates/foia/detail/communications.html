@@ -77,6 +77,10 @@
             {% endif %}
             {% if can_appeal %}
               <a href="#appeal" id="appeal-button" class="red button">Appeal</a>
+            {% else %}
+              <button href="#" id="appeal-button" class="red button" disabled title="This jurisdiction does not have an administrative appeal process. Click “Follow Up” to send a message to this agency or “Get Help” for MuckRock Support.">
+                Appeal
+              </button>
             {% endif %}
           </div>
           {% if not is_agency_user %}
