@@ -117,6 +117,20 @@
         {% endfor %}
       </div>
     </div>
+    <div class="grid__column half">
+      <div class="place-map">
+        <h2>Does the jurisdiction have an appeal process?</h2>
+        <p>
+          Many jurisdictions allow requesters to appeal denials, although these
+          processes vary widely. Based on MuckRock’s research, the following
+          jurisdictions allow some form of requester appeal. You can click on a
+          given state to learn more about its process.
+        </p>
+        {% include "jurisdiction/map.html" with stat="has_appeal" %}
+      </div>
+    </div>
+    <div class="grid__column half">
+    </div>
   </div>
   <p class="credits">Michael Andre, Gurman Bhatia, JPat Brown, Jabril Faraj, Maddy Kennedy, Mitchell Kotler, Beryl Lipton, Edgar Mendez, Michael Morisy, Devi Shastri, Theresa Soley, Miranda Spivack, and Curtis Waltman contributed to the research, fact checking, design and implementation of this database. For any updates, additions or corrections, please send an email to info@muckrock.com. It was funded in part by the Fund for Investigative Journalism, Marquette’s O’Brien Fellowship in Public Service Journalism, and the Arnold Foundation.</p>
 </div>
