@@ -892,13 +892,17 @@ class ZipRequest(AsyncFileDownloadTask):
 
     def generate_file(self, out_file):
         """Zip all of the communications and files"""
+        # https://stackoverflow.com/questions/57165960/error-0x80070057-the-parameter-is-incorrect-when-unzipping-files
+        def clean(filename):
+            return re.sub('[<>:"/\\\\|?*]', "_", filename)
+
         with ZipFile(mode="w", compression=ZIP_DEFLATED, allowZip64=True) as zip_file:
             for i, comm in enumerate(self.foia.communications.all()):
                 file_name = "{:03d}_{}_comm.txt".format(i, comm.datetime)
-                zip_file.writestr(file_name, comm.communication.encode("utf8"))
+                zip_file.writestr(clean(file_name), comm.communication.encode("utf8"))
                 for ffile in comm.files.all():
                     zip_file.write_iter(
-                        ffile.name(),
+                        clean(ffile.name()),
                         # read in 5MB chunks at a time
                         read_in_chunks(ffile.ffile, size=5 * 1024 * 1024),
                     )
