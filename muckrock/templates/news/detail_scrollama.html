@@ -43,9 +43,6 @@
 
 		// generic window resize listener event
 		function handleResize() {
-			// 1. update height of step elements
-			var stepH = Math.floor(window.innerHeight * 0.75);
-      steps.forEach(step => { step.style.height = stepH + "px"; });
 
 			var infoboxHeight = window.innerHeight / 2;
 			var infoboxMarginTop = (window.innerHeight - infoboxHeight) / 2;
