@@ -76,6 +76,9 @@ http {
  	}
 
 	server {
+		if ($http_user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15"){
+		  return 403;
+		}
 		listen <%= ENV["PORT"] %>;
 		server_name www.muckrock.com "";
 		keepalive_timeout 5;
