@@ -193,6 +193,7 @@ class Agency(models.Model, RequestHelper):
     )
     exempt_note = models.CharField(max_length=255, blank=True)
     requires_proxy = models.BooleanField(default=False)
+    has_appeal = models.BooleanField(default=True)
 
     objects = AgencyQuerySet.as_manager()
 

@@ -120,7 +120,7 @@ is_thankable = ~has_thanks & has_status(*END_STATUS)
 @predicate
 @skip_if_not_obj
 def has_appealable_jurisdiction(user, foia):
-    return foia.agency and foia.agency.jurisdiction.has_appeal
+    return foia.agency.has_appeal and foia.agency.jurisdiction.has_appeal
 
 
 @predicate
