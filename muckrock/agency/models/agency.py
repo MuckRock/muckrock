@@ -307,6 +307,15 @@ class Agency(models.Model, RequestHelper):
         """Is there an open review agency task for this agency"""
         return self.reviewagencytask_set.filter(resolved=False).exists()
 
+    def get_appeal_agency(self):
+        """Get the appeal agency for this agency"""
+        if self.appeal_agency:
+            return self.appeal_agency
+        elif self.jurisdiction.appeal_agency:
+            return self.jurisdiction.appeal_agency
+        else:
+            return self
+
     @property
     def email(self):
         """The main email"""
@@ -340,6 +349,8 @@ class Agency(models.Model, RequestHelper):
         ]
         for relation in replace_relations:
             getattr(agency, relation).update(agency=self)
+        # appeal jurisdictions attribute it appeal agency
+        agency.appeal_jurisdictions.update(appeal_agency=self)
 
         replace_self_relations = [
             ("appeal_agency", "appeal_for"),

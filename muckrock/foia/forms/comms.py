@@ -274,7 +274,9 @@ class ContactInfoForm(SendViaForm):
         if self.agency:
             agency = self.agency
         elif self.foia:
-            agency = self.foia.agency.appeal_agency if appeal else self.foia.agency
+            agency = (
+                self.foia.agency.get_appeal_agency() if appeal else self.foia.agency
+            )
         else:
             agency = None
         if agency:

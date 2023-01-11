@@ -426,6 +426,28 @@ class TestFOIARequestAppeal(RunCommitHooksMixin, TestCase):
         eq_(appeal_comm.to_user, self.agency.get_user())
         ok_(appeal_comm.emails.exists())
 
+    def test_appeal_jurisdiction(self):
+        """Set the appeal agency via the jurisdiction"""
+        new_appeal_agency = AppealAgencyFactory()
+        self.agency.jurisdiction.appeal_agency = new_appeal_agency
+        self.agency.jurisdiction.save()
+        self.agency.appeal_agency = None
+        self.agency.save()
+        # Create the appeal message and submit it
+        appeal_message = "Lorem ipsum"
+        appeal_comm = self.foia.appeal(appeal_message, self.foia.user)
+        # Check that everything happened like we expected
+        self.foia.refresh_from_db()
+        appeal_comm.refresh_from_db()
+        self.run_commit_hooks()
+        eq_(self.foia.agency.get_appeal_agency(), new_appeal_agency)
+        eq_(self.foia.email, new_appeal_agency.get_emails("appeal").first())
+        eq_(self.foia.status, "appealing")
+        eq_(appeal_comm.communication, appeal_message)
+        eq_(appeal_comm.from_user, self.foia.user)
+        eq_(appeal_comm.to_user, self.agency.get_user())
+        ok_(appeal_comm.emails.exists())
+
     def test_mailed_appeal(self):
         """Sending an appeal to an agency via mail should set the request to
         'submitted', create a snail mail task with the 'a' category, and set

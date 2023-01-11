@@ -117,7 +117,7 @@ class TestAgencyUnit(TestCase):
                     if f.is_relation and f.auto_created
                 ]
             ),
-            16,
+            17,
         )
         # Many to many relations defined on the agency model
         eq_(

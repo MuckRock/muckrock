@@ -224,8 +224,8 @@ class SnailMailTaskNode(TaskNode):
         # if this is an appeal and their is a specific appeal agency, display
         # that agency, else display the standard agency
         foia_ = self.task.communication.foia
-        if self.task.category == "a" and foia_.agency.appeal_agency:
-            agency_ = foia_.agency.appeal_agency
+        if self.task.category == "a":
+            agency_ = foia_.agency.get_appeal_agency()
         else:
             agency_ = foia_.agency
         extra_context["agency"] = agency_
