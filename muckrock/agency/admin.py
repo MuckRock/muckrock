@@ -183,6 +183,7 @@ class AgencyAdmin(VersionAdmin):
                     "contact_last_name",
                     "contact_title",
                     "portal",
+                    "use_portal_appeal",
                     "form",
                     "url",
                     "website",

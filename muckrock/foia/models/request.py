@@ -584,7 +584,7 @@ class FOIARequest(models.Model):
 
         # set addresses if none have been set yet or if they have been cleared
         if not self.portal and not self.email and not self.fax and not self.address:
-            if not appeal:
+            if not appeal or agency.use_portal_appeal:
                 self.portal = agency.portal
             self.email = agency.get_emails(request_type, "to").first()
             self.fax = agency.get_faxes(request_type).first()

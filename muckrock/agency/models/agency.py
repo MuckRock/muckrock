@@ -145,6 +145,9 @@ class Agency(models.Model, RequestHelper):
         null=True,
         on_delete=models.SET_NULL,
     )
+    use_portal_appeal = models.BooleanField(
+        default=False, help_text="Use the portal for appeals"
+    )
     contact_salutation = models.CharField(blank=True, max_length=30)
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)
