@@ -28,6 +28,7 @@ django-phonenumber-field # for storing phone numbers in the database
 django-premailer # Styles HTML emails
 django-reversion # Version history for models
 django-robots # Manage robots.txt file
+django-simple-history # Jurisdiction page history
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging

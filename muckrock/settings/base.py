@@ -216,6 +216,7 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "reversion.middleware.RevisionMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 )
 
 INTERNAL_IPS = ("127.0.0.1",)
@@ -290,6 +291,7 @@ INSTALLED_APPS = (
     "muckrock.portal",
     "muckrock.crowdsource",
     "actstream",
+    "simple_history",
 )
 
 
@@ -789,3 +791,5 @@ DOCCLOUD_PROCESSING_WAIT = int(os.environ.get("DOCCLOUD_PROCESSING_WAIT", 60))
 AGENCY_SESSION_TIME = int(os.environ.get("AGENCY_SESSION_TIME", 7200))
 
 FOIA_TASKS_STAFF_ONLY = boolcheck(os.environ.get("FOIA_TASKS_STAFF_ONLY", True))
+
+SIMPLE_HISTORY_HISTORY_CHANGE_REASON_USE_TEXT_FIELD = True

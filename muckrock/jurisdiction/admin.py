@@ -13,6 +13,7 @@ import logging
 # Third Party
 from dal import forward
 from reversion.admin import VersionAdmin
+from simple_history.admin import SimpleHistoryAdmin
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -23,6 +24,7 @@ from muckrock.jurisdiction.models import (
     Exemption,
     InvokedExemption,
     Jurisdiction,
+    JurisdictionPage,
     Law,
 )
 
@@ -34,6 +36,7 @@ class LawInline(admin.StackedInline):
 
     model = Law
     extra = 0
+    exclude = ["law_analysis"]
 
 
 class ExampleAppealInline(admin.TabularInline):
@@ -165,5 +168,25 @@ class ExemptionAdmin(VersionAdmin):
     form = ExemptionAdminForm
 
 
+class JurisdictionPageForm(forms.ModelForm):
+    reason = forms.CharField(widget=forms.Textarea())
+
+    class Meta:
+        model = JurisdictionPage
+        fields = "__all__"
+
+
+class JurisdictionPageAdmin(SimpleHistoryAdmin):
+    list_select_related = ["jurisdiction"]
+    autocomplete_fields = ["jurisdiction"]
+    form = JurisdictionPageForm
+
+    def save_model(self, request, obj, form, change):
+        # pylint: disable=protected-access
+        obj._change_reason = form.cleaned_data["reason"]
+        return super().save_model(request, obj, form, change)
+
+
 admin.site.register(Exemption, ExemptionAdmin)
 admin.site.register(Jurisdiction, JurisdictionAdmin)
+admin.site.register(JurisdictionPage, JurisdictionPageAdmin)
