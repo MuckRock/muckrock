@@ -95,6 +95,13 @@ class Jurisdiction(models.Model, RequestHelper):
     )
     public_notes = models.TextField(blank=True, help_text="May use html")
     aliases = models.TextField(blank=True)
+    appeal_agency = models.ForeignKey(
+        "agency.Agency",
+        related_name="appeal_jurisdictions",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
 
     always_proxy = models.BooleanField(default=False)
 

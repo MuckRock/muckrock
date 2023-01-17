@@ -460,10 +460,7 @@ class FOIARequest(models.Model):
         not set the request status, unless the request requires a proxy.
         """
 
-        if appeal and self.agency.appeal_agency:
-            agency = self.agency.appeal_agency
-        else:
-            agency = self.agency
+        agency = self.agency.get_appeal_agency() if appeal else self.agency
 
         needs_review = self.set_address(
             appeal, kwargs.get("contact_info"), kwargs.get("clear")
@@ -493,10 +490,7 @@ class FOIARequest(models.Model):
     def set_address(self, appeal, contact_info, clear):
         """Set the correct contact info upon request submission"""
 
-        if appeal and self.agency.appeal_agency:
-            agency = self.agency.appeal_agency
-        else:
-            agency = self.agency
+        agency = self.agency.get_appeal_agency() if appeal else self.agency
 
         # Return signifies a need to review
         if contact_info and "via" in contact_info:
@@ -590,7 +584,7 @@ class FOIARequest(models.Model):
 
         # set addresses if none have been set yet or if they have been cleared
         if not self.portal and not self.email and not self.fax and not self.address:
-            if not appeal:
+            if not appeal or agency.use_portal_appeal:
                 self.portal = agency.portal
             self.email = agency.get_emails(request_type, "to").first()
             self.fax = agency.get_faxes(request_type).first()
@@ -626,7 +620,7 @@ class FOIARequest(models.Model):
 
     def get_appeal_contact_info(self):
         """Get the appeal contact info"""
-        agency = self.agency.appeal_agency or self.agency
+        agency = self.agency.get_appeal_agency()
         return {
             "email": agency.get_emails("appeal", "to").first(),
             "cc_emails": json.dumps(
@@ -906,11 +900,8 @@ class FOIARequest(models.Model):
         with transaction.atomic():
             # if no address, try to find one on the agency
             if not self.address:
-                if kwargs.get("appeal") and self.agency.appeal_agency:
-                    agency = self.agency.appeal_agency
-                    request_type = "appeal"
-                elif kwargs.get("appeal"):
-                    agency = self.agency
+                if kwargs.get("appeal"):
+                    agency = self.agency.get_appeal_agency()
                     request_type = "appeal"
                 else:
                     agency = self.agency
@@ -977,8 +968,8 @@ class FOIARequest(models.Model):
             if payment_address:
                 context["address"] = payment_address.format(self.agency, appeal=appeal)
         elif self.address and include_address:
-            if appeal and self.agency and self.agency.appeal_agency:
-                agency = self.agency.appeal_agency
+            if appeal and self.agency:
+                agency = self.agency.get_appeal_agency()
             else:
                 agency = self.agency
             context["address"] = self.address.format(agency, appeal=appeal)

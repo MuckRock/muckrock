@@ -258,7 +258,7 @@
               <form class="composer-input" method="post">
                 <header>
                   Send an appeal to the
-                  {{ foia.agency.appeal_agency.name|default:foia.agency.name }}
+                  {{ foia.agency.get_appeal_agency.name }}
                   <br class="nomargin">
                   <div class="contact-info">
                     <a class="see-where" href="#">

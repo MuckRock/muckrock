@@ -170,7 +170,10 @@ class AgencyAdmin(VersionAdmin):
         ("Image", {"fields": ("image", "image_attr_line")}),
         ("Notes", {"fields": ("public_notes", "notes")}),
         ("Related Agencies", {"fields": ("appeal_agency", "parent")}),
-        ("Exempt", {"fields": ("exempt", "uncooperative", "exempt_note")}),
+        (
+            "Exempt",
+            {"fields": ("exempt", "uncooperative", "exempt_note", "has_appeal")},
+        ),
         (
             "Contact Information",
             {
@@ -180,6 +183,7 @@ class AgencyAdmin(VersionAdmin):
                     "contact_last_name",
                     "contact_title",
                     "portal",
+                    "use_portal_appeal",
                     "form",
                     "url",
                     "website",

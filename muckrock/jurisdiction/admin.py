@@ -11,9 +11,11 @@ from django.contrib.auth.models import User
 import logging
 
 # Third Party
+from dal import forward
 from reversion.admin import VersionAdmin
 
 # MuckRock
+from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import (
@@ -65,6 +67,28 @@ class InvokedExemptionInline(admin.StackedInline):
     extra = 0
 
 
+class JurisdictionAdminForm(forms.ModelForm):
+    """Jurisdiction admin form"""
+
+    appeal_agency = forms.ModelChoiceField(
+        queryset=Agency.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            forward=(
+                forward.Field("id", "jurisdiction"),
+                forward.Const(True, "appeal"),
+            ),
+            attrs={"data-placeholder": "Agency?", "data-width": None},
+        ),
+    )
+    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+
+    class Meta:
+        model = Jurisdiction
+        fields = "__all__"
+
+
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
 
@@ -74,11 +98,13 @@ class JurisdictionAdmin(VersionAdmin):
     search_fields = ["name"]
     inlines = [LawInline]
     filter_horizontal = ("holidays",)
+    form = JurisdictionAdminForm
     fieldsets = (
         (
             None,
             {
                 "fields": (
+                    "id",
                     "name",
                     "slug",
                     "abbrev",
@@ -89,6 +115,7 @@ class JurisdictionAdmin(VersionAdmin):
                     "image_attr_line",
                     "public_notes",
                     "aliases",
+                    "appeal_agency",
                 )
             },
         ),
