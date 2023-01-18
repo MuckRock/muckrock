@@ -74,7 +74,11 @@
           {{ jurisdiction.public_notes|markdown }}
         </section>
       {% endif %}
-      {% if jurisdiction.jurisdictionpage.content %}
+      {% if preview_text %}
+        <section class="analysis">
+          {{ preview_text|markdown }}
+        </section>
+      {% elif jurisdiction.jurisdictionpage.content %}
         <section class="analysis">
           {{ jurisdiction.jurisdictionpage.content|markdown }}
         </section>

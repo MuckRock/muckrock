@@ -6,6 +6,10 @@ Admin registration for Jurisdiction models
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
+from django.shortcuts import get_object_or_404
+from django.urls import re_path
 
 # Standard Library
 import logging
@@ -27,6 +31,7 @@ from muckrock.jurisdiction.models import (
     JurisdictionPage,
     Law,
 )
+from muckrock.jurisdiction.views import detail
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +189,44 @@ class JurisdictionPageAdmin(SimpleHistoryAdmin):
     def save_model(self, request, obj, form, change):
         # pylint: disable=protected-access
         obj._change_reason = form.cleaned_data["reason"]
+        cache.delete(
+            make_template_fragment_key("jurisdiction_detail", [obj.jurisdiction.pk])
+        )
         return super().save_model(request, obj, form, change)
+
+    def get_urls(self):
+        """Add custom URLs here"""
+        urls = super().get_urls()
+        my_urls = [
+            re_path(
+                r"^preview/(?P<idx>\d+)/$",
+                self.admin_site.admin_view(self.preview),
+                name="jurisdiction-page-preview",
+            ),
+        ]
+        return my_urls + urls
+
+    def preview(self, request, idx):
+        """Preview the jurisdiction page"""
+        page = get_object_or_404(JurisdictionPage, pk=idx)
+        cache.delete(
+            make_template_fragment_key("jurisdiction_detail", [page.jurisdiction.pk])
+        )
+        if page.jurisdiction.level == "f":
+            fed_slug = page.jurisdiction.slug
+            state_slug = None
+            local_slug = None
+        elif page.jurisdiction.level == "s":
+            fed_slug = page.jurisdiction.parent.slug
+            state_slug = page.jurisdiction.slug
+            local_slug = None
+        else:
+            fed_slug = page.jurisdiction.parent.parent.slug
+            state_slug = page.jurisdiction.parent.slug
+            local_slug = page.jurisdiction.slug
+        return detail(
+            request, fed_slug, state_slug, local_slug, request.POST.get("content")
+        )
 
 
 admin.site.register(Exemption, ExemptionAdmin)

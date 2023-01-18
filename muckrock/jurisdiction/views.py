@@ -131,7 +131,7 @@ def collect_stats(obj, context):
     context["num_submitted"] = requests.count()
 
 
-def detail(request, fed_slug, state_slug=None, local_slug=None):
+def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=None):
     """Details for a jurisdiction"""
     if local_slug:
         jurisdiction = get_object_or_404(
@@ -208,6 +208,7 @@ def detail(request, fed_slug, state_slug=None, local_slug=None):
         "form": form,
         "sidebar_admin_url": admin_url,
         "title": jurisdiction.name + " Public Records Guide",
+        "preview_text": preview_text,
     }
     if request.user.is_staff and jurisdiction.abbrev:
         context["proxies"] = User.objects.filter(
