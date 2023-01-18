@@ -74,9 +74,13 @@
           {{ jurisdiction.public_notes|markdown }}
         </section>
       {% endif %}
-      {% if jurisdiction.law.law_analysis %}
+      {% if preview_text %}
         <section class="analysis">
-          {{ jurisdiction.law.law_analysis|markdown }}
+          {{ preview_text|markdown }}
+        </section>
+      {% elif jurisdiction.jurisdictionpage.content %}
+        <section class="analysis">
+          {{ jurisdiction.jurisdictionpage.content|markdown }}
         </section>
       {% elif jurisdiction.level == 's' %}
         <div class="warning message">

@@ -12,6 +12,7 @@ from django.urls import reverse
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
+from simple_history.models import HistoricalRecords
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -283,6 +284,25 @@ class Law(models.Model):
 
     def get_absolute_url(self):
         """Return the url for the jurisdiction."""
+        return self.jurisdiction.get_absolute_url()
+
+
+class JurisdictionPage(models.Model):
+    """The content for the jurisdiction page"""
+
+    jurisdiction = models.OneToOneField(
+        Jurisdiction,
+        on_delete=models.CASCADE,
+        limit_choices_to={"level__in": ("s", "f")},
+    )
+    content = models.TextField(help_text="Markdown content for the jurisdiction page")
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return str(self.jurisdiction)
+
+    def get_absolute_url(self):
+        """Use the jurisdiction's URL"""
         return self.jurisdiction.get_absolute_url()
 
 

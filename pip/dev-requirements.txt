@@ -12,6 +12,7 @@ autopep8==1.5.4           # via django-silk
 backcall==0.2.0           # via ipython
 bcrypt==3.1.6             # via paramiko
 black==22.6.0             # via -r pip/dev-requirements.in
+build==0.10.0             # via pip-tools
 certifi==2017.4.17        # via requests
 cffi==1.12.2              # via bcrypt, cryptography, pynacl
 chardet==3.0.3            # via requests
@@ -30,7 +31,6 @@ executing==0.10.0         # via stack-data
 fabric==1.14.1            # via -r pip/dev-requirements.in
 factory-boy==2.7.0        # via -r pip/dev-requirements.in
 fake-factory==0.7.2       # via factory-boy
-first==2.0.1              # via pip-tools
 freezegun==0.3.8          # via -r pip/dev-requirements.in
 gprof2dot==2019.11.30     # via django-silk
 idna==2.5                 # via requests
@@ -46,13 +46,14 @@ mccabe==0.6.1             # via pylint
 mock==2.0.0               # via -r pip/dev-requirements.in
 mypy-extensions==0.4.3    # via black
 nose==1.3.7               # via django-nose
+packaging==23.0           # via build
 paramiko==2.4.2           # via fabric
 parso==0.7.0              # via jedi
 pathspec==0.9.0           # via black
 pbr==1.10.0               # via mock
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.4        # via ipython
-pip-tools==2.0.2          # via -r pip/dev-requirements.in
+pip-tools==6.12.1         # via -r pip/dev-requirements.in
 platformdirs==2.5.2       # via black, pylint
 prompt-toolkit==3.0.31    # via ipython
 ptyprocess==0.6.0         # via pexpect
@@ -65,21 +66,24 @@ pylint==2.14.5            # via pylint-django, pylint-plugin-utils
 pylint-django==2.5.3      # via -r pip/dev-requirements.in
 pylint-plugin-utils==0.7  # via pylint-django
 pynacl==1.3.0             # via paramiko
+pyproject-hooks==1.0.0    # via build
 python-dateutil==2.5.3    # via django-silk, fake-factory, freezegun
 pytz==2020.1              # via django, django-silk
 requests==2.21.0          # via django-silk, requests-mock
 requests-mock==1.3.0      # via -r pip/dev-requirements.in
-six==1.15.0               # via asttokens, bcrypt, cryptography, dj-inmemorystorage, fake-factory, freezegun, mock, pip-tools, pynacl, python-dateutil, requests-mock
+six==1.15.0               # via asttokens, bcrypt, cryptography, dj-inmemorystorage, fake-factory, freezegun, mock, pynacl, python-dateutil, requests-mock
 sqlparse==0.2.4           # via django, django-debug-toolbar, django-silk
 stack-data==0.4.0         # via ipython
 toml==0.10.2              # via autopep8, ipdb
-tomli==2.0.1              # via black, pylint
+tomli==2.0.1              # via black, build, pylint, pyproject-hooks
 tomlkit==0.11.4           # via pylint
 traitlets==5.3.0          # via ipython, matplotlib-inline
 urllib3==1.24.2           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
+wheel==0.38.4             # via pip-tools
 whoosh==2.7.4             # via -r pip/dev-requirements.in
 wrapt==1.12.1             # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:
+# pip
 # setuptools
