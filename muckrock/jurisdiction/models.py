@@ -173,7 +173,7 @@ class Jurisdiction(models.Model, RequestHelper):
             return getattr(self.legal.law, attr)
         # if looking for a law relation, but this model does not have one,
         # do not error, but return None
-        if attr == "law":
+        if attr in {"law", "jurisdictionpage"}:
             return None
         raise AttributeError(
             "{!r} object has no attribute {!r}".format(self.__class__.__name__, attr)

@@ -13,6 +13,22 @@ from muckrock.core.test_utils import http_get_response
 from muckrock.jurisdiction import factories, views
 
 
+class TestJurisdictionDetailView(TestCase):
+    """Test the jurisdiction views"""
+
+    def setUp(self):
+        self.view = views.detail
+
+    def test_ok(self):
+        """The view should return a 200 OK status."""
+        jurisdiction = factories.FederalJurisdictionFactory()
+        url = jurisdiction.get_absolute_url()
+        kwargs = jurisdiction.get_slugs()
+
+        response = http_get_response(url, self.view, **kwargs)
+        eq_(response.status_code, 200)
+
+
 class TestExemptionDetailView(TestCase):
     """The exemption detail view provides information about the exemption at a
     standalone url."""
