@@ -238,7 +238,10 @@ class Profile(models.Model):
     def public_profile_page(self):
         """Does this user have a public profile page?"""
         filed_request = self.user.composers.exclude(status="started").count() > 0
-        return not self.private_profile and filed_request
+        has_byline = (
+            self.user.authored_articles.exists() or self.user.edited_articles.exists()
+        )
+        return not self.private_profile and (filed_request or has_byline)
 
 
 class RecurringDonation(models.Model):
