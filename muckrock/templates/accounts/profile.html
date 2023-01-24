@@ -56,6 +56,11 @@
       </li>
     {% endif %}
   </ul>
+  {% if user.profile.profile %}
+    <p>
+      {{ user.profile.profile|markdown }}
+    </p>
+  {% endif %}
   {% if user == user_obj %}
     <dl class="stats">
       {% if user.profile.individual_organization.requests_per_month %}

@@ -55,6 +55,7 @@ class ProfileQuerySet(models.QuerySet):
             "email_verified": "email_confirmed",
             "use_autologin": "use_autologin",
             "agency": "agency",
+            "bio": "profile",
         }
         profile_defaults = {
             "name": "",
@@ -62,6 +63,7 @@ class ProfileQuerySet(models.QuerySet):
             "email_failed": False,
             "email_verified": False,
             "use_autologin": True,
+            "bio": "",
         }
         # if key is not present in profile_defaults, the default is to
         # leave it unchanged, do not include it in profile_data
