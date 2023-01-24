@@ -579,8 +579,10 @@ def pay_fee(request, foia):
                 form.cleaned_data["organization"].pay(
                     amount=int(form.cleaned_data["amount"] * 1.05),
                     fee_amount=5,
-                    description="Pay ${:.2f} fee for request #{}".format(
-                        form.cleaned_data["amount"] / 100.0, foia.pk
+                    description="Pay ${:.2f} to {}, {} for request fees".format(
+                        form.cleaned_data["amount"] / 100.0,
+                        foia.agency,
+                        foia.jurisdiction,
                     ),
                     token=form.cleaned_data["stripe_token"],
                     save_card=form.cleaned_data["save_card"],
