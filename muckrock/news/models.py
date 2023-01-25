@@ -56,7 +56,9 @@ class Article(models.Model):
     title = models.CharField(max_length=200)
     kicker = models.CharField(max_length=200, blank=True)
     slug = models.SlugField(
-        unique=True, help_text='A "Slug" is a unique URL-friendly title for an object.'
+        max_length=200,
+        unique=True,
+        help_text='A "Slug" is a unique URL-friendly title for an object.',
     )
     summary = models.TextField(
         help_text="A single paragraph summary or preview of the article."
