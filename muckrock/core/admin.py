@@ -48,6 +48,7 @@ class FlatpageAdmin(SimpleHistoryAdmin, flatpages.admin.FlatPageAdmin):
     def preview(self, request, idx):
         """Preview the flatpage"""
         flatpage = get_object_or_404(FlatPage, pk=idx)
+        flatpage.content = request.POST.get("content")
         return render_flatpage(request, flatpage)
 
 
