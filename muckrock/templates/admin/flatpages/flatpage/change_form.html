@@ -1,0 +1,20 @@
+{% extends "admin/change_form.html" %}
+{% block object-tools-items %}
+  <script>
+    function preview(e) {
+      e.preventDefault();
+      var form = document.getElementById("flatpage_form");
+      form.setAttribute("action", "{% url 'admin:flatpage-preview' idx=original.pk %}");
+      form.setAttribute("target", "_blank");
+      form.submit();
+      form.removeAttribute("action");
+      form.removeAttribute("target");
+    }
+  </script>
+  {% if original %}
+    <li>
+      <a href="#" onclick="preview(event);">Preview</a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
