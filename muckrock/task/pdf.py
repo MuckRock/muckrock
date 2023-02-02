@@ -322,7 +322,7 @@ class MailPDF(PDF):
         try:
             self._resize_pages(merger.pages)
             merger.write(single_pdf)
-        except PdfReadError:
+        except (PdfReadError, TypeError):
             return (None, None, files, None)
 
         # create the mail communication object
