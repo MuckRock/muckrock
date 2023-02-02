@@ -208,6 +208,15 @@ $color-advanced-container: lighten($color-agency, 40%);
         }
     }
 
+    .tags {
+      .select2 .select2-selection__choice {
+        color: $color-black;
+      }
+      .select2-selection__choice__remove {
+        filter:brightness(0%);
+      }
+    }
+
     footer.footer--submit, footer.footer--signup {
         padding: $vr;
         @include border-bottom-radius($border-radius);
