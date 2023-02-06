@@ -293,6 +293,7 @@ def markdown_filter(text, _safe=None):
         "markdown.extensions.tables",
         "markdown.extensions.codehilite",
         "markdown.extensions.fenced_code",
+        "markdown.extensions.md_in_html",
         "pymdownx.magiclink",
     ]
     markdown_text = markdown.markdown(text, extensions=extensions)

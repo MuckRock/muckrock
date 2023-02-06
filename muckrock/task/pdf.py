@@ -19,16 +19,16 @@ from tempfile import TemporaryDirectory
 
 # Third Party
 import emoji
-import PyPDF2
+import pypdf
 from fpdf import FPDF
-from PyPDF2 import PdfMerger, PdfReader
-from PyPDF2.errors import PdfReadError
+from pypdf import PdfMerger, PdfReader
+from pypdf.errors import PdfReadError
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
 
 # These are the dimensions of a standard sized PDF page
-# in whatever units PyPDF2 are using
+# in whatever units pypdf are using
 PDF_WIDTH = 612
 PDF_HEIGHT = 792
 
@@ -47,13 +47,11 @@ def walk(obj, fnt, emb):
     We create and add to two sets, fnt = fonts used and emb = fonts embedded.
     """
 
-    if isinstance(obj, PyPDF2.generic.IndirectObject):
+    if isinstance(obj, pypdf.generic.IndirectObject):
         # recurse on indirect objects
         walk(obj.get_object(), fnt, emb)
 
-    if not isinstance(
-        obj, (PyPDF2.generic.DictionaryObject, PyPDF2.generic.ArrayObject)
-    ):
+    if not isinstance(obj, (pypdf.generic.DictionaryObject, pypdf.generic.ArrayObject)):
         # cannot check non dictionary or array objects for properties
         return
 
@@ -65,12 +63,12 @@ def walk(obj, fnt, emb):
             emb.add(obj["/FontName"])
 
     # recurse on dictionaries
-    if isinstance(obj, PyPDF2.generic.DictionaryObject):
+    if isinstance(obj, pypdf.generic.DictionaryObject):
         for key in obj.keys():
             walk(obj[key], fnt, emb)
 
     # recurse on arrays
-    elif isinstance(obj, PyPDF2.generic.ArrayObject):
+    elif isinstance(obj, pypdf.generic.ArrayObject):
         for i in obj:
             walk(i, fnt, emb)
 
