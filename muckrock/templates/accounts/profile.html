@@ -56,9 +56,9 @@
       </li>
     {% endif %}
   </ul>
-  {% if user.profile.profile %}
+  {% if profile.profile %}
     <p>
-      {{ user.profile.profile|markdown }}
+      {{ profile.profile|markdown }}
     </p>
   {% endif %}
   {% if user == user_obj %}
