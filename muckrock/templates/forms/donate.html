@@ -46,14 +46,29 @@
                 </div>
                 <div>
                     <input type="number" name="stripe_amount" id="other_amount">
+                    <input type="text" name="name" id="name" placeholder="Name">
+                    <input type="text" name="email" id="email" placeholder="Email">
+                    <input type="text" name="phone" id="phone" placeholder="Phone Number">
+                    <input type="text" name="honor" id="honor" placeholder="In Honor Of">
+                    <p class="why">
+                      We appreciate your support.  We'd love to know more
+                      about what inspired you to give to MuckRock today.
+                    </p>
+                    <textarea name="why" id="why"></textarea>
+                    <label>
+                      <input type="checkbox" name="cover_fees" id="cover_fees">
+                      I’d like to cover the processing fees so more of my
+                      donation goes directly to MuckRock.
+                    </label>
                 </div>
             </div>
             <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
+
             <div class="buttons">
                 <button type="submit" class="green button">Donate</button>
             </div>
         </form>
-        <p><small>Donations may also be sent via PayPal:</small></p>
+        <p>Donations may also be sent via PayPal:</p>
 
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="text-align: center;">
         <input type="hidden" name="cmd" value="_s-xclick">
@@ -61,13 +76,12 @@
         <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
         <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
         </form>
-
-        <p><small>Or mailed to:</small></p>
-        <p><small>
-        MuckRock<br>
-        263 Huntington Ave<br>
-        Boston, MA 02115<br>
-        </small></p>
+        <p>
+          Or mailed to:<br class="nomb">
+          MuckRock<br class="nomb">
+          263 Huntington Ave<br class="nomb">
+          Boston, MA 02115<br class="nomb">
+        </p>
         {% endblock %}
     </div>
 </div>
