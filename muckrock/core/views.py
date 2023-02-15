@@ -41,7 +41,7 @@ from muckrock.accounts.utils import (
     stripe_get_customer,
 )
 from muckrock.agency.models import Agency
-from muckrock.core.forms import NewsletterSignupForm, SearchForm, StripeForm
+from muckrock.core.forms import DonateForm, NewsletterSignupForm, SearchForm
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
@@ -446,7 +446,7 @@ class StripeFormMixin:
 class DonationFormView(StripeFormMixin, FormView):
     """Accepts donations from all users."""
 
-    form_class = StripeForm
+    form_class = DonateForm
     template_name = "forms/donate.html"
 
     def get_initial(self):
@@ -461,6 +461,10 @@ class DonationFormView(StripeFormMixin, FormView):
             "stripe_description": "Tax Deductible Donation",
         }
 
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return super().form_invalid(form)
+
     def form_valid(self, form):
         """If the form is valid, charge the token provided by the form, then
         send a receipt."""
@@ -468,12 +472,19 @@ class DonationFormView(StripeFormMixin, FormView):
         email = form.cleaned_data["stripe_email"]
         amount = form.cleaned_data["stripe_amount"]
         type_ = form.cleaned_data["type"]
+        metadata = {
+            "name": form.cleaned_data["name"],
+            "email": form.cleaned_data["email"],
+            "phone": form.cleaned_data["phone"],
+            "honor": form.cleaned_data["honor"],
+            "why": form.cleaned_data["why"],
+        }
         if type_ == "one-time":
-            charge = self.make_charge(token, amount, email)
+            charge = self.make_charge(token, amount, email, metadata)
             if charge is None:
                 return self.form_invalid(form)
         elif type_ == "monthly":
-            subscription = self.make_subscription(token, amount, email)
+            subscription = self.make_subscription(token, amount, email, metadata)
             if subscription is None:
                 return self.form_invalid(form)
         return super().form_valid(form)
@@ -482,7 +493,7 @@ class DonationFormView(StripeFormMixin, FormView):
         """Return a redirection the donation page, always."""
         return reverse("donate-thanks")
 
-    def make_charge(self, token, amount, email):
+    def make_charge(self, token, amount, email, metadata):
         """Make a Stripe charge and catch any errors."""
         charge = None
         error_msg = None
@@ -504,7 +515,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 currency="usd",
                 description="Donation from %s" % email,
                 statement_descriptor_suffix="Donation",
-                metadata={"email": email, "action": "Donation"},
+                metadata={"action": "Donation", **metadata},
                 idempotency_key=True,
             )
         except stripe.error.CardError:
@@ -536,7 +547,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 )
         return charge
 
-    def make_subscription(self, token, amount, email):
+    def make_subscription(self, token, amount, email, metadata):
         """Start a subscription for recurring donations"""
         subscription = None
         quantity = int(amount / 100)
@@ -555,7 +566,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 plan="donate",
                 source=token,
                 quantity=quantity,
-                metadata={"action": "Donation (Recurring)"},
+                metadata={"action": "Donation (Recurring)", **metadata},
                 idempotency_key=True,
             )
         except stripe.error.CardError:
