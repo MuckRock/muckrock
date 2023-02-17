@@ -32,3 +32,5 @@ npm-debug.log
 celerybeat-schedule
 .ipython
 .envs
+.envrc
+.vscode

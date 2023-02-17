@@ -34,7 +34,7 @@ from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.tasks import mass_import
 from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
-from muckrock.foia.models import FOIATemplate
+from muckrock.foia.models import FOIATemplate, FOIAFile
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -81,6 +81,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
         .select_related("agency__jurisdiction__parent__parent")
         .order_by("-composer__datetime_submitted")[:10]
     )
+    foia_files = FOIAFile.objects.filter(comm__foia__agency=agency).order_by("datetime")
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -106,13 +107,14 @@ def detail(request, jurisdiction, jidx, slug, idx):
     context = {
         "agency": agency,
         "foia_requests": foia_requests,
+        "foia_files": foia_files,
         "form": form,
         "sidebar_admin_url": reverse("admin:agency_agency_change", args=(agency.pk,)),
     }
 
     collect_stats(agency, context)
 
-    return render(request, "profile/agency.html", context)
+    return render(request, "agency/detail/detail.html", context)
 
 
 def redirect_old(request, jurisdiction, slug, idx, action):
