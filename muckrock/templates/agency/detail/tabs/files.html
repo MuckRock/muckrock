@@ -1,0 +1,12 @@
+<section role="tabpanel" class="tab-panel files" id="files">
+  <h2 class="tab-panel-heading">Files</h2>
+  {% if foia_files|length > 0 %}
+  <ul class="files-list nostyle" id="all-files">
+  {% for file in foia_files %}
+    <li>{% include "lib/file.html" with show_date=True %}</li>
+  {% endfor %}
+  </ul>
+  {% else %}
+  <p>No records released from this agency</p>
+  {% endif %}
+</section>

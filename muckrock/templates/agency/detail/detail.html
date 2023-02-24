@@ -84,3 +84,12 @@
     </section>
   {% endif %}
 {% endblock activity %}
+
+{% block data %}
+  <div class="tab-container">
+    {% include "agency/detail/tabs/tablist.html" %}
+    {# the individual tabs #}
+    {% include "agency/detail/tabs/requests.html" %}
+    {% include "agency/detail/tabs/files.html" %}
+  </div>
+{% endblock %}
