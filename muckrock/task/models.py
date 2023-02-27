@@ -779,6 +779,15 @@ class FlaggedTask(Task):
         user = client.users.create_or_update(ZenUser(**user_data))
         ticket_data["requester_id"] = user.id
         ticket_audit = client.tickets.create(Ticket(**ticket_data))
+
+        if self.foia and self.user and self.foia.has_perm(self.user, "change"):
+            self.foia.notes.create(
+                author=self.user,
+                datetime=timezone.now(),
+                note=f"Submitted help request:\n\n{self.text}\n\n"
+                f"https://muckrock.zendesk.com/agent/tickets/{ticket_audit.ticket.id}",
+            )
+
         return ticket_audit.ticket.id
 
     def check_permission(self, user):
