@@ -561,7 +561,8 @@ def phaxio_callback(request):
                 # Phone Number Not Operational - all other errors are considered
                 # temporary for now
                 perm_error_ids = set([34, 47, 49, 91, 107, 109, 116, 123])
-                temp_failure = int(fax_info["error_id"]) not in perm_error_ids
+                error_id = int(recipient.get("error_id", fax_info.get("error_id", 0)))
+                temp_failure = error_id not in perm_error_ids
                 logger.warning(
                     "Fax Error - Number: %s - ID: %s - Temp: %s - "
                     "error_count: %s - foia: %s - comm: %s",
