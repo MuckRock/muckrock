@@ -139,13 +139,6 @@ def flag(request, foia):
         messages.success(request, "Problem succesfully reported")
         if request.user.is_authenticated:
             new_action(request.user, "flagged", target=foia)
-        if foia.has_perm(request.user, "change"):
-            foia.notes.create(
-                foia=foia,
-                author=request.user,
-                datetime=timezone.now(),
-                note="Submitted help request:\n\n" + form.cleaned_data["text"],
-            )
 
     return _get_redirect(request, foia)
 
