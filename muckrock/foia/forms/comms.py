@@ -215,10 +215,9 @@ class FOIAAdminFixForm(SendCommunicationForm):
         muckrock_staff = None
         try:
             muckrock_staff = User.objects.get(username="MuckrockStaff")
-            from_user_set = [muckrock_staff.pk,
-                             request.user.pk, self.foia.user.pk]
-        except:
-            print('missing user MuckrockStaff')
+            from_user_set = [muckrock_staff.pk, request.user.pk, self.foia.user.pk]
+        except User.DoesNotExist:
+            print("missing user MuckrockStaff")
             from_user_set = [request.user.pk, self.foia.user.pk]
         self.fields["from_user"].queryset = User.objects.filter(pk__in=from_user_set)
         self.fields["from_user"].initial = request.user.pk

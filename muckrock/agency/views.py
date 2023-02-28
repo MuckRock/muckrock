@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
 from django.db.models.aggregates import Count
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -34,7 +34,12 @@ from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
 from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.tasks import mass_import
-from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView, ModelFilterMixin, MRListView
+from muckrock.core.views import (
+    MRAutocompleteView,
+    MRSearchFilterListView,
+    ModelFilterMixin,
+    MRListView,
+)
 from muckrock.foia.filters import FOIAFileFilterSet
 from muckrock.foia.models import FOIATemplate, FOIAFile
 from muckrock.jurisdiction.forms import FlagForm
@@ -76,17 +81,18 @@ def detail(request, jurisdiction, jidx, slug, idx):
         status="approved",
     )
 
-    foia_requests = agency.get_requests().get_viewable(request.user).filter(agency=agency)
-    foia_files = FOIAFile.objects.filter(comm__foia__in=foia_requests).order_by("datetime")
+    foia_requests = (
+        agency.get_requests().get_viewable(request.user).filter(agency=agency)
+    )
+    foia_files = FOIAFile.objects.filter(comm__foia__in=foia_requests).order_by(
+        "datetime"
+    )
     foia_request_count = foia_requests.count()
     foia_files_count = foia_files.count()
-    foia_requests = (foia_requests
-        .select_related("agency__jurisdiction__parent__parent")
-        .order_by("-composer__datetime_submitted")[:10]
-    )
+    foia_requests = foia_requests.select_related(
+        "agency__jurisdiction__parent__parent"
+    ).order_by("-composer__datetime_submitted")[:10]
     foia_files = foia_files[:FOIA_FILE_LIMIT]
-    
-    
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -483,6 +489,7 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
         messages.error(self.request, "You do not have permission to view this page")
         return redirect("index")
 
+
 class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
     """Presents a paginated list of files."""
 
@@ -496,7 +503,9 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         if self.agency is None:
             self.agency = get_object_or_404(
                 Agency.objects.select_related(
-                    "jurisdiction", "jurisdiction__parent", "jurisdiction__parent__parent"
+                    "jurisdiction",
+                    "jurisdiction__parent",
+                    "jurisdiction__parent__parent",
                 ),
                 jurisdiction__slug=self.kwargs.get("jurisdiction"),
                 jurisdiction__pk=self.kwargs.get("jidx"),
@@ -510,7 +519,9 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         """Only files for one agency"""
         agency = self.get_agency()
         queryset = super().get_queryset()
-        return queryset.filter(comm__foia__embargo=False, comm__foia__agency=agency).select_related("comm__foia")
+        return queryset.filter(
+            comm__foia__embargo=False, comm__foia__agency=agency
+        ).select_related("comm__foia")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
