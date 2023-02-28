@@ -23,6 +23,7 @@ urlpatterns = [
         jurisdiction,
         name="agency-jurisdiction",
     ),
+    re_path(r"^%s/files/$" % agency_url, views.AgencyFOIAFileListView.as_view(), name="agency-files"),
     re_path(r"^%s/flag/$" % agency_url, views.redirect_flag, name="agency-flag"),
     re_path(r"^boilerplate/$", views.boilerplate, name="agency-boilerplate"),
     re_path(

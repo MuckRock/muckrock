@@ -1,18 +1,14 @@
 <ul role="tablist" class="tab-list">
   <li>
     <a role="tab" class="tab" aria-controls="requests" href="#requests">
-      {% with foia_requests|length as count %}
-        <span class="counter">{{ count }}</span>
-        <span class="label">Request{{ count|pluralize }}</span>
-      {% endwith %}
+      <span class="counter">{{ foia_requests_count }}</span>
+      <span class="label">Request{{ foia_requests_count|pluralize }}</span>
     </a>
   </li>
   <li>
     <a role="tab" class="tab" aria-controls="files" href="#files">
-      {% with foia_files|length as files_count %}
-        <span class="counter">{{ files_count }}</span>
-        <span class="label">File{{ files_count|pluralize }}</span>
-      {% endwith %}
+      <span class="counter">{{ foia_files_count }}</span>
+      <span class="label">File{{ foia_files_count|pluralize }}</span>
     </a>
   </li>
 </ul>

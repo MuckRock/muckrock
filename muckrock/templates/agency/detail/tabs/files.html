@@ -9,4 +9,12 @@
   {% else %}
   <p>No records released from this agency</p>
   {% endif %}
+  <p>
+    <span>Showing {{foia_files|length}} of {{ foia_files_count }}</span>
+    {% if foia_files|length < foia_files_count %}
+    <a href="{% url "agency-files" jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk idx=agency.id slug=agency.slug %}">
+      See all files
+    </a>
+    {% endif %}
+  </p>
 </section>
