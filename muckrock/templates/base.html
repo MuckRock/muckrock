@@ -143,6 +143,10 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
       <!-- End Google Tag Manager -->
     {% endif %}
 
+    {% if settings.USE_PLAUSIBLE %}
+      <script defer data-domain="muckrock.com" src="https://plausible.io/js/script.js"></script>
+    {% endif %}
+
   </head>
   <body>
     {% hijack_notification %}
