@@ -1,59 +1,65 @@
 <div class="stats">
-  <header class="overline">Response Time</header>
-  <dl>
-    <dt>By Law</dt>
-    <dd class="dotted-line"></dd>
-    {% with agency.jurisdiction.days as days %}
-      {% if days %}
-        <dd>{{days}} day{{days|pluralize}}</dd>
-      {% else %}
-        <dd>Unlimited</dd>
-      {% endif %}
-    {% endwith %}
-  </dl>
-  {% include 'lib/component/grade.html' with grade=grades.abs_response_time.grade text=grades.abs_response_time.text %}
+  <div class="stat">
+    <header class="overline">Responsiveness</header>
+    <main>
+    <dl>
+      <dt>Average</dt>
+      <dd class="dotted-line"></dd>
+      {% with agency.average_response_time as average_response_time %}
+      <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
+      {% endwith %}
+    </dl>
+    {% include 'lib/component/grade.html' with grade=grades.rel_response_time.grade text=grades.rel_response_time.text %}
 
-  <dl>
-    <dt>Average</dt>
-    <dd class="dotted-line"></dd>
-    {% with agency.average_response_time as average_response_time %}
-    <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
+    <dl>
+      <dt>By Law</dt>
+      <dd class="dotted-line"></dd>
+      {% with agency.jurisdiction.days as days %}
+        {% if days %}
+          <dd>{{days}} day{{days|pluralize}}</dd>
+        {% else %}
+          <dd>Unlimited</dd>
+        {% endif %}
+      {% endwith %}
+    </dl>
+    {% include 'lib/component/grade.html' with grade=grades.abs_response_time.grade text=grades.abs_response_time.text %}
+    </main>
+  </div>
+  <div class="stat">
+    <header class="overline">Results</header>
+    <main>
+    {% with agency.success_rate as success_rate %}
+    <dl>
+      <dt>Success Rate</dt>
+      <dd class="dotted-line"></dd>
+      <dd>{{ success_rate|floatformat:"2" }}%</dd>
+    </dl>
+    {% include 'lib/component/grade.html' with grade=grades.success_rate.grade text=grades.success_rate.text %}
     {% endwith %}
-  </dl>
-  {% include 'lib/component/grade.html' with grade=grades.rel_response_time.grade text=grades.rel_response_time.text %}
-</div>
-<div class="stats">
-  <header class="overline">Results</header>
-  {% with agency.success_rate as success_rate %}
-  <dl>
-    <dt>Success Rate</dt>
-    <dd class="dotted-line"></dd>
-    <dd>{{ success_rate|floatformat:"2" }}%</dd>
-  </dl>
-  {% include 'lib/component/grade.html' with grade=grades.success_rate.grade text=grades.success_rate.text %}
-  {% endwith %}
 
-  {% with agency.average_fee as average_fee %}
-  {%  if average_fee > 0 %}
-  <dl>
-    <dt>Fee Likelihood</dt>
-    <dd class="dotted-line"></dd>
-    <dd>{{ agency.fee_rate|floatformat:"2" }}%</dd>
-    <dt>Fee Average</dt>
-    <dd class="dotted-line"></dd>
-    <dd><dd>${{ average_fee|floatformat:"2" }}</dd>
-  <dl>
-  {% endif %}
-  {% endwith %}
-  
-  {% with agency.exemptions as exemptions %}
-  {% if exemptions %}
-  <dl>
-    <dt>Commonly Cited Exemptions</dt>
-    {% for exmp in exemptions %}
-      <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
-    {% endfor %}
-  </dl>
-  {% endif %}
-  {% endwith %}
+    {% with agency.average_fee as average_fee %}
+    {%  if average_fee > 0 %}
+    <dl>
+      <dt>Fee Likelihood</dt>
+      <dd class="dotted-line"></dd>
+      <dd>{{ agency.fee_rate|floatformat:"2" }}%</dd>
+      <dt>Fee Average</dt>
+      <dd class="dotted-line"></dd>
+      <dd><dd>${{ average_fee|floatformat:"2" }}</dd>
+    <dl>
+    {% endif %}
+    {% endwith %}
+    
+    {% with agency.exemptions as exemptions %}
+    {% if exemptions %}
+    <dl>
+      <dt>Commonly Cited Exemptions</dt>
+      {% for exmp in exemptions %}
+        <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
+      {% endfor %}
+    </dl>
+    {% endif %}
+    {% endwith %}
+    </main>
+  </div>
 </div>

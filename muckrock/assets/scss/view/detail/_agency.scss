@@ -1,4 +1,6 @@
 .agency {
+    max-width: 64rem;
+    margin: 0 auto;
     &__name {
         line-height: 1.2;
     }
@@ -8,11 +10,47 @@
     }
 }
 
-.agency .stats header,
+.agency .briefing {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+}
+
+.agency .stats, .agency .contact {
+    flex: 1 1 12rem;
+}
+
+.agency .stats, .agency .contact main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem 1.5rem;
+}
+
+.agency .stat {
+    flex: 1 1 12rem;
+}
+
+.agency .stat header,
 .agency .contact header {
+    flex: 1 1 100%;
     margin-bottom: .5rem;
     padding-bottom: .25rem;
     border-bottom: 1px solid $color-grey;
+}
+
+.agency .contact main .contact__mailing {
+    flex: 3 1 12rem;
+    margin-bottom: 0;
+}
+
+.agency .contact main .contact__calling {
+    flex: 1 1 12rem;
+}
+
+.agency .stat main,
+.agency .contact main {
+    flex: 1 1 100%;
 }
 
 .agency .stats {
@@ -28,12 +66,24 @@
     }
     dd {
         flex: 0 0 auto;
-        font-size: 1.125em;
+        font-size: 1em;
         font-weight: 700;
     }
     .dotted-line {
         flex: 1 1 auto;
         border-bottom: 1px dotted $color-grey;
+    }
+}
+
+.agency .contact {
+    dd {
+        font-size: 1em;
+        line-height: 1.2;
+        opacity: .8;
+        transition: opacity .1s linear;
+        &:hover {
+            opacity: 1;
+        }
     }
 }
 

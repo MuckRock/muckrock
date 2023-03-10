@@ -7,6 +7,7 @@ This is the parent style for a single object: a blog post, a FOI request, a ques
 {% endcomment %}
 {% block content %}
     <article class="{% block type %}{% endblock type %} detail">
+        {% block fullHeader %}      
         {% block image %}{% endblock image %}
         <header class="header">
             <div class="header-container">
@@ -19,7 +20,8 @@ This is the parent style for a single object: a blog post, a FOI request, a ques
                     {% endblock aside %}
                 </div>
             </div>
-        </header>    
+        </header>   
+        {% endblock fullHeader %} 
         {% block actions %}
         {% endblock actions %}
         <section class="body">

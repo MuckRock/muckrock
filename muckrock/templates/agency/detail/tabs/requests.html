@@ -4,11 +4,25 @@
     Requests
     {% if count > 10 %}<small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small>{% endif %}
   </h2>
-  {% if count > 0 %}
-  <h3>Recent Requests </h3>
-  {% include 'lib/foia_table.html' with requests=foia_requests %}
-  {% else %}
-  <p>No requests made to this agency.</p>
-  {% endif %}
-  {% endwith %}
+  <div class="grid__row">
+    <div class="grid__column quarter">
+      <div class="grid___row">
+        <div class="grid__column half">
+          {% include 'lib/request_stats.html' %}
+        </div>
+        <div class="grid__column half">
+          {% include 'lib/appeal_stats.html' %}
+        </div>
+      </div>
+    </div>
+    <div class=-"grid__column three-quarters">
+      {% if count > 0 %}
+      <h3>Recent Requests </h3>
+      {% include 'lib/foia_table.html' with requests=foia_requests %}
+      {% else %}
+      <p>No requests made to this agency.</p>
+      {% endif %}
+      {% endwith %}
+    </div>
+  </div>
 </section>
