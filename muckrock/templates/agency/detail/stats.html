@@ -1,41 +1,60 @@
-<dl class="stats">
-    <dt>Allowed Response Time</dt>
+<div class="stats">
+  <header class="overline">Response Time</header>
+  <dl>
+    <dt>By Law</dt>
+    <dd class="dotted-line"></dd>
     {% with agency.jurisdiction.days as days %}
       {% if days %}
         <dd>{{days}} day{{days|pluralize}}</dd>
       {% else %}
-        <dd>No limit</dd>
+        <dd>Unlimited</dd>
       {% endif %}
     {% endwith %}
+  </dl>
+  {% include 'lib/component/grade.html' with grade="fail" text="Takes longer than average" %}
 
-    <dt>Average Response Time</dt>
+  <dl>
+    <dt>Average</dt>
+    <dd class="dotted-line"></dd>
     {% with agency.average_response_time as average_response_time %}
-      <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
+    <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
     {% endwith %}
+  </dl>
+  {% include 'lib/component/grade.html' with grade="pass" text="Better than 50% of agencies of this type" %}
+  {% include 'lib/component/grade.html' with grade="pass" text="Better than 50% of agencies in this jurisdiction" %}
+</div>
+<div class="stats">
+  <header class="overline">Results</header>
+  {% with agency.success_rate as success_rate %}
+  <dl>
+    <dt>Success Rate</dt>
+    <dd class="dotted-line"></dd>
+    <dd>{{ success_rate|floatformat:"2" }}%</dd>
+  </dl>
+  {% include 'lib/component/grade.html' with grade="pass" text="Better than 50% of agencies" %}
+  {% endwith %}
 
-    {% with agency.success_rate as success_rate %}
-      {% if success_rate > 0 %}
-        <dt>Success Rate</dt>
-        <dd>{{ success_rate|floatformat:"2" }}%</dd>
-      {% endif %}
-    {% endwith %}
-
-    {% with agency.average_fee as average_fee %}
-      {% if average_fee > 0 %}
-        <dt>Average Fee</dt>
-        <dd>${{ average_fee|floatformat:"2" }}</dd>
-        <dd>{{ agency.fee_rate|floatformat:"2" }}% of requests have a fee</dd>
-      {% endif %}
-    {% endwith %}
-
+  {% with agency.average_fee as average_fee %}
+  {%  if average_fee > 0 %}
+  <dl>
+    <dt>Fee Likelihood</dt>
+    <dd class="dotted-line"></dd>
+    <dd>{{ agency.fee_rate|floatformat:"2" }}%</dd>
+    <dt>Fee Average</dt>
+    <dd class="dotted-line"></dd>
+    <dd><dd>${{ average_fee|floatformat:"2" }}</dd>
+  <dl>
+  {% endif %}
+  {% endwith %}
+  
+  {% with agency.exemptions as exemptions %}
+  {% if exemptions %}
+  <dl>
     <dt>Commonly Cited Exemptions</dt>
-    {% with agency.exemptions as exemptions %}
-      {% if exemptions %}
-        {% for exmp in exemptions %}
-          <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
-        {% endfor %}
-      {% else %}
-        <dd>None</dd>
-      {% endif %}
-    {% endwith %}
-</dl>
+    {% for exmp in exemptions %}
+      <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
+    {% endfor %}
+  </dl>
+  {% endif %}
+  {% endwith %}
+</div>
