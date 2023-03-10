@@ -40,15 +40,16 @@ def staging(c):
 
 
 @task
-def test(c, test_path="", reuse="0", capture=False, warning=False):
+def test(c, test_path="", reuse="0", capture=False, warning=False, failed=False):
     """Run all tests, or a specific subset of tests"""
     cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
         opt="-e REUSE_DB={reuse}".format(reuse=reuse),
         service="muckrock_django",
-        cmd="python {warn} manage.py test {test_path} {capture} "
+        cmd="python {warn} manage.py test {test_path} {capture} {failed} "
         "--settings=muckrock.settings.test".format(
             warn="-Wd" if warning else "",
             test_path=test_path,
+            failed="--failed" if failed else "",
             capture="--nologcapture" if not capture else "",
         ),
     )
