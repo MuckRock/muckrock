@@ -1,0 +1,63 @@
+.agency {
+    &__name {
+        line-height: 1.2;
+    }
+    &__username {
+        font-size: .8em;
+        font-family: $monospace;
+    }
+}
+
+.agency .stats header,
+.agency .contact header {
+    margin-bottom: .5rem;
+    padding-bottom: .25rem;
+    border-bottom: 1px solid $color-grey;
+}
+
+.agency .stats {
+    dl {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: .5rem;
+        gap: .5rem;
+    }
+    dt {
+        flex: 0 0 auto;
+    }
+    dd {
+        flex: 0 0 auto;
+        font-size: 1.125em;
+        font-weight: 700;
+    }
+    .dotted-line {
+        flex: 1 1 auto;
+        border-bottom: 1px dotted $color-grey;
+    }
+}
+
+.agency .grade {
+    display: flex;
+    gap: .75rem;
+    font-size: .8em;
+    line-height: 1.2;
+    .icon {
+        flex: 0 0 auto;
+        height: 1rem;
+        width: 1rem;
+        path {
+            fill: $color-grey;
+        }
+    }
+    .text {
+        flex: 1 1 auto;
+    }
+}
+
+.agency .pass.grade .icon path {
+    fill: $color-green;
+}
+.agency .fail.grade .icon path {
+    fill: $color-red;
+}
