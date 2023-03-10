@@ -32,10 +32,12 @@ from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm, StripeForm
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
+from muckrock.core.stats import collect_stats, grade_agency
 from muckrock.core.utils import new_action, notify
 from muckrock.core.views import DonationFormView, NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.jurisdiction.factories import LocalJurisdictionFactory
 from muckrock.task.factories import (
     FlaggedTaskFactory,
     NewAgencyTaskFactory,
@@ -347,3 +349,30 @@ class TestTemplatetagsFunctional(TestCase):
 
         nose.tools.eq_(tags.company_title("one\ntwo\nthree"), "one, et al")
         nose.tools.eq_(tags.company_title("company"), "company")
+
+class TestGradeAgency(TestCase):
+    """Evaluates agency key metrics against the law and sibling agencies."""
+
+    def setUp(self):
+        local = LocalJurisdictionFactory()
+        state = local.parent
+        federal = state.parent
+        self.cia = AgencyFactory(
+            name="Central Intelligence Agency",
+            jurisdiction=federal,
+            email=None,
+            fax=None,
+        )
+        self.governor = AgencyFactory(
+            name="Governor's Office",
+            jurisdiction=state,
+        )
+        self.police = AgencyFactory(
+            name="Boston Police Department",
+            jurisdiction=local,
+        )
+
+    def test_grade_absolute_response_time(self):
+        context = {}
+        grade_agency(self.cia, context)
+        eq_(context, {'grades': {'abs_response_time': {'grade': 'pass', 'text': 'On average, they respond within the legally allowed time.'}, 'rel_response_time': {'grade': 'neutral', 'text': 'Not enough data available to evaluate agency'}, 'success_rate': {'grade': 'neutral', 'text': 'Not enough data available to evaluate agency'}}})
