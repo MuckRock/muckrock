@@ -39,27 +39,19 @@
 
     {% with agency.average_fee as average_fee %}
     {%  if average_fee > 0 %}
-    <dl>
-      <dt>Fee Likelihood</dt>
+    <dl class="fee-rate">
+      <dt>Fee Rate</dt>
       <dd class="dotted-line"></dd>
       <dd>{{ agency.fee_rate|floatformat:"2" }}%</dd>
+    </dl>
+    {% include 'lib/component/grade.html' with grade=grades.fee_rate.grade text=grades.fee_rate.text %}
+    <dl class="fee-average">
       <dt>Fee Average</dt>
       <dd class="dotted-line"></dd>
       <dd><dd>${{ average_fee|floatformat:"2" }}</dd>
-    <dl>
-    {% endif %}
-    {% endwith %}
-    
-    {% with agency.exemptions as exemptions %}
-    {% if exemptions %}
-    <dl>
-      <dt>Commonly Cited Exemptions</dt>
-      {% for exmp in exemptions %}
-        <dd>{{exmp.tags__name|capfirst}} <small>{{exmp.count}} time{{exmp.count|pluralize}}</small></dd>
-      {% endfor %}
     </dl>
+    {% include 'lib/component/grade.html' with grade=grades.fee_average.grade text=grades.fee_average.text %}
     {% endif %}
     {% endwith %}
-    </main>
   </div>
 </div>

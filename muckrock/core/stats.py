@@ -31,6 +31,8 @@ def grade_agency(agency, context):
         "abs_response_time": grade_absolute_response_time(agency),
         "rel_response_time": grade_relative_response_time(agency),
         "success_rate": grade_success_rate(agency),
+        "fee_rate": grade_fee_rate(agency),
+        "fee_average": grade_fee_average(agency)
     }
 
 def grade_absolute_response_time(agency):
@@ -83,3 +85,29 @@ def grade_success_rate(agency):
             "fail",
             "They fulfill {}% fewer requests than other agencies in their jurisdiction.".format(percentile)
         )
+
+def grade_fee_rate(agency):
+    """Do they charge feeds more often than other agencies in the jurisdiction?"""
+    agency_fee_rate = agency.fee_rate()
+    jurisdiction_fee_rate = agency.jurisdiction.fee_rate()
+    if (agency_fee_rate == 0 or jurisdiction_fee_rate == 0):
+        return assign_grade("neutral", "Not enough data available to evaluate agency")
+    elif (agency_fee_rate <= jurisdiction_fee_rate):
+        percentile = (1 - (agency_fee_rate / jurisdiction_fee_rate)) * 100
+        return assign_grade("pass", "They require a fee {}% less often than other agencies in their jurisdiction.".format(percentile))
+    else:
+        percentile = ((agency_fee_rate / jurisdiction_fee_rate) - 1) * 100
+        return assign_grade("fail", "They require a fee {}% more often than other agencies in their jurisdiction.".format(percentile))
+
+def grade_fee_average(agency):
+    """Do they charge feeds higher than other agencies in the jurisdiction?"""
+    agency_fee_average = agency.average_fee()
+    jurisdiction_fee_average = agency.jurisdiction.average_fee()
+    if (agency_fee_average == 0 or jurisdiction_fee_average == 0):
+        return assign_grade("neutral", "Not enough data available to evaluate agency")
+    elif (agency_fee_average <= jurisdiction_fee_average):
+        percentile = (1 - (agency_fee_average / jurisdiction_fee_average)) * 100
+        return assign_grade("pass", "On average, they charge {}% lower fees than other agencies in their jurisdiction.".format(percentile))
+    else:
+        percentile = ((agency_fee_average / jurisdiction_fee_average) - 1) * 100
+        return assign_grade("fail", "On average, they charge {}% higher fees than other agencies in their jurisdiction.".format(percentile))
