@@ -549,25 +549,25 @@ def phaxio_callback(request):
                 number, _ = PhoneNumber.objects.get_or_create(
                     number=recipient["number"], defaults={"type": "fax"}
                 )
+                error_id = int(recipient.get("error_id", fax_info.get("error_id", 0)))
                 FaxError.objects.create(
                     fax=fax_comm,
                     datetime=date,
                     recipient=number,
                     error_type=recipient.get("error_type", ""),
                     error_code=recipient.get("error_code", ""),
-                    error_id=int(recipient.get("error_id", 0)),
+                    error_id=error_id,
                 )
                 # the following phaxio error IDs all correspond to
                 # Phone Number Not Operational - all other errors are considered
                 # temporary for now
                 perm_error_ids = set([34, 47, 49, 91, 107, 109, 116, 123])
-                error_id = int(recipient.get("error_id", fax_info.get("error_id", 0)))
                 temp_failure = error_id not in perm_error_ids
                 logger.warning(
                     "Fax Error - Number: %s - ID: %s - Temp: %s - "
                     "error_count: %s - foia: %s - comm: %s",
                     number,
-                    recipient["error_id"],
+                    error_id,
                     temp_failure,
                     error_count,
                     fax_comm.communication.foia.pk,
