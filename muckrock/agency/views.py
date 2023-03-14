@@ -35,13 +35,13 @@ from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.tasks import mass_import
 from muckrock.core.views import (
-    MRAutocompleteView,
-    MRSearchFilterListView,
     ModelFilterMixin,
+    MRAutocompleteView,
     MRListView,
+    MRSearchFilterListView,
 )
 from muckrock.foia.filters import FOIAFileFilterSet
-from muckrock.foia.models import FOIATemplate, FOIAFile
+from muckrock.foia.models import FOIAFile, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -84,8 +84,10 @@ def detail(request, jurisdiction, jidx, slug, idx):
     foia_requests = (
         agency.get_requests().get_viewable(request.user).filter(agency=agency)
     )
-    foia_files = FOIAFile.objects.filter(comm__foia__in=foia_requests).order_by(
-        "datetime"
+    foia_files = (
+        FOIAFile.objects.filter(comm__foia__in=foia_requests)
+        .order_by("datetime")
+        .select_related("comm__foia__agency__jurisdiction")
     )
     foia_request_count = foia_requests.count()
     foia_files_count = foia_files.count()
@@ -521,7 +523,7 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         queryset = super().get_queryset()
         return queryset.filter(
             comm__foia__embargo=False, comm__foia__agency=agency
-        ).select_related("comm__foia")
+        ).select_related("comm__foia__agency__jurisdiction")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
