@@ -1,0 +1,20 @@
+<section role="tabpanel" class="tab-panel files" id="files">
+  <h2 class="tab-panel-heading">Files</h2>
+  {% if foia_files|length > 0 %}
+  <ul class="files-list nostyle" id="all-files">
+  {% for file in foia_files %}
+    <li>{% include "lib/file.html" with show_date=True %}</li>
+  {% endfor %}
+  </ul>
+  {% else %}
+  <p>No records released from this agency</p>
+  {% endif %}
+  <p>
+    <span>Showing {{foia_files|length}} of {{ foia_files_count }}</span>
+    {% if foia_files|length < foia_files_count %}
+    <a href="{% url "agency-files" jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk idx=agency.id slug=agency.slug %}">
+      See all files
+    </a>
+    {% endif %}
+  </p>
+</section>

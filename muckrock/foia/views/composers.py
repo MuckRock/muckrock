@@ -129,11 +129,13 @@ class GenericComposer(BuyRequestsMixin):
                 "stripe_pk": settings.STRIPE_PUB_KEY,
             }
         )
-        intro, outro = FOIATemplate.objects.render(
+        template = FOIATemplate.objects.render(
             [], self.request.user, None, split=True, html=True
         )
-        context["intro"] = intro
-        context["outro"] = outro
+        if template:
+            intro, outro = template
+            context["intro"] = intro
+            context["outro"] = outro
         return context
 
     def get_initial(self):

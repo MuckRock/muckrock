@@ -28,13 +28,20 @@ from fuzzywuzzy import fuzz, process
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
+from muckrock.agency.constants import FOIA_FILE_LIMIT
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
 from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.tasks import mass_import
-from muckrock.core.views import MRAutocompleteView, MRSearchFilterListView
-from muckrock.foia.models import FOIATemplate
+from muckrock.core.views import (
+    ModelFilterMixin,
+    MRAutocompleteView,
+    MRListView,
+    MRSearchFilterListView,
+)
+from muckrock.foia.filters import FOIAFileFilterSet
+from muckrock.foia.models import FOIAFile, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
@@ -74,13 +81,21 @@ def detail(request, jurisdiction, jidx, slug, idx):
         status="approved",
     )
 
-    foia_requests = agency.get_requests()
     foia_requests = (
-        foia_requests.get_viewable(request.user)
-        .filter(agency=agency)
-        .select_related("agency__jurisdiction__parent__parent")
-        .order_by("-composer__datetime_submitted")[:10]
+        agency.get_requests().get_viewable(request.user).filter(agency=agency)
     )
+    foia_files = (
+        FOIAFile.objects.filter(comm__foia__in=foia_requests)
+        .order_by("datetime")
+        .select_related("comm__foia__agency__jurisdiction")
+    )
+
+    foia_request_count = foia_requests.count()
+    foia_files_count = foia_files.count()
+    foia_requests = foia_requests.select_related(
+        "agency__jurisdiction__parent__parent"
+    ).order_by("-composer__datetime_submitted")[:10]
+    foia_files = foia_files[:FOIA_FILE_LIMIT]
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -106,13 +121,17 @@ def detail(request, jurisdiction, jidx, slug, idx):
     context = {
         "agency": agency,
         "foia_requests": foia_requests,
+        "foia_requests_count": foia_request_count,
+        "foia_files": foia_files,
+        "foia_files_count": foia_files_count,
+        "foia_files_limit": FOIA_FILE_LIMIT,
         "form": form,
         "sidebar_admin_url": reverse("admin:agency_agency_change", args=(agency.pk,)),
     }
 
     collect_stats(agency, context)
 
-    return render(request, "profile/agency.html", context)
+    return render(request, "agency/detail/detail.html", context)
 
 
 def redirect_old(request, jurisdiction, slug, idx, action):
@@ -472,3 +491,43 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
         """What to do if the user does not have permisson to view this page"""
         messages.error(self.request, "You do not have permission to view this page")
         return redirect("index")
+
+
+class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
+    """Presents a paginated list of files."""
+
+    model = FOIAFile
+    template_name = "agency/file_list.html"
+    agency = None
+    filter_class = FOIAFileFilterSet
+
+    def get_agency(self):
+        """Returns the Agency for the files. Caches it as an attribute."""
+        if self.agency is None:
+            self.agency = get_object_or_404(
+                Agency.objects.select_related(
+                    "jurisdiction",
+                    "jurisdiction__parent",
+                    "jurisdiction__parent__parent",
+                ),
+                jurisdiction__slug=self.kwargs.get("jurisdiction"),
+                jurisdiction__pk=self.kwargs.get("jidx"),
+                slug=self.kwargs.get("slug"),
+                pk=self.kwargs.get("idx"),
+                status="approved",
+            )
+        return self.agency
+
+    def get_queryset(self):
+        """Only files for one agency"""
+        agency = self.get_agency()
+        queryset = super().get_queryset()
+        return queryset.filter(
+            comm__foia__embargo=False, comm__foia__agency=agency
+        ).select_related("comm__foia__agency__jurisdiction")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["agency"] = self.get_agency()
+        context["agency_url"] = context["agency"].get_absolute_url()
+        return context

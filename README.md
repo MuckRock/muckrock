@@ -1,9 +1,13 @@
 # MuckRock
+**MuckRock** &middot; [Squarelet][squarelet] &middot; [DocumentCloud][documentcloud] &middot; [DocumentCloud-Frontend][documentcloudfrontend]
 
 [![Codeship Status for MuckRock/muckrock][codeship-img]][codeship]
 [![codecov.io][codecov-img]][codecov]
 
 MuckRock is a non-profit collaborative news site that gives you the tools to keep our government transparent and accountable.
+
+## Prerequisites 
+MuckRock depends on Squarelet for user authentication. As the services need to communivate directly, the development environment for MuckRock depends on the development environment for Squarelet - the MuckRock docker containers will join Squarelet's docker network. [Please install Squarelet and set up its development environment first][squarelet].
 
 ## Install
 
@@ -12,20 +16,27 @@ MuckRock is a non-profit collaborative news site that gives you the tools to kee
 1. [docker][docker-install]
 3. [python][python-install]
 4. [invoke][invoke-install]
+5. [git][git-install]
 
 ### Installation Steps
-
-MuckRock depends on Squarelet for user authentication.  As the services need to communivate directly, the development environment for MuckRock depends on the development environment for Squarelet - the MuckRock docker containers will join Squarelet's docker network.  [Please install Squarelet and set up its development environment first][squarelet].
 
 1. Check out the git repository - `git clone git@github.com:MuckRock/muckrock.git`
 2. Enter the directory - `cd muckrock`
 3. Run the dotenv initialization script - `python initialize_dotenvs.py`
 This will create files with the environment variables needed to run the development environment.
-4. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
-5. Start the docker images - `inv up`
-This will build and start all of the docker images using docker compose.  The invoke tasks specify the `local.yml` configuration file for docker compose.  If you would like to run docker compose commands directly, set the environment variable `export COMPSE_FILE=local.yml`.
-6. Set `dev.muckrock.com` to point to localhost - `sudo echo "127.0.0.1   dev.muckrock.com" >> /etc/hosts`
-7. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
+4. Set an environment variable that directs `docker-compose` to use the `local.yml` file - `export COMPOSE_FILE=local.yml`
+5. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
+6. Start the docker images - `inv up`
+This will build and start all of the docker images using docker-compose.
+7. Set `dev.muckrock.com` to point to localhost - `echo "127.0.0.1   dev.muckrock.com" | sudo tee -a /etc/hosts`
+8. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
+9. In  `.envs/.local/.django` set the following environment variables:
+
+-   `SQUARELET_KEY`  to the value of Client ID from the Squarelet Client
+-   `SQUARELET_SECRET`  to the value of Client SECRET from the Squarelet Client
+10. You must restart the Docker Compose session (via the command `docker-compose down` followed by `docker-compose up`) each time you change a `.django` file for it to take effect.
+
+You should now be able to log in to MuckRock using your Squarelet account.
 
 ## Docker info
 
@@ -49,31 +60,6 @@ This is the [Django][django] application
 The celery beat image is responsible for queueing up periodic celery tasks.
 
 All systems can be brought up using `inv up`.  You can rebuild all images using `inv build`.  There are various other invoke commands for common tasks interacting with docker, which you can view in the `tasks.py` file.
-
-### Squarelet Integration
-
-If you have not yet created an RSA key on squarelet, please run: `manage.py creatersakey` from the squarelet command line.
-
-Create the client on Squarelet by going to the Admin site - OpenID Connect Provider - Clients and adding a client.
-* Name - set this to `MuckRock Dev`
-* Owner - you may leave this blank or set it to your user account.
-* Client Type - `Confidential`
-* Response types - `code (Authorization Code Flow)`
-* Redirect URIs - `http://dev.muckrock.com/accounts/complete/squarelet` (you may optionally add `http://dev.foiamachine.org/accounts/complete/squarelet` on a second line if you will be developing FOIAMachine)
-* JWT Algorithm - `RS256`
-* Require Consent? - Unchecked
-* Reuse Consent? - Checked
-* Client ID - This will be filled in automatically upon saving, and will be copied into the `.envs/.local/.django` file.
-* Client SECRET - This will be filled in automatically upon saving, and will be copied into the `.envs/.local/.django` file.
-* Scopes - `read_user write_user read_organization write_charge read_auth_token`
-* Post Logout Redirect URIs - `http://dev.muckrock.com/` (you may optionally add `http://dev.foiamachine.org/` on a second line if you will be developing FOIAMachine)
-* Add a client profile and set the Webhook URL - `http://dev.muckrock.com/squarelet/webhook/`
-
-Click save and continue editing.  In `.envs/.local/.django` set the following environment variables:
-* `SQUARELET_KEY` to the value of Client ID
-* `SQUARELET_SECRET` to the value of Client SECRET
-
-You should now be able to log in to MuckRock using your Squarelet account.
 
 ### Networking Setup
 
@@ -139,6 +125,7 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 [docker-install]: https://docs.docker.com/install/
 [invoke-install]: http://www.pyinvoke.org/installing.html
 [python-install]: https://www.python.org/downloads/
+[git-install]: https://git-scm.com/downloads
 [codeship]: https://app.codeship.com/projects/296009
 [pylint]:  https://www.pylint.org/
 [pip-tools]: https://github.com/jazzband/pip-tools
@@ -149,3 +136,5 @@ MuckRock uses [watson][watson] for search.  The index should stay updated. If a 
 [squarelet]: https://github.com/muckrock/squarelet/
 [yapf]: https://github.com/google/yapf
 [watson]: https://github.com/etianen/django-watson
+[documentcloudfrontend]: https://github.com/MuckRock/documentcloud-frontend
+[documentcloud]: https://github.com/MuckRock/documentcloud

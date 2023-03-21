@@ -427,7 +427,7 @@ class FOIATemplateQuerySet(models.QuerySet):
         else:
             template = self._render_generic(user, requested_docs, **kwargs)
 
-        if kwargs.get("split"):
+        if kwargs.get("split") and template:
             return template.split(requested_docs, 1)
 
         return template
@@ -444,8 +444,9 @@ class FOIATemplateQuerySet(models.QuerySet):
             template = self.filter(jurisdiction=jurisdiction).order_by("pk").first()
             if template is None:
                 template = self.filter(jurisdiction=None).order_by("pk").first()
-
-        return template.render(agency, user, requested_docs, **kwargs)
+        if template:
+            return template.render(agency, user, requested_docs, **kwargs)
+        return template
 
     def _render_generic(self, user, requested_docs, **kwargs):
         """Render the template in a generic way, suitable for more than one agency"""
@@ -454,7 +455,9 @@ class FOIATemplateQuerySet(models.QuerySet):
             template = self.model(template=requested_docs)
         else:
             template = self.filter(jurisdiction=None).order_by("pk").first()
-        return template.render_generic(user, requested_docs, **kwargs)
+        if template:
+            return template.render_generic(user, requested_docs, **kwargs)
+        return template
 
 
 class RawEmailQuerySet(models.QuerySet):

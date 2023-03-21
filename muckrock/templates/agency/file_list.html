@@ -1,0 +1,18 @@
+{% extends 'base_list.html' %}
+
+{% block title %}
+  Files from {{ agency }}
+{% endblock %}
+
+{% block list-header %}
+  <p><a href="{{ agency_url }}">{{ agency }}</a></p>
+  <h1 class="list-title">Files</h1>
+{% endblock list-header %}
+
+{% block list-objects %}
+  <ul class="nostyle">
+    {% for file in object_list %}
+      <li>{% include "lib/file.html" with show_date=True %}</li>
+    {% endfor %}
+  </ul>
+{% endblock list-objects %}
