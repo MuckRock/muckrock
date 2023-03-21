@@ -89,6 +89,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
         .order_by("datetime")
         .select_related("comm__foia__agency__jurisdiction")
     )
+
     foia_request_count = foia_requests.count()
     foia_files_count = foia_files.count()
     foia_requests = foia_requests.select_related(
