@@ -1,0 +1,95 @@
+{% extends 'base_profile.html' %}
+{% load tags %}
+{% load thumbnail %}
+{% load rules %}
+
+{% block title %}{{ agency.name }} &bull; MuckRock{% endblock title %}
+{% block type %}agency{% endblock type %}
+{% block rss %}
+  {{ block.super }}
+  <link rel="alternate" type="application/rss+xml" title="{{agency.name}}'s FOIA Feed" href="{% url 'foia-agency-feed' agency.pk %}" />
+{% endblock rss %}
+
+{% block metadata %}
+  {% if agency.image %}
+    <figure class="agency image">
+      <img src="{% thumbnail agency.image 600x600 %}" class="header-image" alt="{{ agency.image_attr_line|striptags}}">
+      {% if agency.image_attr_line %}
+        <figcaption>{{ agency.image_attr_line | safe }}</figcaption>
+      {% endif %}
+    </figure>
+  {% endif %}
+  <h1>{{agency.name}}</h1>
+  <h2><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
+  {% if request.user.is_staff and agency.profile %}
+    <h3><a href="{{ agency.profile.get_absolute_url }}">{{ agency.profile.user.username }}</a></h3>
+  {% endif %}
+  {% include 'lib/request_stats.html' %}
+  {% include 'lib/appeal_stats.html' %}
+  {% include 'agency/detail/stats.html' %}
+  {% include 'agency/detail/contact.html' %}
+{% endblock metadata %}
+
+{% block activity %}
+  {% if user.is_authenticated %}
+    {% if user.is_staff and not agency.has_open_review_task %}
+      <form method="post" id="review-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="review">
+      </form>
+    {% endif %}
+    <div class="modal" id="flag-form">
+      <form method="post">
+        {% csrf_token %}
+        {% include 'lib/pattern/form.html' %}
+        <footer>
+          <button type="submit" name="action" value="flag" class="primary button">Submit</button>
+          <span class="close-modal button">Cancel</span>
+        </footer>
+      </form>
+    </div>
+  {% endif %}
+  <section class="actions">
+    <div class="button-group">
+      <a href="{% url 'foia-create' %}?agency={{agency.pk}}" class="blue button">
+        {% include 'lib/component/icon/create-request.svg' %}
+        <span class="label">File a Request</span>
+      </a>
+      {% if user.is_staff and not agency.has_open_review_task %}
+        <button type="submit" class="button" form="review-form">Mark for Review</button>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <a href="#flag-form" class="modal-trigger button">Suggest Change</a>
+      {% endif %}
+      {% if user.is_staff %}
+        <a href="{% url "agency-merge" %}?bad_agency={{ agency.pk }}" class="red button">Merge</a>
+      {% endif %}
+    </div>
+  </section>
+  {% if agency.exempt %}
+    <section class="notes">
+      <h2>Exempt</h2>
+      {{ agency.exempt_note|safe }}
+    </section>
+  {% endif %}
+  {% if agency.uncooperative %}
+    <section class="notes">
+      <h2>Scofflaw</h2>
+      {{ agency.exempt_note|safe }}
+    </section>
+  {% endif %}
+  {% if agency.public_notes %}
+    <section class="notes">
+      {{ agency.public_notes|markdown }}
+    </section>
+  {% endif %}
+{% endblock activity %}
+
+{% block data %}
+  <div class="tab-container">
+    {% include "agency/detail/tabs/tablist.html" %}
+    {# the individual tabs #}
+    {% include "agency/detail/tabs/requests.html" %}
+    {% include "agency/detail/tabs/files.html" %}
+  </div>
+{% endblock %}

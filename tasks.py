@@ -249,33 +249,6 @@ def build(c):
     c.run("docker compose build")
 
 
-# Database populating
-# --------------------------------------------------------------------------------
-
-
-@task(name="populate-db")
-def populate_db(c, db_name="muckrock"):
-    """Populate the local DB with the data from heroku"""
-    # https://devcenter.heroku.com/articles/heroku-postgres-import-export
-
-    confirm = raw_input(
-        "This will over write your local database ({db_name}).  "
-        "Are you sure you want to continue? [y/N] ".format(db_name=db_name)
-    )
-    if confirm.lower() not in ["y", "yes"]:
-        return
-
-    c.run(
-        DJANGO_RUN.format(
-            cmd='sh -c "dropdb {db_name} && '
-            "heroku pg:pull DATABASE {db_name} --app muckrock "
-            '--exclude-table-data=\\"public.reversion_version;public.foia_rawemail\\""'.format(
-                db_name=db_name
-            )
-        )
-    )
-
-
 @task(name="update-staging-db")
 def update_staging_db(c):
     """Update the staging database"""
