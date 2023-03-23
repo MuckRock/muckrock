@@ -497,6 +497,8 @@ CACHES = {
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     },
 }
+if REDIS_URL.startswith("rediss:"):
+    CACHES["lock"]["OPTIONS"]["CONNECTION_POOL_KWARGS"] = {"ssl_cert_reqs": None}
 DEFAULT_CACHE_TIMEOUT = 15 * 60
 
 REST_FRAMEWORK = {
