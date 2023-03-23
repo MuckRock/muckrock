@@ -34,3 +34,4 @@ celerybeat-schedule
 .envs
 .envrc
 .vscode
+/src
