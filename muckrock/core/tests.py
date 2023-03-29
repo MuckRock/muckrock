@@ -32,7 +32,7 @@ from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm, StripeForm
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
-from muckrock.core.stats import collect_stats, grade_agency
+from muckrock.core.stats import grade_agency
 from muckrock.core.utils import new_action, notify
 from muckrock.core.views import DonationFormView, NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
@@ -350,6 +350,7 @@ class TestTemplatetagsFunctional(TestCase):
         nose.tools.eq_(tags.company_title("one\ntwo\nthree"), "one, et al")
         nose.tools.eq_(tags.company_title("company"), "company")
 
+
 class TestGradeAgency(TestCase):
     """Evaluates agency key metrics against the law and sibling agencies."""
 
@@ -375,4 +376,30 @@ class TestGradeAgency(TestCase):
     def test_grade_absolute_response_time(self):
         context = {}
         grade_agency(self.cia, context)
-        eq_(context, {'grades': {'abs_response_time': {'grade': 'pass', 'text': 'On average, they respond within the legally allowed time.'}, 'rel_response_time': {'grade': 'neutral', 'text': 'Not enough data available to evaluate agency'}, 'success_rate': {'grade': 'neutral', 'text': 'Not enough data available to evaluate agency'}, 'fee_rate': {'grade': 'neutral', 'text': 'Not enough data available to evaluate agency'}, 'fee_average': {'grade': 'neutral', 'text': 'Not enough data available to evaluate agency'}}})
+        eq_(
+            context,
+            {
+                "grades": {
+                    "abs_response_time": {
+                        "grade": "pass",
+                        "text": "On average, they respond within the legally allowed time.",
+                    },
+                    "rel_response_time": {
+                        "grade": "neutral",
+                        "text": "Not enough data available to evaluate agency",
+                    },
+                    "success_rate": {
+                        "grade": "neutral",
+                        "text": "Not enough data available to evaluate agency",
+                    },
+                    "fee_rate": {
+                        "grade": "neutral",
+                        "text": "Not enough data available to evaluate agency",
+                    },
+                    "fee_average": {
+                        "grade": "neutral",
+                        "text": "Not enough data available to evaluate agency",
+                    },
+                }
+            },
+        )
