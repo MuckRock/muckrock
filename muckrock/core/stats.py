@@ -70,7 +70,8 @@ def grade_relative_response_time(agency):
         ) * 100
         return assign_grade(
             "pass",
-            "They typically respond {}% faster than other agencies in their jurisdiction",
+            """They typically respond {}% faster than
+            other agencies in their jurisdiction")""",
             percentile,
         )
     else:
@@ -79,7 +80,8 @@ def grade_relative_response_time(agency):
         ) * 100
         return assign_grade(
             "fail",
-            "They typically respond {}% slower than other agencies in their jurisdiction",
+            """They typically respond {}% slower than
+            other agencies in their jurisdiction""",
             percentile,
         )
 
@@ -98,14 +100,16 @@ def grade_success_rate(agency):
         percentile = ((agency_success_rate / jurisdiction_success_rate) - 1) * 100
         return assign_grade(
             "pass",
-            "They fulfill {}% more requests than other agencies in their jurisdiction.",
+            """They fulfill {}% more requests than
+            other agencies in their jurisdiction.""",
             percentile,
         )
     else:
         percentile = (1 - (agency_success_rate / jurisdiction_success_rate)) * 100
         return assign_grade(
             "fail",
-            "They fulfill {}% fewer requests than other agencies in their jurisdiction.",
+            """They fulfill {}% fewer requests than
+            other agencies in their jurisdiction.""",
             percentile,
         )
 
@@ -124,14 +128,16 @@ def grade_fee_rate(agency):
         percentile = (1 - (agency_fee_rate / jurisdiction_fee_rate)) * 100
         return assign_grade(
             "pass",
-            "They require a fee {}% less often than other agencies in their jurisdiction.",
+            """They require a fee {}% less often than
+            other agencies in their jurisdiction.""",
             percentile,
         )
     else:
         percentile = ((agency_fee_rate / jurisdiction_fee_rate) - 1) * 100
         return assign_grade(
             "fail",
-            "They require a fee {}% more often than other agencies in their jurisdiction.",
+            """They require a fee {}% more often than
+            other agencies in their jurisdiction.""",
             percentile,
         )
 
@@ -150,13 +156,15 @@ def grade_fee_average(agency):
         percentile = (1 - (agency_fee_average / jurisdiction_fee_average)) * 100
         return assign_grade(
             "pass",
-            "On average, they charge {}% lower fees than other agencies in their jurisdiction.",
+            """On average, they charge {}% lower fees
+            than other agencies in their jurisdiction.""",
             percentile,
         )
     else:
         percentile = ((agency_fee_average / jurisdiction_fee_average) - 1) * 100
         return assign_grade(
             "fail",
-            "On average, they charge {}% higher fees than other agencies in their jurisdiction.",
+            """On average, they charge {}% higher fees
+            than other agencies in their jurisdiction.""",
             percentile,
         )

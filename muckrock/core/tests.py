@@ -376,30 +376,32 @@ class TestGradeAgency(TestCase):
     def test_grade_absolute_response_time(self):
         context = {}
         grade_agency(self.cia, context)
+        expected_abs_result = {
+            "grade": "pass",
+            "text": "On average, they respond within the legally allowed time.",
+        }
+        expected_result = {
+            "grades": {
+                "abs_response_time": expected_abs_result,
+                "rel_response_time": {
+                    "grade": "neutral",
+                    "text": "Not enough data available to evaluate agency",
+                },
+                "success_rate": {
+                    "grade": "neutral",
+                    "text": "Not enough data available to evaluate agency",
+                },
+                "fee_rate": {
+                    "grade": "neutral",
+                    "text": "Not enough data available to evaluate agency",
+                },
+                "fee_average": {
+                    "grade": "neutral",
+                    "text": "Not enough data available to evaluate agency",
+                },
+            }
+        }
         eq_(
             context,
-            {
-                "grades": {
-                    "abs_response_time": {
-                        "grade": "pass",
-                        "text": "On average, they respond within the legally allowed time.",
-                    },
-                    "rel_response_time": {
-                        "grade": "neutral",
-                        "text": "Not enough data available to evaluate agency",
-                    },
-                    "success_rate": {
-                        "grade": "neutral",
-                        "text": "Not enough data available to evaluate agency",
-                    },
-                    "fee_rate": {
-                        "grade": "neutral",
-                        "text": "Not enough data available to evaluate agency",
-                    },
-                    "fee_average": {
-                        "grade": "neutral",
-                        "text": "Not enough data available to evaluate agency",
-                    },
-                }
-            },
+            expected_result,
         )
