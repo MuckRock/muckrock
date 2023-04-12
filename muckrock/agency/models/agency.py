@@ -350,6 +350,7 @@ class Agency(models.Model, RequestHelper):
             "flaggedtask_set",
             "newagencytask_set",
             "staleagencytask_set",
+            "foialog_set",
         ]
         for relation in replace_relations:
             getattr(agency, relation).update(agency=self)
