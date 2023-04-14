@@ -71,7 +71,7 @@ def grade_relative_response_time(agency):
         return assign_grade(
             "pass",
             """They typically respond {}% faster than
-            other agencies in their jurisdiction")""",
+            other agencies in their jurisdiction""",
             percentile,
         )
     else:
