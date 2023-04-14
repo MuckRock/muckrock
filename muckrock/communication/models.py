@@ -189,11 +189,15 @@ class PhoneNumber(models.Model):
     objects = PhoneNumberQuerySet.as_manager()
 
     def __str__(self):
-        number = f"{self.number.as_national}"
+        number = f"{self.number.as_national} ({self.type})"
         if self.status == "error":
             return f"{number} ({self.status})"
         else:
             return number
+
+    def get_clean(self):
+        """Returns phone number as a string without type annotation"""
+        return f"{self.number.as_national}"
 
     def get_absolute_url(self):
         """The url for this phone number"""
