@@ -28,18 +28,22 @@
       {% if agency.website %}
       <dd class="contact__website"><a href="{{agency.website}}">{{agency.website}}</a></dd>
       {% else %}
-      <dd>Unknown</dd>
+      <dd>None</dd>
       {% endif %}
 
       <dt>Phone</dt>
       {% for phone in agency.get_phones %}
-      <dd>{{ phone }}</dd>
+      <dd>{{ phone.get_clean }}</dd>
       {% empty %}
-      <dd>Unknown</dd>
+      <dd>None</dd>
       {% endfor %}
       
       <dt>Fax</dt>
-      <dd>{{ agency.get_faxes.first|default:"Unknown" }}</dd>
+      {% for fax in agency.get_faxes %}
+      <dd>{{ fax.get_clean }}</dd>
+      {% empty %}
+      <dd>None</dd>
+      {% endfor %}
     </dl>
   </main>
 </div>
