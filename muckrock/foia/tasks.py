@@ -881,8 +881,9 @@ class ZipRequest(AsyncFileDownloadTask):
     mode = "wb"
 
     def __init__(self, user_pk, foia_pk):
-        super().__init__(user_pk, foia_pk)
         self.foia = FOIARequest.objects.get(pk=foia_pk)
+        self.file_name = f"{self.foia}.zip"
+        super().__init__(user_pk, foia_pk)
 
     def get_context(self):
         """Add the foia title to the context"""
