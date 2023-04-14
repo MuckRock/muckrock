@@ -87,6 +87,13 @@
     }
 }
 
+.agency .contact__website {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 12rem;
+}
+
 .agency .grade {
     display: flex;
     gap: .75rem;
@@ -110,4 +117,12 @@
 }
 .agency .fail.grade .icon path {
     fill: $color-red;
+}
+
+.agency .notes {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: $border $color-yellow;
+    border-radius: $border-radius;
+    background-color: $color-yellow-light;
 }

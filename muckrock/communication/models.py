@@ -189,7 +189,7 @@ class PhoneNumber(models.Model):
     objects = PhoneNumberQuerySet.as_manager()
 
     def __str__(self):
-        number = f"{self.number.as_national} ({self.type})"
+        number = f"{self.number.as_national}"
         if self.status == "error":
             return f"{number} ({self.status})"
         else:
