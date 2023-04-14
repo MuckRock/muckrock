@@ -1,11 +1,13 @@
-<dl class="appeal-stats">
-    <dt>Appeals</dt>
+<div class="request-record appeal-stats">
+    <header class="overline">Appeals</header>
     {% if num_appealing or num_appeals_done or num_appeals_rejected or num_appeals_response_time %}
-    {% if num_appealing %}<dd><span class="counter">{{num_appealing}}</span> appeal{{ num_appealing | pluralize }} awaiting response</dd>{% endif %}
-    {% if num_appeals_done %}<dd><span class="green counter">{{num_appeals_done}}</span> successful appeals</dd>{% endif %}
-    {% if num_appeals_rejected %}<dd><span class="red counter">{{num_appeals_rejected}}</span> denied appeals</dd>{% endif %}
-    {% if num_appeals_response_time %}<dd>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize %} average response time</dd>{% endif %}
+    <table>
+    {% if num_appealing %}<tr><td>Appeal{{ num_appealing | pluralize }} awaiting response</td><td><span class="counter">{{num_appealing}}</span></td></tr>{% endif %}
+    {% if num_appeals_done %}<tr><td>Successful appeals</td><td><span class="green counter">{{num_appeals_done}}</span></td></tr>{% endif %}
+    {% if num_appeals_rejected %}<tr><td>Denied appeals</td><td><span class="red counter">{{num_appeals_rejected}}</span></td></tr>{% endif %}
+    {% if num_appeals_response_time %}<tr><td>Average response time</td><td>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize }}</td></tr>{% endif %}
+    </table>
     {% else %}
-    <dd>None</dd>
+    <p>None</p>
     {% endif %}
-</dl>
+</div>

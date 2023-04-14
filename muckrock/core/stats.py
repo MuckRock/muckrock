@@ -23,7 +23,7 @@ def collect_stats(obj, context):
 
 def assign_grade(grade, text, percentile=None):
     if percentile:
-        text = text.format(round(percentile, 2))
+        text = text.format(round(percentile))
     return {"grade": grade, "text": text}
 
 

@@ -4,7 +4,7 @@
   <header class="overline">Contact Info</header>
   <main>
     <dl class="contact__mailing">
-      <dt>Mailing Address</dt>
+      <dt>Address</dt>
       <dd>{{ agency.get_addresses.first|linebreaks|default:"Unknown" }}</dd>
 
       {% if request.user.is_staff and agency.portal %}
@@ -15,7 +15,7 @@
       </dd>
       {% endif%}
 
-      <dt>E-mail Address</dt>
+      <dt>Email</dt>
       {% has_perm 'agency.view_emails' request.user as can_view_emails %}
       {% if can_view_emails %}
       <dd>{{ agency.get_emails.first.email|default:"Unknown" }}</dd>
@@ -24,22 +24,22 @@
       {% endif %}
     </dl>
     <dl class="contact__calling">
-      <dt>Fax Number</dt>
-      <dd>{{ agency.get_faxes.first|default:"Unknown" }}</dd>
+      <dt>Website</dt>
+      {% if agency.website %}
+      <dd class="contact__website"><a href="{{agency.website}}">{{agency.website}}</a></dd>
+      {% else %}
+      <dd>Unknown</dd>
+      {% endif %}
 
-      <dt>Phone Number</dt>
+      <dt>Phone</dt>
       {% for phone in agency.get_phones %}
       <dd>{{ phone }}</dd>
       {% empty %}
       <dd>Unknown</dd>
       {% endfor %}
-
-      <dt>Website</dt>
-      {% if agency.website %}
-      <dd><a href="{{agency.website}}">{{agency.website}}</a> {% else %}</dd>
-
-      <dd>Unknown</dd>
-      {% endif %}
+      
+      <dt>Fax</dt>
+      <dd>{{ agency.get_faxes.first|default:"Unknown" }}</dd>
     </dl>
   </main>
 </div>
