@@ -1,4 +1,4 @@
-{% extends 'base_profile.html' %}
+{% extends 'base_detail.html' %}
 {% load tags %}
 {% load thumbnail %}
 {% load rules %}
@@ -10,7 +10,8 @@
   <link rel="alternate" type="application/rss+xml" title="{{agency.name}}'s FOIA Feed" href="{% url 'foia-agency-feed' agency.pk %}" />
 {% endblock rss %}
 
-{% block metadata %}
+{% block fullHeader %}
+<header class="agency__header">
   {% if agency.image %}
     <figure class="agency image">
       <img src="{% thumbnail agency.image 600x600 %}" class="header-image" alt="{{ agency.image_attr_line|striptags}}">
@@ -19,19 +20,14 @@
       {% endif %}
     </figure>
   {% endif %}
-  <h1>{{agency.name}}</h1>
-  <h2><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
+  <p><a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></p>
+  <h1 class="agency__name">{{agency.name}}</h1>
   {% if request.user.is_staff and agency.profile %}
-    <h3><a href="{{ agency.profile.get_absolute_url }}">{{ agency.profile.user.username }}</a></h3>
+    <h3 class="agency__username"><a href="{{ agency.profile.get_absolute_url }}">{{ agency.profile.user.username }}</a></h3>
   {% endif %}
-  {% include 'lib/request_stats.html' %}
-  {% include 'lib/appeal_stats.html' %}
-  {% include 'agency/detail/stats.html' %}
-  {% include 'agency/detail/contact.html' %}
-{% endblock metadata %}
-
-{% block activity %}
-  {% if user.is_authenticated %}
+</header>
+<section class="agency__actions">
+{% if user.is_authenticated %}
     {% if user.is_staff and not agency.has_open_review_task %}
       <form method="post" id="review-form">
         {% csrf_token %}
@@ -49,7 +45,6 @@
       </form>
     </div>
   {% endif %}
-  <section class="actions">
     <div class="button-group">
       <a href="{% url 'foia-create' %}?agency={{agency.pk}}" class="blue button">
         {% include 'lib/component/icon/create-request.svg' %}
@@ -65,7 +60,14 @@
         <a href="{% url "agency-merge" %}?bad_agency={{ agency.pk }}" class="red button">Merge</a>
       {% endif %}
     </div>
-  </section>
+</section>
+<section class="briefing">
+  {% include 'agency/detail/contact.html' %}
+  {% include 'agency/detail/stats.html' %}
+</section>
+{% endblock fullHeader %}
+
+{% block actions %}
   {% if agency.exempt %}
     <section class="notes">
       <h2>Exempt</h2>
@@ -83,9 +85,9 @@
       {{ agency.public_notes|markdown }}
     </section>
   {% endif %}
-{% endblock activity %}
+{% endblock actions %}
 
-{% block data %}
+{% block main %}
   <div class="tab-container">
     {% include "agency/detail/tabs/tablist.html" %}
     {# the individual tabs #}

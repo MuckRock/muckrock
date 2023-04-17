@@ -1,39 +1,49 @@
 {% load rules %}
 
-<dl class="contact">
-  <dt>Mailing Address</dt>
-  <dd>{{ agency.get_addresses.first|linebreaks|default:"Unknown" }}</dd>
+<div class="contact">
+  <header class="overline">Contact Info</header>
+  <main>
+    <dl class="contact__mailing">
+      <dt>Address</dt>
+      <dd>{{ agency.get_addresses.first|linebreaks|default:"Unknown" }}</dd>
 
-  {% if request.user.is_staff and agency.portal %}
-  <dt>Portal</dt>
-  <dd>
-    <a href="{{agency.portal.url}}">{{agency.portal.name}}</a>
-    ({{agency.portal.get_type_display}})
-  </dd>
-  {% endif%}
+      {% if request.user.is_staff and agency.portal %}
+      <dt>Portal</dt>
+      <dd>
+        <a href="{{agency.portal.url}}">{{agency.portal.name}}</a>
+        ({{agency.portal.get_type_display}})
+      </dd>
+      {% endif%}
 
-  <dt>E-mail Address</dt>
-  {% has_perm 'agency.view_emails' request.user as can_view_emails %}
-  {% if can_view_emails %}
-  <dd>{{ agency.get_emails.first.email|default:"Unknown" }}</dd>
-  {% else %}
-  <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
-  {% endif %}
+      <dt>Email</dt>
+      {% has_perm 'agency.view_emails' request.user as can_view_emails %}
+      {% if can_view_emails %}
+      <dd>{{ agency.get_emails.first.email|default:"Unknown" }}</dd>
+      {% else %}
+      <dd><a href="{% url 'accounts' %}">Available to Pro Users</a></dd>
+      {% endif %}
+    </dl>
+    <dl class="contact__calling">
+      <dt>Website</dt>
+      {% if agency.website %}
+      <dd class="contact__website"><a href="{{agency.website}}">{{agency.website}}</a></dd>
+      {% else %}
+      <dd>None</dd>
+      {% endif %}
 
-  <dt>Fax Number</dt>
-  <dd>{{ agency.get_faxes.first|default:"Unknown" }}</dd>
-
-  <dt>Phone Number</dt>
-  {% for phone in agency.get_phones %}
-  <dd>{{ phone }}</dd>
-  {% empty %}
-  <dd>Unknown</dd>
-  {% endfor %}
-
-  <dt>Website</dt>
-  {% if agency.website %}
-  <dd><a href="{{agency.website}}">{{agency.website}}</a> {% else %}</dd>
-
-  <dd>Unknown</dd>
-  {% endif %}
-</dl>
+      <dt>Phone</dt>
+      {% for phone in agency.get_phones %}
+      <dd>{{ phone.get_clean }}</dd>
+      {% empty %}
+      <dd>None</dd>
+      {% endfor %}
+      
+      <dt>Fax</dt>
+      {% for fax in agency.get_faxes %}
+      <dd>{{ fax.get_clean }}</dd>
+      {% empty %}
+      <dd>None</dd>
+      {% endfor %}
+    </dl>
+  </main>
+</div>

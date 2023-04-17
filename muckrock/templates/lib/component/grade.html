@@ -1,0 +1,20 @@
+{% comment %}
+Grade
+
+Presents a grade (pass, fail, neutral) along with an explanation.
+
+@params
+- 'grade': "pass" or "fail"
+- 'text'(required): explanatory text for the grade
+{% endcomment %}
+
+<div class="grade {{grade}}">
+{% if grade == "pass" %}
+  {% include 'lib/component/icon/success.svg' %}
+{% elif grade == "fail" %}
+  {% include 'lib/component/icon/error.svg' %}
+{% else %}
+  {% include 'lib/component/icon/neutral.svg' %}
+{% endif %}
+  <div class="text">{{text}}</div>
+</div>

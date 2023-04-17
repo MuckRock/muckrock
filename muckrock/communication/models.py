@@ -195,6 +195,10 @@ class PhoneNumber(models.Model):
         else:
             return number
 
+    def get_clean(self):
+        """Returns phone number as a string without type annotation"""
+        return f"{self.number.as_national}"
+
     def get_absolute_url(self):
         """The url for this phone number"""
         return reverse("phone-detail", kwargs={"idx": self.pk})

@@ -74,7 +74,7 @@ small, .small {
     line-height: $lh;
 }
 
-dfn, dt {
+dfn, dt, .overline {
     display: block;
     font-size: $size-1;
     font-style: normal;

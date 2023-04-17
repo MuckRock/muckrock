@@ -34,6 +34,7 @@ from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
 from muckrock.agency.importer import CSVReader, Importer
 from muckrock.agency.models import Agency
 from muckrock.agency.tasks import mass_import
+from muckrock.core.stats import collect_stats, grade_agency
 from muckrock.core.views import (
     ModelFilterMixin,
     MRAutocompleteView,
@@ -44,7 +45,6 @@ from muckrock.foia.filters import FOIAFileFilterSet
 from muckrock.foia.models import FOIAFile, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
 
 
@@ -130,6 +130,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     }
 
     collect_stats(agency, context)
+    grade_agency(agency, context)
 
     return render(request, "agency/detail/detail.html", context)
 
