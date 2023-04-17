@@ -30,9 +30,9 @@ from muckrock.core.factories import (
 )
 from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm, StripeForm
+from muckrock.core.stats import grade_agency
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
-from muckrock.core.stats import grade_agency
 from muckrock.core.utils import new_action, notify
 from muckrock.core.views import DonationFormView, NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
