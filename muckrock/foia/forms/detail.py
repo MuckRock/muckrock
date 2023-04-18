@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from datetime import date, timedelta
 
 # MuckRock
+from muckrock.accounts.models import StockResponse
 from muckrock.core import autocomplete
 from muckrock.foia.models import END_STATUS, FOIANote, FOIARequest, TrackingNumber
 from muckrock.organization.forms import StripeForm
@@ -165,6 +166,10 @@ class FOIAContactUserForm(forms.Form):
     prefix = "contact"
 
     text = forms.CharField(widget=forms.Textarea)
+    stock_response = forms.ModelChoiceField(
+        queryset=StockResponse.objects.all(),
+        to_field_name="text",
+    )
 
 
 class FOIASoftDeleteForm(forms.Form):

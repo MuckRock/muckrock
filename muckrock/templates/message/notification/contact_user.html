@@ -2,6 +2,6 @@
 {% block body %}
 <p>A MuckRock admin has contacted you about the following request:</p>
 <a href="{{ foia_url|safe }}">{{ foia_title }}</a>
-<p>{{ text }}</p>
+<p>{{ text|linebreaks }}</p>
 <p>Sincerely,<br/>The MuckRock Team</p>
 {% endblock %}

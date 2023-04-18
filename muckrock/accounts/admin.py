@@ -14,7 +14,12 @@ from django.utils.safestring import mark_safe
 from reversion.admin import VersionAdmin
 
 # MuckRock
-from muckrock.accounts.models import Profile, RecurringDonation, Statistics
+from muckrock.accounts.models import (
+    Profile,
+    RecurringDonation,
+    Statistics,
+    StockResponse,
+)
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
@@ -200,7 +205,13 @@ class RecurringDonationAdmin(VersionAdmin):
         return super().save_model(request, obj, form, change)
 
 
+class StockResponseAdmin(VersionAdmin):
+    model = StockResponse
+    list_display = ("title",)
+
+
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
 admin.site.register(User, MRUserAdmin)
 admin.site.register(RecurringDonation, RecurringDonationAdmin)
+admin.site.register(StockResponse, StockResponseAdmin)
