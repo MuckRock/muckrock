@@ -546,3 +546,7 @@ $(".raw-content-button").click(function(e) {
   e.preventDefault();
 });
 
+
+$("#id_contact-stock_response").change(function() {
+  $("#id_contact-text").text($(this).val());
+});

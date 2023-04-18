@@ -558,3 +558,13 @@ class Statistics(models.Model):
     class Meta:
         ordering = ["-date"]
         verbose_name_plural = "statistics"
+
+
+class StockResponse(models.Model):
+    """Stock responses for contacting users"""
+
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+    def __str__(self):
+        return self.title
