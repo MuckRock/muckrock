@@ -67,6 +67,7 @@ drf-nested-routers==0.91  # via -r pip/requirements.in
 easy-thumbnails==2.8      # via -r pip/requirements.in
 ecdsa==0.15               # via python-jose
 emoji==0.6.0              # via -r pip/requirements.in
+et-xmlfile==1.1.0         # via openpyxl
 fpdf==1.7.2               # via -r pip/requirements.in
 furl==1.0.1               # via -r pip/requirements.in
 future==0.18.2            # via celery, pyjwkest, python-documentcloud
@@ -91,6 +92,7 @@ newrelic==2.70.0.51       # via -r pip/requirements.in
 numpy==1.19.0             # via -r pip/requirements.in, scikit-learn, scipy
 oauth2client==4.1.2       # via google-api-python-client
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
+openpyxl==3.1.2           # via -r pip/requirements.in
 orderedmultidict==1.0.1   # via furl
 packaging==16.8           # via bleach
 parso==0.7.0              # via jedi
@@ -153,7 +155,7 @@ svglib==1.1.0             # via easy-thumbnails
 threadpoolctl==2.1.0      # via scikit-learn
 tinycss2==1.1.1           # via cssselect2, svglib
 traitlets==4.3.2          # via ipython
-typing-extensions==4.4.0  # via pypdf, pypdf2
+typing-extensions==4.4.0  # via pypdf
 unidecode==0.4.19         # via -r pip/requirements.in
 uritemplate==3.0.0        # via google-api-python-client
 urllib3[secure]==1.24.2   # via botocore, python-documentcloud, requests, scout-apm
