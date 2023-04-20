@@ -1,8 +1,5 @@
 <section role="tabpanel" class="tab-panel requests" id="requests">
-  <h2 class="tab-panel-heading">
-    Requests
-    {% if foia_requests_count > 10 %}<small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small>{% endif %}
-  </h2>
+  <h2 class="tab-panel-heading">Requests</h2>
   <div class="grid__row">
     <div class="grid__column quarter">
       <div class="grid___row">
@@ -16,7 +13,10 @@
     </div>
     <div class="grid__column three-quarters">
       {% if foia_requests_count > 0 %}
-      <h3>Recent Requests </h3>
+      <h3 class="foia-table-header">
+        Recent Requests
+        {% if foia_requests_count > 10 %}<small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small>{% endif %}
+      </h3>
       {% include 'lib/foia_table.html' with requests=foia_requests %}
       {% else %}
       <p>No requests made to this agency.</p>
