@@ -3,13 +3,13 @@
     {% if num_submitted %}
     <table>
     <tr><td>Filed</td><td><span class="blue counter">{{ num_submitted }}</span></td></tr>
-    {% if num_done %}<tr><td><span class="green counter">{{ num_done }}</span></td><td>Completed</td></tr>{% endif %}
-    {% if num_rejected %}<tr><td><span class="red counter">{{ num_rejected }}</span></td><td>Rejected</td></tr>{% endif %}
-    {% if num_no_docs %}<tr><td><span class="red counter">{{ num_no_docs }}</span></td><td>No Responsive Documents</td></tr>{% endif %}
-    {% if num_ack %}<tr><td><span class="counter">{{ num_ack }}</span></td><td>Awaiting Acknowledgement</td></tr>{% endif %}
-    {% if num_processed %}<tr><td><span class="counter">{{ num_processed }}</span></td><td>Awaiting Response</td></tr>{% endif %}
-    {% if num_fix %}<tr><td><span class="counter">{{ num_fix }}</span></td><td>Requiring Action</td></tr>{% endif %}
-    {% if num_overdue %}<tr><td><span class="red counter">{{ num_overdue }}</span></td><td>Overdue</td></tr>{% endif %}
+    {% if num_done %}<tr><td>Completed</td><td><span class="green counter">{{ num_done }}</span></td></tr>{% endif %}
+    {% if num_rejected %}<tr><td>Rejected</td><td><span class="red counter">{{ num_rejected }}</span></td></tr>{% endif %}
+    {% if num_no_docs %}<tr><td>No Responsive Documents</td><td><span class="red counter">{{ num_no_docs }}</span></td></tr>{% endif %}
+    {% if num_ack %}<tr><td>Awaiting Acknowledgement</td><td><span class="counter">{{ num_ack }}</span></td></tr>{% endif %}
+    {% if num_processed %}<tr><td>Awaiting Response</td><td><span class="counter">{{ num_processed }}</span></td></tr>{% endif %}
+    {% if num_fix %}<tr><td>Requiring Action</td><td><span class="counter">{{ num_fix }}</span></td></tr>{% endif %}
+    {% if num_overdue %}<tr><td>Overdue</td><td><span class="red counter">{{ num_overdue }}</span></td></tr>{% endif %}
     </table>
     {% else %}
     <p>None</p>
