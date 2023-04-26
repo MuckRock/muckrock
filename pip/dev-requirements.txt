@@ -22,7 +22,7 @@ cryptography==2.6.1       # via paramiko
 decorator==4.3.0          # via ipdb, ipython
 dill==0.3.5.1             # via pylint
 dj-inmemorystorage==2.1.0  # via -r pip/dev-requirements.in
-django==3.2.9             # via -r pip/dev-requirements.in, dj-inmemorystorage, django-debug-toolbar, django-silk
+django==3.2.18            # via -r pip/dev-requirements.in, dj-inmemorystorage, django-debug-toolbar, django-silk
 django-debug-toolbar==3.2.2  # via django-debug-toolbar-request-history
 django-debug-toolbar-request-history==0.1.4  # via -r pip/dev-requirements.in
 django-nose==1.4.4        # via -r pip/dev-requirements.in
@@ -53,7 +53,7 @@ pathspec==0.9.0           # via black
 pbr==1.10.0               # via mock
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.4        # via ipython
-pip-tools==6.12.1         # via -r pip/dev-requirements.in
+pip-tools==6.13.0         # via -r pip/dev-requirements.in
 platformdirs==2.5.2       # via black, pylint
 prompt-toolkit==3.0.31    # via ipython
 ptyprocess==0.6.0         # via pexpect
