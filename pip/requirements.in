@@ -1,5 +1,6 @@
 -e git+https://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun # Mail backend used directly (on production)
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
+-e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
@@ -23,7 +24,6 @@ django-hosts # Used for multi-domain routing
 django-ipware # Used to get user's IP address
 django-localflavor # Used for phone numbers and state list
 django-mathfilters # Mathematical template filters
-django-opensearch # Enables opensearch
 django-phonenumber-field # for storing phone numbers in the database
 django-premailer # Styles HTML emails
 django-reversion # Version history for models
