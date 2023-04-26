@@ -53,7 +53,7 @@ pathspec==0.9.0           # via black
 pbr==1.10.0               # via mock
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.4        # via ipython
-pip-tools==6.12.1         # via -r pip/dev-requirements.in
+pip-tools==6.13.0         # via -r pip/dev-requirements.in
 platformdirs==2.5.2       # via black, pylint
 prompt-toolkit==3.0.31    # via ipython
 ptyprocess==0.6.0         # via pexpect
