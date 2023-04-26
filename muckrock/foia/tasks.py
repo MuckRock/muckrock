@@ -858,9 +858,7 @@ class ExportCsv(AsyncFileDownloadTask):
         """Export selected foia requests as a CSV file"""
         writer = csv.writer(out_file)
         writer.writerow(f[1] for f in self.fields)
-        # We may want to switch this back to .iterator() when upgrading to Django 4.1
-        # or higher, as they enable prefetchign with the iterator method
-        for foia in self.foias.all():
+        for foia in self.foias.iterator(chunk_size=2000):
             writer.writerow(f[0](foia) for f in self.fields)
 
 
