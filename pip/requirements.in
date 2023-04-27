@@ -11,7 +11,6 @@ django-anymail[mailgun] # Use for sending email on production
 django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
-django-compat # ?
 django-compressor # Compress all JS and CSS assets into a single file
 django-constance[database] # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
@@ -34,7 +33,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
-django>4.0 # Django is kinda important...
+django<5.0 # Django is kinda important...
 djangorestframework # The API framework
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF
