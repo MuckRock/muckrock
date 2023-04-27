@@ -27,8 +27,8 @@ from hashlib import md5
 
 # Third Party
 from actstream.models import followers
+from anymail.exceptions import AnymailError
 from constance import config
-from django_mailgun import MailgunAPIError
 from reversion import revisions as reversion
 from taggit.managers import TaggableManager
 
@@ -830,13 +830,13 @@ class FOIARequest(models.Model):
             try:
                 logger.info("sending mail with backend: %s", backend)
                 msg.send(fail_silently=False)
-            except MailgunAPIError as exc:
+            except AnymailError as exc:
                 EmailError.objects.create(
                     email=email_comm,
                     datetime=timezone.now(),
                     recipient=self.email,
-                    code=exc.args[0].status_code,
-                    error=exc.args[0].text,
+                    code=exc.status_code,
+                    error=exc.response.reason if exc.response else None,
                     event="mailgunapi",
                     reason="",
                 )
