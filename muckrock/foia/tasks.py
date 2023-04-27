@@ -35,8 +35,8 @@ import dill as pickle
 import lob
 import numpy as np
 import requests
+from anymail.exceptions import AnymailError
 from constance import config
-from django_mailgun import MailgunAPIError
 from documentcloud import DocumentCloud
 from documentcloud.exceptions import DocumentCloudError
 from phaxio import PhaxioApi
@@ -448,7 +448,7 @@ def followup_requests():
                 try:
                     foia.followup()
                     log.append("%s - %d - %s" % (foia.status, foia.pk, foia.title))
-                except MailgunAPIError as exc:
+                except AnymailError as exc:
                     logger.error(
                         "Mailgun error during followups: %s",
                         exc,
