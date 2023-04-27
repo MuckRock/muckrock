@@ -39,6 +39,7 @@ from muckrock.foia.models import (
     FOIANote,
     FOIARequest,
     FOIATemplate,
+    FOIALog,
     OutboundComposerAttachment,
     OutboundRequestAttachment,
     TrackingNumber,
@@ -711,10 +712,31 @@ class FOIATemplateAdmin(VersionAdmin):
     search_fields = ["name", "template"]
     form = FOIATemplateAdminForm
 
+class FOIALogAdminForm(forms.ModelForm):
+    """Form for FOIA Log admin"""
+
+    agency = forms.ModelChoiceField(
+        queryset=Agency.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="agency-autocomplete",
+            attrs={"data-placeholder": "Agency?", "data-width": None},
+        ),
+    )
+
+    class Meta:
+        model = FOIALog
+        fields = "__all__"
+
+class FOIALogAdmin(VersionAdmin):
+    """Outbound Attachment admin options"""
+    list_display = ("agency", "request_id", "date")
+    search_fields = ["request_id", "agency"]
+    form = FOIALogAdminForm
 
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
 admin.site.register(FOIAComposer, FOIAComposerAdmin)
 admin.site.register(FOIATemplate, FOIATemplateAdmin)
+admin.site.register(FOIALog, FOIALogAdmin)
 admin.site.register(OutboundRequestAttachment, OutboundRequestAttachmentAdmin)
 admin.site.register(OutboundComposerAttachment, OutboundComposerAttachmentAdmin)

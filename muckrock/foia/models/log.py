@@ -12,6 +12,11 @@ from muckrock.foia.models.request import STATUS
 class FOIALog(models.Model):
     """A FOIA from a FOIA Log"""
 
+    class Meta:
+        ordering = ["date"]
+        verbose_name = "FOIA Log"
+        app_label = "foia"
+
     request_id = models.CharField(max_length=255, unique=True)
     requestor = models.CharField(max_length=255)
     subject = models.TextField()
