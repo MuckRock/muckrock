@@ -4,7 +4,6 @@
 #
 #    pip-compile --annotation-style=line pip/requirements.in
 #
--e git+https://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun  # via -r pip/requirements.in
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps  # via -r pip/requirements.in
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch  # via -r pip/requirements.in
 amqp==2.6.0               # via kombu
@@ -29,8 +28,9 @@ cssutils==1.0.1           # via premailer
 decorator==4.3.0          # via ipython, traitlets
 defusedxml==0.7.0rc1      # via python3-openid, social-auth-core
 dill==0.3.2               # via -r pip/requirements.in
-django==4.2               # via -r pip/requirements.in, django-activity-stream, django-appconf, django-celery-email, django-choices, django-cors-headers, django-debug-toolbar, django-extensions, django-filter, django-hijack, django-localflavor, django-news-sitemaps, django-opensearch, django-phonenumber-field, django-picklefield, django-redis, django-reversion, django-sslify, django-storages, django-taggit, djangorestframework, dogslow, drf-nested-routers, easy-thumbnails, jsonfield
+django==4.2               # via -r pip/requirements.in, django-activity-stream, django-anymail, django-appconf, django-celery-email, django-choices, django-cors-headers, django-debug-toolbar, django-extensions, django-filter, django-hijack, django-localflavor, django-news-sitemaps, django-opensearch, django-phonenumber-field, django-picklefield, django-redis, django-reversion, django-sslify, django-storages, django-taggit, djangorestframework, dogslow, drf-nested-routers, easy-thumbnails, jsonfield
 django-activity-stream==1.4.2  # via -r pip/requirements.in
+django-anymail[mailgun]==9.1  # via -r pip/requirements.in
 django-appconf==1.0.4     # via django-celery-email, django-compressor, django-opensearch
 django-autocomplete-light==3.9.0rc5  # via -r pip/requirements.in
 django-celery-email==3.0.0  # via -r pip/requirements.in
@@ -135,7 +135,7 @@ raven==6.10.0             # via -r pip/requirements.in
 rcssmin==1.0.6            # via django-compressor
 redis==3.5.3              # via -r pip/requirements.in, django-redis, python-redis-lock
 reportlab==3.5.47         # via -r pip/requirements.in
-requests==2.21.0          # via -r pip/requirements.in, django-mailgun, lob, plaid-python, premailer, pyembed, pyjwkest, pyphaxio, python-documentcloud, requests-oauthlib, smart-open, social-auth-core, stripe, zenpy
+requests==2.21.0          # via -r pip/requirements.in, django-anymail, lob, plaid-python, premailer, pyembed, pyjwkest, pyphaxio, python-documentcloud, requests-oauthlib, smart-open, social-auth-core, stripe, zenpy
 requests-oauthlib==1.0.0  # via social-auth-core
 rjsmin==1.1.0             # via django-compressor
 rsa==3.4.2                # via oauth2client, python-jose
@@ -145,7 +145,7 @@ scikit-learn==0.23.1      # via -r pip/requirements.in
 scipy==1.5.0              # via -r pip/requirements.in, scikit-learn
 scout-apm==2.16.2         # via -r pip/requirements.in
 simplejson==3.16.0        # via -r pip/requirements.in
-six==1.15.0               # via bleach, cryptography, django-autocomplete-light, django-compat, django-compressor, django-mailgun, ecdsa, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pyjwkest, python-dateutil, python-jose, traitlets, zenpy
+six==1.15.0               # via bleach, cryptography, django-autocomplete-light, django-compat, django-compressor, ecdsa, furl, google-api-python-client, oauth2client, orderedmultidict, packaging, pyjwkest, python-dateutil, python-jose, traitlets, zenpy
 smart-open==1.6.0         # via -r pip/requirements.in
 smartypants==1.8.6        # via -r pip/requirements.in
 social-auth-app-django==5.0.0  # via -r pip/requirements.in

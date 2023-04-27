@@ -292,6 +292,7 @@ INSTALLED_APPS = (
     "muckrock.crowdsource",
     "actstream",
     "simple_history",
+    "anymail",
 )
 
 

@@ -22,9 +22,16 @@ SESSION_COOKIE_SECURE = True
 PREPEND_WWW = False
 
 if boolcheck(os.environ.get("USE_CELERY_EMAIL", True)):
-    CELERY_EMAIL_BACKEND = "django_mailgun.MailgunBackend"
+    CELERY_EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
     EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
 else:
-    EMAIL_BACKEND = "django_mailgun.MailgunBackend"
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
 SCOUT_NAME = "MuckRock"
+
+# https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
+ANYMAIL = {
+    "MAILGUN_API_KEY": MAILGUN_ACCESS_KEY,
+    "MAILGUN_SENDER_DOMAIN": MAILGUN_SERVER_NAME,
+    "MAILGUN_API_URL": MAILGUN_API_URL,
+}

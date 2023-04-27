@@ -1,4 +1,3 @@
--e git+https://github.com/BradWhittington/django-mailgun.git@c4bfb77fca1eb3d5c772294e3d065274bab9ddc6#egg=django_mailgun # Mail backend used directly (on production)
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
 beautifulsoup4 # used for parsing html
@@ -8,6 +7,7 @@ celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
+django-anymail[mailgun] # Use for sending email on production
 django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
