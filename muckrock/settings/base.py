@@ -113,10 +113,20 @@ COMPRESS_JS_FILTERS = []
 THUMBNAIL_CACHE_DIMENSIONS = True
 
 # Boto3S3Storage configuration
-DEFAULT_FILE_STORAGE = "muckrock.core.storage.MediaRootS3BotoStorage"
-THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
-STATICFILES_STORAGE = "muckrock.core.storage.CachedS3Boto3Storage"
-COMPRESS_STORAGE = STATICFILES_STORAGE
+STORAGES = {
+    "default": {
+        "BACKEND": "muckrock.core.storage.MediaRootS3BotoStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "muckrock.core.storage.CachedS3Boto3Storage",
+    },
+    "compressor": {
+        "BACKEND": "compressor.storage.CompressorFileStorage",
+    },
+}
+THUMBNAIL_DEFAULT_STORAGE = STORAGES["default"]["BACKEND"]
+THUMBNAIL_STORAGE = STORAGES["default"]["BACKEND"]
+COMPRESS_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 CLEAN_S3_ON_FOIA_DELETE = True
 
 # Settings for static bucket storage
@@ -262,7 +272,6 @@ INSTALLED_APPS = (
     "webpack_loader",
     "django_hosts",
     "hijack",
-    "compat",  # for hijack
     "django_filters",
     "opensearch",
     "constance",

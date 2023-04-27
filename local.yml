@@ -1,8 +1,8 @@
 version: '3.8'
 
 volumes:
-  postgres_data_local: {}
-  postgres_backup_local: {}
+  postgres15_data_local: {}
+  postgres15_backup_local: {}
 
 services:
   muckrock_django: &django
@@ -36,11 +36,11 @@ services:
   muckrock_postgres:
     build:
       context: .
-      dockerfile: ./compose/production/postgres/Dockerfile
-    image: muckrock_production_postgres
+      dockerfile: ./compose/production/postgres/Dockerfile15
+    image: muckrock_production_postgres15
     volumes:
-      - postgres_data_local:/var/lib/postgresql/data
-      - postgres_backup_local:/backups
+      - postgres15_data_local:/var/lib/postgresql/data
+      - postgres15_backup_local:/backups
     env_file:
       - ./.envs/.local/.postgres
 

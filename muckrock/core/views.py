@@ -4,7 +4,7 @@ Views for muckrock project
 # Django
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin.utils import lookup_needs_distinct
+from django.contrib.admin.utils import lookup_spawns_duplicates
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
@@ -658,7 +658,7 @@ class MRAutocompleteView(autocomplete.Select2QuerySetView):
                 queryset = queryset.filter(reduce(operator.or_, or_queries))
 
             for search_spec in orm_lookups:
-                if lookup_needs_distinct(queryset.model._meta, search_spec):
+                if lookup_spawns_duplicates(queryset.model._meta, search_spec):
                     queryset = queryset.distinct()
                     break
 
