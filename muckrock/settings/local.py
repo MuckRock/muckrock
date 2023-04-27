@@ -11,9 +11,11 @@ from muckrock.settings.base import *
 DEBUG = True
 
 # Loads static files locally
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+STORAGES["staticfiles"][
+    "BACKEND"
+] = "django.contrib.staticfiles.storage.StaticFilesStorage"
 STATIC_URL = "/static/"
-COMPRESS_STORAGE = STATICFILES_STORAGE
+COMPRESS_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 COMPRESS_URL = STATIC_URL
 COMPRESS_ENABLED = False
 
