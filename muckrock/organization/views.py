@@ -11,7 +11,7 @@ from django.db.models.query import Prefetch
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import DetailView, RedirectView
 
 # MuckRock
@@ -104,7 +104,9 @@ def activate(request):
     """Activate one of your organizations"""
     redirect_url = request.POST.get("next", "/")
     redirect_url = (
-        redirect_url if is_safe_url(redirect_url, allowed_hosts=None) else "/"
+        redirect_url
+        if url_has_allowed_host_and_scheme(redirect_url, allowed_hosts=None)
+        else "/"
     )
 
     try:
