@@ -169,6 +169,7 @@ class FOIAContactUserForm(forms.Form):
     stock_response = forms.ModelChoiceField(
         queryset=StockResponse.objects.all(),
         to_field_name="text",
+        required=False,
     )
 
 
