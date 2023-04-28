@@ -1,0 +1,20 @@
+<section role="tabpanel" class="tab-panel logs" id="logs">
+  <h2 class="tab-panel-heading">FOIA Logs</h2>
+  {% if foia_logs|length > 0 %}
+  <ul class="logs-list nostyle" id="all-logs">
+  {% for foia_log in foia_logs %}
+    <li>{% include "lib/foia_log.html" %}</li>
+  {% endfor %}
+  </ul>
+  {% else %}
+  <p>No logs available for this agency</p>
+  {% endif %}
+  <p>
+    <span>Showing {{foia_logs|length}} of {{ foia_logs_count }}</span>
+    {# {% if foia_logs|length < foia_logs_count %}
+    <a href="{% url "agency-logs" jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk idx=agency.id slug=agency.slug %}">
+      See all logs
+    </a>
+    {% endif %} #}
+  </p>
+</section>
