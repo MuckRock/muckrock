@@ -333,3 +333,13 @@ class FOIAFileFilterSet(django_filters.FilterSet):
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
+
+class FOIALogFilterSet(django_filters.FilterSet):
+    """Filters for files"""
+
+    date_range = django_filters.DateFromToRangeFilter(
+        field_name="date",
+        label="Date Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
