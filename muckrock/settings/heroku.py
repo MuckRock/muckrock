@@ -66,3 +66,11 @@ if "MEMCACHIER_SERVERS" in os.environ:
     }
 
 CONSTANCE_DATABASE_CACHE_BACKEND = "default"
+
+# https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
+ANYMAIL = {
+    "MAILGUN_API_KEY": MAILGUN_ACCESS_KEY,
+    "MAILGUN_SENDER_DOMAIN": os.environ.get(
+        "MAILGUN_SENDER_DOMAIN", MAILGUN_SERVER_NAME
+    ),
+}
