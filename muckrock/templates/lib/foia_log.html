@@ -1,3 +1,3 @@
 <div class="foia_log">
-  {{ foia_log.request_id }}
+  <a href="{% url 'foia-log' idx=foia_log.pk %}">{{ foia_log.request_id }}</a>
 </div>
