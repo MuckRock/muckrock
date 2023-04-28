@@ -104,6 +104,7 @@ urlpatterns = [
         views.FOIARequestAutocomplete.as_view(),
         name="foia-request-autocomplete",
     ),
+    re_path(r"^logs/(?P<idx>\d+)/$", views.FOIALogDetail.as_view(), name="foia-log"),
     # Feeds
     re_path(
         r"^feeds/submitted/$",
