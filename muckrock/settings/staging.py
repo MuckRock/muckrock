@@ -35,10 +35,3 @@ os.environ["http_proxy"] = os.environ.get("FIXIE_URL", "")
 os.environ["https_proxy"] = os.environ.get("FIXIE_URL", "")
 
 SCOUT_NAME = "MuckRock Staging"
-
-# https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
-ANYMAIL = {
-    "MAILGUN_API_KEY": MAILGUN_ACCESS_KEY,
-    "MAILGUN_SENDER_DOMAIN": MAILGUN_SERVER_NAME,
-    "MAILGUN_API_URL": MAILGUN_API_URL,
-}
