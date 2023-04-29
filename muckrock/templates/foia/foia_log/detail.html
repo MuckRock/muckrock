@@ -2,5 +2,7 @@
 {% block title %}MuckRock &bull; FOIA Log{% endblock %}
 
 {% block content %}
-{{ foia_log.request_id }} 
+<article class="foia-log-detail">
+  {% include "lib/foia_log.html" with show_agency=True %}
+</article>
 {% endblock content %}
