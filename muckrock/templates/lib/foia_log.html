@@ -1,3 +1,14 @@
-<div class="foia_log">
-  <a href="{% url 'foia-log' idx=foia_log.pk %}">{{ foia_log.request_id }}</a>
+<div class="foia-log" id="{{foia_log.request_id}}">
+  <header class="foia-log__header">
+    <time class="foia-log__date" datetime="{{ foia_log.date|date:"c" }}" title="{{ foia_log.date|date:"c" }}">{{foia_log.date}}</time>
+    <p class="foia-log__request_id">#{{ foia_log.request_id }}</p>
+  </header>
+  <main class="foia-log__main">
+    <p class="foia-log__requestor"><strong>From: </strong>{{ foia_log.requestor }}</p>
+    {% if show_agency %}<p class="foia-log__agency"><strong>To: </strong><a href="{{ foia_log.agency.get_absolute_url }}">{{foia_log.agency.name}}</a></p>{% endif %}
+    <p class="foia-log__subject">{{ foia_log.subject }}</p>
+  </main>
+  <footer class="foia-log__footer">
+    <a href="{% url 'foia-log' idx=foia_log.pk %}">Permalink</a>
+  </footer>
 </div>
