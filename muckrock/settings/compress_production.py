@@ -11,8 +11,7 @@ from muckrock.settings.base import *
 STORAGES["staticfiles"][
     "BACKEND"
 ] = "django.contrib.staticfiles.storage.StaticFilesStorage"
-COMPRESS_STORAGE = "compressor.storage.CompressorFileStorage"
-STORAGES["compressor"]["BACKEND"] = COMPRESS_STORAGE
+COMPRESS_STORAGE = STORAGES["compressor"]["BACKEND"]
 STATIC_URL = "https://cdn.muckrock.com/"
 COMPRESS_URL = STATIC_URL
 COMPRESS_ENABLED = True

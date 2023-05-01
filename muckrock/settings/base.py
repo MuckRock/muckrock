@@ -100,7 +100,6 @@ WEBPACK_LOADER = {
 
 COMPRESS_OFFLINE = True
 
-COMPRESS_STORAGE = "compressor.storage.CompressorFileStorage"
 COMPRESS_CSS_FILTERS = [
     "compressor.filters.css_default.CssAbsoluteFilter",
     "compressor.filters.cssmin.CSSMinFilter",
