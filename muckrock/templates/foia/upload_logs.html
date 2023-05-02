@@ -1,0 +1,36 @@
+{% extends "forms/base_form.html" %}
+
+{% block form-title %}
+  <h1>Upload FOIA Logs</h1>
+{% endblock %}
+
+{% block form-info %}
+  <p>
+    The CSV file should have one row at top for the headers.  All other rows
+    should be valid FOIA logs.  The columns supported are (* denotes required):
+  </p>
+  <ul>
+    <li>request id*</li>
+    <li>requestor*</li>
+    <li>subject*</li>
+    <li>date requested*</li>
+    <li>date completed</li>
+    <li>status</li>
+  </ul>
+  <p>
+    The status column should be one of:
+  </p>
+  <ul>
+    <li>processed</li>
+    <li>appealing</li>
+    <li>fix</li>
+    <li>payment</li>
+    <li>lawsuit</li>
+    <li>rejected</li>
+    <li>no_docs</li>
+    <li>done</li>
+    <li>partial</li>
+    <li>abandoned</li>
+  </ul>
+
+{% endblock %}
