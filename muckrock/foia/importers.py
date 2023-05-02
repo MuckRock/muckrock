@@ -3,43 +3,70 @@ How to import FOIA Logs from various formats
 """
 
 # Standard Library
-import io
+import codecs
+import csv
 import logging
-from datetime import datetime
+from datetime import date
 
 # Third Party
-import openpyxl
-import requests
+from dateutil.parser import parse
 
 # MuckRock
 from muckrock.foia.models import FOIALog
+from muckrock.foia.models.request import STATUS, TrackingNumber
 
 logger = logging.getLogger(__name__)
 
 
-def import_fda(url, agency):
-    """Import a FOIA Log from the FDA"""
-    logger.info("[FDA FOIA LOG] Importing FDA FOIA log from %s", url)
-    resp = requests.get(url)
-    logger.info("[FDA FOIA LOG] Response status code: %s", resp.status_code)
-    resp.raise_for_status()
-    file = io.BytesIO(resp.content)
-    workbook = openpyxl.load_workbook(file)
-    worksheet = workbook.active
+def parse_date(date_):
+    """deal with missing dates"""
+    if not date_:
+        return None
+    return parse(date_)
 
+
+def import_logs(agency, file):
+    """Import a generic FOIA Log"""
+    logger.info("[FOIA LOG IMPORT] Importing a FOIA log")
+    reader = csv.DictReader(codecs.iterdecode(file, "utf8"))
     logs = []
-    for row in worksheet.iter_rows(values_only=True, min_row=2):
-        recd_date = datetime.strptime(row[1], "%m/%d/%Y").date()
-        logs.append(
-            FOIALog(
-                request_id=row[0],
-                requestor=row[2],
-                date=recd_date,
-                subject=row[4],
-                agency=agency,
-            )
-        )
+    statuses = set(s[0] for s in STATUS)
+    tracking_ids = []
+    for row in reader:
+        tracking_ids.append(row["request id"])
+    tracking_id_objs = TrackingNumber.objects.filter(
+        tracking_id__in=tracking_ids, foia__agency=agency
+    )
+    tracking_ids_map = {t.tracking_id: t.foia_id for t in tracking_id_objs}
 
-    logger.info("[FDA FOIA LOG] Logs found: %d", len(logs))
-    FOIALog.objects.bulk_create(logs)
-    logger.info("[FDA FOIA LOG] Logs created")
+    file.seek(0)
+    reader = csv.DictReader(codecs.iterdecode(file, "utf8"))
+    for row in reader:
+        try:
+            status = row.get("status", "")
+            if status and status not in statuses:
+                raise ValueError
+            logs.append(
+                FOIALog(
+                    request_id=row["request id"],
+                    requestor=row["requestor"],
+                    subject=row["subject"],
+                    date_requested=parse_date(row["date requested"]),
+                    date_completed=parse_date(row.get("date completed")),
+                    status=row.get("status", ""),
+                    agency=agency,
+                    foia_request_id=tracking_ids_map.get(row["request id"]),
+                )
+            )
+        except (KeyError, ValueError) as exc:
+            logger.warning(
+                "[FOIA LOG IMPORT] Error importing %s - %s",
+                row.get("request id", ""),
+                exc,
+            )
+
+    agency.last_log_update = date.today()
+    logger.info("[FOIA LOG IMPORT] Logs found: %d", len(logs))
+    objs = FOIALog.objects.bulk_create(logs, ignore_conflicts=True)
+    logger.info("[FOIA LOG IMPORT] Logs created: %d", len(objs))
+    return len(objs)
