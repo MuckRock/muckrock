@@ -81,7 +81,6 @@ jmespath==0.10.0          # via boto3, botocore
 joblib==0.16.0            # via scikit-learn
 jsonfield==2.0.2          # via -r pip/requirements.in
 kombu==4.6.11             # via celery
-levenshtein==0.21.0       # via -r pip/requirements.in
 listcrunch==1.0.1         # via python-documentcloud
 lob==4.0.1                # via -r pip/requirements.in
 lxml==4.5.1               # via premailer
@@ -121,11 +120,11 @@ pyphaxio==0.11            # via -r pip/requirements.in
 python-dateutil==2.8.1    # via -r pip/requirements.in, botocore, python-documentcloud, zenpy
 python-documentcloud==3.0.0  # via -r pip/requirements.in
 python-jose==3.1.0        # via social-auth-core
+python-levenshtein==0.12.2  # via -r pip/requirements.in
 python-redis-lock[django]==3.7.0  # via -r pip/requirements.in
 python-stdnum==1.13       # via django-localflavor
 python3-openid==3.2.0     # via social-auth-core
 pytz==2020.1              # via celery, djangorestframework, zenpy
-rapidfuzz==3.0.0          # via levenshtein
 ratelimit==2.2.1          # via python-documentcloud
 raven==6.10.0             # via -r pip/requirements.in
 rcssmin==1.1.1            # via django-compressor

@@ -46,7 +46,7 @@ google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson
-Levenshtein # fuzzy string matching for FM agency import
+python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
 lob # sending mail via lob.com
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
