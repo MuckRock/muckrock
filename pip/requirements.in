@@ -46,6 +46,7 @@ google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson
+python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
 lob # sending mail via lob.com
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
@@ -63,7 +64,6 @@ pylibmc # memcache client
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
 pyphaxio # For sending faxes through Phaxio
-python-Levenshtein # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
 python-documentcloud # for uploading to documentcloud
 python-redis-lock[django] # use a redis cache with a locking mechanism

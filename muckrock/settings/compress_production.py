@@ -8,8 +8,10 @@ Settings for compressing production assets
 # MuckRock
 from muckrock.settings.base import *
 
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-COMPRESS_STORAGE = "compressor.storage.CompressorFileStorage"
+STORAGES["staticfiles"][
+    "BACKEND"
+] = "django.contrib.staticfiles.storage.StaticFilesStorage"
+COMPRESS_STORAGE = STORAGES["compressor"]["BACKEND"]
 STATIC_URL = "https://cdn.muckrock.com/"
 COMPRESS_URL = STATIC_URL
 COMPRESS_ENABLED = True
