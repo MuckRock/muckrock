@@ -198,6 +198,8 @@ class Agency(models.Model, RequestHelper):
     requires_proxy = models.BooleanField(default=False)
     has_appeal = models.BooleanField(default=True)
 
+    last_log_update = models.DateField(blank=True, null=True)
+
     objects = AgencyQuerySet.as_manager()
 
     def __str__(self):
