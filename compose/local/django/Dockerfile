@@ -35,10 +35,10 @@ RUN curl https://cli-assets.heroku.com/install.sh | sh
 
 # install NVM
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 5.6.0
+ENV NODE_VERSION 18.16.0
 
 RUN mkdir $NVM_DIR
-RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash \
+RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash \
     && . $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
