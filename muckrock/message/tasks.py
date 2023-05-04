@@ -7,7 +7,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 # Standard Library
 import logging
@@ -45,8 +44,7 @@ def send_activity_digest(user_id, subject, preference):
     }[preference]
 
     logger.info(
-        "Starting activity digest at: %s User: %s Subject: %s Interval: %s",
-        timezone.now(),
+        "Starting activity digest - User: %s Subject: %s Interval: %s",
         user,
         subject,
         interval,
@@ -54,6 +52,12 @@ def send_activity_digest(user_id, subject, preference):
     try:
         email = digests.ActivityDigest(user=user, subject=subject, interval=interval)
         email.send()
+        logger.info(
+            "Activity digest sent - User: %s Subject: %s Interval: %s",
+            user,
+            subject,
+            interval,
+        )
     except SoftTimeLimitExceeded:
         logger.error(
             "Send Activity Digest took too long. User: %s, Subject: %s, Interval %s",
