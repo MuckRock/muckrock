@@ -1,7 +1,6 @@
-var path = require('path')
-var webpack = require('webpack')
-// var validate = require('webpack-validator')
-var BundleTracker = require('webpack-bundle-tracker')
+const path = require('path')
+const webpack = require('webpack')
+const BundleTracker = require('webpack-bundle-tracker')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 
 // paths are absolute to the root of the project, where we run `npm` commands
@@ -17,7 +16,8 @@ var config = {
     },
     output: {
         path: path.resolve(root + 'assets/bundles/'),
-        filename: '[name].js'
+        filename: '[name].js',
+        globalObject: 'this'
     },
     plugins: [
         new BundleTracker({filename: './muckrock/assets/webpack-stats.json'}),
@@ -25,10 +25,16 @@ var config = {
         new webpack.ProvidePlugin({
             $: "jquery",
             jQuery: "jquery",
+            jquery: "jquery",
             "window.jQuery": "jquery"
         }),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+        }),
+        new webpack.LoaderOptionsPlugin({
+            options: {
+              context: process.cwd() // or the same value as `context`
+            }
         })
     ],
     module: {
@@ -44,22 +50,36 @@ var config = {
                 }
             },
             {
-                test: /\.scss?$/,
-                use: [MiniCssExtractPlugin.loader, 'style-loader', 'css-loader?sourceMap', 'sass-loader?sourceMap']
+                test: /\.s[ac]ss?$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: "css-loader",
+                        options: {
+                        sourceMap: true
+                        }
+                    },
+                    {
+                        loader: "sass-loader",
+                        options: {
+                        sourceMap: true
+                        }
+                    }
+                ]
             },
             {
                 test: /jquery\.js$/,
-                use: ['expose?jQuery', 'expose'],
+                use: ['expose-loader?exposes=$,jQuery!jquery'],
             },
             {
                 test: /\.json$/,
-                loader: 'json-loader',
+                loader: 'json-loader'
             },
             {
                 test: /\.gif$/,
-                loader: 'url-loader',
-            },
-        ],
+                loader: 'url-loader'
+            }
+        ]
     },
     resolve: {
         extensions: ['', '.js', '.jsx']
