@@ -13,7 +13,7 @@ class FOIALog(models.Model):
     """A FOIA from a FOIA Log"""
 
     class Meta:
-        ordering = ["date"]
+        ordering = ["date_requested"]
         verbose_name = "FOIA Log"
         app_label = "foia"
 

@@ -724,7 +724,7 @@ class FOIALogAdminForm(forms.ModelForm):
 
 class FOIALogAdmin(VersionAdmin):
     """Outbound Attachment admin options"""
-    list_display = ("agency", "request_id", "date")
+    list_display = ("agency", "request_id", "date_requested")
     search_fields = ["request_id", "agency"]
     form = FOIALogAdminForm
 
