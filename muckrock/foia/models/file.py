@@ -6,6 +6,7 @@ Models for the FOIA application
 # Django
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db import models, transaction
 
 # Standard Library
@@ -14,6 +15,7 @@ import os
 
 # MuckRock
 from muckrock.foia.querysets import FOIAFileQuerySet
+from muckrock.foia.utils import file_name_trim
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +153,18 @@ class FOIAFile(models.Model):
         verbose_name = "FOIA Document File"
         ordering = ["datetime"]
         app_label = "foia"
+
+
+def get_path(file_name):
+    """
+    Given a file name, get a unique path to a new file on S3
+
+    This is useful to write content directly to S3, then save the path to the DB
+    """
+    file_name = file_name_trim(file_name)
+    file = FOIAFile()
+    key = file.ffile.field.generate_filename(file.ffile.instance, file_name)
+    return default_storage.get_available_name(key)
 
 
 # This needs to stick around for migration purposes

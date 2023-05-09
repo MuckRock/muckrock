@@ -32,6 +32,7 @@ from muckrock.foia.models import (
     OutboundComposerAttachment,
     OutboundRequestAttachment,
 )
+from muckrock.foia.utils import file_name_trim
 
 
 def login_or_agency_required(function):
@@ -309,28 +310,11 @@ def _build_presigned_chunk(key, upload_id, chunk_index):
     return {"url": presigned_url, "fields": {}}
 
 
-def _key_name_trim(name):
-    """
-    Total name cannot be longer than 255, but we limit the base name to 100
-    to give room for the directory and because that's plenty long
-    """
-    max_len = 100
-    if len(name) > max_len:
-        base, ext = os.path.splitext(name)
-        if len(ext) > max_len:
-            # if someone give us a large extension just cut part of it off
-            name = name[:max_len]
-        else:
-            # otherwise truncate the base and put the extension back on
-            name = base[: max_len - len(ext)] + ext
-    return name
-
-
 def _get_key(request, model, id_name=None):
     """Generate the S3 key name from the filename, while guaranteeing uniqueness"""
     name = request.POST.get("name")
     attached_id = request.POST.get("id")
-    name = _key_name_trim(name)
+    name = file_name_trim(name)
     attachment = (
         model(user=request.user, **{id_name: attached_id}) if id_name else model()
     )
