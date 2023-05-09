@@ -430,7 +430,7 @@ class FOIARequest(models.Model):
         # Do something with anchor
         self.update_dates()
 
-    def notify(self, action):
+    def notify(self, action, owner_only=False):
         """
         Notify the owner of the request.
         Notify followers if the request is not under embargo.
@@ -447,7 +447,7 @@ class FOIARequest(models.Model):
         for notification in identical_notifications:
             notification.mark_read()
         utils.notify(self.composer.user, action)
-        if self.is_public():
+        if self.is_public() and not owner_only:
             utils.notify(followers(self), action)
 
     def submit(self, appeal=False, **kwargs):

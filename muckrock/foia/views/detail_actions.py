@@ -19,6 +19,7 @@ import sys
 import requests
 
 # MuckRock
+from muckrock.accounts.models import Notification
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.forms import AgencyForm
 from muckrock.communication.models import WebCommunication
@@ -117,6 +118,14 @@ def add_note(request, foia):
         foia_note.author = request.user
         foia_note.datetime = timezone.now()
         foia_note.save()
+        if note_form.cleaned_data.get("notify"):
+            action = new_action(
+                request.user,
+                "added a note",
+                action_object=foia_note,
+                target=foia,
+            )
+            foia.notify(action, owner_only=True)
         logger.info("%s added %s to %s", foia_note.author, foia_note, foia_note.foia)
         messages.success(request, "Your note is attached to the request.")
     return _get_redirect(request, foia)

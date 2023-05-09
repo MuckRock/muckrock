@@ -203,6 +203,7 @@ class ActivityDigest(Digest):
                 ("interim_response", "processing"),
                 ("acknowledged", "acknowledged"),
                 ("received", "sent a communication"),
+                ("note", "added a note"),
             ],
         )
         filtered_notifications["following"] = self.classify_request_notifications(
