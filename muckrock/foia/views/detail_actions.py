@@ -47,7 +47,7 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
 from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask
+from muckrock.task.models import FlaggedTask, ResponseTask
 
 logger = logging.getLogger(__name__)
 
@@ -100,9 +100,6 @@ def status(request, foia):
             }
         else:
             kwargs = {}
-        StatusChangeTask.objects.create(
-            user=request.user, old_status=old_status, foia=foia, **kwargs
-        )
         response_tasks = ResponseTask.objects.filter(
             resolved=False, communication__foia=foia
         )

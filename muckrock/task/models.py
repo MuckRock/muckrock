@@ -798,48 +798,6 @@ class FlaggedTask(Task):
             return super().check_permission(user)
 
 
-class ProjectReviewTask(Task):
-    """Created when a project is published and needs approval."""
-
-    type = "ProjectReviewTask"
-    project = models.ForeignKey("project.Project", on_delete=models.PROTECT)
-    notes = models.TextField(blank=True)
-
-    objects = ProjectReviewTaskQuerySet.as_manager()
-
-    def __str__(self):
-        return "Project Review Task"
-
-    def get_absolute_url(self):
-        return reverse("projectreview-task", kwargs={"pk": self.pk})
-
-    def reply(self, text, action="reply"):
-        """Send an email reply to the user that raised the flag."""
-        send_to = [contributor.email for contributor in self.project.contributors.all()]
-        project_email = TemplateEmail(
-            to=send_to,
-            extra_context={"action": action, "message": text, "task": self},
-            subject="%s %s" % (self.project, action),
-            text_template="message/project/%s.txt" % action,
-            html_template="message/project/%s.html" % action,
-        )
-        project_email.send(fail_silently=False)
-        return project_email
-
-    def approve(self, text):
-        """Mark the project approved and notify the user."""
-        self.project.approved = True
-        self.project.date_approved = date.today()
-        self.project.save()
-        return self.reply(text, "approved")
-
-    def reject(self, text):
-        """Mark the project private and notify the user."""
-        self.project.private = True
-        self.project.save()
-        return self.reply(text, "rejected")
-
-
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
 
@@ -991,27 +949,6 @@ class ResponseTask(Task):
         return self.communication.foia.has_perm(user, "tasks")
 
 
-class StatusChangeTask(Task):
-    """A user has changed the status on a request"""
-
-    type = "StatusChangeTask"
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    old_status = models.CharField(max_length=255)
-    foia = models.ForeignKey("foia.FOIARequest", on_delete=models.PROTECT)
-
-    objects = StatusChangeTaskQuerySet.as_manager()
-
-    def __str__(self):
-        return "Status Change Task"
-
-    def get_absolute_url(self):
-        return reverse("status-change-task", kwargs={"pk": self.pk})
-
-    def check_permission(self, user):
-        """Check if a user has permission to manage this task"""
-        return self.foia.has_perm(user, "tasks")
-
-
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
 
@@ -1131,6 +1068,69 @@ class NewPortalTask(Task):
 
 
 # Retired Tasks
+
+
+class StatusChangeTask(Task):
+    """A user has changed the status on a request"""
+
+    type = "StatusChangeTask"
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    old_status = models.CharField(max_length=255)
+    foia = models.ForeignKey("foia.FOIARequest", on_delete=models.PROTECT)
+
+    objects = StatusChangeTaskQuerySet.as_manager()
+
+    def __str__(self):
+        return "Status Change Task"
+
+    def get_absolute_url(self):
+        return reverse("status-change-task", kwargs={"pk": self.pk})
+
+    def check_permission(self, user):
+        """Check if a user has permission to manage this task"""
+        return self.foia.has_perm(user, "tasks")
+
+
+class ProjectReviewTask(Task):
+    """Created when a project is published and needs approval."""
+
+    type = "ProjectReviewTask"
+    project = models.ForeignKey("project.Project", on_delete=models.PROTECT)
+    notes = models.TextField(blank=True)
+
+    objects = ProjectReviewTaskQuerySet.as_manager()
+
+    def __str__(self):
+        return "Project Review Task"
+
+    def get_absolute_url(self):
+        return reverse("projectreview-task", kwargs={"pk": self.pk})
+
+    def reply(self, text, action="reply"):
+        """Send an email reply to the user that raised the flag."""
+        send_to = [contributor.email for contributor in self.project.contributors.all()]
+        project_email = TemplateEmail(
+            to=send_to,
+            extra_context={"action": action, "message": text, "task": self},
+            subject="%s %s" % (self.project, action),
+            text_template="message/project/%s.txt" % action,
+            html_template="message/project/%s.html" % action,
+        )
+        project_email.send(fail_silently=False)
+        return project_email
+
+    def approve(self, text):
+        """Mark the project approved and notify the user."""
+        self.project.approved = True
+        self.project.date_approved = date.today()
+        self.project.save()
+        return self.reply(text, "approved")
+
+    def reject(self, text):
+        """Mark the project private and notify the user."""
+        self.project.private = True
+        self.project.save()
+        return self.reply(text, "rejected")
 
 
 class GenericTask(Task):
