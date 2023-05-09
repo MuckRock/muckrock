@@ -85,7 +85,6 @@ def status(request, foia):
     """Handle updating status"""
     allowed_statuses = [s for s, _ in STATUS if s != "submitted"]
     status_ = request.POST.get("status")
-    old_status = foia.get_status_display()
     has_perm = foia.has_perm(request.user, "change")
     user_editable = has_perm and status_ in allowed_statuses
     staff_editable = request.user.is_staff and status_ in allowed_statuses
