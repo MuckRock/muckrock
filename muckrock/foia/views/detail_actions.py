@@ -19,7 +19,6 @@ import sys
 import requests
 
 # MuckRock
-from muckrock.accounts.models import Notification
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.forms import AgencyForm
 from muckrock.communication.models import WebCommunication
