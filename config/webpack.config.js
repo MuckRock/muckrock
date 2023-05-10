@@ -75,10 +75,6 @@ var config = {
                 },
             },
             {
-                test: /\.json$/,
-                loader: 'json-loader'
-            },
-            {
                 test: /\.gif$/,
                 loader: 'url-loader'
             }

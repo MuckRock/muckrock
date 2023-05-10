@@ -30,6 +30,7 @@ import './crowdfund';
 import './crowdsource';
 import './currencyField';
 import './dropdown';
+import './editor';
 import './exemptionBrowser/app';
 import './foiaRequest';
 import './foiaCreate';
