@@ -17,6 +17,7 @@
         "jquery.tabulator": "^3.3.2",
         "js-cookie": "^2.1.0",
         "lodash": "^4.14.2",
+        "prosemirror": "^0.6.0",
         "punycode": "^2.3.0",
         "react": "^15.3.0",
         "react-dom": "^15.3.0",
@@ -2732,7 +2733,6 @@
       "version": "1.0.9",
       "resolved": "https://registry.npmjs.org/argparse/-/argparse-1.0.9.tgz",
       "integrity": "sha1-c9g7wmP4bpf4zE9rrhsOkKfSLIY=",
-      "dev": true,
       "dependencies": {
         "sprintf-js": "~1.0.2"
       }
@@ -2925,6 +2925,11 @@
         "balanced-match": "^1.0.0",
         "concat-map": "0.0.1"
       }
+    },
+    "node_modules/browserkeymap": {
+      "version": "0.1.0",
+      "resolved": "https://registry.npmjs.org/browserkeymap/-/browserkeymap-0.1.0.tgz",
+      "integrity": "sha512-7wzikovLjm7szV2jxrno4k4+sN/1cU0ckcf4TochQKXb3K3aEiwl81qFbKhBhEOZtDhyv655jmc7td3OF10MMA=="
     },
     "node_modules/buffer-from": {
       "version": "1.1.2",
@@ -3657,6 +3662,11 @@
       "engines": {
         "node": ">=10.13.0"
       }
+    },
+    "node_modules/entities": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/entities/-/entities-1.1.2.tgz",
+      "integrity": "sha512-f2LZMYl1Fzu7YSBKg+RoROelpOaNrcGmE9AZubeDfrCEia483oW4MI4VyFd5VNHIgQ/7qm1I0wUHK1eJnn2y2w=="
     },
     "node_modules/env-paths": {
       "version": "2.2.1",
@@ -5007,6 +5017,14 @@
       "integrity": "sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==",
       "dev": true
     },
+    "node_modules/linkify-it": {
+      "version": "1.2.4",
+      "resolved": "https://registry.npmjs.org/linkify-it/-/linkify-it-1.2.4.tgz",
+      "integrity": "sha512-eGHwtlABkp1NOJSiKUNqBf3SYAS5jPHtvRXPAgNaQwTqmkTahjtiLH9NtxdR5IOPhNvwNMN/diswSfZKzUkhGg==",
+      "dependencies": {
+        "uc.micro": "^1.0.1"
+      }
+    },
     "node_modules/loader-runner": {
       "version": "4.3.0",
       "resolved": "https://registry.npmjs.org/loader-runner/-/loader-runner-4.3.0.tgz",
@@ -5390,6 +5408,26 @@
       "funding": {
         "url": "https://github.com/sponsors/sindresorhus"
       }
+    },
+    "node_modules/markdown-it": {
+      "version": "4.4.0",
+      "resolved": "https://registry.npmjs.org/markdown-it/-/markdown-it-4.4.0.tgz",
+      "integrity": "sha512-Rl8dHHeLuAh3E72OPY0tY7CLvlxgHiLhlshIYswAAabAg4YDBLa6e/LTgNkkxBO2K61ESzoquPQFMw/iMrT1PA==",
+      "dependencies": {
+        "argparse": "~1.0.2",
+        "entities": "~1.1.1",
+        "linkify-it": "~1.2.0",
+        "mdurl": "~1.0.0",
+        "uc.micro": "^1.0.0"
+      },
+      "bin": {
+        "markdown-it": "bin/markdown-it.js"
+      }
+    },
+    "node_modules/mdurl": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/mdurl/-/mdurl-1.0.1.tgz",
+      "integrity": "sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g=="
     },
     "node_modules/mem": {
       "version": "1.1.0",
@@ -6904,6 +6942,16 @@
         "object-assign": "^4.1.1"
       }
     },
+    "node_modules/prosemirror": {
+      "version": "0.6.0",
+      "resolved": "https://registry.npmjs.org/prosemirror/-/prosemirror-0.6.0.tgz",
+      "integrity": "sha512-lKOkpqqr1zgpGv698qzvGV9nCrQrO2/Im67X+DQjZPc8D6v8A0Nbp9CXF12ihssMVuj1ApivN/yQI0saXYPT6A==",
+      "deprecated": "This library has been split up into separate modules. This is the old monolithic package, which is no longer maintained. Use prosemirror-view, prosemirror-model, etc instead.",
+      "dependencies": {
+        "browserkeymap": "^0.1.0",
+        "markdown-it": "^4.4.0"
+      }
+    },
     "node_modules/pseudomap": {
       "version": "1.0.2",
       "resolved": "https://registry.npmjs.org/pseudomap/-/pseudomap-1.0.2.tgz",
@@ -7676,8 +7724,7 @@
     "node_modules/sprintf-js": {
       "version": "1.0.3",
       "resolved": "https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.0.3.tgz",
-      "integrity": "sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=",
-      "dev": true
+      "integrity": "sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw="
     },
     "node_modules/ssri": {
       "version": "9.0.1",
@@ -8135,6 +8182,11 @@
       "engines": {
         "node": "*"
       }
+    },
+    "node_modules/uc.micro": {
+      "version": "1.0.6",
+      "resolved": "https://registry.npmjs.org/uc.micro/-/uc.micro-1.0.6.tgz",
+      "integrity": "sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA=="
     },
     "node_modules/unicode-canonical-property-names-ecmascript": {
       "version": "2.0.0",
