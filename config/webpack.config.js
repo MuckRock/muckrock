@@ -68,8 +68,11 @@ var config = {
                 ]
             },
             {
-                test: /jquery\.js$/,
-                use: ['expose-loader?exposes=$,jQuery!jquery'],
+                test: require.resolve("jquery"),
+                loader: "expose-loader",
+                options: {
+                  exposes: ["$", "jQuery"],
+                },
             },
             {
                 test: /\.json$/,
