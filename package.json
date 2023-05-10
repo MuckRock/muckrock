@@ -9,9 +9,7 @@
     "build:staging": "NODE_ENV=staging webpack --config config/webpack.config.production.js --color",
     "watch": "webpack --config config/webpack.config.js --progress --color --watch",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
-    "heroku-postbuild": "npm run build:production",
-    "lockdown": "node ./node_modules/.bin/lockdown",
-    "lockdown-relock": "node ./node_modules/.bin/lockdown-relock"
+    "heroku-postbuild": "npm run build:production"
   },
   "repository": {
     "type": "git",
@@ -55,7 +53,6 @@
     "jquery-ui": "1.10.x",
     "jquery.tabulator": "^3.3.2",
     "js-cookie": "^2.1.0",
-    "lockdown": "^0.0.8-dev",
     "lodash": "^4.14.2",
     "punycode": "^2.3.0",
     "react": "^15.3.0",
