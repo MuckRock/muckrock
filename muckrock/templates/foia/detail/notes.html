@@ -31,6 +31,7 @@
       </header>
 
       {{ note_form.note }}
+      {% include 'lib/pattern/field.html' with field=note_form.notify %}
 
       <footer>
         <button class="primary button" type="submit" name="action" value="add_note">

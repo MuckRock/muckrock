@@ -17,6 +17,7 @@
             {% include 'message/component/foia_digest.html' with notifications=my_foia.acknowledged label='Acknowledged' color='blue' %}
             {% include 'message/component/foia_digest.html' with notifications=my_foia.interim_response label='Updated' color='blue' %}
             {% include 'message/component/foia_digest.html' with notifications=my_foia.received label='New Response' color='grey' %}
+            {% include 'message/component/foia_digest.html' with notifications=my_foia.note label='New Note' color='blue' %}
         </table>
         {% endif %}
         {% endwith %}

@@ -9,6 +9,7 @@ from django.db.models.functions import Cast, Now
 from django.utils import timezone
 
 # Standard Library
+import logging
 from collections import OrderedDict
 from datetime import date, timedelta
 
@@ -29,6 +30,8 @@ from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.message.email import TemplateEmail
 from muckrock.qanda.models import Question
+
+logger = logging.getLogger(__name__)
 
 
 def get_salutation():
@@ -136,6 +139,7 @@ class ActivityDigest(Digest):
 
     def __init__(self, **kwargs):
         """Initialize the digest with a dynamic subject."""
+        logger.info("Activity digest - creating - User: %s", self.user)
         super().__init__(**kwargs)
         self.subject = self.get_subject()
 
@@ -199,6 +203,7 @@ class ActivityDigest(Digest):
                 ("interim_response", "processing"),
                 ("acknowledged", "acknowledged"),
                 ("received", "sent a communication"),
+                ("note", "added a note"),
             ],
         )
         filtered_notifications["following"] = self.classify_request_notifications(
@@ -246,6 +251,7 @@ class ActivityDigest(Digest):
     def send(self, fail_silently=False):
         """Don't send the email if there's no activity."""
         if self.activity["count"] < 1:
+            logger.info("Activity digest - not sent, no activity - User: %s", self.user)
             return 0
         return super().send(fail_silently)
 

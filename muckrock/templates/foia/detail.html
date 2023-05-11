@@ -39,6 +39,17 @@
       <span class="symbol">{% include "lib/component/icon/error.svg" %}</span>
       <span class="text"><p>This request has been deleted</p></span>
     </div>
+  {% elif foia.embargo or foia.permanent_embargo %}
+    <div class="message warning">
+      <span class="symbol">{% include "lib/component/icon/warning.svg" %}</span>
+      <span class="text">
+        {% if foia.permanent_embargo %}
+          <p>This request is permanently embargoed.</p>
+        {% else %}
+          <p>This request is embargoed until {% if foia.date_embargo %}{{ foia.date_embargo }}{% else %}30 days after it is finished.{% endif %}</p>
+        {% endif %}
+      </span>
+    </div>
   {% endif %}
 
   <article class="request detail grid__row" id="foia-{{ foia.id }}">

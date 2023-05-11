@@ -197,6 +197,7 @@ $request-breakpoint: 768px;
         }
         input[type="checkbox"] {
             margin-left: $vr/2;
+            margin-top: $vr * 0.75;
         }
         .currency {
             font-size: $size-4;
@@ -348,6 +349,14 @@ $request-breakpoint: 768px;
             p {
                 padding-left: $vr;
             }
+        }
+        .field {
+          header {
+            border-bottom: 0;
+          }
+          input[type="checkbox"] {
+              margin-top: $vr * 0.75;
+          }
         }
     }
 

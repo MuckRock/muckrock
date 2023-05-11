@@ -47,7 +47,7 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
 from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask
+from muckrock.task.models import FlaggedTask, ResponseTask
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,6 @@ def status(request, foia):
     """Handle updating status"""
     allowed_statuses = [s for s, _ in STATUS if s != "submitted"]
     status_ = request.POST.get("status")
-    old_status = foia.get_status_display()
     has_perm = foia.has_perm(request.user, "change")
     user_editable = has_perm and status_ in allowed_statuses
     staff_editable = request.user.is_staff and status_ in allowed_statuses
@@ -100,9 +99,6 @@ def status(request, foia):
             }
         else:
             kwargs = {}
-        StatusChangeTask.objects.create(
-            user=request.user, old_status=old_status, foia=foia, **kwargs
-        )
         response_tasks = ResponseTask.objects.filter(
             resolved=False, communication__foia=foia
         )
@@ -121,6 +117,14 @@ def add_note(request, foia):
         foia_note.author = request.user
         foia_note.datetime = timezone.now()
         foia_note.save()
+        if note_form.cleaned_data.get("notify"):
+            action = new_action(
+                request.user,
+                "added a note",
+                action_object=foia_note,
+                target=foia,
+            )
+            foia.notify(action, owner_only=True)
         logger.info("%s added %s to %s", foia_note.author, foia_note, foia_note.foia)
         messages.success(request, "Your note is attached to the request.")
     return _get_redirect(request, foia)

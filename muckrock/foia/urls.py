@@ -89,6 +89,7 @@ urlpatterns = [
         views.toggle_autofollowups,
         name="foia-toggle-followups",
     ),
+    re_path(r"^request/(?P<idx>\d+)/$", views.redirect_request),
     # This just redirects to the composer
     re_path(
         r"^multi/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$",

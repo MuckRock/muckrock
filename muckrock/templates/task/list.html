@@ -77,22 +77,10 @@
             Multirequest
         </a>
     </li>
-    <li class="{% active request '^/task/project-review/$' %}">
-        <a href="{% url 'projectreview-task-list' %}">
-            <span class="yellow counter">{{ counters.projectreview }}</span>
-            Pending Projects
-        </a>
-    </li>
     <li class="{% active request '^/task/crowdfund/$' %}">
         <a href="{% url 'crowdfund-task-list' %}">
             <span class="yellow counter">{{ counters.crowdfund }}</span>
             Crowdfund
-        </a>
-    </li>
-    <li class="{% active request '^/task/status-change/$' %}">
-        <a href="{% url 'status-change-task-list' %}">
-            <span class="yellow counter">{{ counters.status_change }}</span>
-            Status Change
         </a>
     </li>
 </ul>

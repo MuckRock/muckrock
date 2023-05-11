@@ -33,6 +33,12 @@ def redirect_old(request, jurisdiction, slug, idx, action):
     return redirect(f"/foi/{jurisdiction}-{jidx}/{slug}-{idx}/{action}/")
 
 
+def redirect_request(request, idx):
+    """Redirect for finding a request page with just its ID"""
+    foia = get_object_or_404(FOIARequest, pk=idx)
+    return redirect(foia)
+
+
 def acronyms(request):
     """A page with all the acronyms explained"""
     status_dict = dict(STATUS)
