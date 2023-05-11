@@ -7,6 +7,8 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.validators import validate_email
+from django.db.models.expressions import Case, Value, When
+from django.db.models.fields import IntegerField
 from django.db.models.functions.text import Length
 
 # Standard Library
@@ -56,6 +58,18 @@ class AgencyEmailInline(admin.TabularInline):
     show_change_link = True
     autocomplete_fields = ["email"]
     extra = 1
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.annotate(
+            custom_order=Case(
+                When(request_type="primary", then=Value(0)),
+                When(request_type="appeal", then=Value(1)),
+                When(request_type="check", then=Value(2)),
+                When(request_type="none", then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by("custom_order")
 
 
 class AgencyPhoneInline(admin.TabularInline):
