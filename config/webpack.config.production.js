@@ -6,18 +6,17 @@
 
 var webpack = require('webpack');
 var merge = require('webpack-merge');
-var validate = require('webpack-validator');
-
+const TerserPlugin = require("terser-webpack-plugin");
 var config = require('./webpack.config.js');
 
 productionConfig = merge(config, {
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-        compress: {
-            warnings: false
-        }
-    }),
-  ]
+    mode: 'production',
+    optimization: {
+        minimize: true,
+        // see Terser plugin options:
+        // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+        minimizer: [new TerserPlugin()],
+    },
 });
 
-module.exports = validate(productionConfig);
+module.exports = productionConfig;
