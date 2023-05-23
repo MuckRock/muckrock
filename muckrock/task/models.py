@@ -89,6 +89,7 @@ class Task(models.Model):
         on_delete=models.PROTECT,
     )
     form_data = models.JSONField(blank=True, null=True)
+    zendesk_ticket_id = models.IntegerField(blank=True, null=True)
 
     objects = TaskQuerySet.as_manager()
 
@@ -118,6 +119,38 @@ class Task(models.Model):
         # by default, only staff can manage requests
         # some tasks will override this to allow the foia owner to manage as well
         return user.is_staff
+
+    def create_zendesk_ticket(self):
+        print("zendesk")
+        client = Zenpy(
+            email=settings.ZENDESK_EMAIL,
+            subdomain=settings.ZENDESK_SUBDOMAIN,
+            token=settings.ZENDESK_TOKEN,
+        )
+
+        description = "{}{}".format(settings.MUCKROCK_URL, self.get_absolute_url())
+        print("description", description)
+
+        ticket_data = {
+            "subject": self.__class__.__name__,
+            "comment": Comment(body=description),
+            "type": "task",
+            "priority": "normal",
+            "status": "new",
+        }
+        print(ticket_data)
+
+        user_data = {"name": "Anonymous User"}
+        user = client.users.create_or_update(ZenUser(**user_data))
+
+        ticket_data["requester_id"] = user.id
+        ticket_audit = client.tickets.create(Ticket(**ticket_data))
+
+        self.zendesk_ticket_id = ticket_audit.ticket.id
+        self.save()
+        print(self.zendesk_ticket_id)
+
+        return self.zendesk_ticket_id
 
 
 class OrphanTask(Task):
