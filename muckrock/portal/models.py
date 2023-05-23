@@ -38,6 +38,7 @@ class Portal(models.Model):
         # MuckRock
         from muckrock.portal.portals import (
             FBIPortal,
+            GovQAPortal,
             ManualPortal,
             NextRequestPortal,
             WebFormPortal,
@@ -49,6 +50,7 @@ class Portal(models.Model):
             # as it is causing issues
             "__nextrequest": NextRequestPortal,
             "fbi": FBIPortal,
+            "govqa": GovQAPortal,
             "webform": WebFormPortal,
         }
         if hasattr(self, "_portal_type"):

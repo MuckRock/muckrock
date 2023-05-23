@@ -1,5 +1,6 @@
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
+-e git+https://github.com/datamade/govqa-py.git@bd1aee85569e1ca21ced1ce95763f87a32d4eebd#egg=govqa
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
