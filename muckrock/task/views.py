@@ -76,7 +76,11 @@ from muckrock.task.models import (
     Task,
 )
 from muckrock.task.pdf import SnailMailPDF
-from muckrock.task.tasks import snail_mail_bulk_pdf_task, submit_review_update
+from muckrock.task.tasks import (
+    create_generic_ticket,
+    snail_mail_bulk_pdf_task,
+    submit_review_update,
+)
 
 
 def count_tasks():
@@ -189,6 +193,8 @@ class TaskList(MRFilterListView):
                     pass
         elif request.POST.get("resolve"):
             task.resolve(request.user, form_data)
+        elif request.POST.get("zendesk"):
+            create_generic_ticket.delay(task.pk, self.model.__name__)
         return task
 
     def post(self, request):
@@ -404,6 +410,7 @@ class NewAgencyTaskList(TaskList):
     title = "New Agencies"
     filter_class = NewAgencyTaskFilterSet
     queryset = NewAgencyTask.objects.preload_list()
+    model = NewAgencyTask
 
     def task_post_helper(self, request, task, form_data=None):
         """Special post handlers exclusive to NewAgencyTasks"""

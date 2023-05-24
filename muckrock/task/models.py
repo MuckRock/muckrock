@@ -121,7 +121,7 @@ class Task(models.Model):
         return user.is_staff
 
     def create_zendesk_ticket(self):
-        # pylint: disable=too-many-branches
+        print("zendesk")
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
             subdomain=settings.ZENDESK_SUBDOMAIN,
@@ -129,6 +129,7 @@ class Task(models.Model):
         )
 
         description = "{}{}".format(settings.MUCKROCK_URL, self.get_absolute_url())
+        print("description", description)
 
         ticket_data = {
             "subject": self.__class__.__name__,
@@ -137,6 +138,7 @@ class Task(models.Model):
             "priority": "normal",
             "status": "new",
         }
+        print(ticket_data)
 
         user_data = {"name": "Anonymous User"}
         user = client.users.create_or_update(ZenUser(**user_data))
@@ -146,8 +148,9 @@ class Task(models.Model):
 
         self.zendesk_ticket_id = ticket_audit.ticket.id
         self.save()
+        print(self.zendesk_ticket_id)
 
-        return ticket_audit.ticket.id
+        return self.zendesk_ticket_id
 
 
 class OrphanTask(Task):

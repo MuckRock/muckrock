@@ -11,6 +11,12 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.task__zendesk {
+  margin: $vr/2;
+  float: right;
+
+}
+
 .task .full-letter {
     margin-bottom: 0;
     background: $color-grey-7;

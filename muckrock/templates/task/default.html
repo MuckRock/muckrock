@@ -16,6 +16,13 @@
     </header>
     {% block task-main %}
       <main class="textbox__section task__main">
+          {% if user.is_staff and task.zendesk_ticket_id %}
+            <p class="task__zendesk">
+              <a href="https://muckrock.zendesk.com/agent/tickets/{{task.zendesk_ticket_id}}" target="_blank">
+                ZenDesk Ticket
+              </a>
+            </p>
+          {% endif %}
           {% if task.resolved and task.resolved_by %}
             <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.profile.full_name }}</a>.</p>
           {% elif user.is_staff %}
@@ -54,6 +61,7 @@
                 <span class="task-defer">
                   <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
                   <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+                  <button type="submit" name="zendesk" value="true" class="primary button">Create ZenDesk Ticket</button>
                 </span>
                 <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
               {% endblock task-actions %}
