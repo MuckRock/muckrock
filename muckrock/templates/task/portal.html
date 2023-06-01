@@ -135,8 +135,11 @@
         {% endif %}
     </div>
     <span class="task-defer">
-      <input type="text" class="datepicker-future" name="date_deferred" value="{{task.date_deferred|date:"m/d/Y"|default:""}}">
-      <button type="submit" name="defer" value="true" class="primary button">Defer</button>
+      {% if not task.zendesk_ticket_id %}
+        <button type="submit" name="zendesk" value="true" class="primary button">
+          Create ZenDesk Ticket
+        </button>
+      {% endif %}
     </span>
     <button class="red button" type="submit" name="reject" value="true">Reject</button>
     <button class="primary button" type="submit" name="save" value="true">Save &amp; Resolve</button>
