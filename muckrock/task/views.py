@@ -198,6 +198,7 @@ class TaskList(MRFilterListView):
                 task.pk,
                 self.model.__name__,
                 request.POST.get("zendesk_note", ""),
+                self.request.user.email,
             )
         return task
 

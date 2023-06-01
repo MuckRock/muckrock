@@ -147,7 +147,7 @@ def create_ticket(flag_pk, **kwargs):
 @task(
     ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_generic_ticket"
 )
-def create_generic_ticket(task_pk, task_name, note, **kwargs):
+def create_generic_ticket(task_pk, task_name, note, email, **kwargs):
     """Create a ticket from a task"""
     task_models = {
         task.__name__: task
@@ -177,7 +177,7 @@ def create_generic_ticket(task_pk, task_name, note, **kwargs):
         return
 
     try:
-        task_.create_zendesk_ticket(note)
+        task_.create_zendesk_ticket(note, email)
     except (RequestException, ZenpyException, APIException) as exc:
         logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
         raise create_generic_ticket.retry(
