@@ -120,7 +120,7 @@ class Task(models.Model):
         # some tasks will override this to allow the foia owner to manage as well
         return user.is_staff
 
-    def create_zendesk_ticket(self):
+    def create_zendesk_ticket(self, note):
         print("zendesk")
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
@@ -128,7 +128,7 @@ class Task(models.Model):
             token=settings.ZENDESK_TOKEN,
         )
 
-        description = "{}{}".format(settings.MUCKROCK_URL, self.get_absolute_url())
+        description = f"{settings.MUCKROCK_URL}{self.get_absolute_url()}\n\n{note}"
         print("description", description)
 
         ticket_data = {
@@ -140,7 +140,7 @@ class Task(models.Model):
         }
         print(ticket_data)
 
-        user_data = {"name": "Anonymous User"}
+        user_data = {"name": "MuckRock Task"}
         user = client.users.create_or_update(ZenUser(**user_data))
 
         ticket_data["requester_id"] = user.id

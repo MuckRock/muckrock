@@ -78,12 +78,13 @@
         {{ response_form }}
     </div>
     <span class="task-defer">
+      {% if not task.zendesk_ticket_id %}
+        <input type="text" name="zendesk_note" placeholder="ZenDesk note...">
+        <button type="submit" name="zendesk" value="true" class="primary button">
+          Create ZenDesk Ticket
+        </button>
+      {% endif %}
     </span>
-    {% if not task.zendesk_ticket_id %}
-      <button type="submit" name="zendesk" value="true" class="primary button">
-        Create ZenDesk Ticket
-      </button>
-    {% endif %}
     <button type="submit" name="proxy" value="true" class="proxy button">Proxy Rejection</button>
     <button type="submit" name="save" value="true" class="primary button">Save &amp; Resolve</button>
 {% endblock %}
