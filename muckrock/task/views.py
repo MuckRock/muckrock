@@ -194,7 +194,11 @@ class TaskList(MRFilterListView):
         elif request.POST.get("resolve"):
             task.resolve(request.user, form_data)
         elif request.POST.get("zendesk"):
-            create_generic_ticket.delay(task.pk, self.model.__name__)
+            create_generic_ticket.delay(
+                task.pk,
+                self.model.__name__,
+                request.POST.get("zendesk_note", ""),
+            )
         return task
 
     def post(self, request):
