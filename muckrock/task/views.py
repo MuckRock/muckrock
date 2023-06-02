@@ -467,6 +467,7 @@ class ResponseTaskList(TaskList):
     title = "Responses"
     filter_class = ResponseTaskFilterSet
     queryset = ResponseTask.objects.preload_list()
+    model = ResponseTask
 
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to ResponseTask"""
@@ -507,6 +508,7 @@ class CrowdfundTaskList(TaskList):
 
     title = "Crowdfunds"
     queryset = CrowdfundTask.objects.preload_list()
+    model = CrowdfundTask
 
 
 class MultiRequestTaskList(TaskList):
@@ -514,6 +516,7 @@ class MultiRequestTaskList(TaskList):
 
     title = "Multi-Requests"
     queryset = MultiRequestTask.objects.preload_list()
+    model = MultiRequestTask
 
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to MultiRequestTasks"""
@@ -535,6 +538,7 @@ class PortalTaskList(TaskList):
     title = "Portal"
     filter_class = PortalTaskFilterSet
     queryset = PortalTask.objects.preload_list()
+    model = PortalTask
 
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to Portal Tasks"""
@@ -635,6 +639,7 @@ class NewPortalTaskList(TaskList):
 
     title = "New Portal"
     queryset = NewPortalTask.objects.preload_list()
+    model = NewPortalTask
 
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to New Portal Tasks"""

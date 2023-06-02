@@ -6,6 +6,7 @@
   <th width="10%" data-sort="date_submitted">Created</th>
   <th width="10%" data-sort="date_processing">Processing</th>
   <th width="10%">Task</th>
+  <th width="10%">Ticket</th>
   <th width="10%">Category</th>
   <th width="10%">Reason</th>
   <th width="10%">Error</th>
@@ -30,6 +31,43 @@
       {% elif foia.agency.open_newagencytasks %}
         New Agency
       {% endif %}
+    </td>
+    <td>
+      {% with zendesk_ticket_id=foia.portaltask_communications.0.open_portaltasks.0.zendesk_ticket_id %}
+        {% if zendesk_ticket_id %}
+          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
+            ZenDesk Ticket
+          </a>
+        {% endif %}
+      {% endwith %}
+      {% with zendesk_ticket_id=foia.snailmailtask_communications.0.open_snailmailtasks.0.zendesk_ticket_id %}
+        {% if zendesk_ticket_id %}
+          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
+            ZenDesk Ticket
+          </a>
+        {% endif %}
+      {% endwith %}
+      {% with zendesk_ticket_id=foia.composer.open_multirequesttasks.0.zendesk_ticket_id %}
+        {% if zendesk_ticket_id %}
+          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
+            ZenDesk Ticket
+          </a>
+        {% endif %}
+      {% endwith %}
+      {% with zendesk_ticket_id=foia.paymentinfotask_communications.0.open_paymentinfotasks.0.zendesk_ticket_id %}
+        {% if zendesk_ticket_id %}
+          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
+            ZenDesk Ticket
+          </a>
+        {% endif %}
+      {% endwith %}
+      {% with zendesk_ticket_id=foia.agency.open_newagencytasks.0.zendesk_ticket_id %}
+        {% if zendesk_ticket_id %}
+          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
+            ZenDesk Ticket
+          </a>
+        {% endif %}
+      {% endwith %}
     </td>
     <td>
       {% if foia.portaltask_communications.0.open_portaltasks %}
