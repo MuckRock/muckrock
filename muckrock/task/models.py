@@ -129,9 +129,10 @@ class Task(models.Model):
         )
 
         description = (
-            f"{settings.MUCKROCK_URL}{self.get_absolute_url()}\n\n"
-            f"{email}\n\n"
-            f"{note}\n\n"
+            f"Ticket link: {settings.MUCKROCK_URL}{self.get_absolute_url()}\n\n"
+            f"Ticket created by: {email}\n\n"
+            f"Note: {note}\n\n"
+            f"{self.get_ticket_info()}"
         )
         print("description", description)
 
@@ -156,6 +157,10 @@ class Task(models.Model):
         print(self.zendesk_ticket_id)
 
         return self.zendesk_ticket_id
+
+    def get_ticket_info(self):
+        """For subclasses to specify additional ticket info"""
+        return ""
 
 
 class OrphanTask(Task):
@@ -218,6 +223,10 @@ class OrphanTask(Task):
             blacklist = BlacklistDomain.objects.filter(domain=domain).first()
         blacklist.resolve_matches()
 
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return f"Orphan Task\nSubject: {self.communication.subject}"
+
 
 class PaymentInfoTask(Task):
     """Pull who to make the payment to"""
@@ -236,6 +245,13 @@ class PaymentInfoTask(Task):
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
         return self.communication.foia.has_perm(user, "tasks")
+
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Payment Info Task\nFOIA: {self.communication.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.communication.foia.get_absolute_url()}"
+        )
 
 
 class SnailMailTask(Task):
@@ -319,6 +335,13 @@ class SnailMailTask(Task):
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
         return self.communication.foia.has_perm(user, "tasks")
+
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Snail Mail Task\nFOIA: {self.communication.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.communication.foia.get_absolute_url()}"
+        )
 
 
 class ReviewAgencyTask(Task):
@@ -604,6 +627,13 @@ class ReviewAgencyTask(Task):
         else:
             return None
 
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Review Agency Task\nAgency: {self.communication.agency}\n"
+            f"{settings.MUCKROCK_URL}{self.communication.agency.get_absolute_url()}"
+        )
+
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
@@ -735,7 +765,7 @@ class FlaggedTask(Task):
         else:
             return None
 
-    def create_zendesk_ticket(self):
+    def create_zendesk_flag_ticket(self):
         # pylint: disable=too-many-branches
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
@@ -949,6 +979,13 @@ class NewAgencyTask(Task):
             recipient_list=[settings.DEFAULT_FROM_EMAIL],
         )
 
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"New Agency Task\nAgency: {self.agency}\n"
+            f"{settings.MUCKROCK_URL}{self.agency.get_absolute_url()}"
+        )
+
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
@@ -986,6 +1023,13 @@ class ResponseTask(Task):
         """Check if a user has permission to manage this task"""
         return self.communication.foia.has_perm(user, "tasks")
 
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Response Task\nFOIA: {self.communication.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.communication.foia.get_absolute_url()}"
+        )
+
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
@@ -1000,6 +1044,13 @@ class CrowdfundTask(Task):
 
     def get_absolute_url(self):
         return reverse("crowdfund-task", kwargs={"pk": self.pk})
+
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Crowdfund Task\nCrowdfund: {self.crowdfund}\n"
+            f"{settings.MUCKROCK_URL}{self.crowdfund.get_absolute_url()}"
+        )
 
 
 class MultiRequestTask(Task):
@@ -1046,6 +1097,13 @@ class MultiRequestTask(Task):
             self.composer.status = "started"
             self.composer.save()
 
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"MultiRequest Task\nComposer: {self.composer}\n"
+            f"{settings.MUCKROCK_URL}{self.composer.get_absolute_url()}"
+        )
+
 
 class PortalTask(Task):
     """An admin needs to interact with a portal"""
@@ -1082,6 +1140,13 @@ class PortalTask(Task):
         """Check if a user has permission to manage this task"""
         return self.communication.foia.has_perm(user, "tasks")
 
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Portal Task\nFOIA: {self.communication.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.communication.foia.get_absolute_url()}"
+        )
+
 
 class NewPortalTask(Task):
     """A portal has been detected where we do not have one in the system"""
@@ -1103,6 +1168,13 @@ class NewPortalTask(Task):
 
     def get_absolute_url(self):
         return reverse("new-portal-task", kwargs={"pk": self.pk})
+
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"New Portal Task\nFOIA: {self.communication.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.communication.foia.get_absolute_url()}"
+        )
 
 
 # Retired Tasks
