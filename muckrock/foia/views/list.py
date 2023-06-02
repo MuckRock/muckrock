@@ -592,7 +592,7 @@ class BaseProcessingRequestList(RequestList):
             )
 
         objects = super().get_queryset()
-        return (
+        objects = (
             objects.only(
                 "title",
                 "slug",
@@ -623,6 +623,7 @@ class BaseProcessingRequestList(RequestList):
                 ),
             )
         )
+        return objects
 
 
 class ProcessingRequestList(BaseProcessingRequestList):
