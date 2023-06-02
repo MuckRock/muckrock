@@ -132,7 +132,7 @@ def create_ticket(flag_pk, **kwargs):
 
     try:
         if settings.USE_ZENDESK:
-            zen_id = flag.create_zendesk_ticket()
+            zen_id = flag.create_zendesk_flag_ticket()
             flag.resolve(form_data={"zen_id": zen_id})
     except (RequestException, ZenpyException, APIException) as exc:
         logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
