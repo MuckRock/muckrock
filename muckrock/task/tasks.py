@@ -25,7 +25,20 @@ from zenpy.lib.exception import APIException, ZenpyException
 # MuckRock
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.filters import SnailMailTaskFilterSet
-from muckrock.task.models import FlaggedTask, SnailMailTask
+from muckrock.task.models import (
+    CrowdfundTask,
+    FlaggedTask,
+    MultiRequestTask,
+    NewAgencyTask,
+    NewPortalTask,
+    OrphanTask,
+    PaymentInfoTask,
+    PortalTask,
+    ResponseTask,
+    ReviewAgencyTask,
+    SnailMailTask,
+    Task,
+)
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
 
 logger = logging.getLogger(__name__)
@@ -119,13 +132,58 @@ def create_ticket(flag_pk, **kwargs):
 
     try:
         if settings.USE_ZENDESK:
-            zen_id = flag.create_zendesk_ticket()
+            zen_id = flag.create_zendesk_flag_ticket()
             flag.resolve(form_data={"zen_id": zen_id})
     except (RequestException, ZenpyException, APIException) as exc:
         logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
         raise create_ticket.retry(
             countdown=(2**create_ticket.request.retries) * 300 + randint(0, 300),
             args=[flag_pk],
+            kwargs=kwargs,
+            exc=exc,
+        )
+
+
+@task(
+    ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_generic_ticket"
+)
+def create_generic_ticket(task_pk, task_name, note, email, **kwargs):
+    """Create a ticket from a task"""
+    task_models = {
+        task.__name__: task
+        for task in [
+            SnailMailTask,
+            NewAgencyTask,
+            ResponseTask,
+            OrphanTask,
+            PortalTask,
+            NewPortalTask,
+            PaymentInfoTask,
+            ReviewAgencyTask,
+            MultiRequestTask,
+            CrowdfundTask,
+        ]
+    }
+    model = task_models.get(task_name)
+
+    if not model:
+        logger.warning("Create generic ticket: task not found: %s", task_name)
+        return
+
+    try:
+        task_ = model.objects.get(pk=task_pk)
+    except Task.DoesNotExist as exc:
+        logger.warning("Create generic ticket: %s", exc, exc_info=sys.exc_info())
+        return
+
+    try:
+        task_.create_zendesk_ticket(note, email)
+    except (RequestException, ZenpyException, APIException) as exc:
+        logger.warning("ZenPy error: %s", exc, exc_info=sys.exc_info())
+        raise create_generic_ticket.retry(
+            countdown=(2**create_generic_ticket.request.retries) * 300
+            + randint(0, 300),
+            args=[task_pk, task_name, note],
             kwargs=kwargs,
             exc=exc,
         )

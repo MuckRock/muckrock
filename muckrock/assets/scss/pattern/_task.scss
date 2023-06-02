@@ -11,6 +11,12 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.task__zendesk {
+  margin: $vr/2;
+  float: right;
+
+}
+
 .task .full-letter {
     margin-bottom: 0;
     background: $color-grey-7;
@@ -102,9 +108,8 @@ $task-padding: $vr/4 $vr/2;
 .task__actions .task-defer {
     text-align: left;
     float: left;
-    width: 200px;
     input {
-        width:100px;
+        width: 200px;
         display: inline-block;
     }
 }
@@ -310,6 +315,7 @@ $task-padding: $vr/4 $vr/2;
     }
 	.proxy {
 		float: left;
+    margin-left: 0.5rem;
 	}
 }
 
@@ -389,7 +395,6 @@ $task-padding: $vr/4 $vr/2;
     .task-defer {
         input {
             display: inline-block;
-            width: 100px;
         }
     }
 }
