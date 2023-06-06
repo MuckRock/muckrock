@@ -6,6 +6,9 @@ Provides Jurisdiction application API views
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
+# Standard Library
+import logging
+
 # Third Party
 import django_filters
 from rest_framework.decorators import action
@@ -24,6 +27,8 @@ from muckrock.jurisdiction.serializers import (
 )
 from muckrock.task.models import FlaggedTask
 from muckrock.task.serializers import FlaggedTaskSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class JurisdictionViewSet(ModelViewSet):
@@ -108,6 +113,7 @@ class ExemptionViewSet(ModelViewSet):
         """
         results = self.queryset
         query = request.query_params.get("q")
+        logger.info("[EXEMPTION SEARCH] Query: %s", query)
         jurisdiction = request.query_params.get("jurisdiction")
         if query:
             results = self.queryset.filter(
