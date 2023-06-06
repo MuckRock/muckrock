@@ -99,7 +99,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     
     foia_logs = (
         FOIALog.objects.filter(agency=agency)
-        .order_by("-date")
+        .order_by("-date_requested")
         .select_related("agency__jurisdiction")
     )
     foia_logs_count = foia_logs.count()
