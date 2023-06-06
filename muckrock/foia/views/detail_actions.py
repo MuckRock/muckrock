@@ -35,6 +35,7 @@ from muckrock.foia.forms import (
     FOIANoteForm,
     FOIAOwnerForm,
     FOIASoftDeleteForm,
+    FOIAWithdrawForm,
     RequestFeeForm,
     ResendForm,
     TrackingNumberForm,
@@ -159,6 +160,24 @@ def delete(request, foia):
             form.cleaned_data["note"],
         )
         messages.success(request, "Request succesfully deleted")
+    if not form.is_valid():
+        messages.error(request, form.errors)
+    return _get_redirect(request, foia)
+
+
+def withdraw(request, foia):
+    """Allow users to withdraw requests"""
+    form = FOIAWithdrawForm(request.POST)
+    has_perm = request.user.has_perm("foia.change_foiarequest")
+    if has_perm and form.is_valid():
+        foia.withdraw(
+            request.user,
+            form.cleaned_data["final_message"],
+            form.cleaned_data["note"],
+        )
+        messages.success(request, "Request succesfully withdrawn")
+    if not form.is_valid():
+        messages.error(request, form.errors)
     return _get_redirect(request, foia)
 
 

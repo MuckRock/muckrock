@@ -198,6 +198,20 @@ class FOIASoftDeleteForm(forms.Form):
             self.fields.pop("final_message")
 
 
+class FOIAWithdrawForm(forms.Form):
+    """Form to soft delete a request"""
+
+    final_message = forms.CharField(
+        widget=forms.Textarea,
+        help_text="A final communication to the agency, explaining that the request is "
+        "being withdrawn",
+    )
+    note = forms.CharField(
+        widget=forms.Textarea,
+        help_text="An internal note explaining why the request is being withdrawn",
+    )
+
+
 class RequestFeeForm(StripeForm):
     """A form to pay request fees"""
 

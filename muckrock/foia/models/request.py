@@ -1112,6 +1112,7 @@ class FOIARequest(models.Model):
             FOIAContactUserForm,
             FOIAFlagForm,
             FOIASoftDeleteForm,
+            FOIAWithdrawForm,
         )
 
         is_owner = self.created_by(user)
@@ -1169,6 +1170,15 @@ class FOIARequest(models.Model):
                 "class_name": "failure",
                 "modal": True,
                 "form": FOIASoftDeleteForm(foia=self),
+            },
+            {
+                "test": user.has_perm("foia.change_foiarequest"),
+                "title": "Withdraw Request",
+                "action": "withdraw",
+                "desc": "Withdraw your request from the agency",
+                "class_name": "failure",
+                "modal": True,
+                "form": FOIAWithdrawForm(),
             },
             {
                 "test": is_admin,
@@ -1359,6 +1369,14 @@ class FOIARequest(models.Model):
         self.deleted = True
         self.embargo = True
         self.permanent_embargo = True
+        self.status = "abandoned"
+        self.save()
+
+    @transaction.atomic
+    def withdraw(self, user, final_message, note):
+        """Allow a user to withdraw their request from the agency"""
+        self.create_out_communication(user, final_message, user)
+        self.notes.create(author=user, note=note)
         self.status = "abandoned"
         self.save()
 
