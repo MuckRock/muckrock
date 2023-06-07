@@ -44,11 +44,11 @@ class GovQAPortal(ManualPortal):
 
     def get_client(self, comm):
         """Get a GovQA client"""
-        return GovQA(
+        client = GovQA(
             furl(comm.foia.portal.url).origin,
-            comm.foia.get_request_email(),
-            comm.foia.portal_password,
         )
+        client.login(comm.foia.get_request_email(), comm.foia.portal_password)
+        return client
 
     def receive_msg(self, comm, **kwargs):
         """Check for attachments upon receiving a communication"""
