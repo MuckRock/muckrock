@@ -63,11 +63,6 @@ class FOIAEmbargoForm(forms.Form):
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
 
-    notify = forms.BooleanField(
-        required=False,
-        label="Notify user",
-    )
-
     class Meta:
         model = FOIANote
         fields = ["note", "notify"]

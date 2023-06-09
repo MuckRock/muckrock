@@ -118,7 +118,7 @@ def add_note(request, foia):
         foia_note.author = request.user
         foia_note.datetime = timezone.now()
         foia_note.save()
-        if note_form.cleaned_data.get("notify"):
+        if foia_note.notify:
             action = new_action(
                 request.user,
                 "added a note",
