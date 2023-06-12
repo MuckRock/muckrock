@@ -26,6 +26,8 @@
             <a href="#filter-toggle" class="bold list__toggle" id="filter-toggle">{% include 'lib/component/icon/search.svg' %}Show Filters &amp; Search</a>
             <a href="#" class="bold list__toggle list__toggle--hide">&times; Hide Filters</a>
             <form method="GET" class="filter form" id="filter-form">
+              <!-- we want this to be the default, not deleting a saved search -->
+              <button class="hidden get"></button>
               {% csrf_token %}
               {% if saved_searches %}
                 <label>Saved searches:</label>
@@ -40,7 +42,7 @@
               {% endif %}
               {% include 'lib/pattern/form.html' with form=filter.form %}
               <div class="button-group">
-                <button class="button get" action="apply-filters">Filter</button>
+                <button class="button get">Filter</button>
                 <a class="button" href="{{ request.path }}">Clear</a>
               </div>
               {% if save_search_form and request.user.is_authenticated %}
