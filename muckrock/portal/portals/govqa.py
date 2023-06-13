@@ -38,18 +38,19 @@ class GovQAPortal(ManualPortal):
             and comm.foia.email.status == "good"
             and comm.foia.user.is_staff
         ):
-            subject = self._set_subject(comm)
+            subject, msg_id = self._set_reply_fields(comm)
             if subject is None:
                 super().send_msg(comm, **kwargs)
                 return
             comm.subject = subject
             comm.save()
-            comm.foia.send_email(comm, **kwargs)
+            headers = {"In-Reply-To": f"<{msg_id}>"}
+            comm.foia.send_email(comm, headers=headers, **kwargs)
         else:
             super().send_msg(comm, **kwargs)
 
-    def _set_subject(self, comm):
-        """Try to find an appropriate subject so the reply will make it to the portal"""
+    def _set_reply_fields(self, comm):
+        """Try to find an appropriate message to reply to"""
         for communication in comm.foia.communications.filter(response=True).order_by(
             "-datetime"
         ):
@@ -57,23 +58,14 @@ class GovQAPortal(ManualPortal):
             # message in that format to reply to
             if "::" in communication.subject:
                 subject = f"RE: {communication.subject}"
-                break
-        else:
-            # if no suitable subject to reply to, try creating out own if we know
-            # the tracking ID
-            tracking_id = comm.foia.current_tracking_id()
-            law_name = comm.foia.jurisdiction.get_law_name()
-            if tracking_id:
-                subject = f"RE: {law_name} Request :: {tracking_id}"
-            else:
-                return None
+                if len(subject) > 255:
+                    return None, None
+                email = communication.emails.last()
+                if email is None or not email.message_id:
+                    return None, None
+                return subject, email.message_id
 
-        if len(subject) > 255:
-            # this shouls not happen, but since the DB cannot hold a subject over 255
-            # characters, we put this in as a safeguard
-            return None
-
-        return subject
+        return None, None
 
     def get_client(self, comm):
         """Get a GovQA client"""

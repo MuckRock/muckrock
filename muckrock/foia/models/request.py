@@ -812,6 +812,9 @@ class FOIARequest(models.Model):
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
         backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
+        headers = {"X-Mailgun-Variables": {"email_id": email_comm.pk}}
+        if "headers" in kwargs:
+            headers.update(kwargs["headers"])
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
                 subject=comm.subject,
@@ -820,7 +823,7 @@ class FOIARequest(models.Model):
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
                 bcc=[settings.DIAGNOSTIC_EMAIL],
-                headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
+                headers=headers,
                 connection=email_connection,
             )
             msg.attach_alternative(linebreaks(escape(body)), "text/html")
