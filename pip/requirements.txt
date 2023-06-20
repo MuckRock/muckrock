@@ -72,7 +72,7 @@ furl==1.0.1               # via -r pip/requirements.in
 future==0.18.2            # via celery, pyjwkest, python-documentcloud
 fuzzywuzzy==0.18.0        # via -r pip/requirements.in
 google-api-python-client==1.6.5  # via -r pip/requirements.in
-govqa==1.0.0              # via -r pip/requirements.in
+govqa==1.0.1              # via -r pip/requirements.in
 gunicorn==19.6.0          # via -r pip/requirements.in
 httplib2==0.18.1          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests, urllib3
