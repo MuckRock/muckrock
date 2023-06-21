@@ -28,11 +28,11 @@ logger = logging.getLogger(__name__)
 class GovQAPortal(ManualPortal):
     """GovQA portal integreation"""
 
-    def __send_msg(self, comm, **kwargs):
+    def _send_msg(self, comm, **kwargs):
         """Send a message via email if possible"""
         # Note:
         # Disabling this for now, as it does not seem to work
-        # Rename method back to send_msg to re-enable if we figure ot
+        # Rename method back to send_msg to re-enable if we figure out
         # how to get email replies in GovQA to work
 
         # send an email for not new submissions, which have a valid email address,
