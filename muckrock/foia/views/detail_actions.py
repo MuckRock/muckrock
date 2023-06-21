@@ -150,8 +150,11 @@ def flag(request, foia):
 
 def delete(request, foia):
     """Allow staff to soft delete requests"""
-    form = FOIASoftDeleteForm(request.POST, foia=foia)
-    has_perm = request.user.has_perm("foia.delete_foiarequest")
+    form = FOIASoftDeleteForm(request.POST, foia=foia, prefix="delete")
+    has_perm = (
+        request.user.has_perm("foia.delete_foiarequest")
+        and not foia.composer.revokable()
+    )
     if has_perm and form.is_valid():
         foia.soft_delete(
             request.user,
@@ -167,8 +170,11 @@ def delete(request, foia):
 
 def withdraw(request, foia):
     """Allow users to withdraw requests"""
-    form = FOIAWithdrawForm(request.POST)
-    has_perm = request.user.has_perm("foia.change_foiarequest")
+    form = FOIAWithdrawForm(request.POST, prefix="withdraw")
+    has_perm = (
+        request.user.has_perm("foia.change_foiarequest")
+        and not foia.composer.revokable()
+    )
     if has_perm and form.is_valid():
         foia.withdraw(
             request.user,

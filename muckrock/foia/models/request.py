@@ -1165,23 +1165,25 @@ class FOIARequest(models.Model):
                 "form": FOIAFlagForm(is_agency_user=is_agency_user),
             },
             {
-                "test": user.has_perm("foia.delete_foiarequest"),
+                "test": user.has_perm("foia.delete_foiarequest")
+                and not self.composer.revokable(),
                 "title": "Delete Request",
                 "action": "delete",
                 "desc": "Wipe all data from this request.  WARNING: This cannot be "
                 "undone.",
                 "class_name": "failure",
                 "modal": True,
-                "form": FOIASoftDeleteForm(foia=self),
+                "form": FOIASoftDeleteForm(foia=self, prefix="delete"),
             },
             {
-                "test": user.has_perm("foia.change_foiarequest"),
+                "test": user.has_perm("foia.change_foiarequest")
+                and not self.composer.revokable(),
                 "title": "Withdraw Request",
                 "action": "withdraw",
                 "desc": "Withdraw your request from the agency",
                 "class_name": "failure",
                 "modal": True,
-                "form": FOIAWithdrawForm(),
+                "form": FOIAWithdrawForm(prefix="withdraw"),
             },
             {
                 "test": is_admin,
