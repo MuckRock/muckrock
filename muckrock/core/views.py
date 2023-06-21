@@ -9,7 +9,9 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
+from django.core.paginator import InvalidPage
 from django.db.models import F, Q, Sum
+from django.http.response import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -144,6 +146,31 @@ class PaginationMixin:
         context = super().get_context_data(**kwargs)
         context["per_page"] = self.get_paginate_by(self.get_queryset())
         return context
+
+    def paginate_queryset(self, queryset, page_size):
+        """Redirect to last page if over the limit"""
+        paginator = self.get_paginator(
+            queryset,
+            page_size,
+            orphans=self.get_paginate_orphans(),
+            allow_empty_first_page=self.get_allow_empty(),
+        )
+        page_kwarg = self.page_kwarg
+        page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+        try:
+            page_number = int(page)
+        except ValueError:
+            if page == "last":
+                page_number = paginator.num_pages
+            else:
+                raise Http404("Page is not “last”, nor can it be converted to an int.")
+        try:
+            page = paginator.page(page_number)
+            return (paginator, page, page.object_list, page.has_other_pages())
+        except InvalidPage:
+            page_number = paginator.num_pages
+            page = paginator.page(page_number)
+            return (paginator, page, page.object_list, page.has_other_pages())
 
 
 class CursorPaginationMixin(PaginationMixin):
