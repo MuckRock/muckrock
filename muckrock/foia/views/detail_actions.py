@@ -42,7 +42,7 @@ from muckrock.foia.forms import (
 )
 from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import STATUS, FOIACommunication, FOIAFile, FOIARequest
-from muckrock.foia.tasks import import_doccloud_file
+from muckrock.foia.tasks import import_doccloud_file, upload_user_document_cloud
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
@@ -729,6 +729,18 @@ def import_dc_file(request, foia):
         file_pk = request.POST.get("file_pk")
         import_doccloud_file.delay(file_pk)
         messages.success(request, "The file will be imported from DocumentCloud soon")
+    return _get_redirect(request, foia)
+
+
+def upload_dc_file(request, foia):
+    """Upload a file to the user's DocumentCloud account"""
+    if foia.has_perm(request.user, "change"):
+        file_pk = request.POST.get("file_pk")
+        upload_user_document_cloud.delay(file_pk, request.user.pk)
+        messages.success(
+            request,
+            "The file will be uploaded to your DocumentCloud account soon",
+        )
     return _get_redirect(request, foia)
 
 
