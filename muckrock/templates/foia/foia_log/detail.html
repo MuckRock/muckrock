@@ -3,6 +3,19 @@
 
 {% block content %}
 <article class="foia-log-detail">
+  <header>
+    <h1>FOIA Logs</h1>
+    <ul>
+    {% with foia_log.agency as agency %}
+    <li><a href="{% url "agency-logs" jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk idx=agency.id slug=agency.slug %}">
+      Browse all {{agency.name}} FOIA logs &rarr;
+    </a></li>
+    {% endwith %}
+    <li><a href="{% url "foia-logs" %}">
+      Browse all FOIA logs &rarr;
+    </a></li>
+    </ul>
+  </header>
   {% include "lib/foia_log.html" with show_agency=True %}
 </article>
 {% endblock content %}

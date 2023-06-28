@@ -126,3 +126,11 @@
     border-radius: $border-radius;
     background-color: $color-yellow-light;
 }
+
+.agency__all-logs {
+    display: flex;
+    gap: 1em;
+    & a {
+        font-weight: bold;
+    }
+}
