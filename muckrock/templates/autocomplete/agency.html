@@ -4,17 +4,14 @@
       {{ choice.name }}
       {% if choice.exempt %}
         <span class="small red badge exempt">Exempt</span>
-        {% if choice.exempt_note %}
-          <span class="exempt-note">{{ choice.exempt_note|safe }}</span>
-        {% endif %}
       {% elif choice.uncooperative %}
         <span class="small red badge uncooperative">Scofflaw</span>
-        {% if choice.exempt_note %}
-          <span class="exempt-note">{{ choice.exempt_note|safe }}</span>
-        {% endif %}
       {% elif choice.requires_proxy or choice.jurisdiction.legal.always_proxy %}
         <span class="small yellow badge proxy">Proxy Required</span>
         <span class="exempt-note">This agency doesn't accept out of state requesters, so a local volunteer will file it on your behalf once submitted.</span>
+      {% endif %}
+      {% if choice.exempt_note %}
+        <span class="exempt-note">{{ choice.exempt_note|safe }}</span>
       {% endif %}
       {% if choice.status == "pending" %}
         <span class="small yellow badge">Pending</span>
