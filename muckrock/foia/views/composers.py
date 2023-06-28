@@ -247,6 +247,12 @@ class CreateComposer(MiniregMixin, GenericComposer, CreateView):
         if agency_pks:
             agencies = Agency.objects.filter(pk__in=agency_pks, status="approved")
             data.update({"agencies": agencies})
+        requested_docs = self.request.GET.get('requested_docs')
+        if requested_docs:
+            data.update({"requested_docs": smart_str(requested_docs)})
+        title = self.request.GET.get('title')
+        if title:
+            data.update({"title": title})
         return data
 
     def _get_clone_data(self, clone_pk):
