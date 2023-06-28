@@ -94,16 +94,12 @@ def detail(request, jurisdiction, jidx, slug, idx):
         .order_by("datetime")
         .select_related("comm__foia__agency__jurisdiction")
     )
-    foia_files_count = foia_files.count()
-    foia_files = foia_files[:FOIA_FILE_LIMIT]
-    
+
     foia_logs = (
         FOIALog.objects.filter(agency=agency)
         .order_by("-date_requested")
         .select_related("agency__jurisdiction")
     )
-    foia_logs_count = foia_logs.count()
-    foia_logs = foia_logs[:FOIA_LOG_LIMIT]
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -130,11 +126,11 @@ def detail(request, jurisdiction, jidx, slug, idx):
         "agency": agency,
         "foia_requests": foia_requests,
         "foia_requests_count": foia_request_count,
-        "foia_files": foia_files,
-        "foia_files_count": foia_files_count,
+        "foia_files": foia_files[:FOIA_FILE_LIMIT],
+        "foia_files_count": foia_files.count(),
         "foia_files_limit": FOIA_FILE_LIMIT,
-        "foia_logs": foia_logs,
-        "foia_logs_count": foia_logs_count,
+        "foia_logs": foia_logs[:FOIA_LOG_LIMIT],
+        "foia_logs_count": foia_logs.count(),
         "foia_logs_limit": FOIA_LOG_LIMIT,
         "form": form,
         "sidebar_admin_url": reverse("admin:agency_agency_change", args=(agency.pk,)),

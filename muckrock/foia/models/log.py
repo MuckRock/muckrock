@@ -39,5 +39,9 @@ class FOIALog(models.Model):
         """Prepares language for requesting a copy of any responsive documents"""
         return render_to_string(
             "text/foia/copy_log.txt",
-            {"request_id": self.request_id, "date_requested": self.date_requested, "subject": self.subject},
+            {
+                "request_id": self.request_id,
+                "date_requested": self.date_requested,
+                "subject": self.subject
+            },
         )
