@@ -152,8 +152,8 @@ class GovQAPortal(ManualPortal):
                 )
                 return
             path = get_path(file_name)
-            path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{path}"
-            with smart_open(path, "wb") as file:
+            full_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{path}"
+            with smart_open(full_path, "wb", s3_upload={"ACL": "public-read"}) as file:
                 for chunk in resp.iter_content(chunk_size=10 * 1024 * 1024):
                     file.write(chunk)
 
