@@ -7,6 +7,7 @@ from django.db import models
 
 # MuckRock
 from muckrock.foia.models.request import STATUS
+from django.template.loader import render_to_string
 
 
 class FOIALog(models.Model):
@@ -33,3 +34,10 @@ class FOIALog(models.Model):
         blank=True,
         null=True,
     )
+
+    def request_copy(self):
+        """Prepares language for requesting a copy of any responsive documents"""
+        return render_to_string(
+            "text/foia/copy_log.txt",
+            {"request_id": self.request_id, "date_requested": self.date_requested, "subject": self.subject},
+        )
