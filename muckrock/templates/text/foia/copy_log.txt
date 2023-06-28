@@ -1,0 +1,6 @@
+Please provide any documents responsive to request #{{request_id}}, received on {{date_requested}}.
+{% if subject %}
+The subject of the initial request is copied below:
+
+{{subject}}
+{% endif %}
