@@ -12,4 +12,3 @@ from muckrock.foia.views.list import *
 from muckrock.foia.views.logs import *
 from muckrock.foia.views.views import *
 from muckrock.foia.views.webhooks import *
-from muckrock.foia.views.foia_log import *

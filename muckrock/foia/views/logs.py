@@ -4,11 +4,15 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse
+from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 
 # MuckRock
+from muckrock.core.views import ModelFilterMixin, MRListView
+from muckrock.foia.filters import FOIALogFilterSet
 from muckrock.foia.forms.logs import FOIALogUploadForm
 from muckrock.foia.importers import import_logs
+from muckrock.foia.models.log import FOIALog
 
 
 class FOIALogUploadView(UserPassesTestMixin, FormView):
@@ -30,3 +34,23 @@ class FOIALogUploadView(UserPassesTestMixin, FormView):
         num = import_logs(form.cleaned_data["agency"], form.cleaned_data["log"])
         messages.success(self.request, f"Import succesful - {num} logs imported")
         return super().form_valid(form)
+
+
+class FOIALogDetail(DetailView):
+    """Details of a single FOIA Log"""
+
+    model = FOIALog
+    context_object_name = "foia_log"
+    pk_url_kwarg = "idx"
+    template_name = "foia/foia_log/detail.html"
+
+
+class FOIALogList(ModelFilterMixin, MRListView):
+    """Filterable list of FOIA logs"""
+
+    model = FOIALog
+    template_name = "foia/foia_log/list.html"
+    foia = None
+    filter_class = FOIALogFilterSet
+    title = "FOIA Logs"
+    
