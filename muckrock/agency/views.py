@@ -42,7 +42,7 @@ from muckrock.core.views import (
     MRSearchFilterListView,
 )
 from muckrock.foia.filters import FOIAFileFilterSet, FOIALogFilterSet
-from muckrock.foia.models import FOIAFile, FOIATemplate, FOIALog
+from muckrock.foia.models import FOIAFile, FOIALog, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
@@ -533,43 +533,6 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         return queryset.filter(
             comm__foia__embargo=False, comm__foia__agency=agency
         ).select_related("comm__foia__agency__jurisdiction")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["agency"] = self.get_agency()
-        context["agency_url"] = context["agency"].get_absolute_url()
-        return context
-
-class AgencyFOIALogListView(ModelFilterMixin, MRListView):
-    """Presents a paginated list of FOIA Logs."""
-
-    model = FOIALog
-    template_name = "agency/log_list.html"
-    agency = None
-    filter_class = FOIALogFilterSet
-
-    def get_agency(self):
-        """Returns the Agency for the logs. Caches it as an attribute."""
-        if self.agency is None:
-            self.agency = get_object_or_404(
-                Agency.objects.select_related(
-                    "jurisdiction",
-                    "jurisdiction__parent",
-                    "jurisdiction__parent__parent",
-                ),
-                jurisdiction__slug=self.kwargs.get("jurisdiction"),
-                jurisdiction__pk=self.kwargs.get("jidx"),
-                slug=self.kwargs.get("slug"),
-                pk=self.kwargs.get("idx"),
-                status="approved",
-            )
-        return self.agency
-
-    def get_queryset(self):
-        """Only logs for one agency"""
-        agency = self.get_agency()
-        queryset = super().get_queryset()
-        return queryset.filter(agency=agency).select_related("agency__jurisdiction")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
