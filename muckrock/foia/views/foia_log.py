@@ -4,11 +4,12 @@ Detail view for a FOIA Log
 
 # Django
 from django.views.generic import DetailView
-from muckrock.core.views import ModelFilterMixin, MRListView
 
 # MuckRock
-from muckrock.foia.models.log import FOIALog
+from muckrock.core.views import ModelFilterMixin, MRListView
 from muckrock.foia.filters import FOIALogFilterSet
+from muckrock.foia.models.log import FOIALog
+
 
 class FOIALogDetail(DetailView):
     """Details of a single FOIA Log"""
@@ -18,6 +19,7 @@ class FOIALogDetail(DetailView):
     pk_url_kwarg = "idx"
     template_name = "foia/foia_log/detail.html"
 
+
 class FOIALogList(ModelFilterMixin, MRListView):
     """Filterable list of FOIA logs"""
 
@@ -26,4 +28,3 @@ class FOIALogList(ModelFilterMixin, MRListView):
     foia = None
     filter_class = FOIALogFilterSet
     title = "FOIA Logs"
-    
