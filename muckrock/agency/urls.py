@@ -28,11 +28,6 @@ urlpatterns = [
         views.AgencyFOIAFileListView.as_view(),
         name="agency-files",
     ),
-    re_path(
-        r"^%s/logs/$" % agency_url,
-        views.AgencyFOIALogListView.as_view(),
-        name="agency-logs"
-    ),
     re_path(r"^%s/flag/$" % agency_url, views.redirect_flag, name="agency-flag"),
     re_path(r"^boilerplate/$", views.boilerplate, name="agency-boilerplate"),
     re_path(
