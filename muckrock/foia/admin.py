@@ -712,6 +712,7 @@ class FOIATemplateAdmin(VersionAdmin):
     search_fields = ["name", "template"]
     form = FOIATemplateAdminForm
 
+
 class FOIALogAdminForm(forms.ModelForm):
     """Form for FOIA Log admin"""
 
@@ -727,11 +728,14 @@ class FOIALogAdminForm(forms.ModelForm):
         model = FOIALog
         fields = "__all__"
 
+
 class FOIALogAdmin(VersionAdmin):
     """Outbound Attachment admin options"""
+
     list_display = ("agency", "request_id", "date_requested")
     search_fields = ["request_id", "agency"]
     form = FOIALogAdminForm
+
 
 admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
