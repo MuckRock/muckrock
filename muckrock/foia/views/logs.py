@@ -53,4 +53,3 @@ class FOIALogList(ModelFilterMixin, MRListView):
     foia = None
     filter_class = FOIALogFilterSet
     title = "FOIA Logs"
-    

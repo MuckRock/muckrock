@@ -42,6 +42,6 @@ class FOIALog(models.Model):
             {
                 "request_id": self.request_id,
                 "date_requested": self.date_requested,
-                "subject": self.subject
+                "subject": self.subject,
             },
         )
