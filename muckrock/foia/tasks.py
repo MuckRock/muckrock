@@ -57,7 +57,7 @@ from muckrock.communication.models import (
 )
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
-from muckrock.core.utils import read_in_chunks
+from muckrock.core.utils import read_in_chunks, squarelet_get
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
@@ -118,6 +118,65 @@ def upload_document_cloud(ffile_pk):
         auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
 
+    _upload_documentcloud(dc_client, ffile, change, save_doc_attrs=True)
+
+
+@task(
+    ignore_result=True,
+    time_limit=600,
+    name="muckrock.foia.tasks.upload_user_document_cloud",
+    autoretry_for=(DocumentCloudError, requests.exceptions.RequestException),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
+)
+def upload_user_document_cloud(ffile_pk, user_pk):
+    """Upload a document to a user's Document Cloud account"""
+
+    logger.info("Upload User Doc Cloud: %s", ffile_pk)
+    ffile = (
+        FOIAFile.objects.filter(pk=ffile_pk)
+        .select_related(
+            "comm__foia__agency__jurisdiction",
+            "comm__foia__composer__user",
+        )
+        .first()
+    )
+    user = User.objects.get(pk=user_pk)
+
+    if not ffile.is_doccloud():
+        # not a file doc cloud supports, do not attempt to upload
+        return
+
+    try:
+        resp = squarelet_get(f"/api/refresh_tokens/{user.profile.uuid}/")
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as exc:
+        logger.warning(
+            "Error getting token for Add-On: %s", exc, exc_info=sys.exc_info()
+        )
+        raise
+
+    dc_client = DocumentCloud(
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    dc_client.session.headers.update(
+        {"Authorization": "Bearer {}".format(resp.json()["access_token"])}
+    )
+    project, _created = dc_client.projects.get_or_create_by_title("MuckRock Imports")
+    params = {"project": project.id}
+
+    _upload_documentcloud(
+        dc_client,
+        ffile,
+        change=False,
+        save_doc_attrs=False,
+        extra_params=params,
+    )
+
+
+def _upload_documentcloud(dc_client, ffile, change, save_doc_attrs, extra_params=None):
+    """Shared function for uploading to Document Cloud"""
     params = {
         "title": ffile.title,
         "source": ffile.source,
@@ -126,6 +185,8 @@ def upload_document_cloud(ffile_pk):
         "original_extension": ffile.get_extension(),
         "data": {},
     }
+    if extra_params:
+        params.update(extra_params)
     foia = ffile.get_foia()
     if foia:
         params["data"] = {
@@ -148,14 +209,16 @@ def upload_document_cloud(ffile_pk):
             document.save()
         else:
             document = dc_client.documents.upload(ffile.ffile.url, **params)
-            ffile.doc_id = f"{document.id}-{document.slug}"
-            ffile.save()
+            if save_doc_attrs:
+                ffile.doc_id = f"{document.id}-{document.slug}"
+                ffile.save()
 
-        transaction.on_commit(
-            lambda: set_document_cloud_pages.apply_async(
-                args=[ffile.pk], countdown=settings.DOCCLOUD_PROCESSING_WAIT
+        if save_doc_attrs:
+            transaction.on_commit(
+                lambda: set_document_cloud_pages.apply_async(
+                    args=[ffile.pk], countdown=settings.DOCCLOUD_PROCESSING_WAIT
+                )
             )
-        )
 
 
 class DocumentCloudRetryError(Exception):

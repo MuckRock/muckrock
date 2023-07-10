@@ -28,7 +28,7 @@ from fuzzywuzzy import fuzz, process
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
-from muckrock.agency.constants import FOIA_FILE_LIMIT
+from muckrock.agency.constants import FOIA_FILE_LIMIT, FOIA_LOG_LIMIT
 from muckrock.agency.filters import AgencyFilterSet
 from muckrock.agency.forms import AgencyMassImportForm, AgencyMergeForm
 from muckrock.agency.importer import CSVReader, Importer
@@ -41,8 +41,8 @@ from muckrock.core.views import (
     MRListView,
     MRSearchFilterListView,
 )
-from muckrock.foia.filters import FOIAFileFilterSet
-from muckrock.foia.models import FOIAFile, FOIATemplate
+from muckrock.foia.filters import FOIAFileFilterSet, FOIALogFilterSet
+from muckrock.foia.models import FOIAFile, FOIALog, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
@@ -84,18 +84,22 @@ def detail(request, jurisdiction, jidx, slug, idx):
     foia_requests = (
         agency.get_requests().get_viewable(request.user).filter(agency=agency)
     )
+    foia_request_count = foia_requests.count()
+    foia_requests = foia_requests.select_related(
+        "agency__jurisdiction__parent__parent"
+    ).order_by("-composer__datetime_submitted")[:10]
+
     foia_files = (
         FOIAFile.objects.filter(comm__foia__in=foia_requests)
         .order_by("datetime")
         .select_related("comm__foia__agency__jurisdiction")
     )
 
-    foia_request_count = foia_requests.count()
-    foia_files_count = foia_files.count()
-    foia_requests = foia_requests.select_related(
-        "agency__jurisdiction__parent__parent"
-    ).order_by("-composer__datetime_submitted")[:10]
-    foia_files = foia_files[:FOIA_FILE_LIMIT]
+    foia_logs = (
+        FOIALog.objects.filter(agency=agency)
+        .order_by("-date_requested")
+        .select_related("agency__jurisdiction")
+    )
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -122,9 +126,12 @@ def detail(request, jurisdiction, jidx, slug, idx):
         "agency": agency,
         "foia_requests": foia_requests,
         "foia_requests_count": foia_request_count,
-        "foia_files": foia_files,
-        "foia_files_count": foia_files_count,
+        "foia_files": foia_files[:FOIA_FILE_LIMIT],
+        "foia_files_count": foia_files.count(),
         "foia_files_limit": FOIA_FILE_LIMIT,
+        "foia_logs": foia_logs[:FOIA_LOG_LIMIT],
+        "foia_logs_count": foia_logs.count(),
+        "foia_logs_limit": FOIA_LOG_LIMIT,
         "form": form,
         "sidebar_admin_url": reverse("admin:agency_agency_change", args=(agency.pk,)),
     }

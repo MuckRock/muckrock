@@ -66,7 +66,12 @@
             <tbody>
               {% for member in members %}
                 <tr class="member">
-                  <td class="name"><a href="{{ member.get_absolute_url }}">{{ member.profile.full_name|default:"(None)" }}</a></td>
+                  <td class="name">
+                    <a href="{{ member.get_absolute_url }}">
+                      {{ member.profile.full_name|default:"(None)" }}
+                    </a>
+                    {% if member in admins %}(Admin){% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>

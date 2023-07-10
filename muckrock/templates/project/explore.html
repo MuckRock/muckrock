@@ -5,9 +5,9 @@
 {% block explore_header_description %}
 <h1>MuckRock Projects</h1>
 <p>
-  <a href="/staff/#news">MuckRock's news team</a> works on original editorial
-  projects, including both collaborative and independent reporting efforts on
-  issues of public importance. Contact MuckRock’s editorial team at
+  MuckRock's news team works on original editorial projects, including both
+  collaborative and independent reporting efforts on issues of public
+  importance. Contact MuckRock’s editorial team at
   <a href="mailto:news@muckrock.com">news@muckrock.com</a>
   or <a href="/newsletters/">register for our weekly newsletter</a>.
 </p>
@@ -18,8 +18,9 @@
   {% if request.user.is_staff %}
     <li class="mb1"><a class="blue button" href="{% url 'project-create' %}">Create Project</a></li>
   {% endif %}
+    <li><a class="action" href="/staff/#news">Our team &rarr;</a></li>
+    <li><a class="action" href="/news/editorial-policy/">Our editorial mission &rarr;</a></li>
     <li><a class="action" href="{% url 'news-index' %}">Read more news &rarr;</a></li>
-    <li><a class="action" href="/news/editorial-policy/">Learn more &rarr;</a></li>
 </ul>
 {% endblock %}
 

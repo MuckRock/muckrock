@@ -333,3 +333,20 @@ class FOIAFileFilterSet(django_filters.FilterSet):
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
+
+
+class FOIALogFilterSet(django_filters.FilterSet):
+    """Filters for files"""
+
+    agency = django_filters.ModelMultipleChoiceFilter(
+        queryset=Agency.objects.get_approved(),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
+        ),
+    )
+    date_range = django_filters.DateFromToRangeFilter(
+        field_name="date",
+        label="Date Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )

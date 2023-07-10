@@ -1,0 +1,81 @@
+.foia-log {
+    background: $color-white-pure;
+    border: $border $color-grey-5;
+    border-radius: $border-radius;
+    overflow: hidden;
+    
+    font-size: $size-2;
+    margin: $vr auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.foia-log__header, .foia-log__main {
+    margin: 0;
+    padding: .75rem $vr;
+}
+
+.foia-log__header {
+    flex: 1 1 16em;
+    @include display(flex);
+    @include justify-content(space-between);
+    flex-wrap: wrap;
+    gap: .5em 1.5em;
+    & p, & div {
+        margin: 0;
+    }
+    &__left, &__right {
+        flex: 1 1 12em;
+        display: flex;
+        flex-direction: column;
+        gap: .5em;
+        line-height: 1.4;
+        & strong {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: .75em;
+        }
+    }
+}
+
+.foia-log__main {
+    flex: 2 1 32em;
+    @include display(flex);
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    gap: 1em;
+    font-size: $size-3;
+}
+
+.foia-log__footer {
+    margin: 0;
+    padding: .5em $vr;
+    flex: 1 1 100%;
+    @include display(flex);
+    gap: 1em 2em;
+    border-top: 1px solid $color-grey-7;
+    background-color: $color-grey-8;
+    font-weight: 700;
+}
+
+.foia-log__subject {
+    @include flex(1 1 100%);
+    margin: 0;
+}
+
+.foia-log-detail {
+    max-width: 64rem;
+    margin: 2em auto;
+    padding: 0 $vr;
+}
+
+.foia-log-detail:last-child {
+    margin-bottom: 2em;
+}
+
+.foia-log__request-id {
+    margin: 0;
+    font-family: $monospace;
+    font-family: $size-1;
+}

@@ -812,6 +812,9 @@ class FOIARequest(models.Model):
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
         backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
+        headers = {"X-Mailgun-Variables": {"email_id": email_comm.pk}}
+        if "headers" in kwargs:
+            headers.update(kwargs["headers"])
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
                 subject=comm.subject,
@@ -820,7 +823,7 @@ class FOIARequest(models.Model):
                 to=[str(self.email)],
                 cc=[str(e) for e in self.cc_emails.all() if e.status == "good"],
                 bcc=[settings.DIAGNOSTIC_EMAIL],
-                headers={"X-Mailgun-Variables": {"email_id": email_comm.pk}},
+                headers=headers,
                 connection=email_connection,
             )
             msg.attach_alternative(linebreaks(escape(body)), "text/html")
@@ -1112,6 +1115,7 @@ class FOIARequest(models.Model):
             FOIAContactUserForm,
             FOIAFlagForm,
             FOIASoftDeleteForm,
+            FOIAWithdrawForm,
         )
 
         is_owner = self.created_by(user)
@@ -1161,14 +1165,25 @@ class FOIARequest(models.Model):
                 "form": FOIAFlagForm(is_agency_user=is_agency_user),
             },
             {
-                "test": user.has_perm("foia.delete_foiarequest"),
+                "test": user.has_perm("foia.delete_foiarequest")
+                and not self.composer.revokable(),
                 "title": "Delete Request",
                 "action": "delete",
                 "desc": "Wipe all data from this request.  WARNING: This cannot be "
                 "undone.",
                 "class_name": "failure",
                 "modal": True,
-                "form": FOIASoftDeleteForm(foia=self),
+                "form": FOIASoftDeleteForm(foia=self, prefix="delete"),
+            },
+            {
+                "test": user.has_perm("foia.change_foiarequest")
+                and not self.composer.revokable(),
+                "title": "Withdraw Request",
+                "action": "withdraw",
+                "desc": "Withdraw your request from the agency",
+                "class_name": "failure",
+                "modal": True,
+                "form": FOIAWithdrawForm(prefix="withdraw"),
             },
             {
                 "test": is_admin,
@@ -1359,6 +1374,14 @@ class FOIARequest(models.Model):
         self.deleted = True
         self.embargo = True
         self.permanent_embargo = True
+        self.status = "abandoned"
+        self.save()
+
+    @transaction.atomic
+    def withdraw(self, user, final_message, note):
+        """Allow a user to withdraw their request from the agency"""
+        self.create_out_communication(user, final_message, user)
+        self.notes.create(author=user, note=note)
         self.status = "abandoned"
         self.save()
 

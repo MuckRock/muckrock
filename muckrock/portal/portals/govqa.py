@@ -3,6 +3,9 @@ Automate some parts of GovQA portal handling
 """
 
 
+# Django
+from django.conf import settings
+
 # Standard Library
 import cgi
 import logging
@@ -25,8 +28,13 @@ logger = logging.getLogger(__name__)
 class GovQAPortal(ManualPortal):
     """GovQA portal integreation"""
 
-    def send_msg(self, comm, **kwargs):
+    def _send_msg(self, comm, **kwargs):
         """Send a message via email if possible"""
+        # Note:
+        # Disabling this for now, as it does not seem to work
+        # Rename method back to send_msg to re-enable if we figure out
+        # how to get email replies in GovQA to work
+
         # send an email for not new submissions, which have a valid email address,
         # only for staff users for right now
         if (
@@ -35,17 +43,42 @@ class GovQAPortal(ManualPortal):
             and comm.foia.email.status == "good"
             and comm.foia.user.is_staff
         ):
-            comm.foia.send_email(comm, **kwargs)
+            subject, msg_id = self._set_reply_fields(comm)
+            if subject is None:
+                super().send_msg(comm, **kwargs)
+                return
+            comm.subject = subject
+            comm.save()
+            headers = {"In-Reply-To": f"<{msg_id}>"}
+            comm.foia.send_email(comm, headers=headers, **kwargs)
         else:
             super().send_msg(comm, **kwargs)
 
+    def _set_reply_fields(self, comm):
+        """Try to find an appropriate message to reply to"""
+        for communication in comm.foia.communications.filter(response=True).order_by(
+            "-datetime"
+        ):
+            # GovQA expects the tracking ID after two colons, so try to find a
+            # message in that format to reply to
+            if "::" in communication.subject:
+                subject = f"RE: {communication.subject}"
+                if len(subject) > 255:
+                    return None, None
+                email = communication.emails.last()
+                if email is None or not email.message_id:
+                    return None, None
+                return subject, email.message_id
+
+        return None, None
+
     def get_client(self, comm):
         """Get a GovQA client"""
-        return GovQA(
+        client = GovQA(
             furl(comm.foia.portal.url).origin,
-            comm.foia.get_request_email(),
-            comm.foia.portal_password,
         )
+        client.login(comm.foia.get_request_email(), comm.foia.portal_password)
+        return client
 
     def receive_msg(self, comm, **kwargs):
         """Check for attachments upon receiving a communication"""
@@ -119,7 +152,8 @@ class GovQAPortal(ManualPortal):
                 )
                 return
             path = get_path(file_name)
-            with smart_open(path, "wb") as file:
+            full_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{path}"
+            with smart_open(full_path, "wb", s3_upload={"ACL": "public-read"}) as file:
                 for chunk in resp.iter_content(chunk_size=10 * 1024 * 1024):
                     file.write(chunk)
 

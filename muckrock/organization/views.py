@@ -71,7 +71,10 @@ class OrganizationDetailView(DetailView):
             "completed": requests.get_done().order_by("-datetime_done")[:10],
         }
 
-        context["members"] = organization.users.all()
+        context["members"] = organization.users.order_by(
+            "-memberships__admin", "username"
+        )
+        context["admins"] = organization.users.filter(memberships__admin=True)
         if organization.requests_per_month > 0:
             context["requests_progress"] = (
                 float(organization.monthly_requests) / organization.requests_per_month

@@ -35,13 +35,14 @@ from muckrock.foia.forms import (
     FOIANoteForm,
     FOIAOwnerForm,
     FOIASoftDeleteForm,
+    FOIAWithdrawForm,
     RequestFeeForm,
     ResendForm,
     TrackingNumberForm,
 )
 from muckrock.foia.forms.comms import AgencyPasscodeForm
 from muckrock.foia.models import STATUS, FOIACommunication, FOIAFile, FOIARequest
-from muckrock.foia.tasks import import_doccloud_file
+from muckrock.foia.tasks import import_doccloud_file, upload_user_document_cloud
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
@@ -117,7 +118,7 @@ def add_note(request, foia):
         foia_note.author = request.user
         foia_note.datetime = timezone.now()
         foia_note.save()
-        if note_form.cleaned_data.get("notify"):
+        if foia_note.notify:
             action = new_action(
                 request.user,
                 "added a note",
@@ -149,8 +150,11 @@ def flag(request, foia):
 
 def delete(request, foia):
     """Allow staff to soft delete requests"""
-    form = FOIASoftDeleteForm(request.POST, foia=foia)
-    has_perm = request.user.has_perm("foia.delete_foiarequest")
+    form = FOIASoftDeleteForm(request.POST, foia=foia, prefix="delete")
+    has_perm = (
+        request.user.has_perm("foia.delete_foiarequest")
+        and not foia.composer.revokable()
+    )
     if has_perm and form.is_valid():
         foia.soft_delete(
             request.user,
@@ -159,6 +163,27 @@ def delete(request, foia):
             form.cleaned_data["note"],
         )
         messages.success(request, "Request succesfully deleted")
+    if not form.is_valid():
+        messages.error(request, form.errors)
+    return _get_redirect(request, foia)
+
+
+def withdraw(request, foia):
+    """Allow users to withdraw requests"""
+    form = FOIAWithdrawForm(request.POST, prefix="withdraw")
+    has_perm = (
+        request.user.has_perm("foia.change_foiarequest")
+        and not foia.composer.revokable()
+    )
+    if has_perm and form.is_valid():
+        foia.withdraw(
+            request.user,
+            form.cleaned_data["final_message"],
+            form.cleaned_data["note"],
+        )
+        messages.success(request, "Request succesfully withdrawn")
+    if not form.is_valid():
+        messages.error(request, form.errors)
     return _get_redirect(request, foia)
 
 
@@ -704,6 +729,18 @@ def import_dc_file(request, foia):
         file_pk = request.POST.get("file_pk")
         import_doccloud_file.delay(file_pk)
         messages.success(request, "The file will be imported from DocumentCloud soon")
+    return _get_redirect(request, foia)
+
+
+def upload_dc_file(request, foia):
+    """Upload a file to the user's DocumentCloud account"""
+    if foia.has_perm(request.user, "change"):
+        file_pk = request.POST.get("file_pk")
+        upload_user_document_cloud.delay(file_pk, request.user.pk)
+        messages.success(
+            request,
+            "The file will be uploaded to your DocumentCloud account soon",
+        )
     return _get_redirect(request, foia)
 
 

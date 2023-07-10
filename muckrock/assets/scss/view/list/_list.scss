@@ -17,6 +17,15 @@
     .button-group {
       width: 100%;
     }
+    button.hidden {
+      overflow: visible !important;
+      height: 0 !important;
+      width: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+      padding: 0 !important;
+      display: block !important;
+    }
   }
   .list__toggle {
     display: none;

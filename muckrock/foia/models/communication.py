@@ -535,6 +535,7 @@ class FOIANote(models.Model):
     )
     datetime = models.DateTimeField(auto_now_add=True)
     note = models.TextField()
+    notify = models.BooleanField(default=False)
 
     def __str__(self):
         if self.author:

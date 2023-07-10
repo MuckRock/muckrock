@@ -6,9 +6,9 @@
 #
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps  # via -r pip/requirements.in
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch  # via -r pip/requirements.in
--e git+https://github.com/datamade/govqa-py.git@bd1aee85569e1ca21ced1ce95763f87a32d4eebd#egg=govqa  # via -r pip/requirements.in
 amqp==2.6.0               # via kombu
 asgiref==3.6.0            # via django, scout-apm
+attrs==23.1.0             # via jsonschema
 backcall==0.2.0           # via ipython
 backports-zoneinfo==0.2.1  # via django
 beautifulsoup4==4.6.0     # via -r pip/requirements.in, pyembed
@@ -73,15 +73,18 @@ furl==1.0.1               # via -r pip/requirements.in
 future==0.18.2            # via celery, pyjwkest, python-documentcloud
 fuzzywuzzy==0.18.0        # via -r pip/requirements.in
 google-api-python-client==1.6.5  # via -r pip/requirements.in
+govqa==1.0.1              # via -r pip/requirements.in
 gunicorn==19.6.0          # via -r pip/requirements.in
 httplib2==0.18.1          # via google-api-python-client, oauth2client
 idna==2.5                 # via requests, urllib3
+importlib-resources==5.12.0  # via jsonschema
 ipython==7.16.1           # via -r pip/requirements.in
 ipython-genutils==0.2.0   # via traitlets
 jedi==0.17.1              # via ipython
 jmespath==0.10.0          # via boto3, botocore
 joblib==0.16.0            # via scikit-learn
 jsonfield==2.0.2          # via -r pip/requirements.in
+jsonschema==4.17.3        # via govqa
 kombu==4.6.11             # via celery
 levenshtein==0.21.0       # via python-levenshtein
 listcrunch==1.0.1         # via python-documentcloud
@@ -102,6 +105,7 @@ pexpect==4.6.0            # via ipython
 phonenumberslite==8.8.2   # via -r pip/requirements.in
 pickleshare==0.7.5        # via ipython
 pillow==7.2.0             # via -r pip/requirements.in, easy-thumbnails, reportlab
+pkgutil-resolve-name==1.3.10  # via jsonschema
 plaid-python==3.4.0       # via -r pip/requirements.in
 premailer==3.0.0          # via django-premailer
 prompt-toolkit==3.0.31    # via ipython
@@ -122,7 +126,8 @@ pyopenssl==22.0.0         # via urllib3
 pyparsing==2.4.7          # via packaging
 pypdf==3.4.0              # via -r pip/requirements.in
 pyphaxio==0.11            # via -r pip/requirements.in
-python-dateutil==2.8.1    # via -r pip/requirements.in, botocore, python-documentcloud, zenpy
+pyrsistent==0.19.3        # via jsonschema
+python-dateutil==2.8.1    # via -r pip/requirements.in, botocore, govqa, python-documentcloud, zenpy
 python-documentcloud==3.0.0  # via -r pip/requirements.in
 python-jose==3.1.0        # via social-auth-core
 python-levenshtein==0.12.2  # via -r pip/requirements.in
@@ -167,6 +172,7 @@ webencodings==0.5.1       # via bleach
 wrapt==1.12.1             # via scout-apm
 xlrd==1.1.0               # via -r pip/requirements.in
 zenpy==2.0.20             # via -r pip/requirements.in
+zipp==3.15.0              # via importlib-resources
 zipstream==1.1.4          # via -r pip/requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:

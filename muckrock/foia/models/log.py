@@ -4,6 +4,7 @@ Models for FOIAs obtained from an agency's FOIA Logs
 
 # Django
 from django.db import models
+from django.template.loader import render_to_string
 
 # MuckRock
 from muckrock.foia.models.request import STATUS
@@ -11,6 +12,11 @@ from muckrock.foia.models.request import STATUS
 
 class FOIALog(models.Model):
     """A FOIA from a FOIA Log"""
+
+    class Meta:
+        ordering = ["date_requested"]
+        verbose_name = "FOIA Log"
+        app_label = "foia"
 
     request_id = models.CharField(max_length=255, unique=True)
     requestor = models.CharField(max_length=255)
@@ -28,3 +34,14 @@ class FOIALog(models.Model):
         blank=True,
         null=True,
     )
+
+    def request_copy(self):
+        """Prepares language for requesting a copy of any responsive documents"""
+        return render_to_string(
+            "text/foia/copy_log.txt",
+            {
+                "request_id": self.request_id,
+                "date_requested": self.date_requested,
+                "subject": self.subject,
+            },
+        )

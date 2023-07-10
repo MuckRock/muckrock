@@ -276,9 +276,9 @@ class Agency(models.Model, RequestHelper):
             type="fax", status="good", agencyphone__request_type=request_type
         )
 
-    def get_phones(self, request_type="none"):
+    def get_phones(self):
         """Get the phone numbers"""
-        return self.phones.filter(type="phone", agencyphone__request_type=request_type)
+        return self.phones.filter(type="phone")
 
     def get_addresses(self, request_type="primary"):
         """Get the contact addresses"""
