@@ -26,7 +26,7 @@ chardet==3.0.3            # via -r pip/requirements.in
 charset-normalizer==3.1.0  # via requests
 cryptography==38.0.4      # via pyopenssl, social-auth-core, urllib3
 cssselect==0.9.2          # via premailer
-cssutils==1.0.1           # via premailer
+cssutils==2.7.1           # via premailer
 decorator==4.3.0          # via ipython, traitlets
 defusedxml==0.7.0rc1      # via python3-openid, social-auth-core
 dill==0.3.2               # via -r pip/requirements.in
