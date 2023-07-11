@@ -105,7 +105,8 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black muckrock --exclude migrations\\|vendor && isort muckrock"
+            cmd="black muckrock --exclude migrations\\|vendor && "
+            "isort --recursive muckrock"
         )
     )
 
@@ -116,7 +117,7 @@ def format_check(c):
     c.run(
         DJANGO_RUN_USER.format(
             cmd="black --check muckrock --exclude migrations\\|vendor && "
-            "isort --check-only muckrock"
+            "isort --check-only --recursive muckrock"
         )
     )
 
