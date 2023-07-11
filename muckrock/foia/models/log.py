@@ -4,10 +4,10 @@ Models for FOIAs obtained from an agency's FOIA Logs
 
 # Django
 from django.db import models
+from django.template.loader import render_to_string
 
 # MuckRock
 from muckrock.foia.models.request import STATUS
-from django.template.loader import render_to_string
 
 
 class FOIALog(models.Model):
