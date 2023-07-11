@@ -41,7 +41,7 @@ from muckrock.core.views import (
     MRListView,
     MRSearchFilterListView,
 )
-from muckrock.foia.filters import FOIAFileFilterSet, FOIALogFilterSet
+from muckrock.foia.filters import FOIAFileFilterSet
 from muckrock.foia.models import FOIAFile, FOIALog, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
