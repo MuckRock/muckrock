@@ -24,7 +24,7 @@ cffi==1.14.0              # via cryptography
 chardet==3.0.3            # via -r pip/requirements.in, requests
 cryptography==2.9.2       # via social-auth-core
 cssselect==0.9.2          # via premailer
-cssutils==1.0.1           # via premailer
+cssutils==2.7.1           # via premailer
 decorator==4.3.0          # via ipython, traitlets
 defusedxml==0.7.0rc1      # via python3-openid, social-auth-core
 dill==0.3.2               # via -r pip/requirements.in
