@@ -40,7 +40,6 @@ from muckrock.foia.models import (
     FOIANote,
     FOIARequest,
     FOIATemplate,
-    FOIALog,
     OutboundComposerAttachment,
     OutboundRequestAttachment,
     TrackingNumber,
