@@ -36,6 +36,7 @@ from muckrock.foia.models import (
     FOIACommunication,
     FOIAComposer,
     FOIAFile,
+    FOIALog,
     FOIANote,
     FOIARequest,
     FOIATemplate,
