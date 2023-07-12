@@ -3,9 +3,9 @@
 
 {% block content %}
   <article class="foia-log-detail">
-    <header>
-      <h1>FOIA Logs</h1>
-      <ul>
+    <header class="grid__row space-between">
+      <h1 class="grid__column third">FOIA Logs</h1>
+      <ul class="nostyle grid__column two-thirds">
         {% with foia_log.agency as agency %}
           <li>
             <a href="{% url "foia-logs" %}?agency={{ agency.pk }}">
