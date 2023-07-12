@@ -44,5 +44,10 @@ urlpatterns = [
         views.AgencyComposerAutocomplete.as_view(),
         name="agency-composer-autocomplete",
     ),
+    re_path(
+        r"^agency-foialog-autocomplete/$",
+        views.AgencyFOIALogAutocomplete.as_view(),
+        name="agency-foialog-autocomplete",
+    ),
     re_path(r"^import/$", views.MassImportAgency.as_view(), name="agency-mass-import"),
 ]
