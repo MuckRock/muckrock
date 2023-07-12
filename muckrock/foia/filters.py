@@ -19,6 +19,7 @@ from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.models import FOIARequest
+from muckrock.foia.models.log import FOIALog
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
@@ -344,9 +345,13 @@ class FOIALogFilterSet(django_filters.FilterSet):
             url="agency-autocomplete", attrs={"data-placeholder": "Search agencies"}
         ),
     )
-    date_range = django_filters.DateFromToRangeFilter(
-        field_name="date",
-        label="Date Range",
+    date_requested = django_filters.DateFromToRangeFilter(
+        field_name="date_requested",
+        label="Date Requested",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
+
+    class Meta:
+        model = FOIALog
+        fields = ["agency", "requestor", "date_requested"]
