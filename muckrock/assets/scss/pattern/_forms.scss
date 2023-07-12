@@ -199,3 +199,16 @@ fieldset {
 #build-wrap .form-wrap.form-builder .frmb .form-elements .input-wrap {
   width: 80%;
 }
+
+.RangeWidget.field {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5em;
+    align-items: center;
+    & header {
+        flex: 1 1 100%;
+    }
+    & input {
+        flex: 1 1;
+    }
+}
