@@ -53,3 +53,5 @@ class FOIALogList(MRSearchFilterListView):
     foia = None
     filter_class = FOIALogFilterSet
     title = "FOIA Logs"
+    default_sort = "date_requested"
+    default_order = "desc"
