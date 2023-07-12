@@ -342,7 +342,8 @@ class FOIALogFilterSet(django_filters.FilterSet):
     agency = django_filters.ModelMultipleChoiceFilter(
         queryset=Agency.objects.with_logs(),
         widget=autocomplete.ModelSelect2Multiple(
-            url="agency-foialog-autocomplete", attrs={"data-placeholder": "Search agencies"}
+            url="agency-foialog-autocomplete",
+            attrs={"data-placeholder": "Search agencies"},
         ),
     )
     date_requested = django_filters.DateFromToRangeFilter(
