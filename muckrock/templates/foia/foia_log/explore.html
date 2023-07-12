@@ -1,0 +1,52 @@
+{% extends 'base_explore.html' %}
+{% load thumbnail %}
+
+{% block classes %}foia-log{% endblock %}
+
+{% block explore_header_description %}
+<h1>FOIA Logs</h1>
+<p>Search for interesting requests in federal FOIA logs and get notified whenever new results are found.</p>
+{% endblock %}
+
+{% block explore_header %}
+{{block.super}}
+<div class="grid__column full">
+    <form method="GET" class="oneline-form" action="{% url 'foia-logs-list' %}">
+        <div class="field">
+            <input type="search" name="q" placeholder="Search FOIA logs">
+        	<button class="basic blue button" type="submit">
+                {% include 'lib/component/icon/search.svg' %}
+        	    <span class="label">Search</span>
+        	</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block explore_main %}
+<div class="explore__section suggested-searches">
+    <div class="align-baseline">
+        <h1 class="mr1 mb0">Suggested Searches</h1>
+    </div>
+</div>
+{# <div class="explore__section grid__row">
+    <div class="grid__column half recently-completed">
+        <div class="align-baseline mb0">
+            <h2 class="mr1">Recently completed</h2>
+            <a class="bold" href="{% url 'foia-list' %}?status=done">See all &rarr;</a>
+        </div>
+        {% for foia in recently_completed %}
+        {% include 'lib/foia.html' with hide_actions=True %}
+        {% endfor %}
+    </div>
+    <div class="grid__column half recently-completed">
+        <div class="align-baseline mb0">
+            <h2 class="mr1">Recently rejected</h2>
+            <p><a class="bold" href="{% url 'foia-list' %}?status=rejected">See all &rarr;</a></p>
+        </div>
+        {% for foia in recently_rejected %}
+        {% include 'lib/foia.html' with hide_actions=True %}
+        {% endfor %}
+    </div>
+</div> #}
+{% endblock %}

@@ -4,7 +4,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse
-from django.views.generic import DetailView
+from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import FormView
 
 # MuckRock
@@ -55,3 +55,18 @@ class FOIALogList(MRSearchFilterListView):
     title = "FOIA Logs"
     default_sort = "date_requested"
     default_order = "desc"
+
+class FOIALogLanding(TemplateView):
+    """Landing page that introduces FOIA logs"""
+    template_name = "foia/foia_log/explore.html"
+
+    def get_context_data(self, **kwargs):
+        """Adds educational content and suggested searches"""
+        context = super().get_context_data(**kwargs)
+        context["education"] = [
+            {
+                "q": "What?",
+                "a": "This."
+            }
+        ]
+        return context;

@@ -4,7 +4,7 @@
     <p class="agency__all-logs">
       <span>Showing {{foia_logs|length}} of {{ foia_logs_count }}</span>
       {% if foia_logs|length < foia_logs_count %}
-        <a href="{% url "foia-logs" %}?agency={{ agency.pk }}">
+        <a href="{% url "foia-logs-list" %}?agency={{ agency.pk }}">
           Browse all agency FOIA logs &rarr;
         </a>
       {% endif %}
