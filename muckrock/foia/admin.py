@@ -723,6 +723,13 @@ class FOIALogAdminForm(forms.ModelForm):
             attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
+    foia = forms.ModelChoiceField(
+        queryset=FOIARequest.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
+        ),
+    )
 
     class Meta:
         model = FOIALog
