@@ -62,9 +62,6 @@ urlpatterns = [
     ),
     re_path(r"^(?P<idx>\d+)/$", RedirectView.as_view(pattern_name="foia-draft")),
     re_path(r"^composer-autosave/(?P<idx>\d+)/$", views.autosave, name="foia-autosave"),
-    re_path(
-        r"^log-upload/$", views.FOIALogUploadView.as_view(), name="foia-log-upload"
-    ),
     # Detail View
     re_path(
         r"^%s/$" % foia_url,
@@ -106,6 +103,9 @@ urlpatterns = [
     ),
     re_path(r"^logs/list/$", views.FOIALogList.as_view(), name="foia-logs"),
     re_path(r"^logs/(?P<idx>\d+)/$", views.FOIALogDetail.as_view(), name="foia-log"),
+    re_path(
+        r"^logs/upload/$", views.FOIALogUploadView.as_view(), name="foia-log-upload"
+    ),
     # Feeds
     re_path(
         r"^feeds/submitted/$",
