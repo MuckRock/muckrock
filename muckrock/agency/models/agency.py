@@ -62,7 +62,7 @@ class AgencyQuerySet(models.QuerySet):
             .filter(status="approved")
             .order_by("name")
         )
-    
+
     def with_logs(self):
         """Get only agencies with FOIA logs"""
         return self.exclude(foialog=None)

@@ -8,7 +8,7 @@ from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 
 # MuckRock
-from muckrock.core.views import ModelFilterMixin, MRSearchFilterListView
+from muckrock.core.views import MRSearchFilterListView
 from muckrock.foia.filters import FOIALogFilterSet
 from muckrock.foia.forms.logs import FOIALogUploadForm
 from muckrock.foia.importers import import_logs

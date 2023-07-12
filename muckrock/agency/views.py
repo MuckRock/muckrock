@@ -433,14 +433,13 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
                 {"name": capwords(name), "jurisdiction": jurisdiction},
             )
         return create_option
-    
+
+
 class AgencyFOIALogAutocomplete(MRAutocompleteView):
     """Autocomplete for picking agencies"""
+
     queryset = Agency.objects.with_logs()
-    search_fields = [
-        "name",
-        "aliases"
-    ]
+    search_fields = ["name", "aliases"]
     split_words = "and"
     template = "autocomplete/agency.html"
 
