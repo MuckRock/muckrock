@@ -38,7 +38,9 @@ import requests
 from anymail.exceptions import AnymailError
 from constance import config
 from documentcloud import DocumentCloud
+from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
+from documentcloud.toolbox import grouper
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
 from raven import Client
@@ -277,6 +279,33 @@ def retry_stuck_documents():
     logger.info("Reupload documents, %d documents are stuck", len(docs))
     for doc in docs:
         upload_document_cloud.delay(doc.pk)
+
+
+@task(
+    ignore_results=True,
+    name="muckrock.foia.tasks.noindex_documentcloud",
+    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
+    retry_backoff=60,
+    retry_kwargs={"max_retries": 10},
+)
+def noindex_documentcloud(foia_pk):
+    """Set the documents for this request to noindex on DocumentCloud"""
+    foia = FOIARequest.objects.get(pk=foia_pk)
+    doc_ids = foia.get_files().exclude(doc_id="").values_list("doc_id", flat=True)
+    # get just the numeric ID
+    doc_ids = [d.split("-")[0] for d in doc_ids]
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    for group in grouper(doc_ids, BULK_LIMIT):
+        resp = dc_client.patch(
+            "documents/",
+            json=[{"id": d, "noindex": True} for d in group if d is not None],
+        )
+        resp.raise_for_status()
 
 
 @task(
