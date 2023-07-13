@@ -60,13 +60,9 @@ class FOIAFile(models.Model):
         use a generic fallback."""
         mimetypes = {
             "avi": "file-video.png",
-            "bmp": "file-image.png",
             "csv": "file-spreadsheet.png",
-            "gif": "file-image.png",
-            "jpg": "file-image.png",
             "mp3": "file-audio.png",
             "mpg": "file-video.png",
-            "png": "file-image.png",
             "ppt": "file-presentation.png",
             "pptx": "file-presentation.png",
             "tif": "file-image.png",
@@ -75,12 +71,15 @@ class FOIAFile(models.Model):
             "xlsx": "file-spreadsheet.png",
             "zip": "file-archive.png",
         }
+        image_preview = ["bmp", "gif", "jpg", "jpeg", "png", "svg", "webp"]
         if self.show_embed:
             id_, slug = self.doc_id.split("-", 1)
             return (
                 f"{settings.DOCCLOUD_ASSET_URL}documents/"
                 f"{id_}/pages/{slug}-p1-small.gif"
             )
+        elif self.get_extension() in image_preview:
+            return self.ffile.url
         else:
             filename = mimetypes.get(self.get_extension(), "file-document.png")
             return "%simg/%s" % (settings.STATIC_URL, filename)
