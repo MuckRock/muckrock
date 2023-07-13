@@ -8,7 +8,7 @@ from django.views.generic import DetailView
 from django.views.generic.edit import FormView
 
 # MuckRock
-from muckrock.core.views import ModelFilterMixin, MRListView
+from muckrock.core.views import MRSearchFilterListView
 from muckrock.foia.filters import FOIALogFilterSet
 from muckrock.foia.forms.logs import FOIALogUploadForm
 from muckrock.foia.importers import import_logs
@@ -45,7 +45,7 @@ class FOIALogDetail(DetailView):
     template_name = "foia/foia_log/detail.html"
 
 
-class FOIALogList(ModelFilterMixin, MRListView):
+class FOIALogList(MRSearchFilterListView):
     """Filterable list of FOIA logs"""
 
     model = FOIALog
@@ -53,3 +53,5 @@ class FOIALogList(ModelFilterMixin, MRListView):
     foia = None
     filter_class = FOIALogFilterSet
     title = "FOIA Logs"
+    default_sort = "date_requested"
+    default_order = "desc"

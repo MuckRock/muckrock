@@ -63,6 +63,10 @@ class AgencyQuerySet(models.QuerySet):
             .order_by("name")
         )
 
+    def with_logs(self):
+        """Get only agencies with FOIA logs"""
+        return self.exclude(foialog=None)
+
     def create_new(self, name, jurisdiction, user):
         """Create a pending agency with a NewAgency task"""
         user = user if user.is_authenticated else None

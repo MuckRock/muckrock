@@ -435,6 +435,15 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         return create_option
 
 
+class AgencyFOIALogAutocomplete(MRAutocompleteView):
+    """Autocomplete for picking agencies"""
+
+    queryset = Agency.objects.with_logs()
+    search_fields = ["name", "aliases"]
+    split_words = "and"
+    template = "autocomplete/agency.html"
+
+
 class MassImportAgency(PermissionRequiredMixin, FormView):
     """View to do a mass import of new agencies"""
 
