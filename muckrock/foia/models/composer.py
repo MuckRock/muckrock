@@ -21,6 +21,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 # Standard Library
+import logging
 import re
 from datetime import timedelta
 from itertools import zip_longest
@@ -35,6 +36,8 @@ from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.tags.models import TaggedItemBase
+
+logger = logging.getLogger(__name__)
 
 STATUS = [("started", "Draft"), ("submitted", "Processing"), ("filed", "Filed")]
 
@@ -103,6 +106,7 @@ class FOIAComposer(models.Model):
             "foia-composer-detail", kwargs={"slug": self.slug, "idx": self.pk}
         )
 
+    @transaction.atomic
     def submit(self, contact_info=None, no_proxy=False):
         """Submit a composer to create the requests"""
         # pylint: disable=import-outside-toplevel
@@ -131,6 +135,7 @@ class FOIAComposer(models.Model):
         approve = (
             num_requests < settings.MULTI_REVIEW_AMOUNT and not self.needs_moderation()
         )
+        logger.info("Composer submit: %s %s", self.pk, approve)
         result = composer_delayed_submit.apply_async(
             args=(self.pk, approve, contact_info), countdown=COMPOSER_SUBMIT_DELAY
         )
@@ -150,8 +155,10 @@ class FOIAComposer(models.Model):
                 return True
         return False
 
+    @transaction.atomic
     def approved(self, contact_info=None):
         """A pending composer is approved for sending to the agencies"""
+        logger.info("Composer approved: %s", self.pk)
         for foia in self.foias.all():
             foia.submit(contact_info=contact_info)
         self.status = "filed"
@@ -217,11 +224,14 @@ class FOIAComposer(models.Model):
             and self.status == "submitted"
         )
 
+    @transaction.atomic
     def revoke(self):
         """Revoke a submitted composer"""
         # pylint: disable=import-outside-toplevel
         # MuckRock
         from muckrock.foia.signals import foia_file_delete_s3
+
+        logger.info("Composer revoked: %s", self.pk)
 
         current_app.control.revoke(self.delayed_id)
         self.status = "started"

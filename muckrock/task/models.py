@@ -1075,6 +1075,8 @@ class MultiRequestTask(Task):
         # MuckRock
         from muckrock.foia.tasks import composer_delayed_submit
 
+        logger.info("Multirequest Task submit: %s, %s", self.pk, agency_list)
+
         return_requests = 0
         with transaction.atomic():
             for agency in self.composer.agencies.all():
@@ -1091,6 +1093,7 @@ class MultiRequestTask(Task):
 
     def reject(self):
         """Reject the composer and return the user their requests"""
+        logger.info("Multirequest Task reject: %s", self.pk)
         with transaction.atomic():
             self.composer.foias.all().delete()
             self.composer.return_requests()

@@ -460,6 +460,8 @@ class FOIARequest(models.Model):
         not set the request status, unless the request requires a proxy.
         """
 
+        logger.info("FOIA Request submitted: %s, %s, %s", self.pk, appeal, kwargs)
+
         agency = self.agency.get_appeal_agency() if appeal else self.agency
 
         needs_review = self.set_address(
