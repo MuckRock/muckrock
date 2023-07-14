@@ -14,11 +14,15 @@ import os
 
 def attachment_path(instance, filename):
     """Generate path for attachment file"""
-    return "outbound_%s_attachments/%s/%d/%s" % (
-        instance.type,
-        instance.user.username,
-        instance.attached_to.pk,
-        filename,
+    if instance.user.profile.is_agency_user:
+        return (
+            f"inbound_{instance.type}_attachments/{instance.user.username}/"
+            f"{instance.attach_to.pk}/{filename}"
+        )
+
+    return (
+        f"outbound_{instance.type}_attachments/{instance.user.username}/"
+        f"{instance.attached_to.pk}/{filename}"
     )
 
 
