@@ -112,6 +112,7 @@ ptyprocess==0.6.0         # via pexpect
 pyasn1==0.4.2             # via oauth2client, pyasn1-modules, python-jose, rsa
 pyasn1-modules==0.2.1     # via oauth2client
 pycparser==2.20           # via cffi
+pycryptodome==3.18.0      # via -r pip/requirements.in
 pycryptodomex==3.6.4      # via pyjwkest
 pyembed==1.3.3            # via -r pip/requirements.in
 pygments==2.13.0          # via ipython
