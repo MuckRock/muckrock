@@ -46,6 +46,7 @@ from muckrock.foia.models import (
 )
 from muckrock.foia.tasks import (
     autoimport,
+    noindex_documentcloud,
     set_document_cloud_pages,
     upload_document_cloud,
 )
@@ -463,6 +464,10 @@ class FOIARequestAdmin(VersionAdmin):
         # If changing to completed and embargoed, set embargo date to 30 days out
         if obj.status in ["done", "partial"] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
+
+        # If turned noindex on, turn noindex on DocumentCloud as well
+        if "noindex" in form.changed_data and form.cleaned_data["noindex"]:
+            noindex_documentcloud.delay(obj.pk)
 
         # NOT saving here if changed
         # saving after formset so that we can check for updates there first

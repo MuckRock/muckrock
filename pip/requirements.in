@@ -59,6 +59,7 @@ phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
 plaid-python # for access to bank account information
 psycopg2-binary # Interface to postgres DB
+pycryptodome # Reading encypted PDFs
 pyembed # Used for embedding in crowdsources
 pyjwkest # for oauth
 pylibmc # memcache client

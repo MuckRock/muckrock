@@ -1,3 +1,5 @@
+/* Component */
+
 .foia-log {
     background: $color-white-pure;
     border: $border $color-grey-5;
@@ -87,3 +89,58 @@
     font-family: $monospace;
     font-family: $size-1;
 }
+
+/* Explore */
+
+.foia-log-explore {
+    & .explore__header__wrapper {
+        padding: 6rem 0;
+        background-color: $color-yellow-light;
+        mix-blend-mode: multiply;
+        position: relative;
+        & .grid__column.third {
+            display: none;
+        }
+        & .grid__column.two-thirds {
+            text-align: center;
+        }
+        & .background-image {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: none;
+            z-index: -1;
+            opacity: .1;
+        }
+    }
+    & .basic.button {
+        background-color: $color-yellow-dark;
+    }
+    & .oneline-form .field {
+        border-color: $color-yellow-dark;
+    }
+    & .foia-log-metrics {
+        margin: 2em 0;
+        font-size: .8em;
+        text-align: center;
+    }
+    & .foia-log-metrics .stat {
+        font-size: 1.5em;
+        font-weight: 700;
+    }  
+    & .education {
+        max-width: 72em;
+        margin: 0 auto;
+        padding: 1em;
+        & h2 {
+            font-size: 2em;
+            margin: 2em;
+            text-align: center;
+        }
+    } 
+}
+

@@ -43,14 +43,14 @@
               {% if authors %}
                 <div class="authors">Written by
                   {% for author in authors %}
-                    <a href="{{ author.profile.get_absolute_url }}" title="{{ author.profile.full_name }}" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{{ author.profile.full_name }}</span></a>{% if not forloop.last %}, {% endif %}
+                    <a href="{{ author.profile.get_absolute_url }}" title="{{ author.profile.full_name }}" itemprop="author" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{{ author.profile.full_name }}</span></a>{% if forloop.revcounter == 2 %} and {% elif not forloop.last %}, {% endif %}
                   {% endfor %}
                 </div>
               {% endif %}
               {% if editors %}
                 <div class="editors">Edited by
                   {% for editor in editors %}
-                    <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.profile.full_name }}" itemprop="editor" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{{ editor.profile.full_name }}</span></a>{% if not forloop.last %}, {% endif %}
+                    <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.profile.full_name }}" itemprop="editor" itemscope itemtype="https://schema.org/Person"><span itemprop="name">{{ editor.profile.full_name }}</span></a>{% if forloop.revcounter == 2 %} and {% elif not forloop.last %}, {% endif %}
                   {% endfor %}
                 </div>
               {% endif %}

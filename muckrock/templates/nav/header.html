@@ -87,6 +87,11 @@
                   <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
                   <li><a class="nav-item" href="{% url 'communication-list' %}">Communications</a></li>
                 {% endif %}
+                <li>
+                  <a class="nav-item" href="{% url 'foia-logs-landing' %}">
+                    <span class="small blue badge">NEW</span>&nbsp;FOIA Logs
+                  </a>
+                </li>
               </ul>
             </li>
             <li><a class="nav-item" href="{% url 'crowdsource-index' %}">Assignments</a></li>
