@@ -1,0 +1,40 @@
+{% extends 'base_explore.html' %}
+{% load thumbnail %}
+{% load static %}
+
+{% block classes %}foia-log-explore{% endblock %}
+
+{% block explore_header_description %}
+<h1 class="small-caps">FOIA Logs</h1>
+<p class="foia-log-metrics overline">Search for interesting requests across <span class="stat">{{stats.log_count}}</span> FOIA log{{stats.log_count|pluralize}} from <span class="stat">{{stats.agency_count}}</span> federal agenc{{stats.agency_count|pluralize:"y,ies"}}</p>
+{% endblock %}
+
+{% block explore_header %}
+{{block.super}}
+<div class="background-image" style="background-image:url({% static 'img/filing-cabinets.jpg' %});"></div>
+<div class="grid__column full">
+    <form method="GET" class="oneline-form" action="{% url 'foia-logs-list' %}">
+        <div class="field">
+            <input type="search" name="q" placeholder="Search FOIA logs">
+        	<button class="basic blue button" type="submit">
+                {% include 'lib/component/icon/search.svg' %}
+        	    <span class="label">Search</span>
+        	</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block explore_main %}
+<div class="education">
+  <h2>A Brief Introduction to FOIA Logs</h2>
+  <div class="grid__row">
+    {% for lesson in education %}
+    <div class="lesson grid__column third">
+      <h3>{{lesson.head}}</h3>
+      <p>{{lesson.body}}</p>
+    </div>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

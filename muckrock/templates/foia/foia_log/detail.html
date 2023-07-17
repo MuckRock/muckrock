@@ -8,13 +8,13 @@
       <ul class="nostyle grid__column two-thirds">
         {% with foia_log.agency as agency %}
           <li>
-            <a href="{% url "foia-logs" %}?agency={{ agency.pk }}">
+            <a href="{% url "foia-logs-list" %}?agency={{ agency.pk }}">
               Browse all {{agency.name}} FOIA logs &rarr;
             </a>
           </li>
         {% endwith %}
         <li>
-          <a href="{% url "foia-logs" %}">
+          <a href="{% url "foia-logs-list" %}">
             Browse all FOIA logs &rarr;
           </a>
         </li>
