@@ -57,8 +57,10 @@ class FOIALogList(MRSearchFilterListView):
     default_sort = "date_requested"
     default_order = "desc"
 
+
 class FOIALogLanding(TemplateView):
     """Landing page that introduces FOIA logs"""
+
     template_name = "foia/foia_log/explore.html"
 
     def get_context_data(self, **kwargs):
@@ -71,15 +73,26 @@ class FOIALogLanding(TemplateView):
         context["education"] = [
             {
                 "head": "Many agencies keeps a list of who requested what, and when.",
-                "body": "Federal agency FOIA logs disclose public records requests made by law firms, businesses, journalists—and you!"
+                "body": """
+                    Federal agency FOIA logs disclose public records requests
+                    made by law firms, businesses, journalists—and you!
+                """,
             },
             {
                 "head": "Logs are released on a consistent schedule.",
-                "body": "Agencies don't release their logs in realtime, instead they are provided in monthly or quarterly updates. Soon after their lists are published, they'll be made available here."
+                "body": """
+                    Agencies don't release their logs in realtime, instead they are
+                    provided in monthly or quarterly updates. Soon after their lists
+                    are published, they'll be made available here.
+                """,
             },
             {
                 "head": "Not every agency keeps a FOIA log.",
-                "body": "We index the logs released by agencies who keep them. If an agency you see isn't included in this list, you can try filing for their logs yourself!"
+                "body": """
+                    We index the logs released by agencies who keep them. If an agency
+                    you see isn't included in this list, you can try filing for their
+                    logs yourself!
+                """,
             },
         ]
-        return context;
+        return context
