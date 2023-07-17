@@ -1,15 +1,17 @@
 {% extends 'base_explore.html' %}
 {% load thumbnail %}
+{% load static %}
 
-{% block classes %}foia-log{% endblock %}
+{% block classes %}foia-log-explore{% endblock %}
 
 {% block explore_header_description %}
-<h1>FOIA Logs</h1>
-<p>Search for interesting requests in federal FOIA logs and get notified whenever new results are found.</p>
+<h1 class="small-caps">FOIA Logs</h1>
+<p class="foia-log-metrics overline">Search for interesting requests across <span class="stat">{{stats.log_count}}</span> FOIA log{{stats.log_count|pluralize}} from <span class="stat">{{stats.agency_count}}</span> federal agenc{{stats.agency_count|pluralize:"y,ies"}}</p>
 {% endblock %}
 
 {% block explore_header %}
 {{block.super}}
+<div class="background-image" style="background-image:url({% static 'img/filing-cabinets.jpg' %});"></div>
 <div class="grid__column full">
     <form method="GET" class="oneline-form" action="{% url 'foia-logs-list' %}">
         <div class="field">
@@ -24,29 +26,15 @@
 {% endblock %}
 
 {% block explore_main %}
-<div class="explore__section suggested-searches">
-    <div class="align-baseline">
-        <h1 class="mr1 mb0">Suggested Searches</h1>
+<div class="education">
+  <h2>A Brief Introduction to FOIA Logs</h2>
+  <div class="grid__row">
+    {% for lesson in education %}
+    <div class="lesson grid__column third">
+      <h3>{{lesson.head}}</h3>
+      <p>{{lesson.body}}</p>
     </div>
+  {% endfor %}
+  </div>
 </div>
-{# <div class="explore__section grid__row">
-    <div class="grid__column half recently-completed">
-        <div class="align-baseline mb0">
-            <h2 class="mr1">Recently completed</h2>
-            <a class="bold" href="{% url 'foia-list' %}?status=done">See all &rarr;</a>
-        </div>
-        {% for foia in recently_completed %}
-        {% include 'lib/foia.html' with hide_actions=True %}
-        {% endfor %}
-    </div>
-    <div class="grid__column half recently-completed">
-        <div class="align-baseline mb0">
-            <h2 class="mr1">Recently rejected</h2>
-            <p><a class="bold" href="{% url 'foia-list' %}?status=rejected">See all &rarr;</a></p>
-        </div>
-        {% for foia in recently_rejected %}
-        {% include 'lib/foia.html' with hide_actions=True %}
-        {% endfor %}
-    </div>
-</div> #}
 {% endblock %}

@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import FormView
+from muckrock.agency.models.agency import Agency
 
 # MuckRock
 from muckrock.core.views import MRSearchFilterListView
@@ -63,10 +64,22 @@ class FOIALogLanding(TemplateView):
     def get_context_data(self, **kwargs):
         """Adds educational content and suggested searches"""
         context = super().get_context_data(**kwargs)
+        context["stats"] = {
+            "log_count": FOIALog.objects.count(),
+            "agency_count": Agency.objects.with_logs().count(),
+        }
         context["education"] = [
             {
-                "q": "What?",
-                "a": "This."
-            }
+                "head": "Many agencies keeps a list of who requested what, and when.",
+                "body": "Federal agency FOIA logs disclose public records requests made by law firms, businesses, journalists—and you!"
+            },
+            {
+                "head": "Logs are released on a consistent schedule.",
+                "body": "Agencies don't release their logs in realtime, instead they are provided in monthly or quarterly updates. Soon after their lists are published, they'll be made available here."
+            },
+            {
+                "head": "Not every agency keeps a FOIA log.",
+                "body": "We index the logs released by agencies who keep them. If an agency you see isn't included in this list, you can try filing for their logs yourself!"
+            },
         ]
         return context;
