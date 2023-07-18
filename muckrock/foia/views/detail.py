@@ -294,6 +294,9 @@ class Detail(DetailView):
             (t, v) for _, t, v in merge(communications, notes, checks)
         ]
         context["notes"] = [(t, v) for _, t, v in merge(notes, checks)]
+        context["siblings"] = self.foia.composer.foias.all().select_related(
+            "agency__jurisdiction"
+        )
 
     def _get_date_context_data(self, context):
         """Get context data about dates"""
