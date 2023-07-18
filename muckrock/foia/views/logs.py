@@ -6,9 +6,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import FormView
-from muckrock.agency.models.agency import Agency
 
 # MuckRock
+from muckrock.agency.models.agency import Agency
 from muckrock.core.views import MRSearchFilterListView
 from muckrock.foia.filters import FOIALogFilterSet
 from muckrock.foia.forms.logs import FOIALogUploadForm
@@ -56,6 +56,10 @@ class FOIALogList(MRSearchFilterListView):
     title = "FOIA Logs"
     default_sort = "date_requested"
     default_order = "desc"
+
+    def get_queryset(self):
+        """Select related agency and jurisdiction to avoid extra queries"""
+        return super().get_queryset().select_related("agency__jurisdiction")
 
 
 class FOIALogLanding(TemplateView):
