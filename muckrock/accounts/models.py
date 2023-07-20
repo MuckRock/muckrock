@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
-from django.db.models import Max
+from django.db.models import Max, Sum
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from django.urls import reverse
@@ -30,6 +30,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from muckrock.accounts.querysets import ProfileQuerySet
 from muckrock.core.utils import cache_get_or_set, squarelet_get, stripe_retry_on_error
 from muckrock.organization.models import Organization
+from muckrock.foia.models import FOIAFile
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -83,7 +84,7 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-
+    total_pages_for_user = sum_pages_for_user(user)
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(
@@ -157,6 +158,14 @@ class Profile(models.Model):
         """Advanced users can access features basic users cannot."""
         # pylint: disable=comparison-with-callable
         return self.feature_level > 0
+
+    def sum_pages_for_user(self, user):
+        # Filter FOIAFile objects for the given user
+        foia_files_for_user = FOIAFile.objects.filter(comm_foia_composer_user=user)
+
+        # Calculate the sum of pages for the user's FOIAs
+        total_pages_for_user = foia_files_for_user.aggregate(Sum("pages"))["pages__sum"]
+        return total_pages_for_user or 0
 
     @mproperty
     def organization(self):
