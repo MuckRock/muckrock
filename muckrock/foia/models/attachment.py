@@ -17,7 +17,7 @@ def attachment_path(instance, filename):
     if instance.user.profile.is_agency_user:
         return (
             f"inbound_{instance.type}_attachments/{instance.user.username}/"
-            f"{instance.attach_to.pk}/{filename}"
+            f"{instance.attached_to.pk}/{filename}"
         )
 
     return (
