@@ -76,6 +76,7 @@ class GovQAPortal(ManualPortal):
         """Get a GovQA client"""
         client = GovQA(
             furl(comm.foia.portal.url).origin,
+            check_login=False,
         )
         client.login(comm.foia.get_request_email(), comm.foia.portal_password)
         return client
