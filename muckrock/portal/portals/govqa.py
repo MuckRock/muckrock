@@ -11,6 +11,7 @@ import cgi
 import logging
 
 # Third Party
+import dateutil
 import requests
 from furl import furl
 from govqa.base import GovQA
@@ -86,18 +87,17 @@ class GovQAPortal(ManualPortal):
         super().receive_msg(comm, **kwargs)
         portal_task.delay(self.portal.pk, "receive_msg_task", [comm.pk], kwargs)
 
-    def receive_msg_task(self, comm_pk, **kwargs):
-        """Fetch the request from GovQA"""
-        comm = FOIACommunication.objects.get(pk=comm_pk)
-
-        client = self.get_client(comm)
+    def _get_request(self, client, comm):
+        """Get the correct request for receive msg task"""
         reqs = client.list_requests()
+
         if len(reqs) == 0:
             logger.warning(
                 "[GOVQA] Communication: %d, list_requests returned no requests",
-                comm_pk,
+                comm.pk,
             )
-            return
+            return None
+
         for request in reqs:
             # find the request with a matching reference number
             # if none match, take the last one
@@ -105,18 +105,46 @@ class GovQAPortal(ManualPortal):
                 break
         else:
             request = reqs[-1]
-        status = request["status"]
-        logger.info("[GOVQA] Communication: %d Status %s", comm_pk, status)
+
         request_id = request["id"]
-        date = comm.datetime.date()
         request = client.get_request(request_id)
-        logger.info("[GOVQA] Communication: %d Request %s", comm_pk, request)
-        upload_attachments = [
-            a for a in request["attachments"] if a["uploaded_at"] == date
-        ]
+        logger.info("[GOVQA] Communication: %d Request %s", comm.pk, request)
+
+        return request
+
+    def _get_attachments(self, request, comm):
+        """Get the correct request for receive msg task"""
+
+        # the requestor is the original sender - we went all replies,
+        # which are messages sent by not the requestor
+        requester = request["messages"][-1]["sender"]
+        replies = [m for m in request["messages"] if m["sender"] != requester]
+
+        if len(replies) < 2:
+            # if this is the first reply, grab all attachments
+            upload_attachments = request["attachments"]
+        else:
+            # get all attachments since the previous reply
+            date = dateutil.parser.parse(replies[1]["date"]).date()
+            upload_attachments = [
+                a for a in request["attachments"] if a["uploaded_at"] >= date
+            ]
+
         logger.info(
-            "[GOVQA] Communication: %d Attachments: %s", comm_pk, upload_attachments
+            "[GOVQA] Communication: %d Attachments: %s", comm.pk, upload_attachments
         )
+        return upload_attachments
+
+    def receive_msg_task(self, comm_pk, **kwargs):
+        """Fetch the request from GovQA"""
+        comm = FOIACommunication.objects.get(pk=comm_pk)
+        client = self.get_client(comm)
+
+        request = self._get_request(client, comm)
+        if request is None:
+            return
+
+        upload_attachments = self._get_attachments(request, comm)
 
         for attachment in upload_attachments:
             value, params = cgi.parse_header(attachment["content-disposition"])
