@@ -92,14 +92,19 @@ class GovQAPortal(ManualPortal):
 
         client = self.get_client(comm)
         reqs = client.list_requests()
-        if len(reqs) != 1:
+        if len(reqs) == 0:
             logger.warning(
-                "[GOVQA] Communication: %d, list_requests returned %d requests",
+                "[GOVQA] Communication: %d, list_requests returned no requests",
                 comm_pk,
-                len(reqs),
             )
             return
-        request = reqs[0]
+        for request in reqs:
+            # find the request with a matching reference number
+            # if none match, take the last one
+            if request["reference_number"] == comm.foia.current_tracking_id():
+                break
+        else:
+            request = reqs[-1]
         status = request["status"]
         logger.info("[GOVQA] Communication: %d Status %s", comm_pk, status)
         request_id = request["id"]
