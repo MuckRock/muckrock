@@ -30,7 +30,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from muckrock.accounts.querysets import ProfileQuerySet
 from muckrock.core.utils import cache_get_or_set, squarelet_get, stripe_retry_on_error
 from muckrock.organization.models import Organization
-from muckrock.foia.models import FOIAFile
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -160,6 +159,7 @@ class Profile(models.Model):
         return self.feature_level > 0
 
     def sum_pages_for_user(self):
+        from muckrock.foia.models import FOIAFile
         # Filter FOIAFile objects for the given user
         foia_files_for_user = FOIAFile.objects.filter(comm_foia_composer_user=self.user)
 
