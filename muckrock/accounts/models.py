@@ -83,7 +83,6 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    total_pages_for_user = self.sum_pages_for_user()
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(
