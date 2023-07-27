@@ -159,9 +159,9 @@ class Profile(models.Model):
         # pylint: disable=comparison-with-callable
         return self.feature_level > 0
 
-    def sum_pages_for_user(self, user):
+    def sum_pages_for_user(self):
         # Filter FOIAFile objects for the given user
-        foia_files_for_user = FOIAFile.objects.filter(comm_foia_composer_user=user)
+        foia_files_for_user = FOIAFile.objects.filter(comm_foia_composer_user=self.user)
 
         # Calculate the sum of pages for the user's FOIAs
         total_pages_for_user = foia_files_for_user.aggregate(Sum("pages"))["pages__sum"]
