@@ -118,12 +118,12 @@
         will lose access to this request.  Please be sure you are selecting the
         correct user.
       </p>
-      {% if foia.composer.foias.count > 1 %}
+      {% if siblings|length > 1 %}
       <p class="help-text error">
         The following requests were filed with this request, and will also have
         their owner changed:
         <ul>
-          {% for sibling in foia.composer.foias.all %}
+          {% for sibling in siblings %}
             {% if sibling != foia %}
               <li><a href="{{ sibling.get_absolute_url }}">{{ sibling.title }}</a>
             {% endif %}
