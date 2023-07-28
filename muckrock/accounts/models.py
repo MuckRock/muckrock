@@ -160,6 +160,7 @@ class Profile(models.Model):
     def sum_pages_for_user(self):
         # pylint: disable=import-outside-toplevel
         from muckrock.foia.models import FOIAFile
+
         # Filter FOIAFile objects for the given user
         foia_files_for_user = FOIAFile.objects.filter(
             comm__foia__composer__user=self.user
