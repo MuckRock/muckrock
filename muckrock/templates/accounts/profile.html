@@ -79,7 +79,7 @@
         <a href="{% url 'org-detail' org.slug %}" title="{{ org }}'s organization page">
           {{ org }}
         </a>
-        {% user_obj.profile.full_name %}'s requests have released {{ user_obj.profile.sum_pages_for_user }} pages of documents. 
+        {{ user_obj.profile.full_name }}'s requests have released {{ user_obj.profile.sum_pages_for_user }} pages of documents. 
         {% if user == user_obj %}
           <dl class="stats">
             <dt>Monthly Requests</dt>
