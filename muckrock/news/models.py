@@ -6,6 +6,7 @@ Models for the News application
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Prefetch
 from django.urls import reverse
@@ -160,3 +161,59 @@ class Photo(models.Model):
 
     def __str__(self):
         return self.image.name
+
+
+class HomepageOverride(models.Model):
+    """An override for one of the article slots on the homepage"""
+
+    slot = models.PositiveSmallIntegerField(
+        unique=True, validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    article = models.ForeignKey(
+        "Article", on_delete=models.CASCADE, blank=True, null=True
+    )
+    url = models.URLField(blank=True)
+    pub_date_override = models.DateTimeField(
+        "Publish date", default=timezone.now, blank=True, null=True
+    )
+    title_override = models.CharField(max_length=200, blank=True)
+    summary_override = models.TextField(blank=True)
+    image_override = ThumbnailerImageField(
+        upload_to="news_images/%Y/%m/%d",
+        blank=True,
+        null=True,
+        resize_source={"size": (2400, 800), "crop": "smart"},
+    )
+
+    def __str__(self):
+        return f"Override {self.slot}"
+
+    def __getattr__(self, attr):
+        """Short cut access to properties stored on the article model"""
+        attrs = {
+            "image",
+            "title",
+            "authors",
+            "pub_date",
+            "summary",
+        }
+        if attr in attrs:
+            value = getattr(self, f"{attr}_override")
+            if value:
+                return value
+            elif self.article:
+                return getattr(self.article, attr)
+            else:
+                return None
+        return super().__getattr__(attr)
+
+    def get_absolute_url(self):
+        """Use the provided URL or the article URL"""
+        if self.url:
+            return self.url
+        if self.article:
+            return self.article.get_absolute_url()
+        return None
+
+    class Meta:
+        ordering = ["slot"]
