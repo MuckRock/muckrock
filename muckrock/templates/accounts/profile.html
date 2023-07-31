@@ -71,6 +71,10 @@
       <dd>{{ user_obj.profile.individual_organization.number_requests }}</dd>
     </dl>
   {% endif %}
+  <dl class="stats">
+    <dt> Pages Released by Records Requests </dt>
+    <dd> {{ user_obj.profile.sum_pages_for_user }} </dd>
+  </dl>
   {% for org in organizations %}
     {% if not org.individual %}
       <p class="organization">
@@ -78,7 +82,7 @@
         {% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of
         <a href="{% url 'org-detail' org.slug %}" title="{{ org }}'s organization page">
           {{ org }}
-        </a>
+        </a> 
         {% if user == user_obj %}
           <dl class="stats">
             <dt>Monthly Requests</dt>
