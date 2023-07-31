@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, transaction
-from django.db.models import Max
+from django.db.models import Max, Sum
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from django.urls import reverse
@@ -83,7 +83,6 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(
@@ -157,6 +156,19 @@ class Profile(models.Model):
         """Advanced users can access features basic users cannot."""
         # pylint: disable=comparison-with-callable
         return self.feature_level > 0
+
+    def sum_pages_for_user(self):
+        # pylint: disable=import-outside-toplevel
+        from muckrock.foia.models import FOIAFile
+
+        # Filter FOIAFile objects for the given user
+        foia_files_for_user = FOIAFile.objects.filter(
+            comm__foia__composer__user=self.user
+        )
+
+        # Calculate the sum of pages for the user's FOIAs
+        total_pages_for_user = foia_files_for_user.aggregate(Sum("pages"))["pages__sum"]
+        return total_pages_for_user or 0
 
     @mproperty
     def organization(self):
