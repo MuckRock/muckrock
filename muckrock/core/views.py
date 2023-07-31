@@ -45,7 +45,7 @@ from muckrock.core.forms import NewsletterSignupForm, SearchForm, StripeForm
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.news.models import Article
+from muckrock.news.models import Article, HomepageOverride
 from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
@@ -359,7 +359,11 @@ class Homepage:
 
     def articles(self):
         """Get the articles for the front page"""
-        return Article.objects.get_published().prefetch_authors()[:5]
+        articles = list(Article.objects.get_published().prefetch_authors()[:5])
+        overrides = HomepageOverride.objects.all()
+        for override in overrides:
+            articles[override.slot - 1] = override
+        return articles
 
     def featured_projects(self):
         """Get the featured projects for the front page"""
