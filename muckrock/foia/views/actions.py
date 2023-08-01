@@ -72,6 +72,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     def delete_embargo(request, foia):
         """Remove an embargo from the FOIA"""
         foia.embargo = False
+        foia.permanent_embargo = False
         foia.save(comment="removed embargo")
         logger.info("%s unembargoed %s", request.user, foia)
         new_action(request.user, "unembargoed", target=foia)
