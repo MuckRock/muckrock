@@ -108,6 +108,16 @@ def status(request, foia):
     return _get_redirect(request, foia)
 
 
+def title(request, foia):
+    """Handle updating title"""
+    title_ = request.POST.get("title")
+    has_perm = foia.has_perm(request.user, "change")
+    if has_perm:
+        foia.title = title_
+        foia.save(comment="title updated")
+    return _get_redirect(request, foia)
+
+
 def add_note(request, foia):
     """Adds a note to the request"""
     note_form = FOIANoteForm(request.POST)

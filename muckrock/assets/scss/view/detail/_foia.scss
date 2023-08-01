@@ -62,6 +62,13 @@ $request-breakpoint: 768px;
             display: table;
         }
     }
+    .identity {
+      width: 100%;
+    }
+    .small.action {
+      float: right;
+      margin-bottom: 0;
+    }
 }
 
 .request.main {
