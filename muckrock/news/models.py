@@ -173,9 +173,7 @@ class HomepageOverride(models.Model):
         "Article", on_delete=models.CASCADE, blank=True, null=True
     )
     url = models.URLField(blank=True)
-    pub_date_override = models.DateTimeField(
-        "Publish date", default=timezone.now, blank=True, null=True
-    )
+    pub_date_override = models.DateTimeField("Publish date", blank=True, null=True)
     title_override = models.CharField(max_length=200, blank=True)
     summary_override = models.TextField(blank=True)
     image_override = ThumbnailerImageField(
