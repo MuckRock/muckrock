@@ -132,6 +132,10 @@ class HomepageOverrideAdmin(VersionAdmin):
         super().save_model(request, obj, form, change)
         cache.delete(make_template_fragment_key("homepage_bottom"))
 
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+        cache.delete(make_template_fragment_key("homepage_bottom"))
+
 
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)
