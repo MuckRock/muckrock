@@ -198,14 +198,16 @@ class HomepageOverride(models.Model):
             "summary",
         }
         if attr in attrs:
-            value = getattr(self, f"{attr}_override")
+            value = getattr(self, f"{attr}_override", None)
             if value:
                 return value
             elif self.article:
                 return getattr(self.article, attr)
             else:
                 return None
-        return super().__getattr__(attr)
+        raise AttributeError(
+            "{!r} object has no attribute {!r}".format(self.__class__.__name__, attr)
+        )
 
     def get_absolute_url(self):
         """Use the provided URL or the article URL"""
