@@ -174,6 +174,7 @@ class HomepageOverride(models.Model):
     )
     url = models.URLField(blank=True)
     pub_date_override = models.DateTimeField("Publish date", blank=True, null=True)
+    hide_date = models.BooleanField(default=False)
     title_override = models.CharField(max_length=200, blank=True)
     summary_override = models.TextField(blank=True)
     image_override = ThumbnailerImageField(
@@ -195,6 +196,8 @@ class HomepageOverride(models.Model):
             "pub_date",
             "summary",
         }
+        if attr == "pub_date" and self.hide_date:
+            return None
         if attr in attrs:
             value = getattr(self, f"{attr}_override", None)
             if value:
