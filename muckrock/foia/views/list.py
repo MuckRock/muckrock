@@ -336,12 +336,12 @@ class RequestList(MRSearchFilterListView):
         else:
             return None
 
-    def _embargo(self, foias, user, post):
+    def _embargo(self, foias, _user, _post):
         """Embargo the requests"""
         foias.update(embargo=True, permanent_embargo=True)
         return "Requests have been embargoed"
 
-    def _noindex(self, foias, user, post):
+    def _noindex(self, foias, _user, _post):
         """No index the requests"""
         with transaction.atomic():
             foias.update(noindex=True)
