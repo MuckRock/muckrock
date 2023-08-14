@@ -224,11 +224,15 @@ class RequestList(MRSearchFilterListView):
             msg = actions[request.POST["action"]](foias, request.user, request.POST)
             if msg:
                 messages.success(request, msg)
-            return redirect(request.resolver_match.view_name)
         except (KeyError, ValueError):
             if request.POST.get("action") != "":
                 messages.error(request, "Something went wrong")
-            return redirect(request.resolver_match.view_name)
+
+        return redirect(
+            "{}?{}".format(
+                reverse(request.resolver_match.view_name), request.GET.urlencode()
+            )
+        )
 
     def get_actions(self):
         """Get available actions for this view"""
