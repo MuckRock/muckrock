@@ -49,9 +49,12 @@ def import_logs(agency, file):
             logs.append(
                 FOIALog(
                     request_id=row["request id"],
-                    requestor=row["requestor"],
+                    requester=row.get("requester", ""),
+                    requester_organization=row.get("requester_organization", ""),
+                    source=row.get("source", ""),
+                    exemptions=row.get("exemptions", ""),
                     subject=row["subject"],
-                    date_requested=parse_date(row["date requested"]),
+                    date_requested=parse_date(row.get("date requested")),
                     date_completed=parse_date(row.get("date completed")),
                     status=row.get("status", ""),
                     agency=agency,
