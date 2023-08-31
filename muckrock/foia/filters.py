@@ -355,4 +355,4 @@ class FOIALogFilterSet(django_filters.FilterSet):
 
     class Meta:
         model = FOIALog
-        fields = ["agency", "requestor", "date_requested"]
+        fields = ["agency", "requester", "date_requested"]

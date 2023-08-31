@@ -2,7 +2,7 @@
   <header class="foia-log__header">
     <div class="foia-log__header__left">
       {% if show_agency %}<p class="foia-log__agency"><strong>To</strong> <a href="{{ foia_log.agency.get_absolute_url }}">{{foia_log.agency.name}}</a></p>{% endif %}
-      <p class="foia-log__requestor"><strong>From</strong> {{ foia_log.requestor }}</p>
+      <p class="foia-log__requester"><strong>From</strong> {{ foia_log.requester }}</p>
     </div>
     <div class="foia-log__header__right">
       <p class="foia-log__date"><strong>Sent</strong> <time datetime="{{ foia_log.date_requested|date:"c" }}" title="{{ foia_log.date_requested|date:"c" }}">{{foia_log.date_requested}}</time></p>

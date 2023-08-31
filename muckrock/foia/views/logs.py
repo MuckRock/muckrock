@@ -57,6 +57,10 @@ class FOIALogList(MRSearchFilterListView):
     default_sort = "date_requested"
     default_order = "desc"
 
+    def get_queryset(self):
+        """Select related agency and jurisdiction to avoid extra queries"""
+        return super().get_queryset().select_related("agency__jurisdiction")
+
 
 class FOIALogLanding(TemplateView):
     """Landing page that introduces FOIA logs"""
