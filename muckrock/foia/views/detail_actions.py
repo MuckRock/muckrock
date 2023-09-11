@@ -546,6 +546,8 @@ def agency_reply(request, foia):
             foia.status = form.cleaned_data["status"]
             if foia.status == "payment":
                 foia.price = form.cleaned_data["price"] / 100.0
+            if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
+                foia.datetime_done = comm.datetime
             foia.save()
             foia.process_attachments(agency_user)
             comm.create_agency_notifications()
