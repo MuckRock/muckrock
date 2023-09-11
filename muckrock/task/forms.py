@@ -224,7 +224,7 @@ class ResponseTaskForm(forms.Form):
                 mail = comm.mails.last()
                 if mail:
                     comm.communication += (
-                        " Postmark: {mail.sent_datetime.strftime('%B %d, %Y')}"
+                        f" Postmark: {mail.sent_datetime.strftime('%B %d, %Y')}"
                     )
             if title is not None and comm.files.count() == 1:
                 comm.files.update(title=title)
