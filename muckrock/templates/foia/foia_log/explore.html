@@ -5,36 +5,110 @@
 {% block classes %}foia-log-explore{% endblock %}
 
 {% block explore_header_description %}
-<h1 class="small-caps">FOIA Logs</h1>
-<p class="foia-log-metrics overline">Search for interesting requests across <span class="stat">{{stats.log_count}}</span> FOIA log{{stats.log_count|pluralize}} from <span class="stat">{{stats.agency_count}}</span> federal agenc{{stats.agency_count|pluralize:"y,ies"}}</p>
+  <h1 class="small-caps">FOIA Log Explorer</h1>
+  <p class="foia-log-metrics overline">Search for interesting requests across <span class="stat">{{stats.log_count}}</span> FOIA log{{stats.log_count|pluralize}} from <span class="stat">{{stats.agency_count}}</span> federal, state and local agenc{{stats.agency_count|pluralize:"y,ies"}}</p>
 {% endblock %}
 
 {% block explore_header %}
-{{block.super}}
-<div class="background-image" style="background-image:url({% static 'img/filing-cabinets.jpg' %});"></div>
-<div class="grid__column full">
+  {{block.super}}
+  <div class="background-image" style="background-image:url({% static 'img/filing-cabinets.jpg' %});"></div>
+  <div class="grid__column full">
     <form method="GET" class="oneline-form" action="{% url 'foia-logs-list' %}">
-        <div class="field">
-            <input type="search" name="q" placeholder="Search FOIA logs">
-        	<button class="basic blue button" type="submit">
-                {% include 'lib/component/icon/search.svg' %}
-        	    <span class="label">Search</span>
-        	</button>
-        </div>
+      <div class="field">
+        <input type="search" name="q" placeholder="Search FOIA logs">
+        <button class="basic blue button" type="submit">
+          {% include 'lib/component/icon/search.svg' %}
+          <span class="label">Search</span>
+        </button>
+      </div>
     </form>
-</div>
+  </div>
 {% endblock %}
 
 {% block explore_main %}
-<div class="education">
-  <h2>A Brief Introduction to FOIA Logs</h2>
-  <div class="grid__row">
-    {% for lesson in education %}
-    <div class="lesson grid__column third">
-      <h3>{{lesson.head}}</h3>
-      <p>{{lesson.body}}</p>
+  <div class="education">
+    <h2>Improve your own requests by exploring what others asked for</h2>
+    <div class="grid__row">
+      <div class="lesson grid__column third">
+        <h3>Many agencies keep a list of who requested what, and when.</h3>
+        <p>
+          Almost every federal agency keeps a FOIA log that tracks
+          <a href="/place/united-states-of-america/">
+            Freedom of Information Act requests
+          </a>
+          made by law firms, businesses, researchers and journalists. Many
+          state and local agencies keep similar logs for requests
+          <a href="/place/">filed under the respective state laws</a>.
+        </p>
+        <p>
+          We’ve gathered, standardized and organized as many of these logs as
+          we could get to make it easier for you to jumpstart your records
+          process. Note that not all logs keep the same exact fields, so some
+          entries will have more detail than others. Also, the way the
+          request’s current status is indicated varies significantly, so we’ve
+          standardized this information as best we can, but the same term might
+          mean different things depending on the information the agency
+          releases. You can
+          <a href="/foi/list/?q=foia+logs&status=done">
+            explore hundreds of raw FOIA logs here
+          </a>
+          to get a sense of how messy the data can be.
+        </p>
+      </div>
+      <div class="lesson grid__column third">
+        <h3>Concrete request ideas, at your fingertips.</h3>
+        <p>
+          FOIA and public records logs generally detail what the user
+          requested. You can use this to generate more concrete language for
+          your own requests, particularly if you see a previous request was
+          successful. You can also just request a copy of the responsive
+          records to a given request and ask for the same materials released to
+          the prior requester. To do so, just click “Request a Copy” and we’ll
+          pre-fill out a request you can review and submit with just two
+          clicks.
+        </p>
+        <p>
+          Read more about how
+          <a href="/news/archives/2019/mar/15/rv-keri-blakinger/">
+            one reporter uses FOIA logs to develop story ideas and sources
+          </a>
+          on their beat and more general tips and tricks to
+          <a href="/news/archives/2021/mar/25/using-foia-logs-to-develop-news-stories/">
+            make the most out of FOI logs
+          </a>.
+        </p>
+      </div>
+      <div class="lesson grid__column third">
+        <h3>An ever-expanding library</h3>
+        <p>
+          The FOIA Log Explorer will continue to grow as we receive and process
+          new releases from agencies. You can help. If you see an agency or a
+          specific log not currently represented in the Explorer, you can email
+          it to <a href="mailto:info@muckrock.com">info@muckrock.com</a> and we
+          would love to add it to our growing database. It helps speed up the
+          process if you can provide the FOIA log in our standardized FOIA log
+          format, which has a set of consistent columns
+          (<a href="https://muckrock.s3.amazonaws.com/files_static/2023/samplelog.csv">see sample here</a>)
+          as well as a link to the source of the log so we can verify it.
+        </p>
+        <p>
+          If your research needs go beyond the basic search and browsing
+          options currently available,
+          <a href="mailto:info@muckrock.com">please reach out</a>. We can assist
+          with custom projects that require importing additional logs from
+          specific agencies, custom analysis of trends, alerts, bulk data exports
+          and more. We’re interested in hearing from organizations with
+          additional needs, and can offer a range of analysis, data cleaning,
+          alert and development services.
+        </p>
+        <p>
+          This new tool is made possible through the support of Columbia
+          University’s
+          <a href="https://brown.columbia.edu">Brown Institute for Media Innovation</a>,
+          with Web design by Allan Lasser and product development and
+          research by Derek Kravitz and Riya Chadha.
+        </p>
+      </div>
     </div>
-  {% endfor %}
   </div>
-</div>
 {% endblock %}
