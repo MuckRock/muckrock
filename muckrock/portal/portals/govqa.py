@@ -85,7 +85,8 @@ class GovQAPortal(ManualPortal):
     def receive_msg(self, comm, **kwargs):
         """Check for attachments upon receiving a communication"""
         super().receive_msg(comm, **kwargs)
-        portal_task.delay(self.portal.pk, "receive_msg_task", [comm.pk], kwargs)
+        if not self.portal.disable_automation:
+            portal_task.delay(self.portal.pk, "receive_msg_task", [comm.pk], kwargs)
 
     def _get_request(self, client, comm):
         """Get the correct request for receive msg task"""
