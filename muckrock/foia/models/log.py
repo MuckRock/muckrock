@@ -5,6 +5,7 @@ Models for FOIAs obtained from an agency's FOIA Logs
 # Django
 from django.db import models
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 
 # MuckRock
@@ -51,3 +52,7 @@ class FOIALog(models.Model):
                 "subject": self.subject,
             },
         )
+
+    def get_absolute_url(self):
+        """The url for this object"""
+        return reverse("foia-log", kwargs={"idx": self.pk})
