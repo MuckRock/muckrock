@@ -91,15 +91,9 @@ def status(request, foia):
     staff_editable = request.user.is_staff and status_ in allowed_statuses
     if foia.status != "submitted" and (user_editable or staff_editable):
         foia.status = status_
+        if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
+            foia.datetime_done = foia.communications.last().datetime
         foia.save(comment="status updated")
-        if staff_editable:
-            kwargs = {
-                "resolved": True,
-                "resolved_by": request.user,
-                "date_done": timezone.now(),
-            }
-        else:
-            kwargs = {}
         response_tasks = ResponseTask.objects.filter(
             resolved=False, communication__foia=foia
         )
