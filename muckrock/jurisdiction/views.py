@@ -164,7 +164,7 @@ def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=Non
         .only("pk", "slug", "name", "jurisdiction")
         .annotate(foia_count=Count("foiarequest", distinct=True))
         .annotate(pages=Sum("foiarequest__communications__files__pages"))
-        .select_related("jurisdictions")
+        .select_related("jurisdiction")
         .order_by("-foia_count")
     )
 
