@@ -152,21 +152,34 @@ def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=Non
         ).select_related("jurisdiction")
     else:
         agencies = jurisdiction.agencies
-    agencies = (
+    # done in two queries for efficiancy
+    agency_pks = list(
         agencies.get_approved()
+        .annotate(foia_count=Count("foiarequest", distinct=True))
+        .order_by("-foia_count")
+        .values_list("pk", flat=True)[:10]
+    )
+    agencies = (
+        Agency.objects.filter(pk__in=agency_pks)
         .only("pk", "slug", "name", "jurisdiction")
         .annotate(foia_count=Count("foiarequest", distinct=True))
         .annotate(pages=Sum("foiarequest__communications__files__pages"))
-        .order_by("-foia_count")[:10]
+        .order_by("-foia_count")
     )
 
     _children = Jurisdiction.objects.filter(parent=jurisdiction).select_related(
         "parent__parent"
     )
-    _top_children = (
+    _top_children_pks = list(
         _children.annotate(foia_count=Count("agencies__foiarequest", distinct=True))
+        .order_by("-foia_count")
+        .values_list("pk", flat=True)[:10]
+    )
+    _top_children = (
+        Jurisdiction.objects.filter(pk__in=_top_children_pks)
+        .annotate(foia_count=Count("agencies__foiarequest", distinct=True))
+        .order_by("-foia_count")
         .annotate(pages=Sum("agencies__foiarequest__communications__files__pages"))
-        .order_by("-foia_count")[:10]
     )
 
     if request.method == "POST":
