@@ -1,8 +1,8 @@
 {% load tags %}
 
 {% cond_cache foia_cache_timeout foia_detail_sidebar foia.pk request.user.pk is_agency_user %}
-  <section class="request properties grid__column one-quarter manager">
-    <header>
+  <section class="request properties grid__column one-quarter">
+    <header class="manager">
       <section class="identity">
         <h1 class="state">{{ foia.title }}</h1>
         {% if user_can_edit %}
