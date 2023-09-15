@@ -180,6 +180,7 @@ def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=Non
         .annotate(foia_count=Count("agencies__foiarequest", distinct=True))
         .order_by("-foia_count")
         .annotate(pages=Sum("agencies__foiarequest__communications__files__pages"))
+        .select_related("parent__parent")
     )
 
     if request.method == "POST":
