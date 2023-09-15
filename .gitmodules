@@ -1,0 +1,3 @@
+[submodule "muckrock/gloo-muckrock"]
+	path = muckrock/gloo-muckrock
+	url = git@github.com:GlooHQ/gloo-muckrock.git
