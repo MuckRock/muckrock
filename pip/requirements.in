@@ -43,16 +43,17 @@ emoji # Stripe emoji's for pdf generation
 fpdf # Used to generate PDFs
 furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
+gloo-lib # For using gloo to use ChatGPT
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson
-python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
 lob # sending mail via lob.com
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
 newrelic # Interface to newrelic service
 numpy # Used by machine learning
+pandas # Used by gloo
 pdfrw # Used for reading/writing PDFs for form filling in
 phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
@@ -65,6 +66,7 @@ pylibmc # memcache client
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
 pyphaxio # For sending faxes through Phaxio
+python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
 python-documentcloud # for uploading to documentcloud
 python-redis-lock[django] # use a redis cache with a locking mechanism
@@ -83,6 +85,7 @@ social-auth-app-django # for oauth client
 social-auth-core[openidconnect] # for oauth client
 sorl-thumbnail # used for squarlet avatars
 stripe # Stripe payment processor integration
+tiktoken # Used by gloo
 unidecode # Used for unicode decoding
 xlrd # Used to read excel files
 zenpy # library for zendesk API
