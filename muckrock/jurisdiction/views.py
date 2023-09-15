@@ -149,7 +149,7 @@ def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=Non
     if jurisdiction.level == "s":
         agencies = Agency.objects.filter(
             Q(jurisdiction=jurisdiction) | Q(jurisdiction__parent=jurisdiction)
-        ).select_related("jurisdiction")
+        )
     else:
         agencies = jurisdiction.agencies
     # done in two queries for efficiancy
@@ -164,6 +164,7 @@ def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=Non
         .only("pk", "slug", "name", "jurisdiction")
         .annotate(foia_count=Count("foiarequest", distinct=True))
         .annotate(pages=Sum("foiarequest__communications__files__pages"))
+        .select_related("jurisdictions")
         .order_by("-foia_count")
     )
 
