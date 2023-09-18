@@ -5,7 +5,7 @@ Views for the Jurisdiction application
 # Django
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.db.models.expressions import Value
 from django.db.models.fields import BooleanField
 from django.shortcuts import get_object_or_404, redirect, render
