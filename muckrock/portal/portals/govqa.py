@@ -5,10 +5,12 @@ Automate some parts of GovQA portal handling
 
 # Django
 from django.conf import settings
+from django.contrib.auth.models import User
 
 # Standard Library
 import cgi
 import logging
+import sys
 
 # Third Party
 import dateutil
@@ -22,6 +24,7 @@ from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.file import get_path
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
+from muckrock.task.models import FlaggedTask
 
 logger = logging.getLogger(__name__)
 
@@ -75,11 +78,19 @@ class GovQAPortal(ManualPortal):
 
     def get_client(self, comm):
         """Get a GovQA client"""
-        client = GovQA(
-            furl(comm.foia.portal.url).origin,
-            check_login=False,
+        url = furl(comm.foia.portal.url).origin
+        logger.info(
+            "[GOVQA] FOIA: %d Comm: %d - Getting Client from %s",
+            comm.foia_id,
+            comm.pk,
+            url,
         )
+        client = GovQA(url, check_login=False)
+        logger.info("[GOVQA] FOIA: %d Comm: %d - Logging In", comm.foia_id, comm.pk)
         client.login(comm.foia.get_request_email(), comm.foia.portal_password)
+        logger.info(
+            "[GOVQA] FOIA: %d Comm: %d - Returning Client", comm.foia_id, comm.pk
+        )
         return client
 
     def receive_msg(self, comm, **kwargs):
@@ -90,11 +101,17 @@ class GovQAPortal(ManualPortal):
 
     def _get_request(self, client, comm):
         """Get the correct request for receive msg task"""
+        logger.warning(
+            "[GOVQA] FOIA: %d Comm: %d - Listing requests",
+            comm.foia_id,
+            comm.pk,
+        )
         reqs = client.list_requests()
 
         if len(reqs) == 0:
             logger.warning(
-                "[GOVQA] Communication: %d, list_requests returned no requests",
+                "[GOVQA] FOIA: %d Comm: %d, list_requests returned no requests",
+                comm.foia_id,
                 comm.pk,
             )
             return None
@@ -109,12 +126,19 @@ class GovQAPortal(ManualPortal):
 
         request_id = request["id"]
         request = client.get_request(request_id)
-        logger.info("[GOVQA] Communication: %d Request %s", comm.pk, request)
+        logger.info(
+            "[GOVQA] FOIA %d Comm: %d Request %s", comm.foia_id, comm.pk, request
+        )
 
         return request
 
     def _get_attachments(self, request, comm):
         """Get the correct request for receive msg task"""
+        logger.info(
+            "[GOVQA] FOIA: %d Comm: %d - Getting attachments",
+            comm.foia_id,
+            comm.pk,
+        )
 
         # the requestor is the original sender - we went all replies,
         # which are messages sent by not the requestor
@@ -132,70 +156,117 @@ class GovQAPortal(ManualPortal):
             ]
 
         logger.info(
-            "[GOVQA] Communication: %d Attachments: %s", comm.pk, upload_attachments
+            "[GOVQA] FOIA: %d Comm: %d - Attachments: %s",
+            comm.foia_id,
+            comm.pk,
+            upload_attachments,
         )
         return upload_attachments
 
     def receive_msg_task(self, comm_pk, **kwargs):
         """Fetch the request from GovQA"""
         comm = FOIACommunication.objects.get(pk=comm_pk)
-        client = self.get_client(comm)
+        try:
+            logger.warning(
+                "[GOVQA] FOIA: %d Comm: %d - Start",
+                comm.foia_id,
+                comm_pk,
+            )
+            client = self.get_client(comm)
 
-        request = self._get_request(client, comm)
-        if request is None:
-            return
+            request = self._get_request(client, comm)
+            if request is None:
+                return
 
-        upload_attachments = self._get_attachments(request, comm)
+            upload_attachments = self._get_attachments(request, comm)
 
-        for attachment in upload_attachments:
-            value, params = cgi.parse_header(attachment["content-disposition"])
-            if value == "attachment" and "filename" in params:
-                file_name = params["filename"]
-            else:
-                logger.warning(
-                    "[GOVQA] Communication: %d No file name for attachment: %s",
-                    comm_pk,
-                    attachment,
+            for attachment in upload_attachments:
+                value, params = cgi.parse_header(attachment["content-disposition"])
+                if value == "attachment" and "filename" in params:
+                    file_name = params["filename"]
+                else:
+                    logger.warning(
+                        "[GOVQA] FOIA: %d Comm: %d - No file name for attachment: %s",
+                        comm.foia_id,
+                        comm_pk,
+                        attachment,
+                    )
+                    continue
+
+                portal_task.delay(
+                    self.portal.pk,
+                    "download_attachment_task",
+                    [comm.pk, attachment["url"], file_name],
+                    kwargs,
                 )
-                continue
-
-            portal_task.delay(
-                self.portal.pk,
-                "download_attachment_task",
-                [comm.pk, attachment["url"], file_name],
-                kwargs,
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.error(
+                "[GOVQA] FOIA: %d Comm: %d - Error: %s",
+                comm.foia_id,
+                comm_pk,
+                exc,
+                exc_info=sys.exc_info(),
+            )
+            FlaggedTask.objects.create(
+                user=User.objects.get(username="MuckrockStaff"),
+                text=f"Error during GovQA scraping: {exc}",
+                foia_id=comm.foia_id,
+                category="govqa",
             )
 
     def download_attachment_task(self, comm_pk, url, file_name, **kwargs):
         """Download individual attachments"""
-        logger.info(
-            "[GOVQA] Communication: %d Downloading: %s %s", comm_pk, url, file_name
-        )
         comm = FOIACommunication.objects.get(pk=comm_pk)
+        try:
+            logger.info(
+                "[GOVQA] FOIA: %s Comm: %d - Downloading: %s %s",
+                comm.foia_id,
+                comm_pk,
+                url,
+                file_name,
+            )
 
-        # stream the download to not overflow RAM on large files
-        with requests.get(url, stream=True) as resp:
-            if resp.status_code != 200:
-                logger.warning(
-                    "[GOVQA] Communication: %d Download failed: %s %s Status: %d "
-                    "Error: %s",
-                    comm_pk,
-                    url,
-                    file_name,
-                    resp.status_code,
-                    resp.text,
-                )
-                return
-            path = get_path(file_name)
-            full_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{path}"
-            with smart_open(full_path, "wb", s3_upload={"ACL": "public-read"}) as file:
-                for chunk in resp.iter_content(chunk_size=10 * 1024 * 1024):
-                    file.write(chunk)
+            # stream the download to not overflow RAM on large files
+            with requests.get(url, stream=True) as resp:
+                if resp.status_code != 200:
+                    logger.warning(
+                        "[GOVQA] Communication: %d Download failed: %s %s Status: %d "
+                        "Error: %s",
+                        comm_pk,
+                        url,
+                        file_name,
+                        resp.status_code,
+                        resp.text,
+                    )
+                    return
+                path = get_path(file_name)
+                full_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{path}"
+                with smart_open(
+                    full_path, "wb", s3_upload={"ACL": "public-read"}
+                ) as file:
+                    for chunk in resp.iter_content(chunk_size=10 * 1024 * 1024):
+                        file.write(chunk)
 
-        logger.info(
-            "[GOVQA] Communication: %d Download complete: %s %s",
-            comm_pk,
-            url,
-            file_name,
-        )
-        comm.attach_file(path=path, name=file_name)
+            logger.info(
+                "[GOVQA] FOIA: %d Comm: %d - Download complete: %s %s",
+                comm.foia_id,
+                comm_pk,
+                url,
+                file_name,
+            )
+            comm.attach_file(path=path, name=file_name)
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.error(
+                "[GOVQA] FOIA: %d Comm: %d Download Attachment: %s - Error: %s",
+                comm.foia_id,
+                comm_pk,
+                file_name,
+                exc,
+                exc_info=sys.exc_info(),
+            )
+            FlaggedTask.objects.create(
+                user=User.objects.get(username="MuckrockStaff"),
+                text=f"Error during GovQA scraping: {exc}",
+                foia_id=comm.foia_id,
+                category="govqa",
+            )
