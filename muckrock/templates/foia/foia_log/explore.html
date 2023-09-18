@@ -7,7 +7,7 @@
 
 {% block explore_header_description %}
   <h1 class="small-caps">FOIA Log Explorer</h1>
-  <p class="foia-log-metrics overline">Search for interesting requests across <span class="stat">{{stats.log_count|intcomma}}</span> FOIA log{{stats.log_count|pluralize}} from <span class="stat">{{stats.agency_count|intcomma}}</span> federal, state and local agenc{{stats.agency_count|pluralize:"y,ies"}}</p>
+  <p class="foia-log-metrics overline">Search for interesting requests across <span class="stat">{{stats.log_count|intcomma}}</span> FOIA log entr{{stats.log_count|pluralize:"y,ies"}} from <span class="stat">{{stats.agency_count|intcomma}}</span> federal, state and local agenc{{stats.agency_count|pluralize:"y,ies"}}</p>
 {% endblock %}
 
 {% block explore_header %}
