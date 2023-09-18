@@ -140,15 +140,13 @@
         <h3>Top Agencies <small><a href="{% url 'agency-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
         <table>
           <tr>
-            <th width="50%">Agency</th>
-            <th width="20%">Requests</th>
-            <th width="30%">Pages Released</th>
+            <th width="70%">Agency</th>
+            <th width="30%">Requests</th>
           </tr>
           {% for agency in agencies %}
             <tr>
               <td><a href="{{agency.get_absolute_url}}">{{ agency.name }}</a></td>
               <td>{{ agency.foia_count|intcomma }}</td>
-              <td>{% if agency.pages %}{{ agency.pages|intcomma }}{% else %}0{%endif %}</td>
             </tr>
           {% endfor %}
         </table>
@@ -159,15 +157,13 @@
         <h3>Top Localities <small><a href="{% url 'jurisdiction-list' %}?parent={{ jurisdiction.pk }}">See All</a></small></h3>
         <table>
           <tr>
-            <th width="50%">Jurisdiction</th>
-            <th width="20%">Requests</th>
-            <th width="30%">Pages Released</th>
+            <th width="70%">Jurisdiction</th>
+            <th width="30%">Requests</th>
           </tr>
           {% for child in top_children %}
             <tr>
               <td><a href="{{child.get_absolute_url}}">{{ child }}</a></td>
               <td>{{ child.foia_count|intcomma }}</td>
-              <td>{% if child.pages %}{{ child.pages|intcomma }}{% else %}0{%endif %}</td>
             </tr>
           {% endfor %}
         </table>
