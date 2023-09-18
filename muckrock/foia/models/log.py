@@ -42,6 +42,9 @@ class FOIALog(models.Model):
     )
     datetime_created = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        return f"FOIA Log #{self.request_id}"
+
     def request_copy(self):
         """Prepares language for requesting a copy of any responsive documents"""
         return render_to_string(
