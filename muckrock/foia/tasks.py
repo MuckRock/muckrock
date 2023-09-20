@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
+import asyncio
 import csv
 import logging
 import os
@@ -68,6 +69,7 @@ from muckrock.foia.models import (
     FOIARequest,
     RawEmail,
 )
+from muckrock.gloo.app.process_request import map_status, process_request
 from muckrock.task.models import (
     PaymentInfoTask,
     ResponseTask,
@@ -428,6 +430,7 @@ def classify_status(task_pk, **kwargs):
             # wait longer for document cloud
             classify_status.retry(countdown=60 * 30, args=[task_pk], kwargs=kwargs)
 
+    # old classify
     full_text = resp_task.communication.communication + (" ".join(file_text))
     vectorizer, selector, classifier = get_classifier()
 
@@ -441,6 +444,17 @@ def classify_status(task_pk, **kwargs):
     resolve_if_possible(resp_task)
 
     resp_task.save()
+
+    # new classify
+    extracted_data = asyncio.run(
+        process_request(
+            resp_task.communication.communication,
+            "\n\n".join(file_text),
+            mlrobot_status=resp_task.predicted_status,
+            mlrobot_prob=resp_task.status_probability,
+        )
+    )
+    status = map_status(extracted_data)
 
 
 @task(
