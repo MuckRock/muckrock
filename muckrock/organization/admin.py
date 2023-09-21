@@ -33,6 +33,7 @@ class OrganizationAdmin(VersionAdmin):
         "monthly_requests",
         "number_requests",
         "date_update",
+        "verified_journalist",
     )
     readonly_fields = (
         "uuid",
@@ -44,6 +45,7 @@ class OrganizationAdmin(VersionAdmin):
         "card",
         "requests_per_month",
         "date_update",
+        "verified_journalist",
     )
 
     def get_fields(self, request, obj=None):
