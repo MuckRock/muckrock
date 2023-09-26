@@ -22,6 +22,7 @@ from easy_thumbnails.fields import ThumbnailerImageField
 # MuckRock
 from muckrock.accounts.models import Profile
 from muckrock.core.utils import squarelet_post
+from muckrock.foia.models.log import FOIALog
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock.task.models import NewAgencyTask
 
@@ -65,7 +66,9 @@ class AgencyQuerySet(models.QuerySet):
 
     def with_logs(self):
         """Get only agencies with FOIA logs"""
-        return self.exclude(foialog=None)
+        return self.filter(
+            id__in=FOIALog.objects.values("agency").order_by().distinct()
+        )
 
     def create_new(self, name, jurisdiction, user):
         """Create a pending agency with a NewAgency task"""

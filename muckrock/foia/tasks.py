@@ -755,7 +755,7 @@ def autoimport():
                         from_user=from_user,
                         to_user=foia.user,
                         response=True,
-                        datetime=file_datetime,
+                        datetime=timezone.now(),
                         communication="",
                         hidden=True,
                     )

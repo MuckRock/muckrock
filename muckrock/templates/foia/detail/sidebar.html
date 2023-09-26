@@ -2,9 +2,20 @@
 
 {% cond_cache foia_cache_timeout foia_detail_sidebar foia.pk request.user.pk is_agency_user %}
   <section class="request properties grid__column one-quarter">
-    <header>
+    <header class="manager">
       <section class="identity">
-        <h1>{{ foia.title }}</h1>
+        <h1 class="state">{{ foia.title }}</h1>
+        {% if user_can_edit %}
+          <div class="small action" id="edit-title">Edit</div>
+          <form method="post" class="title-form" id="title-form">
+            {% csrf_token %}
+            <textarea name="title">{{ foia.title }}</textarea>
+            <footer>
+              <button type="submit" name="action" value="title" class="primary button">Save</button>
+              <button class="cancel button" id="cancel-status">Cancel</button>
+            </footer>
+          </form>
+        {% endif %}
       </section>
     </header>
 

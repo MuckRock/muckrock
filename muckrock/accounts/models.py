@@ -255,6 +255,11 @@ class Profile(models.Model):
         )
         return not self.private_profile and (filed_request or has_byline)
 
+    @property
+    def verified_journalist(self):
+        """Is this user a member of a verified journalistic organization?"""
+        return self.user.organizations.filter(verified_journalist=True).exists()
+
 
 class RecurringDonation(models.Model):
     """Keep track of our recurring donations"""

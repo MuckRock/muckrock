@@ -37,6 +37,7 @@ PRIVATE_FLAG_CATEGORIES = [
         "A request needs a PDF form to be manually filled out to be submitted",
     ),
     ("foiaonline", "The FOIAOnline autologin failed"),
+    ("govqa", "The GovQA scraper failed"),
     ("download file", "This request contains a link to a file to download"),
 ]
 AGENCY_FLAG_CATEGORIES = [

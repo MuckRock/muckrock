@@ -67,6 +67,8 @@
           {% if user.is_staff %}
             <option value="review-agency" data-help="Create a review agency task for the selected requests' agencies">Review agencies</option>
             <option value="change-owner" data-help="Transfer ownships of these requests to another user.  WARNING: this will cause you to lose access to these documents">Change Owner</option>
+            <option value="embargo" data-help="Permanently embargo the selected requests">Embargo</option>
+            <option value="noindex" data-help="No-index the selected requests">No Index</option>
           {% endif %}
         </select>
         <button class="blue button" disabled>Go</button>

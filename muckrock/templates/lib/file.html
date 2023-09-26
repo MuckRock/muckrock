@@ -1,6 +1,6 @@
 {% load tags %}
 {% load rules %}
-{% has_perm 'foia.change_foiarequest' request.user as can_edit %}
+{% has_perm 'foia.change_foiarequest' request.user file.comm.foia as can_edit %}
 <div
   class="file"
   data-doc-id="{{ file.doc_id }}"
@@ -69,7 +69,7 @@
           </form>
         </li>
       {% endif %}
-      {% if can_edit and file.doc_id %}
+      {% if can_edit and file.doc_id and request.user.profile.verified_journalist %}
         <li>
           <form method="post" action="{% if foia_url %}{{ foia_url }}{% else %}{{ file.comm.foia.get_absolute_url }}{% endif %}" >
             <span class="file-form action" >

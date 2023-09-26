@@ -5,7 +5,7 @@ Views for the Jurisdiction application
 # Django
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.db.models.expressions import Value
 from django.db.models.fields import BooleanField
 from django.shortcuts import get_object_or_404, redirect, render
@@ -149,25 +149,23 @@ def detail(request, fed_slug, state_slug=None, local_slug=None, preview_text=Non
     if jurisdiction.level == "s":
         agencies = Agency.objects.filter(
             Q(jurisdiction=jurisdiction) | Q(jurisdiction__parent=jurisdiction)
-        ).select_related("jurisdiction")
+        )
     else:
         agencies = jurisdiction.agencies
     agencies = (
         agencies.get_approved()
         .only("pk", "slug", "name", "jurisdiction")
         .annotate(foia_count=Count("foiarequest", distinct=True))
-        .annotate(pages=Sum("foiarequest__communications__files__pages"))
+        .select_related("jurisdiction")
         .order_by("-foia_count")[:10]
     )
 
     _children = Jurisdiction.objects.filter(parent=jurisdiction).select_related(
         "parent__parent"
     )
-    _top_children = (
-        _children.annotate(foia_count=Count("agencies__foiarequest", distinct=True))
-        .annotate(pages=Sum("agencies__foiarequest__communications__files__pages"))
-        .order_by("-foia_count")[:10]
-    )
+    _top_children = _children.annotate(
+        foia_count=Count("agencies__foiarequest", distinct=True)
+    ).order_by("-foia_count")[:10]
 
     if request.method == "POST":
         form = FlagForm(request.POST)

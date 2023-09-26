@@ -27,6 +27,7 @@ class Portal(models.Model):
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
     created_timestamp = models.DateTimeField(auto_now_add=True)
+    disable_automation = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -45,3 +45,11 @@
         @include align-items(flex-start);
     }
 }
+
+.request.manager .title-form {
+    display: none;
+    margin-bottom: 0;
+    &.visible {
+        display: block;
+    }
+}

@@ -173,9 +173,8 @@ class HomepageOverride(models.Model):
         "Article", on_delete=models.CASCADE, blank=True, null=True
     )
     url = models.URLField(blank=True)
-    pub_date_override = models.DateTimeField(
-        "Publish date", default=timezone.now, blank=True, null=True
-    )
+    pub_date_override = models.DateTimeField("Publish date", blank=True, null=True)
+    hide_date = models.BooleanField(default=False)
     title_override = models.CharField(max_length=200, blank=True)
     summary_override = models.TextField(blank=True)
     image_override = ThumbnailerImageField(
@@ -197,15 +196,19 @@ class HomepageOverride(models.Model):
             "pub_date",
             "summary",
         }
+        if attr == "pub_date" and self.hide_date:
+            return None
         if attr in attrs:
-            value = getattr(self, f"{attr}_override")
+            value = getattr(self, f"{attr}_override", None)
             if value:
                 return value
             elif self.article:
                 return getattr(self.article, attr)
             else:
                 return None
-        return super().__getattr__(attr)
+        raise AttributeError(
+            "{!r} object has no attribute {!r}".format(self.__class__.__name__, attr)
+        )
 
     def get_absolute_url(self):
         """Use the provided URL or the article URL"""

@@ -6,6 +6,7 @@ Views to display lists of FOIA requests
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.db import transaction
 from django.db.models import Count, Prefetch
 from django.http import Http404
 from django.shortcuts import redirect
@@ -46,7 +47,7 @@ from muckrock.foia.models import (
     FOIASavedSearch,
 )
 from muckrock.foia.rules import can_embargo, can_embargo_permananently
-from muckrock.foia.tasks import export_csv
+from muckrock.foia.tasks import export_csv, noindex_documentcloud
 from muckrock.news.models import Article
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.project.models import Project
@@ -223,11 +224,15 @@ class RequestList(MRSearchFilterListView):
             msg = actions[request.POST["action"]](foias, request.user, request.POST)
             if msg:
                 messages.success(request, msg)
-            return redirect(request.resolver_match.view_name)
         except (KeyError, ValueError):
             if request.POST.get("action") != "":
                 messages.error(request, "Something went wrong")
-            return redirect(request.resolver_match.view_name)
+
+        return redirect(
+            "{}?{}".format(
+                reverse(request.resolver_match.view_name), request.GET.urlencode()
+            )
+        )
 
     def get_actions(self):
         """Get available actions for this view"""
@@ -240,6 +245,8 @@ class RequestList(MRSearchFilterListView):
         if self.request.user.is_staff:
             actions["review-agency"] = self._review_agency
             actions["change-owner"] = self._change_owner
+            actions["embargo"] = self._embargo
+            actions["noindex"] = self._noindex
         return actions
 
     def _delete(self, request):
@@ -332,6 +339,19 @@ class RequestList(MRSearchFilterListView):
             )
         else:
             return None
+
+    def _embargo(self, foias, _user, _post):
+        """Embargo the requests"""
+        foias.update(embargo=True, permanent_embargo=True)
+        return "Requests have been embargoed"
+
+    def _noindex(self, foias, _user, _post):
+        """No index the requests"""
+        with transaction.atomic():
+            foias.update(noindex=True)
+            for foia in foias:
+                transaction.on_commit(lambda f=foia: noindex_documentcloud.delay(f.pk))
+        return "Requests have been no-indexed"
 
     def get(self, request, *args, **kwargs):
         """Check for loading saved searches"""

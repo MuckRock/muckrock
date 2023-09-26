@@ -91,20 +91,24 @@ def status(request, foia):
     staff_editable = request.user.is_staff and status_ in allowed_statuses
     if foia.status != "submitted" and (user_editable or staff_editable):
         foia.status = status_
+        if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
+            foia.datetime_done = foia.communications.last().datetime
         foia.save(comment="status updated")
-        if staff_editable:
-            kwargs = {
-                "resolved": True,
-                "resolved_by": request.user,
-                "date_done": timezone.now(),
-            }
-        else:
-            kwargs = {}
         response_tasks = ResponseTask.objects.filter(
             resolved=False, communication__foia=foia
         )
         for task in response_tasks:
             task.resolve(request.user)
+    return _get_redirect(request, foia)
+
+
+def title(request, foia):
+    """Handle updating title"""
+    title_ = request.POST.get("title")
+    has_perm = foia.has_perm(request.user, "change")
+    if has_perm:
+        foia.title = title_
+        foia.save(comment="title updated")
     return _get_redirect(request, foia)
 
 
@@ -536,6 +540,8 @@ def agency_reply(request, foia):
             foia.status = form.cleaned_data["status"]
             if foia.status == "payment":
                 foia.price = form.cleaned_data["price"] / 100.0
+            if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
+                foia.datetime_done = comm.datetime
             foia.save()
             foia.process_attachments(agency_user)
             comm.create_agency_notifications()

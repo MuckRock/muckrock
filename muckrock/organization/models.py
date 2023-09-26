@@ -67,6 +67,10 @@ class Organization(models.Model):
     date_update = models.DateField(null=True)
 
     payment_failed = models.BooleanField(default=False)
+    verified_journalist = models.BooleanField(
+        default=False,
+        help_text="This organization is a verified jorunalistic organization",
+    )
 
     def __str__(self):
         if self.individual:
@@ -152,6 +156,7 @@ class Organization(models.Model):
             "card",
             "payment_failed",
             "avatar_url",
+            "verified_journalist",
         ]
         for field in fields:
             if field in data:
