@@ -22,6 +22,7 @@ import nose.tools
 import pytz
 import requests_mock
 from freezegun import freeze_time
+from mock import Mock, patch
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
@@ -88,6 +89,8 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.factory = RequestFactory()
         mail.outbox = []
 
+    # patching asyncio.run to not run the classification on actual LLM
+    @patch("asyncio.run", Mock())
     @requests_mock.Mocker()
     def test_normal(self, mock_requests):
         """Test a normal succesful response"""

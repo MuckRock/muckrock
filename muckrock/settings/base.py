@@ -677,6 +677,17 @@ CONSTANCE_CONFIG = OrderedDict(
             "CONFIDENCE_MIN",
             (70, "Minimum percent confidence level to automatically resolve"),
         ),
+        (
+            "ENABLE_GLOO",
+            (False, "Run Gloo LLM to classify response tasks"),
+        ),
+        (
+            "USE_GLOO",
+            (
+                False,
+                "Automatically resolve response tasks with Gloo LLM classification",
+            ),
+        ),
         ("NEW_USER_GOAL_INIT", (0, "Initial goal for monthly new user registration")),
         (
             "NEW_USER_GOAL_GROWTH",
@@ -712,7 +723,12 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "MODERATION_REGEX",
     ),
     "Lob Options": ("AUTO_LOB", "AUTO_LOB_PAY", "AUTO_LOB_APPEAL"),
-    "Machine Learning Options": ("ENABLE_ML", "CONFIDENCE_MIN"),
+    "Machine Learning Options": (
+        "ENABLE_ML",
+        "CONFIDENCE_MIN",
+        "ENABLE_GLOO",
+        "USE_GLOO",
+    ),
     "Dashboard Options": (
         "NEW_USER_GOAL_INIT",
         "NEW_USER_GOAL_GROWTH",
