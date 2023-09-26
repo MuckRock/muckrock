@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
+import asyncio
 import csv
 import logging
 import os
@@ -68,6 +69,7 @@ from muckrock.foia.models import (
     FOIARequest,
     RawEmail,
 )
+from muckrock.gloo.app.process_request import map_status, process_request
 from muckrock.task.models import (
     PaymentInfoTask,
     ResponseTask,
@@ -367,7 +369,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
 def classify_status(task_pk, **kwargs):
     """Use a machine learning classifier to predict the communications status"""
 
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals, too-many-statements
 
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
@@ -413,6 +415,16 @@ def classify_status(task_pk, **kwargs):
             except User.DoesNotExist:
                 logger.error("mlrobot account does not exist")
 
+    def resolve_gloo_if_possible(resp_task):
+        """Resolve this response task if possible based off of ML setttings"""
+        if resp_task.predicted_status != "indeterminate":
+            try:
+                gloo_robot = User.objects.get(username="gloo")
+                resp_task.set_status(resp_task.predicted_status)
+                resp_task.resolve(gloo_robot, {"status": resp_task.predicted_status})
+            except User.DoesNotExist:
+                logger.error("gloo account does not exist")
+
     try:
         resp_task = ResponseTask.objects.get(pk=task_pk)
     except ResponseTask.DoesNotExist as exc:
@@ -428,6 +440,7 @@ def classify_status(task_pk, **kwargs):
             # wait longer for document cloud
             classify_status.retry(countdown=60 * 30, args=[task_pk], kwargs=kwargs)
 
+    # old classify
     full_text = resp_task.communication.communication + (" ".join(file_text))
     vectorizer, selector, classifier = get_classifier()
 
@@ -435,12 +448,34 @@ def classify_status(task_pk, **kwargs):
         vectorizer, selector, classifier, full_text, total_pages
     )
 
-    resp_task.predicted_status = status
-    resp_task.status_probability = int(100 * prob)
+    if not (config.ENABLE_GLOO and config.USE_GLOO):
+        resp_task.predicted_status = status
+        resp_task.status_probability = int(100 * prob)
 
-    resolve_if_possible(resp_task)
+        resolve_if_possible(resp_task)
 
-    resp_task.save()
+        resp_task.save()
+
+    # new classify
+    if config.ENABLE_GLOO:
+        try:
+            extracted_data = asyncio.run(
+                process_request(
+                    resp_task.communication.communication,
+                    "\n\n".join(file_text),
+                    mlrobot_status=status,
+                    mlrobot_prob=str(prob),
+                )
+            )
+            status = map_status(extracted_data).value
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.error("Gloo error: %s", exc, exc_info=sys.exc_info())
+            status = "indeterminate"
+
+        if config.USE_GLOO:
+            resp_task.predicted_status = status
+            resolve_gloo_if_possible(resp_task)
+            resp_task.save()
 
 
 @task(

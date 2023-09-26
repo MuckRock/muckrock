@@ -7,6 +7,7 @@ from django.test import TestCase
 
 # Third Party
 import nose.tools
+from mock import Mock, patch
 
 # MuckRock
 from muckrock.foia.factories import FOIACommunicationFactory
@@ -17,6 +18,7 @@ from muckrock.task.factories import ResponseTaskFactory
 class TestFOIAClassify(TestCase):
     """Test the classification of a new communication"""
 
+    @patch("asyncio.run", Mock())
     def test_classifier(self):
         """Classifier should populate the fields on the response task"""
         comm = FOIACommunicationFactory(
