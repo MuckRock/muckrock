@@ -190,20 +190,29 @@ $color-advanced-container: lighten($color-agency, 40%);
         width: 100%;
         .select2-selection__choice {
             display: block;
-            width: 100%;
+            width: 90%;
             margin: 0;
             color: $color-white;
             background: transparent;
             border: none;
             font-size: $size-4;
+            .choice {
+                margin-left: 20px;
+            }
             .select2-selection__choice__remove {
+                margin-top: 15px;
                 font-size: 0;
                 float: right;
-                height: 24px !important;
-                width: 24px !important;
+                height: 20px !important;
+                width: 20px !important;
+                border-right: 0px;
                 background-size: 90%;
                 background-position: center center !important;
-                &:hover { background-position: center center !important; }
+                background-repeat: no-repeat;
+                &:hover {
+                    background-position: center center !important;
+                    background-color: transparent;
+                }
             }
         }
     }
