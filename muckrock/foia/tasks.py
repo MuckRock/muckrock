@@ -464,7 +464,10 @@ def classify_status(task_pk, **kwargs):
                     resp_task.communication.communication,
                     "\n\n".join(file_text),
                     mlrobot_status=status,
-                    mlrobot_prob=str(prob),
+                    mlrobot_prob=str(int(100 * prob)),
+                    task_url=settings.MUCKROCK_URL + resp_task.get_absolute_url(),
+                    agency=str(resp_task.communication.foia.agency),
+                    jurisdiction=str(resp_task.communication.foia.agency.jurisdiction),
                 )
             )
             status = map_status(extracted_data).value
