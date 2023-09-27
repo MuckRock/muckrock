@@ -459,7 +459,7 @@ def classify_status(task_pk, **kwargs):
     # new classify
     if config.ENABLE_GLOO:
         try:
-            extracted_data = asyncio.run(
+            extracted_data, status = asyncio.run(
                 process_request(
                     resp_task.communication.communication,
                     "\n\n".join(file_text),
@@ -470,7 +470,6 @@ def classify_status(task_pk, **kwargs):
                     jurisdiction=str(resp_task.communication.foia.agency.jurisdiction),
                 )
             )
-            status = map_status(extracted_data).value
         except Exception as exc:  # pylint: disable=broad-except
             logger.error("Gloo error: %s", exc, exc_info=sys.exc_info())
             status = "indeterminate"
