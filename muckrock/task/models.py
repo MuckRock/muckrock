@@ -1019,6 +1019,33 @@ class ResponseTask(Task):
         form = ResponseTaskForm(task=self)
         form.set_status(status, set_foia=True, comms=[self.communication])
 
+    def set_tracking_id(self, tracking_id):
+        """Forward to form logic, for use in classify_status task"""
+        # pylint: disable=import-outside-toplevel
+        # MuckRock
+        from muckrock.task.forms import ResponseTaskForm
+
+        form = ResponseTaskForm(task=self)
+        form.set_tracking_id(tracking_id, [self.communication])
+
+    def set_price(self, price):
+        """Forward to form logic, for use in classify_status task"""
+        # pylint: disable=import-outside-toplevel
+        # MuckRock
+        from muckrock.task.forms import ResponseTaskForm
+
+        form = ResponseTaskForm(task=self)
+        form.set_price(price, [self.communication])
+
+    def set_date_estimate(self, date_estimate):
+        """Forward to form logic, for use in classify_status task"""
+        # pylint: disable=import-outside-toplevel
+        # MuckRock
+        from muckrock.task.forms import ResponseTaskForm
+
+        form = ResponseTaskForm(task=self)
+        form.set_date_estimate(date_estimate, [self.communication])
+
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
         return self.communication.foia.has_perm(user, "tasks")

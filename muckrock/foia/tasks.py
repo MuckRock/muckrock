@@ -69,7 +69,7 @@ from muckrock.foia.models import (
     FOIARequest,
     RawEmail,
 )
-from muckrock.gloo.app.process_request import map_status, process_request
+from muckrock.gloo.app.process_request import process_request
 from muckrock.task.models import (
     PaymentInfoTask,
     ResponseTask,
@@ -415,13 +415,26 @@ def classify_status(task_pk, **kwargs):
             except User.DoesNotExist:
                 logger.error("mlrobot account does not exist")
 
-    def resolve_gloo_if_possible(resp_task):
+    def resolve_gloo_if_possible(resp_task, extracted_data):
         """Resolve this response task if possible based off of ML setttings"""
         if resp_task.predicted_status != "indeterminate":
             try:
                 gloo_robot = User.objects.get(username="gloo")
+                values = {"status": resp_task.predicted_status}
                 resp_task.set_status(resp_task.predicted_status)
-                resp_task.resolve(gloo_robot, {"status": resp_task.predicted_status})
+                if extracted_data.trackingNumber:
+                    values["tracking_id"] = extracted_data.trackingNumber
+                    resp_task.set_tracking_id(extracted_data.trackingNumber)
+                if extracted_data.price:
+                    values["price"] = extracted_data.price
+                    resp_task.set_price(extracted_data.price)
+                if extracted_data.dateEstimate:
+                    values["price"] = datetime.strptime(
+                        extracted_data.dateEstimate, "%Y-%m-%d"
+                    )
+                    resp_task.set_price(values["price"])
+
+                resp_task.resolve(gloo_robot, values)
             except User.DoesNotExist:
                 logger.error("gloo account does not exist")
 
@@ -476,7 +489,7 @@ def classify_status(task_pk, **kwargs):
 
         if config.USE_GLOO:
             resp_task.predicted_status = status
-            resolve_gloo_if_possible(resp_task)
+            resolve_gloo_if_possible(resp_task, extracted_data)
             resp_task.save()
 
 
