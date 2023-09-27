@@ -434,6 +434,19 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
             )
         return create_option
 
+    def get_results(self, context):
+        """Return data for the 'results' key of the response."""
+        # Over riding to add title
+        return [
+            {
+                "id": self.get_result_value(result),
+                "text": self.get_result_label(result),
+                "selected_text": self.get_selected_result_label(result),
+                "title": str(result),
+            }
+            for result in context["object_list"]
+        ]
+
 
 class AgencyFOIALogAutocomplete(MRAutocompleteView):
     """Autocomplete for picking agencies"""
