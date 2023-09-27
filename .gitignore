@@ -35,4 +35,3 @@ celerybeat-schedule
 .envrc
 .vscode
 /src
-gloo
