@@ -580,7 +580,31 @@ def db_cleanup():
     logger.info("Starting DB Clean up")
     try:
         call_command("clearsessions", verbosity=2)
-        call_command("deleterevisions", days=180, verbosity=2)
+        revision_cleanup = [
+            "foia.foialog",
+            "foia.outboundcomposerattachment",
+            "foia.outboundrequestattachment",
+            "foia.foiarequest",
+            "foia.foiacommunication",
+            "foia.trackingnumber",
+            "foia.foianote",
+            "foia.foiacomposer",
+            "foia.foiatemplate",
+            "communication",
+            "task",
+            "agency",
+            "news",
+            "portal",
+            "foiamachine",
+            "jurisdiction",
+            "project",
+            "crowdfund",
+            "accounts",
+            "organization",
+            "qanda",
+        ]
+        for cleanup in revision_cleanup:
+            call_command("deleterevisions", cleanup, days=180, verbosity=2)
     except SoftTimeLimitExceeded:
         logger.error("DB Clean up took too long")
     logger.info("Ending DB Clean up")
