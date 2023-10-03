@@ -1210,6 +1210,7 @@ class NewPortalTask(Task):
 # Retired Tasks
 
 
+# Un-retire for now to keep tabs on how Gloo is doing
 class StatusChangeTask(Task):
     """A user has changed the status on a request"""
 

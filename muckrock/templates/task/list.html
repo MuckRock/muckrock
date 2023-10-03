@@ -83,6 +83,12 @@
             Crowdfund
         </a>
     </li>
+    <li class="{% active request '^/task/status-change/$' %}">
+        <a href="{% url 'status-change-task-list' %}">
+            <span class="yellow counter">{{ counters.status_change }}</span>
+            Status Change
+        </a>
+    </li>
 </ul>
 {% endblock %}
 
