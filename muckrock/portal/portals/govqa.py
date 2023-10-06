@@ -140,19 +140,23 @@ class GovQAPortal(ManualPortal):
             comm.pk,
         )
 
-        # the requestor is the original sender - we went all replies,
-        # which are messages sent by not the requestor
-        requester = request["messages"][-1]["sender"]
-        replies = [m for m in request["messages"] if m["sender"] != requester]
+        # We want to find the previous message from the same sender as the most recent
+        # message.  The most recent message is at index 0.
+        replier = request["messages"][0]["sender"]
+        for message in request["messages"][1:]:
+            if message["sender"] == replier:
+                break
+        else:
+            message = None
 
-        if len(replies) < 2:
+        if message is None:
             # if this is the first reply, grab all attachments
             upload_attachments = request["attachments"]
         else:
             # get all attachments since the previous reply
-            date = dateutil.parser.parse(replies[1]["date"]).date()
+            date = dateutil.parser.parse(message["date"]).date()
             upload_attachments = [
-                a for a in request["attachments"] if a["uploaded_at"] >= date
+                a for a in request["attachments"] if a["uploaded_at"] > date
             ]
 
         logger.info(
