@@ -212,7 +212,6 @@ class GovQAPortal(ManualPortal):
                 exc_info=sys.exc_info(),
             )
             FlaggedTask.objects.create(
-                user=User.objects.get(username="MuckrockStaff"),
                 text=f"Error during GovQA scraping: {exc}",
                 foia_id=comm.foia_id,
                 category="govqa",
@@ -269,7 +268,6 @@ class GovQAPortal(ManualPortal):
                 exc_info=sys.exc_info(),
             )
             FlaggedTask.objects.create(
-                user=User.objects.get(username="MuckrockStaff"),
                 text=f"Error during GovQA scraping: {exc}",
                 foia_id=comm.foia_id,
                 category="govqa",
