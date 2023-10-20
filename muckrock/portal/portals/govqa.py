@@ -5,7 +5,6 @@ Automate some parts of GovQA portal handling
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User
 
 # Standard Library
 import cgi
