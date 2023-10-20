@@ -69,8 +69,8 @@ class StripeForm(forms.Form):
 class DonateForm(StripeForm):
     """A form for donations"""
 
-    name = forms.CharField()
-    email = forms.EmailField()
-    phone = PhoneNumberField()
+    name = forms.CharField(required=False)
+    email = forms.EmailField(required=False)
+    phone = PhoneNumberField(required=False)
     honor = forms.CharField(required=False)
     why = forms.CharField(required=False)
