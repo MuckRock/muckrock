@@ -21,6 +21,12 @@
         width: 100%;
         margin-top: 5px;
     }
+    input[type="text"] {
+        font-size: $size-5;
+        font-weight: $bold;
+        width: 100%;
+        margin-top: 5px;
+    }
     .button {
         width: 100%;
     }
@@ -30,5 +36,12 @@
         input[type="radio"] {
             display: none;
         }
+    }
+    p.why {
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    textarea {
+      height: 5rem;
     }
 }
