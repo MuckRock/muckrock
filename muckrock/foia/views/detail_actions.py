@@ -48,7 +48,7 @@ from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
 from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.task.models import FlaggedTask, ResponseTask
+from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +86,7 @@ def status(request, foia):
     """Handle updating status"""
     allowed_statuses = [s for s, _ in STATUS if s != "submitted"]
     status_ = request.POST.get("status")
+    old_status = foia.get_status_display()
     has_perm = foia.has_perm(request.user, "change")
     user_editable = has_perm and status_ in allowed_statuses
     staff_editable = request.user.is_staff and status_ in allowed_statuses
@@ -94,6 +95,11 @@ def status(request, foia):
         if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
             foia.datetime_done = foia.communications.last().datetime
         foia.save(comment="status updated")
+        StatusChangeTask.objects.create(
+            user=request.user,
+            old_status=old_status,
+            foia=foia,
+        )
         response_tasks = ResponseTask.objects.filter(
             resolved=False, communication__foia=foia
         )

@@ -99,6 +99,7 @@ class ArticleAdminForm(forms.ModelForm):
             "publish",
             "foias",
             "image",
+            "image_alt_text",
             "tags",
             "scrollama",
             "sidebar",

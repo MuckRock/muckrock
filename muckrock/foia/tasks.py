@@ -429,10 +429,10 @@ def classify_status(task_pk, **kwargs):
                     values["price"] = extracted_data.price
                     resp_task.set_price(extracted_data.price)
                 if extracted_data.dateEstimate:
-                    values["price"] = datetime.strptime(
+                    values["date_estimate"] = datetime.strptime(
                         extracted_data.dateEstimate, "%Y-%m-%d"
                     )
-                    resp_task.set_price(values["price"])
+                    resp_task.set_date_estimate(values["date_estimate"])
 
                 resp_task.resolve(gloo_robot, values)
             except User.DoesNotExist:

@@ -25,7 +25,7 @@
       <meta itemscope itemprop="mainEntityOfPage" itemType="https://schema.org/WebPage" itemid="https://www.muckrock.com{{ article.get_absolute_url }}">
       {% if article.image %}
         <div class="news__image" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
-          <img src="{% thumbnail article.image 2400x800 crop %}" alt="{{ article.title }}">
+          <img src="{% thumbnail article.image 2400x800 crop %}" alt="{{ article.image_alt_text|default:article.title }}">
           <meta itemprop="url" content="https://www.muckrock.com{% thumbnail article.image 2400x800 crop %}">
           <meta itemprop="width" content="2400">
           <meta itemprop="height" content="800">

@@ -53,7 +53,7 @@
     {% for article in recent_news %}
     <div class="grid__row news-request">
         <div class="news-request__article grid__column quarter">
-            <a href="{{article.get_absolute_url}}"><img class="nomargin" src="{% thumbnail article.image 600x200 %}" /></a>
+          <a href="{{article.get_absolute_url}}"><img class="nomargin" src="{% thumbnail article.image 600x200 %}" alt="{{ article.image_alt_text|default:article.title }}"/></a>
             <p class="bold nomargin news-request__article__title"><a class="black" href="{{article.get_absolute_url}}">{{article.title}}</a></p>
             <p class="small grey mb0">by {{article.get_authors_names}}</p>
             <p class="small grey mb0"><datetime title="{{article.pub_date|date:'c'}}">{{article.pub_date|date:'F d, Y'}}</datetime></p>

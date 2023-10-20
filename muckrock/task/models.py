@@ -997,7 +997,7 @@ class ResponseTask(Task):
     created_from_orphan = models.BooleanField(default=False)
     # for predicting statuses
     predicted_status = models.CharField(
-        max_length=10, choices=STATUS, blank=True, null=True
+        max_length=13, choices=STATUS, blank=True, null=True
     )
     status_probability = models.IntegerField(blank=True, null=True)
     scan = models.BooleanField(default=False)
@@ -1210,6 +1210,7 @@ class NewPortalTask(Task):
 # Retired Tasks
 
 
+# Un-retire for now to keep tabs on how Gloo is doing
 class StatusChangeTask(Task):
     """A user has changed the status on a request"""
 

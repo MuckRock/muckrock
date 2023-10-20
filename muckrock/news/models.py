@@ -81,6 +81,7 @@ class Article(models.Model):
         null=True,
         resize_source={"size": (2400, 800), "crop": "smart"},
     )
+    image_alt_text = models.CharField(max_length=200, blank=True)
     scrollama = models.BooleanField(
         "Use scrollama",
         default=False,
@@ -183,6 +184,7 @@ class HomepageOverride(models.Model):
         null=True,
         resize_source={"size": (2400, 800), "crop": "smart"},
     )
+    image_alt_text_override = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return f"Override {self.slot}"
@@ -191,6 +193,7 @@ class HomepageOverride(models.Model):
         """Short cut access to properties stored on the article model"""
         attrs = {
             "image",
+            "image_alt_text",
             "title",
             "authors",
             "pub_date",

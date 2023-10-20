@@ -96,6 +96,7 @@ def count_tasks():
             flagged=Count("flaggedtask"),
             new_agency=Count("newagencytask"),
             response=Count("responsetask"),
+            status_change=Count("statuschangetask"),
             crowdfund=Count("crowdfundtask"),
             multirequest=Count("multirequesttask"),
             portal=Count("portaltask"),
