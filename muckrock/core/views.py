@@ -6,11 +6,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import lookup_spawns_duplicates
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage
 from django.db.models import F, Q, Sum
+from django.db.models.query import Prefetch
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -360,7 +362,18 @@ class Homepage:
     def articles(self):
         """Get the articles for the front page"""
         articles = list(Article.objects.get_published().prefetch_authors()[:5])
-        overrides = HomepageOverride.objects.all()
+        overrides = (
+            HomepageOverride.objects.all()
+            .select_related("article")
+            .prefetch_related(
+                Prefetch(
+                    "article__authors",
+                    queryset=User.objects.select_related("profile").order_by(
+                        "authorship__order"
+                    ),
+                ),
+            )
+        )
         for override in overrides:
             articles[override.slot - 1] = override
         return articles
