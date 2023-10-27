@@ -12,7 +12,7 @@ from datetime import date
 from dateutil.parser import parse
 
 # MuckRock
-from muckrock.foia.models import FOIALog, FOIALogEntry
+from muckrock.foia.models import FOIALogEntry
 from muckrock.foia.models.request import STATUS, TrackingNumber
 
 logger = logging.getLogger(__name__)
