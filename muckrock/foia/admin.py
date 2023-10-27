@@ -37,6 +37,7 @@ from muckrock.foia.models import (
     FOIAComposer,
     FOIAFile,
     FOIALog,
+    FOIALogEntry,
     FOIANote,
     FOIARequest,
     FOIATemplate,
@@ -713,6 +714,31 @@ class FOIATemplateAdmin(VersionAdmin):
     form = FOIATemplateAdminForm
 
 
+class FOIALogEntryAdminForm(forms.ModelForm):
+    """Form for FOIA Log Entry admin"""
+
+    foia_request = forms.ModelChoiceField(
+        queryset=FOIARequest.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="foia-request-autocomplete",
+            attrs={"data-placeholder": "FOIA?", "data-width": None},
+        ),
+    )
+
+    class Meta:
+        model = FOIALogEntry
+        fields = "__all__"
+
+
+class FOIALogEntryAdmin(VersionAdmin):
+    """FOIA Log Entry admin options"""
+
+    list_display = ("request_id", "date_requested")
+    search_fields = ("request_id", "foia_log__agency")
+    readonly_fields = ("foia_log",)
+    form = FOIALogEntryAdminForm
+
+
 class FOIALogAdminForm(forms.ModelForm):
     """Form for FOIA Log admin"""
 
@@ -723,11 +749,19 @@ class FOIALogAdminForm(forms.ModelForm):
             attrs={"data-placeholder": "Agency?", "data-width": None},
         ),
     )
-    foia_request = forms.ModelChoiceField(
-        queryset=FOIARequest.objects.all(),
+    contributed_by = forms.ModelChoiceField(
+        required=False,
+        queryset=User.objects.all(),
         widget=autocomplete.ModelSelect2(
-            url="foia-request-autocomplete",
-            attrs={"data-placeholder": "FOIA?", "data-width": None},
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
+        ),
+    )
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="user-autocomplete",
+            attrs={"data-placeholder": "User?", "data-width": None},
         ),
     )
 
@@ -737,10 +771,10 @@ class FOIALogAdminForm(forms.ModelForm):
 
 
 class FOIALogAdmin(VersionAdmin):
-    """Outbound Attachment admin options"""
+    """FOIA Log admin options"""
 
-    list_display = ("agency", "request_id", "date_requested")
-    search_fields = ["request_id", "agency"]
+    list_display = ("agency", "start_date", "end_date", "source", "user")
+    search_fields = ("agency",)
     form = FOIALogAdminForm
 
 
@@ -748,6 +782,7 @@ admin.site.register(FOIARequest, FOIARequestAdmin)
 admin.site.register(FOIACommunication, FOIACommunicationAdmin)
 admin.site.register(FOIAComposer, FOIAComposerAdmin)
 admin.site.register(FOIATemplate, FOIATemplateAdmin)
+admin.site.register(FOIALogEntry, FOIALogEntryAdmin)
 admin.site.register(FOIALog, FOIALogAdmin)
 admin.site.register(OutboundRequestAttachment, OutboundRequestAttachmentAdmin)
 admin.site.register(OutboundComposerAttachment, OutboundComposerAttachmentAdmin)

@@ -429,10 +429,16 @@ def classify_status(task_pk, **kwargs):
                     values["price"] = extracted_data.price
                     resp_task.set_price(extracted_data.price)
                 if extracted_data.dateEstimate:
-                    values["date_estimate"] = datetime.strptime(
-                        extracted_data.dateEstimate, "%Y-%m-%d"
-                    )
-                    resp_task.set_date_estimate(values["date_estimate"])
+                    try:
+                        resp_task.set_date_estimate(
+                            datetime.strptime(
+                                extracted_data.dateEstimate, "%Y-%m-%d"
+                            ).date()
+                        )
+                        values["date_estimate"] = extracted_data.dateEstimate
+                    except ValueError:
+                        # ignore the date estimate if it is the wrong format
+                        pass
 
                 resp_task.resolve(gloo_robot, values)
             except User.DoesNotExist:
@@ -486,6 +492,7 @@ def classify_status(task_pk, **kwargs):
         except Exception as exc:  # pylint: disable=broad-except
             logger.error("Gloo error: %s", exc, exc_info=sys.exc_info())
             status = "indeterminate"
+            extracted_data = None
 
         if config.USE_GLOO:
             resp_task.predicted_status = status
