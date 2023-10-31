@@ -461,7 +461,7 @@ def bounces(request, email_comm, timestamp):
 
     if "event-data" in request.POST:
         data = request.POST["event-data"]
-        recipient = data.get("receipient", "")
+        recipient = data.get("recipient", "")
         event = data.get("severity", "")
         status = data.get("delivery-status", {})
         # the keys might exist with contents as NULL
@@ -469,7 +469,7 @@ def bounces(request, email_comm, timestamp):
         code = status.get("code", "")
         reason = data.get("reason", "")
     else:
-        recipient = request.POST.get("receipient", "")
+        recipient = request.POST.get("recipient", "")
         event = request.POST.get("event", "")
         if event == "bounced":
             error = request.POST.get("error", "")
