@@ -684,7 +684,7 @@ def _verify(post):
     # if signature is a str, we fetch the three values from the top level post
     # otherwise we fetch them from the signature sub-dictionary
     sig_data = post["signature"]
-    if isinstance(sig_data, "str"):
+    if isinstance(sig_data, str):
         sig_data = post
     token = sig_data.get("token", "")
     timestamp = sig_data.get("timestamp", "")
