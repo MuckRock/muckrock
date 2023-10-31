@@ -133,9 +133,37 @@ def get_common_webhook_params(allow_empty_email=False):
 
         @wraps(function)
         def wrapper(request):
+            if "event-data" in request.POST:
+                return wrapper_new(request)
+            else:
+                return wrapper_legacy(request)
+
+        def wrapper_legacy(request):
             """Wrapper"""
             email_id = request.POST.get("email_id")
             timestamp = request.POST["timestamp"]
+            timestamp = datetime.fromtimestamp(
+                int(timestamp), tz=timezone.get_current_timezone()
+            )
+
+            if email_id:
+                email_comm = EmailCommunication.objects.filter(pk=email_id).first()
+            else:
+                email_comm = None
+
+            if email_comm or allow_empty_email:
+                function(request, email_comm, timestamp)
+            else:
+                logger.warning(
+                    "No email comm for %s webhook: %s", function.__name__, request.POST
+                )
+
+            return HttpResponse("OK")
+
+        def wrapper_new(request):
+            """Wrapper"""
+            email_id = request.POST["event-data"]["user-variables"].get("email_id")
+            timestamp = request.POST["event-data"]["timestamp"]
             timestamp = datetime.fromtimestamp(
                 int(timestamp), tz=timezone.get_current_timezone()
             )
@@ -431,24 +459,39 @@ def bounces(request, email_comm, timestamp):
         # This was an email to a user, it will be handled by squarelet
         return
 
-    recipient = EmailAddress.objects.fetch(request.POST.get("recipient", ""))
-    event = request.POST.get("event", "")
-    if event == "bounced":
-        error = request.POST.get("error", "")
-    elif event == "dropped":
-        error = request.POST.get("description", "")
+    if "event-data" in request.POST:
+        data = request.POST["event-data"]
+        recipient = data.get("receipient", "")
+        event = data.get("severity", "")
+        status = data.get("delivery-status", {})
+        # the keys might exist with contents as NULL
+        error = status.get("message") or status.get("description") or ""
+        code = status.get("code", "")
+        reason = data.get("reason", "")
     else:
-        error = ""
+        recipient = request.POST.get("receipient", "")
+        event = request.POST.get("event", "")
+        if event == "bounced":
+            error = request.POST.get("error", "")
+        elif event == "dropped":
+            error = request.POST.get("description", "")
+        else:
+            error = ""
+        code = request.POST.get("code", "")
+        reason = request.POST.get("reason", "")
 
+    recipient = EmailAddress.objects.fetch(recipient)
     EmailError.objects.create(
         email=email_comm,
         datetime=timestamp,
         recipient=recipient,
-        code=request.POST.get("code", ""),
+        code=code,
         error=error,
         event=event,
-        reason=request.POST.get("reason", ""),
+        reason=reason,
     )
+
+    # XXX What to do for temporary errors?
     recipient.status = "error"
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
@@ -482,22 +525,43 @@ def bounces(request, email_comm, timestamp):
 @get_common_webhook_params()
 def opened(request, email_comm, timestamp):
     """Notify when an email has been opened or clicked"""
-    recipient = EmailAddress.objects.fetch(request.POST.get("recipient", ""))
-    EmailOpen.objects.create(
-        email=email_comm,
-        datetime=timestamp,
-        recipient=recipient,
-        event=request.POST.get("event", ""),
-        city=request.POST.get("city", ""),
-        region=request.POST.get("region", ""),
-        country=request.POST.get("country", ""),
-        client_type=request.POST.get("client-type", ""),
-        client_name=request.POST.get("client-name", ""),
-        client_os=request.POST.get("client-os", ""),
-        device_type=request.POST.get("device-type", ""),
-        user_agent=request.POST.get("user-agent", "")[:255],
-        ip_address=request.POST.get("ip", ""),
-    )
+    if "event-data" in request.POST:
+        event_data = request.POST.get("event-data", {})
+        geolocation = event_data.get("geolocation", {})
+        client_info = event_data.get("client-info", {})
+        recipient = EmailAddress.objects.fetch(event_data.get("recipient", ""))
+        EmailOpen.objects.create(
+            email=email_comm,
+            datetime=timestamp,
+            recipient=recipient,
+            event=event_data.get("event", ""),
+            city=geolocation.get("city", ""),
+            region=geolocation.get("region", ""),
+            country=geolocation.get("country", ""),
+            client_type=client_info.get("client-type", ""),
+            client_name=client_info.get("client-name", ""),
+            client_os=client_info.get("client-os", ""),
+            device_type=client_info.get("device-type", ""),
+            user_agent=client_info.get("user-agent", "")[:255],
+            ip_address=event_data.get("ip", ""),
+        )
+    else:
+        recipient = EmailAddress.objects.fetch(request.POST.get("recipient", ""))
+        EmailOpen.objects.create(
+            email=email_comm,
+            datetime=timestamp,
+            recipient=recipient,
+            event=request.POST.get("event", ""),
+            city=request.POST.get("city", ""),
+            region=request.POST.get("region", ""),
+            country=request.POST.get("country", ""),
+            client_type=request.POST.get("client-type", ""),
+            client_name=request.POST.get("client-name", ""),
+            client_os=request.POST.get("client-os", ""),
+            device_type=request.POST.get("device-type", ""),
+            user_agent=request.POST.get("user-agent", "")[:255],
+            ip_address=request.POST.get("ip", ""),
+        )
 
 
 @mailgun_verify
@@ -612,9 +676,19 @@ def _validate_phaxio(token, url, parameters, files, signature):
 
 def _verify(post):
     """Verify that the message is from mailgun"""
-    token = post.get("token", "")
-    timestamp = post.get("timestamp", "")
-    signature = post.get("signature", "")
+    # is no signature data is present, fail verification
+    if "signature" not in post:
+        return False
+    # the signature data includes three values, token, timestamp and signature
+    # these may all be at the top level data, or in a sub-dictionary under signature
+    # if signature is a str, we fetch the three values from the top level post
+    # otherwise we fetch them from the signature sub-dictionary
+    sig_data = post["signature"]
+    if isinstance(sig_data, "str"):
+        sig_data = post
+    token = sig_data.get("token", "")
+    timestamp = sig_data.get("timestamp", "")
+    signature = sig_data.get("signature", "")
     signature_ = hmac.new(
         key=settings.MAILGUN_ACCESS_KEY.encode("utf8"),
         msg="{}{}".format(timestamp, token).encode("utf8"),
