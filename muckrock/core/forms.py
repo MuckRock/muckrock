@@ -8,6 +8,7 @@ from django.conf import settings
 
 # Third Party
 from dal.autocomplete import TaggitSelect2
+from phonenumber_field.formfields import PhoneNumberField
 from taggit.forms import TagField
 
 
@@ -63,3 +64,13 @@ class StripeForm(forms.Form):
     )
     stripe_amount = forms.IntegerField(min_value=0)
     type = forms.ChoiceField(choices=(("one-time", "One Time"), ("monthly", "Monthly")))
+
+
+class DonateForm(StripeForm):
+    """A form for donations"""
+
+    name = forms.CharField(required=False)
+    email = forms.EmailField(required=False)
+    phone = PhoneNumberField(required=False)
+    honor = forms.CharField(required=False)
+    why = forms.CharField(required=False)
