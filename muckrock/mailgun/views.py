@@ -491,7 +491,7 @@ def bounces(request, email_comm, timestamp):
         reason=reason,
     )
 
-    # XXX What to do for temporary errors?
+    # What to do for temporary errors?
     recipient.status = "error"
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
