@@ -137,6 +137,7 @@ def get_common_webhook_params(allow_empty_email=False):
 
         @wraps(function)
         def wrapper(request):
+            logger.info("[MAILGUN WEBHOOK] content-type %s", request.content_type)
             if request.content_type == "application/json":
                 return wrapper_new(request)
             else:
