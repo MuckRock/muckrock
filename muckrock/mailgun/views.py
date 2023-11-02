@@ -137,35 +137,6 @@ def get_common_webhook_params(allow_empty_email=False):
 
         @wraps(function)
         def wrapper(request):
-            logger.info("[MAILGUN WEBHOOK] content-type %s", request.content_type)
-            if request.content_type == "application/json":
-                return wrapper_new(request)
-            else:
-                return wrapper_legacy(request)
-
-        def wrapper_legacy(request):
-            """Wrapper"""
-            email_id = request.POST.get("email_id")
-            timestamp = request.POST["timestamp"]
-            timestamp = datetime.fromtimestamp(
-                int(timestamp), tz=timezone.get_current_timezone()
-            )
-
-            if email_id:
-                email_comm = EmailCommunication.objects.filter(pk=email_id).first()
-            else:
-                email_comm = None
-
-            if email_comm or allow_empty_email:
-                function(request, email_comm, timestamp)
-            else:
-                logger.warning(
-                    "No email comm for %s webhook: %s", function.__name__, request.POST
-                )
-
-            return HttpResponse("OK")
-
-        def wrapper_new(request):
             """Wrapper"""
             data = json.loads(request.body.decode("utf8"))
             email_id = data["event-data"]["user-variables"].get("email_id")
@@ -461,27 +432,15 @@ def _find_likely_bounce(subject):
 def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
-    if request.content_type == "application/json":
-        data = json.loads(request.body.decode("utf8"))
-        event_data = data["event-data"]
-        recipient = event_data.get("recipient", "")
-        event = event_data.get("severity", "")
-        status = event_data.get("delivery-status", {})
-        # the keys might exist with contents as NULL
-        error = status.get("message") or status.get("description") or ""
-        code = status.get("code", "")
-        reason = event_data.get("reason", "")
-    else:
-        recipient = request.POST.get("recipient", "")
-        event = request.POST.get("event", "")
-        if event == "bounced":
-            error = request.POST.get("error", "")
-        elif event == "dropped":
-            error = request.POST.get("description", "")
-        else:
-            error = ""
-        code = request.POST.get("code", "")
-        reason = request.POST.get("reason", "")
+    data = json.loads(request.body.decode("utf8"))
+    event_data = data["event-data"]
+    recipient = event_data.get("recipient", "")
+    event = event_data.get("severity", "")
+    status = event_data.get("delivery-status", {})
+    # the keys might exist with contents as NULL
+    error = status.get("message") or status.get("description") or ""
+    code = status.get("code", "")
+    reason = event_data.get("reason", "")
 
     recipient = EmailAddress.objects.fetch(recipient)
     EmailError.objects.create(
@@ -528,44 +487,26 @@ def bounces(request, email_comm, timestamp):
 @get_common_webhook_params()
 def opened(request, email_comm, timestamp):
     """Notify when an email has been opened or clicked"""
-    if request.content_type == "application/json":
-        data = json.loads(request.body.decode("utf8"))
-        event_data = data.get("event-data", {})
-        geolocation = event_data.get("geolocation", {})
-        client_info = event_data.get("client-info", {})
-        recipient = EmailAddress.objects.fetch(event_data.get("recipient", ""))
-        EmailOpen.objects.create(
-            email=email_comm,
-            datetime=timestamp,
-            recipient=recipient,
-            event=event_data.get("event", ""),
-            city=geolocation.get("city", ""),
-            region=geolocation.get("region", ""),
-            country=geolocation.get("country", ""),
-            client_type=client_info.get("client-type", ""),
-            client_name=client_info.get("client-name", ""),
-            client_os=client_info.get("client-os", ""),
-            device_type=client_info.get("device-type", ""),
-            user_agent=client_info.get("user-agent", "")[:255],
-            ip_address=event_data.get("ip", ""),
-        )
-    else:
-        recipient = EmailAddress.objects.fetch(request.POST.get("recipient", ""))
-        EmailOpen.objects.create(
-            email=email_comm,
-            datetime=timestamp,
-            recipient=recipient,
-            event=request.POST.get("event", ""),
-            city=request.POST.get("city", ""),
-            region=request.POST.get("region", ""),
-            country=request.POST.get("country", ""),
-            client_type=request.POST.get("client-type", ""),
-            client_name=request.POST.get("client-name", ""),
-            client_os=request.POST.get("client-os", ""),
-            device_type=request.POST.get("device-type", ""),
-            user_agent=request.POST.get("user-agent", "")[:255],
-            ip_address=request.POST.get("ip", ""),
-        )
+    data = json.loads(request.body.decode("utf8"))
+    event_data = data.get("event-data", {})
+    geolocation = event_data.get("geolocation", {})
+    client_info = event_data.get("client-info", {})
+    recipient = EmailAddress.objects.fetch(event_data.get("recipient", ""))
+    EmailOpen.objects.create(
+        email=email_comm,
+        datetime=timestamp,
+        recipient=recipient,
+        event=event_data.get("event", ""),
+        city=geolocation.get("city", ""),
+        region=geolocation.get("region", ""),
+        country=geolocation.get("country", ""),
+        client_type=client_info.get("client-type", ""),
+        client_name=client_info.get("client-name", ""),
+        client_os=client_info.get("client-os", ""),
+        device_type=client_info.get("device-type", ""),
+        user_agent=client_info.get("user-agent", "")[:255],
+        ip_address=event_data.get("ip", ""),
+    )
 
 
 @mailgun_verify
