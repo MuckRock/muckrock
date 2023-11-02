@@ -280,7 +280,8 @@ class TestMailgunViewWebHooks(TestMailgunViews):
             foia__email=EmailAddress.objects.fetch(recipient), foia__agency__fax=None
         )
         email = comm.emails.first()
-        event = "bounced"
+        event = "failed"
+        severity = "permanent"
         code = 550
         error = (
             "5.1.1 The email account that you tried to reach "
@@ -289,15 +290,27 @@ class TestMailgunViewWebHooks(TestMailgunViews):
             "unnecessary spaces. Learn more at 5.1.1 "
             "http://support.example.com/mail/bin/answer.py"
         )
+        signature = {}
+        self.sign(signature)
         data = {
-            "event": event,
-            "email_id": email.pk,
-            "code": code,
-            "error": error,
-            "recipient": recipient,
+            "event-data": {
+                "event": event,
+                "timestamp": int(time.time()),
+                "severity": severity,
+                "recipient": recipient,
+                "delivery-status": {
+                    "code": code,
+                    "description": error,
+                },
+                "user-variables": {
+                    "email_id": email.pk,
+                },
+            },
+            "signature": signature,
         }
-        self.sign(data)
-        request = self.factory.post(reverse("mailgun-bounces"), data)
+        request = self.factory.post(
+            reverse("mailgun-bounces"), data, content_type="application/json"
+        )
         bounces(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
@@ -308,7 +321,7 @@ class TestMailgunViewWebHooks(TestMailgunViews):
                 recipient=EmailAddress.objects.fetch(recipient),
                 code=code,
                 error=error,
-                event=event,
+                event=severity,
             ).exists()
         )
 
@@ -334,22 +347,35 @@ class TestMailgunViewWebHooks(TestMailgunViews):
             "(KHTML, like Gecko) Chrome/26.0.1410.43 Safari/537.31"
         )
         ip_address = "50.56.129.169"
+        signature = {}
+        self.sign(signature)
         data = {
-            "event": event,
-            "email_id": email.pk,
-            "recipient": recipient,
-            "city": city,
-            "region": region,
-            "country": country,
-            "client-type": client_type,
-            "client-name": client_name,
-            "client-os": client_os,
-            "device-type": device_type,
-            "user-agent": user_agent,
-            "ip": ip_address,
+            "event-data": {
+                "event": event,
+                "timestamp": int(time.time()),
+                "ip": ip_address,
+                "user-variables": {
+                    "email_id": email.pk,
+                },
+                "recipient": recipient,
+                "geolocation": {
+                    "city": city,
+                    "region": region,
+                    "country": country,
+                },
+                "client-info": {
+                    "client-type": client_type,
+                    "client-name": client_name,
+                    "client-os": client_os,
+                    "device-type": device_type,
+                    "user-agent": user_agent,
+                },
+            },
+            "signature": signature,
         }
-        self.sign(data)
-        request = self.factory.post(reverse("mailgun-opened"), data)
+        request = self.factory.post(
+            reverse("mailgun-opened"), data, content_type="application/json"
+        )
         opened(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
@@ -375,9 +401,19 @@ class TestMailgunViewWebHooks(TestMailgunViews):
 
         comm = FOIACommunicationFactory()
         email = comm.emails.first()
-        data = {"event": "delivered", "email_id": email.pk}
-        self.sign(data)
-        request = self.factory.post(reverse("mailgun-delivered"), data)
+        signature = {}
+        self.sign(signature)
+        data = {
+            "event-data": {
+                "event": "delivered",
+                "timestamp": int(time.time()),
+                "user-variables": {"email_id": email.pk},
+            },
+            "signature": signature,
+        }
+        request = self.factory.post(
+            reverse("mailgun-delivered"), data, content_type="application/json"
+        )
         delivered(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
