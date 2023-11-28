@@ -30,11 +30,11 @@ class FOIAConfig(AppConfig):
         FOIARequest = self.get_model("FOIARequest")
         FOIACommunication = self.get_model("FOIACommunication")
         FOIANote = self.get_model("FOIANote")
-        FOIALog = self.get_model("FOIALog")
+        FOIALogEntry = self.get_model("FOIALogEntry")
         action.register(FOIARequest)
         action.register(FOIACommunication)
         action.register(FOIANote)
         search.register(FOIARequest.objects.get_public())
-        search.register(FOIALog)
+        search.register(FOIALogEntry)
         # monkey patch the word_split regex so urlize works better
         django.utils.html.word_split_re = re.compile(r'([\s<>\(\)\[\]"\']+)')

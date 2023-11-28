@@ -42,7 +42,7 @@ from muckrock.core.views import (
     MRSearchFilterListView,
 )
 from muckrock.foia.filters import FOIAFileFilterSet
-from muckrock.foia.models import FOIAFile, FOIALog, FOIATemplate
+from muckrock.foia.models import FOIAFile, FOIALogEntry, FOIATemplate
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
@@ -96,9 +96,9 @@ def detail(request, jurisdiction, jidx, slug, idx):
     )
 
     foia_logs = (
-        FOIALog.objects.filter(agency=agency)
+        FOIALogEntry.objects.filter(foia_log__agency=agency)
         .order_by("-date_requested")
-        .select_related("agency__jurisdiction")
+        .select_related("foia_log__agency__jurisdiction")
     )
 
     if request.method == "POST":
