@@ -3,6 +3,7 @@ Digest objects for the messages app
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import DurationField, F, Q
 from django.db.models.functions import Cast, Now
@@ -16,6 +17,7 @@ from datetime import date, timedelta
 # Third Party
 from actstream.models import Action
 from dateutil.relativedelta import relativedelta
+from zenpy import Zenpy
 
 # MuckRock
 from muckrock.accounts.models import Notification, Statistics
@@ -506,6 +508,24 @@ class StaffDigest(Digest):
         ]
         return {k: getattr(stats, k) for k in keys}
 
+    def get_tickets(self):
+        """Get ZenDesk ticket data"""
+        client = Zenpy(
+            email=settings.ZENDESK_EMAIL,
+            subdomain=settings.ZENDESK_SUBDOMAIN,
+            token=settings.ZENDESK_TOKEN,
+        )
+        tickets = {}
+        response = client.search(
+            type="ticket",
+            status="open",
+            created_less_than=timezone.now() - timedelta(days=14),
+        )
+        tickets["two_weeks"] = response.count
+        response = client.search(type="ticket", status="open")
+        tickets["all"] = response.count
+        return tickets
+
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
         context = super().get_context_data(*args)
@@ -520,6 +540,7 @@ class StaffDigest(Digest):
         context["crowdfunds"] = self.get_crowdfunds()
         context["projects"] = self.get_projects()
         context["checks"] = self.get_checks()
+        context["tickets"] = self.get_tickets()
         return context
 
     def send(self, fail_silently=False):
