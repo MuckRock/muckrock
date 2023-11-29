@@ -194,6 +194,22 @@
     </tbody>
   </table>
 {% endif %}
+
+<h1>Tickets</h1>
+<table>
+    <tbody>
+        <tr>
+            <td>Total open</td>
+            <td>{{ tickets.all }}</td>
+        </tr>
+        <tr>
+            <td>Open more than 2 weeks</td>
+            <td>{{ tickets.two_weeks }}</td>
+        </tr>
+    </tbody>
+</table>
+
+
 {% if stats %}
 <h1>Users</h1>
 <table>
