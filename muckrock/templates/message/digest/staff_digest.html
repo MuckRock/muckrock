@@ -7,6 +7,9 @@
   {% for task_type, tasks in stale_tasks.items %}
     {% if tasks %}
       <h2>{{ task_type }}</h2>
+      {% if task_type == "Processing Requests" %}
+        <p>Goal: Keep processing days under 7 days.</p>
+      {% endif %}
       <ul>
         {% for task in tasks %}
           <li>
