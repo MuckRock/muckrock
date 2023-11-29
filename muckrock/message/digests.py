@@ -369,9 +369,6 @@ class StaffDigest(Digest):
                 False,
             ),
             ("user", "Users Filed", "total_users_filed", True),
-            ("user", "Users", "total_users", True),
-            ("user", "Pro Users", "pro_users", True),
-            ("user", "Active Org Members", "total_active_org_members", True),
         ]
         for section, name, stat, growth in stats:
             data[section].append(
