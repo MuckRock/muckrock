@@ -58,17 +58,17 @@ register_signal(client)
 
 
 @periodic_task(
-    run_every=crontab(hour=0, minute=30),
+    run_every=crontab(hour=7, minute=30),
     name="muckrock.accounts.tasks.store_statistics",
 )
 def store_statistics():
     """Store the daily statistics"""
     # pylint: disable=too-many-statements
 
-    midnight = time(tzinfo=timezone.get_current_timezone())
-    today_midnight = datetime.combine(date.today(), midnight)
+    cutoff_time = time(hour=7, tzinfo=timezone.get_current_timezone())
+    today_time = datetime.combine(date.today(), cutoff_time)
     yesterday = date.today() - timedelta(1)
-    yesterday_midnight = today_midnight - timedelta(1)
+    yesterday_time = today_time - timedelta(1)
 
     kwargs = {}
     kwargs["date"] = yesterday
@@ -120,19 +120,19 @@ def store_statistics():
         status="filed"
     ).count()
     kwargs["sent_communications_portal"] = PortalCommunication.objects.filter(
-        communication__datetime__range=(yesterday_midnight, today_midnight),
+        communication__datetime__range=(yesterday_time, today_time),
         communication__response=False,
     ).count()
     kwargs["sent_communications_email"] = EmailCommunication.objects.filter(
-        communication__datetime__range=(yesterday_midnight, today_midnight),
+        communication__datetime__range=(yesterday_time, today_time),
         communication__response=False,
     ).count()
     kwargs["sent_communications_fax"] = FaxCommunication.objects.filter(
-        communication__datetime__range=(yesterday_midnight, today_midnight),
+        communication__datetime__range=(yesterday_time, today_time),
         communication__response=False,
     ).count()
     kwargs["sent_communications_mail"] = MailCommunication.objects.filter(
-        communication__datetime__range=(yesterday_midnight, today_midnight),
+        communication__datetime__range=(yesterday_time, today_time),
         communication__response=False,
     ).count()
 
@@ -240,31 +240,31 @@ def store_statistics():
         FOIARequest.objects.filter(
             composer__organization__entitlement__slug="professional"
         )
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .exclude_org_users()
         .count()
     )
     kwargs["daily_requests_basic"] = (
         FOIARequest.objects.filter(composer__organization__entitlement__slug="free")
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .exclude_org_users()
         .count()
     )
     kwargs["daily_requests_beta"] = (
         FOIARequest.objects.filter(composer__organization__entitlement__slug="beta")
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .exclude_org_users()
         .count()
     )
     kwargs["daily_requests_proxy"] = (
         FOIARequest.objects.filter(composer__organization__entitlement__slug="proxy")
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .exclude_org_users()
         .count()
     )
     kwargs["daily_requests_admin"] = (
         FOIARequest.objects.filter(composer__organization__entitlement__slug="admin")
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .exclude_org_users()
         .count()
     )
@@ -272,7 +272,7 @@ def store_statistics():
         FOIARequest.objects.filter(
             composer__organization__entitlement__slug="organization"
         )
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .count()
     )
     kwargs["daily_requests_other"] = (
@@ -286,11 +286,11 @@ def store_statistics():
                 "organization",
             ]
         )
-        .get_submitted_range(yesterday_midnight, today_midnight)
+        .get_submitted_range(yesterday_time, today_time)
         .count()
     )
     kwargs["daily_articles"] = Article.objects.filter(
-        pub_date__range=(yesterday_midnight, today_midnight)
+        pub_date__range=(yesterday_time, today_time)
     ).count()
     kwargs["orphaned_communications"] = FOIACommunication.objects.filter(
         foia=None
@@ -375,8 +375,8 @@ def store_statistics():
     )
     kwargs["total_deferred_portal_tasks"] = PortalTask.objects.get_deferred().count()
     kwargs["daily_robot_response_tasks"] = ResponseTask.objects.filter(
-        date_done__gte=yesterday_midnight,
-        date_done__lt=today_midnight,
+        date_done__gte=yesterday_time,
+        date_done__lt=today_time,
         resolved_by__username="mlrobot",
     ).count()
     kwargs["flag_processing_days"] = FlaggedTask.objects.get_processing_days()
