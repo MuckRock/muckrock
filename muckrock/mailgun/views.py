@@ -117,7 +117,11 @@ def mailgun_verify(function):
     @wraps(function)
     def wrapper(request):
         """Wrapper"""
-        if _verify(request.POST):
+        if request.content_type == "application/json":
+            data = json.loads(request.body.decode("utf8"))
+        else:
+            data = request.POST
+        if _verify(data):
             return function(request)
         else:
             return HttpResponseForbidden()
@@ -140,8 +144,9 @@ def get_common_webhook_params(allow_empty_email=False):
 
         def wrapper_legacy(request):
             """Wrapper"""
-            email_id = request.POST.get("email_id")
-            timestamp = request.POST["timestamp"]
+            data = json.loads(request.body.decode("utf8"))
+            email_id = data["event-data"]["user-variables"].get("email_id")
+            timestamp = data["event-data"]["timestamp"]
             timestamp = datetime.fromtimestamp(
                 int(timestamp), tz=timezone.get_current_timezone()
             )
@@ -155,7 +160,7 @@ def get_common_webhook_params(allow_empty_email=False):
                 function(request, email_comm, timestamp)
             else:
                 logger.warning(
-                    "No email comm for %s webhook: %s", function.__name__, request.POST
+                    "No email comm for %s webhook: %s", function.__name__, data
                 )
 
             return HttpResponse("OK")
@@ -451,34 +456,19 @@ def _find_likely_bounce(subject):
 
 @mailgun_verify
 @csrf_exempt
-@get_common_webhook_params(allow_empty_email=True)
+@get_common_webhook_params()
 def bounces(request, email_comm, timestamp):
     """Notify when an email is bounced or dropped"""
 
-    if email_comm is None:
-        # This was an email to a user, it will be handled by squarelet
-        return
-
-    if "event-data" in request.POST:
-        data = request.POST["event-data"]
-        recipient = data.get("recipient", "")
-        event = data.get("severity", "")
-        status = data.get("delivery-status", {})
-        # the keys might exist with contents as NULL
-        error = status.get("message") or status.get("description") or ""
-        code = status.get("code", "")
-        reason = data.get("reason", "")
-    else:
-        recipient = request.POST.get("recipient", "")
-        event = request.POST.get("event", "")
-        if event == "bounced":
-            error = request.POST.get("error", "")
-        elif event == "dropped":
-            error = request.POST.get("description", "")
-        else:
-            error = ""
-        code = request.POST.get("code", "")
-        reason = request.POST.get("reason", "")
+    data = json.loads(request.body.decode("utf8"))
+    event_data = data["event-data"]
+    recipient = event_data.get("recipient", "")
+    event = event_data.get("severity", "")
+    status = event_data.get("delivery-status", {})
+    # the keys might exist with contents as NULL
+    error = status.get("message") or status.get("description") or ""
+    code = status.get("code", "")
+    reason = event_data.get("reason", "")
 
     recipient = EmailAddress.objects.fetch(recipient)
     EmailError.objects.create(
@@ -525,43 +515,26 @@ def bounces(request, email_comm, timestamp):
 @get_common_webhook_params()
 def opened(request, email_comm, timestamp):
     """Notify when an email has been opened or clicked"""
-    if "event-data" in request.POST:
-        event_data = request.POST.get("event-data", {})
-        geolocation = event_data.get("geolocation", {})
-        client_info = event_data.get("client-info", {})
-        recipient = EmailAddress.objects.fetch(event_data.get("recipient", ""))
-        EmailOpen.objects.create(
-            email=email_comm,
-            datetime=timestamp,
-            recipient=recipient,
-            event=event_data.get("event", ""),
-            city=geolocation.get("city", ""),
-            region=geolocation.get("region", ""),
-            country=geolocation.get("country", ""),
-            client_type=client_info.get("client-type", ""),
-            client_name=client_info.get("client-name", ""),
-            client_os=client_info.get("client-os", ""),
-            device_type=client_info.get("device-type", ""),
-            user_agent=client_info.get("user-agent", "")[:255],
-            ip_address=event_data.get("ip", ""),
-        )
-    else:
-        recipient = EmailAddress.objects.fetch(request.POST.get("recipient", ""))
-        EmailOpen.objects.create(
-            email=email_comm,
-            datetime=timestamp,
-            recipient=recipient,
-            event=request.POST.get("event", ""),
-            city=request.POST.get("city", ""),
-            region=request.POST.get("region", ""),
-            country=request.POST.get("country", ""),
-            client_type=request.POST.get("client-type", ""),
-            client_name=request.POST.get("client-name", ""),
-            client_os=request.POST.get("client-os", ""),
-            device_type=request.POST.get("device-type", ""),
-            user_agent=request.POST.get("user-agent", "")[:255],
-            ip_address=request.POST.get("ip", ""),
-        )
+    data = json.loads(request.body.decode("utf8"))
+    event_data = data.get("event-data", {})
+    geolocation = event_data.get("geolocation", {})
+    client_info = event_data.get("client-info", {})
+    recipient = EmailAddress.objects.fetch(event_data.get("recipient", ""))
+    EmailOpen.objects.create(
+        email=email_comm,
+        datetime=timestamp,
+        recipient=recipient,
+        event=event_data.get("event", ""),
+        city=geolocation.get("city", ""),
+        region=geolocation.get("region", ""),
+        country=geolocation.get("country", ""),
+        client_type=client_info.get("client-type", ""),
+        client_name=client_info.get("client-name", ""),
+        client_os=client_info.get("client-os", ""),
+        device_type=client_info.get("device-type", ""),
+        user_agent=client_info.get("user-agent", "")[:255],
+        ip_address=event_data.get("ip", ""),
+    )
 
 
 @mailgun_verify
@@ -678,6 +651,7 @@ def _verify(post):
     """Verify that the message is from mailgun"""
     # is no signature data is present, fail verification
     if "signature" not in post:
+        logger.warning("[MAILGUN VERIFY] missing signature")
         return False
     # the signature data includes three values, token, timestamp and signature
     # these may all be at the top level data, or in a sub-dictionary under signature
