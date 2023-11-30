@@ -73,4 +73,8 @@ ANYMAIL = {
     "MAILGUN_SENDER_DOMAIN": os.environ.get(
         "MAILGUN_SENDER_DOMAIN", MAILGUN_SERVER_NAME
     ),
+    "SEND_DEFAULTS": {
+        "track_clicks": True,
+        "track_opens": True,
+    },
 }
