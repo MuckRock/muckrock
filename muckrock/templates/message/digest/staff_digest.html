@@ -3,6 +3,16 @@
 
 {% block body %}
 <p>{{ salutation }}, {{ user.profile.full_name }}.</p>
+
+
+{% for stat in stats.request %}
+  {% if stat.name == "Flags" and stat.current > 0 %}
+    <h1 class="red">
+      Total flags is greater than 0, check ZenDesk integration is working!
+    </h1>
+  {% endif %}
+{% endfor %}
+
 {% if stale_tasks_show %}
   <h1>Stale Tasks</h1>
   {% for task_type, tasks in stale_tasks.items %}
