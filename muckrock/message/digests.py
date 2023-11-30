@@ -523,6 +523,17 @@ class StaffDigest(Digest):
         tickets["all"] = response.count
         return tickets
 
+    def get_scans(self):
+        """Get last scan date"""
+        last_scanned = (
+            MailCommunication.objects.order_by("-communication__datetime")
+            .filter(communication__response=True)
+            .first()
+            .communication.datetime
+        )
+        delta = timezone.now() - last_scanned
+        return delta.days
+
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
         context = super().get_context_data(*args)
@@ -538,6 +549,7 @@ class StaffDigest(Digest):
         context["projects"] = self.get_projects()
         context["checks"] = self.get_checks()
         context["tickets"] = self.get_tickets()
+        context["last_scanned"] = self.get_scans()
         return context
 
     def send(self, fail_silently=False):
