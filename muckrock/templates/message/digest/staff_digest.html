@@ -13,6 +13,9 @@
   {% endif %}
 {% endfor %}
 
+<h1>Last Scan</h1>
+<p>{{ last_scanned }} day{{ last_scanned|pluralize }} ago.</p>
+
 {% if stale_tasks_show %}
   <h1>Stale Tasks</h1>
   {% for task_type, tasks in stale_tasks.items %}
