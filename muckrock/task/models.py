@@ -121,7 +121,6 @@ class Task(models.Model):
         return user.is_staff
 
     def create_zendesk_ticket(self, note, email):
-        print("zendesk")
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
             subdomain=settings.ZENDESK_SUBDOMAIN,
@@ -134,7 +133,6 @@ class Task(models.Model):
             f"Note: {note}\n\n"
             f"{self.get_ticket_info()}"
         )
-        print("description", description)
 
         ticket_data = {
             "subject": self.__class__.__name__,
@@ -144,7 +142,6 @@ class Task(models.Model):
             "status": "new",
             "tags": ["tasks"],
         }
-        print(ticket_data)
 
         user_data = {"name": "MuckRock Task"}
         user = client.users.create_or_update(ZenUser(**user_data))
@@ -154,7 +151,6 @@ class Task(models.Model):
 
         self.zendesk_ticket_id = ticket_audit.ticket.id
         self.save()
-        print(self.zendesk_ticket_id)
 
         return self.zendesk_ticket_id
 

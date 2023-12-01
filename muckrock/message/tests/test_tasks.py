@@ -48,6 +48,7 @@ class TestStaffTask(TestCase):
     def setUp(self):
         self.staff_user = UserFactory(is_staff=True)
 
+    @mock.patch("muckrock.message.digests.Zenpy", mock.Mock())
     @mock.patch("muckrock.message.digests.StaffDigest.send")
     def test_staff_digest_task(self, mock_send):
         """Make sure the send method is called with the staff user."""

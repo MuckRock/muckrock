@@ -525,14 +525,17 @@ class StaffDigest(Digest):
 
     def get_scans(self):
         """Get last scan date"""
-        last_scanned = (
+        last_scanned_comm = (
             MailCommunication.objects.order_by("-communication__datetime")
             .filter(communication__response=True)
             .first()
-            .communication.datetime
         )
-        delta = timezone.now() - last_scanned
-        return delta.days
+        if last_scanned_comm is not None:
+            last_scanned = last_scanned_comm.communication.datetime
+            delta = timezone.now() - last_scanned
+            return delta.days
+        else:
+            return None
 
     def get_context_data(self, *args):
         """Adds classified activity to the context"""
