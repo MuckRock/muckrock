@@ -377,7 +377,7 @@ def store_statistics():
     kwargs["daily_robot_response_tasks"] = ResponseTask.objects.filter(
         date_done__gte=yesterday_time,
         date_done__lt=today_time,
-        resolved_by__username="mlrobot",
+        resolved_by__username="gloo",
     ).count()
     kwargs["flag_processing_days"] = FlaggedTask.objects.get_processing_days()
     kwargs["unresolved_snailmail_appeals"] = (

@@ -51,3 +51,6 @@ warnings.filterwarnings(
 )
 
 CLEAN_S3_ON_FOIA_DELETE = False
+
+# do not use external apis during test
+ZENDESK_TOKEN = "token"

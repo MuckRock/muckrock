@@ -14,6 +14,7 @@ from datetime import date
 import nose.tools
 from actstream.actions import follow
 from dateutil.relativedelta import relativedelta
+from mock import Mock, patch
 
 # MuckRock
 from muckrock.core.factories import (
@@ -132,11 +133,13 @@ class TestStaffDigest(TestCase):
         StatisticsFactory(date=week_before_yesterday)
         StatisticsFactory(date=month_before_yesterday)
 
+    @patch("muckrock.message.digests.Zenpy", Mock())
     def test_send(self):
         """The digest should send to staff members without errors."""
         digest = digests.StaffDigest(user=self.user)
         eq_(digest.send(), 1)
 
+    @patch("muckrock.message.digests.Zenpy", Mock())
     def test_not_staff(self):
         """The digest should not send to users who are not staff."""
         not_staff = UserFactory()
