@@ -1376,6 +1376,7 @@ class FOIARequest(models.Model):
         self.deleted = True
         self.embargo = True
         self.permanent_embargo = True
+        self.disable_autofollowups = True
         self.status = "abandoned"
         self.save()
 
