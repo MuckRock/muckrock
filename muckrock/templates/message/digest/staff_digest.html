@@ -1,17 +1,34 @@
 {% extends 'message/base.html' %}
+{% load humanize %}
 
 {% block body %}
 <p>{{ salutation }}, {{ user.profile.full_name }}.</p>
+
+
+{% for stat in stats.request %}
+  {% if stat.name == "Flags" and stat.current > 0 %}
+    <h1 class="red">
+      Total flags is greater than 0, check ZenDesk integration is working!
+    </h1>
+  {% endif %}
+{% endfor %}
+
+<h1>Last Scan</h1>
+<p>{{ last_scanned }} day{{ last_scanned|pluralize }} ago.</p>
+
 {% if stale_tasks_show %}
   <h1>Stale Tasks</h1>
   {% for task_type, tasks in stale_tasks.items %}
     {% if tasks %}
       <h2>{{ task_type }}</h2>
+      {% if task_type == "Processing Requests" %}
+        <p>Goal: Keep processing days under 7 days.</p>
+      {% endif %}
       <ul>
         {% for task in tasks %}
           <li>
             <a href="{{ task.get_absolute_url }}">{{ task.display|default:task }}</a><br>
-            <small>{{ task.days_old }} days old</small>
+            <small>{{ task.days_old|intcomma }} days old</small>
           </li>
         {% endfor %}
       </ul>
@@ -35,14 +52,14 @@
         {% for stat in stats.request %}
         <tr>
             <td>{{ stat.name }}</td>
-            <td>{{ stat.current }}</td>
+            <td>{{ stat.current|intcomma }}</td>
             {% if stat.delta > 0 %}
                 {% if stat.growth %}
                     <td class="green">
                 {% else %}
                     <td class="red">
                 {% endif %}
-                +{{ stat.delta }}
+                +{{ stat.delta|intcomma }}
                 </td>
             {% elif stat.delta < 0 %}
                 {% if stat.growth %}
@@ -50,10 +67,10 @@
                 {% else %}
                     <td class="green">
                 {% endif %}
-                {{ stat.delta }}
+                {{ stat.delta|intcomma }}
                 </td>
             {% else %}
-                <td>{{ stat.delta }}</td>
+                <td>{{ stat.delta|intcomma }}</td>
             {% endif %}
             {% if stat.delta_week > 0 %}
                 {% if stat.growth %}
@@ -61,7 +78,7 @@
                 {% else %}
                     <td class="red">
                 {% endif %}
-                +{{ stat.delta_week }}
+                +{{ stat.delta_week|intcomma }}
                 </td>
             {% elif stat.delta_week < 0 %}
                 {% if stat.growth %}
@@ -69,10 +86,10 @@
                 {% else %}
                     <td class="green">
                 {% endif %}
-                {{ stat.delta_week }}
+                {{ stat.delta_week|intcomma }}
                 </td>
             {% else %}
-                <td>{{ stat.delta_week }}</td>
+                <td>{{ stat.delta_week|intcomma }}</td>
             {% endif %}
             {% if stat.delta_month > 0 %}
                 {% if stat.growth %}
@@ -80,7 +97,7 @@
                 {% else %}
                     <td class="red">
                 {% endif %}
-                +{{ stat.delta_month }}
+                +{{ stat.delta_month|intcomma }}
                 </td>
             {% elif stat.delta_month < 0 %}
                 {% if stat.growth %}
@@ -88,10 +105,10 @@
                 {% else %}
                     <td class="green">
                 {% endif %}
-                {{ stat.delta_month }}
+                {{ stat.delta_month|intcomma }}
                 </td>
             {% else %}
-                <td>{{ stat.delta_month }}</td>
+                <td>{{ stat.delta_month|intcomma }}</td>
             {% endif %}
         </tr>
         {% endfor %}
@@ -104,11 +121,11 @@
     <tbody>
         <tr>
             <td>Sent</td>
-            <td>{{ comms.sent }}</td>
+            <td>{{ comms.sent|intcomma }}</td>
         </tr>
         <tr>
             <td>Received</td>
-            <td>{{ comms.received }}</td>
+            <td>{{ comms.received|intcomma }}</td>
         </tr>
     </tbody>
 </table>
@@ -166,34 +183,50 @@
     <tbody>
       <tr>
         <td>Email</td>
-        <td>{{ confirm.email_communications_weekly_confirmed }}</td>
-        <td>{{ confirm.email_communications_weekly_total }}</td>
+        <td>{{ confirm.email_communications_weekly_confirmed|intcomma }}</td>
+        <td>{{ confirm.email_communications_weekly_total|intcomma }}</td>
         <td>{% widthratio confirm.email_communications_weekly_confirmed confirm.email_communications_weekly_total 100 %}%</td>
-        <td>{{ confirm.email_communications_weekly2_confirmed }}</td>
-        <td>{{ confirm.email_communications_weekly2_total }}</td>
+        <td>{{ confirm.email_communications_weekly2_confirmed|intcomma }}</td>
+        <td>{{ confirm.email_communications_weekly2_total|intcomma }}</td>
         <td>{% widthratio confirm.email_communications_weekly2_confirmed confirm.email_communications_weekly2_total 100 %}%</td>
       </tr>
       <tr>
         <td>Fax</td>
-        <td>{{ confirm.fax_communications_weekly_confirmed }}</td>
-        <td>{{ confirm.fax_communications_weekly_total }}</td>
+        <td>{{ confirm.fax_communications_weekly_confirmed|intcomma }}</td>
+        <td>{{ confirm.fax_communications_weekly_total|intcomma }}</td>
         <td>{% widthratio confirm.fax_communications_weekly_confirmed confirm.fax_communications_weekly_total 100 %}%</td>
-        <td>{{ confirm.fax_communications_weekly2_confirmed }}</td>
-        <td>{{ confirm.fax_communications_weekly2_total }}</td>
+        <td>{{ confirm.fax_communications_weekly2_confirmed|intcomma }}</td>
+        <td>{{ confirm.fax_communications_weekly2_total|intcomma }}</td>
         <td>{% widthratio confirm.fax_communications_weekly2_confirmed confirm.fax_communications_weekly2_total 100 %}%</td>
       </tr>
       <tr>
         <td>Post</td>
-        <td>{{ confirm.mail_communications_weekly_confirmed }}</td>
-        <td>{{ confirm.mail_communications_weekly_total }}</td>
+        <td>{{ confirm.mail_communications_weekly_confirmed|intcomma }}</td>
+        <td>{{ confirm.mail_communications_weekly_total|intcomma }}</td>
         <td>{% widthratio confirm.mail_communications_weekly_confirmed confirm.mail_communications_weekly_total 100 %}%</td>
-        <td>{{ confirm.mail_communications_weekly2_confirmed }}</td>
-        <td>{{ confirm.mail_communications_weekly2_total }}</td>
+        <td>{{ confirm.mail_communications_weekly2_confirmed|intcomma }}</td>
+        <td>{{ confirm.mail_communications_weekly2_total|intcomma }}</td>
         <td>{% widthratio confirm.mail_communications_weekly2_confirmed confirm.mail_communications_weekly2_total 100 %}%</td>
       </tr>
     </tbody>
   </table>
 {% endif %}
+
+<h1>Tickets</h1>
+<table>
+    <tbody>
+        <tr>
+            <td>Total open</td>
+            <td>{{ tickets.all|intcomma }}</td>
+        </tr>
+        <tr>
+            <td>Open more than 2 weeks</td>
+            <td>{{ tickets.two_weeks|intcomma }}</td>
+        </tr>
+    </tbody>
+</table>
+
+
 {% if stats %}
 <h1>Users</h1>
 <table>
@@ -210,14 +243,14 @@
         {% for stat in stats.user %}
         <tr>
             <td>{{ stat.name }}</td>
-            <td>{{ stat.current }}</td>
+            <td>{{ stat.current|intcomma }}</td>
             {% if stat.delta > 0 %}
                 {% if stat.growth %}
                     <td class="green">
                 {% else %}
                     <td class="red">
                 {% endif %}
-                +{{ stat.delta }}
+                +{{ stat.delta|intcomma }}
                 </td>
             {% elif stat.delta < 0 %}
                 {% if stat.growth %}
@@ -225,10 +258,10 @@
                 {% else %}
                     <td class="green">
                 {% endif %}
-                {{ stat.delta }}
+                {{ stat.delta|intcomma }}
                 </td>
             {% else %}
-                <td>{{ stat.delta }}</td>
+                <td>{{ stat.delta|intcomma }}</td>
             {% endif %}
             {% if stat.delta_week > 0 %}
                 {% if stat.growth %}
@@ -236,7 +269,7 @@
                 {% else %}
                     <td class="red">
                 {% endif %}
-                +{{ stat.delta_week }}
+                +{{ stat.delta_week|intcomma }}
                 </td>
             {% elif stat.delta_week < 0 %}
                 {% if stat.growth %}
@@ -244,10 +277,10 @@
                 {% else %}
                     <td class="green">
                 {% endif %}
-                {{ stat.delta_week }}
+                {{ stat.delta_week|intcomma }}
                 </td>
             {% else %}
-                <td>{{ stat.delta_week }}</td>
+                <td>{{ stat.delta_week|intcomma }}</td>
             {% endif %}
             {% if stat.delta_month > 0 %}
                 {% if stat.growth %}
@@ -255,7 +288,7 @@
                 {% else %}
                     <td class="red">
                 {% endif %}
-                +{{ stat.delta_month }}
+                +{{ stat.delta_month|intcomma }}
                 </td>
             {% elif stat.delta_month < 0 %}
                 {% if stat.growth %}
@@ -263,10 +296,10 @@
                 {% else %}
                     <td class="green">
                 {% endif %}
-                {{ stat.delta_month }}
+                {{ stat.delta_month|intcomma }}
                 </td>
             {% else %}
-                <td>{{ stat.delta_month }}</td>
+                <td>{{ stat.delta_month|intcomma }}</td>
             {% endif %}
         </tr>
         {% endfor %}
