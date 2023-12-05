@@ -104,8 +104,8 @@ http {
 			proxy_pass http://app_server;
 		}
 
-		error_page 403 /403.html;
-		location = /403.html {
+		error_page 403 /403_nginx.html;
+		location = /403_nginx.html {
 			root /app/muckrock/templates/;
 			allow all;
 			internal;

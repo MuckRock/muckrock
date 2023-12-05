@@ -6,6 +6,7 @@ Tasks for the messages application.
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from django.conf import settings
 from django.contrib.auth.models import User
 
 # Standard Library
@@ -120,6 +121,9 @@ def monthly_digest():
 )
 def staff_digest():
     """Send out staff digest"""
+    if not settings.SEND_STAFF_DIGEST:
+        return
+
     staff_users = User.objects.filter(is_staff=True)
     for staff_user in staff_users:
         email = digests.StaffDigest(user=staff_user, subject="Daily Staff Digest")
