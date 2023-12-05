@@ -1,11 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Forbidden{% endblock %}
 
-<!doctype html>
-<html>
-  <head>
-    <title>Muckrock - Error 403</title>
-  </head>
-  <body style="background-color: #eee; padding: 0; margin: 0;">
-    <h1 style="text-align: center; font-family: verdana, helvetica, sans-serif; color: #222; background-color: #bdf; margin: 0; padding: 15px 0;">Error 403 - Forbidden</h1>
-    <p style="text-align: center; max-width: 600px; margin: 0 auto; font-family: verdana, helvetica, sans-serif; color: #444; margin-top: 25px;">Your IP address has been blocked due to suspicious activity.  If you are using a VPN, you may want to try a different host.  If you believe your IP address has been blocked in error, please contact <a href="info@muckrock.com">info@muckrock.com</a> with your information so we can restore your access.</p>
-  </body>
-</html>
+{% block content %}
+<section class="error-404">
+    <div class="error-404__page">
+        <p><mark class="redacted">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor</mark> Error <mark class="redacted">invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.At vero eos</mark> 403 <mark class="redacted"> et accusam et justoduo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctusest Lorem ipsum dolor sit amet.Lorem ipsum dolor sit amet,consetetur  </mark> Forbidden. <mark class="redacted">sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</mark><p>
+            <p><mark class="redacted">At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, nosea takimata sanctus est Lorem ipsum dolor sit amet.Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam no {% if not user.is_authenticated %}</mark> Need to <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}">sign in</a>? <mark class="redacted">{% else %}</mark> Need to <a href="{% url 'acct-logout' %}">sign out</a>? <mark class="redacted">{% endif %}numy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</mark></p>
+    </div>
+</section>
+{% endblock content %}
