@@ -6,7 +6,7 @@ Test the FOIA API
 from django.test import TestCase
 
 # Third Party
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
