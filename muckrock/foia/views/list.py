@@ -528,7 +528,8 @@ class MyProxyRequestList(UserPassesTestMixin, RequestList):
 
     def test_func(self):
         """User must be a proxy"""
-        return self.request.user.profile.proxy
+        user = self.request.user
+        return user.is_authenticated and user.profile.proxy
 
     def get_queryset(self):
         """Limit to just requests the user is a proxy for"""
