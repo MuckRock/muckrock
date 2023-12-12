@@ -485,6 +485,8 @@ def classify_status(task_pk, **kwargs):
                     mlrobot_status=status,
                     mlrobot_prob=str(int(100 * prob)),
                     task_url=settings.MUCKROCK_URL + resp_task.get_absolute_url(),
+                    request_url=settings.MUCKROCK_URL
+                    + resp_task.communication.foia.get_absolute_url(),
                     agency=str(resp_task.communication.foia.agency),
                     jurisdiction=str(resp_task.communication.foia.agency.jurisdiction),
                 )
