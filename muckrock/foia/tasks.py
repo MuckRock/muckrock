@@ -799,9 +799,12 @@ def autoimport():
             try:
                 foia_pks, file_datetime = parse_name(file_name)
             except ValueError as exc:
-                s3_copy(bucket, obj.key, "review/%s" % file_name)
-                s3_delete(bucket, obj.key)
                 log.append(str(exc))
+                try:
+                    s3_copy(bucket, obj.key, "review/%s" % file_name)
+                    s3_delete(bucket, obj.key)
+                except Exception as exc2:
+                    log.append(str(exc2))
                 continue
 
             for foia_pk in foia_pks:
@@ -856,6 +859,9 @@ def autoimport():
             "ERROR: Time limit exceeded, please check folder for "
             "undeleted uploads.  How big of a file did you put in there?"
         )
+        log.append("End Time: %s" % timezone.now())
+    except Exception as exc:
+        log.append(str(exc))
         log.append("End Time: %s" % timezone.now())
     finally:
         EmailMessage(
