@@ -41,6 +41,7 @@ from muckrock.foia.forms import (
     FOIAOwnerForm,
     RequestFeeForm,
     ResendForm,
+    StaffFOIANoteForm,
     TrackingNumberForm,
 )
 from muckrock.foia.forms.comms import AgencyPasscodeForm
@@ -243,7 +244,10 @@ class Detail(DetailView):
             context["admin_organizations"] = self.request.user.organizations.filter(
                 memberships__admin=True
             )
-        context["note_form"] = FOIANoteForm()
+        if self.request.user.is_staff:
+            context["note_form"] = StaffFOIANoteForm()
+        else:
+            context["note_form"] = FOIANoteForm()
         context["portal_form"] = PortalForm(foia=self.foia)
         context["resend_forms"] = self.resend_forms
         context["tracking_id_form"] = TrackingNumberForm()

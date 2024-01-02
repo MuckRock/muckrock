@@ -33,6 +33,7 @@ from muckrock.foia.serializers import (
     FOIARequestSerializer,
     IsOwner,
 )
+from muckrock.organization.models import Organization
 from muckrock.task.models import ResponseTask
 
 logger = logging.getLogger(__name__)
@@ -129,6 +130,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         """Do all of the data validation for request creation"""
         cleaned_data = {}
         cleaned_data["agencies"] = self._clean_agencies(data.get("agency", []))
+        cleaned_data["organization"] = self._clean_organization(
+            user, data.get("organization")
+        )
         (
             cleaned_data["embargo"],
             cleaned_data["permanent_embargo"],
@@ -161,6 +165,20 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         if not agencies:
             raise forms.ValidationError("At least one valid agency required")
         return agencies
+
+    def _clean_organization(self, user, slug):
+        """Get the correct organization"""
+        if not slug:
+            # default to the active organization
+            return user.profile.organization
+
+        try:
+            return Organization.objects.get(slug=slug, users=user)
+        except Organization.DoesNotExist:
+            raise forms.ValidationError(
+                f"The given organization slug {slug} did not match one of your "
+                "organizations"
+            )
 
     def _clean_embargo(self, user, embargo, permanent_embargo):
         """Clean embargo and permanent embargo"""
@@ -248,7 +266,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
         composer = FOIAComposer.objects.create(
             user=request.user,
-            organization=request.user.profile.organization,
+            organization=data["organization"],
             title=data["title"],
             slug=slugify(data["title"]) or "untitled",
             requested_docs=data["requested_docs"],

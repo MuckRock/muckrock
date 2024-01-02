@@ -207,7 +207,8 @@ class RecurringDonationAdmin(VersionAdmin):
 
 class StockResponseAdmin(VersionAdmin):
     model = StockResponse
-    list_display = ("title",)
+    list_display = ("title", "type")
+    list_filter = ("type",)
 
 
 admin.site.register(Statistics, StatisticsAdmin)

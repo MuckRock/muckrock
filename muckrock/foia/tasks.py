@@ -485,6 +485,8 @@ def classify_status(task_pk, **kwargs):
                     mlrobot_status=status,
                     mlrobot_prob=str(int(100 * prob)),
                     task_url=settings.MUCKROCK_URL + resp_task.get_absolute_url(),
+                    request_url=settings.MUCKROCK_URL
+                    + resp_task.communication.foia.get_absolute_url(),
                     agency=str(resp_task.communication.foia.agency),
                     jurisdiction=str(resp_task.communication.foia.agency.jurisdiction),
                 )
@@ -797,9 +799,12 @@ def autoimport():
             try:
                 foia_pks, file_datetime = parse_name(file_name)
             except ValueError as exc:
-                s3_copy(bucket, obj.key, "review/%s" % file_name)
-                s3_delete(bucket, obj.key)
                 log.append(str(exc))
+                try:
+                    s3_copy(bucket, obj.key, "review/%s" % file_name)
+                    s3_delete(bucket, obj.key)
+                except Exception as exc2:
+                    log.append(str(exc2))
                 continue
 
             for foia_pk in foia_pks:
@@ -854,6 +859,9 @@ def autoimport():
             "ERROR: Time limit exceeded, please check folder for "
             "undeleted uploads.  How big of a file did you put in there?"
         )
+        log.append("End Time: %s" % timezone.now())
+    except Exception as exc:
+        log.append(str(exc))
         log.append("End Time: %s" % timezone.now())
     finally:
         EmailMessage(

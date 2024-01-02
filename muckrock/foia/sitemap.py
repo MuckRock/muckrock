@@ -22,4 +22,10 @@ class FoiaSitemap(Sitemap):
             FOIARequest.objects.select_related("agency__jurisdiction")
             .exclude(noindex=True)
             .get_public()
+            .only(
+                "title",
+                "slug",
+                "agency__jurisdiction__id",
+                "agency__jurisdiction__slug",
+            )
         )

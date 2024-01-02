@@ -16,10 +16,8 @@ class QuestionConfig(AppConfig):
         # pylint: disable=invalid-name, import-outside-toplevel
         # Third Party
         from actstream import registry
-        from watson import search
 
         Question = self.get_model("Question")
         Answer = self.get_model("Answer")
         registry.register(Question)
         registry.register(Answer)
-        search.register(Question)

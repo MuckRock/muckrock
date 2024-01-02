@@ -814,9 +814,7 @@ class FOIARequest(models.Model):
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
         backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
-        headers = {"X-Mailgun-Variables": {"email_id": email_comm.pk}}
-        if "headers" in kwargs:
-            headers.update(kwargs["headers"])
+        headers = kwargs.get("headers", {})
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
                 subject=comm.subject,
@@ -829,6 +827,7 @@ class FOIARequest(models.Model):
                 connection=email_connection,
             )
             msg.attach_alternative(linebreaks(escape(body)), "text/html")
+            msg.metadata = {"email_id": email_comm.pk}
             # atach all files from the latest communication
             comm.attach_files_to_email(msg)
 

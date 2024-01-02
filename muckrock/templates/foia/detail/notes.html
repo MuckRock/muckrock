@@ -31,6 +31,9 @@
       </header>
 
       {{ note_form.note }}
+      {% if user.is_staff %}
+        {% include 'lib/pattern/field.html' with field=note_form.stock_response %}
+      {% endif %}
       {% include 'lib/pattern/field.html' with field=note_form.notify %}
 
       <footer>

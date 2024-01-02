@@ -69,6 +69,20 @@ class FOIANoteForm(forms.ModelForm):
         widgets = {"note": forms.Textarea(attrs={"class": "prose-editor"})}
 
 
+class StaffFOIANoteForm(FOIANoteForm):
+    """A form note which supports stock responses"""
+
+    stock_response = forms.ModelChoiceField(
+        queryset=StockResponse.objects.filter(type="note"),
+        to_field_name="text",
+        required=False,
+    )
+
+    class Meta:
+        model = FOIANote
+        fields = ["note", "stock_response", "notify"]
+
+
 class FOIAAccessForm(forms.Form):
     """Form to add editors or viewers to a request."""
 
@@ -167,7 +181,7 @@ class FOIAContactUserForm(forms.Form):
 
     text = forms.CharField(widget=forms.Textarea)
     stock_response = forms.ModelChoiceField(
-        queryset=StockResponse.objects.all(),
+        queryset=StockResponse.objects.filter(type="user"),
         to_field_name="text",
         required=False,
     )
