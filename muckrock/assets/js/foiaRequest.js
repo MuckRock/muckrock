@@ -548,5 +548,8 @@ $(".raw-content-button").click(function(e) {
 
 
 $("#id_contact-stock_response").change(function() {
-  $("#id_contact-text").text($(this).val());
+  $("#id_contact-text").val($(this).val());
+});
+$("#id_stock_response").change(function() {
+  $("#id_note").val($(this).val());
 });
