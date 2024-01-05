@@ -32,42 +32,35 @@
         New Agency
       {% endif %}
     </td>
-    <td>
-      {% with zendesk_ticket_id=foia.portaltask_communications.0.open_portaltasks.0.zendesk_ticket_id %}
-        {% if zendesk_ticket_id %}
-          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
-            ZenDesk Ticket
-          </a>
-        {% endif %}
-      {% endwith %}
-      {% with zendesk_ticket_id=foia.snailmailtask_communications.0.open_snailmailtasks.0.zendesk_ticket_id %}
-        {% if zendesk_ticket_id %}
-          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
-            ZenDesk Ticket
-          </a>
-        {% endif %}
-      {% endwith %}
-      {% with zendesk_ticket_id=foia.composer.open_multirequesttasks.0.zendesk_ticket_id %}
-        {% if zendesk_ticket_id %}
-          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
-            ZenDesk Ticket
-          </a>
-        {% endif %}
-      {% endwith %}
-      {% with zendesk_ticket_id=foia.paymentinfotask_communications.0.open_paymentinfotasks.0.zendesk_ticket_id %}
-        {% if zendesk_ticket_id %}
-          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
-            ZenDesk Ticket
-          </a>
-        {% endif %}
-      {% endwith %}
-      {% with zendesk_ticket_id=foia.agency.open_newagencytasks.0.zendesk_ticket_id %}
-        {% if zendesk_ticket_id %}
-          <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
-            ZenDesk Ticket
-          </a>
-        {% endif %}
-      {% endwith %}
+    <td class="processing-zendesk-cell">
+      {% firstof foia.portaltask_communications.0.open_portaltasks.0.zendesk_ticket_id foia.snailmailtask_communications.0.open_snailmailtasks.0.zendesk_ticket_id foia.composer.open_multirequesttasks.0.zendesk_ticket_id foia.paymentinfotask_communications.0.open_paymentinfotasks.0.zendesk_ticket_id foia.agency.open_newagencytasks.0.zendesk_ticket_id  as zendesk_ticket_id %}
+      {% if zendesk_ticket_id %}
+        <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
+          ZenDesk Ticket
+        </a>
+      {% else %}
+        <form method="post">
+          {% csrf_token %}
+          {% if foia.portaltask_communications.0.open_portaltasks %}
+            <input type="hidden" name="zendesk_pk" value="{{ foia.portaltask_communications.0.open_portaltasks.0.pk }}">
+            <input type="hidden" name="zendesk_name" value="PortalTask">
+          {% elif foia.snailmailtask_communications.0.open_snailmailtasks %}
+            <input type="hidden" name="zendesk_pk" value="{{ foia.snailmailtask_communications.0.open_snailmailtasks.0.pk }}">
+            <input type="hidden" name="zendesk_name" value="SnailMailTask">
+          {% elif foia.composer.open_multirequesttasks %}
+            <input type="hidden" name="zendesk_pk" value="{{ foia.composer.open_multirequesttasks.0.pk }}">
+            <input type="hidden" name="zendesk_name" value="MultiRequestTask">
+          {% elif foia.paymentinfotask_communications.0.open_paymentinfotasks %}
+            <input type="hidden" name="zendesk_pk" value="{{ foia.paymentinfotask_communications.0.open_paymentinfotasks.0.pk }}">
+            <input type="hidden" name="zendesk_name" value="PaymentInfoTask">
+          {% elif foia.agency.open_newagencytasks %}
+            <input type="hidden" name="zendesk_pk" value="{{ foia.agency.open_newagencytasks.0.pk }}">
+            <input type="hidden" name="zendesk_name" value="NewAgencyTask">
+          {% endif %}
+          <input type="text" name="zendesk_note" placeholder="ZenDesk note...">
+          <button type="submit" class="small primary button">Create Ticket</button>
+        </form>
+      {% endif %}
     </td>
     <td>
       {% if foia.portaltask_communications.0.open_portaltasks %}

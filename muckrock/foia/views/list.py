@@ -60,6 +60,7 @@ from muckrock.task.models import (
     ReviewAgencyTask,
     SnailMailTask,
 )
+from muckrock.task.tasks import create_generic_ticket
 
 
 class RequestExploreView(TemplateView):
@@ -652,6 +653,24 @@ class ProcessingRequestList(BaseProcessingRequestList):
 
     def get_queryset(self):
         return super().get_queryset().filter(status="submitted")
+
+    def post(self, request, *args, **kwargs):
+        # handle ZenDesk ticket creation
+        if "zendesk_pk" in request.POST:
+            create_generic_ticket.delay(
+                request.POST["zendesk_pk"],
+                request.POST["zendesk_name"],
+                request.POST.get("zendesk_note", ""),
+                request.user.email,
+            )
+            messages.success(request, "Creating ZenDesk Ticket...")
+            return redirect(
+                "{}?{}".format(
+                    reverse(request.resolver_match.view_name), request.GET.urlencode()
+                )
+            )
+        else:
+            return super().post(request, *args, **kwargs)
 
 
 class PortalProcessingRequestList(BaseProcessingRequestList):
