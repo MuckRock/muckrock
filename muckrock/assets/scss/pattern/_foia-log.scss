@@ -95,7 +95,7 @@
 
 .foia-log-explore {
     & .explore__header__wrapper {
-        padding: 6rem 0;
+        padding: 6rem 0 0;
         background-color: $color-yellow-light;
         mix-blend-mode: multiply;
         position: relative;
@@ -143,5 +143,63 @@
             text-align: center;
         }
     } 
+    & .browse {
+        border-top: 1px solid rgba($color-white, .35);
+        background: rgba($color-white, .1);
+        &--inner {
+            max-width: 72em;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 18em);
+            gap: $vr;
+            padding: $vr;
+        }
+        .agency-card {
+            width: 100%;
+            display: inline-block;
+            background-color: $color-white;
+            padding: $vr;
+            margin: 0;
+            position: relative;
+            @include border;
+            @include border-radius;
+            &__jurisdiction {
+                margin: 0;
+                font-weight: 500;
+                font-size: .875em;
+            }
+            &__name {
+                font-weight: bold;
+                margin-bottom: $vr/4;
+            }
+            &__releases {
+                overflow: visible;
+                &__count {
+                    display: list-item;
+                    margin-bottom: 0;
+                    font-weight: 500;
+                    font-size: .875em;
+                    cursor: pointer;
+                }
+                &__list {
+                    position: absolute;
+                    top: auto;
+                    width: 100%;
+                    margin-top: $vr/2;
+                    background: $color-white;
+                    width: 18em;
+                    padding: $vr;
+                    @include border;
+                    @include border-radius;
+                    @include box-shadow;
+                    z-index: 1;
+                    padding-left: 0;
+                    & ul {
+                        padding-left: 1.5*$vr;
+                    }
+                }
+            }
+        }
+    }
 }
 
