@@ -74,4 +74,7 @@ class FOIALogLanding(TemplateView):
             "log_count": FOIALogEntry.objects.count(),
             "agency_count": Agency.objects.with_logs().count(),
         }
+        context["browse"] = {
+            "agencies": Agency.objects.with_logs().select_related("jurisdiction")
+        }
         return context
