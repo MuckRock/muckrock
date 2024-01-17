@@ -150,17 +150,17 @@
             max-width: 72em;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, 18em);
+            grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
             gap: $vr;
             padding: $vr;
         }
         .agency-card {
             width: 100%;
+            max-width: 18em;
             display: inline-block;
             background-color: $color-white;
             padding: $vr;
             margin: 0;
-            position: relative;
             @include border;
             @include border-radius;
             &__jurisdiction {
@@ -197,6 +197,8 @@
                     & ul {
                         padding-left: 1.5*$vr;
                     }
+                    max-height: 25vh;
+                    overflow-y: auto;
                 }
             }
         }
