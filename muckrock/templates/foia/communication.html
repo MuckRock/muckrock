@@ -11,7 +11,7 @@
           {% else %}
             <a href="{{communication.foia.get_absolute_url}}#{{communication.anchor}}" class="permalink">
             {% endif %}
-            {% with datetime=communication.get_subcomm.sent_datetime|default:communication.datetime %}
+            {% with datetime=communication.datetime %}
               <time datetime="{{ datetime|date:'c' }}" class="date">
                 {{ datetime|date:"m/d/Y" }}
               </time>
@@ -70,17 +70,22 @@
         {% if communication.category and request.user.is_staff %}
           <span class="small badge">{{ communication.get_category_display }}</span>
         {% endif %}
-        {% if communication.get_delivered %}
-          <span class="small badge">
-            {% if request.user.is_staff and communication.verified %}
-              &check;
-            {% endif %}
-            {{ communication.get_delivered|capfirst }}
-            {% if request.user.is_staff and communication.verified %}
-              (Verified on {{ communication.verified.datetime|date }})
-            {% endif %}
-          </span>
-        {% endif %}
+        {% with delivered=communication.get_delivered %}
+          {% if delivered %}
+            <span class="small badge">
+              {% if request.user.is_staff and communication.verified %}
+                &check;
+              {% endif %}
+              {{ delivered|capfirst }}
+              {% if communication.response and delivered == "mail" %}
+                (Postmarked {{ communication.get_subcomm.sent_datetime|date }})
+              {% endif %}
+              {% if request.user.is_staff and communication.verified %}
+                (Verified on {{ communication.verified.datetime|date }})
+              {% endif %}
+            </span>
+          {% endif %}
+        {% endwith %}
       </span>
     </section>
     {% if request.user.is_staff and show_addrs %}

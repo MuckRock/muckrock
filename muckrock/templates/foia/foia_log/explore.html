@@ -27,6 +27,26 @@
 {% endblock %}
 
 {% block explore_main %}
+  <div class="browse">
+    <div class="browse--inner">
+      {%for agency in browse.agencies %}
+      <div class="agency-card">
+        <p class="agency-card__jurisdiction"><small>{{ agency.jurisdiction }}</small></p>
+        <p class="agency-card__name"><a href="{% url 'foia-logs-list' %}?agency={{ agency.pk }}">{{agency.name}}</a></p>
+        <details class="agency-card__releases">
+          <summary class="agency-card__releases__count">{{agency.foialog_set.count}} Log{{agency.foialog_set.count|pluralize}}</summary>
+          <div class="agency-card__releases__list">
+            <ul>
+          {% for release in agency.foialog_set.all %}
+            <li class="agency-card__release"><a href="{% url 'foia-logs-list' %}?agency={{agency.pk}}&amp;date_requested_min={{release.start_date|urlencode}}&amp;date_requested_max={{release.end_date|urlencode}}">{{release.start_date}} &ndash; {{release.end_date}}</a></li>
+          {% endfor %}
+            </ul>
+          </div>
+        </details>
+      </div>
+      {%endfor %}
+    </div>
+  </div>
   <div class="education">
     <h2>Improve your own requests by exploring what others asked for</h2>
     <div class="grid__row">

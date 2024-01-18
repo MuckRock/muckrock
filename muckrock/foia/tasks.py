@@ -417,32 +417,44 @@ def classify_status(task_pk, **kwargs):
 
     def resolve_gloo_if_possible(resp_task, extracted_data):
         """Resolve this response task if possible based off of ML setttings"""
-        if resp_task.predicted_status != "indeterminate":
-            try:
-                gloo_robot = User.objects.get(username="gloo")
-                values = {"status": resp_task.predicted_status}
-                resp_task.set_status(resp_task.predicted_status)
-                if extracted_data.trackingNumber:
-                    values["tracking_id"] = extracted_data.trackingNumber
-                    resp_task.set_tracking_id(extracted_data.trackingNumber)
-                if extracted_data.price:
-                    values["price"] = extracted_data.price
-                    resp_task.set_price(extracted_data.price)
-                if extracted_data.dateEstimate:
-                    try:
-                        resp_task.set_date_estimate(
-                            datetime.strptime(
-                                extracted_data.dateEstimate, "%Y-%m-%d"
-                            ).date()
-                        )
-                        values["date_estimate"] = extracted_data.dateEstimate
-                    except ValueError:
-                        # ignore the date estimate if it is the wrong format
-                        pass
 
-                resp_task.resolve(gloo_robot, values)
-            except User.DoesNotExist:
-                logger.error("gloo account does not exist")
+        # do not resolve the task if gloo cannot determine the correct status
+        if resp_task.predicted_status == "indeterminate":
+            return
+
+        # do not resolve the task if gloo classifies a communication as completed
+        # or partially completed without an attachment
+        if (
+            resp_task.predicted_status in ["done", "partial"]
+            and not resp_task.communication.files.exists()
+        ):
+            return
+
+        try:
+            gloo_robot = User.objects.get(username="gloo")
+            values = {"status": resp_task.predicted_status}
+            resp_task.set_status(resp_task.predicted_status)
+            if extracted_data.trackingNumber:
+                values["tracking_id"] = extracted_data.trackingNumber
+                resp_task.set_tracking_id(extracted_data.trackingNumber)
+            if extracted_data.price:
+                values["price"] = extracted_data.price
+                resp_task.set_price(extracted_data.price)
+            if extracted_data.dateEstimate:
+                try:
+                    resp_task.set_date_estimate(
+                        datetime.strptime(
+                            extracted_data.dateEstimate, "%Y-%m-%d"
+                        ).date()
+                    )
+                    values["date_estimate"] = extracted_data.dateEstimate
+                except ValueError:
+                    # ignore the date estimate if it is the wrong format
+                    pass
+
+            resp_task.resolve(gloo_robot, values)
+        except User.DoesNotExist:
+            logger.error("gloo account does not exist")
 
     try:
         resp_task = ResponseTask.objects.get(pk=task_pk)
