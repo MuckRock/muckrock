@@ -398,3 +398,10 @@ $task-padding: $vr/4 $vr/2;
         }
     }
 }
+
+/* Multi */
+
+.task__data.multirequest em {
+  font-style: inherit;
+  background: #fdfd96;
+}
