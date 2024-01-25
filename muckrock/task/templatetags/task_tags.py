@@ -103,6 +103,12 @@ class MultiRequestTaskNode(TaskNode):
     endpoint_name = "multirequest-task-list"
     class_name = "multirequest"
 
+    def get_extra_context(self):
+        """Adds MultiRequestTask-specific context"""
+        extra_context = super().get_extra_context()
+        extra_context["rejection_form"] = task.forms.MultiRequestRejectionForm()
+        return extra_context
+
 
 class NewAgencyTaskNode(TaskNode):
     """Renders a new agency task."""

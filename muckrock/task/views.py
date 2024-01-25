@@ -54,6 +54,7 @@ from muckrock.task.forms import (
     BulkNewAgencyTaskFormSet,
     FlaggedTaskForm,
     IncomingPortalForm,
+    MultiRequestRejectionForm,
     ProjectReviewTaskForm,
     ReplaceNewAgencyForm,
     ResponseTaskForm,
@@ -527,9 +528,16 @@ class MultiRequestTaskList(TaskList):
             task.resolve(request.user, {"action": "submit", "agencies": agency_list})
             messages.success(request, "Multirequest submitted")
         elif request.POST.get("action") == "reject":
+            form = MultiRequestRejectionForm(request.POST)
             task.reject()
             task.resolve(request.user, {"action": "reject"})
-            messages.error(request, "Multirequest rejected")
+            if form.is_valid():
+                form.send_message(task.composer)
+                messages.error(
+                    request, "Multirequest rejected - rejection message sent"
+                )
+            else:
+                messages.error(request, "Multirequest rejected")
         return super().task_post_helper(request, task)
 
 

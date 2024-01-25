@@ -114,6 +114,10 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.task__actions br.clear {
+  clear: both;
+}
+
 .task__main .form-data-table {
     width: 95%;
     margin: 10px auto;
@@ -397,4 +401,19 @@ $task-padding: $vr/4 $vr/2;
             display: inline-block;
         }
     }
+}
+
+/* Multi */
+
+.task__data.multirequest em {
+  font-style: inherit;
+  background: #fdfd96;
+}
+
+.multirequest.task .multi-reject-form {
+  margin-bottom: 0;
+  text-align: left;
+  label {
+    font-size: $size-2;
+  }
 }

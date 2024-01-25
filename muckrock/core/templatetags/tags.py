@@ -21,6 +21,7 @@ from email.parser import Parser
 import bleach
 import markdown
 import smartypants as _smartypants
+from constance import config
 from sorl.thumbnail.templatetags.thumbnail import thumbnail
 
 # MuckRock
@@ -470,3 +471,14 @@ def sorl_thumbnail(parser, token):
 def nbsp(value):
     """Replace spaces with non-breaking spaces"""
     return mark_safe("&nbsp;".join(value.split(" ")))
+
+
+@register.filter
+def moderation_hl(text):
+    """Highlight keywords which set off the moderation filter"""
+    for keyword in config.MODERATION_KEYWORDS.split("\n"):
+        compiled = re.compile(f"({re.escape(keyword)})", re.IGNORECASE)
+        text = compiled.sub(r"<em>\1</em>", text)
+    for regex in config.MODERATION_REGEX.split("\n"):
+        text = re.sub(rf"({regex})", r"<em>\1</em>", text)
+    return mark_safe(text)

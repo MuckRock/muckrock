@@ -553,3 +553,6 @@ $("#id_contact-stock_response").change(function() {
 $("#id_stock_response").change(function() {
   $("#id_note").val($(this).val());
 });
+$(".multirequest [name='stock_response']").change(function() {
+  $(this).siblings("textarea").val($(this).val());
+});
