@@ -13,6 +13,7 @@ from hmac import compare_digest
 from phonenumber_field.formfields import PhoneNumberField
 
 # MuckRock
+from muckrock.accounts.models import StockResponse
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.fields import EmptyLastModelChoiceField
@@ -197,6 +198,11 @@ class FOIAAdminFixForm(SendCommunicationForm):
     )
     subject = forms.CharField(max_length=255)
     comm = forms.CharField(label="Body", widget=forms.Textarea())
+    stock_response = forms.ModelChoiceField(
+        queryset=StockResponse.objects.filter(type="follow"),
+        to_field_name="text",
+        required=False,
+    )
 
     field_order = [
         "from_user",
@@ -206,6 +212,7 @@ class FOIAAdminFixForm(SendCommunicationForm):
         "fax",
         "subject",
         "comm",
+        "stock_response",
     ]
 
     def __init__(self, *args, **kwargs):
