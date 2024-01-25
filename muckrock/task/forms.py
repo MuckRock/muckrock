@@ -13,7 +13,7 @@ from dal import forward
 from dal_select2.widgets import ListSelect2
 
 # MuckRock
-from muckrock.accounts.models import Notification
+from muckrock.accounts.models import Notification, StockResponse
 from muckrock.agency.models import Agency
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.core import autocomplete
@@ -21,6 +21,7 @@ from muckrock.core.utils import generate_status_action
 from muckrock.foia.codes import CODE_CHOICES, CODES
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.message.email import TemplateEmail
 
 
 class FlaggedTaskForm(forms.Form):
@@ -334,6 +335,36 @@ class BulkNewAgencyTaskForm(forms.Form):
             attrs={"data-placeholder": "Search for jurisdiction", "data-width": "30%"},
         ),
     )
+
+
+class MultiRequestRejectionForm(forms.Form):
+    """Form for contacting the owner of a request about a multirequest rejection"""
+
+    text = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 6}),
+        label="Rejection message",
+    )
+    stock_response = forms.ModelChoiceField(
+        queryset=StockResponse.objects.filter(type="multi"),
+        to_field_name="text",
+        required=False,
+    )
+
+    def send_message(self, composer):
+        """Send the rejection message to the user"""
+        context = {
+            "text": self.cleaned_data["text"],
+            "foia_url": composer.user.profile.wrap_url(composer.get_absolute_url()),
+            "foia_title": composer.title,
+        }
+        email = TemplateEmail(
+            user=composer.user,
+            extra_context=context,
+            subject="Request Rejected",
+            text_template="message/notification/contact_user.txt",
+            html_template="message/notification/contact_user.html",
+        )
+        email.send(fail_silently=False)
 
 
 BulkNewAgencyTaskFormSet = forms.formset_factory(BulkNewAgencyTaskForm, extra=10)

@@ -583,8 +583,12 @@ class StockResponse(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField()
     type = models.CharField(
-        max_length=4,
-        choices=(("user", "Contact User"), ("note", "Note")),
+        max_length=5,
+        choices=(
+            ("user", "Contact User"),
+            ("note", "Note"),
+            ("multi", "Multirequest Rejection"),
+        ),
         default="user",
     )
 
