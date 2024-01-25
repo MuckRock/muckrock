@@ -556,3 +556,6 @@ $("#id_stock_response").change(function() {
 $(".multirequest [name='stock_response']").change(function() {
   $(this).siblings("textarea").val($(this).val());
 });
+$("#id_admin_fix-stock_response").change(function() {
+  $("#id_admin_fix-comm").val($(this).val());
+});
