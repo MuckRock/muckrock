@@ -1,6 +1,7 @@
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
 -e git+https://github.com/MuckRock/govqa-py@main#egg=govqa # for govqa integration
+baml # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
@@ -43,7 +44,6 @@ emoji # Stripe emoji's for pdf generation
 fpdf # Used to generate PDFs
 furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
-gloo-lib # For using gloo to use ChatGPT
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 ipython # better python shell
