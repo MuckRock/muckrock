@@ -65,7 +65,7 @@ def coverage(c, settings="test", reuse="0", codeship=False):
         "coverage erase",
         'coverage run --branch --source muckrock --omit="*/migrations/*" '
         f"manage.py test --settings=muckrock.settings.{settings}",
-        "coverage html -i",
+        # "coverage html -i",
     ]
     if codeship:
         for cmd in cmds:
