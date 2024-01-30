@@ -531,7 +531,7 @@ class MultiRequestTaskList(TaskList):
             form = MultiRequestRejectionForm(request.POST)
             task.reject()
             task.resolve(request.user, {"action": "reject"})
-            if form.is_valid():
+            if form.is_valid() and form.cleaned_data["text"]:
                 form.send_message(task.composer)
                 messages.error(
                     request, "Multirequest rejected - rejection message sent"
