@@ -58,7 +58,7 @@ def test(c, test_path="", reuse="0", capture=False, warning=False, failed=False)
 
 @task
 def test_codeship(c, v=1):
-    c.run(f"python manage.py test --settings=muckrock.settings.codeship -v={v}")
+    c.run(f"python manage.py test --settings=muckrock.settings.codeship -v {v}")
 
 
 @task
