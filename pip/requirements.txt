@@ -111,7 +111,6 @@ markdown==3.2.2           # via -r pip/requirements.in, pymdown-extensions
 memoize==1.0.0            # via -r pip/requirements.in
 multidict==6.0.4          # via aiohttp, yarl
 newrelic==2.70.0.51       # via -r pip/requirements.in
-numpy==1.24.4             # via pandas
 oauth2client==4.1.2       # via google-api-python-client
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 openai==0.28.0            # via baml
@@ -121,7 +120,6 @@ opentelemetry-sdk==1.22.0  # via baml
 opentelemetry-semantic-conventions==0.43b0  # via opentelemetry-sdk
 orderedmultidict==1.0.1   # via furl
 packaging==23.2           # via bleach, huggingface-hub, pytest
-pandas==1.4.4             # via -r pip/requirements.in
 parso==0.7.0              # via jedi
 pdfrw==0.4                # via -r pip/requirements.in
 pexpect==4.6.0            # via ipython
@@ -153,7 +151,7 @@ pypdf==3.4.0              # via -r pip/requirements.in
 pyphaxio==0.11            # via -r pip/requirements.in
 pytest==7.4.2             # via baml, pytest-asyncio
 pytest-asyncio==0.21.1    # via baml
-python-dateutil==2.8.2    # via -r pip/requirements.in, botocore, pandas, python-documentcloud, zenpy
+python-dateutil==2.8.2    # via -r pip/requirements.in, botocore, python-documentcloud, zenpy
 python-documentcloud==3.0.0  # via -r pip/requirements.in
 python-dotenv==1.0.1      # via baml
 python-jose==3.1.0        # via social-auth-core
@@ -161,7 +159,7 @@ python-levenshtein==0.12.2  # via -r pip/requirements.in
 python-redis-lock[django]==3.7.0  # via -r pip/requirements.in
 python-stdnum==1.13       # via django-localflavor
 python3-openid==3.2.0     # via social-auth-core
-pytz==2020.1              # via celery, djangorestframework, pandas, zenpy
+pytz==2020.1              # via celery, djangorestframework, zenpy
 pyyaml==6.0.1             # via huggingface-hub
 ratelimit==2.2.1          # via python-documentcloud
 raven==6.10.0             # via -r pip/requirements.in
