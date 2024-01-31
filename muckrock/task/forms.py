@@ -343,6 +343,7 @@ class MultiRequestRejectionForm(forms.Form):
     text = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 6}),
         label="Rejection message",
+        required=False,
     )
     stock_response = forms.ModelChoiceField(
         queryset=StockResponse.objects.filter(type="multi"),
