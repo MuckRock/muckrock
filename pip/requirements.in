@@ -7,7 +7,6 @@ bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
 celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
-dill # Used to serialize machine learning data
 django-activity-stream # Used for notifications
 django-anymail[mailgun] # Use for sending email on production
 django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
@@ -52,7 +51,6 @@ lob # sending mail via lob.com
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
 newrelic # Interface to newrelic service
-numpy # Used by machine learning
 pandas # Used by gloo
 pdfrw # Used for reading/writing PDFs for form filling in
 phonenumberslite # Library for validating and formatting phone numbers
@@ -75,8 +73,6 @@ redis # Redis integration - for use with celery
 reportlab # Used for adding text to PDFs for form filling in
 requests # HTTP for humans
 rules # Rule based permissions
-scikit-learn # Used for machine learning
-scipy # Used for machine learning
 scout-apm # performance monitoring
 simplejson # json decoder for requests
 smart-open # Use for streaming files from S3

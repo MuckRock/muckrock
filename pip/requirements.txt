@@ -40,7 +40,6 @@ cssutils==2.7.1           # via premailer
 decorator==4.3.0          # via ipython, traitlets
 defusedxml==0.7.0rc1      # via python3-openid, social-auth-core
 deprecated==1.2.14        # via opentelemetry-api
-dill==0.3.2               # via -r pip/requirements.in
 distro==1.9.0             # via anthropic
 django==4.2               # via -r pip/requirements.in, django-activity-stream, django-anymail, django-appconf, django-celery-email, django-choices, django-cors-headers, django-debug-toolbar, django-extensions, django-filter, django-hijack, django-localflavor, django-news-sitemaps, django-opensearch, django-phonenumber-field, django-picklefield, django-redis, django-reversion, django-sslify, django-storages, django-taggit, djangorestframework, dogslow, drf-nested-routers, easy-thumbnails, jsonfield
 django-activity-stream==1.4.2  # via -r pip/requirements.in
@@ -102,7 +101,6 @@ ipython==7.16.1           # via -r pip/requirements.in
 ipython-genutils==0.2.0   # via traitlets
 jedi==0.17.1              # via ipython
 jmespath==0.10.0          # via boto3, botocore
-joblib==0.16.0            # via scikit-learn
 json5==0.9.14             # via baml
 jsonfield==2.0.2          # via -r pip/requirements.in
 kombu==4.6.11             # via celery
@@ -113,7 +111,7 @@ markdown==3.2.2           # via -r pip/requirements.in, pymdown-extensions
 memoize==1.0.0            # via -r pip/requirements.in
 multidict==6.0.4          # via aiohttp, yarl
 newrelic==2.70.0.51       # via -r pip/requirements.in
-numpy==1.19.0             # via -r pip/requirements.in, pandas, scikit-learn, scipy
+numpy==1.24.4             # via pandas
 oauth2client==4.1.2       # via google-api-python-client
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 openai==0.28.0            # via baml
@@ -177,8 +175,6 @@ rjsmin==1.2.1             # via django-compressor
 rsa==3.4.2                # via oauth2client, python-jose
 rules==2.2                # via -r pip/requirements.in
 s3transfer==0.6.1         # via boto3
-scikit-learn==0.23.1      # via -r pip/requirements.in
-scipy==1.5.0              # via -r pip/requirements.in, scikit-learn
 scout-apm==2.16.2         # via -r pip/requirements.in
 scrapelib==2.2.0          # via govqa
 simplejson==3.16.0        # via -r pip/requirements.in
@@ -192,7 +188,6 @@ sorl-thumbnail==12.9.0    # via -r pip/requirements.in
 sqlparse==0.4.4           # via django, django-debug-toolbar
 stripe==1.75.0            # via -r pip/requirements.in
 tenacity==8.2.3           # via baml
-threadpoolctl==2.1.0      # via scikit-learn
 tiktoken==0.5.1           # via -r pip/requirements.in
 tokenizers==0.15.1        # via anthropic
 tomli==2.0.1              # via pytest
