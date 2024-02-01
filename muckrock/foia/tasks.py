@@ -32,9 +32,7 @@ from random import randint
 
 # Third Party
 import boto3
-import dill as pickle
 import lob
-import numpy as np
 import requests
 from anymail.exceptions import AnymailError
 from constance import config
@@ -46,7 +44,6 @@ from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
 from raven import Client
 from raven.contrib.celery import register_logger_signal, register_signal
-from scipy.sparse import hstack
 from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
@@ -389,32 +386,6 @@ def classify_status(task_pk, **kwargs):
 
         return document.full_text
 
-    def get_classifier():
-        """Load the pickled classifier"""
-        with open("muckrock/foia/classifier.pkl", "rb") as pkl_fp:
-            return pickle.load(pkl_fp)
-
-    def predict_status(vectorizer, selector, classifier, text, pages):
-        """Run the prediction"""
-        input_vect = vectorizer.transform([text])
-        pages_vect = np.array([pages], dtype=np.float).transpose()
-        input_vect = hstack([input_vect, pages_vect])
-        input_vect = selector.transform(input_vect)
-        probs = classifier.predict_proba(input_vect)[0]
-        max_prob = max(probs)
-        status = classifier.classes_[list(probs).index(max_prob)]
-        return status, max_prob
-
-    def resolve_if_possible(resp_task):
-        """Resolve this response task if possible based off of ML setttings"""
-        if config.ENABLE_ML and resp_task.status_probability >= config.CONFIDENCE_MIN:
-            try:
-                ml_robot = User.objects.get(username="mlrobot")
-                resp_task.set_status(resp_task.predicted_status)
-                resp_task.resolve(ml_robot, {"status": resp_task.predicted_status})
-            except User.DoesNotExist:
-                logger.error("mlrobot account does not exist")
-
     def resolve_gloo_if_possible(resp_task, extracted_data):
         """Resolve this response task if possible based off of ML setttings"""
 
@@ -471,22 +442,6 @@ def classify_status(task_pk, **kwargs):
             # wait longer for document cloud
             classify_status.retry(countdown=60 * 30, args=[task_pk], kwargs=kwargs)
 
-    # old classify
-    full_text = resp_task.communication.communication + (" ".join(file_text))
-    vectorizer, selector, classifier = get_classifier()
-
-    status, prob = predict_status(
-        vectorizer, selector, classifier, full_text, total_pages
-    )
-
-    if not (config.ENABLE_GLOO and config.USE_GLOO):
-        resp_task.predicted_status = status
-        resp_task.status_probability = int(100 * prob)
-
-        resolve_if_possible(resp_task)
-
-        resp_task.save()
-
     # new classify
     if config.ENABLE_GLOO:
         try:
@@ -494,8 +449,6 @@ def classify_status(task_pk, **kwargs):
                 process_request(
                     resp_task.communication.communication,
                     "\n\n".join(file_text),
-                    mlrobot_status=status,
-                    mlrobot_prob=str(int(100 * prob)),
                     task_url=settings.MUCKROCK_URL + resp_task.get_absolute_url(),
                     request_url=settings.MUCKROCK_URL
                     + resp_task.communication.foia.get_absolute_url(),
