@@ -1,6 +1,19 @@
 {% extends 'task/default.html' %}
 
 {% block task-content %}
+  {% if check_address %}
+    <div class="message warning">
+      <span class="symbol">
+        {% include "lib/component/icon/warning.svg" %}
+      </span>
+      <span class="text"><p>
+          This agency already has a check address, it will fail if you try to
+          submit a new address.  Double check the check address below is
+          correct, and if it is, you may reject this task.  If it is incorrect,
+          please update it on the backend and then reject this tsk.
+      </p></span>
+    </div>
+  {% endif %}
   <dl class="task__data">
     <dt>Request</dt>
     <dd>
@@ -21,6 +34,10 @@
     {% endif %}
     <dt>Agency Address</dt>
     <dd>{{ task.communication.foia.agency.address|linebreaks }}</dd>
+    {% if check_address %}
+      <dt>Check Address</dt>
+      <dd>{{ check_address|linebreaks }}</dd>
+    {% endif %}
     <dt>Amount</dt>
     <dd class="success">${{ task.amount|floatformat:2 }}</dd>
   </dl>

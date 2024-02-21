@@ -410,6 +410,7 @@ class PaymentInfoTaskNode(TaskNode):
         extra_context = super().get_extra_context()
         extra_context["form"] = AddressForm(agency=foia_.agency)
         extra_context["previous_communications"] = foia_.reverse_communications
+        extra_context["check_address"] = foia_.agency.get_addresses("check").first()
         return extra_context
 
 
