@@ -152,7 +152,7 @@ pyphaxio==0.11            # via -r pip/requirements.in
 pytest==7.4.2             # via baml, pytest-asyncio
 pytest-asyncio==0.21.1    # via baml
 python-dateutil==2.8.2    # via -r pip/requirements.in, botocore, python-documentcloud, zenpy
-python-documentcloud==3.0.0  # via -r pip/requirements.in
+python-documentcloud==4.1.0  # via -r pip/requirements.in
 python-dotenv==1.0.1      # via baml
 python-jose==3.1.0        # via social-auth-core
 python-levenshtein==0.12.2  # via -r pip/requirements.in

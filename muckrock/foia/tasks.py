@@ -119,7 +119,13 @@ def upload_document_cloud(ffile_pk):
         auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
 
-    _upload_documentcloud(dc_client, ffile, change, save_doc_attrs=True)
+    _upload_documentcloud(
+        dc_client,
+        ffile,
+        change,
+        save_doc_attrs=True,
+        extra_params={"revision_control": True},
+    )
 
 
 @task(
