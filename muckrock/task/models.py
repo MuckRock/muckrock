@@ -228,10 +228,9 @@ class PaymentInfoTask(Task):
     """Pull who to make the payment to"""
 
     type = "PaymentInfoTask"
-    communication = models.ForeignKey(
-        "foia.FOIACommunication", on_delete=models.PROTECT
-    )
+    foia = models.ForeignKey("foia.FOIARequest", on_delete=models.PROTECT)
     amount = models.DecimalField(default=0.00, max_digits=8, decimal_places=2)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     objects = PaymentInfoTaskQuerySet.as_manager()
 
@@ -240,13 +239,13 @@ class PaymentInfoTask(Task):
 
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
-        return self.communication.foia.has_perm(user, "tasks")
+        return self.foia.has_perm(user, "tasks")
 
     def get_ticket_info(self):
         """For task specific ticket info"""
         return (
-            f"Payment Info Task\nFOIA: {self.communication.foia}\n"
-            f"{settings.MUCKROCK_URL}{self.communication.foia.get_absolute_url()}"
+            f"Payment Info Task\nFOIA: {self.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.foia.get_absolute_url()}"
         )
 
 

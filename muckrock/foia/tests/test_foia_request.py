@@ -499,13 +499,12 @@ class TestRequestPayment(RunCommitHooksMixin, TestCase):
         """The request should accept payments for request fees."""
         user = self.foia.user
         amount = 100.0
-        comm = self.foia.pay(user, amount)
+        self.foia.pay(user, amount)
         self.run_commit_hooks()
         self.foia.refresh_from_db()
         eq_(self.foia.status, "submitted")
         eq_(self.foia.date_processing, date.today())
-        ok_(comm, "The function should return a communication.")
-        task = PaymentInfoTask.objects.filter(communication=comm).first()
+        task = PaymentInfoTask.objects.filter(foia=self.foia).first()
         ok_(task, "A payment info task should be created.")
         eq_(task.amount, amount)
 
