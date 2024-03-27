@@ -407,6 +407,10 @@ def classify_status(task_pk, **kwargs):
         ):
             return
 
+        # do not resolve the task if gloo detects payments, to avoid false positives
+        if resp_task.predicted_status == "payment":
+            return
+
         try:
             gloo_robot = User.objects.get(username="gloo")
             values = {"status": resp_task.predicted_status}
