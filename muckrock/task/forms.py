@@ -15,6 +15,8 @@ from dal_select2.widgets import ListSelect2
 # MuckRock
 from muckrock.accounts.models import Notification, StockResponse
 from muckrock.agency.models import Agency
+from muckrock.communication.forms import AddressForm
+from muckrock.communication.models import Address
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.core import autocomplete
 from muckrock.core.utils import generate_status_action
@@ -366,6 +368,44 @@ class MultiRequestRejectionForm(forms.Form):
             html_template="message/notification/contact_user.html",
         )
         email.send(fail_silently=False)
+
+
+class PaymentInfoTaskForm(AddressForm):
+    """Form for either an address to mail a check to, or a portal payment URL"""
+
+    portal_payment_url = forms.URLField(required=False)
+
+    class Meta:
+        model = Address
+        fields = [
+            "portal_payment_url",
+            "agency_override",
+            "attn_override",
+            "street",
+            "suite",
+            "city",
+            "state",
+            "zip_code",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = False
+
+    def clean(self):
+        """Require either a payment URL or a valid address"""
+        cleaned_data = super().clean()
+        if cleaned_data.get("portal_payment_url"):
+            return
+
+        required_address_fields = ["street", "city", "state", "zip_code"]
+        if not all(cleaned_data.get(f) for f in required_address_fields):
+            self.add_error(
+                "portal_payment_url",
+                "Either a portal payment URL must be specified, or a valid address "
+                "including a street, city, state and zip code must be specified.",
+            )
 
 
 BulkNewAgencyTaskFormSet = forms.formset_factory(BulkNewAgencyTaskForm, extra=10)

@@ -699,37 +699,73 @@ class FOIARequest(models.Model):
     def pay(self, user, amount, include_latest_pdf=True):
         """
         Users can make payments for request fees.
+
         Upon payment, we create a snail mail task and we set the request to
         a processing status.  Payments are always snail mail, because we need to
         mail the check to the agency.  Since collaborators may make payments, we
         do not assume the user is the request creator.  Returns the
         communication that was generated.
-        """
-        # We create the payment communication and a snail mail task for it.
-        text = render_to_string("message/communication/payment.txt", {"amount": amount})
-        num_msgs = 1 if include_latest_pdf else 0
 
-        comm = self.create_out_communication(
-            from_user=user,
-            text=text,
-            user=user,
-            payment=True,
-            snail=True,
-            amount=amount,
-            # we include the latest pdf here under the assumption
-            # it is the invoice, unless told not to
-            include_latest_pdf=include_latest_pdf,
-            num_msgs=num_msgs,
-        )
+        Some agencies now use portals to process payments.  For those, we do
+        not want to mail a check, but we create a flag task to notify staff to
+        the need to pay for the request at the portal.
+        """
 
         # We perform some logging and activity generation
         logger.info(
             "%s has paid %0.2f for request %s", user.username, amount, self.title
         )
         utils.new_action(user, "paid fees", target=self)
-        # We return the communication we generated, in case the caller wants to
-        # do anything with it
-        return comm
+
+        if self.agency.portal_payment_url:
+            self.flaggedtask_set.create(
+                category="portal payment",
+                text=f"The user {user} has submitted a payment in the amount of "
+                f"${amount}.  It should be submitted to the agency {self.agency} "
+                f"via their portal, {self.agency.portal_payment_url}",
+            )
+            self.communications.create(
+                from_user=user,
+                to_user=self.get_to_user(),
+                datetime=timezone.now(),
+                response=False,
+                communication=f"A payment for ${amount} has been submitted online",
+                category="p",
+                hidden=True,
+            )
+            return
+
+        payment_address = self.agency.get_addresses("check").first()
+        if payment_address is not None:
+            # We create the payment communication and a snail mail task for it.
+            text = render_to_string(
+                "message/communication/payment.txt", {"amount": amount}
+            )
+            num_msgs = 1 if include_latest_pdf else 0
+
+            self.create_out_communication(
+                from_user=user,
+                text=text,
+                user=user,
+                payment=True,
+                snail=True,
+                amount=amount,
+                # we include the latest pdf here under the assumption
+                # it is the invoice, unless told not to
+                include_latest_pdf=include_latest_pdf,
+                num_msgs=num_msgs,
+            )
+            return
+
+        # We do not have a payment portal or a check address
+        # Create a payment info task and mark request as processing
+        self.status = "submitted"
+        self.date_processing = date.today()
+        self.save()
+        self.paymentinfotask_set.create(
+            amount=amount,
+            user=user,
+        )
 
     def _send_msg(self, **kwargs):
         """Send a message for this request"""
