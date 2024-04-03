@@ -10,14 +10,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Count
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseForbidden,
-    JsonResponse,
-)
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import resolve
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -35,7 +30,6 @@ from django_filters import FilterSet
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.agency.models.communication import AgencyAddress
-from muckrock.communication.forms import AddressForm
 from muckrock.communication.models import Address, PortalCommunication
 from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.models import STATUS, FOIARequest
@@ -55,6 +49,7 @@ from muckrock.task.forms import (
     FlaggedTaskForm,
     IncomingPortalForm,
     MultiRequestRejectionForm,
+    PaymentInfoTaskForm,
     ProjectReviewTaskForm,
     ReplaceNewAgencyForm,
     ResponseTaskForm,
@@ -212,7 +207,7 @@ class TaskList(MRFilterListView):
                 self.task_post_helper(request, task)
         except ValueError as exception:
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                return HttpResponseBadRequest(exception.args[0])
+                return JsonResponse(exception.args[0], status=400)
             else:
                 messages.warning(self.request, exception)
                 return redirect(self.get_redirect_url())
@@ -681,36 +676,52 @@ class PaymentInfoTaskList(TaskList):
     @transaction.atomic
     def task_post_helper(self, request, task, form_data=None):
         if request.POST.get("save"):
-            agency = task.communication.foia.agency
-            form = AddressForm(request.POST, agency=agency)
+            agency = task.foia.agency
+            form = PaymentInfoTaskForm(request.POST, agency=agency)
             if not form.is_valid():
                 raise ValueError(form.errors)
-            if agency.get_addresses("check").exists():
-                raise ValueError("This agency already has a check address")
-            address, _created = Address.objects.get_or_create(
-                # set address override to blank for uniqueness purposes
-                address="",
-                **form.cleaned_data,
-            )
-            AgencyAddress.objects.create(
-                agency=agency, address=address, request_type="check"
-            )
-            tasks = PaymentInfoTask.objects.filter(
-                resolved=False, communication__foia__agency=agency
-            )
-            for task_ in tasks:
-                # send the check
-                task_.resolve(request.user, form.cleaned_data)
-                transaction.on_commit(
-                    lambda t=task_: prepare_snail_mail.delay(
-                        t.communication.pk, False, {"amount": t.amount}
-                    )
+
+            if form.cleaned_data.get("portal_payment_url"):
+                agency.portal_payment_url = form.cleaned_data.get("portal_payment_url")
+                agency.save()
+            else:
+                if agency.get_addresses("check").exists():
+                    raise ValueError("This agency already has a check address")
+                address, _created = Address.objects.get_or_create(
+                    # set address override to blank for uniqueness purposes
+                    address="",
+                    **form.cleaned_data,
                 )
+                AgencyAddress.objects.create(
+                    agency=agency, address=address, request_type="check"
+                )
+
+            tasks = PaymentInfoTask.objects.filter(resolved=False, foia__agency=agency)
+            for task_ in tasks:
+                # send the payment
+                task_.resolve(request.user, form.cleaned_data)
+                task_.foia.pay(task_.user, task_.amount)
+
         elif request.POST.get("reject"):
+            text = render_to_string(
+                "message/communication/payment.txt", {"amount": task.amount}
+            )
+            communication = self.create_out_communication(
+                from_user=task.user,
+                text=text,
+                user=task.user,
+                payment=True,
+                snail=True,
+                amount=task.amount,
+                # we include the latest pdf here under the assumption
+                # it is the invoice, unless told not to
+                include_latest_pdf=True,
+                num_msgs=1,
+            )
             SnailMailTask.objects.create(
                 category="p",
-                communication=task.communication,
-                user=task.communication.from_user,
+                communication=communication,
+                user=task.user,
                 reason="pay",
                 amount=task.amount,
             )

@@ -40,7 +40,6 @@ class TaskQuerySet(models.QuerySet):
         communication_task_types = [
             task.models.ResponseTask,
             task.models.SnailMailTask,
-            task.models.PaymentInfoTask,
             task.models.PortalTask,
         ]
         has_perm = foia.has_perm(user, "tasks")
@@ -50,7 +49,11 @@ class TaskQuerySet(models.QuerySet):
                     task_type.objects.filter(communication__foia=foia).preload_list()
                 )
         # tasks that point to a foia
-        foia_task_types = [task.models.FlaggedTask, task.models.StatusChangeTask]
+        foia_task_types = [
+            task.models.FlaggedTask,
+            task.models.StatusChangeTask,
+            task.models.PaymentInfoTask,
+        ]
         if has_perm:
             for task_type in foia_task_types:
                 tasks += list(task_type.objects.filter(foia=foia).preload_list())
@@ -458,10 +461,10 @@ class PaymentInfoTaskQuerySet(TaskQuerySet):
     def preload_list(self):
         """Preload relations for list display"""
         return self.select_related(
-            "communication__foia__agency__jurisdiction", "resolved_by__profile"
+            "foia__agency__jurisdiction", "resolved_by__profile"
         ).prefetch_related(
             Prefetch(
-                "communication__foia__communications",
+                "foia__communications",
                 queryset=FOIACommunication.objects.order_by("-datetime")
                 .select_related("from_user__profile__agency")
                 .preload_list(),

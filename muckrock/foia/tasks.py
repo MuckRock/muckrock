@@ -67,12 +67,7 @@ from muckrock.foia.models import (
     RawEmail,
 )
 from muckrock.gloo.app.process_request import process_request
-from muckrock.task.models import (
-    PaymentInfoTask,
-    ResponseTask,
-    ReviewAgencyTask,
-    SnailMailTask,
-)
+from muckrock.task.models import ResponseTask, ReviewAgencyTask, SnailMailTask
 from muckrock.task.pdf import LobPDF
 
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
@@ -119,7 +114,13 @@ def upload_document_cloud(ffile_pk):
         auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
 
-    _upload_documentcloud(dc_client, ffile, change, save_doc_attrs=True)
+    _upload_documentcloud(
+        dc_client,
+        ffile,
+        change,
+        save_doc_attrs=True,
+        extra_params={"revision_control": True},
+    )
 
 
 @task(
@@ -366,8 +367,6 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
 def classify_status(task_pk, **kwargs):
     """Use a machine learning classifier to predict the communications status"""
 
-    # pylint: disable=too-many-locals, too-many-statements
-
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
 
@@ -399,6 +398,10 @@ def classify_status(task_pk, **kwargs):
             resp_task.predicted_status in ["done", "partial"]
             and not resp_task.communication.files.exists()
         ):
+            return
+
+        # do not resolve the task if gloo detects payments, to avoid false positives
+        if resp_task.predicted_status == "payment":
             return
 
         try:
@@ -1091,7 +1094,17 @@ def prepare_snail_mail(comm_pk, switch, extra, force=False, num_msgs=5, **kwargs
     if comm.category == "p":
         address = comm.foia.agency.get_addresses("check").first()
         if address is None:
-            PaymentInfoTask.objects.create(communication=comm, amount=amount)
+            # this shouldn't happen
+            logger.error(
+                "Error geting payment address: %s %s %s",
+                comm,
+                comm.foia,
+                comm.foia.agency,
+            )
+            comm.foia.flaggedtask_set.create(
+                text=f"Something went wrong with payment: {comm.foia} "
+                "https://www.muckrock.com{comm.foia.get_absolute_url()}"
+            )
             return
     else:
         address = comm.foia.address

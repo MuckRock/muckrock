@@ -214,6 +214,10 @@ def contact_user(request, foia):
             subject="Message from MuckRock",
         )
         email.send(fail_silently=False)
+        foia.notes.create(
+            author=request.user,
+            note=f"Staff contacted the user:\n\n{context['text']}",
+        )
         messages.success(request, "Email sent to %s" % foia.user.email)
     return _get_redirect(request, foia)
 

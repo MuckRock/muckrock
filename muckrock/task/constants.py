@@ -25,6 +25,7 @@ PUBLIC_FLAG_CATEGORIES = [
     ("follow-up complaints", "Agency is complaining about follow-up messages."),
     ("appeal", "Should I appeal this response?"),
     ("proxy", "The agency denied the request due to an in-state citzenship law."),
+    ("payment", "There is an issue with my payment."),
 ]
 PRIVATE_FLAG_CATEGORIES = [
     ("contact info changed", "User supplied contact info."),
@@ -39,6 +40,7 @@ PRIVATE_FLAG_CATEGORIES = [
     ("foiaonline", "The FOIAOnline autologin failed"),
     ("govqa", "The GovQA scraper failed"),
     ("download file", "This request contains a link to a file to download"),
+    ("portal payment", "A payment has been paid which should be submitted via portal"),
 ]
 AGENCY_FLAG_CATEGORIES = [
     ("already responded", "I already responded to this request"),

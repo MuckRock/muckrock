@@ -12,7 +12,6 @@ from botocore.exceptions import ClientError
 
 # MuckRock
 from muckrock import agency, foia, task
-from muckrock.communication.forms import AddressForm
 from muckrock.portal.forms import PortalForm
 from muckrock.task.models import Task
 
@@ -406,10 +405,11 @@ class PaymentInfoTaskNode(TaskNode):
 
     def get_extra_context(self):
         """Adds status to the context"""
-        foia_ = self.task.communication.foia
+        foia_ = self.task.foia
         extra_context = super().get_extra_context()
-        extra_context["form"] = AddressForm(agency=foia_.agency)
+        extra_context["form"] = task.forms.PaymentInfoTaskForm(agency=foia_.agency)
         extra_context["previous_communications"] = foia_.reverse_communications
+        extra_context["check_address"] = foia_.agency.get_addresses("check").first()
         return extra_context
 
 
