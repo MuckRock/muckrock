@@ -66,7 +66,7 @@ from muckrock.foia.models import (
     FOIARequest,
     RawEmail,
 )
-from muckrock.gloo.app.process_request import process_request
+from muckrock.gloo.app.process_request import RequestStatus, process_request
 from muckrock.task.models import (
     PaymentInfoTask,
     ResponseTask,
@@ -372,8 +372,6 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
 def classify_status(task_pk, **kwargs):
     """Use a machine learning classifier to predict the communications status"""
 
-    # pylint: disable=too-many-locals, too-many-statements
-
     def get_text_ocr(doc_id):
         """Get the text OCR from document cloud"""
 
@@ -408,7 +406,10 @@ def classify_status(task_pk, **kwargs):
             return
 
         # do not resolve the task if gloo detects payments, to avoid false positives
-        if resp_task.predicted_status == "payment":
+        if (
+            not config.GLOO_RESOLVE_PAYMENTS
+            and extracted_data.requestStatus == RequestStatus.PAYMENT_REQUIRED
+        ):
             return
 
         try:
