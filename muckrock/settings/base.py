@@ -688,6 +688,13 @@ CONSTANCE_CONFIG = OrderedDict(
                 "Automatically resolve response tasks with Gloo LLM classification",
             ),
         ),
+        (
+            "GLOO_RESOLVE_PAYMENTS",
+            (
+                False,
+                "Allow Gloo to resolve payment status response tasks",
+            ),
+        ),
         ("NEW_USER_GOAL_INIT", (0, "Initial goal for monthly new user registration")),
         (
             "NEW_USER_GOAL_GROWTH",
