@@ -20,6 +20,7 @@ from itertools import groupby
 
 # Third Party
 import bleach
+from taggit.managers import TaggableManager
 from zenpy import Zenpy
 from zenpy.lib.api_objects import (
     Comment,
@@ -38,6 +39,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.portal.models import PORTAL_TYPES
+from muckrock.tags.models import Tag, TaggedItemBase, normalize
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -90,6 +92,7 @@ class Task(models.Model):
     )
     form_data = models.JSONField(blank=True, null=True)
     zendesk_ticket_id = models.IntegerField(blank=True, null=True)
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     objects = TaskQuerySet.as_manager()
 
