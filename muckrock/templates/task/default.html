@@ -26,7 +26,7 @@
           {% if task.resolved and task.resolved_by %}
             <p class="task__data">Resolved by <a href="{% url 'acct-profile' username=task.resolved_by.username %}">{{ task.resolved_by.profile.full_name }}</a>.</p>
           {% elif user.is_staff %}
-            <p class="task__data">
+            <div class="task__data">
               Assigned to
               <select class="assigned-chooser" name="{{task.pk}}">
                 <option value="0">Nobody</option>
@@ -34,7 +34,16 @@
                 <option value="{{asignee.pk}}" {% if task.assigned == asignee %}selected{%endif %}>{{asignee.profile.full_name}}</option>
                 {% endfor %}
               </select>
-            </p>
+
+              <form method="POST" action="{{ endpoint }}" class="tags-form">
+                {% csrf_token %}
+                <input type="hidden" name="task" value="{{task.pk}}">
+                {{ task.tag_form.tags }}
+                <button type="submit" name="tag" value="true" class="primary button">
+                  Save
+                </button>
+              </form>
+            </div>
           {% endif %}
           {% if task.form_data %}
             <div class="form-data-table">
