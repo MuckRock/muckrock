@@ -9,6 +9,33 @@ $task-padding: $vr/4 $vr/2;
     li {
         margin-left: $vr;
     }
+
+    .assigned-chooser {
+      margin-right: 2em;
+    }
+
+    .tags-form {
+      display: inline;
+      .select2-selection__choice {
+        width: inherit;
+      }
+
+    }
+}
+
+.task__note {
+  header.textbox__header {
+    background: $color-yellow;
+    color: $color-black;
+  }
+
+  main {
+    background: $color-yellow-light;
+  }
+
+  p.has-note {
+    font-weight: bold;
+  }
 }
 
 .task__zendesk {
