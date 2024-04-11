@@ -94,6 +94,7 @@ class Task(models.Model):
     form_data = models.JSONField(blank=True, null=True)
     zendesk_ticket_id = models.IntegerField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+    note = models.TextField(blank=True)
 
     objects = TaskQuerySet.as_manager()
 
