@@ -40,7 +40,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.portal.models import PORTAL_TYPES
-from muckrock.tags.models import Tag, TaggedItemBase, normalize
+from muckrock.tags.models import TaggedItemBase
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
