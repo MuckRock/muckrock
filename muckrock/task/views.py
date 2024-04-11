@@ -204,6 +204,9 @@ class TaskList(MRFilterListView):
                 new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
                 tag_set.add(new_tag)
             task.tags.set(tag_set)
+        elif request.POST.get("edit_note"):
+            task.note = request.POST.get("note", "")
+            task.save()
         return task
 
     def post(self, request):

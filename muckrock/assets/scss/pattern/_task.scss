@@ -23,6 +23,21 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
+.task__note {
+  header.textbox__header {
+    background: $color-yellow;
+    color: $color-black;
+  }
+
+  main {
+    background: $color-yellow-light;
+  }
+
+  p.has-note {
+    font-weight: bold;
+  }
+}
+
 .task__zendesk {
   margin: $vr/2;
   float: right;
