@@ -14,6 +14,21 @@
           <a class="nocollapse permalink" href="{{task.get_absolute_url}}"><time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}">{{task.date_created|date:'m/d/Y G:i'}}</time></a>
         {% endif %}
     </header>
+    <section class="collapsable collapsed task__note">
+      <header class="textbox__header">
+        <p class="{% if task.note %}has-note{% endif %}">Note</p>
+      </header>
+      <main>
+        <form method="POST" action="{{ endpoint }}" class="note-form">
+          {% csrf_token %}
+          <input type="hidden" name="task" value="{{task.pk}}">
+          <textarea rows="7" name="note">{{ task.note }}</textarea>
+          <button type="submit" name="edit_note" value="true" class="primary button">
+            Save
+          </button>
+        </form>
+      </main>
+    </section>
     {% block task-main %}
       <main class="textbox__section task__main">
           {% if user.is_staff and task.zendesk_ticket_id %}
