@@ -57,9 +57,6 @@ class TaskFilterSet(django_filters.FilterSet):
             forward=(forward.Const(True, "tasks"),),
         ),
     )
-    deferred = django_filters.BooleanFilter(
-        label="Deferred", method="filter_deferred", widget=forms.CheckboxInput()
-    )
     tags = django_filters.ModelMultipleChoiceFilter(
         field_name="tags__name",
         queryset=Tag.objects.all(),
@@ -77,15 +74,6 @@ class TaskFilterSet(django_filters.FilterSet):
     class Meta:
         model = Task
         fields = ["resolved", "resolved_by"]
-
-    def filter_deferred(self, queryset, name, value):
-        """Check if the foia has a tracking number."""
-        # pylint: disable=unused-argument
-        if value:
-            queryset = queryset.get_deferred()
-        else:
-            queryset = queryset.get_undeferred()
-        return queryset
 
 
 class ResponseTaskFilterSet(TaskFilterSet):
