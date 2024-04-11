@@ -32,6 +32,7 @@ from zenpy.lib.exception import APIException
 
 # MuckRock
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
+from muckrock.core.forms import TagManagerForm
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import zoho_get, zoho_post
 from muckrock.foia.models import STATUS, FOIATemplate
@@ -160,6 +161,12 @@ class Task(models.Model):
     def get_ticket_info(self):
         """For subclasses to specify additional ticket info"""
         return ""
+
+    def tag_form(self):
+        return TagManagerForm(
+            initial={"tags": self.tags.all()},
+            prefix=f"task-{self.pk}",
+        )
 
 
 class OrphanTask(Task):

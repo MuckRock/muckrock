@@ -9,6 +9,18 @@ $task-padding: $vr/4 $vr/2;
     li {
         margin-left: $vr;
     }
+
+    .assigned-chooser {
+      margin-right: 2em;
+    }
+
+    .tags-form {
+      display: inline;
+      .select2-selection__choice {
+        width: inherit;
+      }
+
+    }
 }
 
 .task__zendesk {
