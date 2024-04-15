@@ -5,6 +5,7 @@
 .crowdsource.form {
   margin: 0 auto;
   display: flex;
+  overflow: visible;
   flex-wrap: wrap;
   & .crowdsource-form {
     &__header {
@@ -16,8 +17,17 @@
     }
     &__data {
       flex: 4 1 44em;
+      div {
+        top: 75px;
+        position: sticky;
+      }
     }
   }
+}
+
+/* Needed for sticky to work */
+.container.container-overflow-visible {
+  overflow: visible;
 }
 
 .crowdsource.detail .actions form {
@@ -103,4 +113,7 @@
 
 #build-wrap .name-wrap {
   display: none !important;
+}
+
+.crowdsource-form__data {
 }
