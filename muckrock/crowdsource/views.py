@@ -262,6 +262,7 @@ class CrowdsourceFormView(MiniregMixin, BaseDetailView, FormView):
             )
         else:
             kwargs["number"] = 1
+        kwargs["extra_container_classes"] = "container-overflow-visible"
         return super().get_context_data(**kwargs)
 
     def get_initial(self):

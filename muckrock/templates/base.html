@@ -151,7 +151,7 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
   <body>
     {% hijack_notification %}
     {% block body %}
-      <div class="container">
+      <div class="container {{ extra_container_classes }}">
         <div id="modal-overlay"></div>
         {% include 'nav/header.html' %}
         {% if messages %}
