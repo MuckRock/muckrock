@@ -26,14 +26,14 @@
         Snail Mail
       {% elif foia.composer.open_multirequesttasks %}
         Multirequest
-      {% elif foia.paymentinfotask_communications.0.open_paymentinfotasks %}
+      {% elif foia.open_paymentinfotasks %}
         Payment Info
       {% elif foia.agency.open_newagencytasks %}
         New Agency
       {% endif %}
     </td>
     <td class="processing-zendesk-cell">
-      {% firstof foia.portaltask_communications.0.open_portaltasks.0.zendesk_ticket_id foia.snailmailtask_communications.0.open_snailmailtasks.0.zendesk_ticket_id foia.composer.open_multirequesttasks.0.zendesk_ticket_id foia.paymentinfotask_communications.0.open_paymentinfotasks.0.zendesk_ticket_id foia.agency.open_newagencytasks.0.zendesk_ticket_id  as zendesk_ticket_id %}
+      {% firstof foia.portaltask_communications.0.open_portaltasks.0.zendesk_ticket_id foia.snailmailtask_communications.0.open_snailmailtasks.0.zendesk_ticket_id foia.composer.open_multirequesttasks.0.zendesk_ticket_id foia.open_paymentinfotasks.0.zendesk_ticket_id foia.agency.open_newagencytasks.0.zendesk_ticket_id  as zendesk_ticket_id %}
       {% if zendesk_ticket_id %}
         <a href="https://muckrock.zendesk.com/agent/tickets/{{zendesk_ticket_id}}" target="_blank">
           ZenDesk Ticket
@@ -50,8 +50,8 @@
           {% elif foia.composer.open_multirequesttasks %}
             <input type="hidden" name="zendesk_pk" value="{{ foia.composer.open_multirequesttasks.0.pk }}">
             <input type="hidden" name="zendesk_name" value="MultiRequestTask">
-          {% elif foia.paymentinfotask_communications.0.open_paymentinfotasks %}
-            <input type="hidden" name="zendesk_pk" value="{{ foia.paymentinfotask_communications.0.open_paymentinfotasks.0.pk }}">
+          {% elif foia.open_paymentinfotasks %}
+            <input type="hidden" name="zendesk_pk" value="{{ foia.open_paymentinfotasks.0.pk }}">
             <input type="hidden" name="zendesk_name" value="PaymentInfoTask">
           {% elif foia.agency.open_newagencytasks %}
             <input type="hidden" name="zendesk_pk" value="{{ foia.agency.open_newagencytasks.0.pk }}">
