@@ -17,6 +17,7 @@ from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
+from muckrock.tags.models import Tag
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -56,8 +57,13 @@ class TaskFilterSet(django_filters.FilterSet):
             forward=(forward.Const(True, "tasks"),),
         ),
     )
-    deferred = django_filters.BooleanFilter(
-        label="Deferred", method="filter_deferred", widget=forms.CheckboxInput()
+    tags = django_filters.ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        queryset=Tag.objects.all(),
+        label="Tags",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
+        ),
     )
     date_created = django_filters.DateFromToRangeFilter(
         label="Date Range",
@@ -68,15 +74,6 @@ class TaskFilterSet(django_filters.FilterSet):
     class Meta:
         model = Task
         fields = ["resolved", "resolved_by"]
-
-    def filter_deferred(self, queryset, name, value):
-        """Check if the foia has a tracking number."""
-        # pylint: disable=unused-argument
-        if value:
-            queryset = queryset.get_deferred()
-        else:
-            queryset = queryset.get_undeferred()
-        return queryset
 
 
 class ResponseTaskFilterSet(TaskFilterSet):

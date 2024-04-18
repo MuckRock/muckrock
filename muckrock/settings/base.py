@@ -735,6 +735,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "CONFIDENCE_MIN",
         "ENABLE_GLOO",
         "USE_GLOO",
+        "GLOO_RESOLVE_PAYMENTS",
     ),
     "Dashboard Options": (
         "NEW_USER_GOAL_INIT",

@@ -20,6 +20,7 @@ from itertools import groupby
 
 # Third Party
 import bleach
+from taggit.managers import TaggableManager
 from zenpy import Zenpy
 from zenpy.lib.api_objects import (
     Comment,
@@ -31,6 +32,7 @@ from zenpy.lib.exception import APIException
 
 # MuckRock
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
+from muckrock.core.forms import TagManagerForm
 from muckrock.core.models import ExtractDay
 from muckrock.core.utils import zoho_get, zoho_post
 from muckrock.foia.models import STATUS, FOIATemplate
@@ -38,6 +40,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.portal.models import PORTAL_TYPES
+from muckrock.tags.models import TaggedItemBase
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -90,6 +93,8 @@ class Task(models.Model):
     )
     form_data = models.JSONField(blank=True, null=True)
     zendesk_ticket_id = models.IntegerField(blank=True, null=True)
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
+    note = models.TextField(blank=True)
 
     objects = TaskQuerySet.as_manager()
 
@@ -157,6 +162,12 @@ class Task(models.Model):
     def get_ticket_info(self):
         """For subclasses to specify additional ticket info"""
         return ""
+
+    def tag_form(self):
+        return TagManagerForm(
+            initial={"tags": self.tags.all()},
+            prefix=f"task-{self.pk}",
+        )
 
 
 class OrphanTask(Task):

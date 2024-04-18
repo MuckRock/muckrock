@@ -35,6 +35,7 @@ from muckrock.core.views import MRFilterListView, class_view_decorator
 from muckrock.foia.models import STATUS, FOIARequest
 from muckrock.foia.tasks import prepare_snail_mail
 from muckrock.portal.forms import PortalForm
+from muckrock.tags.models import Tag, normalize
 from muckrock.task.filters import (
     FlaggedTaskFilterSet,
     NewAgencyTaskFilterSet,
@@ -197,6 +198,15 @@ class TaskList(MRFilterListView):
                 request.POST.get("zendesk_note", ""),
                 self.request.user.email,
             )
+        elif request.POST.get("tag"):
+            tag_set = set()
+            for tag in request.POST.getlist(f"task-{task.pk}-tags"):
+                new_tag, _ = Tag.objects.get_or_create(name=normalize(tag))
+                tag_set.add(new_tag)
+            task.tags.set(tag_set)
+        elif request.POST.get("edit_note"):
+            task.note = request.POST.get("note", "")
+            task.save()
         return task
 
     def post(self, request):
