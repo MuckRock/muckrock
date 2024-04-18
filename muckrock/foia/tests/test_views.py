@@ -139,7 +139,7 @@ class TestFOIAViews(TestCase):
 
         user = UserFactory(username="adam", is_staff=True)
         self.client.force_login(user)
-        response = get_allowed(self.client, reverse("foia-list-processing"))
+        get_allowed(self.client, reverse("foia-list-processing"))
 
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
