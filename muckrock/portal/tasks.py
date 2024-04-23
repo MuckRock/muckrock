@@ -3,24 +3,13 @@ Celery tasks for the portal application
 """
 
 # Django
-from celery.schedules import crontab
-from celery.task import periodic_task, task
-from django.conf import settings
-from django.db.models import F
+from celery.task import task
 
 # Standard Library
 import logging
-from datetime import date
-
-# Third Party
-import requests
-from zenpy import Zenpy
 
 # MuckRock
-from muckrock.core.utils import zoho_get
-from muckrock.foia.models import FOIARequest
 from muckrock.portal.models import Portal
-from muckrock.task.models import FlaggedTask
 
 logger = logging.getLogger(__name__)
 
