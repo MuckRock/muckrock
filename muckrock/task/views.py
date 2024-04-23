@@ -713,28 +713,6 @@ class PaymentInfoTaskList(TaskList):
                 task_.foia.pay(task_.user, task_.amount)
 
         elif request.POST.get("reject"):
-            text = render_to_string(
-                "message/communication/payment.txt", {"amount": task.amount}
-            )
-            communication = self.create_out_communication(
-                from_user=task.user,
-                text=text,
-                user=task.user,
-                payment=True,
-                snail=True,
-                amount=task.amount,
-                # we include the latest pdf here under the assumption
-                # it is the invoice, unless told not to
-                include_latest_pdf=True,
-                num_msgs=1,
-            )
-            SnailMailTask.objects.create(
-                category="p",
-                communication=communication,
-                user=task.user,
-                reason="pay",
-                amount=task.amount,
-            )
             task.resolve(request.user, {"reject": "true"})
             messages.error(request, "Payment info task rejected")
         return super().task_post_helper(request, task)
