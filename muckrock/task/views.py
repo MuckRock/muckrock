@@ -696,6 +696,7 @@ class PaymentInfoTaskList(TaskList):
             else:
                 if agency.get_addresses("check").exists():
                     raise ValueError("This agency already has a check address")
+                form.cleaned_data.pop("portal_payment_url")
                 address, _created = Address.objects.get_or_create(
                     # set address override to blank for uniqueness purposes
                     address="",
