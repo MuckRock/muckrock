@@ -20,7 +20,7 @@ MuckRock depends on Squarelet for user authentication. As the services need to c
 
 ### Installation Steps
 
-1. Check out the git repository - `git clone git@github.com:MuckRock/muckrock.git`
+1. Check out the git repository - `git clone --recurse-submodules git@github.com:MuckRock/muckrock.git`
 2. Enter the directory - `cd muckrock`
 3. Run the dotenv initialization script - `python initialize_dotenvs.py`
 This will create files with the environment variables needed to run the development environment.
