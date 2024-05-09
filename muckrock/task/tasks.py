@@ -164,6 +164,7 @@ def create_generic_ticket(task_pk, task_name, note, email, **kwargs):
             ReviewAgencyTask,
             MultiRequestTask,
             CrowdfundTask,
+            StatusChangeTask,
         ]
     }
     model = task_models.get(task_name)
