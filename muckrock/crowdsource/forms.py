@@ -4,6 +4,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
+from django.utils.safestring import mark_safe
 
 # Standard Library
 import codecs
@@ -43,7 +44,7 @@ class CrowdsourceAssignmentForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        crowdsource = kwargs.pop("crowdsource")
+        self.crowdsource = kwargs.pop("crowdsource")
         datum = kwargs.pop("datum")
         metadata = datum.metadata if datum else None
         user = kwargs.pop("user")
@@ -56,7 +57,7 @@ class CrowdsourceAssignmentForm(forms.Form):
             text = re.sub(r"\s*}", "}", text)
             return text.format_map(metadata)
 
-        for field in crowdsource.fields.filter(deleted=False):
+        for field in self.crowdsource.fields.filter(deleted=False):
             # swap in template tags from metadata
             form_field = field.get_form_field()
             if metadata:
@@ -64,8 +65,8 @@ class CrowdsourceAssignmentForm(forms.Form):
                 form_field.help_text = sub(form_field.help_text, metadata)
                 form_field.initial = sub(form_field.initial, metadata)
             self.fields[str(field.pk)] = form_field
-        if user.is_anonymous and crowdsource.registration != "off":
-            required = crowdsource.registration == "required"
+        if user.is_anonymous and self.crowdsource.registration != "off":
+            required = self.crowdsource.registration == "required"
             self.fields["full_name"] = forms.CharField(
                 label="Full Name or Handle (Public)", required=required
             )
@@ -76,7 +77,7 @@ class CrowdsourceAssignmentForm(forms.Form):
                 label="Get MuckRock's weekly newsletter with "
                 "FOIA news, tips, and more",
             )
-        if crowdsource.ask_public:
+        if self.crowdsource.ask_public:
             # move public to the end
             self.fields["public"] = self.fields.pop("public")
         else:
@@ -88,7 +89,11 @@ class CrowdsourceAssignmentForm(forms.Form):
         email = self.cleaned_data["email"]
         if email and User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(
-                "User with this email already exists. Please login first."
+                mark_safe(
+                    f"It looks like {email} has an account on MuckRock - please "
+                    '<a href="https://accounts.muckrock.com/accounts/login/">log in</a> '
+                    "and return to this form."
+                )
             )
         return email
 
@@ -96,10 +101,15 @@ class CrowdsourceAssignmentForm(forms.Form):
         """Must supply both name and email, or neither"""
         data = super().clean()
 
-        if data.get("email") and not data.get("full_name"):
-            self.add_error("full_name", "Name is required if registering with an email")
-        if data.get("full_name") and not data.get("email"):
-            self.add_error("email", "Email is required if registering with a name")
+        if self.crowdsource.registration == "optional":
+            if data.get("email") and not data.get("full_name"):
+                self.add_error(
+                    "full_name", "Name is required if registering with an email"
+                )
+            if data.get("full_name") and not data.get("email"):
+                self.add_error("email", "Email is required if registering with a name")
+
+        return data
 
 
 class CrowdsourceDataCsvForm(forms.Form):
