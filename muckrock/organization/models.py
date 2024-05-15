@@ -69,7 +69,7 @@ class Organization(models.Model):
     payment_failed = models.BooleanField(default=False)
     verified_journalist = models.BooleanField(
         default=False,
-        help_text="This organization is a verified jorunalistic organization",
+        help_text="This organization is a verified journalistic organization",
     )
 
     def __str__(self):
