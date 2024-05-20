@@ -1,6 +1,7 @@
 """
 Models for the Task application
 """
+
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -494,9 +495,11 @@ class ReviewAgencyTask(Task):
                         "total_errors": addr.error_count,
                         "last_error": addr.last_error,
                         "last_confirm": addresses_confirm[addr.pk].last_confirm,
-                        "last_open": addresses_open[addr.pk].last_open
-                        if email_or_fax == "email"
-                        else None,
+                        "last_open": (
+                            addresses_open[addr.pk].last_open
+                            if email_or_fax == "email"
+                            else None
+                        ),
                         "checkbox_name": "foias-%d-%s-%d"
                         % (self.pk, email_or_fax, addr.pk),
                         "email_or_fax": email_or_fax,
@@ -1236,6 +1239,13 @@ class StatusChangeTask(Task):
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
         return self.foia.has_perm(user, "tasks")
+
+    def get_ticket_info(self):
+        """For task specific ticket info"""
+        return (
+            f"Status Change Task\nFOIA: {self.foia}\n"
+            f"{settings.MUCKROCK_URL}{self.foia.get_absolute_url()}"
+        )
 
 
 class ProjectReviewTask(Task):

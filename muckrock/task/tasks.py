@@ -12,6 +12,7 @@ from django.utils import timezone
 # Standard Library
 import logging
 import sys
+from datetime import timedelta
 from io import BytesIO
 from random import randint
 
@@ -37,6 +38,7 @@ from muckrock.task.models import (
     ResponseTask,
     ReviewAgencyTask,
     SnailMailTask,
+    StatusChangeTask,
     Task,
 )
 from muckrock.task.pdf import CoverPDF, SnailMailPDF
@@ -162,6 +164,7 @@ def create_generic_ticket(task_pk, task_name, note, email, **kwargs):
             ReviewAgencyTask,
             MultiRequestTask,
             CrowdfundTask,
+            StatusChangeTask,
         ]
     }
     model = task_models.get(task_name)
@@ -196,3 +199,15 @@ def cleanup_flags():
     """Find any flags that failed to make it to zoho/zendesk and try again"""
     for flag in FlaggedTask.objects.filter(resolved=False):
         create_ticket.delay(flag.pk)
+
+
+@periodic_task(
+    run_every=crontab(hour=3, minute=0),
+    name="muckrock.task.tasks.cleanup_status_change",
+)
+def cleanup_status_change():
+    """Auto resolve status change tasks older than 3 weeks"""
+    StatusChangeTask.objects.filter(
+        resolved=False,
+        date_created__lt=timezone.now() - timedelta(days=21),
+    ).update(resolved=True)

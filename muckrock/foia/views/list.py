@@ -632,7 +632,11 @@ class BaseProcessingRequestList(RequestList):
             .prefetch_related(
                 make_prefetch(PortalTask),
                 make_prefetch(SnailMailTask),
-                make_prefetch(PaymentInfoTask),
+                Prefetch(
+                    "paymentinfotask_set",
+                    queryset=PaymentInfoTask.objects.filter(resolved=False),
+                    to_attr="open_paymentinfotasks",
+                ),
                 Prefetch(
                     "composer__multirequesttask_set",
                     queryset=MultiRequestTask.objects.filter(resolved=False),

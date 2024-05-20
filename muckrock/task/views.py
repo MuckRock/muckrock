@@ -194,7 +194,7 @@ class TaskList(MRFilterListView):
         elif request.POST.get("zendesk"):
             create_generic_ticket.delay(
                 task.pk,
-                self.model.__name__,
+                task.__class__.__name__,
                 request.POST.get("zendesk_note", ""),
                 self.request.user.email,
             )
@@ -690,13 +690,13 @@ class PaymentInfoTaskList(TaskList):
             form = PaymentInfoTaskForm(request.POST, agency=agency)
             if not form.is_valid():
                 raise ValueError(form.errors)
-
             if form.cleaned_data.get("portal_payment_url"):
                 agency.portal_payment_url = form.cleaned_data.get("portal_payment_url")
                 agency.save()
             else:
                 if agency.get_addresses("check").exists():
                     raise ValueError("This agency already has a check address")
+                form.cleaned_data.pop("portal_payment_url")
                 address, _created = Address.objects.get_or_create(
                     # set address override to blank for uniqueness purposes
                     address="",
@@ -713,28 +713,6 @@ class PaymentInfoTaskList(TaskList):
                 task_.foia.pay(task_.user, task_.amount)
 
         elif request.POST.get("reject"):
-            text = render_to_string(
-                "message/communication/payment.txt", {"amount": task.amount}
-            )
-            communication = self.create_out_communication(
-                from_user=task.user,
-                text=text,
-                user=task.user,
-                payment=True,
-                snail=True,
-                amount=task.amount,
-                # we include the latest pdf here under the assumption
-                # it is the invoice, unless told not to
-                include_latest_pdf=True,
-                num_msgs=1,
-            )
-            SnailMailTask.objects.create(
-                category="p",
-                communication=communication,
-                user=task.user,
-                reason="pay",
-                amount=task.amount,
-            )
             task.resolve(request.user, {"reject": "true"})
             messages.error(request, "Payment info task rejected")
         return super().task_post_helper(request, task)

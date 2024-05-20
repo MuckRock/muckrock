@@ -134,6 +134,13 @@ class TestFOIAViews(TestCase):
                     ],
                 )
 
+    def test_foia_processing_list(self):
+        """Test the foia processing list view"""
+
+        user = UserFactory(username="adam", is_staff=True)
+        self.client.force_login(user)
+        get_allowed(self.client, reverse("foia-list-processing"))
+
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
         response = get_allowed(self.client, reverse("foia-list") + "?sort=test")
