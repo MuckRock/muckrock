@@ -71,7 +71,6 @@ class RequestHelper:
 
 class Jurisdiction(models.Model, RequestHelper):
     """A jursidiction that you may file FOIA requests in"""
-
     levels = (("f", "Federal"), ("s", "State"), ("l", "Local"))
 
     name = models.CharField(max_length=50)
@@ -297,6 +296,7 @@ class JurisdictionPage(models.Model):
     )
     content = models.TextField(help_text="Markdown content for the jurisdiction page")
     history = HistoricalRecords()
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.jurisdiction)
