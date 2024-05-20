@@ -71,6 +71,7 @@ class RequestHelper:
 
 class Jurisdiction(models.Model, RequestHelper):
     """A jursidiction that you may file FOIA requests in"""
+
     levels = (("f", "Federal"), ("s", "State"), ("l", "Local"))
 
     name = models.CharField(max_length=50)

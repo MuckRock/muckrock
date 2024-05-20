@@ -90,7 +90,7 @@ class CrowdsourceAssignmentForm(forms.Form):
         if email and User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(
                 mark_safe(
-                    f"It looks like {email} has an account on MuckRock - please " # pylint: disable=C0301
+                    f"It looks like {email} has an account on MuckRock - please "  # pylint: disable=C0301
                     '<a href="https://accounts.muckrock.com/accounts/login/">log in</a> '
                     "and return to this form."
                 )
