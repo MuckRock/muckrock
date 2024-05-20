@@ -74,6 +74,9 @@
           {{ jurisdiction.public_notes|markdown }}
         </section>
       {% endif %}
+      {% if jurisdiction.jurisdictionpage.updated_at %}
+        <p>Last Updated: {{ jurisdiction.jurisdictionpage.updated_at|date:"D d M Y" }}</p>
+      {% endif %}
       {% if preview_text %}
         <section class="analysis">
           {{ preview_text|markdown }}

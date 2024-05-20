@@ -297,6 +297,7 @@ class JurisdictionPage(models.Model):
     )
     content = models.TextField(help_text="Markdown content for the jurisdiction page")
     history = HistoricalRecords()
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return str(self.jurisdiction)
