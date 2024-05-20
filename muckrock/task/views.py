@@ -12,7 +12,6 @@ from django.db import transaction
 from django.db.models import Count
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
 from django.urls import resolve
 from django.utils import timezone
 from django.utils.decorators import method_decorator
