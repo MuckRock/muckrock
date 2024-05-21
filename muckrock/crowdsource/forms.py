@@ -91,8 +91,8 @@ class CrowdsourceAssignmentForm(forms.Form):
             raise forms.ValidationError(
                 mark_safe(
                     f"It looks like {email} has an account on MuckRock - please "
-                    '<a href="https://accounts.muckrock.com/accounts/login/">log in</a> '
-                    "and return to this form."
+                    '<a href="https://accounts.muckrock.com/accounts/login/">'
+                    "log in</a> and return to this form."
                 )
             )
         return email
