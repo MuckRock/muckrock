@@ -297,7 +297,7 @@ class JurisdictionPage(models.Model):
     )
     content = models.TextField(help_text="Markdown content for the jurisdiction page")
     history = HistoricalRecords()
-    updated_at = models.DateTimeField(auto_now=True, null=True)
+    updated_at = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.jurisdiction)
@@ -305,6 +305,10 @@ class JurisdictionPage(models.Model):
     def get_absolute_url(self):
         """Use the jurisdiction's URL"""
         return self.jurisdiction.get_absolute_url()
+        
+    def save(self, *args, **kwargs):
+        self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
 
 
 class LawYear(models.Model):
