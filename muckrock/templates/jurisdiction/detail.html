@@ -75,7 +75,7 @@
         </section>
       {% endif %}
       {% if jurisdiction.jurisdictionpage.updated_at is not None %}
-        <p>Last Updated: {{ jurisdiction.jurisdictionpage.updated_at|date:"D d M Y" }}</p>
+        <p>Last Updated: {{ jurisdiction.jurisdictionpage.updated_at|date:"m/d/Y" }}</p>
       {% endif %}
       {% if preview_text %}
         <section class="analysis">
