@@ -9,6 +9,7 @@ from django.db.models.expressions import Value
 from django.db.models.functions import Coalesce
 from django.template.defaultfilters import slugify
 from django.urls import reverse
+from django.utils import timezone
 
 # Third Party
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -297,6 +298,7 @@ class JurisdictionPage(models.Model):
     )
     content = models.TextField(help_text="Markdown content for the jurisdiction page")
     history = HistoricalRecords()
+    updated_at = models.DateTimeField(null=True)
 
     def __str__(self):
         return str(self.jurisdiction)
@@ -304,6 +306,10 @@ class JurisdictionPage(models.Model):
     def get_absolute_url(self):
         """Use the jurisdiction's URL"""
         return self.jurisdiction.get_absolute_url()
+
+    def save(self, *args, **kwargs):
+        self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
 
 
 class LawYear(models.Model):
