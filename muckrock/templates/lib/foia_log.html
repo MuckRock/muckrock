@@ -10,7 +10,7 @@
     </div>
   </header>
   <main class="foia-log__main">
-    <p class="foia-log__subject">{{ foia_log.subject }}</p>
+    <p class="foia-log__subject">{{ foia_log.subject|linebreaksbr|urlize }}</p>
   </main>
   <footer class="foia-log__footer">
     <a class="foia-log__request-id" title="Permalink" href="{% url 'foia-log' idx=foia_log.pk %}">#{{ foia_log.request_id }}</a>

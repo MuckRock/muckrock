@@ -723,6 +723,7 @@ class FOIALogEntryAdminForm(forms.ModelForm):
             url="foia-request-autocomplete",
             attrs={"data-placeholder": "FOIA?", "data-width": None},
         ),
+        required=False,
     )
 
     class Meta:
@@ -734,7 +735,7 @@ class FOIALogEntryAdmin(VersionAdmin):
     """FOIA Log Entry admin options"""
 
     list_display = ("request_id", "date_requested")
-    search_fields = ("request_id", "foia_log__agency")
+    search_fields = ("request_id", "foia_log__agency__name")
     readonly_fields = ("foia_log",)
     form = FOIALogEntryAdminForm
 
