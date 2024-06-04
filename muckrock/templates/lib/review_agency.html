@@ -82,7 +82,11 @@
 {% for data in review_data %}
   <div class="collapsable review-requests{% if not data.primary %} collapsed{% endif %}">
     <header {% if data.error %}class="error"{% endif %}>
-      <p>{{data.address}} (<a href="{{ data.address.get_absolute_url }}" class="nocollapse">Details</a>)</p>
+      <p>
+        {{data.address}}
+        (<a href="{{ data.address.get_absolute_url }}" class="nocollapse">Details</a>)
+        - Total Open Requests: {{data.foias|length}}
+      </p>
     </header>
     <table>
       <tr>
