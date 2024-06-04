@@ -235,6 +235,13 @@ $('document').ready(function(){
       type: 'get',
       success: function(data) {
         $(that).html(data);
+        $(that).find('.collapsable header').click(function(){
+          $(this).parent().toggleClass('collapsed');
+        });
+        $(that).find('.collapsable header').find('.nocollapse').click(function(event){
+          // Prevent click from propagating up to the collapsable header.
+          event.stopPropagation();
+        });
       },
       error: function() {
         $(that).html("<summary class='task__data'><p class='error'>Error</p></summary>");
