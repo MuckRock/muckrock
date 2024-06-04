@@ -378,6 +378,17 @@ class ReviewAgencyTask(Task):
         """Get all the data on all open requests for the agency"""
         review_data = []
 
+        primary = {}
+        primary["email"] = self.agency.agencyemail_set.filter(request_type="primary")
+        primary["fax"] = self.agency.agencyphone_set.filter(request_type="primary")
+
+        def is_primary(email_or_fax, addr):
+            if email_or_fax == "email":
+                return addr in [e.email for e in primary["email"]]
+            elif email_or_fax == "fax":
+                return addr in [f.phone for f in primary["fax"]]
+            return False
+
         def get_data(email_or_fax):
             """Helper function to get email or fax data"""
             if email_or_fax == "email":
@@ -476,6 +487,7 @@ class ReviewAgencyTask(Task):
                 review_data.append(
                     {
                         "address": addr,
+                        "primary": is_primary(email_or_fax, addr),
                         "error": addr.status == "error",
                         "errors": addr.errors.select_related(
                             "%s__communication__foia__agency__jurisdiction"

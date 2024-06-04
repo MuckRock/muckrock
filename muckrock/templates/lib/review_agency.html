@@ -80,7 +80,7 @@
 </dl>
 
 {% for data in review_data %}
-  <div class="collapsable review-requests{% if not data.error and not data.unacknowledged %} collapsed{% endif %}">
+  <div class="collapsable review-requests{% if not data.primary %} collapsed{% endif %}">
     <header {% if data.error %}class="error"{% endif %}>
       <p>{{data.address}} (<a href="{{ data.address.get_absolute_url }}" class="nocollapse">Details</a>)</p>
     </header>
