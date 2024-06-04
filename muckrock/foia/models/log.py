@@ -66,6 +66,7 @@ class FOIALogEntry(models.Model):
     date_requested = models.DateField(blank=True, null=True)
     date_completed = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=10, choices=STATUS, blank=True)
+    request_url = models.CharField(max_length=255, blank=True)
     foia_request = models.ForeignKey(
         "foia.foiarequest",
         on_delete=models.SET_NULL,

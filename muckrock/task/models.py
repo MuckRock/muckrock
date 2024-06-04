@@ -168,6 +168,7 @@ class Task(models.Model):
         return TagManagerForm(
             initial={"tags": self.tags.all()},
             prefix=f"task-{self.pk}",
+            required=False,
         )
 
 

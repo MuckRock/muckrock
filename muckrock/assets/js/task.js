@@ -156,7 +156,7 @@ $('document').ready(function(){
   }
 
   var actions = ['resolve', 'reject', 'spam', 'defer',
-    'approve', 'save', 'move', 'no_mail'];
+    'approve', 'save', 'move', 'no_mail', 'tag', 'edit_note'];
   for (var i = 0; i < actions.length; i++) {
     $('button[name="'+ actions[i] +'"]').click(ajaxSubmit(actions[i]));
   }
