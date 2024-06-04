@@ -8,7 +8,7 @@
       <p class="foia-log__date"><strong>Sent</strong> <time datetime="{{ foia_log.date_requested|date:"c" }}" title="{{ foia_log.date_requested|date:"c" }}">{{foia_log.date_requested}}</time></p>
       {% if foia_log.date_completed %}<p class="foia-log__date"><strong>Completed</strong> <time datetime="{{ foia_log.date_completed|date:"c" }}" title="{{ foia_log.date_completed|date:"c" }}">{{foia_log.date_completed}}</time></p>{% endif %}
       {% if foia_log.request_url %}
-          <strong>Link</strong> <p class="foia-log__request-url"><a href="{{ foia_log.request_url }}">Original Request</a></p>
+          <p class="foia-log__request-url"> <strong>Link</strong> <a href="{{ foia_log.request_url }}">Original Request</a></p>
         {% endif %}
     </div>
   </header>
