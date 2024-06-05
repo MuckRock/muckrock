@@ -62,6 +62,7 @@ def import_logs(form, user):
                     date_requested=parse_date(row.get("date requested")),
                     date_completed=parse_date(row.get("date completed")),
                     status=row.get("status", ""),
+                    request_url=row.get("request_url", ""),
                     foia_request_id=tracking_ids_map.get(row["request id"]),
                     foia_log=foia_log,
                 )
