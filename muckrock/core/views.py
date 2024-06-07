@@ -1,6 +1,7 @@
 """
 Views for muckrock project
 """
+
 # Django
 from django.conf import settings
 from django.contrib import messages
@@ -13,7 +14,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage
 from django.db.models import F, Q, Sum
 from django.db.models.query import Prefetch
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -22,6 +23,7 @@ from django.utils.html import escape
 from django.views.generic import FormView, ListView, TemplateView, View
 
 # Standard Library
+import csv
 import logging
 import operator
 import sys
@@ -729,3 +731,18 @@ class MRAutocompleteView(autocomplete.Select2QuerySetView):
     def get_selected_result_label(self, result):
         """Do not use HTML template for selected label"""
         return str(result)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def user_export(request):
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="muckrock_users.csv"'},
+    )
+    writer = csv.writer(response)
+
+    writer.writerow(["username", "name", "email"])
+    for user in User.objects.filter(profile__agency=None):
+        writer.writerow([user.username, user.profile.full_name, user.email])
+
+    return response
