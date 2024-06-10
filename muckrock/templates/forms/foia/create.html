@@ -283,11 +283,62 @@
           </footer>
         {% endif %}
 
-        <div class="modal" id="email-warning-modal" data-foias-filed="{{foias_filed}}">
-          <p>Hi! It looks like you included your email address this in your request. When you file with MuckRock, we generate a unique email and physical address for every request to keep things organized. We include that information in what we send to the agency, so no need to add your contact information on this form. If you're including an email address to help the agency search for responsive documents, simply hit "Submit." If you'd like to edit the body of your request, click "Revise Request." You'll only see this message until you've submitted your first request.<p>
+        <div class="modal" id="email-warning-modal" data-foias-filed1="{{ foias_filed }}">
+          <p>
+            Hi! It looks like you included your email address this in your
+            request. When you file with MuckRock, we generate a unique email
+            and physical address for every request to keep things organized. We
+            include that information in what we send to the agency, so no need
+            to add your contact information on this form. If you're including
+            an email address to help the agency search for responsive
+            documents, simply hit "Submit." If you'd like to edit the body of
+            your request, click "Revise Request." You'll only see this message
+            until you've submitted your first request.
+          </p>
           <footer>
             <button type="submit" class="primary button">Submit</button>
             <span class="close-modal button">Revise Request</span>
+          </footer>
+        </div>
+
+        <div class="modal" id="tos-modal" data-foias-filed="{{ foias_filed }}">
+          <h1>Terms of Service Agreement</h1>
+          <p>
+            I've reviewed and understand MuckRock's
+            <a href="/tos/">Terms of Service</a> and I understand that certain
+            requests are not suitable for MuckRock’s Request service. In
+            particular:
+          </p>
+          <ol>
+            <li>
+              Requests are for requesting information, and not making public
+              accusations. Our services may not be used as a tool to broadcast
+              complaints or engage in harassment or intimidation.
+            </li>
+            <li>
+              Previous requests on the topic of energy-directed weapons,
+              touchless torture, gangstalking, and related subjects have proven
+              to be disruptive to the site's operations while not producing
+              useful responses in the public interest and are not permitted on
+              the site.
+            </li>
+            <li>
+              Requests seeking personal information about yourself are not
+              suitable for our services. Refer to our
+              <a href="https://muckrock.notion.site/Tip-Sheet-Requesting-information-about-yourself-3fb2a338de4a4f7cb4a7d9fcb533bc96">
+                tip sheet on requesting information about yourself
+              </a> for help with requests of this type.
+            </li>
+          </ol>
+          <footer>
+            <div>
+              <label>
+                <input type="checkbox" id="tos-check">
+                I have read and agree to the Terms of Service
+              </label>
+            </div>
+            <button type="submit" class="primary button" disabled="disabled" id="tos-submit">Submit</button>
+            <span class="close-modal button">Cancel</span>
           </footer>
         </div>
 
