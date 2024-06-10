@@ -357,3 +357,9 @@ class FOIALogEntryFilterSet(django_filters.FilterSet):
     class Meta:
         model = FOIALogEntry
         fields = ["agency", "requester", "date_requested"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user = kwargs["request"].user
+        if user.is_anonymous or user.profile.feature_level < 1:
+            self.filters.pop("requester")
