@@ -6,7 +6,6 @@ Admin registration for accounts models
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count
 from django.http.response import HttpResponse
