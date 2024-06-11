@@ -55,7 +55,7 @@ def raw(request, idx):
     """Get the raw email for a communication"""
     comm = get_object_or_404(FOIACommunication, pk=idx)
     raw_email = comm.get_raw_email()
-    permission = request.user.is_staff or request.user == comm.foia.user
+    permission = comm.foia.has_perm(request.user, "change")
     if not raw_email or not permission:
         raise Http404
     text, html = raw_email.get_text_html()
