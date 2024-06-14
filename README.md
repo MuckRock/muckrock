@@ -7,7 +7,7 @@
 MuckRock is a non-profit collaborative news site that gives you the tools to keep our government transparent and accountable.
 
 ## Prerequisites 
-MuckRock depends on Squarelet for user authentication. As the services need to communivate directly, the development environment for MuckRock depends on the development environment for Squarelet - the MuckRock docker containers will join Squarelet's docker network. [Please install Squarelet and set up its development environment first][squarelet].
+MuckRock depends on Squarelet for user authentication. As the services need to communicate directly, the development environment for MuckRock depends on the development environment for Squarelet - the MuckRock docker containers will join Squarelet's docker network. [Please install Squarelet and set up its development environment first][squarelet].
 
 ## Install
 
