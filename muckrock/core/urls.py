@@ -146,6 +146,10 @@ urlpatterns = [
     re_path(r"^landing/$", views.LandingView.as_view(), name="landing"),
     re_path(r"^hijack/", include("hijack.urls")),
     re_path(r"^opensearch/", include("opensearch.urls")),
+    re_path(
+        r"^election/$",
+        RedirectView.as_view(url=settings.SQUARELET_URL + "/election-hub/"),
+    ),
     path(
         "respond/<int:idx>/",
         FOIACommunicationDirectAgencyView.as_view(),
