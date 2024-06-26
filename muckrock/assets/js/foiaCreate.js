@@ -273,14 +273,20 @@ $(document).ready(function(){
     if ($("#tos-modal").data("foias-filed") == 0) {
       if (email_regex.test($("#id_requested_docs").val())) {
         modal($("#email-warning-modal"));
+      } else {
+        modal($("#tos-modal"));
       }
-      modal($("#tos-modal"));
     } else {
       var form = $(this).closest("form");
       if (form.get(0).reportValidity()) {
         form.submit();
       }
     }
+  });
+
+  $("#email_modal_button").click(function(){
+    $("#email-warning-modal").removeClass("visibile");
+    modal($("#tos-modal"));
   });
 
   $("#delete_button").click(function(){
