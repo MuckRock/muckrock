@@ -284,6 +284,18 @@ $(document).ready(function(){
     }
   });
 
+  $("#buy_requests_button").click(function(){
+
+    if ($("#tos-modal").data("foias-filed") == 0) {
+      modal($("#tos-modal"));
+    } else {
+      var form = $(this).closest("form");
+      if (form.get(0).reportValidity()) {
+        form.submit();
+      }
+    }
+  });
+
   $("#email_modal_button").click(function(){
     $("#email-warning-modal").removeClass("visibile");
     modal($("#tos-modal"));
