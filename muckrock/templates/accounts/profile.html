@@ -144,7 +144,12 @@
           {% endfor %}
         </div>
         {% include "lib/pattern/buy_requests.html" with user=user form=form admin_organizations=admin_organizations only %}
-        <button class="blue button" type="submit">Buy Requests</button>
+        <button class="blue button" id="buy_requests_button" type="button">
+          Buy Requests
+        </button>
+
+        {% include "lib/tos_modal.html" %}
+
       </form>
     </section>
   {% endif %}

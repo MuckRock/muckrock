@@ -156,7 +156,7 @@ $('document').ready(function(){
   }
 
   var actions = ['resolve', 'reject', 'spam', 'defer',
-    'approve', 'save', 'move', 'no_mail'];
+    'approve', 'save', 'move', 'no_mail', 'tag', 'edit_note'];
   for (var i = 0; i < actions.length; i++) {
     $('button[name="'+ actions[i] +'"]').click(ajaxSubmit(actions[i]));
   }
@@ -235,6 +235,13 @@ $('document').ready(function(){
       type: 'get',
       success: function(data) {
         $(that).html(data);
+        $(that).find('.collapsable header').click(function(){
+          $(this).parent().toggleClass('collapsed');
+        });
+        $(that).find('.collapsable header').find('.nocollapse').click(function(event){
+          // Prevent click from propagating up to the collapsable header.
+          event.stopPropagation();
+        });
       },
       error: function() {
         $(that).html("<summary class='task__data'><p class='error'>Error</p></summary>");

@@ -7,8 +7,14 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django.db.models.aggregates import Count
+from django.http.response import HttpResponse
 from django.urls import reverse
+from django.urls.conf import re_path
 from django.utils.safestring import mark_safe
+
+# Standard Library
+import csv
 
 # Third Party
 from reversion.admin import VersionAdmin
@@ -143,6 +149,58 @@ class MRUserAdmin(UserAdmin):
     def full_name(self, obj):
         """Show full name from profile"""
         return obj.profile.full_name
+
+    def get_urls(self):
+        """Add custom URLs here"""
+        urls = super().get_urls()
+        my_urls = [
+            re_path(
+                r"^export/$",
+                self.admin_site.admin_view(self.user_export),
+                name="accounts-admin-user-export",
+            ),
+        ]
+        return my_urls + urls
+
+    def user_export(self, request):
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={
+                "Content-Disposition": 'attachment; filename="muckrock_users.csv"'
+            },
+        )
+        writer = csv.writer(response)
+
+        def format_date(date):
+            if date is not None:
+                return date.strftime("%Y-%m-%d")
+            else:
+                return ""
+
+        writer.writerow(
+            ["username", "name", "email", "last_login", "date_joined", "requests"]
+        )
+        for user in (
+            User.objects.filter(profile__agency=None)
+            .select_related("profile")
+            .only(
+                "username", "profile__full_name", "email", "last_login", "date_joined"
+            )
+            .annotate(requests=Count("composers__foias"))
+            .iterator(chunk_size=2000)
+        ):
+            writer.writerow(
+                [
+                    user.username,
+                    user.profile.full_name,
+                    user.email,
+                    format_date(user.last_login),
+                    format_date(user.date_joined),
+                    user.requests,
+                ]
+            )
+
+        return response
 
 
 class RecurringDonationAdminForm(forms.ModelForm):
