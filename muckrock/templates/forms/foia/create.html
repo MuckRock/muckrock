@@ -303,46 +303,7 @@
           </footer>
         </div>
 
-        <div class="modal" id="tos-modal" data-foias-filed="{{ foias_filed }}">
-          <h1>Terms of Service Agreement</h1>
-          <p>
-            I've reviewed and understand MuckRock's
-            <a href="/tos/">Terms of Service</a> and I understand that certain
-            requests are not suitable for MuckRock’s Request service. In
-            particular:
-          </p>
-          <ol>
-            <li>
-              Requests are for requesting information, and not making public
-              accusations. Our services may not be used as a tool to broadcast
-              complaints or engage in harassment or intimidation.
-            </li>
-            <li>
-              Previous requests on the topic of energy-directed weapons,
-              touchless torture, gangstalking, and related subjects have proven
-              to be disruptive to the site's operations while not producing
-              useful responses in the public interest and are not permitted on
-              the site.
-            </li>
-            <li>
-              Requests seeking personal information about yourself are not
-              suitable for our services. Refer to our
-              <a href="https://muckrock.notion.site/Tip-Sheet-Requesting-information-about-yourself-3fb2a338de4a4f7cb4a7d9fcb533bc96">
-                tip sheet on requesting information about yourself
-              </a> for help with requests of this type.
-            </li>
-          </ol>
-          <footer>
-            <div>
-              <label>
-                <input type="checkbox" id="tos-check">
-                I have read and agree to the Terms of Service
-              </label>
-            </div>
-            <button type="submit" class="primary button" disabled="disabled" id="tos-submit">Submit</button>
-            <span class="close-modal button">Cancel</span>
-          </footer>
-        </div>
+        {% include "lib/tos_modal.html" %}
 
       </form>
     </div>
