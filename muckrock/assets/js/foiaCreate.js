@@ -234,9 +234,6 @@ $(document).ready(function(){
   });
   agencyWidget.trigger("select2:select");
 
-  $("form.create-request").submit(function(e){
-  });
-
   $("#tos-check").change(function() {
     $("#tos-submit").prop("disabled", !this.checked);
   });
