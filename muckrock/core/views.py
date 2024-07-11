@@ -39,6 +39,7 @@ from watson.views import SearchMixin
 
 # MuckRock
 from muckrock.accounts.models import RecurringDonation
+from muckrock.accounts.tasks import donor_tag
 from muckrock.accounts.utils import (
     mailchimp_subscribe,
     mixpanel_event,
@@ -552,6 +553,7 @@ class DonationFormView(StripeFormMixin, FormView):
             if error_msg:
                 messages.error(self.request, error_msg)
             else:
+                donor_tag.delay(email)
                 self.request.session["donated"] = amount
                 self.request.session["ga"] = "donation"
                 mixpanel_event(
@@ -593,6 +595,7 @@ class DonationFormView(StripeFormMixin, FormView):
                 self.request, "Oops, something went wrong on our end. Sorry about that!"
             )
         else:
+            donor_tag.delay(email)
             RecurringDonation.objects.create(
                 user=user,
                 email=email,

@@ -5,7 +5,7 @@ Tasks for the account application
 # Django
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
-from celery.task import periodic_task
+from celery.task import periodic_task, task
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.db.models import Count, F, Sum
@@ -22,6 +22,7 @@ from raven.contrib.celery import register_logger_signal, register_signal
 
 # MuckRock
 from muckrock.accounts.models import Statistics
+from muckrock.accounts.utils import mailchimp_donor_tag
 from muckrock.agency.models import Agency
 from muckrock.communication.models import (
     EmailCommunication,
@@ -139,13 +140,13 @@ def store_statistics():
     range_max = 7
     range_min = 0
     for weekly, range_min, range_max in [("weekly", 0, 7), ("weekly2", 7, 14)]:
-        kwargs[
-            f"email_communications_{weekly}_total"
-        ] = EmailCommunication.objects.filter(
-            communication__response=False,
-            sent_datetime__gt=timezone.now() - timedelta(days=range_max),
-            sent_datetime__lt=timezone.now() - timedelta(days=range_min),
-        ).count()
+        kwargs[f"email_communications_{weekly}_total"] = (
+            EmailCommunication.objects.filter(
+                communication__response=False,
+                sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+                sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+            ).count()
+        )
         kwargs[f"email_communications_{weekly}_confirmed"] = (
             EmailCommunication.objects.filter(
                 communication__response=False,
@@ -167,13 +168,13 @@ def store_statistics():
             .exclude(confirmed_datetime=None)
             .count()
         )
-        kwargs[
-            f"mail_communications_{weekly}_total"
-        ] = MailCommunication.objects.filter(
-            communication__response=False,
-            sent_datetime__gt=timezone.now() - timedelta(days=range_max),
-            sent_datetime__lt=timezone.now() - timedelta(days=range_min),
-        ).count()
+        kwargs[f"mail_communications_{weekly}_total"] = (
+            MailCommunication.objects.filter(
+                communication__response=False,
+                sent_datetime__gt=timezone.now() - timedelta(days=range_max),
+                sent_datetime__lt=timezone.now() - timedelta(days=range_min),
+            ).count()
+        )
         kwargs[f"mail_communications_{weekly}_confirmed"] = (
             MailCommunication.objects.filter(
                 communication__response=False,
@@ -316,16 +317,16 @@ def store_statistics():
     kwargs["total_unresolved_snailmail_tasks"] = (
         SnailMailTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_snailmail_tasks"
-    ] = SnailMailTask.objects.get_deferred().count()
+    kwargs["total_deferred_snailmail_tasks"] = (
+        SnailMailTask.objects.get_deferred().count()
+    )
     kwargs["total_rejected_tasks"] = RejectedEmailTask.objects.count()
     kwargs["total_unresolved_rejected_tasks"] = (
         RejectedEmailTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_rejected_tasks"
-    ] = RejectedEmailTask.objects.get_deferred().count()
+    kwargs["total_deferred_rejected_tasks"] = (
+        RejectedEmailTask.objects.get_deferred().count()
+    )
     kwargs["total_staleagency_tasks"] = 0
     kwargs["total_unresolved_staleagency_tasks"] = 0
     kwargs["total_deferred_staleagency_tasks"] = 0
@@ -338,37 +339,37 @@ def store_statistics():
     kwargs["total_unresolved_newagency_tasks"] = (
         NewAgencyTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_newagency_tasks"
-    ] = NewAgencyTask.objects.get_deferred().count()
+    kwargs["total_deferred_newagency_tasks"] = (
+        NewAgencyTask.objects.get_deferred().count()
+    )
     kwargs["total_response_tasks"] = ResponseTask.objects.count()
     kwargs["total_unresolved_response_tasks"] = (
         ResponseTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_response_tasks"
-    ] = ResponseTask.objects.get_deferred().count()
+    kwargs["total_deferred_response_tasks"] = (
+        ResponseTask.objects.get_deferred().count()
+    )
     kwargs["total_faxfail_tasks"] = FailedFaxTask.objects.count()
     kwargs["total_unresolved_faxfail_tasks"] = (
         FailedFaxTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_faxfail_tasks"
-    ] = FailedFaxTask.objects.get_deferred().count()
+    kwargs["total_deferred_faxfail_tasks"] = (
+        FailedFaxTask.objects.get_deferred().count()
+    )
     kwargs["total_crowdfundpayment_tasks"] = CrowdfundTask.objects.count()
     kwargs["total_unresolved_crowdfundpayment_tasks"] = (
         CrowdfundTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_crowdfundpayment_tasks"
-    ] = CrowdfundTask.objects.get_deferred().count()
+    kwargs["total_deferred_crowdfundpayment_tasks"] = (
+        CrowdfundTask.objects.get_deferred().count()
+    )
     kwargs["total_reviewagency_tasks"] = ReviewAgencyTask.objects.count()
     kwargs["total_unresolved_reviewagency_tasks"] = (
         ReviewAgencyTask.objects.filter(resolved=False).get_undeferred().count()
     )
-    kwargs[
-        "total_deferred_reviewagency_tasks"
-    ] = ReviewAgencyTask.objects.get_deferred().count()
+    kwargs["total_deferred_reviewagency_tasks"] = (
+        ReviewAgencyTask.objects.get_deferred().count()
+    )
     kwargs["total_portal_tasks"] = PortalTask.objects.count()
     kwargs["total_unresolved_portal_tasks"] = (
         PortalTask.objects.filter(resolved=False).get_undeferred().count()
@@ -546,9 +547,9 @@ def store_statistics():
     kwargs["total_close_crowdsources"] = Crowdsource.objects.filter(
         status="close"
     ).count()
-    kwargs[
-        "num_crowdsource_responded_users"
-    ] = CrowdsourceResponse.objects.get_user_count()
+    kwargs["num_crowdsource_responded_users"] = (
+        CrowdsourceResponse.objects.get_user_count()
+    )
     kwargs["total_crowdsource_responses"] = CrowdsourceResponse.objects.count()
     kwargs["crowdsource_responses_pro"] = CrowdsourceResponse.objects.filter(
         user__organizations__entitlement__slug="professional"
@@ -608,3 +609,8 @@ def db_cleanup():
     except SoftTimeLimitExceeded:
         logger.error("DB Clean up took too long")
     logger.info("Ending DB Clean up")
+
+
+@task(ignore_results=True, name="muckrock.accounts.tasks.donor_tag")
+def donor_tag(email):
+    mailchimp_donor_tag(email)
