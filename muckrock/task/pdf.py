@@ -431,9 +431,11 @@ class CoverPDF(PDF):
                     lines.append(
                         "{}□ Write a {}check for ${:.2f}".format(
                             2 * tab,
-                            "CERTIFIED "
-                            if snail.amount >= settings.CHECK_LIMIT
-                            else "",
+                            (
+                                "CERTIFIED "
+                                if snail.amount >= settings.CHECK_LIMIT
+                                else ""
+                            ),
                             snail.amount,
                         )
                     )

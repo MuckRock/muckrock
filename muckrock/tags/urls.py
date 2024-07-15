@@ -1,6 +1,7 @@
 """
 URLs for tag pages
 """
+
 # Django
 from django.urls import re_path
 
