@@ -120,12 +120,14 @@ STORAGES = {
         "BACKEND": "muckrock.core.storage.CachedS3Boto3Storage",
     },
     "compressor": {
-        "BACKEND": "compressor.storage.CompressorFileStorage",
+        "BACKEND": "muckrock.core.storage.CachedS3Boto3Storage",
+    },
+    "compressor-offine": {
+        "BACKEND": "muckrock.core.storage.CachedS3Boto3Storage",
     },
 }
 THUMBNAIL_DEFAULT_STORAGE = STORAGES["default"]["BACKEND"]
 THUMBNAIL_STORAGE = STORAGES["default"]["BACKEND"]
-COMPRESS_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 CLEAN_S3_ON_FOIA_DELETE = True
 
 # Settings for static bucket storage
