@@ -1,4 +1,5 @@
 """App configuration for the squarelet app"""
+
 # -*- coding: utf-8 -*-
 
 # Django

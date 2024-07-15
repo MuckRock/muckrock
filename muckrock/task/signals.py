@@ -1,4 +1,5 @@
 """Signals for the task application"""
+
 # Django
 from django.db.models.signals import post_save
 from django.urls import reverse

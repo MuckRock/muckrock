@@ -1,6 +1,7 @@
 """
 Custom importer for jurisdiction laws
 """
+
 # Django
 from django.conf import settings
 

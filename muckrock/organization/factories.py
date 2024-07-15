@@ -1,6 +1,7 @@
 """
 Factories for the organization app
 """
+
 # Django
 from django.utils.text import slugify
 

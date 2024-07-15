@@ -341,10 +341,9 @@ class Detail(DetailView):
             self.foia.composer.status == "submitted"
             and self.foia.composer.datetime_submitted is not None
         ):
-            context[
-                "revoke_deadline"
-            ] = self.foia.composer.datetime_submitted + timedelta(
-                seconds=COMPOSER_EDIT_DELAY
+            context["revoke_deadline"] = (
+                self.foia.composer.datetime_submitted
+                + timedelta(seconds=COMPOSER_EDIT_DELAY)
             )
             context["can_revoke"] = (
                 context["user_can_edit"] and self.foia.composer.revokable()

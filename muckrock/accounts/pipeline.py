@@ -1,6 +1,7 @@
 """
 Custom pipeline steps for oAuth authentication
 """
+
 # Standard Library
 import logging
 

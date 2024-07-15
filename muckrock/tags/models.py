@@ -2,7 +2,6 @@
 Models for the tags application
 """
 
-
 # Django
 from django.db import models
 
