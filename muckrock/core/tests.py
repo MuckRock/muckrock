@@ -309,7 +309,8 @@ class TestDonations(TestCase):
         self.view = DonationFormView.as_view()
         self.form = StripeForm
 
-    def test_donate(self):
+    @mock.patch("muckrock.accounts.tasks.donor_tag.delay")
+    def test_donate(self, mock_mailchimp):
         """Donations should have a token, email, and amount.
         An email receipt should be sent for the donation."""
         token = "test"
@@ -330,6 +331,7 @@ class TestDonations(TestCase):
             302,
             "A successful donation will return a redirection.",
         )
+        mock_mailchimp.assert_called_with(email)
 
 
 class TestTemplatetagsFunctional(TestCase):
