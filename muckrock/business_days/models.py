@@ -1,6 +1,7 @@
 """
 Models for the Business Days application
 """
+
 # Django
 from django.db import models
 

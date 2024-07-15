@@ -1,6 +1,7 @@
 """
 Nodes and tags for rendering news widgets
 """
+
 # Django
 from django import template
 

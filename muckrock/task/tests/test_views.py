@@ -1,6 +1,7 @@
 """
 Tests for Tasks views
 """
+
 # Django
 from django.conf import settings
 from django.db import connection, reset_queries

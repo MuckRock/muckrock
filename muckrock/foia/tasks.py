@@ -861,9 +861,11 @@ class ExportCsv(AsyncFileDownloadTask):
         (lambda f: f.jurisdiction.pk, "Jurisdiction ID"),
         (lambda f: f.jurisdiction.get_level_display(), "Jurisdiction Level"),
         (
-            lambda f: f.jurisdiction.parent.name
-            if f.jurisdiction.level == "l"
-            else f.jurisdiction.name,
+            lambda f: (
+                f.jurisdiction.parent.name
+                if f.jurisdiction.level == "l"
+                else f.jurisdiction.name
+            ),
             "Jurisdiction State",
         ),
         (lambda f: f.agency.name if f.agency else "", "Agency"),
@@ -886,39 +888,49 @@ class ExportCsv(AsyncFileDownloadTask):
     staff_fields = (
         (lambda f: f.get_request_email(), "Request Email"),
         (
-            lambda f: f.communications.all()[0].get_delivered()
-            if f.communications.all()
-            else "",
+            lambda f: (
+                f.communications.all()[0].get_delivered()
+                if f.communications.all()
+                else ""
+            ),
             "Initial Communication Delivered",
         ),
         (
-            lambda f: f.communications.all()[0].sent_to()
-            if f.communications.all()
-            else "",
+            lambda f: (
+                f.communications.all()[0].sent_to() if f.communications.all() else ""
+            ),
             "Initial Communication Address",
         ),
         (
-            lambda f: inbound[0].get_delivered()
-            if (inbound := [c for c in f.communications.all() if c.response])
-            else "",
+            lambda f: (
+                inbound[0].get_delivered()
+                if (inbound := [c for c in f.communications.all() if c.response])
+                else ""
+            ),
             "First Inbound Communication Delivered",
         ),
         (
-            lambda f: inbound[0].sent_from()
-            if (inbound := [c for c in f.communications.all() if c.response])
-            else "",
+            lambda f: (
+                inbound[0].sent_from()
+                if (inbound := [c for c in f.communications.all() if c.response])
+                else ""
+            ),
             "First Inbound Communication Address",
         ),
         (
-            lambda f: inbound[-1].get_delivered()
-            if (inbound := [c for c in f.communications.all() if c.response])
-            else "",
+            lambda f: (
+                inbound[-1].get_delivered()
+                if (inbound := [c for c in f.communications.all() if c.response])
+                else ""
+            ),
             "Last Inbound Communication Delivered",
         ),
         (
-            lambda f: inbound[-1].sent_from()
-            if (inbound := [c for c in f.communications.all() if c.response])
-            else "",
+            lambda f: (
+                inbound[-1].sent_from()
+                if (inbound := [c for c in f.communications.all() if c.response])
+                else ""
+            ),
             "Last Inbound Communication Address",
         ),
     )
@@ -1019,6 +1031,7 @@ class ZipRequest(AsyncFileDownloadTask):
 
     def generate_file(self, out_file):
         """Zip all of the communications and files"""
+
         # https://stackoverflow.com/questions/57165960/error-0x80070057-the-parameter-is-incorrect-when-unzipping-files
         def clean(filename):
             return re.sub('[<>:"/\\\\|?*]', "_", filename)

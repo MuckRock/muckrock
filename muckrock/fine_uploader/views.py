@@ -235,7 +235,8 @@ def delete_composer(request, idx):
 
 def _build_presigned_url(key, content_type, user=None):
     """Generate a policy document and presigned URL for an upload
-    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html#generating-a-presigned-url-to-upload-a-file"""
+    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html#generating-a-presigned-url-to-upload-a-file
+    """
 
     bucket = settings.AWS_MEDIA_BUCKET_NAME
     conditions = [

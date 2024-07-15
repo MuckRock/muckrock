@@ -1,6 +1,7 @@
 """
 Site-wide context processors
 """
+
 # Django
 from django.conf import settings as django_settings
 from django.utils.functional import SimpleLazyObject

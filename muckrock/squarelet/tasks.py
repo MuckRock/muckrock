@@ -1,4 +1,5 @@
 """Celery tasks for squarelet app"""
+
 # Django
 from celery.task import task
 

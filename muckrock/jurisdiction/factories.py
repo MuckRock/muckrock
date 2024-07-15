@@ -1,6 +1,7 @@
 """
 Factories for the Jurisdiction application
 """
+
 # Django
 from django.utils.text import slugify
 

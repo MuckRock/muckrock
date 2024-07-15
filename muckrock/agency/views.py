@@ -195,12 +195,14 @@ def contact_info(request, idx):
     else:
         return JsonResponse(
             {
-                "portal": {
-                    "type": agency.portal.get_type_display(),
-                    "url": agency.portal.url,
-                }
-                if agency.portal
-                else None,
+                "portal": (
+                    {
+                        "type": agency.portal.get_type_display(),
+                        "url": agency.portal.url,
+                    }
+                    if agency.portal
+                    else None
+                ),
                 "emails": [
                     {"value": e.pk, "display": str(e)}
                     for e in agency.emails.filter(status="good").exclude(
@@ -211,13 +213,17 @@ def contact_info(request, idx):
                     {"value": f.pk, "display": str(f)}
                     for f in agency.phones.filter(status="good", type="fax")
                 ],
-                "email": str(agency.email)
-                if agency.email and agency.email.status == "good"
-                else None,
+                "email": (
+                    str(agency.email)
+                    if agency.email and agency.email.status == "good"
+                    else None
+                ),
                 "cc_emails": [str(e) for e in agency.other_emails],
-                "fax": str(agency.fax)
-                if agency.fax and agency.fax.status == "good"
-                else None,
+                "fax": (
+                    str(agency.fax)
+                    if agency.fax and agency.fax.status == "good"
+                    else None
+                ),
                 "address": str(agency.address) if agency.address else None,
             }
         )

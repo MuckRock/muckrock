@@ -2,7 +2,6 @@
 Automate some parts of GovQA portal handling
 """
 
-
 # Django
 from django.conf import settings
 
