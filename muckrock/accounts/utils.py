@@ -1,6 +1,7 @@
 """
 Utility method for the accounts application
 """
+
 # Django
 from django.conf import settings
 from django.contrib import messages
@@ -15,6 +16,8 @@ import logging
 import random
 import re
 import string
+from datetime import date
+from hashlib import md5
 
 # Third Party
 import requests
@@ -109,6 +112,38 @@ def mailchimp_subscribe(
         )
     mixpanel_event(request, "Newsletter Sign Up", {"Email": email, "List": list_})
     return False
+
+
+def mailchimp_donor_tag(email):
+    """Tag a donor on mailchimp"""
+
+    list_ = settings.MAILCHIMP_LIST_DEFAULT
+    subscriber_hash = md5(email.lower().encode()).hexdigest()
+
+    # first ensure they are on the wide list
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"apikey {settings.MAILCHIMP_API_KEY}",
+    }
+    api_url = f"{settings.MAILCHIMP_API_ROOT}/lists/{list_}/members/{subscriber_hash}"
+    data = {
+        "email_address": email,
+        "status_if_new": "unsubscribed",
+    }
+    response = retry_on_error(
+        requests.ConnectionError, requests.put, api_url, json=data, headers=headers
+    )
+    response.raise_for_status()
+
+    # then tag them
+    api_url += "/tags"
+    data = {
+        "tags": [{"name": date.today().strftime("%B %Y Donor"), "status": "active"}]
+    }
+    response = retry_on_error(
+        requests.ConnectionError, requests.post, api_url, json=data, headers=headers
+    )
+    response.raise_for_status()
 
 
 def mixpanel_event(request, event, props=None, **kwargs):
