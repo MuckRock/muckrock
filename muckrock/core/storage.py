@@ -28,10 +28,10 @@ class CachedS3Boto3Storage(S3Boto3Storage):
             "compressor.storage.CompressorFileStorage"
         )()
 
-    def save(self, name, content):
+    def save(self, name, content, max_length=None):
         # pylint: disable=protected-access
         self.local_storage._save(name, content)
-        super().save(name, self.local_storage._open(name))
+        super().save(name, self.local_storage._open(name), max_length)
         return name
 
 
