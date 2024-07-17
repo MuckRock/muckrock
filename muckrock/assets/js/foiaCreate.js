@@ -234,14 +234,8 @@ $(document).ready(function(){
   });
   agencyWidget.trigger("select2:select");
 
-  $("form.create-request").submit(function(e){
-    var email_regex = /\w+@\w+.\w+/;
-    if (email_regex.test($("#id_requested_docs").val()) &&
-        $("#email-warning-modal").data("foias-filed") == 0) {
-      e.preventDefault();
-      modal($("#email-warning-modal"));
-      $("form.create-request").off("submit");
-    }
+  $("#tos-check").change(function() {
+    $("#tos-submit").prop("disabled", !this.checked);
   });
 
   $(".toggle-advanced").click(function(){
@@ -271,10 +265,37 @@ $(document).ready(function(){
     } else {
       agencyInput.removeAttr("required");
     }
-    var form = $(this).closest("form");
-    if (form.get(0).reportValidity()) {
-      form.submit();
+
+    var email_regex = /\w+@\w+.\w+/;
+    if ($("#tos-modal").data("foias-filed") == 0) {
+      if (email_regex.test($("#id_requested_docs").val())) {
+        modal($("#email-warning-modal"));
+      } else {
+        modal($("#tos-modal"));
+      }
+    } else {
+      var form = $(this).closest("form");
+      if (form.get(0).reportValidity()) {
+        form.submit();
+      }
     }
+  });
+
+  $("#buy_requests_button").click(function(){
+
+    if ($("#tos-modal").data("foias-filed") == 0) {
+      modal($("#tos-modal"));
+    } else {
+      var form = $(this).closest("form");
+      if (form.get(0).reportValidity()) {
+        form.submit();
+      }
+    }
+  });
+
+  $("#email_modal_button").click(function(){
+    $("#email-warning-modal").removeClass("visibile");
+    modal($("#tos-modal"));
   });
 
   $("#delete_button").click(function(){
