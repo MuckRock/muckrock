@@ -4,7 +4,7 @@ Cache classes that extend S3, for asset compression
 
 # Django
 from django.conf import settings
-from django.core.files.storage import storages
+from django.core.files.storage import get_storage_class
 
 # Third Party
 from storages.backends.s3boto3 import S3Boto3Storage
@@ -21,13 +21,23 @@ class CachedS3Boto3Storage(S3Boto3Storage):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.local_storage = storages["compressor"]
+        self.local_storage = get_storage_class(
+            "compressor.storage.CompressorFileStorage"
+        )()
 
-    def save(self, name, content):
-        # pylint: disable=protected-access, arguments-differ
+    def save(self, name, content, max_length=None):
+        # pylint: disable=protected-access
         self.local_storage._save(name, content)
-        super().save(name, self.local_storage._open(name))
+        super().save(name, self.local_storage._open(name), max_length)
         return name
+
+
+class OfflineManifestFileStorage(CachedS3Boto3Storage):
+    """Store into the COMPRESS_OUTPUT_DIR"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.location = settings.COMPRESS_OUTPUT_DIR
 
 
 class MediaRootS3BotoStorage(S3Boto3Storage):
