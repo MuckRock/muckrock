@@ -523,15 +523,16 @@ class MultiRequestTaskList(TaskList):
     title = "Multi-Requests"
     queryset = MultiRequestTask.objects.preload_list()
     model = MultiRequestTask
+    bulk_actions = ["reject", "submit"]
 
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to MultiRequestTasks"""
-        if request.POST.get("action") == "submit":
+        if request.POST.get("submit"):
             agency_list = request.POST.getlist("agencies")
             task.submit(agency_list)
             task.resolve(request.user, {"action": "submit", "agencies": agency_list})
             messages.success(request, "Multirequest submitted")
-        elif request.POST.get("action") == "reject":
+        elif request.POST.get("reject"):
             form = MultiRequestRejectionForm(request.POST)
             task.reject()
             task.resolve(request.user, {"action": "reject"})
