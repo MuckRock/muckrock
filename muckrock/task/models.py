@@ -1156,6 +1156,10 @@ class MultiRequestTask(Task):
             f"{settings.MUCKROCK_URL}{self.composer.get_absolute_url()}"
         )
 
+    def check_foias_processing(self):
+        """Check if all of the requests are processing"""
+        return all(f.status == "submitted" for f in self.composer.foias.all())
+
 
 class PortalTask(Task):
     """An admin needs to interact with a portal"""
