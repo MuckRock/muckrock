@@ -59,6 +59,7 @@ class TestMailgunViews(TestCase):
         body=None,
         attachments=None,
         sign=True,
+        reply_to=None,
     ):
         """Helper function for testing the mailgun route"""
         # pylint: disable=too-many-arguments
@@ -73,6 +74,8 @@ class TestMailgunViews(TestCase):
             "body-plain": body or "%s\n%s" % (text, signature),
             "Message-ID": "message_id",
         }
+        if reply_to is not None:
+            data["Reply-To"] = reply_to
         for i, attachment in enumerate(attachments):
             data["attachment-%d" % (i + 1)] = attachment
         if sign:
@@ -129,6 +132,33 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
             set(EmailAddress.objects.fetch_many("other@agency.gov")),
         )
         nose.tools.eq_(foia.status, "processed")
+
+    # patching asyncio.run to not run the classification on actual LLM
+    @patch("asyncio.run", Mock())
+    @requests_mock.Mocker()
+    def test_reply_to(self, mock_requests):
+        """Test a succesful response with a reply-to header"""
+        url = "https://www.example.com/raw_email/"
+        mock_requests.get(
+            settings.MAILGUN_API_URL + "/events",
+            json={"items": [{"storage": {"url": url}}]},
+        )
+        mock_requests.get(url, json={"body-mime": "Raw email"})
+
+        foia = FOIARequestFactory(status="ack")
+        from_name = "Smith, Bob"
+        from_email = "test@agency.gov"
+        from_ = '"%s" <%s>' % (from_name, from_email)
+        reply_to = "reply-to@agency.gov"
+        to_ = '%s, "Doe, John" <other@agency.gov>' % foia.get_request_email()
+        subject = "Test subject"
+        text = "Test normal."
+        signature = "-Charlie Jones"
+
+        self.mailgun_route(from_, to_, subject, text, signature, reply_to=reply_to)
+        foia.refresh_from_db()
+
+        nose.tools.eq_(foia.email, EmailAddress.objects.fetch(reply_to))
 
     def test_bad_sender(self):
         """Test receiving a message from an unauthorized sender"""
