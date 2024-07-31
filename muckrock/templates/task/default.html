@@ -5,7 +5,15 @@
               <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
               <span class="task-type">Resolved {{task}}</span>
           </span>
-          <a class="permalink" href="{{task.get_absolute_url}}"><time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</time></a>
+          <a class="permalink" href="{{task.get_absolute_url}}">
+            <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}">
+              Resolved {{task.date_done|date:'m/d/Y G:i'}}
+            </time>
+            |
+            <time class="task-date-created" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}">
+              Created {{task.date_created|date:'m/d/Y G:i'}}
+            </time>
+          </a>
         {% else %}
           <span>
               <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox nocollapse">
