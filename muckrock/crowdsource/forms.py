@@ -202,7 +202,7 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
         super().__init__(*args, **kwargs)
 
         self.fields["data_csv"].required = False
-        if not user.profile.is_advanced:
+        if not user.profile.is_advanced():
             del self.fields["registration"]
         self.fields["project"].queryset = Project.objects.get_manager(user)
 
