@@ -58,7 +58,7 @@ function batchAction(forms, action) {
     var taskIDs = [];
     var taskData = {'tasks': []};
     taskData[action] = true;
-    if (action == "submit") {
+    if (action == "task_submit") {
       // multirequest submit has additional form data,
       // submit each one as its own request
       $(forms).each(function(idx, form) {
@@ -163,7 +163,7 @@ $('document').ready(function(){
     };
   }
 
-  var actions = ['resolve', 'reject', 'submit', 'spam', 'defer',
+  var actions = ['resolve', 'reject', 'task_submit', 'spam', 'defer',
     'approve', 'save', 'move', 'no_mail', 'tag', 'edit_note'];
   for (var i = 0; i < actions.length; i++) {
     $('button[name="'+ actions[i] +'"]').click(ajaxSubmit(actions[i]));
