@@ -24,7 +24,7 @@ from muckrock.core.factories import (
     UserFactory,
 )
 from muckrock.core.test_utils import mock_squarelet
-from muckrock.foia.factories import FOIATemplateFactory
+from muckrock.foia.factories import FOIARequestFactory, FOIATemplateFactory
 from muckrock.foia.models import FOIAComposer
 
 
@@ -262,3 +262,38 @@ class TestFOIAViewsetCreate(TestCase):
             code=402,
             status="Out of requests.  FOI Request has been saved.",
         )
+
+
+class TestFOIAViewsetUpdate(TestCase):
+    """Unit Tests for FOIA API Viewset update method"""
+
+    def test_update_collaorators(self):
+        """Test adding collaborators to a request"""
+        foia = FOIARequestFactory.create()
+        Token.objects.create(user=foia.user)
+
+        editor = UserFactory.create()
+        viewer = UserFactory.create()
+        data = {"edit_collaborators": [editor.pk], "read_collaborators": [viewer.pk]}
+
+        headers = {
+            "content-type": "application/json",
+            "HTTP_AUTHORIZATION": "Token %s" % foia.user.auth_token,
+        }
+        response = self.client.patch(
+            reverse("api-foia-detail", kwargs={"pk": foia.pk}),
+            json.dumps(data),
+            content_type="application/json",
+            **headers
+        )
+        eq_(
+            response.status_code,
+            200,
+            "Code: {}\nResponse: {}".format(response.status_code, response.content),
+        )
+
+        foia.refresh_from_db()
+        assert_true(foia.has_editor(editor))
+        assert_true(foia.has_viewer(viewer))
+        assert_false(foia.has_editor(viewer))
+        assert_false(foia.has_viewer(editor))
