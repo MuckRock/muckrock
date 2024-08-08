@@ -131,6 +131,7 @@ django==4.2
     #   django-storages
     #   django-taggit
     #   djangorestframework
+    #   djangorestframework-simplejwt
     #   dogslow
     #   drf-nested-routers
     #   easy-thumbnails
@@ -201,7 +202,10 @@ django-webpack-loader==1.8.1
 djangorestframework==3.14.0
     # via
     #   -r pip/requirements.in
+    #   djangorestframework-simplejwt
     #   drf-nested-routers
+djangorestframework-simplejwt==5.3.1
+    # via -r pip/requirements.in
 dogslow==1.2
     # via -r pip/requirements.in
 drf-nested-routers==0.91
@@ -395,7 +399,9 @@ pygments==2.13.0
 pyjwkest==1.4.0
     # via -r pip/requirements.in
 pyjwt==2.3.0
-    # via social-auth-core
+    # via
+    #   djangorestframework-simplejwt
+    #   social-auth-core
 pylibmc==1.6.1
     # via -r pip/requirements.in
 pymdown-extensions==7.1

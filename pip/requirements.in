@@ -36,6 +36,7 @@ django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
 django<5.0 # Django is kinda important...
 djangorestframework # The API framework
+djangorestframework_simplejwt # JWT auth for DRF
 dogslow # Monitors slow requests
 drf-nested-routers # Nested resources for DRF
 easy-thumbnails # Used for thumbnailing images
