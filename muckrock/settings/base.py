@@ -533,6 +533,13 @@ REST_FRAMEWORK = {
 }
 MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
 
+SIMPLE_JWT = {
+    "ALGORITHM": "RS256",
+    "VERIFYING_KEY": os.environ["JWT_VERIFYING_KEY"].replace("\\n", "\n"),
+    "AUDIENCE": ["muckrock"],
+    "USER_ID_FIELD": "profile__uuid",
+}
+
 if "ALLOWED_HOSTS" in os.environ:
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
