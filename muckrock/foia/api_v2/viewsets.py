@@ -3,7 +3,7 @@ Viewsets for V2 of the FOIA API
 """
 
 # Third Party
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -12,7 +12,9 @@ from muckrock.foia.api_v2.serializers import FOIARequestSerializer
 from muckrock.foia.models.request import FOIARequest
 
 
-class FOIARequestViewSet(viewsets.ModelViewSet):
+class FOIARequestViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
     """API for FOIA Requests"""
 
     authentication_classes = [JWTAuthentication, SessionAuthentication]
