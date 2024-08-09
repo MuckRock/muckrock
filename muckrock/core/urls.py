@@ -13,6 +13,11 @@ from django.views.generic.base import RedirectView, TemplateView
 
 # Third Party
 import debug_toolbar
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
@@ -97,7 +102,7 @@ router.register(r"project", muckrock.project.viewsets.ProjectViewSet, "api-proje
 
 router_v2 = DefaultRouter()
 router_v2.register(
-    r"foia", muckrock.foia.api_v2.viewsets.FOIARequestViewSet, "api2-foia"
+    r"requests", muckrock.foia.api_v2.viewsets.FOIARequestViewSet, "api2-requests"
 )
 
 urlpatterns = [
@@ -161,6 +166,12 @@ urlpatterns = [
         "respond/<int:idx>/",
         FOIACommunicationDirectAgencyView.as_view(),
         name="communication-direct-agency",
+    ),
+    path("api_v2/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api_v2/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
     ),
 ]
 

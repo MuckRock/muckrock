@@ -305,6 +305,7 @@ INSTALLED_APPS = (
     "actstream",
     "simple_history",
     "anymail",
+    "drf_spectacular",
 )
 
 
@@ -528,8 +529,18 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "MuckRock API",
+    # 'DESCRIPTION': 'Your project description',
+    "VERSION": "2.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
+    "PREPROCESSING_HOOKS": ["muckrock.core.utils.custom_preprocessing_hook"],
+}
 
 SIMPLE_JWT = {
     "ALGORITHM": "RS256",
