@@ -104,6 +104,11 @@ router_v2 = DefaultRouter()
 router_v2.register(
     r"requests", muckrock.foia.api_v2.viewsets.FOIARequestViewSet, "api2-requests"
 )
+router_v2.register(
+    r"communications",
+    muckrock.foia.api_v2.viewsets.FOIACommunicationViewSet,
+    "api2-communications",
+)
 
 urlpatterns = [
     re_path(r"^$", views.homepage, name="index"),
