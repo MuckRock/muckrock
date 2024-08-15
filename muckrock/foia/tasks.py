@@ -870,6 +870,14 @@ class ExportCsv(AsyncFileDownloadTask):
         ),
         (lambda f: f.agency.name if f.agency else "", "Agency"),
         (lambda f: f.agency.pk if f.agency else "", "Agency ID"),
+        (
+            lambda f: (
+                f.agency.addresses.all()[0].zip_code
+                if f.agency and f.agency.addresses.all()
+                else ""
+            ),
+            "Agency Zip Code",
+        ),
         (lambda f: f.date_followup, "Followup Date"),
         (lambda f: f.date_estimate, "Estimated Completion Date"),
         (lambda f: f.composer.requested_docs, "Requested Documents"),
@@ -940,7 +948,7 @@ class ExportCsv(AsyncFileDownloadTask):
         self.foias = (
             FOIARequest.objects.filter(pk__in=foia_pks)
             .select_related("composer__user", "agency__jurisdiction__parent")
-            .prefetch_related("tracking_ids")
+            .prefetch_related("tracking_ids", "agency__addresses")
             .only(
                 "agency__id",
                 "agency__jurisdiction__id",
@@ -1002,7 +1010,7 @@ class ExportCsv(AsyncFileDownloadTask):
             writer.writerow(f[0](foia) for f in self.fields)
 
 
-@task(ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.export_csv")
+@task(ignore_result=True, time_limit=7200, name="muckrock.foia.tasks.export_csv")
 def export_csv(foia_pks, user_pk):
     """Export a csv of the selected FOIA requests"""
     ExportCsv(user_pk, foia_pks).run()
