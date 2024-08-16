@@ -1010,7 +1010,7 @@ class ExportCsv(AsyncFileDownloadTask):
             writer.writerow(f[0](foia) for f in self.fields)
 
 
-@task(ignore_result=True, time_limit=7200, name="muckrock.foia.tasks.export_csv")
+@task(ignore_result=True, time_limit=18000, name="muckrock.foia.tasks.export_csv")
 def export_csv(foia_pks, user_pk):
     """Export a csv of the selected FOIA requests"""
     ExportCsv(user_pk, foia_pks).run()
