@@ -866,7 +866,13 @@ class FlaggedTask(Task):
                 org = client.organizations.create_or_update(ZenOrganization(**org_data))
             user_data["organization_id"] = org.id
             ticket_data["organization_id"] = org.id
-        user = client.users.create_or_update(ZenUser(**user_data))
+        try:
+            user = client.users.create_or_update(ZenUser(**user_data))
+        except APIException:
+            # merge conflicting users
+            user1 = list(client.users.search(external_id=user_data["external_id"]))[0]
+            user2 = list(client.users.search(query=user_data["email"]))[0]
+            user = client.users.merge(user1, user2)
         ticket_data["requester_id"] = user.id
         ticket_audit = client.tickets.create(Ticket(**ticket_data))
 
