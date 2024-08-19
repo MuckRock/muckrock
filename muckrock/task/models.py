@@ -788,7 +788,7 @@ class FlaggedTask(Task):
             return None
 
     def create_zendesk_flag_ticket(self):
-        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-branches, too-many-locals
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
             subdomain=settings.ZENDESK_SUBDOMAIN,
