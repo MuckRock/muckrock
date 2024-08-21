@@ -1007,7 +1007,7 @@ class ExportCsv(AsyncFileDownloadTask):
         """Export selected foia requests as a CSV file"""
         writer = csv.writer(out_file)
         writer.writerow(f[1] for f in self.fields)
-        for i, foia in enumerate(self.foias.iterator(chunk_size=2000)):
+        for i, foia in enumerate(self.foias.iterator(chunk_size=500)):
             if i % 2000 == 0:
                 logger.info("[EXPORT CSV] foia %d", i)
             writer.writerow(f[0](foia) for f in self.fields)
