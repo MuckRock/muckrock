@@ -692,7 +692,6 @@ class PaymentInfoTaskList(TaskList):
             form = PaymentInfoTaskForm(request.POST, agency=agency)
             if not form.is_valid():
                 raise ValueError(form.errors)
-
             if form.cleaned_data.get("portal_payment_url"):
                 agency.portal_payment_url = form.cleaned_data.get("portal_payment_url")
                 agency.save()
