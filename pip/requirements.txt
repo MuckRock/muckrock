@@ -307,8 +307,6 @@ multidict==6.0.4
     # via
     #   aiohttp
     #   yarl
-newrelic==2.70.0.51
-    # via -r pip/requirements.in
 oauth2client==4.1.2
     # via google-api-python-client
 oauthlib==2.1.0
