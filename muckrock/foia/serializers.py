@@ -163,6 +163,18 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
     )
     datetime_done = DateTimeField()
     datetime_updated = DateTimeField()
+    edit_collaborators = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        style={"base_template": "input.html"},
+        many=True,
+        required=False,
+    )
+    read_collaborators = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        style={"base_template": "input.html"},
+        many=True,
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -176,16 +188,22 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
             self.fields.pop("mail_id")
             self.fields.pop("email", None)
             self.fields.pop("notes")
+            self.fields.pop("edit_collaborators")
+            self.fields.pop("read_collaborators")
             return
         if not request.user.is_staff:
             self.fields.pop("mail_id")
             self.fields.pop("email", None)
             if not foia:
                 self.fields.pop("notes")
+                self.fields.pop("edit_collaborators")
+                self.fields.pop("read_collaborators")
             else:
                 has_change = foia.has_perm(request.user, "change")
                 if not has_change:
                     self.fields.pop("notes")
+                    self.fields.pop("edit_collaborators")
+                    self.fields.pop("read_collaborators")
                 if request.method == "PATCH":
                     self._set_patch_fields(request.user, foia)
 
@@ -196,7 +214,9 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
         has_embargo_perm = foia.has_perm(user, "embargo_perm")
         allowed = []
         if has_change:
-            allowed.extend(["notes", "tags"])
+            allowed.extend(
+                ["notes", "tags", "edit_collaborators", "read_collaborators"]
+            )
         if has_embargo:
             allowed.append("embargo")
         if has_embargo_perm:
@@ -222,6 +242,8 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
             "user",
             "username",
             "agency",
+            "edit_collaborators",
+            "read_collaborators",
             # request dates
             "datetime_submitted",
             "date_due",

@@ -235,10 +235,12 @@ def _parse_email_headers(post):
     from_ = post.get("From", "")
     to_ = post.get("To") or post.get("to", "")
     cc_ = post.get("Cc") or post.get("cc", "")
+    reply_to = post.get("Reply-To", "")
     from_email = EmailAddress.objects.fetch(from_)
     to_emails = EmailAddress.objects.fetch_many(to_)
     cc_emails = EmailAddress.objects.fetch_many(cc_)
-    return from_email, to_emails, cc_emails
+    reply_to_email = EmailAddress.objects.fetch(reply_to)
+    return from_email, to_emails, cc_emails, reply_to_email
 
 
 def _handle_request(request, mail_id):
@@ -249,7 +251,7 @@ def _handle_request(request, mail_id):
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
     post = request.POST
-    from_email, to_emails, cc_emails = _parse_email_headers(post)
+    from_email, to_emails, cc_emails, reply_to_email = _parse_email_headers(post)
     subject = post.get("Subject") or post.get("subject", "")
     message_id = (
         post.get("Message-ID") or post.get("Message-Id") or post.get("message-id", "")
@@ -367,7 +369,9 @@ def _handle_request(request, mail_id):
         new_cc_emails = [
             e for e in (to_emails + cc_emails) if e.domain not in muckrock_domains
         ]
-        if from_email.domain not in muckrock_domains:
+        if reply_to_email and reply_to_email.domain not in muckrock_domains:
+            foia.email = reply_to_email
+        elif from_email.domain not in muckrock_domains:
             foia.email = from_email
         foia.cc_emails.set(new_cc_emails)
 
@@ -410,7 +414,7 @@ def _catch_all(request, address):
     """Handle emails sent to other addresses"""
 
     post = request.POST
-    from_email, to_emails, cc_emails = _parse_email_headers(post)
+    from_email, to_emails, cc_emails, _reply_to_email = _parse_email_headers(post)
     subject = post.get("Subject") or post.get("subject", "")
     message_id = (
         post.get("Message-ID") or post.get("Message-Id") or post.get("message-id", "")

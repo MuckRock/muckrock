@@ -58,14 +58,22 @@ function batchAction(forms, action) {
     var taskIDs = [];
     var taskData = {'tasks': []};
     taskData[action] = true;
-    $(forms).each(function() {
-        taskID = getTaskID($(this).serializeArray());
-        taskIDs.push('#' + taskID + '-task');
-        taskData['tasks'].push(taskID);
-    });
-    if (forms.length > 0) {
-        var taskEndpoint = $(forms[0]).attr('action');
-        ajaxPost(taskIDs.join(', '), taskEndpoint, taskData);
+    if (action == "task_submit") {
+      // multirequest submit has additional form data,
+      // submit each one as its own request
+      $(forms).each(function(idx, form) {
+        singleAction(form, action);
+      });
+    } else {
+        $(forms).each(function() {
+          taskID = getTaskID($(this).serializeArray());
+          taskIDs.push('#' + taskID + '-task');
+          taskData['tasks'].push(taskID);
+        });
+        if (forms.length > 0) {
+            var taskEndpoint = $(forms[0]).attr('action');
+            ajaxPost(taskIDs.join(', '), taskEndpoint, taskData);
+        }
     }
 }
 
@@ -141,7 +149,7 @@ $('document').ready(function(){
       var forms = [];
       if ($(this).attr('id') == 'batched-' + action) {
           $(':checked[form=batched]').each(function() {
-              var taskForm = $(this).closest('.task').find('form');
+              var taskForm = $(this).closest('.task').find('form.task-post-actions');
               // the form needs to have a resolve action in order to be added
               if (formHasAction(taskForm, action)) {
                   forms.push(taskForm);
@@ -155,7 +163,7 @@ $('document').ready(function(){
     };
   }
 
-  var actions = ['resolve', 'reject', 'spam', 'defer',
+  var actions = ['resolve', 'reject', 'task_submit', 'spam', 'defer',
     'approve', 'save', 'move', 'no_mail', 'tag', 'edit_note'];
   for (var i = 0; i < actions.length; i++) {
     $('button[name="'+ actions[i] +'"]').click(ajaxSubmit(actions[i]));

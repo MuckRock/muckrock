@@ -92,6 +92,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 ("composer__user__username", "user"),
                 ("agency__name", "agency"),
                 ("datetime_done", "datetime_done"),
+                ("datetime_updated", "datetime_updated"),
                 ("title", "title"),
                 ("status", "status"),
             )

@@ -31,6 +31,19 @@
   <div class="multi-reject-form">
       {{ rejection_form }}
   </div>
-  <button type="submit" class="red button" name="action" value="reject">Reject</button>
-  <button type="submit" class="primary button" name="action" value="submit">Submit</button>
+
+  {% if task.check_foias_processing %}
+    <button type="submit" class="red button" name="reject" value="true">Reject</button>
+    <button type="submit" class="primary button" name="task_submit" value="true">Submit</button>
+  {% else %}
+    <div class="failure">
+      Some of the requests associated with this task have already been
+      submitted, which means something has gone wrong.  This task may no longer
+      be submitted or rejected, but can be resolved to clear it without taking
+      any further action.  If the request is problematic, it may need to be
+      withdrawn or dealt with in another manner.
+    </div>
+    <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
+  {% endif %}
+
 {% endblock %}

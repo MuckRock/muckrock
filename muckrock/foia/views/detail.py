@@ -253,7 +253,9 @@ class Detail(DetailView):
         context["tracking_id_form"] = TrackingNumberForm()
 
         # this data used in a form
-        context["status_choices"] = [(k, v) for (k, v) in STATUS if k != "submitted"]
+        context["status_choices"] = [
+            (k, v) for (k, v) in STATUS if k not in ("submitted", "abandoned")
+        ]
         context["user_actions"] = self.foia.user_actions(
             self.request.user, context["is_agency_user"]
         )

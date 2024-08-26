@@ -186,11 +186,9 @@
               </p>
               {% if request_organizations %}
                 <p class="request-organizations">
-                  , or
-                  <a href="{% url "acct-settings" %}#organization">
-                    switch your active account to {{ request_organizations }}
-                  </a>,
-                  which have requests left you can use.
+                  , or switch your active account to {{ request_organizations }}
+                  which have requests left you can use.  (Switch your
+                  organization using the menu.)
                 </p>
               {% endif %}
             </div>

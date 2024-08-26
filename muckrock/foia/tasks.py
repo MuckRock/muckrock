@@ -870,6 +870,14 @@ class ExportCsv(AsyncFileDownloadTask):
         ),
         (lambda f: f.agency.name if f.agency else "", "Agency"),
         (lambda f: f.agency.pk if f.agency else "", "Agency ID"),
+        (
+            lambda f: (
+                f.agency.addresses.all()[0].zip_code
+                if f.agency and f.agency.addresses.all()
+                else ""
+            ),
+            "Agency Zip Code",
+        ),
         (lambda f: f.date_followup, "Followup Date"),
         (lambda f: f.date_estimate, "Estimated Completion Date"),
         (lambda f: f.composer.requested_docs, "Requested Documents"),
@@ -937,10 +945,11 @@ class ExportCsv(AsyncFileDownloadTask):
 
     def __init__(self, user_pk, foia_pks):
         super().__init__(user_pk, "".join(str(pk) for pk in foia_pks[:100]))
+        logger.info("[EXPORT CSV] init user: %d foia count: %d", user_pk, len(foia_pks))
         self.foias = (
             FOIARequest.objects.filter(pk__in=foia_pks)
             .select_related("composer__user", "agency__jurisdiction__parent")
-            .prefetch_related("tracking_ids")
+            .prefetch_related("tracking_ids", "agency__addresses")
             .only(
                 "agency__id",
                 "agency__jurisdiction__id",
@@ -998,11 +1007,13 @@ class ExportCsv(AsyncFileDownloadTask):
         """Export selected foia requests as a CSV file"""
         writer = csv.writer(out_file)
         writer.writerow(f[1] for f in self.fields)
-        for foia in self.foias.iterator(chunk_size=2000):
+        for i, foia in enumerate(self.foias.iterator(chunk_size=500)):
+            if i % 2000 == 0:
+                logger.info("[EXPORT CSV] foia %d", i)
             writer.writerow(f[0](foia) for f in self.fields)
 
 
-@task(ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.export_csv")
+@task(ignore_result=True, time_limit=18000, name="muckrock.foia.tasks.export_csv")
 def export_csv(foia_pks, user_pk):
     """Export a csv of the selected FOIA requests"""
     ExportCsv(user_pk, foia_pks).run()

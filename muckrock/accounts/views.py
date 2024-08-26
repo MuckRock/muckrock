@@ -212,6 +212,9 @@ class ProfileView(BuyRequestsMixin, FormView):
             context_data["admin_organizations"] = self.user.organizations.filter(
                 memberships__admin=True
             )
+            context_data["foias_filed"] = self.request.user.composers.exclude(
+                status="started"
+            ).count()
         requests = (
             FOIARequest.objects.filter(composer__user=self.user)
             .get_viewable(self.request.user)

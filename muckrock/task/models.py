@@ -788,7 +788,7 @@ class FlaggedTask(Task):
             return None
 
     def create_zendesk_flag_ticket(self):
-        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-branches, too-many-locals
         client = Zenpy(
             email=settings.ZENDESK_EMAIL,
             subdomain=settings.ZENDESK_SUBDOMAIN,
@@ -866,7 +866,13 @@ class FlaggedTask(Task):
                 org = client.organizations.create_or_update(ZenOrganization(**org_data))
             user_data["organization_id"] = org.id
             ticket_data["organization_id"] = org.id
-        user = client.users.create_or_update(ZenUser(**user_data))
+        try:
+            user = client.users.create_or_update(ZenUser(**user_data))
+        except APIException:
+            # merge conflicting users
+            user1 = list(client.users.search(external_id=user_data["external_id"]))[0]
+            user2 = list(client.users.search(query=user_data["email"]))[0]
+            user = client.users.merge(user1, user2)
         ticket_data["requester_id"] = user.id
         ticket_audit = client.tickets.create(Ticket(**ticket_data))
 
@@ -1155,6 +1161,10 @@ class MultiRequestTask(Task):
             f"MultiRequest Task\nComposer: {self.composer}\n"
             f"{settings.MUCKROCK_URL}{self.composer.get_absolute_url()}"
         )
+
+    def check_foias_processing(self):
+        """Check if all of the requests are processing"""
+        return all(f.status == "submitted" for f in self.composer.foias.all())
 
 
 class PortalTask(Task):
