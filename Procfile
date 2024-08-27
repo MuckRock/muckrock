@@ -1,4 +1,3 @@
-
-web:       bin/start-nginx newrelic-admin run-program gunicorn -c config/gunicorn.conf muckrock.wsgi:application
-scheduler: newrelic-admin run-program celery -A muckrock.core.celery worker -E -B --loglevel=INFO
-worker:    newrelic-admin run-program celery -A muckrock.core.celery worker -E -Q celery,phaxio --loglevel=INFO
+web: bin/start-nginx gunicorn -c config/gunicorn.conf muckrock.wsgi:application
+scheduler: celery -A muckrock.core.celery worker -E -B --loglevel=INFO
+worker: celery -A muckrock.core.celery worker -E -Q celery,phaxio --loglevel=INFO
