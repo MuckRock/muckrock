@@ -1213,8 +1213,7 @@ class FOIARequest(models.Model):
                 "form": FOIASoftDeleteForm(foia=self, prefix="delete"),
             },
             {
-                "test": user.has_perm("foia.change_foiarequest")
-                and not self.composer.revokable(),
+                "test": self.has_perm(user, "change") and not self.composer.revokable(),
                 "title": "Withdraw Request",
                 "action": "withdraw",
                 "desc": "Withdraw your request from the agency",
