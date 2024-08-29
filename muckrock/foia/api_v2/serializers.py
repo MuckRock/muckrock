@@ -15,7 +15,9 @@ from drf_spectacular.utils import (
 from rest_framework import serializers
 
 # MuckRock
+from muckrock.agency.models.agency import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.organization.models import Organization
 
 
 @extend_schema_serializer(
@@ -100,6 +102,64 @@ class FOIARequestSerializer(serializers.ModelSerializer):
                 "this request"
             },
         }
+
+
+class FOIARequestCreateSerializer(serializers.ModelSerializer):
+    """Serializer for filing a new request"""
+
+    agencies = serializers.PrimaryKeyRelatedField(
+        queryset=Agency.objects.filter(status="approved"),
+        many=True,
+        required=True,
+    )
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.none(),
+        required=False,
+    )
+    requested_docs = serializers.CharField()
+
+    class Meta:
+        model = FOIARequest
+        fields = (
+            "agencies",
+            "organization",
+            "embargo",
+            "permanent_embargo",
+            "title",
+            "requested_docs",
+            # "attachments",
+            # "edit_collaborators",
+            # "read_collaborators",
+            # "tags",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        request = self.context.get("request", None)
+        view = self.context.get("view", None)
+        user = request and request.user
+        authed = user and user.is_authenticated
+        # are we currently generating the documentation
+        docs = getattr(view, "swagger_fake_view", False)
+        if authed:
+            # set the valid organizations to those the current user is a member of
+            self.fields["organization"].queryset = Organization.objects.filter(
+                users=user
+            )
+        # remove embargo fields if the user does not have permission to set them
+        if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
+            self.fields.pop("embargo")
+        if not docs and (
+            not authed or not user.has_perm("foia.embargo_perm_foiarequest")
+        ):
+            self.fields.pop("permanent_embargo")
+
+    def validate(self, attrs):
+        # if permanent embargo is true, embargo must be true
+        if attrs.get("permanent_embargo"):
+            attrs["embargo"] = True
+        return attrs
 
 
 @extend_schema_serializer(

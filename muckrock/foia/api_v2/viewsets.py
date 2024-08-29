@@ -2,29 +2,45 @@
 Viewsets for V2 of the FOIA API
 """
 
+# Django
+from django.template.defaultfilters import slugify
+
 # Third Party
 import django_filters
 from django_filters.rest_framework.backends import DjangoFilterBackend
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status as http_status, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # MuckRock
+from muckrock.agency.models.agency import Agency
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
+    FOIARequestCreateSerializer,
     FOIARequestSerializer,
 )
+from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models.composer import FOIAComposer
 
 
 class FOIARequestViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
 ):
     """API for FOIA Requests"""
 
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    serializer_class = FOIARequestSerializer
     filter_backends = ()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return FOIARequestCreateSerializer
+
+        return FOIARequestSerializer
 
     def get_queryset(self):
         return (
@@ -34,6 +50,41 @@ class FOIARequestViewSet(
                 "edit_collaborators", "read_collaborators", "tracking_ids"
             )
         )
+
+    def create(self, request, *args, **kwargs):
+
+        composer = FOIAComposer.objects.create(
+            user=request.user,
+            organization_id=request.data.get(
+                "organization", request.user.profile.organization.pk
+            ),
+            title=request.data["title"],
+            slug=slugify(request.data["title"]) or "untitled",
+            requested_docs=request.data["requested_docs"],
+            embargo=request.data.get("embargo", False),
+            permanent_embargo=request.data.get("permanent_embargo", False),
+        )
+        composer.agencies.set(Agency.objects.filter(pk__in=request.data["agencies"]))
+
+        try:
+            composer.submit()
+        except InsufficientRequestsError:
+            return Response(
+                {
+                    "status": "Out of requests.  FOI Request has been saved.",
+                    "location": composer.get_absolute_url(),
+                },
+                status=http_status.HTTP_402_PAYMENT_REQUIRED,
+            )
+        else:
+            return Response(
+                {
+                    "status": "FOI Request submitted",
+                    "location": composer.get_absolute_url(),
+                    "requests": [f.pk for f in composer.foias.all()],
+                },
+                status=http_status.HTTP_201_CREATED,
+            )
 
 
 class FOIACommunicationViewSet(
