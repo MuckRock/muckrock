@@ -92,6 +92,18 @@
           </span>
         </li>
       {% endif %}
+      {% if file.get_extension == "csv" and request.user.is_authenticated %}
+        <li>
+          <a
+            href="{{ settings.DATASETTE_URL }}/muckrock/{{ request.user.profile.organization.slug }}/import-csv/?url={{ file.ffile.url }}"
+            target="_blank"
+            class="action"
+            >
+            {% include "lib/component/icon/upload.svg" %}
+            <span class="label">Upload to Datasette</span>
+          </a>
+        </li>
+      {% endif %}
     </ul>
     {% if file.is_doccloud and file.doc_id %}
       <div class="file-embed">
