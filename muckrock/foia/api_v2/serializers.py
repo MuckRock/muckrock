@@ -89,8 +89,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "price",
             # connected models
             # "tags",
-            # "notes", # XXX
-            # "communications", # XXX
         )
         extra_kwargs = {
             "edit_collaborators": {
@@ -111,12 +109,21 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         queryset=Agency.objects.filter(status="approved"),
         many=True,
         required=True,
+        help_text="A list of IDs for the agencies to file this request with.  "
+        "Providing more than one agency ID allows you to file a single request "
+        "with multiple agencies",
     )
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.none(),
         required=False,
+        help_text="The ID of one of your organizations that you want this request "
+        "associated with.  This organization will be charged for the filing of "
+        "this request.  If left blank, it will default to your current active "
+        "organization",
     )
-    requested_docs = serializers.CharField()
+    requested_docs = serializers.CharField(
+        help_text="A description of the documents you are requesting from the agency."
+    )
 
     class Meta:
         model = FOIARequest
@@ -140,7 +147,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         view = self.context.get("view", None)
         user = request and request.user
         authed = user and user.is_authenticated
-        # are we currently generating the documentation
+        # are we currently generating the documentation?
         docs = getattr(view, "swagger_fake_view", False)
         if authed:
             # set the valid organizations to those the current user is a member of
@@ -160,6 +167,40 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         if attrs.get("permanent_embargo"):
             attrs["embargo"] = True
         return attrs
+
+
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Succesful",
+            status_codes=[201],
+            value={
+                "status": "FOI Request submitted",
+                "location": "https://www.muckrock.com/foi/multirequest/test-123/",
+                "requests": [456],
+            },
+        ),
+        OpenApiExample(
+            "Payment required",
+            status_codes=[402],
+            value={
+                "status": "Out of requests.  FOI Request has been saved.",
+                "location": "https://www.muckrock.com/foi/multirequest/test-123/",
+            },
+        ),
+    ]
+)
+class FOIARequestCreateReturnSerializer(serializers.Serializer):
+    """Serializer for return data for creating a request"""
+
+    status = serializers.CharField(help_text="A description of the status.")
+    location = serializers.URLField(help_text="The URL of the created request.")
+    requests = serializers.PrimaryKeyRelatedField(
+        queryset=FOIARequest.objects.all(),
+        many=True,
+        required=False,
+        help_text="The IDs of the created requests",
+    )
 
 
 @extend_schema_serializer(

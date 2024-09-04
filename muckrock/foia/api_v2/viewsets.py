@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 # Third Party
 import django_filters
 from django_filters.rest_framework.backends import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status as http_status, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
@@ -17,6 +18,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from muckrock.agency.models.agency import Agency
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
+    FOIARequestCreateReturnSerializer,
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
 )
@@ -51,7 +53,14 @@ class FOIARequestViewSet(
             )
         )
 
+    @extend_schema(
+        responses={
+            201: FOIARequestCreateReturnSerializer,
+            402: FOIARequestCreateReturnSerializer,
+        }
+    )
     def create(self, request, *args, **kwargs):
+        """File a new request"""
 
         composer = FOIAComposer.objects.create(
             user=request.user,
@@ -69,20 +78,28 @@ class FOIARequestViewSet(
         try:
             composer.submit()
         except InsufficientRequestsError:
-            return Response(
-                {
+            serializer = FOIARequestCreateReturnSerializer(
+                data={
                     "status": "Out of requests.  FOI Request has been saved.",
                     "location": composer.get_absolute_url(),
-                },
+                }
+            )
+            serializer.is_valid()
+            return Response(
+                serializer.data,
                 status=http_status.HTTP_402_PAYMENT_REQUIRED,
             )
         else:
-            return Response(
-                {
+            serializer = FOIARequestCreateReturnSerializer(
+                data={
                     "status": "FOI Request submitted",
                     "location": composer.get_absolute_url(),
                     "requests": [f.pk for f in composer.foias.all()],
-                },
+                }
+            )
+            serializer.is_valid()
+            return Response(
+                serializer.data,
                 status=http_status.HTTP_201_CREATED,
             )
 
