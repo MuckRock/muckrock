@@ -13,11 +13,7 @@ from django.views.generic.base import RedirectView, TemplateView
 
 # Third Party
 import debug_toolbar
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
 
 # MuckRock

@@ -2,16 +2,8 @@
 Serilizers for V2 of the FOIA API
 """
 
-# Django
-from django.contrib.auth.models import User
-
 # Third Party
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import (
-    OpenApiExample,
-    OpenApiParameter,
-    extend_schema_serializer,
-)
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 
 # MuckRock
@@ -198,6 +190,8 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
 )
 class FOIARequestCreateReturnSerializer(serializers.Serializer):
     """Serializer for return data for creating a request"""
+
+    # pylint: disable=abstract-method
 
     status = serializers.CharField(help_text="A description of the status.")
     location = serializers.URLField(help_text="The URL of the created request.")

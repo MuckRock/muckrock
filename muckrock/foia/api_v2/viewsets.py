@@ -3,6 +3,8 @@ Viewsets for V2 of the FOIA API
 """
 
 # Django
+from django.contrib.auth.models import User
+from django.forms import widgets
 from django.template.defaultfilters import slugify
 
 # Third Party
@@ -25,6 +27,8 @@ from muckrock.foia.api_v2.serializers import (
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
+from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.project.models import Project
 
 
 class FOIARequestViewSet(
@@ -37,7 +41,7 @@ class FOIARequestViewSet(
     """API for FOIA Requests"""
 
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    filter_backends = ()
+    filter_backends = (DjangoFilterBackend,)
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -103,6 +107,73 @@ class FOIARequestViewSet(
                 serializer.data,
                 status=http_status.HTTP_201_CREATED,
             )
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for FOIA Requests"""
+
+        agency = django_filters.ModelChoiceFilter(
+            queryset=Agency.objects.filter(status="approved"),
+            widget=widgets.NumberInput(),
+            help_text="Filter for requests from the given Agency ID",
+        )
+        embargo = django_filters.BooleanFilter(
+            help_text="Filter for requests which do or do not have an embargo",
+        )
+        jurisdiction = django_filters.ModelChoiceFilter(
+            queryset=Jurisdiction.objects.all(),
+            field_name="agency__jurisdiction",
+            widget=widgets.NumberInput(),
+            label="Jurisdiction",
+            help_text="Filter for requests from the given Jurisdiction ID",
+        )
+        project = django_filters.ModelChoiceFilter(
+            queryset=Project.objects.all(),
+            field_name="projects",
+            widget=widgets.NumberInput(),
+            label="Project",
+            help_text="Filter for requests from the given Project ID",
+        )
+        tags = django_filters.CharFilter(
+            field_name="tags__name",
+            label="Tags",
+            help_text="Filter by a given tag",
+        )
+        title = django_filters.CharFilter(help_text="Filter by the title")
+        user = django_filters.ModelChoiceFilter(
+            queryset=User.objects.all(),
+            field_name="composer__user",
+            widget=widgets.NumberInput(),
+            label="User",
+            help_text="Filter for requests from the given User ID",
+        )
+
+        order_by_field = "ordering"
+        ordering = django_filters.OrderingFilter(
+            fields=(
+                ("composer__datetime_submitted", "datetime_submitted"),
+                ("composer__user__username", "user"),
+                ("agency__name", "agency"),
+                ("datetime_done", "datetime_done"),
+                ("datetime_updated", "datetime_updated"),
+                ("title", "title"),
+                ("status", "status"),
+            )
+        )
+
+        class Meta:
+            model = FOIARequest
+            fields = (
+                "agency",
+                "embargo",
+                "jurisdiction",
+                "project",
+                "status",
+                "tags",
+                "title",
+                "user",
+            )
+
+    filterset_class = Filter
 
 
 class FOIACommunicationViewSet(
