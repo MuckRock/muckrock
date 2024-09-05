@@ -232,13 +232,6 @@
               {% endif %}
             </div>
 
-            <div>
-              <p>
-                All MuckRock requests are subject to our
-                <a href="/tos/">Terms of Service</a>.
-              </p>
-            </div>
-
             <div class="button-group">
               {% if composer %}
                 <button type="button" class="failure button" id="delete_button">
@@ -281,27 +274,13 @@
           </footer>
         {% endif %}
 
-        <div class="modal" id="email-warning-modal">
-          <p>
-            Hi! It looks like you included your email address this in your
-            request. When you file with MuckRock, we generate a unique email
-            and physical address for every request to keep things organized. We
-            include that information in what we send to the agency, so no need
-            to add your contact information on this form. If you're including
-            an email address to help the agency search for responsive
-            documents, simply hit "Next." If you'd like to edit the body of
-            your request, click "Revise Request." You'll only see this message
-            until you've submitted your first request.
-          </p>
+        <div class="modal" id="email-warning-modal" data-foias-filed="{{foias_filed}}">
+          <p>Hi! It looks like you included your email address this in your request. When you file with MuckRock, we generate a unique email and physical address for every request to keep things organized. We include that information in what we send to the agency, so no need to add your contact information on this form. If you're including an email address to help the agency search for responsive documents, simply hit "Submit." If you'd like to edit the body of your request, click "Revise Request." You'll only see this message until you've submitted your first request.<p>
           <footer>
-            <button type="button" id="email_modal_button" class="primary button">
-              Next
-            </button>
+            <button type="submit" class="primary button">Submit</button>
             <span class="close-modal button">Revise Request</span>
           </footer>
         </div>
-
-        {% include "lib/tos_modal.html" %}
 
       </form>
     </div>

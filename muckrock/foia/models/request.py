@@ -77,18 +77,41 @@ class FOIARequest(models.Model):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    title = models.CharField(max_length=1024, db_index=True)
-    slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS, db_index=True)
-    agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
+    title = models.CharField(
+        max_length=1024,
+        db_index=True,
+        help_text="Title of the request",
+    )
+    slug = models.SlugField(
+        max_length=255,
+        help_text="The slug is generated from the title and used in the request URL",
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS,
+        db_index=True,
+        help_text="The current status of the request",
+    )
+    agency = models.ForeignKey(
+        "agency.Agency",
+        on_delete=models.PROTECT,
+        help_text="The government agency the request was filed with",
+    )
     composer = models.ForeignKey(
         "foia.FOIAComposer", on_delete=models.PROTECT, related_name="foias"
     )
     datetime_updated = models.DateTimeField(
-        blank=True, null=True, db_index=True, help_text="Date of latest communication"
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Timestamp of the latest communication",
     )
     datetime_done = models.DateTimeField(
-        blank=True, null=True, db_index=True, verbose_name="Date response received"
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name="Date response received",
+        help_text="Timestamp of when this request was completed",
     )
     date_due = models.DateField(blank=True, null=True, db_index=True)
     days_until_due = models.IntegerField(blank=True, null=True)
@@ -98,11 +121,28 @@ class FOIARequest(models.Model):
     )
     date_processing = models.DateField(blank=True, null=True)
 
-    embargo = models.BooleanField(default=False)
-    permanent_embargo = models.BooleanField(default=False)
-    date_embargo = models.DateField(blank=True, null=True)
+    embargo = models.BooleanField(
+        default=False,
+        help_text="Embargoed requests will remain private until their embargo date, "
+        "which is 30 days after completion by default",
+    )
+    permanent_embargo = models.BooleanField(
+        default=False,
+        help_text="A permanent embargo never expires, but can be turned off manually",
+    )
+    date_embargo = models.DateField(
+        blank=True,
+        null=True,
+        help_text="The date when the embargo will expire and the request will become "
+        "public",
+    )
 
-    price = models.DecimalField(max_digits=14, decimal_places=2, default="0.00")
+    price = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default="0.00",
+        help_text="The price associated with any payment this request requires",
+    )
     featured = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
