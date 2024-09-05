@@ -41,6 +41,7 @@ from muckrock.organization.models import Organization
                 "tracking_id": "ABC123-456",
                 "price": "0.00",
             },
+            response_only=True,
         )
     ]
 )
@@ -49,21 +50,19 @@ class FOIARequestSerializer(serializers.ModelSerializer):
 
     user = serializers.PrimaryKeyRelatedField(
         source="composer.user",
-        queryset=User.objects.all(),
         style={"base_template": "input.html"},
         help_text="The user ID of the user who filed this request",
-        required=False,
+        read_only=True,
     )
     datetime_submitted = serializers.DateTimeField(
-        read_only=True,
         source="composer.datetime_submitted",
         help_text="The timestamp of when this request was submitted",
-        required=False,
+        read_only=True,
     )
-    tracking_id = serializers.ReadOnlyField(
+    tracking_id = serializers.CharField(
         source="current_tracking_id",
         help_text="The current tracking ID the agency has assigned to this request",
-        required=False,
+        read_only=True,
     )
 
     class Meta:
@@ -91,6 +90,13 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             # "tags",
         )
         extra_kwargs = {
+            "title": {"read_only": True},
+            "slug": {"read_only": True},
+            "status": {"read_only": True},
+            "agency": {"read_only": True},
+            "datetime_updated": {"read_only": True},
+            "datetime_done": {"read_only": True},
+            "price": {"read_only": True},
             "edit_collaborators": {
                 "help_text": "The IDs of the users who have been given edit access to "
                 "this request"
