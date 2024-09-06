@@ -5,6 +5,7 @@ Serilizers for V2 of the FOIA API
 # Third Party
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
+from taggit.serializers import TaggitSerializer, TagListSerializerField
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
@@ -59,13 +60,16 @@ class EmbargoMixin:
                 "datetime_updated": "2019-02-18T05:00:01.355367-05:00",
                 "datetime_done": None,
                 "tracking_id": "ABC123-456",
+                "tags": ["minutes"],
                 "price": "0.00",
             },
             response_only=True,
         )
     ]
 )
-class FOIARequestSerializer(EmbargoMixin, serializers.ModelSerializer):
+class FOIARequestSerializer(
+    EmbargoMixin, TaggitSerializer, serializers.ModelSerializer
+):
     """Serializer for FOIA Request model"""
 
     user = serializers.PrimaryKeyRelatedField(
@@ -83,6 +87,10 @@ class FOIARequestSerializer(EmbargoMixin, serializers.ModelSerializer):
         source="current_tracking_id",
         help_text="The current tracking ID the agency has assigned to this request",
         read_only=True,
+    )
+    tags = TagListSerializerField(
+        required=False,
+        help_text="Tags associated with the request",
     )
 
     class Meta:
@@ -107,7 +115,7 @@ class FOIARequestSerializer(EmbargoMixin, serializers.ModelSerializer):
             "tracking_id",
             "price",
             # connected models
-            # "tags",
+            "tags",
         )
         extra_kwargs = {
             "title": {"read_only": True},
@@ -170,7 +178,6 @@ class FOIARequestCreateSerializer(EmbargoMixin, serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         request = self.context.get("request", None)
-        view = self.context.get("view", None)
         user = request and request.user
         authed = user and user.is_authenticated
         if authed:
