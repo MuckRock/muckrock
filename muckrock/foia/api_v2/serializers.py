@@ -12,6 +12,34 @@ from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.organization.models import Organization
 
 
+class EmbargoMixin:
+    """Embargo validators for all FOIA Request serializers"""
+
+    def validate_embargo(self, value):
+        request = self.context.get("request", None)
+        user = request and request.user
+        if value and not (user and user.has_perm("foia.embargo_foiarequest")):
+            raise serializers.ValidationError(
+                "You do not have permission to set `embargo`"
+            )
+        return value
+
+    def validate_permanent_embargo(self, value):
+        request = self.context.get("request", None)
+        user = request and request.user
+        if value and not (user and user.has_perm("foia.embargo_perm_foiarequest")):
+            raise serializers.ValidationError(
+                "You do not have permission to set `permanent_embargo`"
+            )
+        return value
+
+    def validate(self, attrs):
+        # if permanent embargo is true, embargo must be true
+        if attrs.get("permanent_embargo"):
+            attrs["embargo"] = True
+        return attrs
+
+
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
@@ -37,7 +65,7 @@ from muckrock.organization.models import Organization
         )
     ]
 )
-class FOIARequestSerializer(serializers.ModelSerializer):
+class FOIARequestSerializer(EmbargoMixin, serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
 
     user = serializers.PrimaryKeyRelatedField(
@@ -100,7 +128,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         }
 
 
-class FOIARequestCreateSerializer(serializers.ModelSerializer):
+class FOIARequestCreateSerializer(EmbargoMixin, serializers.ModelSerializer):
     """Serializer for filing a new request"""
 
     agencies = serializers.PrimaryKeyRelatedField(
@@ -145,26 +173,11 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         view = self.context.get("view", None)
         user = request and request.user
         authed = user and user.is_authenticated
-        # are we currently generating the documentation?
-        docs = getattr(view, "swagger_fake_view", False)
         if authed:
             # set the valid organizations to those the current user is a member of
             self.fields["organization"].queryset = Organization.objects.filter(
                 users=user
             )
-        # remove embargo fields if the user does not have permission to set them
-        if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
-            self.fields.pop("embargo")
-        if not docs and (
-            not authed or not user.has_perm("foia.embargo_perm_foiarequest")
-        ):
-            self.fields.pop("permanent_embargo")
-
-    def validate(self, attrs):
-        # if permanent embargo is true, embargo must be true
-        if attrs.get("permanent_embargo"):
-            attrs["embargo"] = True
-        return attrs
 
 
 @extend_schema_serializer(
