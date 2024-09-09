@@ -494,6 +494,7 @@ class DonationFormView(StripeFormMixin, FormView):
             "phone": form.cleaned_data["phone"],
             "honor": form.cleaned_data["honor"],
             "why": form.cleaned_data["why"],
+            "address": form.cleaned_data["address"],
         }
         if type_ == "one-time":
             charge = self.make_charge(token, amount, email, metadata)
