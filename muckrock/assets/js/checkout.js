@@ -124,9 +124,9 @@ $('document').ready(function(){
   $(".donation.button-group input[name='type']:radio").change(function() {
     var values;
     if ($(this).val() == "one-time") {
-      values = [25, 50, 100, 250];
-    } else {
       values = [10, 25, 50, 100];
+    } else {
+      values = [5, 10, 25, 50];
     }
     $(".donation.button-group input[name='amount']:radio").each(function(index) {
       $(this).val(values[index]);

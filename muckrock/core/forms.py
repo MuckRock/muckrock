@@ -72,5 +72,5 @@ class DonateForm(StripeForm):
     name = forms.CharField(required=False)
     email = forms.EmailField(required=False)
     phone = PhoneNumberField(required=False)
-    honor = forms.CharField(required=False)
     why = forms.CharField(required=False)
+    address = forms.CharField(required=False)

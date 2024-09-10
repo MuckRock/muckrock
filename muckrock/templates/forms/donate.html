@@ -36,23 +36,31 @@
                     <input id="amount_1" type="radio" name="amount" value="10">
                     <label for="amount_2" class="button">$25
                     </label>
-                    <input id="amount_2" type="radio" name="amount" value="25">
+                    <input id="amount_2" type="radio" name="amount" value="25" checked="checked">
                     <label for="amount_3" class="button">$50
                     </label>
-                    <input id="amount_3" type="radio" name="amount" value="50" checked="checked">
+                    <input id="amount_3" type="radio" name="amount" value="50">
                     <label for="amount_4" class="button">$100
                     </label>
                     <input id="amount_4" type="radio" name="amount" value="100">
                 </div>
                 <div>
                     <input type="number" name="stripe_amount" id="other_amount">
+                    <p class="optional">
+                      We appreciate your support!  The following are optional fields:
+                    </p>
                     <input type="text" name="name" id="name" placeholder="Name">
                     <input type="text" name="email" id="email" placeholder="Email">
                     <input type="text" name="phone" id="phone" placeholder="Phone Number">
-                    <input type="text" name="honor" id="honor" placeholder="In Honor Of">
+                    <input type="text" name="address" id="address" placeholder="Address">
+                    <span class="small">
+                      We will use your address for an end-of year thank you
+                      mailing and other acknowledgments.  We never sell your
+                      information to third parties.
+                    </span>
                     <p class="why">
-                      We appreciate your support.  We'd love to know more
-                      about what inspired you to give to MuckRock today.
+                      What inspired your support today?  Is this gift in honor
+                      of someone or in support of a specific program?
                     </p>
                     <textarea name="why" id="why"></textarea>
                 </div>
