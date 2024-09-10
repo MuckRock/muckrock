@@ -62,7 +62,7 @@ class TestRequestSharing(TestCase):
 
     def test_viewer_permission(self):
         """Viewers should be able to see the request if it is embargoed."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         viewer = UserFactory()
         normie = UserFactory()
         embargoed_foia.add_viewer(viewer)
@@ -71,7 +71,7 @@ class TestRequestSharing(TestCase):
 
     def test_promote_viewer(self):
         """Editors should be able to promote viewers to editors."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         viewer = UserFactory()
         embargoed_foia.add_viewer(viewer)
         assert_true(embargoed_foia.has_perm(viewer, "view"))
@@ -81,7 +81,7 @@ class TestRequestSharing(TestCase):
 
     def test_demote_editor(self):
         """Editors should be able to demote editors to viewers."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         editor = UserFactory()
         embargoed_foia.add_editor(editor)
         assert_true(embargoed_foia.has_perm(editor, "view"))
@@ -92,7 +92,7 @@ class TestRequestSharing(TestCase):
     def test_access_key(self):
         """Editors should be able to generate a secure access key to view an
         embargoed request."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         access_key = embargoed_foia.generate_access_key()
         assert_true(
             access_key == embargoed_foia.access_key,
@@ -119,7 +119,7 @@ class TestRequestSharing(TestCase):
         org = OrganizationFactory()
         user = UserFactory()
         MembershipFactory(user=user, organization=org, active=False)
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.composer.organization = org
         # fellow org member cannot view it before sharing is turned on
         assert_false(self.foia.has_perm(user, "view"))

@@ -211,16 +211,13 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
         """Set which fields the user may PATCH"""
         has_change = foia.has_perm(user, "change")
         has_embargo = foia.has_perm(user, "embargo")
-        has_embargo_perm = foia.has_perm(user, "embargo_perm")
         allowed = []
         if has_change:
             allowed.extend(
                 ["notes", "tags", "edit_collaborators", "read_collaborators"]
             )
         if has_embargo:
-            allowed.append("embargo")
-        if has_embargo_perm:
-            allowed.append("permanent_embargo")
+            allowed.append("embargo_status")
         for field in list(self.fields.keys()):
             if field not in allowed:
                 self.fields.pop(field)
@@ -228,6 +225,16 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_absolute_url(self, obj):
         """Prepend the domain name to the URL"""
         return "{}{}".format(settings.MUCKROCK_URL, obj.get_absolute_url())
+
+    def validate_embargo_status(self, value):
+        request = self.context.get("request", None)
+        if value == "permanent" and not request.user.has_perm(
+            "foia.embargo_perm_foiarequest", self.instance
+        ):
+            raise serializers.ValidationError(
+                "You do not have permission to set embargo to permanent"
+            )
+        return value
 
     class Meta:
         model = FOIARequest
@@ -237,8 +244,7 @@ class FOIARequestSerializer(TaggitSerializer, serializers.ModelSerializer):
             "title",
             "slug",
             "status",
-            "embargo",
-            "permanent_embargo",
+            "embargo_status",
             "user",
             "username",
             "agency",

@@ -71,7 +71,7 @@
       <span class="small badge state {{ foia.status|classify_status }}">
         {{foia.get_status_display}}
       </span>
-      {% if foia.embargo %}
+      {% if foia.embargo_status != "public" %}
         <span class="small red badge">Under Embargo</span>
       {% endif %}
       {% if foia.crowdfund and not foia.crowdfund.expired %}

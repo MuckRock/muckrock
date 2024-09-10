@@ -34,6 +34,7 @@ from taggit.managers import TaggableManager
 from muckrock.core.utils import TempDisconnectSignal
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
 from muckrock.foia.models.file import FOIAFile
+from muckrock.foia.models.request import EMBARGO_CHOICES
 from muckrock.foia.querysets import FOIAComposerQuerySet
 from muckrock.tags.models import TaggedItemBase
 
@@ -61,8 +62,11 @@ class FOIAComposer(models.Model):
     edited_boilerplate = models.BooleanField(default=False)
     datetime_created = models.DateTimeField(default=timezone.now, db_index=True)
     datetime_submitted = models.DateTimeField(blank=True, null=True, db_index=True)
-    embargo = models.BooleanField(default=False)
-    permanent_embargo = models.BooleanField(default=False)
+    embargo_status = models.CharField(
+        default="public",
+        max_length=9,
+        choices=EMBARGO_CHOICES,
+    )
     parent = models.ForeignKey(
         "self",
         blank=True,

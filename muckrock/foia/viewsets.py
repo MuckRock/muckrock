@@ -45,7 +45,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     Filter fields:
     * title
-    * embargo
+    * embargo_status
     * user, by username
     * jurisdiction, by id
     * agency, by id
@@ -100,7 +100,14 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
         class Meta:
             model = FOIARequest
-            fields = ("user", "title", "status", "embargo", "jurisdiction", "agency")
+            fields = (
+                "user",
+                "title",
+                "status",
+                "embargo_status",
+                "jurisdiction",
+                "agency",
+            )
 
     filterset_class = Filter
 
@@ -134,10 +141,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         cleaned_data["organization"] = self._clean_organization(
             user, data.get("organization")
         )
-        (
-            cleaned_data["embargo"],
-            cleaned_data["permanent_embargo"],
-        ) = self._clean_embargo(
+        cleaned_data["embargo_status"] = self._clean_embargo(
             user, data.get("embargo", False), data.get("permanent_embargo", False)
         )
         cleaned_data["title"] = self._clean_title(data.get("title"))
@@ -193,7 +197,11 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             raise forms.ValidationError(
                 "You do not have permission to permanently embargo requests"
             )
-        return embargo, permanent_embargo
+        if permanent_embargo:
+            return "permanent"
+        elif embargo:
+            return "embargo"
+        return "public"
 
     def _clean_title(self, title):
         """Clean title"""
@@ -272,8 +280,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             slug=slugify(data["title"]) or "untitled",
             requested_docs=data["requested_docs"],
             edited_boilerplate=data["edited_boilerplate"],
-            embargo=data["embargo"],
-            permanent_embargo=data["permanent_embargo"],
+            embargo_status=data["embargo_status"],
         )
         composer.agencies.set(data["agencies"])
 

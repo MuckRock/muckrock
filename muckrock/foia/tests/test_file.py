@@ -44,7 +44,7 @@ class TestRequestFilesView(TestCase):
     @raises(Http404)
     def test_get_404(self):
         """The view should return 404 is the foia is not visible to the user."""
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.save()
         user = UserFactory()
         ok_(not self.foia.has_perm(user, "view"))

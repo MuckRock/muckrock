@@ -391,7 +391,7 @@ class TestBulkActions(TestCase):
     def test_follow(self):
         """Test bulk following"""
         public_foia = FOIARequestFactory()
-        private_foia = FOIARequestFactory(embargo=True)
+        private_foia = FOIARequestFactory(embargo_status="embargo")
         user = UserFactory()
 
         RequestList()._follow(
@@ -427,13 +427,16 @@ class TestBulkActions(TestCase):
         user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
-            composer__user=user, embargo=False, status="ack"
+            composer__user=user, embargo_status="public", status="ack"
         )
         embargo_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="ack"
+            composer__user=user, embargo_status="embargo", status="ack"
         )
         embargo_done_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="done", date_embargo=tomorrow
+            composer__user=user,
+            embargo_status="embargo",
+            status="done",
+            date_embargo=tomorrow,
         )
 
         MyRequestList()._extend_embargo(
@@ -454,12 +457,12 @@ class TestBulkActions(TestCase):
         embargo_foia.refresh_from_db()
         embargo_done_foia.refresh_from_db()
 
-        assert_false(other_foia.embargo)
-        ok_(public_foia.embargo)
+        eq_(other_foia.embargo_status, "public")
+        eq_(public_foia.embargo_status, "embargo")
         assert_is_none(public_foia.date_embargo)
-        ok_(embargo_foia.embargo)
+        eq_(embargo_foia.embargo_status, "embargo")
         assert_is_none(embargo_foia.date_embargo)
-        ok_(embargo_done_foia.embargo)
+        eq_(embargo_done_foia.embargo_status, "embargo")
         eq_(embargo_done_foia.date_embargo, next_month)
 
     def test_remove_embargo(self):
@@ -468,13 +471,16 @@ class TestBulkActions(TestCase):
         user = ProfessionalUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
-            composer__user=user, embargo=False, status="ack"
+            composer__user=user, embargo_status="public", status="ack"
         )
         embargo_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="ack"
+            composer__user=user, embargo_status="embargo", status="ack"
         )
         embargo_done_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="done", date_embargo=tomorrow
+            composer__user=user,
+            embargo_status="embargo",
+            status="done",
+            date_embargo=tomorrow,
         )
 
         MyRequestList()._remove_embargo(
@@ -495,10 +501,10 @@ class TestBulkActions(TestCase):
         embargo_foia.refresh_from_db()
         embargo_done_foia.refresh_from_db()
 
-        assert_false(other_foia.embargo)
-        assert_false(public_foia.embargo)
-        assert_false(embargo_foia.embargo)
-        assert_false(embargo_done_foia.embargo)
+        eq_(other_foia.embargo_status, "public")
+        eq_(public_foia.embargo_status, "public")
+        eq_(embargo_foia.embargo_status, "public")
+        eq_(embargo_done_foia.embargo_status, "public")
 
     def test_perm_embargo(self):
         """Test bulk permanent embargo"""
@@ -506,13 +512,16 @@ class TestBulkActions(TestCase):
         user = OrganizationUserFactory()
         other_foia = FOIARequestFactory()
         public_foia = FOIARequestFactory(
-            composer__user=user, embargo=False, status="ack"
+            composer__user=user, embargo_status="public", status="ack"
         )
         embargo_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="ack"
+            composer__user=user, embargo_status="embargo", status="ack"
         )
         embargo_done_foia = FOIARequestFactory(
-            composer__user=user, embargo=True, status="done", date_embargo=tomorrow
+            composer__user=user,
+            embargo_status="embargo",
+            status="done",
+            date_embargo=tomorrow,
         )
 
         MyRequestList()._perm_embargo(
@@ -533,13 +542,10 @@ class TestBulkActions(TestCase):
         embargo_foia.refresh_from_db()
         embargo_done_foia.refresh_from_db()
 
-        assert_false(other_foia.embargo)
-        ok_(public_foia.embargo)
-        assert_false(public_foia.permanent_embargo)
-        ok_(embargo_foia.embargo)
-        assert_false(embargo_foia.permanent_embargo)
-        ok_(embargo_done_foia.embargo)
-        ok_(embargo_done_foia.permanent_embargo)
+        eq_(other_foia.embargo_status, "public")
+        eq_(public_foia.embargo_status, "embargo")
+        eq_(embargo_foia.embargo_status, "embargo")
+        eq_(embargo_done_foia.embargo_status, "permanent")
 
     def test_projects(self):
         """Test bulk add to projects"""
@@ -1228,7 +1234,7 @@ class TestFOIAComposerViews(TestCase):
     def test_composer_detail_private(self):
         """Composer is private if no viewable foias"""
         foia = FOIARequestFactory(
-            embargo=True,
+            embargo_status="embargo",
             date_embargo=date.today() + timedelta(1),
             composer__status="filed",
         )

@@ -41,8 +41,10 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         if form.is_valid():
             permanent = form.cleaned_data["permanent_embargo"]
             expiration = form.cleaned_data["date_embargo"]
-            if foia.has_perm(request.user, "embargo_perm"):
-                foia.permanent_embargo = permanent
+            if foia.has_perm(request.user, "embargo_perm") and permanent:
+                foia.embargo_status = "permanent"
+            elif not permanent:
+                foia.embargo_status = "embargo"
             if expiration and foia.status in END_STATUS:
                 foia.date_embargo = expiration
             foia.save(comment="updated embargo")
@@ -50,7 +52,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     def create_embargo(request, foia):
         """Apply an embargo to the FOIA"""
         if foia.has_perm(request.user, "embargo"):
-            foia.embargo = True
+            foia.embargo_status = "embargo"
             foia.save(comment="added embargo")
             logger.info("%s embargoed %s", request.user, foia)
             new_action(request.user, "embargoed", target=foia)
@@ -71,8 +73,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 
     def delete_embargo(request, foia):
         """Remove an embargo from the FOIA"""
-        foia.embargo = False
-        foia.permanent_embargo = False
+        foia.embargo_status = "public"
         foia.save(comment="removed embargo")
         logger.info("%s unembargoed %s", request.user, foia)
         new_action(request.user, "unembargoed", target=foia)

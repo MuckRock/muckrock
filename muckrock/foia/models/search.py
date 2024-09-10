@@ -7,9 +7,10 @@ from django.db import models
 from django.http.request import QueryDict
 
 # MuckRock
-from muckrock.foia.models.request import STATUS
+from muckrock.foia.models.request import EMBARGO_CHOICES, STATUS
 
 BLANK_STATUS = [("", "-")] + STATUS
+BLANK_EMBARGO_CHOICES = [("", "-")] + EMBARGO_CHOICES
 
 
 class FOIASavedSearch(models.Model):
@@ -29,7 +30,11 @@ class FOIASavedSearch(models.Model):
     )
     projects = models.ManyToManyField("project.Project")
     tags = models.ManyToManyField("tags.Tag")
-    embargo = models.BooleanField(null=True, blank=True)
+    embargo_status = models.CharField(
+        default="",
+        max_length=9,
+        choices=BLANK_EMBARGO_CHOICES,
+    )
     exclude_crowdfund = models.BooleanField(null=True, blank=True)
     min_pages = models.PositiveSmallIntegerField(blank=True, null=True)
     min_date = models.DateField(blank=True, null=True)
@@ -56,7 +61,7 @@ class FOIASavedSearch(models.Model):
             {
                 "q": self.query,
                 "status": self.status,
-                "has_embargo": self.embargo,
+                "has_embargo": self.embargo_status,
                 "has_crowdfund": self.exclude_crowdfund,
                 "minimum_pages": min_pages,
                 "date_range_0": min_date,

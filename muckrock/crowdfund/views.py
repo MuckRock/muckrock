@@ -51,14 +51,15 @@ class CrowdfundListView(ListView):
         user = self.request.user
         if not user.is_staff and user.is_authenticated:
             queryset = queryset.filter(
-                Q(foia__embargo=False)
+                Q(foia__embargo_status="public")
                 | Q(foia__composer__user=user)
                 | Q(projectcrowdfunds__project__private=False)
                 | Q(projectcrowdfunds__project__contributors=user)
             ).distinct()
         elif not user.is_staff:
             queryset = queryset.filter(
-                foia__embargo=False, projectcrowdfunds__project__private=False
+                foia__embargo_status="public",
+                projectcrowdfunds__project__private=False,
             )
         return queryset
 

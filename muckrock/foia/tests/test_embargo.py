@@ -59,7 +59,11 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)
-        ok_(self.foia.embargo, "An embargo should be set on the request.")
+        eq_(
+            self.foia.embargo_status,
+            "embargo",
+            "An embargo should be set on the request.",
+        )
 
     def test_no_permission_to_edit(self):
         """Users without permission to edit the request should not be able to
@@ -72,7 +76,11 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)
-        ok_(not self.foia.embargo, "The embargo should not be set on the request.")
+        eq_(
+            self.foia.embargo_status,
+            "public",
+            "The embargo should not be set on the request.",
+        )
 
     def test_no_permission_to_embargo(self):
         """Users without permission to embargo the request should not be
@@ -88,7 +96,11 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)
-        ok_(not self.foia.embargo, "The embargo should not be set on the request.")
+        eq_(
+            self.foia.embargo_status,
+            "public",
+            "The embargo should not be set on the request.",
+        )
 
     def test_unembargo(self):
         """
@@ -98,9 +110,9 @@ class TestEmbargo(TestCase):
         user_without_permission = UserFactory()
         self.foia.composer.user = user_without_permission
         self.foia.composer.save()
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.save()
-        assert_true(self.foia.embargo)
+        eq_(self.foia.embargo_status, "embargo")
         assert_true(self.foia.has_perm(user_without_permission, "change"))
         assert_false(self.foia.has_perm(user_without_permission, "embargo"))
         data = {"embargo": "delete"}
@@ -109,8 +121,10 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)
-        assert_false(
-            self.foia.embargo, "The embargo should be removed from the request."
+        eq_(
+            self.foia.embargo_status,
+            "public",
+            "The embargo should be removed from the request.",
         )
 
     def _test_embargo_details(self):
@@ -133,14 +147,14 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)
-        assert_true(self.foia.embargo, "An embargo should be set on the request.")
         eq_(
             self.foia.date_embargo,
             default_expiration_date,
             "An expiration date should be set on the request.",
         )
-        assert_true(
-            self.foia.permanent_embargo,
+        eq_(
+            self.foia.embargo_status,
+            "permanent",
             "A permanent embargo should be set on the request.",
         )
 
@@ -161,21 +175,20 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         self.foia.refresh_from_db()
         eq_(response.status_code, 302)
-        assert_true(self.foia.embargo, "An embargo should be set on the request.")
-        assert_false(
-            self.foia.permanent_embargo,
-            "A permanent embargo should not be set on the request.",
+        eq_(
+            self.foia.embargo_status,
+            "embargo",
+            "An embargo should be set on the request.",
         )
 
     def test_update_embargo(self):
         """The embargo should be able to be updated."""
-        self.foia.embargo = True
-        self.foia.embargo_permanent = True
+        self.foia.embargo_status = "permanent"
         self.foia.date_embargo = datetime.date.today() + datetime.timedelta(5)
         self.foia.status = "rejected"
         self.foia.save()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo)
+        eq_(self.foia.embargo_status, "permanent")
         expiration = datetime.date.today() + datetime.timedelta(15)
         embargo_form = FOIAEmbargoForm({"date_embargo": expiration})
         data = {"embargo": "update"}
@@ -185,12 +198,7 @@ class TestEmbargo(TestCase):
         response = self.get_response(request)
         eq_(response.status_code, 302)
         self.foia.refresh_from_db()
-        assert_true(
-            self.foia.embargo, "The embargo should stay applied to the request."
-        )
-        assert_false(
-            self.foia.permanent_embargo, "The permanent embargo should be repealed."
-        )
+        eq_(self.foia.embargo_status, "embargo")
         eq_(
             self.foia.date_embargo,
             expiration,
@@ -199,42 +207,45 @@ class TestEmbargo(TestCase):
 
     def test_expire_embargo(self):
         """Any requests with an embargo date before today should be unembargoed"""
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
         self.foia.status = "rejected"
         self.foia.save()
         embargo_expire()
         self.foia.refresh_from_db()
-        assert_false(self.foia.embargo, "The embargo should be repealed.")
+        eq_(self.foia.embargo_status, "public", "The embargo should be repealed.")
 
     def test_do_not_expire_permanent(self):
         """A request with a permanent embargo should stay embargoed."""
-        self.foia.embargo = True
-        self.foia.permanent_embargo = True
+        self.foia.embargo_status = "permanent"
         self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
         self.foia.status = "rejected"
         self.foia.save()
         embargo_expire()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo, "The embargo should remain embargoed.")
+        eq_(
+            self.foia.embargo_status,
+            "permanent",
+            "The embargo should remain embargoed.",
+        )
 
     def test_do_not_expire_no_date(self):
         """A request without an expiration date should not expire."""
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.save()
         embargo_expire()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo, "The embargo should remain embargoed.")
+        eq_(self.foia.embargo_status, "embargo", "The embargo should remain embargoed.")
 
     def test_expire_after_date(self):
         """Only after the date_embargo passes should the embargo expire."""
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.date_embargo = datetime.date.today()
         self.foia.status = "rejected"
         self.foia.save()
         embargo_expire()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo, "The embargo should remain embargoed.")
+        eq_(self.foia.embargo_status, "embargo", "The embargo should remain embargoed.")
 
     def test_set_date_on_status_change(self):
         """
@@ -242,12 +253,13 @@ class TestEmbargo(TestCase):
         set the embargo expiration date to 30 days from today.
         """
         default_expiration_date = datetime.date.today() + datetime.timedelta(30)
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.save()
         self.foia.status = "rejected"
         self.foia.save()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        assert_true(self.foia.status in END_STATUS)
+        eq_(self.foia.embargo_status, "embargo")
         eq_(
             self.foia.date_embargo,
             default_expiration_date,
@@ -261,12 +273,13 @@ class TestEmbargo(TestCase):
         expiration to its default value.
         """
         extended_expiration_date = datetime.date.today() + datetime.timedelta(15)
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.date_embargo = extended_expiration_date
         self.foia.status = "rejected"
         self.foia.save()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        assert_true(self.foia.status in END_STATUS)
+        eq_(self.foia.embargo_status, "embargo")
         eq_(
             self.foia.date_embargo,
             extended_expiration_date,
@@ -277,12 +290,13 @@ class TestEmbargo(TestCase):
         """The embargo date should be removed if the request is changed to an
         active state."""
         default_expiration_date = datetime.date.today() + datetime.timedelta(30)
-        self.foia.embargo = True
+        self.foia.embargo_status = "embargo"
         self.foia.save()
         self.foia.status = "rejected"
         self.foia.save()
         self.foia.refresh_from_db()
-        assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        assert_true(self.foia.status in END_STATUS)
+        eq_(self.foia.embargo_status, "embargo")
         eq_(
             self.foia.date_embargo,
             default_expiration_date,
@@ -291,5 +305,6 @@ class TestEmbargo(TestCase):
         self.foia.status = "appealing"
         self.foia.save()
         self.foia.refresh_from_db()
-        assert_false(self.foia.embargo and self.foia.status in END_STATUS)
+        assert_false(self.foia.status in END_STATUS)
+        eq_(self.foia.embargo_status, "embargo")
         ok_(not self.foia.date_embargo, "The embargo date should be removed.")

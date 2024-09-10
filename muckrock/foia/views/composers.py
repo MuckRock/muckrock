@@ -219,8 +219,6 @@ class GenericComposer(BuyRequestsMixin):
             "Number": len(composer.agencies.all()),
             "Title": composer.title,
             "Agencies": [a.name for a in composer.agencies.all()],
-            "Embargo": composer.embargo,
-            "Permanent Embargo": composer.permanent_embargo,
             "Created At": composer.datetime_created.isoformat(),
             "Parent": composer.parent.pk if composer.parent else None,
             "ID": composer.pk,

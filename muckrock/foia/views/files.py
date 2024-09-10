@@ -18,7 +18,7 @@ class FileEmbedView(DetailView):
     """Presents an embeddable view for a single file."""
 
     model = FOIAFile
-    queryset = FOIAFile.objects.filter(comm__foia__embargo=False)
+    queryset = FOIAFile.objects.filter(comm__foia__embargo_status="public")
     template_name = "foia/file/embed.html"
 
 
