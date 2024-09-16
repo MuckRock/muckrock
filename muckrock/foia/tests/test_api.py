@@ -13,7 +13,7 @@ import re
 
 # Third Party
 import requests_mock
-from nose.tools import assert_false, assert_true, eq_, ok_
+from nose.tools import assert_false, assert_true, eq_
 from rest_framework.authtoken.models import Token
 
 # MuckRock
@@ -142,8 +142,7 @@ class TestFOIAViewsetCreate(TestCase):
         """Test embargoing"""
         self.api_call({"embargo": True}, user_type="pro")
         composer = FOIAComposer.objects.get()
-        assert_true(composer.embargo)
-        assert_false(composer.permanent_embargo)
+        eq_(composer.embargo_status, "embargo")
 
     def test_embargo_bad(self):
         """Test embargoing without permissions"""
@@ -157,8 +156,7 @@ class TestFOIAViewsetCreate(TestCase):
         """Test permanent embargoing"""
         self.api_call({"permanent_embargo": True}, user_type="org")
         composer = FOIAComposer.objects.get()
-        ok_(composer.embargo)
-        ok_(composer.permanent_embargo)
+        eq_(composer.embargo_status, "permanent")
 
     def test_permanent_embargo_bad(self):
         """Test permanent embargoing without permissions"""

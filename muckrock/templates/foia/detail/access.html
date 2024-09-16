@@ -3,7 +3,7 @@
   <section role="tabpanel" class="tab-panel access" id="sharing">
     <h2 class="tab-panel-heading">Sharing</h2>
 
-    {% if foia.embargo %}
+    {% if foia.embargo_status != "public" %}
       <form class="generate-private-link" method="post">
         {% csrf_token %}
         <h3>Private Link</h3>

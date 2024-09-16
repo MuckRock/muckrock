@@ -22,7 +22,7 @@ def foia_update_embargo(sender, **kwargs):
     request = kwargs["instance"]
     old_request = request.get_saved()
     # if we are saving a new FOIA Request, there are no docs to update
-    if old_request and request.embargo != old_request.embargo:
+    if old_request and request.embargo_status != old_request.embargo_status:
         for doc in request.get_files().get_doccloud():
             transaction.on_commit(lambda doc=doc: upload_document_cloud.delay(doc.pk))
 

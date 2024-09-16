@@ -13,7 +13,7 @@
       <a class="bold" href="{{composer.get_absolute_url}}">
         {{ composer.title }}
       </a><br>
-      {% if composer.embargo %}
+      {% if composer.embargo_status != "public" %}
         <span class="small red badge">Under Embargo</span>
       {% endif %}
     </td>

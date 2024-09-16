@@ -78,7 +78,7 @@ class SaveSearchFormHandler:
             defaults={
                 "query": self.data.get("q", ""),
                 "status": cleaned_data.get("status", ""),
-                "embargo": cleaned_data.get("has_embargo"),
+                "embargo_status": cleaned_data.get("has_embargo"),
                 "exclude_crowdfund": cleaned_data.get("has_crowdfund"),
                 "min_pages": cleaned_data.get("minimum_pages"),
                 "min_date": cleaned_data["date_range"][0],

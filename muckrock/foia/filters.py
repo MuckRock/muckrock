@@ -18,7 +18,7 @@ from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import EMBARGO_CHOICES, FOIARequest
 from muckrock.foia.models.log import FOIALogEntry
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
@@ -89,8 +89,9 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
             url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
         ),
     )
-    has_embargo = django_filters.BooleanFilter(
-        field_name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
+    has_embargo = django_filters.ChoiceFilter(
+        field_name="embargo_status",
+        choices=EMBARGO_CHOICES,
     )
     has_crowdfund = django_filters.BooleanFilter(
         field_name="crowdfund",
@@ -148,8 +149,9 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
             url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
         ),
     )
-    has_embargo = django_filters.BooleanFilter(
-        field_name="embargo", widget=forms.Select(choices=NULL_BOOLEAN_CHOICES)
+    has_embargo = django_filters.ChoiceFilter(
+        field_name="embargo_status",
+        choices=EMBARGO_CHOICES,
     )
     has_crowdfund = django_filters.BooleanFilter(
         field_name="crowdfund",

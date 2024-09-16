@@ -155,7 +155,7 @@ class RequestList(MRSearchFilterListView):
                 "title",
                 "slug",
                 "status",
-                "embargo",
+                "embargo_status",
                 "datetime_updated",
                 "agency__name",
                 "agency__jurisdiction__name",
@@ -343,7 +343,7 @@ class RequestList(MRSearchFilterListView):
 
     def _embargo(self, foias, _user, _post):
         """Embargo the requests"""
-        foias.update(embargo=True, permanent_embargo=True)
+        foias.update(embargo_status="permanent")
         return "Requests have been embargoed"
 
     def _noindex(self, foias, _user, _post):
@@ -419,7 +419,7 @@ class MyRequestList(RequestList):
         """Extend the embargo on the selected requests"""
         end_date = date.today() + timedelta(30)
         foias = [f.pk for f in foias if f.has_perm(user, "embargo")]
-        FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
+        FOIARequest.objects.filter(pk__in=foias).update(embargo_status="embargo")
         # only set date if in end state
         FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS).update(
             date_embargo=end_date
@@ -429,16 +429,16 @@ class MyRequestList(RequestList):
     def _remove_embargo(self, foias, user, _post):
         """Remove the embargo on the selected requests"""
         foias = [f.pk for f in foias if f.has_perm(user, "embargo")]
-        FOIARequest.objects.filter(pk__in=foias).update(embargo=False)
+        FOIARequest.objects.filter(pk__in=foias).update(embargo_status="public")
         return "Embargoes removed"
 
     def _perm_embargo(self, foias, user, _post):
         """Permanently embargo the selected requests"""
         foias = [f.pk for f in foias if f.has_perm(user, "embargo_perm")]
-        FOIARequest.objects.filter(pk__in=foias).update(embargo=True)
+        FOIARequest.objects.filter(pk__in=foias).update(embargo_status="embargo")
         # only set permanent
         FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS).update(
-            permanent_embargo=True
+            embargo_status="permanent"
         )
         return "Embargoes extended permanently"
 

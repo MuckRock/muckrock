@@ -559,7 +559,7 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         agency = self.get_agency()
         queryset = super().get_queryset()
         return queryset.filter(
-            comm__foia__embargo=False, comm__foia__agency=agency
+            comm__foia__embargo_status="public", comm__foia__agency=agency
         ).select_related("comm__foia__agency__jurisdiction")
 
     def get_context_data(self, **kwargs):
