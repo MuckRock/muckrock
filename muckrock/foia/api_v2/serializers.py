@@ -22,8 +22,6 @@ from muckrock.organization.models import Organization
                 "slug": "meeting-minutes",
                 "status": "processed",
                 "agency": 2,
-                "embargo": False,
-                "permanent_embargo": False,
                 "user": 3,
                 "edit_collaborators": [4, 5],
                 "read_collaborators": [],
@@ -66,8 +64,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "slug",
             "status",
             "agency",
-            "embargo",
-            "permanent_embargo",
             "user",
             "edit_collaborators",
             "read_collaborators",
@@ -128,8 +124,6 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         fields = (
             "agencies",
             "organization",
-            "embargo",
-            "permanent_embargo",
             "title",
             "requested_docs",
             # "attachments",
@@ -152,19 +146,6 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             self.fields["organization"].queryset = Organization.objects.filter(
                 users=user
             )
-        # remove embargo fields if the user does not have permission to set them
-        if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
-            self.fields.pop("embargo")
-        if not docs and (
-            not authed or not user.has_perm("foia.embargo_perm_foiarequest")
-        ):
-            self.fields.pop("permanent_embargo")
-
-    def validate(self, attrs):
-        # if permanent embargo is true, embargo must be true
-        if attrs.get("permanent_embargo"):
-            attrs["embargo"] = True
-        return attrs
 
 
 @extend_schema_serializer(

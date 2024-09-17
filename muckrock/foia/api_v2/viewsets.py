@@ -75,8 +75,6 @@ class FOIARequestViewSet(
             title=request.data["title"],
             slug=slugify(request.data["title"]) or "untitled",
             requested_docs=request.data["requested_docs"],
-            embargo=request.data.get("embargo", False),
-            permanent_embargo=request.data.get("permanent_embargo", False),
         )
         composer.agencies.set(Agency.objects.filter(pk__in=request.data["agencies"]))
 
@@ -115,9 +113,6 @@ class FOIARequestViewSet(
             queryset=Agency.objects.filter(status="approved"),
             widget=widgets.NumberInput(),
             help_text="Filter for requests from the given Agency ID",
-        )
-        embargo = django_filters.BooleanFilter(
-            help_text="Filter for requests which do or do not have an embargo",
         )
         jurisdiction = django_filters.ModelChoiceFilter(
             queryset=Jurisdiction.objects.all(),
@@ -164,7 +159,6 @@ class FOIARequestViewSet(
             model = FOIARequest
             fields = (
                 "agency",
-                "embargo",
                 "jurisdiction",
                 "project",
                 "status",

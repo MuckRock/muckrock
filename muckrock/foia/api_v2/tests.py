@@ -44,10 +44,11 @@ class TestFOIARequestViewset(TestCase):
 
     def test_update(self):
         foia = FOIARequestFactory.create()
+        user = UserFactory.create()
         self.client.force_authenticate(foia.user)
         response = self.client.patch(
             reverse("api2-requests-detail", kwargs={"pk": foia.pk}),
-            {"embargo": True},
+            {"edit_collaborators": [user.pk]},
         )
         eq_(response.status_code, 200)
 
