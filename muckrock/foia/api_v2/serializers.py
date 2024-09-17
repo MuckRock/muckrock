@@ -136,11 +136,8 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         request = self.context.get("request", None)
-        view = self.context.get("view", None)
         user = request and request.user
         authed = user and user.is_authenticated
-        # are we currently generating the documentation?
-        docs = getattr(view, "swagger_fake_view", False)
         if authed:
             # set the valid organizations to those the current user is a member of
             self.fields["organization"].queryset = Organization.objects.filter(
