@@ -444,9 +444,9 @@ def autosave(request, idx):
                 "permanent_embargo",
             )
         }
-        if form.cleaned_data["permanent_embargo"]:
+        if form.cleaned_data.get("permanent_embargo"):
             fields["embargo_status"] = "permanent"
-        elif form.cleaned_data["embargo"]:
+        elif form.cleaned_data.get("embargo"):
             fields["embargo_status"] = "embargo"
         else:
             fields["embargo_status"] = "public"
