@@ -406,6 +406,16 @@ class UpdateComposer(LoginRequiredMixin, GenericComposer, UpdateView):
             self._submit_composer(composer, form)
         return redirect(composer)
 
+    def get_initial(self):
+        """Set the embargo value"""
+        data = super().get_initial()
+        if self.object.embargo_status == "permanent":
+            data["embargo"] = True
+            data["permanent_embargo"] = True
+        elif self.object.embargo_status == "embargo":
+            data["embargo"] = True
+        return data
+
 
 @login_required
 @require_POST
@@ -424,8 +434,22 @@ def autosave(request, idx):
         fields = {
             f: getattr(composer, f)
             for f in form.cleaned_data
-            if f not in ("agencies", "tags", "no_proxy", "action")
+            if f
+            not in (
+                "agencies",
+                "tags",
+                "no_proxy",
+                "action",
+                "embargo",
+                "permanent_embargo",
+            )
         }
+        if form.cleaned_data["permanent_embargo"]:
+            fields["embargo_status"] = "permanent"
+        elif form.cleaned_data["embargo"]:
+            fields["embargo_status"] = "embargo"
+        else:
+            fields["embargo_status"] = "public"
         with transaction.atomic():
             # ensure that the status is still started
             # otherwise there is a race condition where the auto save is overriding
