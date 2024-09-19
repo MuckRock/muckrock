@@ -419,11 +419,14 @@ class MyRequestList(RequestList):
         """Extend the embargo on the selected requests"""
         end_date = date.today() + timedelta(30)
         foias = [f.pk for f in foias if f.has_perm(user, "embargo")]
-        FOIARequest.objects.filter(pk__in=foias).update(embargo_status="embargo")
-        # only set date if in end state
-        FOIARequest.objects.filter(pk__in=foias, status__in=END_STATUS).update(
-            date_embargo=end_date
+        # do not downgrade permanent embargoes
+        FOIARequest.objects.filter(pk__in=foias, embargo_status="public").update(
+            embargo_status="embargo"
         )
+        # only set date if in end state
+        FOIARequest.objects.filter(
+            pk__in=foias, embargo_status="embargo", status__in=END_STATUS
+        ).update(date_embargo=end_date)
         return "Embargoes extended for 30 days"
 
     def _remove_embargo(self, foias, user, _post):
