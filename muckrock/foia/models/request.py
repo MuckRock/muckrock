@@ -70,6 +70,12 @@ STATUS = [
 
 END_STATUS = ["rejected", "no_docs", "done", "partial", "abandoned"]
 
+EMBARGO_CHOICES = [
+    ("public", "Public"),
+    ("embargo", "Embargo"),
+    ("permanent", "Permanent Embargo"),
+]
+
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -98,8 +104,12 @@ class FOIARequest(models.Model):
     )
     date_processing = models.DateField(blank=True, null=True)
 
-    embargo = models.BooleanField(default=False)
-    permanent_embargo = models.BooleanField(default=False)
+    embargo_status = models.CharField(
+        default="public",
+        max_length=9,
+        choices=EMBARGO_CHOICES,
+    )
+
     date_embargo = models.DateField(blank=True, null=True)
 
     price = models.DecimalField(max_digits=14, decimal_places=2, default="0.00")
@@ -213,7 +223,7 @@ class FOIARequest(models.Model):
         """Normalize fields before saving and set the embargo expiration if necessary"""
         self.slug = slugify(self.slug)
         self.title = self.title.strip()
-        if self.embargo:
+        if self.embargo_status != "public":
             if self.status in END_STATUS:
                 default_date = date.today() + timedelta(30)
                 existing_date = self.date_embargo
@@ -1408,8 +1418,7 @@ class FOIARequest(models.Model):
         self.notes.create(author=user, note=note)
 
         self.deleted = True
-        self.embargo = True
-        self.permanent_embargo = True
+        self.embargo_status = "permanent"
         self.disable_autofollowups = True
         self.status = "abandoned"
         self.save()
@@ -1462,8 +1471,6 @@ class FOIARequest(models.Model):
             "Title": self.title,
             "Agency": self.agency.name,
             "Jurisdiction": str(self.agency.jurisdiction),
-            "Embargo": self.embargo,
-            "Permanent Embargo": self.permanent_embargo,
             "Created At": self.composer.datetime_created.isoformat(),
             "Composer": self.composer_id,
             "ID": self.pk,

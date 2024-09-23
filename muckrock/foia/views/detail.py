@@ -201,10 +201,10 @@ class Detail(DetailView):
             and self.foia.status == "payment"
         )
         context["embargo"] = {
-            "show": user_can_embargo or self.foia.embargo,
+            "show": user_can_embargo or self.foia.embargo_status != "public",
             "edit": user_can_embargo,
             "add": user_can_embargo,
-            "remove": context["user_can_edit"] and self.foia.embargo,
+            "remove": context["user_can_edit"] and self.foia.embargo_status != "public",
         }
         context["is_thankable"] = self.foia.has_perm(self.request.user, "thank")
 
@@ -235,7 +235,7 @@ class Detail(DetailView):
         )
         context["embargo_form"] = FOIAEmbargoForm(
             initial={
-                "permanent_embargo": self.foia.permanent_embargo,
+                "permanent_embargo": self.foia.embargo_status == "permanent",
                 "date_embargo": self.foia.date_embargo,
             }
         )

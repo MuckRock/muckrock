@@ -102,7 +102,7 @@ is_viewer = is_read_collaborator | is_org_shared
 @predicate
 @skip_if_not_obj
 def is_embargoed(user, foia):
-    return foia.embargo
+    return foia.embargo_status != "public"
 
 
 is_private = is_embargoed

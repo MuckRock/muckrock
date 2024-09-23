@@ -75,9 +75,15 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         user2 = UserFactory()
 
         foias = [
-            FOIARequestFactory(composer__user=user1, status="done", embargo=False),
-            FOIARequestFactory(composer__user=user1, status="done", embargo=True),
-            FOIARequestFactory(composer__user=user1, status="done", embargo=True),
+            FOIARequestFactory(
+                composer__user=user1, status="done", embargo_status="public"
+            ),
+            FOIARequestFactory(
+                composer__user=user1, status="done", embargo_status="embargo"
+            ),
+            FOIARequestFactory(
+                composer__user=user1, status="done", embargo_status="embargo"
+            ),
         ]
         foias[2].add_viewer(user2)
 
@@ -119,7 +125,7 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         """Test all the viewable and embargo functions"""
         user = UserFactory()
         foia = FOIARequestFactory(
-            embargo=True, composer__organization=user.profile.organization
+            embargo_status="embargo", composer__organization=user.profile.organization
         )
         foias = FOIARequest.objects.get_viewable(user)
         nose.tools.assert_not_in(foia, foias)
@@ -221,8 +227,7 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         nose.tools.eq_(foia.notes.first().note, "note")
 
         nose.tools.ok_(foia.deleted)
-        nose.tools.ok_(foia.embargo)
-        nose.tools.ok_(foia.permanent_embargo)
+        nose.tools.eq_(foia.embargo_status, "permanent")
         nose.tools.eq_(foia.status, "abandoned")
 
 
@@ -557,7 +562,7 @@ class TestRequestSharing(TestCase):
 
     def test_viewer_permission(self):
         """Viewers should be able to see the request if it is embargoed."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         viewer = UserFactory()
         normie = UserFactory()
         embargoed_foia.add_viewer(viewer)
@@ -566,7 +571,7 @@ class TestRequestSharing(TestCase):
 
     def test_promote_viewer(self):
         """Editors should be able to promote viewers to editors."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         viewer = UserFactory()
         embargoed_foia.add_viewer(viewer)
         nose.tools.assert_true(embargoed_foia.has_perm(viewer, "view"))
@@ -576,7 +581,7 @@ class TestRequestSharing(TestCase):
 
     def test_demote_editor(self):
         """Editors should be able to demote editors to viewers."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         editor = UserFactory()
         embargoed_foia.add_editor(editor)
         nose.tools.assert_true(embargoed_foia.has_perm(editor, "view"))
@@ -587,7 +592,7 @@ class TestRequestSharing(TestCase):
     def test_access_key(self):
         """Editors should be able to generate a secure access key to view an
         embargoed request."""
-        embargoed_foia = FOIARequestFactory(embargo=True)
+        embargoed_foia = FOIARequestFactory(embargo_status="embargo")
         access_key = embargoed_foia.generate_access_key()
         nose.tools.assert_true(
             access_key == embargoed_foia.access_key,
@@ -633,7 +638,7 @@ class TestFOIANotification(TestCase):
             "The owner should get a new notification.",
         )
         # embargoed
-        self.request.embargo = True
+        self.request.embargo_status = "embargo"
         self.request.save()
         notification_count = self.owner.notifications.count()
         self.request.notify(self.action)
@@ -654,7 +659,7 @@ class TestFOIANotification(TestCase):
             "A follower should get a new notification when unembargoed.",
         )
         # embargoed
-        self.request.embargo = True
+        self.request.embargo_status = "embargo"
         self.request.save()
         notification_count = self.follower.notifications.count()
         self.request.notify(self.action)

@@ -65,7 +65,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_public(self):
         """Test get viewable for a public composer"""
 
-        FOIARequestFactory(composer__status="filed", embargo=False)
+        FOIARequestFactory(composer__status="filed", embargo_status="public")
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
         assert_true(FOIAComposer.objects.get_viewable(self.user).exists())
@@ -74,7 +74,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_embargoed(self):
         """Test get viewable for an embargoed composer"""
 
-        FOIARequestFactory(composer__status="filed", embargo=True)
+        FOIARequestFactory(composer__status="filed", embargo_status="embargo")
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
         assert_false(FOIAComposer.objects.get_viewable(self.user).exists())
@@ -83,8 +83,8 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_partial_embargoed(self):
         """Test get viewable for a partially embargoed composer"""
 
-        foia = FOIARequestFactory(composer__status="filed", embargo=True)
-        FOIARequestFactory(composer=foia.composer, embargo=False)
+        foia = FOIARequestFactory(composer__status="filed", embargo_status="embargo")
+        FOIARequestFactory(composer=foia.composer, embargo_status="public")
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
         assert_true(FOIAComposer.objects.get_viewable(self.user).exists())
@@ -103,7 +103,9 @@ class TestFOIAComposerQueryset(TestCase):
         """Test get viewable for the composer owner"""
 
         FOIARequestFactory(
-            composer__status="filed", embargo=True, composer__user=self.user
+            composer__status="filed",
+            embargo_status="embargo",
+            composer__user=self.user,
         )
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -113,7 +115,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_read_collaborator(self):
         """Test get viewable for a read collaborator"""
 
-        foia = FOIARequestFactory(composer__status="filed", embargo=True)
+        foia = FOIARequestFactory(composer__status="filed", embargo_status="embargo")
         foia.add_viewer(self.user)
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -123,7 +125,7 @@ class TestFOIAComposerQueryset(TestCase):
     def test_get_viewable_edit_collaborator(self):
         """Test get viewable for an edit collaborator"""
 
-        foia = FOIARequestFactory(composer__status="filed", embargo=True)
+        foia = FOIARequestFactory(composer__status="filed", embargo_status="embargo")
         foia.add_editor(self.user)
 
         assert_true(FOIAComposer.objects.get_viewable(self.staff).exists())
@@ -141,7 +143,7 @@ class TestFOIAComposerQueryset(TestCase):
 
         FOIARequestFactory(
             composer__status="filed",
-            embargo=True,
+            embargo_status="embargo",
             composer__user=org_user1,
             composer__organization=org,
         )
@@ -162,7 +164,7 @@ class TestFOIAComposerQueryset(TestCase):
 
         FOIARequestFactory(
             composer__status="filed",
-            embargo=True,
+            embargo_status="embargo",
             composer__user=org_user1,
             composer__organization=org,
         )
@@ -178,7 +180,7 @@ class TestFOIAComposerForm(TestCase):
 
     def test_multi_clone(self):
         """Test cloning a multirequest"""
-        foia = FOIARequestFactory(composer__status="filed", embargo=False)
+        foia = FOIARequestFactory(composer__status="filed", embargo_status="public")
         FOIARequestFactory(composer=foia.composer)
         form = BaseComposerForm(
             {"action": "save", "parent": foia.composer.pk, "tags": ""},

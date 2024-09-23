@@ -592,7 +592,7 @@ def followup_requests():
 def embargo_warn():
     """Warn users their requests are about to come off of embargo"""
     for foia in FOIARequest.objects.filter(
-        embargo=True, permanent_embargo=False, date_embargo=date.today()
+        embargo_status="embargo", date_embargo=date.today()
     ):
         EmailMessage(
             subject='[MuckRock] Embargo about to expire for FOI Request "{}"'.format(
@@ -612,9 +612,9 @@ def embargo_warn():
 def embargo_expire():
     """Expire requests that have a date_embargo before today"""
     for foia in FOIARequest.objects.filter(
-        embargo=True, permanent_embargo=False, date_embargo__lt=date.today()
+        embargo_status="embargo", date_embargo__lt=date.today()
     ):
-        foia.embargo = False
+        foia.embargo_status = "public"
         foia.save(comment="embargo expired")
         EmailMessage(
             subject='[MuckRock] Embargo expired for FOI Request "{}"'.format(
@@ -882,7 +882,7 @@ class ExportCsv(AsyncFileDownloadTask):
         (lambda f: f.date_estimate, "Estimated Completion Date"),
         (lambda f: f.composer.requested_docs, "Requested Documents"),
         (lambda f: f.current_tracking_id(), "Tracking Number"),
-        (lambda f: f.embargo, "Embargo"),
+        (lambda f: f.embargo_status, "Embargo"),
         (lambda f: f.days_since_submitted, "Days since submitted"),
         (lambda f: f.days_since_updated, "Days since updated"),
         (lambda f: f.project_names, "Projects"),
@@ -966,7 +966,7 @@ class ExportCsv(AsyncFileDownloadTask):
                 "date_estimate",
                 "date_followup",
                 "datetime_done",
-                "embargo",
+                "embargo_status",
                 "mail_id",
                 "price",
                 "slug",

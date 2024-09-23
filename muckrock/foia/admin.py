@@ -463,7 +463,11 @@ class FOIARequestAdmin(VersionAdmin):
         """Actions to take when a request is saved from the admin"""
 
         # If changing to completed and embargoed, set embargo date to 30 days out
-        if obj.status in ["done", "partial"] and obj.embargo and not obj.date_embargo:
+        if (
+            obj.status in ["done", "partial"]
+            and obj.embargo_status != "public"
+            and not obj.date_embargo
+        ):
             obj.date_embargo = date.today() + timedelta(30)
 
         # If turned noindex on, turn noindex on DocumentCloud as well

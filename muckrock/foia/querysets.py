@@ -95,7 +95,7 @@ class FOIARequestQuerySet(models.QuerySet):
                 | Q(proxy=user)
                 | Q(pk__in=user.edit_access.all())
                 | Q(pk__in=user.read_access.all())
-                | ~Q(embargo=True)
+                | Q(embargo_status="public")
             )
             # agency users may also view requests for their agency
             if user.profile.is_agency_user:
@@ -109,7 +109,9 @@ class FOIARequestQuerySet(models.QuerySet):
         else:
             # anonymous user, filter out embargoes and noindex requests
             return (
-                self.exclude(embargo=True).exclude(noindex=True).exclude(deleted=True)
+                self.filter(embargo_status="public")
+                .exclude(noindex=True)
+                .exclude(deleted=True)
             )
 
     def get_public(self):
@@ -240,8 +242,7 @@ class FOIARequestQuerySet(models.QuerySet):
             title=title,
             slug=slugify(title),
             agency=agency,
-            embargo=composer.embargo,
-            permanent_embargo=composer.permanent_embargo,
+            embargo_status=composer.embargo_status,
             composer=composer,
             date_due=date_due,
             proxy=proxy_user,
@@ -299,7 +300,7 @@ class FOIAComposerQuerySet(models.QuerySet):
                 Q(user=user)
                 | Q(foias__read_collaborators=user)
                 | Q(foias__edit_collaborators=user)
-                | (~Q(status="started") & Q(foias__embargo=False))
+                | (~Q(status="started") & Q(foias__embargo_status="public"))
             )
             # organizational users may also view requests from their org
             # that are shared
@@ -307,7 +308,7 @@ class FOIAComposerQuerySet(models.QuerySet):
             return self.filter(query)
         else:
             # anonymous user, filter out drafts and embargoes
-            return self.exclude(status="started").filter(foias__embargo=False)
+            return self.exclude(status="started").filter(foias__embargo_status="public")
 
     def get_or_create_draft(self, user, organization):
         """Return an existing blank draft or create one"""
@@ -321,8 +322,7 @@ class FOIAComposerQuerySet(models.QuerySet):
             requested_docs="",
             edited_boilerplate=False,
             datetime_submitted=None,
-            embargo=False,
-            permanent_embargo=False,
+            embargo_status="public",
             parent=None,
             tags=None,
             num_monthly_requests=0,
@@ -369,7 +369,7 @@ class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
                 Q(foia__composer__user=user)
                 | Q(foia__in=user.edit_access.all())
                 | Q(foia__in=user.read_access.all())
-                | Q(foia__embargo=False)
+                | Q(foia__embargo_status="public")
             )
             # organizational users may also view requests from their org that are shared
             query = query | Q(
@@ -379,7 +379,7 @@ class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
             return self.filter(query)
         else:
             # anonymous user, filter out embargoes
-            return self.filter(foia__embargo=False)
+            return self.filter(foia__embargo_status="public")
 
 
 class FOIAFileQuerySet(models.QuerySet):
