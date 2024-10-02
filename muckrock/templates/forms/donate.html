@@ -6,7 +6,31 @@
     <div class="donate__form">
         {% block donate-form %}
         <h1 class="form-title">Donate</h1>
-        <p>MuckRock is a <strong>501(c)(3)</strong> organization. Our tax identification number is <strong>81-1485228</strong>. Your donation is fully tax deductible.</p>
+
+        <p>
+          Democracy cannot function without an informed and engaged public.
+          Transparency is never more vital than it is in an election year.
+        </p>
+
+        <p>
+          Your donation to MuckRock supports our work to promote civic
+          engagement with vital tools like our public records request service,
+          which facilitates thousands of requests every year, DocumentCloud,
+          which newsrooms around the world use to analyze, annotate and publish
+          primary source documents; and oTranscribe, which takes the pain out
+          of transcribing audio for thousands of users every single day.
+        </p>
+
+        <p>
+          We know our tools and resources are absolutely vital to protecting
+          transparency, supporting essential reporting and facilitating civic
+          engagement. We need your support to keep them accessible.
+        </p>
+
+        <p>
+          Please support MuckRock today!
+        </p>
+
         <form method="post" class="stripe-checkout">
             {% csrf_token %}
             {% comment %}
@@ -67,6 +91,13 @@
                 <button type="submit" class="green button">Donate</button>
             </div>
         </form>
+
+        <p>
+          MuckRock is a <strong>501(c)(3)</strong> organization. Our tax
+          identification number is <strong>81-1485228</strong>. Your donation
+          is fully tax deductible.
+        </p>
+
         <p>Donations may also be sent via PayPal:</p>
 
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="text-align: center;">
@@ -80,6 +111,17 @@
           MuckRock<br class="nomb">
           263 Huntington Ave<br class="nomb">
           Boston, MA 02115<br class="nomb">
+        </p>
+        <p>
+          You can always find our most current financial statements at
+          <a href="https://www.muckrock.com/financial/">
+            https://www.muckrock.com/financial/
+          </a>.
+        </p>
+        <p>
+          If you’d like to support our work with a legacy or a gift of stocks
+          or crypto currency or a legacy, contact
+          <a href="mailto:amanda@muckrock.com">amanda@muckrock.com</a>.
         </p>
         {% endblock %}
     </div>
