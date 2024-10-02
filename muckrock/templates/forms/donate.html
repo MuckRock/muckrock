@@ -16,19 +16,6 @@
                     {{ field }}
             {% endfor %}
             <div>
-                <h2>How would you like to donate?</h2>
-                <div class="donation button-group">
-                    <label for="one-time" class="primary button">
-                        One Time
-                    </label>
-                    <input id="one-time" type="radio" name="type" value="one-time" checked="checked">
-                    <label for="monthly" class="button">
-                        Monthly
-                    </label>
-                    <input id="monthly" type="radio" name="type" value="monthly">
-                </div>
-            </div>
-            <div>
                 <h2>How much would you like to give?</h2>
                 <div class="donation button-group">
                     <label for="amount_1" class="button">$10
@@ -46,6 +33,16 @@
                 </div>
                 <div>
                     <input type="number" name="stripe_amount" id="other_amount">
+                    <div class="donation button-group">
+                        <label for="one-time" class="primary button">
+                            One Time
+                        </label>
+                        <input id="one-time" type="radio" name="type" value="one-time" checked="checked">
+                        <label for="monthly" class="button">
+                            Monthly
+                        </label>
+                        <input id="monthly" type="radio" name="type" value="monthly">
+                    </div>
                     <p class="optional">
                       We appreciate your support!  The following are optional fields:
                     </p>
