@@ -138,7 +138,10 @@ def mailchimp_donor_tag(email):
     # then tag them
     api_url += "/tags"
     data = {
-        "tags": [{"name": date.today().strftime("%B %Y Donor"), "status": "active"}]
+        "tags": [
+            {"name": date.today().strftime("donor %Y %B"), "status": "active"},
+            {"name": "donor", "status": "active"},
+        ]
     }
     response = retry_on_error(
         requests.ConnectionError, requests.post, api_url, json=data, headers=headers
