@@ -70,7 +70,6 @@ class DonateForm(StripeForm):
     """A form for donations"""
 
     name = forms.CharField(required=False)
-    email = forms.EmailField(required=False)
     phone = PhoneNumberField(required=False)
     why = forms.CharField(required=False)
     address = forms.CharField(required=False)

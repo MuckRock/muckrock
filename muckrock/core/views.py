@@ -490,7 +490,6 @@ class DonationFormView(StripeFormMixin, FormView):
         type_ = form.cleaned_data["type"]
         metadata = {
             "name": form.cleaned_data["name"],
-            "email": form.cleaned_data["email"],
             "phone": form.cleaned_data["phone"],
             "why": form.cleaned_data["why"],
             "address": form.cleaned_data["address"],
