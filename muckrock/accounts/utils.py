@@ -86,6 +86,7 @@ def mailchimp_subscribe(
         "email_address": email,
         "status": "subscribed",
         "merge_fields": merge_fields,
+        "tags": ["Newsletter Subscribers"],
     }
     response = retry_on_error(
         requests.ConnectionError, requests.post, api_url, json=data, headers=headers
