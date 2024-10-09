@@ -1,0 +1,111 @@
+class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
+    """API views for Agency"""
+
+    queryset = (
+        Agency.objects.order_by("id")
+        .select_related("jurisdiction", "parent", "appeal_agency")
+        .prefetch_related(
+            "agencyemail_set__email",
+            "agencyphone_set__phone",
+            "agencyaddress_set__address",
+            Prefetch(
+                "emails",
+                queryset=EmailAddress.objects.filter(
+                    status="good",
+                    agencyemail__request_type="primary",
+                    agencyemail__email_type="to",
+                ),
+                to_attr="primary_emails",
+            ),
+            Prefetch(
+                "phones",
+                queryset=PhoneNumber.objects.filter(
+                    type="fax", status="good", agencyphone__request_type="primary"
+                ),
+                to_attr="primary_faxes",
+            ),
+            Prefetch(
+                "addresses",
+                queryset=Address.objects.filter(agencyaddress__request_type="primary"),
+                to_attr="primary_addresses",
+            ),
+            "types",
+        )
+        .annotate(
+            average_response_time_=Coalesce(
+                ExtractDay(
+                    Avg(
+                        F("foiarequest__datetime_done") - F("foiarequest__composer__datetime_submitted")
+                    )
+                ),
+                Value(0),
+            ),
+            fee_rate_=Coalesce(
+                100 * CountWhen(foiarequest__price__gt=0, output_field=FloatField())
+                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField()),
+                Value(0),
+                output_field=FloatField(),
+            ),
+            success_rate_=Coalesce(
+                100 * CountWhen(
+                    foiarequest__status__in=["done", "partial"],
+                    output_field=FloatField(),
+                )
+                / NullIf(Count("foiarequest"), Value(0), output_field=FloatField()),
+                Value(0),
+                output_field=FloatField(),
+            ),
+            number_requests=Count("foiarequest"),
+            number_requests_completed=CountWhen(foiarequest__status="done"),
+            number_requests_rejected=CountWhen(foiarequest__status="rejected"),
+            number_requests_no_docs=CountWhen(foiarequest__status="no_docs"),
+            number_requests_ack=CountWhen(foiarequest__status="ack"),
+            number_requests_resp=CountWhen(foiarequest__status="processed"),
+            number_requests_fix=CountWhen(foiarequest__status="fix"),
+            number_requests_appeal=CountWhen(foiarequest__status="appealing"),
+            number_requests_pay=CountWhen(foiarequest__status="payment"),
+            number_requests_partial=CountWhen(foiarequest__status="partial"),
+            number_requests_lawsuit=CountWhen(foiarequest__status="lawsuit"),
+            number_requests_withdrawn=CountWhen(foiarequest__status="abandoned"),
+        )
+    )
+    
+    serializer_class = AgencySerializer
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['name', 'jurisdiction__name']  # Added jurisdiction name to search fields
+
+    class AgencyFilter(django_filters.FilterSet):
+        """API Filter for Agencies"""
+        jurisdiction = django_filters.CharFilter(field_name="jurisdiction__name", lookup_expr="icontains")
+        types = django_filters.CharFilter(field_name="types__name", lookup_expr="iexact")
+
+        class Meta:
+            model = Agency
+            fields = ("name", "status", "jurisdiction", "types", "requires_proxy")
+
+    filterset_class = Filter
+
+    def get_queryset(self):
+        """Filter out non-approved agencies for non-staff"""
+        queryset = super().get_queryset()
+        jurisdiction = self.request.query_params.get('jurisdiction', None)
+        search_term = self.request.query_params.get('search', None)
+
+        if jurisdiction:
+            queryset = queryset.filter(jurisdiction__name__icontains=jurisdiction)
+
+        if search_term:
+            queryset = queryset.filter(name__icontains=search_term)
+
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(status="approved")
+
+        return queryset
+
+    # Don't allow ordering by computed fields
+    ordering_fields = [
+        f for f in serializer_class.Meta.fields
+        if f not in (
+            "absolute_url", "average_response_time", "fee_rate", "success_rate"
+        ) and not f.startswith(("has_", "number_"))
+    ]
