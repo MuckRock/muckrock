@@ -1,3 +1,30 @@
+"""Viewsets for Agency"""
+
+# Django
+from django.db.models.aggregates import Avg, Count, Sum
+from django.db.models.expressions import Case, F, Value, When
+from django.db.models.fields import FloatField, IntegerField
+from django.db.models.functions import Coalesce
+from django.db.models.query import Prefetch
+
+# Third Party
+import django_filters
+from rest_framework import viewsets
+
+# MuckRock
+from muckrock.agency.models import Agency
+from muckrock.agency.serializers import AgencySerializer
+from muckrock.communication.models import Address, EmailAddress, PhoneNumber
+from muckrock.core.models import ExtractDay, NullIf
+
+
+def CountWhen(output_field=None, **kwargs):
+    """Use Sum-Case to simulate a filtered Count"""
+    # pylint: disable=invalid-name
+    if output_field is None:
+        output_field = IntegerField()
+    return Sum(Case(When(then=1, **kwargs), default=0), output_field=output_field)
+
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for Agency"""
 
@@ -74,7 +101,7 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['name', 'jurisdiction__name']  # Added jurisdiction name to search fields
 
-    class AgencyFilter(django_filters.FilterSet):
+    class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
         jurisdiction = django_filters.CharFilter(field_name="jurisdiction__name", lookup_expr="icontains")
         types = django_filters.CharFilter(field_name="types__name", lookup_expr="iexact")
