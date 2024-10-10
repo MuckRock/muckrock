@@ -1,8 +1,8 @@
-# serializers.py
+""" Serializer for Jurisdictions """
 
 from django.conf import settings
 from rest_framework import serializers
-from .models import Jurisdiction
+from muckrock.jurisdiction.models import Jurisdiction
 
 class JurisdictionSerializer(serializers.ModelSerializer):
     """Serializer for Jurisdiction model"""
@@ -16,6 +16,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
     success_rate = serializers.ReadOnlyField()
 
     class Meta:
+        """ Fields in Jurisdiction object """
         model = Jurisdiction
         fields = (
             "id",
@@ -32,6 +33,6 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             "success_rate",
         )
 
-    def get_absolute_url(self, obj):
+    def get_absolute_url(self, obj): # pylint: disable=R0201
         """Prepend the domain name to the URL"""
-        return "{}{}".format(settings.MUCKROCK_URL, obj.get_absolute_url())
+        return f"{settings.MUCKROCK_URL}{obj.get_absolute_url()}"

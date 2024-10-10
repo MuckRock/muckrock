@@ -2,12 +2,9 @@
 Provides Jurisdiction application API views
 """
 
-# Standard Library
-import logging
-
 # Third Party
 import django_filters
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
 
@@ -29,6 +26,7 @@ class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
         parent = django_filters.NumberFilter(field_name="parent__id")
 
         class Meta:
+            """ List of filters for the API """
             model = Jurisdiction
             fields = ("name", "abbrev", "level", "parent")
 
