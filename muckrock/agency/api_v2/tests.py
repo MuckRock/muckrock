@@ -1,90 +1,113 @@
+""" Tests for the Agency API """
+
+from django.test import Client
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from muckrock.agency.models import Agency, Jurisdiction
 from muckrock.core.factories import UserFactory, AgencyFactory, JurisdictionFactory
 
+
 class AgencyViewSetTests(APITestCase):
+    """Test suite for the Agency ViewSet."""
 
     def setUp(self):
+        """Set up test cases, creating jurisdictions, agencies, and users."""
         # Create test jurisdictions
-        self.jurisdiction = JurisdictionFactory.create(name='1st Jurisdiction')
-        self.jurisdiction2 = JurisdictionFactory.create(name="2nd Jurisdiction")
-        
+        self.jurisdictions = [
+            JurisdictionFactory.create(name="1st Jurisdiction"),
+            JurisdictionFactory.create(name="2nd Jurisdiction"),
+        ]
+
         # Create agencies
-        self.approved_agency = AgencyFactory.create(
-            name='First Approved Agency',
-            jurisdiction=self.jurisdiction,
-            status='approved'
-        )
-        self.unapproved_agency = AgencyFactory.create(
-            name='Unapproved Agency',
-            jurisdiction=self.jurisdiction,
-            status='unapproved'
-        )
-        self.approved_agency2 = AgencyFactory.create(
-            name="Second Approved Agency",
-            jurisdiction=self.jurisdiction2,
-            status='approved'
-        )
+        self.agencies = [
+            AgencyFactory.create(
+                name="First Approved Agency",
+                jurisdiction=self.jurisdictions[0],
+                status="approved",
+            ),
+            AgencyFactory.create(
+                name="Unapproved Agency",
+                jurisdiction=self.jurisdictions[0],
+                status="unapproved",
+            ),
+            AgencyFactory.create(
+                name="Second Approved Agency",
+                jurisdiction=self.jurisdictions[1],
+                status="approved",
+            ),
+        ]
 
         # URL for the agency list
-        self.url = reverse('agency-list')
+        self.url = reverse("agency-list")
+
+        # Create users
+        self.user1 = UserFactory(username="adam", is_staff=True)
+        self.user2 = UserFactory(username="bob", is_staff=False)
+
+        self.client = Client()
 
     def test_retrieve_agencies(self):
+        """Test retrieving the list of agencies."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_fuzzy_search_agency_name(self):
-        response = self.client.get(self.url, {'search': 'Second'})
+        """Test fuzzy searching by agency name."""
+        response = self.client.get(self.url, {"search": "second"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         response_data = response.json()
-        agency_names = [agency['name'] for agency in response_data['results']]
-        
-        self.assertIn('Second Approved Agency', agency_names)
-        self.assertNotIn('First Approved Agency', agency_names)
-        self.assertNotIn('Unapproved Agency', agency_names)
+        agency_names = [agency["name"] for agency in response_data["results"]]
+
+        self.assertIn("Second Approved Agency", agency_names)
+        self.assertNotIn("First Approved Agency", agency_names)
+        self.assertNotIn("Unapproved Agency", agency_names)
 
     def test_fuzzy_search_jurisdiction_name(self):
-        response = self.client.get(self.url, {'search': '1st'})
+        """Test fuzzy searching by jurisdiction name."""
+        response = self.client.get(self.url, {"search": "1st"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         response_data = response.json()
-        agency_names = [agency['name'] for agency in response_data['results']]
-        
-        self.assertNotIn('Second Approved Agency', agency_names)
+        agency_names = [agency["name"] for agency in response_data["results"]]
+
+        self.assertNotIn("Second Approved Agency", agency_names)
 
     def test_non_approved_agencies_hidden(self):
-        self.client.logout()  # Ensure we're not logged in as staff
+        """Test that non-approved agencies are hidden for non-staff users."""
+        self.client.force_login(self.user2)  # Ensure we are logged in as non-staff user
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         response_data = response.json()
-        agency_names = [agency['name'] for agency in response_data['results']]
-        
-        self.assertIn('First Approved Agency', agency_names)
-        self.assertNotIn('Unapproved Agency', agency_names)
+        agency_names = [agency["name"] for agency in response_data["results"]]
+
+        self.assertIn("First Approved Agency", agency_names)
+        self.assertNotIn("Unapproved Agency", agency_names)
 
     def test_staff_user_can_see_all_agencies(self):
-        user = UserFactory.create(is_staff=True)
-        self.client.force_authenticate(user)
+        """Test that staff users can see all agencies."""
+        self.client.force_login(self.user1)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         response_data = response.json()
-        agency_names = [agency['name'] for agency in response_data['results']]
-        
-        self.assertIn('First Approved Agency', agency_names)
-        self.assertIn('Second Approved Agency', agency_names)
-        self.assertIn('Unapproved Agency', agency_names)
+        agency_names = [agency["name"] for agency in response_data["results"]]
+
+        self.assertIn("First Approved Agency", agency_names)
+        self.assertIn("Second Approved Agency", agency_names)
+        self.assertIn("Unapproved Agency", agency_names)
 
     def test_ordering(self):
-        response = self.client.get(self.url, {'ordering': 'name'})
+        """Test that agencies are returned in the correct order."""
+        response = self.client.get(self.url, {"ordering": "name"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_data = response.json()
-        agency_names = [agency['name'] for agency in response_data['results']]
-        
+        agency_names = [agency["name"] for agency in response_data["results"]]
+
         # Assuming the expected order based on names
-        self.assertEqual(agency_names, ['First Approved Agency', 'Second Approved Agency', 'Unapproved Agency'])
+        self.assertEqual(
+            agency_names,
+            ["First Approved Agency", "Second Approved Agency", "Unapproved Agency"],
+        )
