@@ -39,8 +39,8 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
         jurisdiction = django_filters.CharFilter(
             field_name="jurisdiction__name", lookup_expr="icontains"
         )
-        types = django_filters.CharFilter(
-            field_name="types__name", lookup_expr="iexact"
+        name = django_filters.CharFilter(
+            field_name="name", lookup_expr="icontains"  # Allows case-insensitive filtering by name
         )
 
         # pylint: disable=R0903
@@ -55,15 +55,14 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
         """Filter out non-approved agencies for non-staff"""
         queryset = super().get_queryset()
         jurisdiction = self.request.query_params.get("jurisdiction", None)
-        search_term = self.request.query_params.get("search", None)
+        name = self.request.query_params.get("name", None)
 
         if jurisdiction:
             queryset = queryset.filter(jurisdiction__name__icontains=jurisdiction)
 
-        if search_term:
-            queryset = queryset.filter(name__icontains=search_term)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
 
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(status="approved")
-
-        return queryset
+        if self.request.user.is_staff:
+            return self.queryset
+        return self.queryset.filter(status="approved")
