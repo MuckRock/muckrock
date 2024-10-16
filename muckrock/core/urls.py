@@ -112,10 +112,10 @@ router_v2.register(
     "api2-communications",
 )
 router_v2.register(
-    r"agency", muckrock.agency.viewsets.AgencyViewSet, "api2-agency"
+    r"agency", muckrock.agency.viewsets.AgencyViewSet, "api2-agencies"
 )
 router_v2.register(
-    r"jurisdiction", muckrock.jurisdiction.viewsets.JurisdictionViewSet, "api2-jurisdiction"
+    r"jurisdiction", muckrock.jurisdiction.viewsets.JurisdictionViewSet, "api2-jurisdictions"
 )
 
 urlpatterns = [
