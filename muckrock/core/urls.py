@@ -22,11 +22,13 @@ from rest_framework.routers import DefaultRouter
 
 # MuckRock
 import muckrock.accounts.viewsets
+import muckrock.agency.api_v2.viewsets
 import muckrock.agency.viewsets
 import muckrock.crowdsource.viewsets
 import muckrock.foia.api_v2.viewsets
 import muckrock.foia.viewsets
 import muckrock.jurisdiction.urls
+import muckrock.jurisdiction.api_v2.viewsets
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
 import muckrock.project.viewsets
@@ -108,6 +110,12 @@ router_v2.register(
     r"communications",
     muckrock.foia.api_v2.viewsets.FOIACommunicationViewSet,
     "api2-communications",
+)
+router_v2.register(
+    r"agency", muckrock.agency.viewsets.AgencyViewSet, "api2-agency"
+)
+router_v2.register(
+    r"jurisdiction", muckrock.jurisdiction.viewsets.JurisdictionViewSet, "api2-jurisdiction"
 )
 
 urlpatterns = [
