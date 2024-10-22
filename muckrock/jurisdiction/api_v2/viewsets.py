@@ -6,7 +6,7 @@ Provides Jurisdiction application API views
 import django_filters
 from rest_framework import viewsets
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.jurisdiction.serializers import JurisdictionSerializer
+from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
 
 #pylint: disable=too-few-public-methods
 class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
