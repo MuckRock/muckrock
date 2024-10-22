@@ -7,10 +7,29 @@ from django.contrib.auth.models import User
 
 # Third Party
 from rest_framework import serializers
+from drf_spectacular.utils import (
+    OpenApiExample,
+    extend_schema_serializer,
+)
 
 # MuckRock
 from muckrock.accounts.models import Profile
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Example User",
+            value={
+                "username": "jdoe",
+                "email": "jdoe@example.com",
+                "last_login": "2023-10-20T12:34:56Z",
+                "date_joined": "2023-01-01T00:00:00Z",
+                "full_name": "John Doe",
+                "uuid": "123e4567-e89b-12d3-a456-426614174000",
+            },
+        )
+    ]
+)
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model with relevant Profile fields."""
 
