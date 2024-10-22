@@ -30,28 +30,11 @@ def assign_grade(grade, text, percentile=None):
 def grade_agency(agency, context):
     """Score the agency based on relative stats"""
     context["grades"] = {
-        "abs_response_time": grade_absolute_response_time(agency),
         "rel_response_time": grade_relative_response_time(agency),
         "success_rate": grade_success_rate(agency),
         "fee_rate": grade_fee_rate(agency),
         "fee_average": grade_fee_average(agency),
     }
-
-
-def grade_absolute_response_time(agency):
-    """Do they respond within the legally allowed time?"""
-    if not agency.jurisdiction.days:
-        return assign_grade(
-            "neutral", "The agency's jurisdiction has no mandated response time."
-        )
-    if agency.jurisdiction.days >= agency.average_response_time():
-        return assign_grade(
-            "pass", "On average, they respond within the legally allowed time."
-        )
-    else:
-        return assign_grade(
-            "fail", "On average, they take longer to respond than allowed by law."
-        )
 
 
 def grade_relative_response_time(agency):
@@ -70,7 +53,7 @@ def grade_relative_response_time(agency):
         ) * 100
         return assign_grade(
             "pass",
-            """They typically respond {}% faster than
+            """They typically complete requests {}% faster than
             other agencies in their jurisdiction""",
             percentile,
         )
@@ -80,7 +63,7 @@ def grade_relative_response_time(agency):
         ) * 100
         return assign_grade(
             "fail",
-            """They typically respond {}% slower than
+            """They complete requests respond {}% slower than
             other agencies in their jurisdiction""",
             percentile,
         )
