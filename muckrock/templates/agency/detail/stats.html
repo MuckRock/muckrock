@@ -2,27 +2,33 @@
   <div class="stat">
     <header class="overline">Responsiveness</header>
     <main>
-    <dl>
-      <dt>Average</dt>
-      <dd class="dotted-line"></dd>
-      {% with agency.average_response_time as average_response_time %}
-      <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
-      {% endwith %}
-    </dl>
-    {% include 'lib/component/grade.html' with grade=grades.rel_response_time.grade text=grades.rel_response_time.text %}
+      <dl>
+        <dt>Average</dt>
+        <dd class="dotted-line"></dd>
+        {% with agency.average_response_time as average_response_time %}
+        <dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
+        {% endwith %}
+      </dl>
+      {% include 'lib/component/grade.html' with grade=grades.rel_response_time.grade text=grades.rel_response_time.text %}
 
-    <dl>
-      <dt>By Law</dt>
-      <dd class="dotted-line"></dd>
-      {% with agency.jurisdiction.days as days %}
-        {% if days %}
-          <dd>{{days}} day{{days|pluralize}}</dd>
-        {% else %}
-          <dd>Unlimited</dd>
-        {% endif %}
-      {% endwith %}
-    </dl>
-    {% include 'lib/component/grade.html' with grade=grades.abs_response_time.grade text=grades.abs_response_time.text %}
+      <dl>
+        <dt>By Law</dt>
+        <dd class="dotted-line"></dd>
+        {% with agency.jurisdiction.days as days %}
+          {% if days %}
+            <dd>{{days}} day{{days|pluralize}}</dd>
+          {% else %}
+            <dd>Unlimited</dd>
+          {% endif %}
+        {% endwith %}
+      </dl>
+    <div class="grade" style="display: block">
+      See
+      <a href="{{ agency.jurisdiction.legal.get_absolute_url }}">
+        {{ agency.jurisdiction.legal.name }}
+      </a> for more detail about what the law in this jurisdiction says about
+      response times
+    </div>
     </main>
   </div>
   <div class="stat">
