@@ -6,7 +6,21 @@
     <div class="donate__form">
         {% block donate-form %}
         <h1 class="form-title">Donate</h1>
-        <p>MuckRock is a <strong>501(c)(3)</strong> organization. Our tax identification number is <strong>81-1485228</strong>. Your donation is fully tax deductible.</p>
+
+        <p>
+          Democracy cannot function without an informed and engaged public.
+          Transparency is never more vital than it is in an election year.
+        </p>
+
+        <p>
+          Your donation to MuckRock supports our work to promote civic
+          engagement with vital tools like our public records request service,
+          which facilitates thousands of requests every year, DocumentCloud,
+          which newsrooms around the world use to analyze, annotate and publish
+          primary source documents; and oTranscribe, which takes the pain out
+          of transcribing audio for thousands of users every single day.
+        </p>
+
         <form method="post" class="stripe-checkout">
             {% csrf_token %}
             {% comment %}
@@ -15,19 +29,6 @@
             {% for field in form.hidden_fields %}
                     {{ field }}
             {% endfor %}
-            <div>
-                <h2>How would you like to donate?</h2>
-                <div class="donation button-group">
-                    <label for="one-time" class="primary button">
-                        One Time
-                    </label>
-                    <input id="one-time" type="radio" name="type" value="one-time" checked="checked">
-                    <label for="monthly" class="button">
-                        Monthly
-                    </label>
-                    <input id="monthly" type="radio" name="type" value="monthly">
-                </div>
-            </div>
             <div>
                 <h2>How much would you like to give?</h2>
                 <div class="donation button-group">
@@ -46,11 +47,20 @@
                 </div>
                 <div>
                     <input type="number" name="stripe_amount" id="other_amount">
+                    <div class="donation button-group">
+                        <label for="one-time" class="primary button">
+                            One Time
+                        </label>
+                        <input id="one-time" type="radio" name="type" value="one-time" checked="checked">
+                        <label for="monthly" class="button">
+                            Monthly
+                        </label>
+                        <input id="monthly" type="radio" name="type" value="monthly">
+                    </div>
                     <p class="optional">
                       We appreciate your support!  The following are optional fields:
                     </p>
                     <input type="text" name="name" id="name" placeholder="Name">
-                    <input type="text" name="email" id="email" placeholder="Email">
                     <input type="text" name="phone" id="phone" placeholder="Phone Number">
                     <input type="text" name="address" id="address" placeholder="Address">
                     <span class="small">
@@ -71,6 +81,13 @@
                 <button type="submit" class="green button">Donate</button>
             </div>
         </form>
+
+        <p>
+          MuckRock is a <strong>501(c)(3)</strong> organization. Our tax
+          identification number is <strong>81-1485228</strong>. Your donation
+          is fully tax deductible.
+        </p>
+
         <p>Donations may also be sent via PayPal:</p>
 
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" style="text-align: center;">
@@ -84,6 +101,17 @@
           MuckRock<br class="nomb">
           263 Huntington Ave<br class="nomb">
           Boston, MA 02115<br class="nomb">
+        </p>
+        <p>
+          You can always find our most current financial statements at
+          <a href="https://www.muckrock.com/financial/">
+            https://www.muckrock.com/financial/
+          </a>.
+        </p>
+        <p>
+          If you’d like to support our work with a legacy or a gift of stocks
+          or crypto currency or a legacy, contact
+          <a href="mailto:amanda@muckrock.com">amanda@muckrock.com</a>.
         </p>
         {% endblock %}
     </div>
