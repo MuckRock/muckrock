@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block scripts %}
+  <script
+  async
+  src="https://widgets.givebutter.com/latest.umd.cjs?acct=bxj57JvZkwOILwSl&p=other"
+></script>
+{% endblock scripts %}
+
 {% block content %}
 <div class="donate" style="background-image: url({% static 'img/donation.jpg' %});">
     <div class="donate__form">
@@ -21,66 +28,7 @@
           of transcribing audio for thousands of users every single day.
         </p>
 
-        <form method="post" class="stripe-checkout">
-            {% csrf_token %}
-            {% comment %}
-            {% include 'lib/pattern/form.html' %}
-            {% endcomment %}
-            {% for field in form.hidden_fields %}
-                    {{ field }}
-            {% endfor %}
-            <div>
-                <h2>How much would you like to give?</h2>
-                <div class="donation button-group">
-                    <label for="amount_1" class="button">$10
-                    </label>
-                    <input id="amount_1" type="radio" name="amount" value="10">
-                    <label for="amount_2" class="button">$25
-                    </label>
-                    <input id="amount_2" type="radio" name="amount" value="25" checked="checked">
-                    <label for="amount_3" class="button">$50
-                    </label>
-                    <input id="amount_3" type="radio" name="amount" value="50">
-                    <label for="amount_4" class="button">$100
-                    </label>
-                    <input id="amount_4" type="radio" name="amount" value="100">
-                </div>
-                <div>
-                    <input type="number" name="stripe_amount" id="other_amount">
-                    <div class="donation button-group">
-                        <label for="one-time" class="primary button">
-                            One Time
-                        </label>
-                        <input id="one-time" type="radio" name="type" value="one-time" checked="checked">
-                        <label for="monthly" class="button">
-                            Monthly
-                        </label>
-                        <input id="monthly" type="radio" name="type" value="monthly">
-                    </div>
-                    <p class="optional">
-                      We appreciate your support!  The following are optional fields:
-                    </p>
-                    <input type="text" name="name" id="name" placeholder="Name">
-                    <input type="text" name="phone" id="phone" placeholder="Phone Number">
-                    <input type="text" name="address" id="address" placeholder="Address">
-                    <span class="small">
-                      We will use your address for an end-of year thank you
-                      mailing and other acknowledgments.  We never sell your
-                      information to third parties.
-                    </span>
-                    <p class="why">
-                      What inspired your support today?  Is this gift in honor
-                      of someone or in support of a specific program?
-                    </p>
-                    <textarea name="why" id="why"></textarea>
-                </div>
-            </div>
-            <input type="hidden" name="stripe_image" value="{% static 'icons/logo.png' %}" />
-
-            <div class="buttons">
-                <button type="submit" class="green button">Donate</button>
-            </div>
-        </form>
+        <givebutter-widget id="g6R32g"></givebutter-widget>
 
         <p>
           MuckRock is a <strong>501(c)(3)</strong> organization. Our tax
@@ -117,7 +65,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block scripts %}
-    <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
-{% endblock scripts %}
