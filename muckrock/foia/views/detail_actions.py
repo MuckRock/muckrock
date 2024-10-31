@@ -181,10 +181,7 @@ def delete(request, foia):
 def withdraw(request, foia):
     """Allow users to withdraw requests"""
     form = FOIAWithdrawForm(request.POST, prefix="withdraw")
-    has_perm = (
-        request.user.has_perm("foia.change_foiarequest")
-        and not foia.composer.revokable()
-    )
+    has_perm = foia.has_perm(request.user, "change") and not foia.composer.revokable()
     if has_perm and form.is_valid():
         foia.withdraw(
             request.user,

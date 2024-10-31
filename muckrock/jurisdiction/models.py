@@ -106,7 +106,10 @@ class Jurisdiction(models.Model, RequestHelper):
         on_delete=models.PROTECT,
     )
 
-    always_proxy = models.BooleanField(default=False)
+    always_proxy = models.BooleanField(
+        default=False,
+        help_text="Agencies in this jurisdiction should always be filed with a proxy",
+    )
 
     # non local
     observe_sat = models.BooleanField(
@@ -267,7 +270,15 @@ class Law(models.Model):
     has_appeal = models.BooleanField(
         default=True, help_text="Does this jurisdiction have an appeals process?"
     )
-    requires_proxy = models.BooleanField(default=False)
+    requires_proxy = models.BooleanField(
+        default=False,
+        help_text="This marks that this jurisdiction's law has a citizenship"
+        "requirement.  It is used for informational purposes.  Agencies can be"
+        "marked individually to use the proxy system, in the case that this is"
+        "not widely enforced.  If it is widely enforced and you would like to"
+        "use the proxy system for all agencies, please use the `Always Proxy`"
+        "option under the State/Federal option section",
+    )
     law_analysis = models.TextField(
         blank=True,
         help_text="Our analysis of the state FOIA law, " "as a part of FOI95.",
