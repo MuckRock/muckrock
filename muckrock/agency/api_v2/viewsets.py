@@ -7,7 +7,7 @@ from rest_framework import filters
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.agency.serializers import AgencySerializer
+from muckrock.agency.api_v2.serializers import AgencySerializer
 
 # pylint: disable=too-few-public-methods
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
