@@ -24,7 +24,7 @@ class OrganizationFilter(django_filters.FilterSet):
         model = Organization
         fields = ['name', 'slug', 'uuid']
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for organizations"""
 
     queryset = Organization.objects.all()

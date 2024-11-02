@@ -28,7 +28,7 @@ from drf_spectacular.utils import (
                 "id": 2,
                 "name": "Los Angeles",
                 "slug": "los-angeles",
-                "abbrev": "LA",
+                "abbrev": "",
                 "level": "l",
                 "parent": 1,
             },

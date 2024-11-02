@@ -24,7 +24,7 @@ class UserFilter(django_filters.FilterSet):
         model = User
         fields = ['full_name', 'username', 'uuid', 'email']
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for users"""
 
     queryset = User.objects.order_by("id").prefetch_related("profile")

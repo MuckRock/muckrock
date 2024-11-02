@@ -25,7 +25,7 @@ from drf_spectacular.utils import (
                 "exempt": False,
                 "requires_proxy": False,
                 "jurisdiction": 10,  
-                "types": ["federal", "regulatory"],
+                "types": ["Executive"],
                 "parent": None, 
                 "appeal_agency": None,
             },
