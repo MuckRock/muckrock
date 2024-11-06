@@ -7,6 +7,7 @@ bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
 celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
+daily-active-users # Log daily active users
 django-activity-stream # Used for notifications
 django-anymail[mailgun] # Use for sending email on production
 django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
