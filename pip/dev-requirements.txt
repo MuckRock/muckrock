@@ -22,7 +22,7 @@ build==0.10.0
     # via pip-tools
 certifi==2017.4.17
     # via requests
-cffi==1.12.2
+cffi==1.14.0
     # via
     #   bcrypt
     #   cryptography
