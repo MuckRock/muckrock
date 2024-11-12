@@ -20,6 +20,7 @@ import time
 
 # Third Party
 import dateutil.parser
+import lob
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
@@ -51,8 +52,22 @@ def lob_webhook(request):
     try:
         mail_id = data["body"]["metadata"]["mail_id"]
     except KeyError:
-        logger.error("Lob webhook JSON missing data")
-        return HttpResponseBadRequest("Missing JSON data")
+        # check failed does not have mail_id set
+        if data["event_type"]["id"] == "check.failed":
+            check_id = data["reference_id"]
+            logger.info("Lob webhook: Check Failed %s", check_id)
+            check = lob.Check.retrieve(check_id)
+            mail_id = check["metadata"]["mail_id"]
+            mail = MailCommunication.objects.get(pk=mail_id)
+            mail.communication.foia.flaggedtask_set.create(
+                category="payment",
+                text="Lob check failed.  Please investigate.\n"
+                f"https://dashboard.lob.com/checks/{check_id}",
+            )
+            return HttpResponse("OK")
+        else:
+            logger.error("Lob webhook JSON missing data")
+            return HttpResponseBadRequest("Missing JSON data")
 
     mail = MailCommunication.objects.filter(pk=mail_id).first()
 
