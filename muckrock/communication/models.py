@@ -118,6 +118,13 @@ class EmailAddress(models.Model):
             return ""
         return self.email.rsplit("@", 1)[1]
 
+    @property
+    def local(self):
+        """The local part of the email address"""
+        if "@" not in self.email:
+            return ""
+        return self.email.rsplit("@", 1)[0]
+
     def allowed(self, foia=None):
         """Is this email address allowed to post to this FOIA request?"""
         # pylint: disable=too-many-return-statements, import-outside-toplevel

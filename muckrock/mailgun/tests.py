@@ -160,6 +160,33 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
 
         nose.tools.eq_(foia.email, EmailAddress.objects.fetch(reply_to))
 
+    # patching asyncio.run to not run the classification on actual LLM
+    @patch("asyncio.run", Mock())
+    @requests_mock.Mocker()
+    def test_noreply(self, mock_requests):
+        """Test a succesful response with a no-reply email address"""
+        url = "https://www.example.com/raw_email/"
+        mock_requests.get(
+            settings.MAILGUN_API_URL + "/events",
+            json={"items": [{"storage": {"url": url}}]},
+        )
+        mock_requests.get(url, json={"body-mime": "Raw email"})
+
+        foia = FOIARequestFactory(status="ack")
+        original_email = foia.email
+        from_name = "No Reply"
+        from_email = "no-reply@agency.gov"
+        from_ = '"%s" <%s>' % (from_name, from_email)
+        to_ = '%s, "Doe, John" <other@agency.gov>' % foia.get_request_email()
+        subject = "Test subject"
+        text = "Test normal."
+        signature = "-Charlie Jones"
+
+        self.mailgun_route(from_, to_, subject, text, signature)
+        foia.refresh_from_db()
+
+        nose.tools.eq_(foia.email, original_email)
+
     def test_bad_sender(self):
         """Test receiving a message from an unauthorized sender"""
 
