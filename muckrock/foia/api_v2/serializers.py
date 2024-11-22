@@ -5,11 +5,40 @@ Serilizers for V2 of the FOIA API
 # Third Party
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
+from taggit.serializers import TaggitSerializer, TagListSerializerField
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.organization.models import Organization
+
+
+class EmbargoMixin:
+    """Embargo validators for all FOIA Request serializers"""
+
+    def validate_embargo(self, value):
+        request = self.context.get("request", None)
+        user = request and request.user
+        if value and not (user and user.has_perm("foia.embargo_foiarequest")):
+            raise serializers.ValidationError(
+                "You do not have permission to set `embargo`"
+            )
+        return value
+
+    def validate_permanent_embargo(self, value):
+        request = self.context.get("request", None)
+        user = request and request.user
+        if value and not (user and user.has_perm("foia.embargo_perm_foiarequest")):
+            raise serializers.ValidationError(
+                "You do not have permission to set `permanent_embargo`"
+            )
+        return value
+
+    def validate(self, attrs):
+        # if permanent embargo is true, embargo must be true
+        if attrs.get("permanent_embargo"):
+            attrs["embargo"] = True
+        return attrs
 
 
 @extend_schema_serializer(
@@ -29,13 +58,16 @@ from muckrock.organization.models import Organization
                 "datetime_updated": "2019-02-18T05:00:01.355367-05:00",
                 "datetime_done": None,
                 "tracking_id": "ABC123-456",
+                "tags": ["minutes"],
                 "price": "0.00",
             },
             response_only=True,
         )
     ]
 )
-class FOIARequestSerializer(serializers.ModelSerializer):
+class FOIARequestSerializer(
+    EmbargoMixin, TaggitSerializer, serializers.ModelSerializer
+):
     """Serializer for FOIA Request model"""
 
     user = serializers.PrimaryKeyRelatedField(
@@ -53,6 +85,10 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         source="current_tracking_id",
         help_text="The current tracking ID the agency has assigned to this request",
         read_only=True,
+    )
+    tags = TagListSerializerField(
+        required=False,
+        help_text="Tags associated with the request",
     )
 
     class Meta:
@@ -75,7 +111,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "tracking_id",
             "price",
             # connected models
-            # "tags",
+            "tags",
         )
         extra_kwargs = {
             "title": {"read_only": True},
@@ -96,7 +132,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         }
 
 
-class FOIARequestCreateSerializer(serializers.ModelSerializer):
+class FOIARequestCreateSerializer(EmbargoMixin, serializers.ModelSerializer):
     """Serializer for filing a new request"""
 
     agencies = serializers.PrimaryKeyRelatedField(

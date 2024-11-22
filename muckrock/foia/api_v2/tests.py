@@ -7,7 +7,12 @@ from nose.tools import eq_
 from rest_framework.test import APIClient
 
 # MuckRock
-from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyFactory,
+    OrganizationUserFactory,
+    ProfessionalUserFactory,
+    UserFactory,
+)
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 
 
@@ -42,7 +47,17 @@ class TestFOIARequestViewset(TestCase):
         )
         eq_(response.status_code, 201, response.json())
 
-    def test_update(self):
+    def test_update_embargo_good(self):
+        user = ProfessionalUserFactory.create()
+        foia = FOIARequestFactory.create(composer__user=user)
+        self.client.force_authenticate(user)
+        response = self.client.patch(
+            reverse("api2-requests-detail", kwargs={"pk": foia.pk}),
+            {"embargo": True},
+        )
+        eq_(response.status_code, 200, response.json())
+
+    def test_update_embargo_bad(self):
         foia = FOIARequestFactory.create()
         user = UserFactory.create()
         self.client.force_authenticate(foia.user)
@@ -50,7 +65,7 @@ class TestFOIARequestViewset(TestCase):
             reverse("api2-requests-detail", kwargs={"pk": foia.pk}),
             {"edit_collaborators": [user.pk]},
         )
-        eq_(response.status_code, 200)
+        eq_(response.status_code, 400, response.json())
 
 
 class TestFOIACommunicationViewset(TestCase):
