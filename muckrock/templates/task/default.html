@@ -92,13 +92,15 @@
               {% block task-actions %}
                 <span class="task-defer">
                   {% if not task.zendesk_ticket_id %}
-                    <input type="text" name="zendesk_note" placeholder="ZenDesk note...">
                     <button type="submit" name="zendesk" value="true" class="primary button">
                       Create ZenDesk Ticket
                     </button>
+                    <textarea name="zendesk_note" placeholder="ZenDesk note..."></textarea>
                   {% endif %}
                 </span>
-                <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
+                <span class="task-buttons">
+                  <button type="submit" name="resolve" value="true" class="primary button">Resolve</button>
+                </span>
               {% endblock task-actions %}
           </form>
       </footer>
