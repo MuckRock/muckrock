@@ -148,7 +148,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         # remove embargo fields if the user does not have permission to set them
         if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
             self.fields.pop("embargo_status")
-
+    # If the user doesn't have the permission to set to a permanent embargo, tell them. 
     def validate_embargo_status(self, value):
         request = self.context.get("request", None)
         if value == "permanent" and not request.user.has_perm(
