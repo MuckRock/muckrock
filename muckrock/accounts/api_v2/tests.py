@@ -22,7 +22,9 @@ class UserViewSetTests(TestCase):
         self.user2 = UserFactory(username="asmith", email="asmith@example.com")
 
         # Create a staff user
-        self.staff_user = UserFactory(username="admin", email="admin@example.com", is_staff=True)
+        self.staff_user = UserFactory(
+            username="admin", email="admin@example.com", is_staff=True
+        )
 
         # API URLs
         self.list_url = reverse("api2-users-list")
@@ -66,7 +68,7 @@ class UserViewSetTests(TestCase):
 
     def test_permission_checks_for_non_staff_vs_staff(self):
         """Test the difference in behavior between staff and regular users."""
-        
+
         # Regular user should only see their own user data
         self.client.force_login(self.user1)
         response = self.client.get(self.list_url)
@@ -88,4 +90,4 @@ class UserViewSetTests(TestCase):
         usernames = [user["username"] for user in response_data]
         self.assertIn("jdoe", usernames)
         self.assertIn("asmith", usernames)
-        self.assertIn('admin', usernames)
+        self.assertIn("admin", usernames)

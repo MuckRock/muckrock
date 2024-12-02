@@ -59,7 +59,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             "Parent jurisdiction. This defines the hierarchy between jurisdictions, "
             "where a jurisdiction can have a federal or state parent. "
             "Local jurisdictions cannot be parents."
-        )
+        ),
     )
 
     class Meta:

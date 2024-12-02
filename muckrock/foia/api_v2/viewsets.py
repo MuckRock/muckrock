@@ -52,7 +52,6 @@ class FOIARequestViewSet(
         )
 
     def create(self, request, *args, **kwargs):
-
         composer = FOIAComposer.objects.create(
             user=request.user,
             organization_id=request.data.get(

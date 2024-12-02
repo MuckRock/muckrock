@@ -13,15 +13,18 @@ from muckrock.organization.models import Organization
 
 
 class OrganizationFilter(django_filters.FilterSet):
-    """ Organization filters """
-    name = django_filters.CharFilter(lookup_expr='icontains')
-    slug = django_filters.CharFilter(lookup_expr='icontains')
-    uuid = django_filters.CharFilter(lookup_expr='icontains')
+    """Organization filters"""
+
+    name = django_filters.CharFilter(lookup_expr="icontains")
+    slug = django_filters.CharFilter(lookup_expr="icontains")
+    uuid = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
-        """ Fields """
+        """Fields"""
+
         model = Organization
-        fields = ['name', 'slug', 'uuid']
+        fields = ["name", "slug", "uuid"]
+
 
 class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for organizations"""

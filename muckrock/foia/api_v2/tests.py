@@ -12,7 +12,6 @@ from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 
 
 class TestFOIARequestViewset(TestCase):
-
     def setUp(self):
         self.client = APIClient()
 
@@ -44,7 +43,6 @@ class TestFOIARequestViewset(TestCase):
 
 
 class TestFOIACommunicationViewset(TestCase):
-
     def test_detail(self):
         comm = FOIACommunicationFactory.create()
         response = self.client.get(

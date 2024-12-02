@@ -38,31 +38,33 @@ from muckrock.organization.models import Entitlement, Organization
                         "date_joined": "2023-02-01T00:00:00Z",
                         "full_name": "Alice Smith",
                         "uuid": "123e4567-e89b-12d3-a456-426614174002",
-                    }
-                ]
+                    },
+                ],
             },
         )
     ]
 )
-
 class OrganizationSerializer(serializers.ModelSerializer):
     """Serializer for Organization model with relevant fields."""
 
-    users = UserSerializer(many=True, help_text="List of users associated with the organization")
+    users = UserSerializer(
+        many=True, help_text="List of users associated with the organization"
+    )
     entitlement = serializers.PrimaryKeyRelatedField(
         queryset=Entitlement.objects.all(),
-        help_text="ID of the entitlements associated with the organization"
+        help_text="ID of the entitlements associated with the organization",
     )
 
     class Meta:
         """Fields"""
+
         model = Organization
         fields = [
-            'name',
-            'slug',
-            'uuid',
-            'individual',
-            'entitlement',
-            'verified_journalist',
-            'users'
+            "name",
+            "slug",
+            "uuid",
+            "individual",
+            "entitlement",
+            "verified_journalist",
+            "users",
         ]

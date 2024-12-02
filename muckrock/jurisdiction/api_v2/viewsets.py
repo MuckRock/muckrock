@@ -11,7 +11,7 @@ from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
 from muckrock.jurisdiction.models import Jurisdiction
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for Jurisdiction"""
 
@@ -30,6 +30,8 @@ class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
 
         class Meta:
             """List of filters for the API"""
+
             model = Jurisdiction
             fields = ("abbrev", "level", "name")
+
     filterset_class = JurisdictionFilter

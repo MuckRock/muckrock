@@ -33,19 +33,20 @@ class UserSerializer(serializers.ModelSerializer):
 
     full_name = serializers.PrimaryKeyRelatedField(
         queryset=Profile.objects.all(),
-        source='profile.full_name',
+        source="profile.full_name",
         style={"base_template": "input.html"},
-        help_text="The full name of the user"
+        help_text="The full name of the user",
     )
     uuid = serializers.PrimaryKeyRelatedField(
         queryset=Profile.objects.all(),
-        source='profile.uuid',
+        source="profile.uuid",
         style={"base_template": "input.html"},
-        help_text="The UUID of the user's profile"
+        help_text="The UUID of the user's profile",
     )
 
     class Meta:
         """Fields"""
+
         model = User
         fields = (
             "username",

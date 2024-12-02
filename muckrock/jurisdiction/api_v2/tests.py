@@ -30,8 +30,12 @@ class JurisdictionViewSetTests(TestCase):
             "spring": LocalJurisdictionFactory.create(name="Springville"),
             "MO": LocalJurisdictionFactory.create(name="Missouri", abbrev="MO"),
             "MI": LocalJurisdictionFactory.create(name="Michigan", abbrev="MI"),
-            "federal": FederalJurisdictionFactory.create(name="Federal Test Agency", abbrev="FSA"),
-            "state": StateJurisdictionFactory.create(name="State Test Agency", abbrev="STA"),
+            "federal": FederalJurisdictionFactory.create(
+                name="Federal Test Agency", abbrev="FSA"
+            ),
+            "state": StateJurisdictionFactory.create(
+                name="State Test Agency", abbrev="STA"
+            ),
         }
 
     def test_list(self):
@@ -92,7 +96,5 @@ class JurisdictionViewSetTests(TestCase):
         self.assertNotIn(
             "f", jurisdiction_levels
         )  # Ensure that unexpected levels are not present
-        self.assertNotIn(
-            "l", jurisdiction_levels
-        )
+        self.assertNotIn("l", jurisdiction_levels)
         assert len(jurisdiction_levels) == 1
