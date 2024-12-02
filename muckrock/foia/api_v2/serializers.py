@@ -31,8 +31,7 @@ from muckrock.foia.models.file import FOIAFile
                 "slug": "meeting-minutes",
                 "status": "processed",
                 "agency": 2,
-                "embargo": False,
-                "permanent_embargo": False,
+                "embargo_status": "public",
                 "user": 3,
                 "edit_collaborators": [4, 5],
                 "read_collaborators": [],
@@ -76,8 +75,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "slug",
             "status",
             "agency",
-            "embargo",
-            "permanent_embargo",
+            "embargo_status", # public, embargo, or permanent
             "user",
             "edit_collaborators",
             "read_collaborators",
@@ -104,7 +102,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             },
         }
 
-
 class FOIARequestCreateSerializer(serializers.ModelSerializer):
     """Serializer for filing a new request"""
 
@@ -124,8 +121,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         fields = (
             "agencies",
             "organization",
-            "embargo",
-            "permanent_embargo",
+            "embargo_status",
             "title",
             "requested_docs",
             # "attachments",
@@ -150,18 +146,17 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             )
         # remove embargo fields if the user does not have permission to set them
         if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
-            self.fields.pop("embargo")
-        if not docs and (
-            not authed or not user.has_perm("foia.embargo_perm_foiarequest")
+            self.fields.pop("embargo_status")
+
+    def validate_embargo_status(self, value):
+        request = self.context.get("request", None)
+        if value == "permanent" and not request.user.has_perm(
+            "foia.embargo_perm_foiarequest", self.instance
         ):
-            self.fields.pop("permanent_embargo")
-
-    def validate(self, attrs):
-        # if permanent embargo is true, embargo must be true
-        if attrs.get("permanent_embargo"):
-            attrs["embargo"] = True
-        return attrs
-
+            raise serializers.ValidationError(
+                "You do not have permission to set embargo to permanent"
+            )
+        return value
 
 @extend_schema_serializer(
     examples=[
