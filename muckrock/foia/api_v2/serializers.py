@@ -18,6 +18,7 @@ from rest_framework import serializers
 from muckrock.agency.models.agency import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.organization.models import Organization
+from muckrock.foia.models.file import FOIAFile
 
 
 @extend_schema_serializer(
