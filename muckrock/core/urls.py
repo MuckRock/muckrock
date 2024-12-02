@@ -116,16 +116,16 @@ router_v2.register(
     r"agencies", muckrock.agency.api_v2.viewsets.AgencyViewSet, "api2-agencies"
 )
 router_v2.register(
-    r"jurisdictions", 
-    muckrock.jurisdiction.api_v2.viewsets.JurisdictionViewSet, 
+    r"jurisdictions",
+    muckrock.jurisdiction.api_v2.viewsets.JurisdictionViewSet,
     "api2-jurisdictions"
 )
 router_v2.register(
     r"users", muckrock.accounts.api_v2.viewsets.UserViewSet, "api2-users"
 )
 router_v2.register(
-    r"organizations", 
-    muckrock.organization.api_v2.viewsets.OrganizationViewSet, 
+    r"organizations",
+    muckrock.organization.api_v2.viewsets.OrganizationViewSet,
     "api2-organizations"
 )
 
