@@ -6,10 +6,8 @@ Serilizers for V2 of the FOIA API
 from django.contrib.auth.models import User
 
 # Third Party
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiExample,
-    OpenApiParameter,
     extend_schema_serializer,
 )
 from rest_framework import serializers
@@ -88,8 +86,8 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "price",
             # connected models
             # "tags",
-            # "notes", # XXX
-            # "communications", # XXX
+            # "notes",
+            # "communications",
         )
         extra_kwargs = {
             "edit_collaborators": {
@@ -148,7 +146,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         # remove embargo fields if the user does not have permission to set them
         if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
             self.fields.pop("embargo_status")
-    # If the user doesn't have the permission to set to a permanent embargo, tell them. 
+    # If the user doesn't have the permission to set to a permanent embargo, tell them.
     def validate_embargo_status(self, value):
         request = self.context.get("request", None)
         if value == "permanent" and not request.user.has_perm(
@@ -159,14 +157,13 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             )
         return value
 
-
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
             "FOIA File Example",
             value={
                 "id": 1215939,
-                "ffile": "https://cdn.muckrock.com/foia_files/2024/09/05/PSP_FINAL_RESPONSE_RTK__2024-1657_xLBSvYT.pdf",
+                "ffile": "https://cdn.muckrock.com/foia_files/2024/09/05/PSP_FINAL_RESPONSE_RTK__2024-1657_xLBSvYT.pdf", # pylint: disable=line-too-long
                 "datetime": "2024-09-05T14:01:29.268029",
                 "title": "PSP FINAL RESPONSE RTK # 2024-1657",
                 "source": "Pennsylvania State Police, Pennsylvania",

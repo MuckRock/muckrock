@@ -7,7 +7,6 @@ from nose.tools import eq_
 from rest_framework.test import APIClient
 
 # MuckRock
-from muckrock.agency.models.agency import Agency
 from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 
