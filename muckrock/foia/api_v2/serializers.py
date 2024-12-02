@@ -75,7 +75,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "slug",
             "status",
             "agency",
-            "embargo_status", # public, embargo, or permanent
+            "embargo_status",  # public, embargo, or permanent
             "user",
             "edit_collaborators",
             "read_collaborators",
@@ -101,6 +101,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
                 "this request"
             },
         }
+
 
 class FOIARequestCreateSerializer(serializers.ModelSerializer):
     """Serializer for filing a new request"""
@@ -157,6 +158,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
                 "You do not have permission to set embargo to permanent"
             )
         return value
+
 
 @extend_schema_serializer(
     examples=[
