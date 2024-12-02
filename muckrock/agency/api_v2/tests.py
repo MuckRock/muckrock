@@ -1,10 +1,15 @@
 """ Tests for the Agency API """
 
+# Django
 from django.test import Client
 from django.urls import reverse
+
+# Third Party
 from rest_framework import status
 from rest_framework.test import APITestCase
-from muckrock.core.factories import UserFactory, AgencyFactory, JurisdictionFactory
+
+# MuckRock
+from muckrock.core.factories import AgencyFactory, JurisdictionFactory, UserFactory
 
 
 class AgencyViewSetTests(APITestCase):

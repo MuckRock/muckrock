@@ -2,16 +2,15 @@
 API ViewSets for organizations
 """
 
-# Django
-import django_filters
-
 # Third Party
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
-from muckrock.organization.models import Organization
 from muckrock.organization.api_v2.serializers import OrganizationSerializer
+from muckrock.organization.models import Organization
+
 
 class OrganizationFilter(django_filters.FilterSet):
     """ Organization filters """

@@ -1,7 +1,7 @@
 """ Tests for the organization viewsets """
 
 # Django
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 # Third Party
@@ -10,6 +10,7 @@ from rest_framework import status
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.organization.factories import OrganizationFactory
+
 
 # pylint: disable=too-many-instance-attributes
 class OrganizationViewSetTests(TestCase):

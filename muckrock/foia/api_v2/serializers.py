@@ -6,17 +6,14 @@ Serilizers for V2 of the FOIA API
 from django.contrib.auth.models import User
 
 # Third Party
-from drf_spectacular.utils import (
-    OpenApiExample,
-    extend_schema_serializer,
-)
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
-from muckrock.foia.models import FOIACommunication, FOIARequest, FOIANote
-from muckrock.organization.models import Organization
+from muckrock.foia.models import FOIACommunication, FOIANote, FOIARequest
 from muckrock.foia.models.file import FOIAFile
+from muckrock.organization.models import Organization
 
 
 @extend_schema_serializer(

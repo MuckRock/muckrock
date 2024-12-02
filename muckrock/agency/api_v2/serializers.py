@@ -3,15 +3,13 @@ Serializers for the Agency application API
 """
 
 # Third Party
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from drf_spectacular.utils import (
-    OpenApiExample,
-    extend_schema_serializer,
-)
+
 
 @extend_schema_serializer(
     examples=[

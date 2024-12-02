@@ -13,22 +13,19 @@ from django.views.generic.base import RedirectView, TemplateView
 
 # Third Party
 import debug_toolbar
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-)
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
-import muckrock.accounts.viewsets
 import muckrock.accounts.api_v2.viewsets
+import muckrock.accounts.viewsets
 import muckrock.agency.api_v2.viewsets
 import muckrock.agency.viewsets
 import muckrock.crowdsource.viewsets
 import muckrock.foia.api_v2.viewsets
 import muckrock.foia.viewsets
-import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.api_v2.viewsets
+import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
 import muckrock.organization.api_v2.viewsets

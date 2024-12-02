@@ -5,14 +5,14 @@ from django.test import TestCase
 from django.urls import reverse
 
 # Third Party
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.jurisdiction.factories import (
+    FederalJurisdictionFactory,
     LocalJurisdictionFactory,
     StateJurisdictionFactory,
-    FederalJurisdictionFactory,
 )
 
 

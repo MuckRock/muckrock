@@ -6,14 +6,12 @@ Serializers for the accounts application API
 from django.contrib.auth.models import User
 
 # Third Party
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
-from drf_spectacular.utils import (
-    OpenApiExample,
-    extend_schema_serializer,
-)
 
 # MuckRock
 from muckrock.accounts.models import Profile
+
 
 @extend_schema_serializer(
     examples=[

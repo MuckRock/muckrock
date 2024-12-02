@@ -1,11 +1,11 @@
 """ Serializer for Jurisdictions """
 
+# Third Party
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
+
+# MuckRock
 from muckrock.jurisdiction.models import Jurisdiction
-from drf_spectacular.utils import (
-    OpenApiExample,
-    extend_schema_serializer,
-)
 
 
 @extend_schema_serializer(

@@ -3,16 +3,13 @@ Serializers for organizations
 """
 
 # Third Party
-from drf_spectacular.utils import (
-    OpenApiExample,
-    extend_schema_serializer,
-)
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 
-
 # MuckRock
-from muckrock.organization.models import Organization, Entitlement
 from muckrock.accounts.api_v2.serializers import UserSerializer
+from muckrock.organization.models import Entitlement, Organization
+
 
 @extend_schema_serializer(
     examples=[

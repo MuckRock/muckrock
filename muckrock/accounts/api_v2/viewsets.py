@@ -1,15 +1,16 @@
 """ API ViewSets for accounts """
 
 # Django
-import django_filters
 from django.contrib.auth.models import User
 
 # Third Party
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
 from muckrock.accounts.api_v2.serializers import UserSerializer
+
 
 # pylint: disable=too-few-public-methods
 class UserFilter(django_filters.FilterSet):
