@@ -206,7 +206,7 @@ class FOIAFileSerializer(serializers.ModelSerializer):
 class FOIANoteSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Note model"""
 
-    datetime = DateTimeField(read_only=True)
+    datetime = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = FOIANote
