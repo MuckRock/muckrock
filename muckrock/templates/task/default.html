@@ -27,7 +27,7 @@
         <p class="{% if task.note %}has-note{% endif %}">Note</p>
       </header>
       <main>
-        <form method="POST" action="{{ endpoint }}" class="note-form">
+        <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="note-form">
           {% csrf_token %}
           <input type="hidden" name="task" value="{{task.pk}}">
           <textarea rows="7" name="note">{{ task.note }}</textarea>
@@ -58,7 +58,7 @@
                 {% endfor %}
               </select>
 
-              <form method="POST" action="{{ endpoint }}" class="tags-form">
+              <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="tags-form">
                 {% csrf_token %}
                 <input type="hidden" name="task" value="{{task.pk}}">
                 {{ task.tag_form.tags }}
@@ -86,7 +86,7 @@
     {% endblock %}
     {% block task-footer %}
       <footer class="textbox__footer task__actions">
-          <form method="POST" action="{{ endpoint }}" class="task-post-actions" id="{{task.pk}}-form">
+        <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="task-post-actions" id="{{task.pk}}-form">
               {% csrf_token %}
               <input type="hidden" name="task" value="{{task.pk}}">
               {% block task-actions %}

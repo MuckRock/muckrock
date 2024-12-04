@@ -69,7 +69,7 @@
 {% endblock %}
 {% block task-footer %}
 <footer class="textbox__footer task__actions">
-    <form method="POST" action="{{ endpoint }}" class="task-post-actions">
+    <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="task-post-actions">
         {% csrf_token %}
         <label for="{{form.reply.id_for_label}}">&crarr; Reply</label>
         {{ form.reply }}

@@ -53,7 +53,7 @@
   {% endif %}
   <div class="new-agency-forms">
     {% if user.is_staff %}
-      <form method="POST" action="{{ endpoint }}" class="new-agency red textbox form collapsable">
+      <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="new-agency red textbox form collapsable">
         <header class="textbox__header">
           <p>Reject</p>
         </header>
@@ -68,7 +68,7 @@
           <button type="submit" name="replace" value="true" class="failure button">Reject &amp; Replace</button>
         </footer>
       </form>
-      <form method="POST" action="{{ endpoint }}" class="new-agency green textbox form collapsable">
+      <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="new-agency green textbox form collapsable">
         <header class="textbox__header">
           <p>Approve</p>
         </header>
@@ -140,7 +140,7 @@
 {% block task-footer %}
   {# remove the resolve button #}
   <footer class="textbox__footer task__actions">
-    <form method="POST" action="{{ endpoint }}" class="task-post-actions" id="{{task.pk}}-form">
+    <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="task-post-actions" id="{{task.pk}}-form">
       {% csrf_token %}
       <input type="hidden" name="task" value="{{task.pk}}">
       {% block task-actions %}

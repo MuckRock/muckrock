@@ -25,7 +25,7 @@
       <dd><a href="{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">{{task.jurisdiction}}</a></dd>
     {% endif %}
   </dl>
-  <form method="POST" action="{{ endpoint }}" class="collapsable flag-reply">
+  <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="collapsable flag-reply">
     <header>
       <p>&crarr; Reply to {{task.user.profile.full_name}} &lt;<a href="mailto:{{task.user.email}}">{{task.user.email}}</a>&gt;</p>
     </header>
