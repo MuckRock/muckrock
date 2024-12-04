@@ -1,11 +1,11 @@
 """ Serializer for Jurisdictions """
 
+# Third Party
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
+
+# MuckRock
 from muckrock.jurisdiction.models import Jurisdiction
-from drf_spectacular.utils import (
-    OpenApiExample,
-    extend_schema_serializer,
-)
 
 
 @extend_schema_serializer(
@@ -28,7 +28,7 @@ from drf_spectacular.utils import (
                 "id": 2,
                 "name": "Los Angeles",
                 "slug": "los-angeles",
-                "abbrev": "LA",
+                "abbrev": "",
                 "level": "l",
                 "parent": 1,
             },
@@ -59,7 +59,7 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             "Parent jurisdiction. This defines the hierarchy between jurisdictions, "
             "where a jurisdiction can have a federal or state parent. "
             "Local jurisdictions cannot be parents."
-        )
+        ),
     )
 
     class Meta:

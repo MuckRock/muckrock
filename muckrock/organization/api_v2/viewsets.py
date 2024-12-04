@@ -2,29 +2,31 @@
 API ViewSets for organizations
 """
 
-# Django
-import django_filters
-
 # Third Party
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
-from muckrock.organization.models import Organization
 from muckrock.organization.api_v2.serializers import OrganizationSerializer
+from muckrock.organization.models import Organization
+
 
 class OrganizationFilter(django_filters.FilterSet):
-    """ Organization filters """
-    name = django_filters.CharFilter(lookup_expr='icontains')
-    slug = django_filters.CharFilter(lookup_expr='icontains')
-    uuid = django_filters.CharFilter(lookup_expr='icontains')
+    """Organization filters"""
+
+    name = django_filters.CharFilter(lookup_expr="icontains")
+    slug = django_filters.CharFilter(lookup_expr="icontains")
+    uuid = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
-        """ Fields """
-        model = Organization
-        fields = ['name', 'slug', 'uuid']
+        """Fields"""
 
-class OrganizationViewSet(viewsets.ModelViewSet):
+        model = Organization
+        fields = ["name", "slug", "uuid"]
+
+
+class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for organizations"""
 
     queryset = Organization.objects.all()

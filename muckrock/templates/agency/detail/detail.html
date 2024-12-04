@@ -73,10 +73,13 @@
       <h2>Exempt</h2>
       {{ agency.exempt_note|safe }}
     </section>
-  {% endif %}
-  {% if agency.uncooperative %}
+  {% elif agency.uncooperative %}
     <section class="notes">
       <h2>Scofflaw</h2>
+      {{ agency.exempt_note|safe }}
+    </section>
+  {% elif agency.exempt_note %}
+    <section class="notes">
       {{ agency.exempt_note|safe }}
     </section>
   {% endif %}

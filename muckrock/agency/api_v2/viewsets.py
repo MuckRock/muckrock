@@ -2,12 +2,12 @@
 
 # Third Party
 import django_filters
-from rest_framework import viewsets
-from rest_framework import filters
+from rest_framework import filters, viewsets
 
 # MuckRock
-from muckrock.agency.models import Agency
 from muckrock.agency.api_v2.serializers import AgencySerializer
+from muckrock.agency.models import Agency
+
 
 # pylint: disable=too-few-public-methods
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
@@ -34,12 +34,11 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
         jurisdiction = django_filters.CharFilter(
             field_name="jurisdiction__name", lookup_expr="icontains"
         )
-        name = django_filters.CharFilter(
-            field_name="name", lookup_expr="icontains"
-        )
+        name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
 
         class Meta:
-            """ Filters """
+            """Filters"""
+
             model = Agency
             fields = ("name", "jurisdiction__name")
 

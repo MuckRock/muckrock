@@ -1083,7 +1083,10 @@ class FOIARequest(models.Model):
 
     def sent_status(self, appeal, thanks):
         """After sending out the message, set the correct new status"""
-        if thanks:
+        if self.status == "abandoned":
+            # do not overwrite abandoned status
+            return self.status
+        elif thanks:
             return self.status
         elif appeal:
             return "appealing"

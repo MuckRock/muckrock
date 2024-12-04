@@ -17,15 +17,15 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
-import muckrock.accounts.viewsets
 import muckrock.accounts.api_v2.viewsets
+import muckrock.accounts.viewsets
 import muckrock.agency.api_v2.viewsets
 import muckrock.agency.viewsets
 import muckrock.crowdsource.viewsets
 import muckrock.foia.api_v2.viewsets
 import muckrock.foia.viewsets
-import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.api_v2.viewsets
+import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
 import muckrock.organization.api_v2.viewsets
@@ -113,13 +113,17 @@ router_v2.register(
     r"agencies", muckrock.agency.api_v2.viewsets.AgencyViewSet, "api2-agencies"
 )
 router_v2.register(
-    r"jurisdictions", muckrock.jurisdiction.api_v2.viewsets.JurisdictionViewSet, "api2-jurisdictions"
+    r"jurisdictions",
+    muckrock.jurisdiction.api_v2.viewsets.JurisdictionViewSet,
+    "api2-jurisdictions",
 )
 router_v2.register(
     r"users", muckrock.accounts.api_v2.viewsets.UserViewSet, "api2-users"
 )
 router_v2.register(
-    r"organizations", muckrock.organization.api_v2.viewsets.OrganizationViewSet, "api2-organizations"
+    r"organizations",
+    muckrock.organization.api_v2.viewsets.OrganizationViewSet,
+    "api2-organizations",
 )
 
 urlpatterns = [

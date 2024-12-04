@@ -25,6 +25,9 @@ from datetime import datetime
 from email.utils import getaddresses
 from functools import wraps
 
+# Third Party
+from constance import config
+
 # MuckRock
 from muckrock.agency.models import AgencyEmail
 from muckrock.communication.models import (
@@ -365,13 +368,10 @@ def _handle_request(request, mail_id):
 
         comm.extract_tracking_id()
 
-        muckrock_domains = (settings.MAILGUN_SERVER_NAME, "muckrock.com")
-        new_cc_emails = [
-            e for e in (to_emails + cc_emails) if e.domain not in muckrock_domains
-        ]
-        if reply_to_email and reply_to_email.domain not in muckrock_domains:
+        new_cc_emails = [e for e in (to_emails + cc_emails) if _usable_email(e)]
+        if reply_to_email and _usable_email(reply_to_email):
             foia.email = reply_to_email
-        elif from_email.domain not in muckrock_domains:
+        elif _usable_email(from_email):
             foia.email = from_email
         foia.cc_emails.set(new_cc_emails)
 
@@ -769,3 +769,18 @@ def _detect_file_download_links(comm):
             )
             comm.download = True
             comm.save()
+
+
+def _usable_email(email):
+    """Is this a usable email?
+    Ensure it is not from a Muckrock domain
+    Ensure it is not a no reply email address
+    """
+    muckrock_domains = (settings.MAILGUN_SERVER_NAME, "muckrock.com")
+    if email.domain in muckrock_domains:
+        return False
+
+    if any(n in email.local for n in config.NOREPLY_EMAILS.split()):
+        return False
+
+    return True

@@ -5,10 +5,13 @@ Provides Jurisdiction application API views
 # Third Party
 import django_filters
 from rest_framework import viewsets
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
 
-#pylint: disable=too-few-public-methods
+# MuckRock
+from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
+from muckrock.jurisdiction.models import Jurisdiction
+
+
+# pylint: disable=too-few-public-methods
 class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for Jurisdiction"""
 
@@ -27,6 +30,8 @@ class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
 
         class Meta:
             """List of filters for the API"""
+
             model = Jurisdiction
             fields = ("abbrev", "level", "name")
+
     filterset_class = JurisdictionFilter

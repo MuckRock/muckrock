@@ -1,44 +1,19 @@
 """
-Serilizers for V2 of the FOIA API
+Serializers for V2 of the FOIA API
 """
+
+# Django
+from django.contrib.auth.models import User
 
 # Third Party
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
-from taggit.serializers import TaggitSerializer, TagListSerializerField
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
-from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIANote, FOIARequest
+from muckrock.foia.models.file import FOIAFile
 from muckrock.organization.models import Organization
-
-
-class EmbargoMixin:
-    """Embargo validators for all FOIA Request serializers"""
-
-    def validate_embargo(self, value):
-        request = self.context.get("request", None)
-        user = request and request.user
-        if value and not (user and user.has_perm("foia.embargo_foiarequest")):
-            raise serializers.ValidationError(
-                "You do not have permission to set `embargo`"
-            )
-        return value
-
-    def validate_permanent_embargo(self, value):
-        request = self.context.get("request", None)
-        user = request and request.user
-        if value and not (user and user.has_perm("foia.embargo_perm_foiarequest")):
-            raise serializers.ValidationError(
-                "You do not have permission to set `permanent_embargo`"
-            )
-        return value
-
-    def validate(self, attrs):
-        # if permanent embargo is true, embargo must be true
-        if attrs.get("permanent_embargo"):
-            attrs["embargo"] = True
-        return attrs
 
 
 @extend_schema_serializer(
@@ -51,6 +26,7 @@ class EmbargoMixin:
                 "slug": "meeting-minutes",
                 "status": "processed",
                 "agency": 2,
+                "embargo_status": "public",
                 "user": 3,
                 "edit_collaborators": [4, 5],
                 "read_collaborators": [],
@@ -58,37 +34,31 @@ class EmbargoMixin:
                 "datetime_updated": "2019-02-18T05:00:01.355367-05:00",
                 "datetime_done": None,
                 "tracking_id": "ABC123-456",
-                "tags": ["minutes"],
                 "price": "0.00",
             },
-            response_only=True,
         )
     ]
 )
-class FOIARequestSerializer(
-    EmbargoMixin, TaggitSerializer, serializers.ModelSerializer
-):
+class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
 
     user = serializers.PrimaryKeyRelatedField(
         source="composer.user",
+        queryset=User.objects.all(),
         style={"base_template": "input.html"},
         help_text="The user ID of the user who filed this request",
-        read_only=True,
+        required=False,
     )
     datetime_submitted = serializers.DateTimeField(
+        read_only=True,
         source="composer.datetime_submitted",
         help_text="The timestamp of when this request was submitted",
-        read_only=True,
+        required=False,
     )
-    tracking_id = serializers.CharField(
+    tracking_id = serializers.ReadOnlyField(
         source="current_tracking_id",
         help_text="The current tracking ID the agency has assigned to this request",
-        read_only=True,
-    )
-    tags = TagListSerializerField(
         required=False,
-        help_text="Tags associated with the request",
     )
 
     class Meta:
@@ -100,6 +70,7 @@ class FOIARequestSerializer(
             "slug",
             "status",
             "agency",
+            "embargo_status",  # public, embargo, or permanent
             "user",
             "edit_collaborators",
             "read_collaborators",
@@ -111,16 +82,11 @@ class FOIARequestSerializer(
             "tracking_id",
             "price",
             # connected models
-            "tags",
+            # "tags",
+            # "notes",
+            # "communications",
         )
         extra_kwargs = {
-            "title": {"read_only": True},
-            "slug": {"read_only": True},
-            "status": {"read_only": True},
-            "agency": {"read_only": True},
-            "datetime_updated": {"read_only": True},
-            "datetime_done": {"read_only": True},
-            "price": {"read_only": True},
             "edit_collaborators": {
                 "help_text": "The IDs of the users who have been given edit access to "
                 "this request"
@@ -132,34 +98,26 @@ class FOIARequestSerializer(
         }
 
 
-class FOIARequestCreateSerializer(EmbargoMixin, serializers.ModelSerializer):
+class FOIARequestCreateSerializer(serializers.ModelSerializer):
     """Serializer for filing a new request"""
 
     agencies = serializers.PrimaryKeyRelatedField(
         queryset=Agency.objects.filter(status="approved"),
         many=True,
         required=True,
-        help_text="A list of IDs for the agencies to file this request with.  "
-        "Providing more than one agency ID allows you to file a single request "
-        "with multiple agencies",
     )
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.none(),
         required=False,
-        help_text="The ID of one of your organizations that you want this request "
-        "associated with.  This organization will be charged for the filing of "
-        "this request.  If left blank, it will default to your current active "
-        "organization",
     )
-    requested_docs = serializers.CharField(
-        help_text="A description of the documents you are requesting from the agency."
-    )
+    requested_docs = serializers.CharField()
 
     class Meta:
         model = FOIARequest
         fields = (
             "agencies",
             "organization",
+            "embargo_status",
             "title",
             "requested_docs",
             # "attachments",
@@ -172,49 +130,80 @@ class FOIARequestCreateSerializer(EmbargoMixin, serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         request = self.context.get("request", None)
+        view = self.context.get("view", None)
         user = request and request.user
         authed = user and user.is_authenticated
+        # are we currently generating the documentation
+        docs = getattr(view, "swagger_fake_view", False)
         if authed:
             # set the valid organizations to those the current user is a member of
             self.fields["organization"].queryset = Organization.objects.filter(
                 users=user
             )
+        # remove embargo fields if the user does not have permission to set them
+        if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
+            self.fields.pop("embargo_status")
+
+    # If the user doesn't have the permission to set to a permanent embargo, tell them.
+    def validate_embargo_status(self, value):
+        request = self.context.get("request", None)
+        if value == "permanent" and not request.user.has_perm(
+            "foia.embargo_perm_foiarequest", self.instance
+        ):
+            raise serializers.ValidationError(
+                "You do not have permission to set embargo to permanent"
+            )
+        return value
 
 
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
-            "Succesful",
-            status_codes=[201],
+            "FOIA File Example",
             value={
-                "status": "FOI Request submitted",
-                "location": "https://www.muckrock.com/foi/multirequest/test-123/",
-                "requests": [456],
+                "id": 1215939,
+                "ffile": "https://cdn.muckrock.com/foia_files/2024/09/05/PSP_FINAL_RESPONSE_RTK__2024-1657_xLBSvYT.pdf",  # pylint: disable=line-too-long
+                "datetime": "2024-09-05T14:01:29.268029",
+                "title": "PSP FINAL RESPONSE RTK # 2024-1657",
+                "source": "Pennsylvania State Police, Pennsylvania",
+                "description": "",
+                "doc_id": "25092350-psp-final-response-rtk-2024-1657",
+                "pages": 11,
             },
-        ),
-        OpenApiExample(
-            "Payment required",
-            status_codes=[402],
-            value={
-                "status": "Out of requests.  FOI Request has been saved.",
-                "location": "https://www.muckrock.com/foi/multirequest/test-123/",
-            },
-        ),
+        )
     ]
 )
-class FOIARequestCreateReturnSerializer(serializers.Serializer):
-    """Serializer for return data for creating a request"""
+class FOIAFileSerializer(serializers.ModelSerializer):
+    """Serializer for FOIA File model"""
 
-    # pylint: disable=abstract-method
+    ffile = serializers.SerializerMethodField()
+    datetime = serializers.DateTimeField()
+    title = serializers.CharField()
+    source = serializers.CharField()
+    description = serializers.CharField(required=False, allow_blank=True)
+    doc_id = serializers.CharField()
+    pages = serializers.IntegerField()
 
-    status = serializers.CharField(help_text="A description of the status.")
-    location = serializers.URLField(help_text="The URL of the created request.")
-    requests = serializers.PrimaryKeyRelatedField(
-        queryset=FOIARequest.objects.all(),
-        many=True,
-        required=False,
-        help_text="The IDs of the created requests",
-    )
+    class Meta:
+        model = FOIAFile
+        exclude = ("comm",)  # Exclude communications
+
+    def get_ffile(self, obj):
+        """Get the ffile URL safely"""
+        if obj.ffile and hasattr(obj.ffile, "url"):
+            return obj.ffile.url
+        else:
+            return ""
+
+
+class FOIANoteSerializer(serializers.ModelSerializer):
+    """Serializer for FOIA Note model"""
+
+    datetime = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = FOIANote
+        exclude = ("id", "foia")
 
 
 @extend_schema_serializer(
@@ -242,6 +231,7 @@ class FOIARequestCreateReturnSerializer(serializers.Serializer):
 class FOIACommunicationSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Communication model"""
 
+    files = FOIAFileSerializer(many=True)
     foia = serializers.PrimaryKeyRelatedField(
         queryset=FOIARequest.objects.all(),
         style={"base_template": "input.html"},
@@ -260,6 +250,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
             "autogenerated",
             "communication",
             "status",
+            "files",
         ]
         extra_kwargs = {
             "from_user": {
