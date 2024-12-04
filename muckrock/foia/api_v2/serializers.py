@@ -1,5 +1,5 @@
 """
-Serilizers for V2 of the FOIA API
+Serializers for V2 of the FOIA API
 """
 
 # Django

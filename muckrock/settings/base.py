@@ -529,7 +529,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
+        "muckrock.core.permissions.DjangoObjectPermissionsOrAnonReadOnly",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -592,6 +592,7 @@ DOCCLOUD_API_URL = os.environ.get(
 DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
 )
+DATASETTE_URL = os.environ.get("DATASETTE_URL", "")
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r"^/api(_v\d)?/.*$"

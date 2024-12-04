@@ -133,7 +133,12 @@ class FOIARequest(models.Model):
         choices=EMBARGO_CHOICES,
     )
 
-    date_embargo = models.DateField(blank=True, null=True)
+    date_embargo = models.DateField(
+        blank=True,
+        null=True,
+        help_text="The date when the embargo will expire and the request will become "
+        "public",
+    )
 
     price = models.DecimalField(
         max_digits=14,

@@ -140,6 +140,12 @@ def get_common_webhook_params(allow_empty_email=False):
 
         @wraps(function)
         def wrapper(request):
+            if "event-data" in request.POST:
+                return wrapper_new(request)
+            else:
+                return wrapper_legacy(request)
+
+        def wrapper_legacy(request):
             """Wrapper"""
             data = json.loads(request.body.decode("utf8"))
             email_id = data["event-data"]["user-variables"].get("email_id")
@@ -158,6 +164,28 @@ def get_common_webhook_params(allow_empty_email=False):
             else:
                 logger.warning(
                     "No email comm for %s webhook: %s", function.__name__, data
+                )
+
+            return HttpResponse("OK")
+
+        def wrapper_new(request):
+            """Wrapper"""
+            email_id = request.POST["event-data"]["user-variables"].get("email_id")
+            timestamp = request.POST["event-data"]["timestamp"]
+            timestamp = datetime.fromtimestamp(
+                int(timestamp), tz=timezone.get_current_timezone()
+            )
+
+            if email_id:
+                email_comm = EmailCommunication.objects.filter(pk=email_id).first()
+            else:
+                email_comm = None
+
+            if email_comm or allow_empty_email:
+                function(request, email_comm, timestamp)
+            else:
+                logger.warning(
+                    "No email comm for %s webhook: %s", function.__name__, request.POST
                 )
 
             return HttpResponse("OK")
