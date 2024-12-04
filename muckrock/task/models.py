@@ -652,8 +652,8 @@ class ReviewAgencyTask(Task):
     def get_ticket_info(self):
         """For task specific ticket info"""
         return (
-            f"Review Agency Task\nAgency: {self.communication.agency}\n"
-            f"{settings.MUCKROCK_URL}{self.communication.agency.get_absolute_url()}"
+            f"Review Agency Task\nAgency: {self.agency}\n"
+            f"{settings.MUCKROCK_URL}{self.agency.get_absolute_url()}"
         )
 
 
