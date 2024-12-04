@@ -325,6 +325,19 @@
     </ul>
   {% endif %}
 {% endif %}
+{% if active_users %}
+  <h1>Active Users</h1>
+  <h2>Users who have filed more than 20 requests in the past week</h2>
+  <ul>
+      {% for user in active_users %}
+        <li>
+          <a href="{{user.get_absolute_url}}">
+            {{user.profile.full_name}} ({{ user.count }} requests)
+          </a>
+        </li>
+      {% endfor %}
+  </ul>
+{% endif %}
 {% if crowdfunds.active %}
   <h1>Active Crowdfunds</h1>
   <ul>

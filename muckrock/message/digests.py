@@ -6,6 +6,7 @@ Digest objects for the messages app
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import DurationField, F, Q
+from django.db.models.aggregates import Count
 from django.db.models.functions import Cast, Now
 from django.utils import timezone
 
@@ -413,6 +414,18 @@ class StaffDigest(Digest):
         data = {"gained": pro_gained, "lost": pro_lost}
         return data
 
+    def get_active_users(self):
+        """Users who have filed more than 20 requests in the past week"""
+        return User.objects.annotate(
+            count=Count(
+                "composers",
+                filter=Q(
+                    composers__datetime_submitted__gt=timezone.now()
+                    - timedelta(days=70)
+                ),
+            )
+        ).filter(count__gte=20)
+
     def get_stale_tasks(self):
         """Get stale tasks"""
         # pylint: disable=import-outside-toplevel
@@ -546,6 +559,7 @@ class StaffDigest(Digest):
         context["comms"] = self.get_comms(start, end)
         context["confirm"] = self.get_confirm(end)
         context["pro_users"] = self.get_pro_users(end - relativedelta(days=5), end)
+        context["active_users"] = self.get_active_users()
         context["stale_tasks"] = self.get_stale_tasks()
         context["stale_tasks_show"] = any(i for i in context["stale_tasks"].values())
         context["crowdfunds"] = self.get_crowdfunds()
