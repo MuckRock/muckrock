@@ -205,7 +205,7 @@ class FOIARequest(models.Model):
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __str__(self):
-        return self.title
+        return self.title if self.title else "(Untitled)"
 
     def get_absolute_url(self):
         """The url for this object"""
