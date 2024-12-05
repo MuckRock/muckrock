@@ -117,7 +117,7 @@ class FOIARequestViewSet(
         class Meta:
             """Filters"""
 
-            model = Agency
+            model = FOIARequest
             fields = (
                 "user",
                 "title",
