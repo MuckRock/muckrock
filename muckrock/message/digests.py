@@ -420,8 +420,7 @@ class StaffDigest(Digest):
             count=Count(
                 "composers",
                 filter=Q(
-                    composers__datetime_submitted__gt=timezone.now()
-                    - timedelta(days=70)
+                    composers__datetime_submitted__gt=timezone.now() - timedelta(days=7)
                 ),
             )
         ).filter(count__gte=20)
