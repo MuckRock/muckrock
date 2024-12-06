@@ -25,6 +25,7 @@ from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
 
 
+# pylint:disable=too-many-ancestors
 class FOIARequestViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -74,15 +75,59 @@ class FOIARequestViewSet(
                 },
                 status=http_status.HTTP_402_PAYMENT_REQUIRED,
             )
-        else:
-            return Response(
-                {
-                    "status": "FOI Request submitted",
-                    "location": composer.get_absolute_url(),
-                    "requests": [f.pk for f in composer.foias.all()],
-                },
-                status=http_status.HTTP_201_CREATED,
+        return Response(
+            {
+                "status": "FOI Request submitted",
+                "location": composer.get_absolute_url(),
+                "requests": [f.pk for f in composer.foias.all()],
+            },
+            status=http_status.HTTP_201_CREATED,
+        )
+
+    class Filter(django_filters.FilterSet):
+        """Filters for requests"""
+
+        agency = django_filters.NumberFilter(field_name="agency__id", label="Agency ID")
+        jurisdiction = django_filters.NumberFilter(
+            field_name="agency__jurisdiction__id", label="Jurisdiction ID"
+        )
+        user = django_filters.ModelChoiceFilter(
+            field_name="composer__user__id", label="User"
+        )
+        tags = django_filters.CharFilter(field_name="tags__name", label="Tags")
+
+        title = django_filters.CharFilter(
+            field_name="title", lookup_expr="icontains", label="Title"
+        )
+
+        order_by_field = "ordering"
+        ordering = django_filters.OrderingFilter(
+            fields=(
+                ("composer__datetime_submitted", "datetime_submitted"),
+                ("composer__user__id", "user"),
+                ("agency__id", "agency"),
+                ("datetime_done", "datetime_done"),
+                ("datetime_updated", "datetime_updated"),
+                ("title", "title"),
+                ("status", "status"),
             )
+        )
+
+        # pylint:disable=too-few-public-methods
+        class Meta:
+            """Filters"""
+
+            model = FOIARequest
+            fields = (
+                "user",
+                "title",
+                "status",
+                "embargo_status",
+                "jurisdiction",
+                "agency",
+            )
+
+    filterset_class = Filter
 
 
 class FOIACommunicationViewSet(
@@ -114,7 +159,10 @@ class FOIACommunicationViewSet(
             field_name="foia__id", label="The ID of the associated request"
         )
 
+        # pylint:disable=too-few-public-methods
         class Meta:
+            """Filters for foia communications"""
+
             model = FOIACommunication
             fields = ("max_date", "min_date", "foia", "status", "response")
 
