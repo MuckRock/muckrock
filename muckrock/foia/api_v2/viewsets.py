@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 # Third Party
 import django_filters
 from django_filters.rest_framework.backends import DjangoFilterBackend
-from rest_framework import mixins, status as http_status, viewsets
+from rest_framework import filters, mixins, status as http_status, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -35,7 +35,9 @@ class FOIARequestViewSet(
     """API for FOIA Requests"""
 
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    filter_backends = ()
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+
+    search_fields = ["title"]
 
     def get_serializer_class(self):
         if self.action == "create":
