@@ -105,7 +105,7 @@ class FOIARequestViewSet(
             fields=(
                 ("composer__datetime_submitted", "datetime_submitted"),
                 ("composer__user__id", "user"),
-                ("agency__name", "agency"),
+                ("agency__id", "agency"),
                 ("datetime_done", "datetime_done"),
                 ("datetime_updated", "datetime_updated"),
                 ("title", "title"),
