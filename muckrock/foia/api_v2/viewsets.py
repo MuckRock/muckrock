@@ -45,6 +45,15 @@ class FOIARequestViewSet(
 
         return FOIARequestSerializer
 
+    def get_queryset(self):
+        return (
+            FOIARequest.objects.get_viewable(self.request.user)
+            .select_related("composer")
+            .prefetch_related(
+                "edit_collaborators", "read_collaborators", "tracking_ids"
+            )
+        )
+
     def create(self, request, *args, **kwargs):
         composer = FOIAComposer.objects.create(
             user=request.user,
@@ -121,15 +130,6 @@ class FOIARequestViewSet(
             )
 
     filterset_class = Filter
-
-    def get_queryset(self):
-        return (
-            FOIARequest.objects.get_viewable(self.request.user)
-            .select_related("composer")
-            .prefetch_related(
-                "edit_collaborators", "read_collaborators", "tracking_ids"
-            )
-        )
 
 
 class FOIACommunicationViewSet(
