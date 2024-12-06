@@ -93,7 +93,7 @@ class FOIARequestViewSet(
         jurisdiction = django_filters.NumberFilter(
             field_name="agency__jurisdiction__id", label="Jurisdiction ID"
         )
-        user = django_filters.ModelChoiceFilter(
+        user = django_filters.NumberFilter(
             field_name="composer__user__id", label="User"
         )
         tags = django_filters.CharFilter(field_name="tags__name", label="Tags")
