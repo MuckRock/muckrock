@@ -45,15 +45,6 @@ class FOIARequestViewSet(
 
         return FOIARequestSerializer
 
-    def get_queryset(self):
-        return (
-            FOIARequest.objects.get_viewable(self.request.user)
-            .select_related("composer")
-            .prefetch_related(
-                "edit_collaborators", "read_collaborators", "tracking_ids"
-            )
-        )
-
     def create(self, request, *args, **kwargs):
         composer = FOIAComposer.objects.create(
             user=request.user,
@@ -93,7 +84,7 @@ class FOIARequestViewSet(
         jurisdiction = django_filters.NumberFilter(
             field_name="agency__jurisdiction__id", label="Jurisdiction ID"
         )
-        user = django_filters.ModelChoiceFilter(
+        user = django_filters.NumberFilter(
             field_name="composer__user__id", label="User"
         )
         tags = django_filters.CharFilter(field_name="tags__name", label="Tags")
@@ -130,6 +121,15 @@ class FOIARequestViewSet(
             )
 
     filterset_class = Filter
+
+    def get_queryset(self):
+        return (
+            FOIARequest.objects.get_viewable(self.request.user)
+            .select_related("composer")
+            .prefetch_related(
+                "edit_collaborators", "read_collaborators", "tracking_ids"
+            )
+        )
 
 
 class FOIACommunicationViewSet(
