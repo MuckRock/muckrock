@@ -12,6 +12,8 @@ from rest_framework import serializers
 # MuckRock
 from muckrock.accounts.models import Profile
 
+# pylint:disable = too-few-public-methods
+
 
 @extend_schema_serializer(
     examples=[
@@ -56,3 +58,13 @@ class UserSerializer(serializers.ModelSerializer):
             "full_name",
             "uuid",
         )
+        extra_kwargs = {
+            "username": {"help_text": "The unique username of the user."},
+            "email": {"help_text": "The email address of the user."},
+            "last_login": {"help_text": "The last time the user logged in."},
+            "date_joined": {"help_text": "The date and time when the user joined."},
+            "full_name": {"help_text": "The full name of the user."},
+            "uuid": {
+                "help_text": "The unique identifier (UUID) of the user's profile."
+            },
+        }
