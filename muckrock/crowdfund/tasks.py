@@ -4,7 +4,6 @@ Tasks for crowdfunds
 
 # Django
 from celery import shared_task
-from celery.schedules import crontab
 
 # Standard Library
 from datetime import date, timedelta

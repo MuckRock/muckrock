@@ -5,7 +5,6 @@
 # Django
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.schedules import crontab
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates.general import StringAgg

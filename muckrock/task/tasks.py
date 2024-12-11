@@ -4,7 +4,6 @@ Celery tasks for the task application
 
 # Django
 from celery import shared_task
-from celery.schedules import crontab
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
