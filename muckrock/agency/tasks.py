@@ -2,7 +2,6 @@
 
 # Django
 from celery import shared_task
-from celery.schedules import crontab
 
 # Standard Library
 import csv
