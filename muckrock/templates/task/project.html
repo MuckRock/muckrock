@@ -69,17 +69,17 @@
 {% endblock %}
 {% block task-footer %}
 <footer class="textbox__footer task__actions">
-    <form method="POST" action="{{ endpoint }}" class="task-post-actions">
+    <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="task-post-actions">
         {% csrf_token %}
         <label for="{{form.reply.id_for_label}}">&crarr; Reply</label>
         {{ form.reply }}
         <input type="hidden" name="task" value="{{task.pk}}">
         <span class="task-defer">
           {% if not task.zendesk_ticket_id %}
-            <input type="text" name="zendesk_note" placeholder="ZenDesk note...">
             <button type="submit" name="zendesk" value="true" class="primary button">
               Create ZenDesk Ticket
             </button>
+            <textarea name="zendesk_note" placeholder="ZenDesk note..."></textarea>
           {% endif %}
         </span>
         <footer class="submission-control">

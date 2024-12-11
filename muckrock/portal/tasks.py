@@ -3,7 +3,7 @@ Celery tasks for the portal application
 """
 
 # Django
-from celery.task import task
+from celery import shared_task
 
 # Standard Library
 import logging
@@ -14,7 +14,7 @@ from muckrock.portal.models import Portal
 logger = logging.getLogger(__name__)
 
 
-@task(name="muckrock.portal.tasks.portal_task")
+@shared_task(name="muckrock.portal.tasks.portal_task")
 def portal_task(portal_pk, portal_method, args=None, kwargs=None):
     """Generic portal task to allow you to run portal methods asynchrnously"""
     if args is None:

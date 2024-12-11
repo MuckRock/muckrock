@@ -38,22 +38,23 @@
 {% endblock %}
 
 {% block task-actions %}
-    <div>
+    <span class="task-defer">
+      {% if not task.zendesk_ticket_id %}
+        <button type="submit" name="zendesk" value="true" class="primary button">
+          Create ZenDesk Ticket
+        </button>
+        <textarea name="zendesk_note" placeholder="ZenDesk note..."></textarea>
+      {% endif %}
+    </span>
+    <span class="task-buttons">
+      <div>
         {% if domain %}
             <input type="checkbox" name="blacklist" id="blacklist-orphan-{{ task.pk }}">
             <label for="blacklist-orphan-{{ task.pk }}">Blacklist {{ domain }}</label>
         {% endif %}
         <button class="button" type="submit" name="reject" value="true">Reject</button>
-    </div>
-    <span class="task-defer">
-      {% if not task.zendesk_ticket_id %}
-        <input type="text" name="zendesk_note" placeholder="ZenDesk note...">
-        <button type="submit" name="zendesk" value="true" class="primary button">
-          Create ZenDesk Ticket
-        </button>
-      {% endif %}
-    </span>
-    <div>
+      </div>
+      <div>
         <input type="text" name="foia_pks"
             {% if task.communication.likely_foia %}
                 value="{{task.communication.likely_foia.pk}}"
@@ -61,6 +62,9 @@
                 placeholder="MuckRock №"
             {% endif %}
             >
-        <button type="submit" name="move" value="true" class="primary button">Move</button>
-    </div>
+        <button type="submit" name="move" value="true" class="primary button">
+          Move
+        </button>
+      </div>
+    </span>
 {% endblock %}

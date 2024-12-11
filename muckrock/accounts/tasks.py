@@ -3,9 +3,8 @@ Tasks for the account application
 """
 
 # Django
+from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.schedules import crontab
-from celery.task import periodic_task, task
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.db.models import Count, F, Sum
@@ -58,10 +57,7 @@ register_logger_signal(client)
 register_signal(client)
 
 
-@periodic_task(
-    run_every=crontab(hour=7, minute=30),
-    name="muckrock.accounts.tasks.store_statistics",
-)
+@shared_task
 def store_statistics():
     """Store the daily statistics"""
     # pylint: disable=too-many-statements
@@ -570,12 +566,7 @@ def store_statistics():
     Statistics.objects.create(**kwargs)
 
 
-@periodic_task(
-    run_every=crontab(hour=1, minute=0),
-    time_limit=1800,
-    soft_time_limit=1740,
-    name="muckrock.accounts.tasks.db_cleanup",
-)
+@shared_task
 def db_cleanup():
     """Call some management commands to clean up the database"""
     logger.info("Starting DB Clean up")
@@ -611,6 +602,6 @@ def db_cleanup():
     logger.info("Ending DB Clean up")
 
 
-@task(ignore_results=True, name="muckrock.accounts.tasks.donor_tag")
+@shared_task(ignore_results=True, name="muckrock.accounts.tasks.donor_tag")
 def donor_tag(email):
     mailchimp_donor_tag(email)

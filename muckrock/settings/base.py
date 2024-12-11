@@ -4,6 +4,7 @@ Django settings for muckrock project
 
 # Django
 from celery.concurrency import asynpool
+from celery.schedules import crontab
 from django.urls import reverse
 
 # Standard Library
@@ -332,7 +333,85 @@ REDIS_URL = os.environ.get(
 CELERY_BROKER_URL = REDIS_URL
 CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 25 * 60 * 60}
 
-# CELERY_BEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERY_BEAT_SCHEDULE = {
+    "store_statistics": {
+        "task": "muckrock.accounts.tasks.store_statistics",
+        "schedule": crontab(hour=7, minute=30),
+    },
+    "db_cleanup": {
+        "task": "muckrock.accounts.tasks.db_cleanup",
+        "schedule": crontab(hour=1, minute=0),
+        "options": {
+            "time_limit": 1800,
+            "soft_time_limit": 1740,
+        },
+    },
+    "stale": {
+        "task": "muckrock.agency.tasks.stale",
+        "schedule": crontab(day_of_week="sunday", hour=4, minute=0),
+    },
+    "close_expired": {
+        "task": "muckrock.crowdfund.tasks.close_expired",
+        "schedule": crontab(hour=0, minute=0),
+    },
+    "retry_stuck_documents": {
+        "task": "muckrock.foia.tasks.retry_stuck_documents",
+        "schedule": crontab(hour=0, minute=20),
+    },
+    "followup_requests": {
+        "task": "muckrock.foia.tasks.followup_requests",
+        "schedule": crontab(hour=1, minute=0),
+        "options": {
+            "time_limit": 600,
+            "soft_time_limit": 570,
+        },
+    },
+    "embargo_warn": {
+        "task": "muckrock.foia.tasks.embargo_warn",
+        "schedule": crontab(hour=6, minute=0),
+    },
+    "embargo_expire": {
+        "task": "muckrock.foia.tasks.embargo_expire",
+        "schedule": crontab(hour=0, minute=0),
+    },
+    "autoimport": {
+        "task": "muckrock.foia.tasks.autoimport",
+        "schedule": crontab(hour=2, minute=0),
+        "options": {
+            "time_limit": 36000,
+            "soft_time_limit": 35700,
+        },
+    },
+    "hourly_digest": {
+        "task": "muckrock.message.tasks.hourly_digest",
+        "schedule": crontab(hour="*/1", minute=0),  # every hour
+    },
+    "daily_digest": {
+        "task": "muckrock.message.tasks.daily_digest",
+        "schedule": crontab(hour=10, minute=0),
+    },
+    "weekly_digest": {
+        "task": "muckrock.message.tasks.weekly_digest",
+        "schedule": crontab(day_of_week=1, hour=10, minute=0),
+    },
+    "monthly_digest": {
+        "task": "muckrock.message.tasks.monthly_digest",
+        "schedule": crontab(day_of_month=1, hour=10, minute=0),
+    },
+    "staff_digest": {
+        "task": "muckrock.message.tasks.staff_digest",
+        "schedule": crontab(hour=9, minute=30),
+    },
+    "cleanup_flags": {
+        "task": "muckrock.task.tasks.cleanup_flags",
+        "schedule": crontab(hour=4, minute=0),
+    },
+    "cleanup_status_change": {
+        "task": "muckrock.task.tasks.cleanup_status_change",
+        "schedule": crontab(hour=3, minute=0),
+    },
+}
+
 
 CELERY_SEND_EVENT = True
 CELERY_TASK_IGNORE_RESULTS = True

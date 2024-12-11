@@ -1,7 +1,7 @@
 """Celery tasks for squarelet app"""
 
 # Django
-from celery.task import task
+from celery import shared_task
 
 # Standard Library
 import logging
@@ -18,7 +18,7 @@ from muckrock.organization.models import Organization
 logger = logging.getLogger(__name__)
 
 
-@task(name="muckrock.squarelet.tasks.pull_data")
+@shared_task(name="muckrock.squarelet.tasks.pull_data")
 def pull_data(type_, uuid, **kwargs):
     """Task to pull data from squarelet"""
     types_url = {"user": "users", "organization": "organizations"}

@@ -12,7 +12,6 @@ from django.db import transaction
 from django.db.models import Count
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import resolve
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, TemplateView
@@ -159,8 +158,7 @@ class TaskList(MRFilterListView):
 
     def get_redirect_url(self):
         """Returns the url to redirect to"""
-        resolved_url = resolve(self.request.path)
-        return resolved_url.url_name
+        return self.request.get_full_path()
 
     def get_tasks(self):
         """Every request should specify the task or tasks it is updating as PKs"""

@@ -84,7 +84,6 @@ $task-padding: $vr/4 $vr/2;
 
 .task .task__actions {
     background: $color-grey-7;
-    text-align: right;
     input, select, label {
         display: block;
         width: 100%;
@@ -134,11 +133,33 @@ $task-padding: $vr/4 $vr/2;
 
 .task__actions .task-defer {
     text-align: left;
-    float: left;
+    display: inline-block;
+    min-height: 2.5rem;
     input {
         width: 200px;
         display: inline-block;
     }
+    textarea {
+        width: 200px;
+        height: 2rem;
+        display: inline-block;
+        &:focus {
+          width: 400px;
+          height: 10rem;
+        }
+    }
+    button {
+      vertical-align: top;
+    }
+}
+
+.task__actions .task-buttons {
+  float: right;
+}
+
+.orphan .task__actions .task-buttons {
+  float: none;
+  text-align: right;
 }
 
 .task__actions br.clear {
@@ -345,7 +366,6 @@ $task-padding: $vr/4 $vr/2;
         margin-bottom: 0;
     }
 	.proxy {
-		float: left;
     margin-left: 0.5rem;
 	}
 }
