@@ -93,7 +93,9 @@ class AgencySerializer(serializers.ModelSerializer):
                     "because of in-state residency laws (True/False)."
                 )
             },
-            "jurisdiction": {"help_text": "The ID of the jurisdiction this agency operates under."},
+            "jurisdiction": {
+                "help_text": "The ID of the jurisdiction this agency operates under."
+            },
             "parent": {"help_text": "The ID of the parent agency, if applicable."},
             "appeal_agency": {
                 "help_text": "The ID of the agency to which appeals are directed, if applicable."
