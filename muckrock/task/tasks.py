@@ -3,8 +3,8 @@ Celery tasks for the task application
 """
 
 # Django
+from celery import shared_task
 from celery.schedules import crontab
-from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -46,7 +46,7 @@ from muckrock.task.pdf import CoverPDF, SnailMailPDF
 logger = logging.getLogger(__name__)
 
 
-@task(ignore_result=True, name="muckrock.task.tasks.submit_review_update")
+@shared_task(ignore_result=True, name="muckrock.task.tasks.submit_review_update")
 def submit_review_update(foia_pks, reply_text, **kwargs):
     """Submit all the follow ups after updating agency contact information"""
     foias = FOIARequest.objects.filter(pk__in=foia_pks)
@@ -63,7 +63,7 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
         foia.submit(switch=True)
 
 
-@task(
+@shared_task(
     ignore_result=True,
     time_limit=900,
     name="muckrock.task.tasks.snail_mail_bulk_pdf_task",
@@ -120,7 +120,9 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     )
 
 
-@task(ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_ticket")
+@shared_task(
+    ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_ticket"
+)
 def create_ticket(flag_pk, **kwargs):
     """Create a ticket from a flag"""
     try:
@@ -146,7 +148,7 @@ def create_ticket(flag_pk, **kwargs):
         )
 
 
-@task(
+@shared_task(
     ignore_result=True, max_retries=5, name="muckrock.task.tasks.create_generic_ticket"
 )
 def create_generic_ticket(task_pk, task_name, note, email, **kwargs):
@@ -192,19 +194,14 @@ def create_generic_ticket(task_pk, task_name, note, email, **kwargs):
         )
 
 
-@periodic_task(
-    run_every=crontab(hour=4, minute=0), name="muckrock.task.tasks.cleanup_flags"
-)
+@shared_task
 def cleanup_flags():
     """Find any flags that failed to make it to zoho/zendesk and try again"""
     for flag in FlaggedTask.objects.filter(resolved=False):
         create_ticket.delay(flag.pk)
 
 
-@periodic_task(
-    run_every=crontab(hour=3, minute=0),
-    name="muckrock.task.tasks.cleanup_status_change",
-)
+@shared_task
 def cleanup_status_change():
     """Auto resolve status change tasks older than 3 weeks"""
     StatusChangeTask.objects.filter(

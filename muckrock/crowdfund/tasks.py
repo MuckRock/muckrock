@@ -3,8 +3,8 @@ Tasks for crowdfunds
 """
 
 # Django
+from celery import shared_task
 from celery.schedules import crontab
-from celery.task import periodic_task
 
 # Standard Library
 from datetime import date, timedelta
@@ -13,9 +13,7 @@ from datetime import date, timedelta
 from muckrock.crowdfund.models import Crowdfund
 
 
-@periodic_task(
-    run_every=crontab(hour=0, minute=0), name="muckrock.crowdfund.tasks.close_expired"
-)
+@shared_task
 def close_expired():
     """Close crowdfunds that were due yesterday"""
     yesterday = date.today() - timedelta(1)

@@ -14,7 +14,7 @@ aiohttp==3.8.5
     # via baml
 aiosignal==1.3.1
     # via aiohttp
-amqp==2.6.0
+amqp==5.3.1
     # via kombu
 annotated-types==0.5.0
     # via pydantic
@@ -44,7 +44,7 @@ beautifulsoup4==4.6.0
     # via
     #   -r pip/requirements.in
     #   pyembed
-billiard==3.6.3.0
+billiard==4.2.1
     # via celery
 bleach==4.1.0
     # via -r pip/requirements.in
@@ -62,7 +62,7 @@ bz2file==0.98
     # via smart-open
 cachetools==3.1.1
     # via zenpy
-celery==4.4.6
+celery==5.4.0
     # via
     #   -r pip/requirements.in
     #   django-celery-email
@@ -80,6 +80,18 @@ charset-normalizer==3.1.0
     # via
     #   aiohttp
     #   requests
+click==8.1.7
+    # via
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
+click-didyoumean==0.3.1
+    # via celery
+click-plugins==1.1.1
+    # via celery
+click-repl==0.2.0
+    # via celery
 colorama==0.4.6
     # via baml
 coloredlogs==15.0.1
@@ -235,7 +247,6 @@ furl==1.0.1
     # via -r pip/requirements.in
 future==0.18.2
     # via
-    #   celery
     #   pyjwkest
     #   python-documentcloud
 fuzzywuzzy==0.18.0
@@ -290,7 +301,7 @@ jsonschema==4.21.1
     # via govqa
 jsonschema-specifications==2023.12.1
     # via jsonschema
-kombu==4.6.11
+kombu==5.4.2
     # via celery
 listcrunch==1.0.1
     # via python-documentcloud
@@ -361,7 +372,9 @@ pluggy==1.3.0
 premailer==3.0.0
     # via django-premailer
 prompt-toolkit==3.0.31
-    # via ipython
+    # via
+    #   click-repl
+    #   ipython
 psutil==5.7.2
     # via scout-apm
 psycopg2-binary==2.8.5
@@ -417,6 +430,7 @@ python-dateutil==2.8.2
     # via
     #   -r pip/requirements.in
     #   botocore
+    #   celery
     #   govqa
     #   python-documentcloud
     #   zenpy
@@ -434,9 +448,8 @@ python-stdnum==1.13
     # via django-localflavor
 python3-openid==3.2.0
     # via social-auth-core
-pytz==2020.1
+pytz==2024.2
     # via
-    #   celery
     #   djangorestframework
     #   zenpy
 pyyaml==6.0.1
@@ -508,6 +521,7 @@ simplejson==3.16.0
 six==1.15.0
     # via
     #   bleach
+    #   click-repl
     #   django-autocomplete-light
     #   ecdsa
     #   furl
@@ -565,7 +579,7 @@ types-requests==2.31.0.5
     # via baml
 types-urllib3==1.26.25.14
     # via types-requests
-typing-extensions==4.8.0
+typing-extensions==4.12.2
     # via
     #   anthropic
     #   anyio
@@ -575,6 +589,10 @@ typing-extensions==4.8.0
     #   pydantic
     #   pydantic-core
     #   typeguard
+tzdata==2024.2
+    # via
+    #   celery
+    #   kombu
 unidecode==0.4.19
     # via -r pip/requirements.in
 uritemplate==3.0.0
@@ -588,10 +606,11 @@ urllib3[secure]==1.26.16
     #   scrapelib
 urllib3-secure-extra==0.1.0
     # via urllib3
-vine==1.3.0
+vine==5.1.0
     # via
     #   amqp
     #   celery
+    #   kombu
 wcwidth==0.1.7
     # via prompt-toolkit
 webencodings==0.5.1

@@ -1,8 +1,8 @@
 """Celery Tasks for the agency application"""
 
 # Django
+from celery import shared_task
 from celery.schedules import crontab
-from celery.task import periodic_task, task
 
 # Standard Library
 import csv
@@ -24,10 +24,7 @@ register_logger_signal(client)
 register_signal(client)
 
 
-@periodic_task(
-    run_every=crontab(day_of_week="sunday", hour=4, minute=0),
-    name="muckrock.agency.tasks.stale",
-)
+@shared_task
 def stale():
     """Record all stale agencies once a week"""
     for foia in FOIARequest.objects.get_stale():
@@ -106,7 +103,9 @@ class MassImport(AsyncFileDownloadTask):
                 writer.writerow(datum.get(f, "") for f in fields)
 
 
-@task(ignore_result=True, time_limit=1800, name="muckrock.agency.tasks.mass_import")
+@shared_task(
+    ignore_result=True, time_limit=1800, name="muckrock.agency.tasks.mass_import"
+)
 def mass_import(user_pk, file_path, match, dry):
     """Mass import a CSV of agencies"""
     MassImport(user_pk, file_path, match, dry).run()

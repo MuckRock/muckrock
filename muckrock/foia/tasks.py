@@ -3,9 +3,9 @@
 # pylint: disable=too-many-lines
 
 # Django
+from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
-from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates.general import StringAgg
@@ -81,7 +81,7 @@ register_signal(client)
 lob.api_key = settings.LOB_SECRET_KEY
 
 
-@task(
+@shared_task(
     ignore_result=True,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
@@ -123,7 +123,7 @@ def upload_document_cloud(ffile_pk):
     )
 
 
-@task(
+@shared_task(
     ignore_result=True,
     time_limit=600,
     name="muckrock.foia.tasks.upload_user_document_cloud",
@@ -227,7 +227,7 @@ class DocumentCloudRetryError(Exception):
     """Custom Error to trigger a retry if the document is not done processing"""
 
 
-@task(
+@shared_task(
     ignore_result=True,
     name="muckrock.foia.tasks.set_document_cloud_pages",
     autoretry_for=(DocumentCloudError, DocumentCloudRetryError, requests.ReadTimeout),
@@ -269,10 +269,7 @@ def set_document_cloud_pages(ffile_pk):
         raise DocumentCloudRetryError()
 
 
-@periodic_task(
-    run_every=crontab(hour=0, minute=20),
-    name="muckrock.foia.tasks.retry_stuck_documents",
-)
+@shared_task
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
     docs = FOIAFile.objects.filter(doc_id="").exclude(comm__foia=None).get_doccloud()
@@ -281,7 +278,7 @@ def retry_stuck_documents():
         upload_document_cloud.delay(doc.pk)
 
 
-@task(
+@shared_task(
     ignore_results=True,
     name="muckrock.foia.tasks.noindex_documentcloud",
     autoretry_for=(DocumentCloudError, requests.ReadTimeout),
@@ -308,7 +305,7 @@ def noindex_documentcloud(foia_pk):
         resp.raise_for_status()
 
 
-@task(
+@shared_task(
     ignore_result=True, max_retries=10, name="muckrock.foia.tasks.composer_create_foias"
 )
 def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
@@ -332,7 +329,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
         )
 
 
-@task(max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit")
+@shared_task(max_retries=10, name="muckrock.foia.tasks.composer_delayed_submit")
 def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
     """Submit a composer to all agencies"""
     logger.info(
@@ -363,7 +360,9 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         composer.multirequesttask_set.create()
 
 
-@task(ignore_result=True, max_retries=3, name="muckrock.foia.tasks.classify_status")
+@shared_task(
+    ignore_result=True, max_retries=3, name="muckrock.foia.tasks.classify_status"
+)
 def classify_status(task_pk, **kwargs):
     """Use a machine learning classifier to predict the communications status"""
 
@@ -473,7 +472,7 @@ def classify_status(task_pk, **kwargs):
             resp_task.save()
 
 
-@task(
+@shared_task(
     ignore_result=True,
     max_retries=5,
     name="muckrock.foia.tasks.send_fax",
@@ -552,12 +551,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             )
 
 
-@periodic_task(
-    run_every=crontab(hour=1, minute=0),
-    time_limit=10 * 60,
-    soft_time_limit=570,
-    name="muckrock.foia.tasks.followup_requests",
-)
+@shared_task
 def followup_requests():
     """Follow up on any requests that need following up on"""
     log = []
@@ -586,9 +580,7 @@ def followup_requests():
         logger.info("Follow Ups:\n%s", "\n".join(log))
 
 
-@periodic_task(
-    run_every=crontab(hour=6, minute=0), name="muckrock.foia.tasks.embargo_warn"
-)
+@shared_task
 def embargo_warn():
     """Warn users their requests are about to come off of embargo"""
     for foia in FOIARequest.objects.filter(
@@ -606,9 +598,7 @@ def embargo_warn():
         ).send(fail_silently=False)
 
 
-@periodic_task(
-    run_every=crontab(hour=0, minute=0), name="muckrock.foia.tasks.embargo_expire"
-)
+@shared_task
 def embargo_expire():
     """Expire requests that have a date_embargo before today"""
     for foia in FOIARequest.objects.filter(
@@ -628,14 +618,7 @@ def embargo_expire():
         ).send(fail_silently=False)
 
 
-# Increase the time limit for autoimport to 10 hours, and a soft time limit to
-# 5 minutes before that
-@periodic_task(
-    run_every=crontab(hour=2, minute=0),
-    name="muckrock.foia.tasks.autoimport",
-    time_limit=36000,
-    soft_time_limit=35700,
-)
+@shared_task
 def autoimport():
     """Auto import documents from S3"""
     # pylint: disable=broad-except
@@ -1013,7 +996,9 @@ class ExportCsv(AsyncFileDownloadTask):
             writer.writerow(f[0](foia) for f in self.fields)
 
 
-@task(ignore_result=True, time_limit=18000, name="muckrock.foia.tasks.export_csv")
+@shared_task(
+    ignore_result=True, time_limit=18000, name="muckrock.foia.tasks.export_csv"
+)
 def export_csv(foia_pks, user_pk):
     """Export a csv of the selected FOIA requests"""
     ExportCsv(user_pk, foia_pks).run()
@@ -1061,13 +1046,15 @@ class ZipRequest(AsyncFileDownloadTask):
                 out_file.write(data)
 
 
-@task(ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.zip_request")
+@shared_task(
+    ignore_result=True, time_limit=1800, name="muckrock.foia.tasks.zip_request"
+)
 def zip_request(foia_pk, user_pk):
     """Send a user a zip download of their request"""
     ZipRequest(user_pk, foia_pk).run()
 
 
-@task(max_retries=10, name="muckrock.foia.tasks.foia_send_email")
+@shared_task(max_retries=10, name="muckrock.foia.tasks.foia_send_email")
 def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     """Send outgoing request emails asynchrnously"""
     # We do not want to do this using djcelery-email, as that
@@ -1093,7 +1080,7 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
         )
 
 
-@task(
+@shared_task(
     ignore_result=True,
     max_retries=6,
     rate_limit="15/s",
@@ -1246,7 +1233,7 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
     return check
 
 
-@task(
+@shared_task(
     ignore_result=True,
     autoretry_for=(DocumentCloudError, requests.ReadTimeout),
     retry_backoff=60,
@@ -1291,7 +1278,7 @@ def import_doccloud_file(file_pk):
                 out_file.write(chunk)
 
 
-@task(
+@shared_task(
     ignore_result=True,
     autoretry_for=(requests.exceptions.RequestException, ValueError),
     retry_backoff=60,

@@ -3,7 +3,7 @@ Celery tasks for the crowdsource application
 """
 
 # Django
-from celery.task import task
+from celery import shared_task
 from django.conf import settings
 
 # Standard Library
@@ -21,7 +21,7 @@ from muckrock.crowdsource.models import Crowdsource
 logger = logging.getLogger(__name__)
 
 
-@task(
+@shared_task(
     name="muckrock.crowdsource.tasks.datum_per_page",
     autoretry_for=(DocumentCloudError,),
     retry_backoff=60,
@@ -44,7 +44,7 @@ def datum_per_page(crowdsource_pk, doc_id, metadata):
         )
 
 
-@task(
+@shared_task(
     name="muckrock.crowdsource.tasks.import_doccloud_proj",
     autoretry_for=(DocumentCloudError,),
     retry_backoff=60,
@@ -95,7 +95,7 @@ class ExportCsv(AsyncFileDownloadTask):
             writer.writerow(csr.get_values(metadata_keys, include_emails))
 
 
-@task(time_limit=1800, name="muckrock.crowdsource.tasks.export_csv")
+@shared_task(time_limit=1800, name="muckrock.crowdsource.tasks.export_csv")
 def export_csv(crowdsource_pk, user_pk):
     """Export the results of the crowdsource for the user"""
     ExportCsv(user_pk, crowdsource_pk).run()

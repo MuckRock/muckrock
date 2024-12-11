@@ -3,9 +3,9 @@ Tasks for the messages application.
 """
 
 # Django
+from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.schedules import crontab
-from celery.task import periodic_task, task
 from django.conf import settings
 from django.contrib.auth.models import User
 
@@ -29,7 +29,7 @@ from muckrock.message.notifications import SlackNotification
 logger = logging.getLogger(__name__)
 
 
-@task(
+@shared_task(
     time_limit=600,
     soft_time_limit=570,
     name="muckrock.message.tasks.send_activity_digest",
@@ -77,48 +77,31 @@ def send_digests(preference, subject):
         send_activity_digest.delay(user.pk, subject, preference)
 
 
-# every hour
-@periodic_task(
-    run_every=crontab(hour="*/1", minute=0), name="muckrock.message.tasks.hourly_digest"
-)
+@shared_task
 def hourly_digest():
     """Send out hourly digest"""
     send_digests("hourly", "Hourly Digest")
 
 
-# every day at 10am
-@periodic_task(
-    run_every=crontab(hour=10, minute=0), name="muckrock.message.tasks.daily_digest"
-)
+@shared_task
 def daily_digest():
     """Send out daily digest"""
     send_digests("daily", "Daily Digest")
 
 
-# every Monday at 10am
-@periodic_task(
-    run_every=crontab(day_of_week=1, hour=10, minute=0),
-    name="muckrock.message.tasks.weekly_digest",
-)
+@shared_task
 def weekly_digest():
     """Send out weekly digest"""
     send_digests("weekly", "Weekly Digest")
 
 
-# first day of every month at 10am
-@periodic_task(
-    run_every=crontab(day_of_month=1, hour=10, minute=0),
-    name="muckrock.message.tasks.monthly_digest",
-)
+@shared_task
 def monthly_digest():
     """Send out monthly digest"""
     send_digests("monthly", "Monthly Digest")
 
 
-# every day at 9:30am
-@periodic_task(
-    run_every=crontab(hour=9, minute=30), name="muckrock.message.tasks.staff_digest"
-)
+@shared_task
 def staff_digest():
     """Send out staff digest"""
     if not settings.SEND_STAFF_DIGEST:
@@ -130,7 +113,7 @@ def staff_digest():
         email.send()
 
 
-@task(name="muckrock.message.tasks.send_invoice_receipt")
+@shared_task(name="muckrock.message.tasks.send_invoice_receipt")
 def send_invoice_receipt(invoice_id):
     """Send out a receipt for an invoiced charge"""
     invoice = stripe_retry_on_error(stripe.Invoice.retrieve, invoice_id)
@@ -170,7 +153,7 @@ def send_invoice_receipt(invoice_id):
     receipt.send(fail_silently=False)
 
 
-@task(name="muckrock.message.tasks.send_charge_receipt")
+@shared_task(name="muckrock.message.tasks.send_charge_receipt")
 def send_charge_receipt(charge_id):
     """Send out a receipt for a charge"""
     logger.info("Charge Receipt for %s", charge_id)
@@ -221,7 +204,7 @@ def get_subscription_type(invoice):
         return "unknown"
 
 
-@task(name="muckrock.message.tasks.failed_payment")
+@shared_task(name="muckrock.message.tasks.failed_payment")
 def failed_payment(invoice_id):
     """Notify a customer about a failed subscription invoice."""
     # pylint: disable=too-many-branches
@@ -288,7 +271,7 @@ def failed_payment(invoice_id):
     notification.send(fail_silently=False)
 
 
-@task(name="muckrock.message.tasks.support")
+@shared_task(name="muckrock.message.tasks.support")
 def support(user_id, message, task_id):
     """Send a response to a user about a flag task."""
     # pylint: disable=import-outside-toplevel
@@ -308,7 +291,7 @@ def support(user_id, message, task_id):
     notification.send(fail_silently=False)
 
 
-@task(name="muckrock.message.tasks.notify_project_contributor")
+@shared_task(name="muckrock.message.tasks.notify_project_contributor")
 def notify_project_contributor(user_id, project_id, added_by_id):
     """Notify a user that they were added as a contributor to a project."""
     # pylint: disable=import-outside-toplevel
@@ -329,7 +312,7 @@ def notify_project_contributor(user_id, project_id, added_by_id):
     notification.send(fail_silently=False)
 
 
-@task(name="muckrock.message.tasks.slack")
+@shared_task(name="muckrock.message.tasks.slack")
 def slack(payload):
     """Send a Slack notification using the provided payload."""
     try:
