@@ -11,7 +11,7 @@ from rest_framework import serializers
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
-from muckrock.foia.models import FOIACommunication, FOIANote, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.foia.models.file import FOIAFile
 from muckrock.organization.models import Organization
 
@@ -271,6 +271,15 @@ class FOIAFileSerializer(serializers.ModelSerializer):
 
         model = FOIAFile
         exclude = ("comm",)  # Exclude communications
+        read_only_fields = (
+            "ffile",
+            "datetime",
+            "title",
+            "source",
+            "description",
+            "doc_id",
+            "pages",
+        )
         extra_kwargs = {
             "ffile": {
                 "help_text": "The URL of the file associated with the FOIA request"
@@ -290,33 +299,6 @@ class FOIAFileSerializer(serializers.ModelSerializer):
         if obj.ffile and hasattr(obj.ffile, "url"):
             return obj.ffile.url
         return ""
-
-
-@extend_schema_serializer(
-    examples=[
-        OpenApiExample(
-            "FOIA Note Example",
-            value={
-                "foia": 72048,
-                "datetime": "2024-07-24T08:18:20.380927-04:00",
-                "note": "This is a note regarding the request",
-            },
-        )
-    ]
-)
-class FOIANoteSerializer(serializers.ModelSerializer):
-    """Serializer for FOIA Note model"""
-
-    datetime = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        """Filters for foia notes"""
-
-        model = FOIANote
-        exclude = ("id", "foia")
-        extra_kwargs = {
-            "datetime": {"help_text": "The date and time when the note was created"},
-        }
 
 
 @extend_schema_serializer(
@@ -344,7 +326,12 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 class FOIACommunicationSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Communication model"""
 
-    files = FOIAFileSerializer(many=True)
+    files = serializers.PrimaryKeyRelatedField(
+        queryset=FOIAFile.objects.all(),
+        many=True,
+        required=False,
+        help_text="The list of file IDs associated with this communication",
+    )
     foia = serializers.PrimaryKeyRelatedField(
         queryset=FOIARequest.objects.all(),
         style={"base_template": "input.html"},
