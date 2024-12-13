@@ -19,9 +19,10 @@ from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
+    FOIAFileSerializer
 )
 from muckrock.foia.exceptions import InsufficientRequestsError
-from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIARequest, FOIAFile
 from muckrock.foia.models.composer import FOIAComposer
 
 
@@ -169,3 +170,14 @@ class FOIACommunicationViewSet(
             fields = ("max_date", "min_date", "foia", "status", "response")
 
     filterset_class = Filter
+
+class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet):
+    """API for managing FOIA files"""
+    def get_queryset(self):
+        return FOIAFile.objects.get_viewable(self.request.user)
+
+    serializer_class = FOIAFileSerializer
+    authentication_classes = [JWTAuthentication, SessionAuthentication]
+
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ['title', 'doc_id']
