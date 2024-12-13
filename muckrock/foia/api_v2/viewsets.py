@@ -171,8 +171,10 @@ class FOIACommunicationViewSet(
 
     filterset_class = Filter
 
+
 class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet):
     """API for managing FOIA files"""
+
     def get_queryset(self):
         return FOIAFile.objects.get_viewable(self.request.user)
 
@@ -180,4 +182,4 @@ class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [JWTAuthentication, SessionAuthentication]
 
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    search_fields = ['title', 'doc_id']
+    search_fields = ["title", "doc_id"]
