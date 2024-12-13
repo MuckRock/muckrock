@@ -17,12 +17,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from muckrock.agency.models.agency import Agency
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
+    FOIAFileSerializer,
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
-    FOIAFileSerializer
 )
 from muckrock.foia.exceptions import InsufficientRequestsError
-from muckrock.foia.models import FOIACommunication, FOIARequest, FOIAFile
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
 
 
