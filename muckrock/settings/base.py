@@ -230,7 +230,7 @@ MIDDLEWARE = (
     "reversion.middleware.RevisionMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
-    #"daily_active_users.middleware.DailyActiveUserMiddleware",
+    "daily_active_users.middleware.DailyActiveUserMiddleware",
 )
 
 INTERNAL_IPS = ("127.0.0.1",)
@@ -303,7 +303,7 @@ INSTALLED_APPS = (
     "muckrock.communication",
     "muckrock.portal",
     "muckrock.crowdsource",
-    #"daily_active_users",
+    "daily_active_users",
     "actstream",
     "simple_history",
     "anymail",
