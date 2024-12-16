@@ -25,7 +25,6 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     ]
     search_fields = [
         "name",
-        "jurisdiction__name",
     ]
 
     class Filter(django_filters.FilterSet):
@@ -40,6 +39,6 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
             """Filters"""
 
             model = Agency
-            fields = ("name", "jurisdiction__name")
+            fields = ("name", "jurisdiction__id")
 
     filterset_class = Filter
