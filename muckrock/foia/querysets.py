@@ -385,6 +385,32 @@ class FOIACommunicationQuerySet(PreloadFileQuerysetMixin, models.QuerySet):
 class FOIAFileQuerySet(models.QuerySet):
     """Custom Queryset for FOIA Files"""
 
+    def get_viewable(self, user):
+        """Get all viewable FOIA communications for given user"""
+        # This is only used for filtering API view
+
+        if user.is_staff:
+            return self.all()
+
+        if user.is_authenticated:
+            # Requests are visible if you own them, have view or edit permissions,
+            # or if they are not embargoed
+            query = (
+                Q(comm__foia__composer__user=user)
+                | Q(comm__foia__in=user.edit_access.all())
+                | Q(comm__foia__in=user.read_access.all())
+                | Q(comm__foia__embargo_status="public")
+            )
+            # organizational users may also view requests from their org that are shared
+            query = query | Q(
+                comm__foia__composer__user__profile__org_share=True,
+                comm__foia__composer__organization__in=user.organizations.all(),
+            )
+            return self.filter(query)
+        else:
+            # anonymous user, filter out embargoes
+            return self.filter(comm__foia__embargo_status="public")
+
     def preload(self, comm_ids, limit=11):
         """Preload the top limit files for the communications in comm_ids"""
         file_qs = self.raw(

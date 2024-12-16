@@ -23,10 +23,27 @@ class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
     class JurisdictionFilter(django_filters.FilterSet):
         """API Filters for Jurisdictions"""
 
-        parent = django_filters.NumberFilter(field_name="parent__id")
-        name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
-        abbrev = django_filters.CharFilter(field_name="abbrev", lookup_expr="iexact")
-        level = django_filters.CharFilter(field_name="level")
+        parent = django_filters.NumberFilter(
+            field_name="parent__id",
+            label=(
+                "ID of the parent jurisdiction. This defines the hierarchy between jurisdictions, "
+                "where a jurisdiction can have a federal or state parent. "
+                "Local jurisdictions cannot be parents."
+            ),
+        )
+        name = django_filters.CharFilter(
+            field_name="name",
+            lookup_expr="icontains",
+            label="The name of the jurisdiction.",
+        )
+        abbrev = django_filters.CharFilter(
+            field_name="abbrev",
+            lookup_expr="iexact",
+            label="The abbreviation for the jurisdiction.  Local jurisdictions don't have one.",
+        )
+        level = django_filters.CharFilter(
+            field_name="level", label="The level of the jurisdiction."
+        )
 
         class Meta:
             """List of filters for the API"""

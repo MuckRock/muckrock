@@ -57,9 +57,10 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         help_text="The timestamp of when this request was submitted",
         required=False,
     )
+
     tracking_id = serializers.ReadOnlyField(
         source="current_tracking_id",
-        help_text="The current tracking ID the agency has assigned to this request",
+        help_text="The tracking ID assigned to this request by the agency",
         required=False,
     )
 
@@ -94,13 +95,11 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "id": {"help_text": "The unique identifier for this FOIA request"},
             "title": {"help_text": "The title of the FOIA request"},
             "slug": {"help_text": "The slug (URL identifier) for the FOIA request"},
-            "status": {
-                "help_text": "The current status of the FOIA request (e.g., processing, completed)"
-            },
+            "status": {"help_text": "The current status of the FOIA request"},
             "agency": {"help_text": "The ID of the agency handling this FOIA request"},
             "embargo_status": {
                 "help_text": (
-                    "The embargo status (e.g., public, embargo, or permanent). "
+                    "The embargo status. "
                     "Embargo is only available to paid professional users and "
                     "permanent is only available to paid organizational members."
                 )
@@ -120,9 +119,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             },
             "datetime_done": {
                 "help_text": "The date and time when the request was completed, if applicable"
-            },
-            "tracking_id": {
-                "help_text": "The tracking ID assigned to this request by the agency"
             },
             "price": {
                 "help_text": "The cost of processing this request, if applicable"
@@ -168,12 +164,16 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         queryset=Agency.objects.filter(status="approved"),
         many=True,
         required=True,
+        help_text="List of agency IDs of agencies you would like to send this request to.",
     )
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.none(),
         required=False,
+        help_text="ID of the organization submitting this request",
     )
-    requested_docs = serializers.CharField()
+    requested_docs = serializers.CharField(
+        help_text="Description of the documents being requested"
+    )
 
     class Meta:
         """Filters for foia request create"""
@@ -191,10 +191,6 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             # "tags",
         )
         extra_kwargs = {
-            "agencies": {
-                "help_text": "The list of approved agencies handling this request by ID"
-            },
-            "organization": {"help_text": "The organization submitting this request"},
             "embargo_status": {
                 "help_text": (
                     "The embargo status for the request (e.g., public, embargo, permanent). "
@@ -203,9 +199,6 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
                 )
             },
             "title": {"help_text": "The title of the FOIA request"},
-            "requested_docs": {
-                "help_text": "Description of the documents being requested"
-            },
         }
 
     def __init__(self, *args, **kwargs):
@@ -258,13 +251,25 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
 
-    ffile = serializers.SerializerMethodField()
-    datetime = serializers.DateTimeField()
-    title = serializers.CharField()
-    source = serializers.CharField()
-    description = serializers.CharField(required=False, allow_blank=True)
-    doc_id = serializers.CharField()
-    pages = serializers.IntegerField()
+    ffile = serializers.SerializerMethodField(
+        help_text="The URL of the file"
+    )
+    datetime = serializers.DateTimeField(
+        help_text="The date and time when the file was uploaded"
+    )
+    title = serializers.CharField(help_text="The title of the file")
+    source = serializers.CharField(
+        help_text="The source of the file (e.g., the agency or department)"
+    )
+    description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="A description of the file",
+    )
+    doc_id = serializers.CharField(
+        help_text="The document identifier assigned to the file"
+    )
+    pages = serializers.IntegerField(help_text="The number of pages in the file")
 
     class Meta:
         """Filters for foia files"""
@@ -280,21 +285,8 @@ class FOIAFileSerializer(serializers.ModelSerializer):
             "doc_id",
             "pages",
         )
-        extra_kwargs = {
-            "ffile": {
-                "help_text": "The URL of the file associated with the FOIA request"
-            },
-            "datetime": {"help_text": "The date and time when the file was uploaded"},
-            "title": {"help_text": "The title of the file"},
-            "source": {
-                "help_text": "The source of the file (e.g., the agency or department)"
-            },
-            "description": {"help_text": "A description of the file (optional)"},
-            "doc_id": {"help_text": "The document identifier assigned to the file"},
-            "pages": {"help_text": "The number of pages in the file"},
-        }
 
-    def get_ffile(self, obj):
+    def get_ffile(self, obj) -> str:
         """Get the ffile URL safely"""
         if obj.ffile and hasattr(obj.ffile, "url"):
             return obj.ffile.url
@@ -364,13 +356,9 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
             "datetime": {
                 "help_text": "The date and time when the communication was sent"
             },
-            "response": {
-                "help_text": "Indicates if the communication is a response (True/False)"
-            },
+            "response": {"help_text": "Indicates if the communication is a response"},
             "autogenerated": {
-                "help_text": (
-                    "Indicates if the communication was autogenerated " "(True/False)"
-                )
+                "help_text": ("Indicates if the communication was autogenerated")
             },
             "communication": {"help_text": "The content of the communication"},
             "status": {"help_text": "The status of the communication, if applicable"},
