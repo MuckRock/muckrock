@@ -32,8 +32,13 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
 
         jurisdiction = django_filters.CharFilter(
             field_name="jurisdiction__id",
+            label="Jurisdiction ID"
         )
-        name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
+        name = django_filters.CharFilter(
+            field_name="name",
+            lookup_expr="icontains",
+            label="Agency Name"
+        )
 
         class Meta:
             """Filters"""
