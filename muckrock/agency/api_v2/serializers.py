@@ -34,11 +34,16 @@ from muckrock.jurisdiction.models import Jurisdiction
 class AgencySerializer(serializers.ModelSerializer):
     """Serializer for Agency model"""
 
-    types = serializers.StringRelatedField(many=True)
+    types = serializers.StringRelatedField(
+        many=True,
+        required=False,
+        help_text="The types of the agency (e.g., Executive, Legislative, Police, etc).",
+    )
     appeal_agency = serializers.PrimaryKeyRelatedField(
         queryset=Agency.objects.all(),
         style={"base_template": "input.html"},
         help_text="The ID of the agency to which appeals are directed",
+        required=False,
     )
     parent = serializers.PrimaryKeyRelatedField(
         queryset=Agency.objects.all(),
@@ -73,24 +78,16 @@ class AgencySerializer(serializers.ModelSerializer):
             "id": {"help_text": "The unique identifier for this agency."},
             "name": {"help_text": "The name of the agency."},
             "slug": {"help_text": "The slug (URL identifier) for the agency."},
-            "status": {
-                "help_text": (
-                    "The current status of the agency (e.g., approved, pending, rejected)."
-                )
-            },
+            "status": {"help_text": ("The current status of the agency")},
             "exempt": {
                 "help_text": (
                     "Indicates whether the agency is exempt from records laws "
-                    "(True/False)."
                 )
-            },
-            "types": {
-                "help_text": "The types of the agency (e.g., Executive, Legislative, Police, etc)."
             },
             "requires_proxy": {
                 "help_text": (
                     "Indicates whether the agency requires a proxy "
-                    "because of in-state residency laws (True/False)."
+                    "because of in-state residency laws."
                 )
             },
             "jurisdiction": {

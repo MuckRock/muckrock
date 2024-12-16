@@ -74,16 +74,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
             "slug": {"help_text": "The slug (URL identifier) for the organization."},
             "uuid": {"help_text": "The unique identifier for the organization."},
             "individual": {
-                "help_text": "Indicates if the organization is individual or not (True/False)."
+                "help_text": "Indicates if the organization is individual or not."
             },
             "entitlement": {
-                "help_text": (
-                    "The entitlement associated with the organization (ID of the entitlement)."
-                )
+                "help_text": ("ID of the entitlements associated with the organization")
             },
             "verified_journalist": {
                 "help_text": (
-                    "Indicates if the organization is verified as a journalist (True/False)."
+                    "Indicates if the organization is verified as a journalist."
                 )
             },
             "users": {"help_text": "List of users associated with the organization"},

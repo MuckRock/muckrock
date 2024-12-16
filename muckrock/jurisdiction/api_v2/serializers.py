@@ -80,18 +80,13 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             "slug": {"help_text": "The slug (URL identifier) for the jurisdiction."},
             "abbrev": {
                 "help_text": (
-                    "The abbreviation for the jurisdiction, local jurisdictions don't have one"
+                    "The abbreviation for the jurisdiction. Local jurisdictions don't have one"
                 )
             },
-            "level": {
-                "help_text": (
-                    "The level of the jurisdiction "
-                    "(e.g., 'f' for federal, 's' for state, 'l' for local)."
-                )
-            },
+            "level": {"help_text": ("The level of the jurisdiction.")},
             "parent": {
                 "help_text": (
-                    "Parent jurisdiction. This defines the hierarchy between jurisdictions, "
+                    "ID of the parent jurisdiction. This defines the hierarchy between jurisdictions, "
                     "where a jurisdiction can have a federal or state parent. "
                     "Local jurisdictions cannot be parents."
                 )
