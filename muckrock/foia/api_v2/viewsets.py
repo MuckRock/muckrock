@@ -17,11 +17,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from muckrock.agency.models.agency import Agency
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
+    FOIAFileSerializer,
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
 )
 from muckrock.foia.exceptions import InsufficientRequestsError
-from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
 
 
@@ -89,17 +90,21 @@ class FOIARequestViewSet(
     class Filter(django_filters.FilterSet):
         """Filters for requests"""
 
-        agency = django_filters.NumberFilter(field_name="agency__id", label="Agency ID")
+        agency = django_filters.NumberFilter(
+            field_name="agency__id", label="ID of the agency the request was sent to."
+        )
         jurisdiction = django_filters.NumberFilter(
-            field_name="agency__jurisdiction__id", label="Jurisdiction ID"
+            field_name="agency__jurisdiction__id",
+            label="ID of the jurisdiction for the request.",
         )
         user = django_filters.NumberFilter(
-            field_name="composer__user__id", label="User"
+            field_name="composer__user__id",
+            label="ID of the user who sent the request.",
         )
         tags = django_filters.CharFilter(field_name="tags__name", label="Tags")
 
         title = django_filters.CharFilter(
-            field_name="title", lookup_expr="icontains", label="Title"
+            field_name="title", lookup_expr="icontains", label="Title of the request"
         )
 
         order_by_field = "ordering"
@@ -161,11 +166,51 @@ class FOIACommunicationViewSet(
             field_name="foia__id", label="The ID of the associated request"
         )
 
+        response = django_filters.BooleanFilter(
+            label="Indicates if the communication is a response"
+        )
+
         # pylint:disable=too-few-public-methods
         class Meta:
             """Filters for foia communications"""
 
             model = FOIACommunication
             fields = ("max_date", "min_date", "foia", "status", "response")
+
+    filterset_class = Filter
+
+
+class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet):
+    """API for managing FOIA files"""
+
+    def get_queryset(self):
+        return FOIAFile.objects.get_viewable(self.request.user)
+
+    serializer_class = FOIAFileSerializer
+    authentication_classes = [JWTAuthentication, SessionAuthentication]
+
+    filter_backends = (DjangoFilterBackend,)
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for FOIA files"""
+
+        communication = django_filters.NumberFilter(
+            field_name="communication__id",
+            label="Filter by the associated communication ID",
+        )
+        title = django_filters.CharFilter(
+            field_name="title", lookup_expr="icontains", label="Filter by Title"
+        )
+        doc_id = django_filters.CharFilter(
+            field_name="doc_id",
+            lookup_expr="icontains",
+            label="Filter by the unique slug for the file",
+        )
+
+        class Meta:
+            """Filters for FOIA files"""
+
+            model = FOIAFile
+            fields = ("communication", "title", "doc_id")
 
     filterset_class = Filter

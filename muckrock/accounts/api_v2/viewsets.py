@@ -17,13 +17,21 @@ class UserFilter(django_filters.FilterSet):
     """User filters"""
 
     full_name = django_filters.CharFilter(
-        field_name="profile__full_name", lookup_expr="icontains"
+        field_name="profile__full_name",
+        lookup_expr="icontains",
+        label="The full name of the user.",
     )
-    username = django_filters.CharFilter(lookup_expr="icontains")
+    username = django_filters.CharFilter(
+        lookup_expr="icontains", label="The unique username of the user."
+    )
     uuid = django_filters.CharFilter(
-        field_name="profile__uuid", lookup_expr="icontains"
+        field_name="profile__uuid",
+        lookup_expr="icontains",
+        label="The unique identifier (UUID) of the user's profile.",
     )
-    email = django_filters.CharFilter(lookup_expr="icontains")
+    email = django_filters.CharFilter(
+        lookup_expr="icontains", label="The email address of the user."
+    )
 
     class Meta:
         """Fields"""

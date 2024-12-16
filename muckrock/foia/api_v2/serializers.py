@@ -11,15 +11,17 @@ from rest_framework import serializers
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
-from muckrock.foia.models import FOIACommunication, FOIANote, FOIARequest
+from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.foia.models.file import FOIAFile
 from muckrock.organization.models import Organization
+
+# pylint:disable = too-few-public-methods
 
 
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
-            "Example 1",
+            "FOIA Request Response Example",
             value={
                 "id": 1,
                 "title": "Meeting Minutes",
@@ -55,13 +57,16 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         help_text="The timestamp of when this request was submitted",
         required=False,
     )
+
     tracking_id = serializers.ReadOnlyField(
         source="current_tracking_id",
-        help_text="The current tracking ID the agency has assigned to this request",
+        help_text="The tracking ID assigned to this request by the agency",
         required=False,
     )
 
     class Meta:
+        """Filters for foia request search"""
+
         model = FOIARequest
         fields = (
             # request details
@@ -87,17 +92,71 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             # "communications",
         )
         extra_kwargs = {
+            "id": {"help_text": "The unique identifier for this FOIA request"},
+            "title": {"help_text": "The title of the FOIA request"},
+            "slug": {"help_text": "The slug (URL identifier) for the FOIA request"},
+            "status": {"help_text": "The current status of the FOIA request"},
+            "agency": {"help_text": "The ID of the agency handling this FOIA request"},
+            "embargo_status": {
+                "help_text": (
+                    "The embargo status. "
+                    "Embargo is only available to paid professional users and "
+                    "permanent is only available to paid organizational members."
+                )
+            },
+            "user": {"help_text": "The user who filed this FOIA request"},
             "edit_collaborators": {
-                "help_text": "The IDs of the users who have been given edit access to "
-                "this request"
+                "help_text": "The users who have been given edit access to this request"
             },
             "read_collaborators": {
-                "help_text": "The IDs of the users who have been given view access to "
-                "this request"
+                "help_text": "The users who have been given view access to this request"
+            },
+            "datetime_submitted": {
+                "help_text": "The date and time when the request was submitted"
+            },
+            "datetime_updated": {
+                "help_text": "The date and time when the request was last updated"
+            },
+            "datetime_done": {
+                "help_text": "The date and time when the request was completed, if applicable"
+            },
+            "price": {
+                "help_text": "The cost of processing this request, if applicable"
             },
         }
 
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Create FOIARequest Example",
+            value={
+                "agencies": [2],
+                "organization": 3,
+                "embargo_status": "public",
+                "title": "Request for Meeting Minutes",
+                "requested_docs": "All meeting minutes from Q1 2023",
+            },
+        ),
+        OpenApiExample(
+            "Create FOIARequest Response Example",
+            value={
+                "id": 1,
+                "title": "Request for Meeting Minutes",
+                "slug": "meeting-minutes-1",
+                "status": "processing",
+                "agency": 2,
+                "embargo_status": "public",
+                "user": 3,
+                "datetime_submitted": "2023-01-20T08:00:00Z",
+                "datetime_updated": "2023-01-21T08:00:00Z",
+                "datetime_done": None,
+                "tracking_id": "ABC123-456",
+                "price": "0.00",
+            },
+        ),
+    ]
+)
 class FOIARequestCreateSerializer(serializers.ModelSerializer):
     """Serializer for filing a new request"""
 
@@ -105,14 +164,20 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         queryset=Agency.objects.filter(status="approved"),
         many=True,
         required=True,
+        help_text="List of agency IDs of agencies you would like to send this request to.",
     )
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.none(),
         required=False,
+        help_text="ID of the organization submitting this request",
     )
-    requested_docs = serializers.CharField()
+    requested_docs = serializers.CharField(
+        help_text="Description of the documents being requested"
+    )
 
     class Meta:
+        """Filters for foia request create"""
+
         model = FOIARequest
         fields = (
             "agencies",
@@ -125,6 +190,16 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             # "read_collaborators",
             # "tags",
         )
+        extra_kwargs = {
+            "embargo_status": {
+                "help_text": (
+                    "The embargo status for the request (e.g., public, embargo, permanent). "
+                    "Embargo is only available to paid professional users and "
+                    "permanent is only available to paid organizational members."
+                )
+            },
+            "title": {"help_text": "The title of the FOIA request"},
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -144,8 +219,8 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
             self.fields.pop("embargo_status")
 
-    # If the user doesn't have the permission to set to a permanent embargo, tell them.
     def validate_embargo_status(self, value):
+        """If the user doesn't have the permission to set to a permanent embargo, tell them"""
         request = self.context.get("request", None)
         if value == "permanent" and not request.user.has_perm(
             "foia.embargo_perm_foiarequest", self.instance
@@ -176,34 +251,44 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
 
-    ffile = serializers.SerializerMethodField()
-    datetime = serializers.DateTimeField()
-    title = serializers.CharField()
-    source = serializers.CharField()
-    description = serializers.CharField(required=False, allow_blank=True)
-    doc_id = serializers.CharField()
-    pages = serializers.IntegerField()
+    ffile = serializers.SerializerMethodField(help_text="The URL of the file")
+    datetime = serializers.DateTimeField(
+        help_text="The date and time when the file was uploaded"
+    )
+    title = serializers.CharField(help_text="The title of the file")
+    source = serializers.CharField(
+        help_text="The source of the file (e.g., the agency or department)"
+    )
+    description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="A description of the file",
+    )
+    doc_id = serializers.CharField(
+        help_text="The document identifier assigned to the file"
+    )
+    pages = serializers.IntegerField(help_text="The number of pages in the file")
 
     class Meta:
+        """Filters for foia files"""
+
         model = FOIAFile
         exclude = ("comm",)  # Exclude communications
+        read_only_fields = (
+            "ffile",
+            "datetime",
+            "title",
+            "source",
+            "description",
+            "doc_id",
+            "pages",
+        )
 
-    def get_ffile(self, obj):
+    def get_ffile(self, obj) -> str:
         """Get the ffile URL safely"""
         if obj.ffile and hasattr(obj.ffile, "url"):
             return obj.ffile.url
-        else:
-            return ""
-
-
-class FOIANoteSerializer(serializers.ModelSerializer):
-    """Serializer for FOIA Note model"""
-
-    datetime = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        model = FOIANote
-        exclude = ("id", "foia")
+        return ""
 
 
 @extend_schema_serializer(
@@ -231,7 +316,12 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 class FOIACommunicationSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Communication model"""
 
-    files = FOIAFileSerializer(many=True)
+    files = serializers.PrimaryKeyRelatedField(
+        queryset=FOIAFile.objects.all(),
+        many=True,
+        required=False,
+        help_text="The list of file IDs associated with this communication",
+    )
     foia = serializers.PrimaryKeyRelatedField(
         queryset=FOIARequest.objects.all(),
         style={"base_template": "input.html"},
@@ -239,6 +329,8 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Filters for foia comms"""
+
         model = FOIACommunication
         fields = [
             "foia",
@@ -253,10 +345,22 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
             "files",
         ]
         extra_kwargs = {
-            "from_user": {
-                "help_text": "The ID of the user who sent this communication"
+            "foia": {
+                "help_text": "The ID of the FOIA request associated with this communication"
             },
-            "to_user": {
-                "help_text": "The ID of the user this communication was sent to"
+            "from_user": {"help_text": "The ID of the user sending this communication"},
+            "to_user": {"help_text": "The ID of the user receiving this communication"},
+            "subject": {"help_text": "The subject of the communication"},
+            "datetime": {
+                "help_text": "The date and time when the communication was sent"
+            },
+            "response": {"help_text": "Indicates if the communication is a response"},
+            "autogenerated": {
+                "help_text": ("Indicates if the communication was autogenerated")
+            },
+            "communication": {"help_text": "The content of the communication"},
+            "status": {"help_text": "The status of the communication, if applicable"},
+            "files": {
+                "help_text": "The list of files associated with this communication"
             },
         }

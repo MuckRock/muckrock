@@ -9,7 +9,7 @@ from muckrock.agency.api_v2.serializers import AgencySerializer
 from muckrock.agency.models import Agency
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods, too-many-ancestors
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for Agency"""
 
@@ -25,21 +25,22 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     ]
     search_fields = [
         "name",
-        "jurisdiction__name",
     ]
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
 
-        jurisdiction = django_filters.CharFilter(
-            field_name="jurisdiction__name", lookup_expr="icontains"
+        jurisdiction__id = django_filters.NumberFilter(
+            field_name="jurisdiction__id", label="Jurisdiction ID"
         )
-        name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
+        name = django_filters.CharFilter(
+            field_name="name", lookup_expr="icontains", label="Agency Name"
+        )
 
         class Meta:
             """Filters"""
 
             model = Agency
-            fields = ("name", "jurisdiction__name")
+            fields = ("name", "jurisdiction__id")
 
     filterset_class = Filter

@@ -113,6 +113,9 @@ router_v2.register(
     r"agencies", muckrock.agency.api_v2.viewsets.AgencyViewSet, "api2-agencies"
 )
 router_v2.register(
+    r"files", muckrock.foia.api_v2.viewsets.FOIAFileViewSet, "api2-files"
+)
+router_v2.register(
     r"jurisdictions",
     muckrock.jurisdiction.api_v2.viewsets.JurisdictionViewSet,
     "api2-jurisdictions",

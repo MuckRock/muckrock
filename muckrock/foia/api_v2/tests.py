@@ -8,7 +8,11 @@ from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
-from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
+from muckrock.foia.factories import (
+    FOIACommunicationFactory,
+    FOIAFileFactory,
+    FOIARequestFactory,
+)
 
 
 class TestFOIARequestViewset(TestCase):
@@ -53,4 +57,16 @@ class TestFOIACommunicationViewset(TestCase):
     def test_list(self):
         FOIACommunicationFactory.create()
         response = self.client.get(reverse("api2-communications-list"))
+        eq_(response.status_code, 200)
+
+
+class TestFOIAFileViewset(TestCase):
+    def test_detail(self):
+        file = FOIAFileFactory.create()
+        response = self.client.get(reverse("api2-files-detail", kwargs={"pk": file.pk}))
+        eq_(response.status_code, 200)
+
+    def test_list(self):
+        FOIAFileFactory.create()
+        response = self.client.get(reverse("api2-files-list"))
         eq_(response.status_code, 200)

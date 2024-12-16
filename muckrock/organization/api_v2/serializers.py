@@ -11,6 +11,7 @@ from muckrock.accounts.api_v2.serializers import UserSerializer
 from muckrock.organization.models import Entitlement, Organization
 
 
+# pylint:disable = too-few-public-methods
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
@@ -68,3 +69,20 @@ class OrganizationSerializer(serializers.ModelSerializer):
             "verified_journalist",
             "users",
         ]
+        extra_kwargs = {
+            "name": {"help_text": "The name of the organization."},
+            "slug": {"help_text": "The slug (URL identifier) for the organization."},
+            "uuid": {"help_text": "The unique identifier for the organization."},
+            "individual": {
+                "help_text": "Indicates if the organization is individual or not."
+            },
+            "entitlement": {
+                "help_text": ("ID of the entitlements associated with the organization")
+            },
+            "verified_journalist": {
+                "help_text": (
+                    "Indicates if the organization is verified as a journalist."
+                )
+            },
+            "users": {"help_text": "List of users associated with the organization"},
+        }

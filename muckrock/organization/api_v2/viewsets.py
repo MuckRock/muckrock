@@ -15,9 +15,15 @@ from muckrock.organization.models import Organization
 class OrganizationFilter(django_filters.FilterSet):
     """Organization filters"""
 
-    name = django_filters.CharFilter(lookup_expr="icontains")
-    slug = django_filters.CharFilter(lookup_expr="icontains")
-    uuid = django_filters.CharFilter(lookup_expr="icontains")
+    name = django_filters.CharFilter(
+        lookup_expr="icontains", label="The name of the organization."
+    )
+    slug = django_filters.CharFilter(
+        lookup_expr="icontains", label="The slug (URL identifier) for the organization."
+    )
+    uuid = django_filters.CharFilter(
+        lookup_expr="icontains", label="The unique identifier for the organization."
+    )
 
     class Meta:
         """Fields"""
