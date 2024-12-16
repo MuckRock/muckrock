@@ -251,9 +251,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
 
-    ffile = serializers.SerializerMethodField(
-        help_text="The URL of the file"
-    )
+    ffile = serializers.SerializerMethodField(help_text="The URL of the file")
     datetime = serializers.DateTimeField(
         help_text="The date and time when the file was uploaded"
     )
