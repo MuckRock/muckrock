@@ -195,7 +195,7 @@ class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet):
         """API Filter for FOIA files"""
 
         communication = django_filters.NumberFilter(
-            field_name="communication__id",
+            field_name="comm__id",
             label="Filter by the associated communication ID",
         )
         title = django_filters.CharFilter(
