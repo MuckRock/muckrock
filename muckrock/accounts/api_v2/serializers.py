@@ -46,11 +46,6 @@ class UserSerializer(serializers.ModelSerializer):
         style={"base_template": "input.html"},
         help_text="The UUID of the user's profile",
     )
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Profile.objects.all(),
-        source="profile.id",
-        help_text="The unique identifier of the user's profile",
-    )
 
     class Meta:
         """Fields"""
@@ -66,6 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
             "uuid",
         )
         extra_kwargs = {
+            "id": {"help_text": "The unique identifier for the user"},
             "username": {"help_text": "The unique username of the user."},
             "email": {"help_text": "The email address of the user."},
             "last_login": {"help_text": "The last time the user logged in."},

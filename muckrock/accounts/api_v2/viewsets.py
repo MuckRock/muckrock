@@ -33,11 +33,13 @@ class UserFilter(django_filters.FilterSet):
         lookup_expr="icontains", label="The email address of the user."
     )
 
+    id = django_filters.NumberFilter(label="The ID of the user")
+
     class Meta:
         """Fields"""
 
         model = User
-        fields = ["full_name", "username", "uuid", "email"]
+        fields = ["id", "full_name", "username", "uuid", "email"]
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
