@@ -296,6 +296,7 @@ class FOIAFileSerializer(serializers.ModelSerializer):
         OpenApiExample(
             "Example 1",
             value={
+                "id": 5,
                 "foia": 72048,
                 "from_user": 4420,
                 "to_user": 9670,
@@ -333,6 +334,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
 
         model = FOIACommunication
         fields = [
+            "id",
             "foia",
             "from_user",
             "to_user",
@@ -345,6 +347,7 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
             "files",
         ]
         extra_kwargs = {
+            "id": {"help_text": "The unique identifier for this communication"},
             "foia": {
                 "help_text": "The ID of the FOIA request associated with this communication"
             },
