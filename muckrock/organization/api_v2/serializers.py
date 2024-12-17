@@ -74,5 +74,5 @@ class OrganizationSerializer(serializers.ModelSerializer):
                     "Indicates if the organization is verified as a journalist."
                 )
             },
-            "users": {"help_text": "List of users associated with the organization"},
+            "users": {"help_text": "List of user IDs associated with the organization"},
         }
