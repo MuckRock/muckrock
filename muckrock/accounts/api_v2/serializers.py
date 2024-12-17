@@ -20,6 +20,7 @@ from muckrock.accounts.models import Profile
         OpenApiExample(
             "Example User",
             value={
+                "id": 1,
                 "username": "jdoe",
                 "email": "jdoe@example.com",
                 "last_login": "2023-10-20T12:34:56Z",
@@ -45,12 +46,18 @@ class UserSerializer(serializers.ModelSerializer):
         style={"base_template": "input.html"},
         help_text="The UUID of the user's profile",
     )
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Profile.objects.all(),
+        source="profile.id",
+        help_text="The unique identifier of the user's profile",
+    )
 
     class Meta:
         """Fields"""
 
         model = User
         fields = (
+            "id",
             "username",
             "email",
             "last_login",
