@@ -793,6 +793,20 @@ class FOIARequest(models.Model):
                 include_latest_pdf=include_latest_pdf,
                 num_msgs=num_msgs,
             )
+            # also let them know the check is in the mail
+            # if there is another comm method on the request
+            methods = [self.portal, self.email, self.fax]
+            if any(x and x.status == "good" for x in methods):
+                text = render_to_string(
+                    "message/communication/payment_notice.txt",
+                    {"address": payment_address},
+                )
+                self.create_out_communication(
+                    from_user=user,
+                    text=text,
+                    user=user,
+                )
+
             return
 
         # We do not have a payment portal or a check address
