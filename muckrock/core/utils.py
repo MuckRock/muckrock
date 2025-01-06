@@ -297,3 +297,11 @@ class UnclosableFile:
 
     def close(self):
         """Do not close the underlying file"""
+
+
+def custom_preprocessing_hook(endpoints):
+    filtered = []
+    for path, path_regex, method, callback in endpoints:
+        if "api_v2" in path:
+            filtered.append((path, path_regex, method, callback))
+    return filtered
