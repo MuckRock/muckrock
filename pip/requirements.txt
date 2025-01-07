@@ -146,8 +146,10 @@ django==4.2
     #   django-storages
     #   django-taggit
     #   djangorestframework
+    #   djangorestframework-simplejwt
     #   dogslow
     #   drf-nested-routers
+    #   drf-spectacular
     #   easy-thumbnails
     #   jsonfield
 django-activity-stream==1.4.2
@@ -216,10 +218,16 @@ django-webpack-loader==1.8.1
 djangorestframework==3.14.0
     # via
     #   -r pip/requirements.in
+    #   djangorestframework-simplejwt
     #   drf-nested-routers
+    #   drf-spectacular
+djangorestframework-simplejwt==5.3.1
+    # via -r pip/requirements.in
 dogslow==1.2
     # via -r pip/requirements.in
 drf-nested-routers==0.91
+    # via -r pip/requirements.in
+drf-spectacular==0.27.2
     # via -r pip/requirements.in
 easy-thumbnails==2.8.5
     # via -r pip/requirements.in
@@ -281,6 +289,8 @@ idna==3.6
     #   yarl
 importlib-metadata==6.11.0
     # via opentelemetry-api
+inflection==0.5.1
+    # via drf-spectacular
 iniconfig==2.0.0
     # via pytest
 ipython==7.16.1
@@ -298,7 +308,9 @@ json5==0.9.14
 jsonfield==2.0.2
     # via -r pip/requirements.in
 jsonschema==4.21.1
-    # via govqa
+    # via
+    #   drf-spectacular
+    #   govqa
 jsonschema-specifications==2023.12.1
     # via jsonschema
 kombu==5.4.2
@@ -409,7 +421,9 @@ pygments==2.13.0
 pyjwkest==1.4.0
     # via -r pip/requirements.in
 pyjwt==2.3.0
-    # via social-auth-core
+    # via
+    #   djangorestframework-simplejwt
+    #   social-auth-core
 pylibmc==1.6.1
     # via -r pip/requirements.in
 pymdown-extensions==7.1
@@ -454,6 +468,7 @@ pytz==2024.2
     #   zenpy
 pyyaml==6.0.1
     # via
+    #   drf-spectacular
     #   huggingface-hub
     #   python-documentcloud
 ratelimit==2.2.1
@@ -596,7 +611,9 @@ tzdata==2024.2
 unidecode==0.4.19
     # via -r pip/requirements.in
 uritemplate==3.0.0
-    # via google-api-python-client
+    # via
+    #   drf-spectacular
+    #   google-api-python-client
 urllib3[secure]==1.26.16
     # via
     #   botocore

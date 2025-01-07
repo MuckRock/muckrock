@@ -13,16 +13,22 @@ from django.views.generic.base import RedirectView, TemplateView
 
 # Third Party
 import debug_toolbar
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
 
 # MuckRock
+import muckrock.accounts.api_v2.viewsets
 import muckrock.accounts.viewsets
+import muckrock.agency.api_v2.viewsets
 import muckrock.agency.viewsets
 import muckrock.crowdsource.viewsets
+import muckrock.foia.api_v2.viewsets
 import muckrock.foia.viewsets
+import muckrock.jurisdiction.api_v2.viewsets
 import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
+import muckrock.organization.api_v2.viewsets
 import muckrock.project.viewsets
 import muckrock.qanda.views
 import muckrock.task.viewsets
@@ -94,6 +100,35 @@ router.register(
 )
 router.register(r"project", muckrock.project.viewsets.ProjectViewSet, "api-project")
 
+router_v2 = DefaultRouter()
+router_v2.register(
+    r"requests", muckrock.foia.api_v2.viewsets.FOIARequestViewSet, "api2-requests"
+)
+router_v2.register(
+    r"communications",
+    muckrock.foia.api_v2.viewsets.FOIACommunicationViewSet,
+    "api2-communications",
+)
+router_v2.register(
+    r"agencies", muckrock.agency.api_v2.viewsets.AgencyViewSet, "api2-agencies"
+)
+router_v2.register(
+    r"files", muckrock.foia.api_v2.viewsets.FOIAFileViewSet, "api2-files"
+)
+router_v2.register(
+    r"jurisdictions",
+    muckrock.jurisdiction.api_v2.viewsets.JurisdictionViewSet,
+    "api2-jurisdictions",
+)
+router_v2.register(
+    r"users", muckrock.accounts.api_v2.viewsets.UserViewSet, "api2-users"
+)
+router_v2.register(
+    r"organizations",
+    muckrock.organization.api_v2.viewsets.OrganizationViewSet,
+    "api2-organizations",
+)
+
 urlpatterns = [
     re_path(r"^$", views.homepage, name="index"),
     re_path(r"^reset_cache/$", views.reset_homepage_cache, name="reset-cache"),
@@ -120,6 +155,7 @@ urlpatterns = [
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^search/$", views.SearchView.as_view(), name="search"),
     re_path(r"^api_v1/", include(router.urls)),
+    re_path(r"^api_v2/", include(router_v2.urls)),
     re_path(r"^robots\.txt$", include("robots.urls")),
     re_path(
         r"^favicon.ico$",
@@ -154,6 +190,12 @@ urlpatterns = [
         "respond/<int:idx>/",
         FOIACommunicationDirectAgencyView.as_view(),
         name="communication-direct-agency",
+    ),
+    path("api_v2/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api_v2/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
     ),
 ]
 
