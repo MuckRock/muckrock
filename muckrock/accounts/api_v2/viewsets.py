@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
 from muckrock.accounts.api_v2.serializers import UserSerializer
-
+from muckrock.core.views import AuthenticatedAPIMixin
 
 # pylint: disable=too-few-public-methods
 class UserFilter(django_filters.FilterSet):
@@ -42,7 +42,7 @@ class UserFilter(django_filters.FilterSet):
         fields = ["id", "full_name", "username", "uuid", "email"]
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
     """API views for users"""
 
     queryset = User.objects.order_by("id").prefetch_related("profile")

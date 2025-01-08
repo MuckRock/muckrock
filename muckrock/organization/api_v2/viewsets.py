@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 # MuckRock
 from muckrock.organization.api_v2.serializers import OrganizationSerializer
 from muckrock.organization.models import Organization
-
+from muckrock.core.views import AuthenticatedAPIMixin
 
 class OrganizationFilter(django_filters.FilterSet):
     """Organization filters"""
@@ -32,7 +32,7 @@ class OrganizationFilter(django_filters.FilterSet):
         fields = ["name", "slug", "uuid"]
 
 
-class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
+class OrganizationViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
     """API views for organizations"""
 
     queryset = Organization.objects.all()
