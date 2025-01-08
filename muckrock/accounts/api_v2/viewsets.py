@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from muckrock.accounts.api_v2.serializers import UserSerializer
 from muckrock.core.views import AuthenticatedAPIMixin
 
+
 # pylint: disable=too-few-public-methods
 class UserFilter(django_filters.FilterSet):
     """User filters"""

@@ -7,9 +7,10 @@ import django_filters
 from rest_framework import viewsets
 
 # MuckRock
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.core.views import AuthenticatedAPIMixin
+
 
 # pylint: disable=too-few-public-methods
 class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):

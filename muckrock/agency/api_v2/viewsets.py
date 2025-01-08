@@ -9,6 +9,7 @@ from muckrock.agency.api_v2.serializers import AgencySerializer
 from muckrock.agency.models import Agency
 from muckrock.core.views import AuthenticatedAPIMixin
 
+
 # pylint: disable=too-few-public-methods, too-many-ancestors
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
     """API views for Agency"""

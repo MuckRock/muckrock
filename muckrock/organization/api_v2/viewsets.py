@@ -8,9 +8,10 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.organization.api_v2.serializers import OrganizationSerializer
 from muckrock.organization.models import Organization
-from muckrock.core.views import AuthenticatedAPIMixin
+
 
 class OrganizationFilter(django_filters.FilterSet):
     """Organization filters"""

@@ -11,9 +11,9 @@ from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, mixins, status as http_status, viewsets
 from rest_framework.response import Response
 
-
 # MuckRock
 from muckrock.agency.models.agency import Agency
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
     FOIAFileSerializer,
@@ -23,7 +23,7 @@ from muckrock.foia.api_v2.serializers import (
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
-from muckrock.core.views import AuthenticatedAPIMixin
+
 
 # pylint:disable=too-many-ancestors
 class FOIARequestViewSet(
@@ -31,7 +31,7 @@ class FOIARequestViewSet(
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
-    AuthenticatedAPIMixin
+    AuthenticatedAPIMixin,
 ):
     """API for FOIA Requests"""
 
@@ -138,7 +138,10 @@ class FOIARequestViewSet(
 
 
 class FOIACommunicationViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet, AuthenticatedAPIMixin
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+    AuthenticatedAPIMixin,
 ):
     """API for FOIA Communications"""
 
