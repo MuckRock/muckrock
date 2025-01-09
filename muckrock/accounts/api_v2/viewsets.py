@@ -43,7 +43,7 @@ class UserFilter(django_filters.FilterSet):
         fields = ["id", "full_name", "username", "uuid", "email"]
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
+class UserViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for users"""
 
     queryset = User.objects.order_by("id").prefetch_related("profile")

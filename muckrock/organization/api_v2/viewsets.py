@@ -33,7 +33,7 @@ class OrganizationFilter(django_filters.FilterSet):
         fields = ["name", "slug", "uuid"]
 
 
-class OrganizationViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
+class OrganizationViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for organizations"""
 
     queryset = Organization.objects.all()
