@@ -67,7 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
             "full_name",
             "uuid",
-            "organizations"
+            "organizations",
         )
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for the user"},
