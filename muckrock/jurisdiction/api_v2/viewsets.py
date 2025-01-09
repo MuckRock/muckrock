@@ -13,7 +13,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 
 # pylint: disable=too-few-public-methods
-class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
+class JurisdictionViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for Jurisdiction"""
 
     queryset = Jurisdiction.objects.order_by("id").select_related("parent__parent")

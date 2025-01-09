@@ -11,7 +11,7 @@ from muckrock.core.views import AuthenticatedAPIMixin
 
 
 # pylint: disable=too-few-public-methods, too-many-ancestors
-class AgencyViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
+class AgencyViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for Agency"""
 
     queryset = Agency.objects.order_by("id")

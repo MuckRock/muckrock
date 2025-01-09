@@ -27,11 +27,11 @@ from muckrock.foia.models.composer import FOIAComposer
 
 # pylint:disable=too-many-ancestors
 class FOIARequestViewSet(
+    AuthenticatedAPIMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
-    AuthenticatedAPIMixin,
 ):
     """API for FOIA Requests"""
 
@@ -138,10 +138,10 @@ class FOIARequestViewSet(
 
 
 class FOIACommunicationViewSet(
+    AuthenticatedAPIMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
-    AuthenticatedAPIMixin,
 ):
     """API for FOIA Communications"""
 
@@ -183,7 +183,7 @@ class FOIACommunicationViewSet(
     filterset_class = Filter
 
 
-class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet, AuthenticatedAPIMixin):
+class FOIAFileViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API for managing FOIA files"""
 
     def get_queryset(self):
