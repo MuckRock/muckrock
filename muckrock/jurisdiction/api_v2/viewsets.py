@@ -7,12 +7,13 @@ import django_filters
 from rest_framework import viewsets
 
 # MuckRock
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
 from muckrock.jurisdiction.models import Jurisdiction
 
 
 # pylint: disable=too-few-public-methods
-class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
+class JurisdictionViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for Jurisdiction"""
 
     queryset = Jurisdiction.objects.order_by("id").select_related("parent__parent")
