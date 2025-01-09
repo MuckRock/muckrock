@@ -9,12 +9,11 @@ from django.template.defaultfilters import slugify
 import django_filters
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import filters, mixins, status as http_status, viewsets
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
     FOIAFileSerializer,
@@ -28,6 +27,7 @@ from muckrock.foia.models.composer import FOIAComposer
 
 # pylint:disable=too-many-ancestors
 class FOIARequestViewSet(
+    AuthenticatedAPIMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
@@ -35,7 +35,6 @@ class FOIARequestViewSet(
 ):
     """API for FOIA Requests"""
 
-    authentication_classes = [JWTAuthentication, SessionAuthentication]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
 
     search_fields = ["title"]
@@ -138,11 +137,13 @@ class FOIARequestViewSet(
 
 
 class FOIACommunicationViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    AuthenticatedAPIMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
 ):
     """API for FOIA Communications"""
 
-    authentication_classes = [JWTAuthentication, SessionAuthentication]
     serializer_class = FOIACommunicationSerializer
     filter_backends = (DjangoFilterBackend,)
 
@@ -180,14 +181,13 @@ class FOIACommunicationViewSet(
     filterset_class = Filter
 
 
-class FOIAFileViewSet(viewsets.ReadOnlyModelViewSet):
+class FOIAFileViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API for managing FOIA files"""
 
     def get_queryset(self):
         return FOIAFile.objects.get_viewable(self.request.user)
 
     serializer_class = FOIAFileSerializer
-    authentication_classes = [JWTAuthentication, SessionAuthentication]
 
     filter_backends = (DjangoFilterBackend,)
 
