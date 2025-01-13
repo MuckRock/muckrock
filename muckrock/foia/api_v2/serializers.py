@@ -25,6 +25,7 @@ from muckrock.organization.models import Organization
             value={
                 "id": 1,
                 "title": "Meeting Minutes",
+                "requested_docs": "All the meeting minutes for the last 30 days",
                 "slug": "meeting-minutes",
                 "status": "processed",
                 "agency": 2,
@@ -64,6 +65,12 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    requested_docs = serializers.CharField(
+        read_only=True,
+        source="composer.requested_docs",
+        help_text="Description of the documents being requested",
+    )
+
     class Meta:
         """Filters for foia request search"""
 
@@ -72,6 +79,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             # request details
             "id",
             "title",
+            "requested_docs",
             "slug",
             "status",
             "agency",
