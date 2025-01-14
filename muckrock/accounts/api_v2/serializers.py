@@ -11,6 +11,7 @@ from rest_framework import serializers
 
 # MuckRock
 from muckrock.accounts.models import Profile
+from muckrock.organization.models import Organization
 
 # pylint:disable = too-few-public-methods
 
@@ -47,6 +48,13 @@ class UserSerializer(serializers.ModelSerializer):
         help_text="The UUID of the user's profile",
     )
 
+    organizations = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        many=True,
+        required=False,
+        help_text="The IDs of the organizations the user belongs to",
+    )
+
     class Meta:
         """Fields"""
 
@@ -59,6 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
             "full_name",
             "uuid",
+            "organizations",
         )
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for the user"},

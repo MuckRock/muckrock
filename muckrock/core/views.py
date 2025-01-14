@@ -32,8 +32,10 @@ from functools import reduce
 # Third Party
 import stripe
 from dal import autocomplete
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.pagination import CursorPagination
 from rest_framework.request import Request
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from watson import search as watson
 from watson.views import SearchMixin
 
@@ -54,6 +56,14 @@ from muckrock.news.models import Article, HomepageOverride
 from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
+
+
+class AuthenticatedAPIMixin:
+    """
+    Mixin for APIv2 viewsets to centralize authentication and permissions.
+    """
+
+    authentication_classes = [JWTAuthentication, SessionAuthentication]
 
 
 class OrderedSortMixin:
