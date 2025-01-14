@@ -1,0 +1,7 @@
+{% autoescape off %}
+To Whom It May Concern:
+
+Please know we have started processing a check for this request fee. A check will be sent out within the next couple of days to {{ address }}.
+
+Thank you.
+{% endautoescape %}
