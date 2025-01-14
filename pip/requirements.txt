@@ -105,7 +105,7 @@ cssselect==0.9.2
     # via premailer
 cssutils==2.7.1
     # via premailer
-daily-active-users==0.1.1
+daily-active-users==0.1.2
     # via -r pip/requirements.in
 decorator==4.3.0
     # via
