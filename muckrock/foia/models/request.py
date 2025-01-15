@@ -498,7 +498,13 @@ class FOIARequest(models.Model):
         not set the request status, unless the request requires a proxy.
         """
 
-        logger.info("FOIA Request submitted: %s, %s, %s", self.pk, appeal, kwargs)
+        logger.info(
+            "FOIA Request submitted: %s, %s, %s, %s",
+            self.pk,
+            self.composer_id,
+            appeal,
+            kwargs,
+        )
 
         agency = self.agency.get_appeal_agency() if appeal else self.agency
 
@@ -511,6 +517,14 @@ class FOIARequest(models.Model):
         if agency.form and initial_submit:
             # this needs review if it cannot fill out the form automatically
             needs_review |= agency.form.fill(self.communications.first())
+        # if the composer has an unresolved multirequest, do not submit
+        if self.composer.multirequesttask_set.filter(resolved=False).exists():
+            needs_review = True
+            logger.warning(
+                "Trying to submit with an open multirequest task: %s %s",
+                self.pk,
+                self.composer_id,
+            )
 
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
