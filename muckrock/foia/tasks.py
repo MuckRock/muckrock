@@ -320,7 +320,12 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
         for agency in composer.agencies.select_related(
             "jurisdiction__law", "jurisdiction__parent__law"
         ).iterator():
-            logger.info("Creating the foia for agency (%s, %s)", agency.pk, agency.name)
+            logger.info(
+                "Creating the foia for agency (%s, %s, %s)",
+                composer_pk,
+                agency.pk,
+                agency.name,
+            )
             FOIARequest.objects.create_new(composer, agency, no_proxy, contact_info)
         # mark all attachments as sent here, after all requests have been sent
         composer.pending_attachments.filter(user=composer.user, sent=False).update(
@@ -345,17 +350,17 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         logger.info("could not fetch composer %s from db", composer_pk)
         return
 
-    logger.info("Fetched the composer")
+    logger.info("Fetched the composer: %s", composer_pk)
     # the delayed submit is processing,
     # clear the delayed id, it is too late to cancel
     composer.delayed_id = ""
     composer.save()
-    logger.info("Saved the composer")
+    logger.info("Saved the composer: %s", composer_pk)
     if approve:
-        logger.info("Approving")
+        logger.info("Approving: %s", composer_pk)
         composer.approved(contact_info)
     else:
-        logger.info("Creating Multirequest Task")
+        logger.info("Creating Multirequest Task: %s", composer_pk)
         composer.multirequesttask_set.create()
 
 
