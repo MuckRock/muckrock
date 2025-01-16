@@ -25,6 +25,7 @@ from muckrock.task.constants import (
 )
 from muckrock.task.models import (
     FlaggedTask,
+    MultiRequestTask,
     NewAgencyTask,
     PortalTask,
     ResponseTask,
@@ -291,3 +292,20 @@ class PortalTaskFilterSet(TaskFilterSet):
             "resolved",
             "resolved_by",
         ]
+
+
+class MultiRequestTaskFilterSet(TaskFilterSet):
+    """Allows multirequest tasks to be filtered by action"""
+
+    form_data__action = django_filters.ChoiceFilter(
+        choices=(
+            ("task_submit", "Submit"),
+            ("reject", "Reject"),
+            ("resolve", "Resolve"),
+        ),
+        label="Action",
+    )
+
+    class Meta:
+        model = MultiRequestTask
+        fields = ["form_data__action"]
