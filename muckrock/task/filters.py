@@ -66,7 +66,12 @@ class TaskFilterSet(django_filters.FilterSet):
         ),
     )
     date_created = django_filters.DateFromToRangeFilter(
-        label="Date Range",
+        label="Date Created Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
+    date_done = django_filters.DateFromToRangeFilter(
+        label="Date Done Range",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
