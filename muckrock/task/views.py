@@ -36,6 +36,7 @@ from muckrock.portal.forms import PortalForm
 from muckrock.tags.models import Tag, normalize
 from muckrock.task.filters import (
     FlaggedTaskFilterSet,
+    MultiRequestTaskFilterSet,
     NewAgencyTaskFilterSet,
     PortalTaskFilterSet,
     ResponseTaskFilterSet,
@@ -519,6 +520,7 @@ class MultiRequestTaskList(TaskList):
     """List view for MultiRequest Tasks"""
 
     title = "Multi-Requests"
+    filter_class = MultiRequestTaskFilterSet
     queryset = MultiRequestTask.objects.preload_list()
     model = MultiRequestTask
     bulk_actions = ["reject", "task_submit"]

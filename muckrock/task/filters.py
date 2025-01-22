@@ -25,6 +25,7 @@ from muckrock.task.constants import (
 )
 from muckrock.task.models import (
     FlaggedTask,
+    MultiRequestTask,
     NewAgencyTask,
     PortalTask,
     ResponseTask,
@@ -66,7 +67,12 @@ class TaskFilterSet(django_filters.FilterSet):
         ),
     )
     date_created = django_filters.DateFromToRangeFilter(
-        label="Date Range",
+        label="Date Created Range",
+        lookup_expr="contains",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
+    date_done = django_filters.DateFromToRangeFilter(
+        label="Date Done Range",
         lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
@@ -286,3 +292,20 @@ class PortalTaskFilterSet(TaskFilterSet):
             "resolved",
             "resolved_by",
         ]
+
+
+class MultiRequestTaskFilterSet(TaskFilterSet):
+    """Allows multirequest tasks to be filtered by action"""
+
+    form_data__action = django_filters.ChoiceFilter(
+        choices=(
+            ("task_submit", "Submit"),
+            ("reject", "Reject"),
+            ("resolve", "Resolve"),
+        ),
+        label="Action",
+    )
+
+    class Meta:
+        model = MultiRequestTask
+        fields = ["form_data__action"]

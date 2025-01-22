@@ -32,7 +32,7 @@
       <textarea name="zendesk_note" placeholder="ZenDesk note..."></textarea>
     </span>
   {% endif %}
-  {% if task.check_foias_processing %}
+  {% if task.check_foias_processing or task.resolved %}
     <span class="task-buttons">
       <button type="submit" class="red button" name="reject" value="true">Reject</button>
       <button type="submit" class="primary button" name="task_submit" value="true">Submit</button>
