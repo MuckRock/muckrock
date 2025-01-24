@@ -545,7 +545,9 @@ class MultiRequestTaskList(TaskList):
                 )
             else:
                 messages.error(request, "Multirequest rejected")
-        return super().task_post_helper(request, task)
+        elif request.POST.get("resolve"):
+            form_data = {"action": "resolve"}
+        return super().task_post_helper(request, task, form_data)
 
 
 class PortalTaskList(TaskList):
