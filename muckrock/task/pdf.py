@@ -19,6 +19,7 @@ from tempfile import TemporaryDirectory
 
 # Third Party
 import emoji
+import img2pdf
 import pypdf
 from fpdf import FPDF
 from pypdf import PdfMerger, PdfReader
@@ -299,7 +300,16 @@ class MailPDF(PDF):
         merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
         files = []
         for file_ in self.comm.files.all():
-            if file_.get_extension() == "pdf":
+            if file_.get_extension() in ["jpg", "jpeg", "png"]:
+                mem_file = BytesIO(img2pdf.convert(file_.ffile))
+                if total_pages + 1 > self.page_limit:
+                    # too long, skip
+                    files.append((file_, "skipped", 1))
+                else:
+                    merger.append(mem_file)
+                    files.append((file_, "attached", 1))
+                    total_pages += 1
+            elif file_.get_extension() == "pdf":
                 try:
                     # detect un-embedded fonts
                     handle_embedding(file_)
