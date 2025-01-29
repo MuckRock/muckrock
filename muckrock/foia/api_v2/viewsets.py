@@ -35,7 +35,6 @@ class FOIARequestViewSet(
 ):
     """API for FOIA Requests"""
 
-    # authentication_classes = [JWTAuthentication, SessionAuthentication]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
 
     search_fields = ["title"]
@@ -145,7 +144,6 @@ class FOIACommunicationViewSet(
 ):
     """API for FOIA Communications"""
 
-    # authentication_classes = [JWTAuthentication, SessionAuthentication]
     serializer_class = FOIACommunicationSerializer
     filter_backends = (DjangoFilterBackend,)
 
@@ -190,7 +188,6 @@ class FOIAFileViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
         return FOIAFile.objects.get_viewable(self.request.user)
 
     serializer_class = FOIAFileSerializer
-    # authentication_classes = [JWTAuthentication, SessionAuthentication]
 
     filter_backends = (DjangoFilterBackend,)
 

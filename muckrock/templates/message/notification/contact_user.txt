@@ -1,8 +1,10 @@
 {% extends 'message/base.txt' %}
 {% block body %}
+{% if foia_url %}
 A MuckRock admin has contacted you about the following request:
 
 {{ base_url }}{{ foia_url }}
+{% endif %}
 
 {{ text }}
 

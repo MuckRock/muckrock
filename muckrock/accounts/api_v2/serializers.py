@@ -54,6 +54,13 @@ class UserSerializer(serializers.ModelSerializer):
         help_text="The IDs of the organizations the user belongs to",
     )
 
+    organizations = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        many=True,
+        required=False,
+        help_text="The IDs of the organizations the user belongs to",
+    )
+
     class Meta:
         """Fields"""
 

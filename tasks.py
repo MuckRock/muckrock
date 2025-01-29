@@ -242,8 +242,8 @@ def pip_compile(c, upgrade=False, package=None):
         upgrade_flag = ""
     c.run(
         DJANGO_RUN.format(
-            cmd="pip-compile --annotation-style line {upgrade_flag} pip/requirements.in &&"
-            "pip-compile --annotation-style line {upgrade_flag} pip/dev-requirements.in".format(
+            cmd="pip-compile {upgrade_flag} pip/requirements.in &&"
+            "pip-compile {upgrade_flag} pip/dev-requirements.in".format(
                 upgrade_flag=upgrade_flag
             )
         )

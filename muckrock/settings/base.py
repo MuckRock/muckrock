@@ -943,3 +943,7 @@ SIMPLE_HISTORY_HISTORY_CHANGE_REASON_USE_TEXT_FIELD = True
 USE_PLAUSIBLE = boolcheck(os.environ.get("USE_PLAUSIBLE", False))
 
 SEND_STAFF_DIGEST = boolcheck(os.environ.get("SEND_STAFF_DIGEST", True))
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = os.environ.get(
+    "SECURE_CROSS_ORIGIN_OPENER_POLICY", "same-origin"
+)

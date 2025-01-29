@@ -589,6 +589,7 @@ class StockResponse(models.Model):
             ("note", "Note"),
             ("multi", "Multirequest Rejection"),
             ("follow", "Follow Up"),
+            ("agency", "New Agency Rejection"),
         ),
         default="user",
     )
