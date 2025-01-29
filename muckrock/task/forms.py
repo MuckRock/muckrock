@@ -325,6 +325,31 @@ class ReplaceNewAgencyForm(forms.Form):
         ),
     )
 
+    text = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 6}),
+        label="Rejection message",
+        required=False,
+    )
+    stock_response = forms.ModelChoiceField(
+        queryset=StockResponse.objects.filter(type="agency"),
+        to_field_name="text",
+        required=False,
+    )
+
+    def send_message(self, agency):
+        """Send the rejection message to the user"""
+        context = {
+            "text": self.cleaned_data["text"],
+        }
+        email = TemplateEmail(
+            user=agency.user,
+            extra_context=context,
+            subject="Agency Rejected",
+            text_template="message/notification/contact_user.txt",
+            html_template="message/notification/contact_user.html",
+        )
+        email.send(fail_silently=False)
+
 
 class BulkNewAgencyTaskForm(forms.Form):
     """Form for creating blank new agencies"""
