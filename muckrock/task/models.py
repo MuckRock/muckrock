@@ -917,23 +917,39 @@ class NewAgencyTask(Task):
         """Approves agency, resends pending requests to it"""
         self._resolve_agency()
 
-    def reject(self, replacement_agency=None):
+    def reject(self, replacement_agency=None, msg_text=None):
         """Reject agency, resend to replacement if one is specified"""
         if replacement_agency is not None:
             self._resolve_agency(replacement_agency)
+            subject = f"Agency Updated: {self.agency}"
+            if msg_text:
+                TemplateEmail(
+                    subject=subject,
+                    user=self.user,
+                    text_template="task/email/agency_rejected.txt",
+                    html_template="task/email/agency_rejected.html",
+                    extra_context={
+                        "agency": self.agency,
+                        "text": msg_text,
+                        "url": settings.MUCKROCK_URL,
+                    },
+                ).send(fail_silently=False)
         else:
             self.agency.status = "rejected"
             self.agency.save()
             foias = self.agency.foiarequest_set.select_related("composer").annotate(
                 count=Count("composer__foias")
             )
-            if foias:
-                # only send an email if they submitted a request with it
-                subject = 'We need your help with your request, "{}"'.format(
-                    foias[0].title
-                )
-                if len(foias) > 1:
-                    subject += ", and others"
+            if msg_text:
+                # only send an email if message text was provided
+                if foias:
+                    subject = 'We need your help with your request, "{}"'.format(
+                        foias[0].title
+                    )
+                    if len(foias) > 1:
+                        subject += ", and others"
+                else:
+                    subject = f"Agency Rejected: {self.agency}"
                 TemplateEmail(
                     subject=subject,
                     user=self.user,
@@ -942,6 +958,7 @@ class NewAgencyTask(Task):
                     extra_context={
                         "agency": self.agency,
                         "foias": foias,
+                        "text": msg_text,
                         "url": settings.MUCKROCK_URL,
                     },
                 ).send(fail_silently=False)
