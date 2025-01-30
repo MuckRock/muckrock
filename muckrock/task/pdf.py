@@ -267,6 +267,39 @@ class MailPDF(PDF):
                 else:
                     page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
+    def _handle_file(self, file_, files, merger):
+        """Determine if we can attach the file"""
+        img_exts = ["jpg", "jpeg", "png"]
+        total_pages = self.page
+
+        if file_.get_extension() in img_exts:
+            mem_file = BytesIO(img2pdf.convert(file_.ffile))
+            if total_pages + 1 > self.page_limit:
+                # too long, skip
+                files.append((file_, "skipped", 1))
+            else:
+                merger.append(mem_file)
+                files.append((file_, "attached", 1))
+                total_pages += 1
+        elif file_.get_extension() == "pdf":
+            try:
+                # detect un-embedded fonts
+                handle_embedding(file_)
+                pages = len(PdfReader(file_.ffile).pages)
+                if pages + total_pages > self.page_limit:
+                    # too long, skip
+                    files.append((file_, "skipped", pages))
+                else:
+                    merger.append(file_.ffile)
+                    files.append((file_, "attached", pages))
+                    total_pages += pages
+            except (PdfReadError, ValueError, subprocess.CalledProcessError):
+                files.append((file_, "error", 0))
+        else:
+            files.append((file_, "skipped", 0))
+
+        return total_pages
+
     def prepare(self, address_override=None, num_msgs=5):
         """Prepare the PDF to be sent by appending attachments"""
         # generate the pdf and merge all pdf attachments
@@ -295,36 +328,11 @@ class MailPDF(PDF):
             return new_pdf.prepare(address_override, num_msgs=num_msgs)
 
         self.page = min(self.page, self.page_limit)
-        total_pages = self.page
         merger = PdfMerger(strict=False)
         merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
         files = []
         for file_ in self.comm.files.all():
-            if file_.get_extension() in ["jpg", "jpeg", "png"]:
-                mem_file = BytesIO(img2pdf.convert(file_.ffile))
-                if total_pages + 1 > self.page_limit:
-                    # too long, skip
-                    files.append((file_, "skipped", 1))
-                else:
-                    merger.append(mem_file)
-                    files.append((file_, "attached", 1))
-                    total_pages += 1
-            elif file_.get_extension() == "pdf":
-                try:
-                    # detect un-embedded fonts
-                    handle_embedding(file_)
-                    pages = len(PdfReader(file_.ffile).pages)
-                    if pages + total_pages > self.page_limit:
-                        # too long, skip
-                        files.append((file_, "skipped", pages))
-                    else:
-                        merger.append(file_.ffile)
-                        files.append((file_, "attached", pages))
-                        total_pages += pages
-                except (PdfReadError, ValueError, subprocess.CalledProcessError):
-                    files.append((file_, "error", 0))
-            else:
-                files.append((file_, "skipped", 0))
+            total_pages = self._handle_file(file_, files, merger)
 
         single_pdf = BytesIO()
         try:
