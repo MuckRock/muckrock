@@ -1,9 +1,7 @@
 {% extends 'message/base.html' %}
 {% block body %}
-  {% if foia_url %}
-    <p>A MuckRock admin has contacted you about the following request:</p>
-    <a href="{{ foia_url|safe }}">{{ foia_title }}</a>
-  {% endif %}
+  <p>A MuckRock admin has contacted you about the following request:</p>
+  <a href="{{ foia_url|safe }}">{{ foia_title }}</a>
   <p>{{ text|linebreaks }}</p>
   <p>Sincerely,<br/>The MuckRock Team</p>
 {% endblock %}
