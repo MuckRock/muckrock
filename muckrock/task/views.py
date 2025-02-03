@@ -448,14 +448,10 @@ class NewAgencyTaskList(TaskList):
         form = ReplaceNewAgencyForm(request.POST, prefix=request.POST.get("task", ""))
         if form.is_valid():
             replace_agency = form.cleaned_data["replace_agency"]
-            task.reject(replace_agency)
+            task.reject(replace_agency, msg_text=form.cleaned_data["text"])
             form_data = {"replace": True, "replace_agency": replace_agency.pk}
             task.resolve(request.user, form_data)
-            if form.cleaned_data["text"]:
-                form.send_message(task.agency)
-                messages.error(request, "Agency replaced and user notified")
-            else:
-                messages.error(request, "Agency replaced")
+            messages.error(request, "Agency replaced")
         else:
             messages.error(request, "Bad form data")
 
@@ -463,12 +459,8 @@ class NewAgencyTaskList(TaskList):
         """Reject the new agency"""
         form = ReplaceNewAgencyForm(request.POST, prefix=request.POST.get("task", ""))
         form.is_valid()
-        if form.cleaned_data["text"]:
-            form.send_message(task.agency)
-            messages.error(request, "Agency rejected and user notified")
-        else:
-            messages.error(request, "Agency rejected")
-        task.reject()
+        messages.error(request, "Agency rejected")
+        task.reject(msg_text=form.cleaned_data["text"])
         form_data = {"reject": True}
         task.resolve(request.user, form_data)
 

@@ -4,25 +4,31 @@
 
   <p>Hi,</p>
 
-  <p>You recently submitted a request to "{{ agency.name }}", and we were not able to figure out to which agency you were referring.</p>
+  <p>{{ text|linebreaks }}</p>
 
-  <p>Since we weren’t sure where to send the request, we’ve credited it back your account, but we’d still like to help.</p>
+  {% if foias %}
+    {% if replaced %}
+      <p>
+        Your request has been directed to {{ agency.name }}. If you believe
+        your request should go elsewhere, please let us know.
+      </p>
+    {% else %}
+      <p>
+        There’s a copy of your request draft here if you want to clarify the
+        agency’s name:
+      </p>
+    {% endif %}
 
-  <p>There’s a copy of your request draft here if you want to clarify the agency’s name:</p>
-
-  <ul>
-    {% for foia in foias %}
-      <li>
-        <a href="{{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}">
-          {{ foia.composer.title }}
-        </a>
-      </li>
-    {% endfor %}
-  </ul>
-
-  <p>If you’re filing a request to a local agency, type it in like "Library, Smallville, IL" (Agency Name, City, State Abbreviation); if it’s a state agency just type in "State Police, IL". For federal requests, you can just type the name.
-
-  <p>You can also reply to this email with some more information about the agency; we’ll work with you to get it out the door as soon as possible.</p>
+    <ul>
+      {% for foia in foias %}
+        <li>
+          <a href="{{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}">
+            {{ foia.composer.title }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 
   <p>Sincerely,<br>
   The MuckRock Team</p>

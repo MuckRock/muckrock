@@ -378,22 +378,6 @@ class MultiRequestRejectionForm(forms.Form):
         required=False,
     )
 
-    def send_message(self, composer):
-        """Send the rejection message to the user"""
-        context = {
-            "text": self.cleaned_data["text"],
-            "foia_url": composer.user.profile.wrap_url(composer.get_absolute_url()),
-            "foia_title": composer.title,
-        }
-        email = TemplateEmail(
-            user=composer.user,
-            extra_context=context,
-            subject="Request Rejected",
-            text_template="message/notification/contact_user.txt",
-            html_template="message/notification/contact_user.html",
-        )
-        email.send(fail_silently=False)
-
 
 class PaymentInfoTaskForm(AddressForm):
     """Form for either an address to mail a check to, or a portal payment URL"""
