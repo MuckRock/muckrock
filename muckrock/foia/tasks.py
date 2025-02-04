@@ -391,6 +391,10 @@ def classify_status(task_pk, **kwargs):
     def resolve_gloo_if_possible(resp_task, extracted_data):
         """Resolve this response task if possible based off of ML setttings"""
 
+        # do not resolve the task if gloo is disabled for the request
+        if resp_task.communication.foia.disable_gloo:
+            return
+
         # do not resolve the task if gloo cannot determine the correct status
         if resp_task.predicted_status == "indeterminate":
             return
