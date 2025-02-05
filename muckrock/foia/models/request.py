@@ -181,6 +181,11 @@ class FOIARequest(models.Model):
     )
 
     disable_autofollowups = models.BooleanField(default=False)
+    disable_gloo = models.BooleanField(
+        default=False,
+        help_text="Do not run gloo to automatically categorize communications "
+        "to this request",
+    )
     missing_proxy = models.BooleanField(
         default=False,
         help_text="This request requires a proxy to file, but no such "

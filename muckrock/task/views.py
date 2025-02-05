@@ -422,47 +422,64 @@ class NewAgencyTaskList(TaskList):
     queryset = NewAgencyTask.objects.preload_list()
     model = NewAgencyTask
 
+    def _approve(self, request, task):
+        """Aprove the new agency"""
+        new_agency_form = AgencyForm(
+            request.POST, instance=task.agency, prefix=request.POST.get("task", "")
+        )
+        if new_agency_form.is_valid():
+            new_agency_form.save()
+        else:
+            raise ValueError("The agency info form is invalid.")
+        task.approve()
+        form_data = new_agency_form.cleaned_data
+        # phone numbers must be strings not phone number objects to serialize
+        if form_data.get("phone"):
+            form_data["phone"] = str(form_data["phone"])
+        if form_data.get("fax"):
+            form_data["fax"] = str(form_data["fax"])
+        if form_data.get("jurisdiction"):
+            form_data["jurisdiction"] = form_data["jurisdiction"].pk
+        form_data.update({"approve": True})
+        task.resolve(request.user, form_data)
+
+    def _replace(self, request, task):
+        """Replace the new agency with an existing one"""
+        form = ReplaceNewAgencyForm(request.POST, prefix=request.POST.get("task", ""))
+        if form.is_valid():
+            replace_agency = form.cleaned_data["replace_agency"]
+            task.reject(replace_agency, msg_text=form.cleaned_data["text"])
+            form_data = {"replace": True, "replace_agency": replace_agency.pk}
+            task.resolve(request.user, form_data)
+            messages.error(request, "Agency replaced")
+        else:
+            messages.error(request, "Bad form data")
+
+    def _reject(self, request, task):
+        """Reject the new agency"""
+        form = ReplaceNewAgencyForm(request.POST, prefix=request.POST.get("task", ""))
+        form.is_valid()
+        messages.error(request, "Agency rejected")
+        task.reject(msg_text=form.cleaned_data["text"])
+        form_data = {"reject": True}
+        task.resolve(request.user, form_data)
+
+    def _spam(self, request, task):
+        """Blacklist the submitting user"""
+        task.spam(request.user)
+        form_data = {"spam": True}
+        task.resolve(request.user, form_data)
+
     def task_post_helper(self, request, task, form_data=None):
         """Special post handlers exclusive to NewAgencyTasks"""
         if request.POST.get("approve"):
-            new_agency_form = AgencyForm(
-                request.POST, instance=task.agency, prefix=request.POST.get("task", "")
-            )
-            if new_agency_form.is_valid():
-                new_agency_form.save()
-            else:
-                raise ValueError("The agency info form is invalid.")
-            task.approve()
-            form_data = new_agency_form.cleaned_data
-            # phone numbers must be strings not phone number objects to serialize
-            if form_data.get("phone"):
-                form_data["phone"] = str(form_data["phone"])
-            if form_data.get("fax"):
-                form_data["fax"] = str(form_data["fax"])
-            if form_data.get("jurisdiction"):
-                form_data["jurisdiction"] = form_data["jurisdiction"].pk
-            form_data.update({"approve": True})
-            task.resolve(request.user, form_data)
+            self._approve(request, task)
         elif request.POST.get("replace"):
-            form = ReplaceNewAgencyForm(
-                request.POST, prefix=request.POST.get("task", "")
-            )
-            if form.is_valid():
-                replace_agency = form.cleaned_data["replace_agency"]
-                task.reject(replace_agency)
-                form_data = {"replace": True, "replace_agency": replace_agency.pk}
-                task.resolve(request.user, form_data)
-            else:
-                messages.error(request, "Bad form data")
-                return None
+            self._replace(request, task)
         elif request.POST.get("reject"):
-            task.reject()
-            form_data = {"reject": True}
-            task.resolve(request.user, form_data)
+            self._reject(request, task)
         elif request.POST.get("spam"):
-            task.spam(request.user)
-            form_data = {"spam": True}
-            task.resolve(request.user, form_data)
+            self._spam(request, task)
         return super().task_post_helper(request, task)
 
 
