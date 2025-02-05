@@ -364,81 +364,81 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         composer.multirequesttask_set.create()
 
 
+def get_text_ocr(doc_id):
+    """Get the text OCR from document cloud"""
+
+    dc_client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+
+    try:
+        document = dc_client.documents.get(doc_id)
+    except DocumentCloudError as exc:
+        logger.warning("Doc Cloud error for %s: %s", doc_id, exc.error)
+        return ""
+
+    return document.full_text
+
+
+def resolve_gloo_if_possible(resp_task, extracted_data):
+    """Resolve this response task if possible based off of ML setttings"""
+
+    # do not resolve the task if gloo is disabled for the request
+    if resp_task.communication.foia.disable_gloo:
+        return
+
+    # do not resolve the task if gloo cannot determine the correct status
+    if resp_task.predicted_status == "indeterminate":
+        return
+
+    # do not resolve the task if gloo classifies a communication as completed
+    # or partially completed without an attachment
+    if (
+        resp_task.predicted_status in ["done", "partial"]
+        and not resp_task.communication.files.exists()
+    ):
+        return
+
+    # do not resolve the task if gloo detects payments, to avoid false positives
+    if (
+        not config.GLOO_RESOLVE_PAYMENTS
+        and extracted_data.requestStatus == RequestStatus.PAYMENT_REQUIRED
+    ):
+        return
+
+    try:
+        gloo_robot = User.objects.get(username="gloo")
+        values = {"status": resp_task.predicted_status}
+        resp_task.set_status(resp_task.predicted_status)
+        if extracted_data.trackingNumber:
+            values["tracking_id"] = extracted_data.trackingNumber
+            resp_task.set_tracking_id(extracted_data.trackingNumber)
+        if extracted_data.price:
+            values["price"] = extracted_data.price
+            resp_task.set_price(extracted_data.price)
+        if extracted_data.dateEstimate:
+            try:
+                resp_task.set_date_estimate(
+                    datetime.strptime(extracted_data.dateEstimate, "%Y-%m-%d").date()
+                )
+                values["date_estimate"] = extracted_data.dateEstimate
+            except ValueError:
+                # ignore the date estimate if it is the wrong format
+                pass
+
+        resp_task.resolve(gloo_robot, values)
+    except User.DoesNotExist:
+        logger.error("gloo account does not exist")
+
+
 @shared_task(
     ignore_result=True, max_retries=3, name="muckrock.foia.tasks.classify_status"
 )
 def classify_status(task_pk, **kwargs):
     """Use a machine learning classifier to predict the communications status"""
-
-    def get_text_ocr(doc_id):
-        """Get the text OCR from document cloud"""
-
-        dc_client = DocumentCloud(
-            username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-            password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-            base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-            auth_uri=f"{settings.SQUARELET_URL}/api/",
-        )
-
-        try:
-            document = dc_client.documents.get(doc_id)
-        except DocumentCloudError as exc:
-            logger.warning("Doc Cloud error for %s: %s", doc_id, exc.error)
-            return ""
-
-        return document.full_text
-
-    def resolve_gloo_if_possible(resp_task, extracted_data):
-        """Resolve this response task if possible based off of ML setttings"""
-
-        # do not resolve the task if gloo is disabled for the request
-        if resp_task.communication.foia.disable_gloo:
-            return
-
-        # do not resolve the task if gloo cannot determine the correct status
-        if resp_task.predicted_status == "indeterminate":
-            return
-
-        # do not resolve the task if gloo classifies a communication as completed
-        # or partially completed without an attachment
-        if (
-            resp_task.predicted_status in ["done", "partial"]
-            and not resp_task.communication.files.exists()
-        ):
-            return
-
-        # do not resolve the task if gloo detects payments, to avoid false positives
-        if (
-            not config.GLOO_RESOLVE_PAYMENTS
-            and extracted_data.requestStatus == RequestStatus.PAYMENT_REQUIRED
-        ):
-            return
-
-        try:
-            gloo_robot = User.objects.get(username="gloo")
-            values = {"status": resp_task.predicted_status}
-            resp_task.set_status(resp_task.predicted_status)
-            if extracted_data.trackingNumber:
-                values["tracking_id"] = extracted_data.trackingNumber
-                resp_task.set_tracking_id(extracted_data.trackingNumber)
-            if extracted_data.price:
-                values["price"] = extracted_data.price
-                resp_task.set_price(extracted_data.price)
-            if extracted_data.dateEstimate:
-                try:
-                    resp_task.set_date_estimate(
-                        datetime.strptime(
-                            extracted_data.dateEstimate, "%Y-%m-%d"
-                        ).date()
-                    )
-                    values["date_estimate"] = extracted_data.dateEstimate
-                except ValueError:
-                    # ignore the date estimate if it is the wrong format
-                    pass
-
-            resp_task.resolve(gloo_robot, values)
-        except User.DoesNotExist:
-            logger.error("gloo account does not exist")
 
     try:
         resp_task = ResponseTask.objects.get(pk=task_pk)
