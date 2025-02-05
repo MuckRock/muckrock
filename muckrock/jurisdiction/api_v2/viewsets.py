@@ -43,7 +43,7 @@ class JurisdictionViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
             label="The abbreviation for the jurisdiction.  Local jurisdictions don't have one.",
         )
         level = django_filters.CharFilter(
-            field_name="level", label="The level of the jurisdiction."
+            field_name="level", label="Levels: f for federal, s for state, l for local"
         )
 
         class Meta:
