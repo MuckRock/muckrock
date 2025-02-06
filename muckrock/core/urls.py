@@ -29,6 +29,7 @@ import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
 import muckrock.organization.api_v2.viewsets
+import muckrock.project.api_v2.viewsets
 import muckrock.project.viewsets
 import muckrock.qanda.views
 import muckrock.task.viewsets
@@ -127,6 +128,12 @@ router_v2.register(
     r"organizations",
     muckrock.organization.api_v2.viewsets.OrganizationViewSet,
     "api2-organizations",
+)
+
+router_v2.register(
+    r"projects",
+    muckrock.project.api_v2.viewsets.ProjectViewSet,
+    "api2-projects",
 )
 
 urlpatterns = [
