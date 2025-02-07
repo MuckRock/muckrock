@@ -59,10 +59,11 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         required=False,
     )
 
-    tracking_id = serializers.ReadOnlyField(
+    tracking_id = serializers.CharField(
         source="current_tracking_id",
         help_text="The tracking ID assigned to this request by the agency",
         required=False,
+        read_only=True,
     )
 
     requested_docs = serializers.CharField(
