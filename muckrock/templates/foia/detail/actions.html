@@ -91,8 +91,11 @@
     {% if user_can_pay %}
       <div class="payment prompt">
         <p>
-          This request requires a payment{% if foia.price %} of
-          ${{foia.price|floatformat:2}}{% endif %}.
+          Our automated system has identified a payment request{% if foia.price %}
+          of ${{ foia.price|floatformat:2 }}{% endif %}.
+          We assume our system has made an accurate detection; however, if it
+          looks like the payment status has been applied in error, please
+          submit a Get Help ticket.
         </p>
         <footer class="button-group">
           <a class="success button" href="#pay">Pay</a>
