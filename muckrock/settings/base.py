@@ -232,7 +232,14 @@ MIDDLEWARE = (
     "django_hosts.middleware.HostsResponseMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "daily_active_users.middleware.DailyActiveUserMiddleware",
+    "core.middleware.FlatpageRedirectMiddleware",
 )
+
+FLATPAGES_REDIRECTS = {
+    '/about/how-we-work/': 'https://help.muckrock.com/How-MuckRock-Works-19ef889269638140b169c8224a4c7c05',
+    '/api/': 'https://help.muckrock.com/API-19ef8892696381e88627c50e4ee90ed4',
+    '/faq/': 'https://help.muckrock.com/Frequently-Asked-Questions-19ef88926963814ea7e8e947b7fb6222',
+}
 
 INTERNAL_IPS = ("127.0.0.1",)
 
