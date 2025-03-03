@@ -30,9 +30,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # set up makecert root CA
 RUN curl http://localhost/rootCA.pem > /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates
 
-# heroku cli
-RUN curl https://cli-assets.heroku.com/install.sh | sh
-
 # install NVM
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 18.16.0
@@ -46,6 +43,9 @@ RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash 
 
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+# heroku cli
+RUN curl https://cli-assets.heroku.com/install.sh | sh
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./pip /pip
