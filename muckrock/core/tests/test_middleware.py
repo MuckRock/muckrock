@@ -2,7 +2,10 @@ from django.test import TestCase, RequestFactory, override_settings
 from django.http import HttpResponse, HttpResponseNotFound
 from muckrock.core.middleware import FlatpageRedirectMiddleware
 
-@override_settings(ALLOWED_HOSTS=["www.muckrock.com", "www.foiamachine.org", "www.unknownsite.org"])
+
+@override_settings(
+    ALLOWED_HOSTS=["www.muckrock.com", "www.foiamachine.org", "www.unknownsite.org"]
+)
 class FlatpageRedirectMiddlewareTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -25,7 +28,9 @@ class FlatpageRedirectMiddlewareTests(TestCase):
         response = HttpResponseNotFound()
         redirected = self.middleware.process_response(request, response)
         self.assertEqual(redirected.status_code, 301)
-        self.assertEqual(redirected.url, "https://help.muckrock.com/how-we-work-redirect")
+        self.assertEqual(
+            redirected.url, "https://help.muckrock.com/how-we-work-redirect"
+        )
 
     @override_settings(
         FLATPAGES_REDIRECTS={
@@ -43,7 +48,9 @@ class FlatpageRedirectMiddlewareTests(TestCase):
         response = HttpResponseNotFound()
         redirected = self.middleware.process_response(request, response)
         self.assertEqual(redirected.status_code, 301)
-        self.assertEqual(redirected.url, "https://help.muckrock.com/foia-about-redirect")
+        self.assertEqual(
+            redirected.url, "https://help.muckrock.com/foia-about-redirect"
+        )
 
     @override_settings(
         FLATPAGES_REDIRECTS={

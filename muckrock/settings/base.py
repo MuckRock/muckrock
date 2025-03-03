@@ -236,14 +236,18 @@ MIDDLEWARE = (
 )
 
 FLATPAGES_REDIRECTS = {
-    'www.foiamachine.org': {
-        '/about/': 'https://help.muckrock.com/FOIA-Machine-19ef8892696381929466c66acc213128'
+    "www.foiamachine.org": {
+        "/about/": (
+            "https://help.muckrock.com/FOIA-Machine-19ef8892696381929466c66acc213128"
+        )
     },
-    'www.muckrock.com': {
-        '/about/how-we-work/': 'https://help.muckrock.com/How-MuckRock-Works-19ef889269638140b169c8224a4c7c05',
-        '/api/': 'https://help.muckrock.com/API-19ef8892696381e88627c50e4ee90ed4',
-        '/faq/': 'https://help.muckrock.com/Frequently-Asked-Questions-19ef88926963814ea7e8e947b7fb6222',
-    }
+    "www.muckrock.com": {
+        "/about/how-we-work/": (
+            "https://help.muckrock.com/19ef889269638140b169c8224a4c7c05"
+        ),
+        "/api/": "https://help.muckrock.com/19ef8892696381e88627c50e4ee90ed4",
+        "/faq/": ("https://help.muckrock.com/19ef88926963814ea7e8e947b7fb6222"),
+    },
 }
 
 INTERNAL_IPS = ("127.0.0.1",)
