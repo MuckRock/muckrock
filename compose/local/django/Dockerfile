@@ -30,6 +30,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # set up makecert root CA
 RUN curl http://localhost/rootCA.pem > /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates
 
+
+RUN apt-get update && apt-get install -y libsodium-dev
+ENV SODIUM_INSTALL=system
+
 # install NVM
 ENV NVM_DIR /usr/local/nvm
 ENV NODE_VERSION 18.16.0
@@ -51,6 +55,11 @@ RUN curl https://cli-assets.heroku.com/install.sh | sh
 COPY ./pip /pip
 #RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
 #RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
+# Update setuptools
+RUN pip install --upgrade setuptools>=61.0.0
+# Use pre-built wheel
+RUN pip install wheel
+# Install requirements
 RUN pip install -r /pip/requirements.txt
 RUN pip install -r /pip/dev-requirements.txt
 
