@@ -3,15 +3,17 @@ from django.http import HttpResponse, HttpResponseNotFound
 from muckrock.core.middleware import FlatpageRedirectMiddleware
 
 
-@override_settings(
-    ALLOWED_HOSTS=["www.muckrock.com", "www.foiamachine.org", "www.unknownsite.org"]
-)
 class FlatpageRedirectMiddlewareTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.middleware = FlatpageRedirectMiddleware(lambda request: HttpResponse())
 
     @override_settings(
+        ALLOWED_HOSTS=[
+            "www.muckrock.com",
+            "www.foiamachine.org",
+            "www.unknownsite.org",
+        ],
         FLATPAGES_REDIRECTS={
             "www.muckrock.com": {
                 "about/how-we-work/": "https://help.muckrock.com/how-we-work-redirect",
@@ -19,7 +21,7 @@ class FlatpageRedirectMiddlewareTests(TestCase):
             "www.foiamachine.org": {
                 "about/": "https://help.muckrock.com/foia-about-redirect",
             },
-        }
+        },
     )
     def test_redirect_muckrock_domain(self):
         # Request for a known route in the mocks above
@@ -33,6 +35,11 @@ class FlatpageRedirectMiddlewareTests(TestCase):
         )
 
     @override_settings(
+        ALLOWED_HOSTS=[
+            "www.muckrock.com",
+            "www.foiamachine.org",
+            "www.unknownsite.org",
+        ],
         FLATPAGES_REDIRECTS={
             "www.muckrock.com": {
                 "about/how-we-work/": "https://help.muckrock.com/how-we-work-redirect",
@@ -40,7 +47,7 @@ class FlatpageRedirectMiddlewareTests(TestCase):
             "www.foiamachine.org": {
                 "about/": "https://help.muckrock.com/foia-about-redirect",
             },
-        }
+        },
     )
     def test_redirect_foiamachine_domain(self):
         request = self.factory.get("/about/")
@@ -53,11 +60,16 @@ class FlatpageRedirectMiddlewareTests(TestCase):
         )
 
     @override_settings(
+        ALLOWED_HOSTS=[
+            "www.muckrock.com",
+            "www.foiamachine.org",
+            "www.unknownsite.org",
+        ],
         FLATPAGES_REDIRECTS={
             "www.muckrock.com": {
                 "about/how-we-work/": "https://help.muckrock.com/how-we-work-redirect",
             }
-        }
+        },
     )
     def test_no_redirect_unknown_site(self):
         request = self.factory.get("/about/how-we-work/")
@@ -67,11 +79,16 @@ class FlatpageRedirectMiddlewareTests(TestCase):
         self.assertEqual(new_response.status_code, 404)
 
     @override_settings(
+        ALLOWED_HOSTS=[
+            "www.muckrock.com",
+            "www.foiamachine.org",
+            "www.unknownsite.org",
+        ],
         FLATPAGES_REDIRECTS={
             "www.muckrock.com": {
                 "about/how-we-work/": "https://help.muckrock.com/how-we-work-redirect",
             }
-        }
+        },
     )
     def test_no_redirect_unknown_path(self):
         request = self.factory.get("/unknown/path/")
