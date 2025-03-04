@@ -1,7 +1,8 @@
 # middleware.py
+# Django
+from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
 from django.utils.deprecation import MiddlewareMixin
-from django.conf import settings
 
 
 class FlatpageRedirectMiddleware(MiddlewareMixin):

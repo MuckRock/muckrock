@@ -1,5 +1,8 @@
-from django.test import TestCase, RequestFactory, override_settings
+# Django
 from django.http import HttpResponse, HttpResponseNotFound
+from django.test import RequestFactory, TestCase, override_settings
+
+# MuckRock
 from muckrock.core.middleware import FlatpageRedirectMiddleware
 
 
