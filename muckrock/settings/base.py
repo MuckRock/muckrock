@@ -232,7 +232,7 @@ MIDDLEWARE = (
     "django_hosts.middleware.HostsResponseMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "daily_active_users.middleware.DailyActiveUserMiddleware",
-    "core.middleware.FlatpageRedirectMiddleware",
+    "muckrock.core.middleware.FlatpageRedirectMiddleware",
 )
 
 FLATPAGES_REDIRECTS = {
