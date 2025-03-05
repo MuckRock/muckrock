@@ -20,7 +20,7 @@
                     {% include 'lib/component/icon/create-request.svg' %}
                     <span class="label">File a Request</span>
                 </a>
-                <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="/about/how-we-work/" id="learn-more">learn how it works</a>.</div>
+                <div class="call-to-action"><a href="{% url 'foia-root' %}">Explore filed requests</a> or <a href="https://help.muckrock.com/19ef889269638140b169c8224a4c7c05" id="learn-more">learn how it works</a>.</div>
             </div>
             <ul class="stats banner-container">
 			{% with request_count=stats.request_count agency_count=stats.agency_count completed_count=stats.completed_count page_count=stats.page_count %}
