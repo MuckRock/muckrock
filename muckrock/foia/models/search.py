@@ -22,7 +22,7 @@ class FOIASavedSearch(models.Model):
 
     # fields to search and filter on
     query = models.CharField(max_length=255, blank=True)
-    status = models.CharField(max_length=10, choices=BLANK_STATUS)
+    status = models.CharField(max_length=12, choices=BLANK_STATUS)
     users = models.ManyToManyField("auth.User", related_name="+")
     agencies = models.ManyToManyField("agency.Agency")
     jurisdictions = models.ManyToManyField(

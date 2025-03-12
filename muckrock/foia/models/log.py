@@ -65,7 +65,7 @@ class FOIALogEntry(models.Model):
     exemptions = models.CharField(max_length=255, blank=True)
     date_requested = models.DateField(blank=True, null=True)
     date_completed = models.DateField(blank=True, null=True)
-    status = models.CharField(max_length=10, choices=STATUS, blank=True)
+    status = models.CharField(max_length=12, choices=STATUS, blank=True)
     request_url = models.URLField(max_length=255, blank=True)
     foia_request = models.ForeignKey(
         "foia.foiarequest",

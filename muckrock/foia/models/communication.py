@@ -94,7 +94,7 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for
     # machine learning
     status = models.CharField(
-        max_length=10,
+        max_length=12,
         choices=STATUS,
         blank=True,
         null=True,

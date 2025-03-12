@@ -19,6 +19,7 @@ def classify_status(status):
         "rejected": class_stop,
         "no_docs": class_stop,
         "abandoned": class_stop,
+        "consolidated": class_stop,
         "submitted": class_wait,
         "fix": class_wait,
         "payment": class_wait,

@@ -102,6 +102,9 @@ def store_statistics():
     kwargs["total_requests_abandoned"] = FOIARequest.objects.filter(
         status="abandoned"
     ).count()
+    kwargs["total_requests_consolidated"] = FOIARequest.objects.filter(
+        status="consolidated"
+    ).count()
     kwargs["total_requests_lawsuit"] = FOIARequest.objects.filter(
         status="lawsuit"
     ).count()
@@ -218,6 +221,9 @@ def store_statistics():
     ).count()
     kwargs["machine_requests_abandoned"] = FoiaMachineRequest.objects.filter(
         status="abandoned"
+    ).count()
+    kwargs["machine_requests_consolidated"] = FoiaMachineRequest.objects.filter(
+        status="consolidated"
     ).count()
     kwargs["machine_requests_lawsuit"] = FoiaMachineRequest.objects.filter(
         status="lawsuit"
