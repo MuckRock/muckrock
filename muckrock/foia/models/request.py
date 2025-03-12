@@ -66,9 +66,10 @@ STATUS = [
     ("done", "Completed"),
     ("partial", "Partially Completed"),
     ("abandoned", "Withdrawn"),
+    ("consolidated", "Consolidated"),
 ]
 
-END_STATUS = ["rejected", "no_docs", "done", "partial", "abandoned"]
+END_STATUS = ["rejected", "no_docs", "done", "partial", "abandoned", "consolidated"]
 
 EMBARGO_CHOICES = [
     ("public", "Public"),
@@ -93,7 +94,7 @@ class FOIARequest(models.Model):
         help_text="The slug is generated from the title and used in the request URL",
     )
     status = models.CharField(
-        max_length=10,
+        max_length=12,
         choices=STATUS,
         db_index=True,
         help_text="The current status of the request",

@@ -34,7 +34,7 @@ class FoiaMachineRequest(models.Model):
     slug = models.SlugField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
-        max_length=10, choices=STATUS, default="started", db_index=True
+        max_length=12, choices=STATUS, default="started", db_index=True
     )
     request_language = models.TextField()
     jurisdiction = models.ForeignKey(

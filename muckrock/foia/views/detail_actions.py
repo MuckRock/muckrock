@@ -92,7 +92,7 @@ def status(request, foia):
     staff_editable = request.user.is_staff and status_ in allowed_statuses
     if foia.status != "submitted" and (user_editable or staff_editable):
         foia.status = status_
-        if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
+        if foia.status in ["rejected", "no_docs", "done", "abandoned", "consolidated"]:
             foia.datetime_done = foia.communications.last().datetime
         foia.save(comment="status updated")
         StatusChangeTask.objects.create(
@@ -547,7 +547,13 @@ def agency_reply(request, foia):
             foia.status = form.cleaned_data["status"]
             if foia.status == "payment":
                 foia.price = form.cleaned_data["price"] / 100.0
-            if foia.status in ["rejected", "no_docs", "done", "abandoned"]:
+            if foia.status in [
+                "rejected",
+                "no_docs",
+                "done",
+                "abandoned",
+                "consolidated",
+            ]:
                 foia.datetime_done = comm.datetime
             foia.save()
             foia.process_attachments(agency_user)

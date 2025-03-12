@@ -232,7 +232,13 @@ class ResponseTaskForm(forms.Form):
                 foia = comm.foia
                 if status is not None:
                     foia.status = status
-                if status in ["rejected", "no_docs", "done", "abandoned"]:
+                if status in [
+                    "rejected",
+                    "no_docs",
+                    "done",
+                    "abandoned",
+                    "consolidated",
+                ]:
                     foia.datetime_done = comm.datetime
                 foia.update()
                 foia.save(comment="response task status")
