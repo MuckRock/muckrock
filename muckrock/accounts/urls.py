@@ -13,15 +13,16 @@ from django.views.generic import RedirectView
 from muckrock.accounts import views
 
 urlpatterns = [
+    re_path(r"^$", views.AccountsView.as_view(), name="accounts"),
     re_path(
         r"^upgrade/$", views.AccountsUpgradeView.as_view(), name="accounts-upgrade"
     ),
     re_path(
-        r"^accounts/$",
+        r"^signup/$",
         RedirectView.as_view(
             url=settings.SQUARELET_URL + "/accounts/signup/?intent=muckrock"
         ),
-        name="accounts",
+        name="accounts-signup",
     ),
     re_path(
         r"^login/$",
