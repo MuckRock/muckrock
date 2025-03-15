@@ -320,7 +320,7 @@
               </ul>
             </li>
           {% else %}
-            <li><a href="{% url 'accounts' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
+            <li><a href="{% url 'accounts-signup' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
             <li><a href="{% url "acct-login" %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
           {% endif %}
         {% elif user.profile.is_agency_user %} {# for agency users #}
