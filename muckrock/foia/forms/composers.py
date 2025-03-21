@@ -83,6 +83,18 @@ class BaseComposerForm(forms.ModelForm):
         choices=[("save", "Save"), ("submit", "Submit"), ("delete", "Delete")],
         widget=forms.HiddenInput(),
     )
+    certified = forms.ChoiceField(
+        choices=[
+            (None, "-----"),
+            ("certified", "Certified"),
+            ("certified_return_receipt", "Certified Return Receipt"),
+            ("registered", "Registered"),
+        ],
+        required=False,
+        help_text="Send certified mail - these options are currently for staff "
+        "only and cost money.  Please be sure you understand what you are doing "
+        "before selecting one.",
+    )
 
     no_proxy = forms.BooleanField(
         initial=False,
@@ -138,6 +150,8 @@ class BaseComposerForm(forms.ModelForm):
             del self.fields["embargo"]
         if not self._user.has_perm("foia.embargo_perm_foiarequest"):
             del self.fields["permanent_embargo"]
+        if not self._user.is_staff:
+            del self.fields["certified"]
         self.fields["parent"].queryset = FOIAComposer.objects.get_viewable(
             self._user
         ).distinct()

@@ -1001,6 +1001,7 @@ class FOIARequest(models.Model):
         from muckrock.foia.tasks import prepare_snail_mail
 
         extra = self.process_manual_send(**kwargs)
+        certified = kwargs.get("contact_info", {}).get("certified")
 
         switch = bool(
             kwargs.get("switch", False)
@@ -1028,7 +1029,11 @@ class FOIARequest(models.Model):
 
             transaction.on_commit(
                 lambda: prepare_snail_mail.delay(
-                    comm.pk, switch, extra, num_msgs=kwargs.get("num_msgs", 5)
+                    comm.pk,
+                    switch,
+                    extra,
+                    certified,
+                    num_msgs=kwargs.get("num_msgs", 5),
                 )
             )
 
