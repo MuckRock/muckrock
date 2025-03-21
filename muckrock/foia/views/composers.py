@@ -152,7 +152,13 @@ class GenericComposer(BuyRequestsMixin):
         if num_requests > 0:
             active, payer = self._get_organizations(self.request.user)
             self.buy_requests(form, active, payer)
-        if (
+
+        if form.cleaned_data.get("certified"):
+            contact_info = {
+                "via": "snail",
+                "certified": form.cleaned_data["certified"],
+            }
+        elif (
             form.cleaned_data.get("use_contact_information")
             and self.request.user.has_perm("foia.set_info_foiarequest")
             and len(composer.agencies.all()) == 1

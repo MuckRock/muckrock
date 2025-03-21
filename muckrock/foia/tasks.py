@@ -1094,7 +1094,9 @@ def foia_send_email(foia_pk, comm_pk, options, **kwargs):
     rate_limit="15/s",
     name="muckrock.foia.tasks.prepare_snail_mail",
 )
-def prepare_snail_mail(comm_pk, switch, extra, force=False, num_msgs=5, **kwargs):
+def prepare_snail_mail(
+    comm_pk, switch, extra, certified, force=False, num_msgs=5, **kwargs
+):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
     # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
@@ -1165,7 +1167,7 @@ def prepare_snail_mail(comm_pk, switch, extra, force=False, num_msgs=5, **kwargs
         if comm.category == "p":
             lob_obj = _lob_create_check(comm, prepared_pdf, mail, address, amount)
         else:
-            lob_obj = _lob_create_letter(comm, prepared_pdf, mail)
+            lob_obj = _lob_create_letter(comm, prepared_pdf, mail, certified)
         mail.lob_id = lob_obj.id
         mail.save()
         comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
@@ -1174,7 +1176,7 @@ def prepare_snail_mail(comm_pk, switch, extra, force=False, num_msgs=5, **kwargs
     except lob.error.APIConnectionError as exc:
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
-            args=[comm_pk, comm.category, switch, extra, force],
+            args=[comm_pk, comm.category, switch, extra, certified, force, num_msgs],
             kwargs=kwargs,
             exc=exc,
         )
@@ -1183,7 +1185,7 @@ def prepare_snail_mail(comm_pk, switch, extra, force=False, num_msgs=5, **kwargs
         create_snail_mail_task("lob", exc.args[0])
 
 
-def _lob_create_letter(comm, prepared_pdf, mail):
+def _lob_create_letter(comm, prepared_pdf, mail, certified):
     """Send a letter via Lob"""
     return lob.Letter.create(
         description="Letter for communication {}".format(comm.pk),
@@ -1200,6 +1202,7 @@ def _lob_create_letter(comm, prepared_pdf, mail):
         file=prepared_pdf,
         double_sided=True,
         metadata={"mail_id": mail.pk},
+        extra_service=certified,
     )
 
 

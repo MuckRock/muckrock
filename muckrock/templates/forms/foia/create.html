@@ -131,6 +131,9 @@
           <div class="advanced-container">
             {% include "lib/pattern/new_request_field.html" with field=form.edited_boilerplate only %}
             {% include "lib/pattern/new_request_field.html" with field=form.tags only %}
+            {% if form.certified %}
+              {% include "lib/pattern/new_request_field.html" with field=form.certified only %}
+            {% endif %}
             <fieldset class="attachments">
               <label class="bold">Attachments</label>
               {% if composer %}
