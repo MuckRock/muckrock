@@ -996,7 +996,11 @@ class FOIARequest(models.Model):
         from muckrock.foia.tasks import prepare_snail_mail
 
         extra = self.process_manual_send(**kwargs)
-        certified = kwargs.get("contact_info", {}).get("certified")
+        contact_info = kwargs.get("contact_info")
+        if contact_info:
+            certified = contact_info.get("certified")
+        else:
+            certified = None
 
         switch = bool(
             kwargs.get("switch", False)
