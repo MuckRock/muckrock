@@ -288,34 +288,71 @@ class AgencyAutocomplete(MRAutocompleteView):
         """Filter by jurisdiction"""
 
         queryset = super().get_queryset()
-        queryset = self._filter_by_jurisdiction(queryset)
 
-        return queryset
+        queryset, jurisdiction = self._filter_by_jurisdiction(queryset)
+
+        exclude = self.forwarded.get("self", [])
+        queryset = (
+            queryset.get_approved()
+            .exclude(pk__in=exclude)
+            .annotate(count=Count("foiarequest"))
+            .order_by("-count")[:10]
+        )
+
+        if jurisdiction:
+            fuzzy_choices = self._fuzzy_choices(self.q, jurisdiction, exclude)
+            return (
+                self.queryset.filter(
+                    pk__in=[a.pk for a in queryset] + [a[2].pk for a in fuzzy_choices]
+                )
+                .annotate(count=Count("foiarequest"))
+                .order_by("-count")
+            )
+        else:
+            return queryset
 
     def _filter_by_jurisdiction(self, queryset):
         """If a jurisdiction is forwarded, filter by it"""
         if "jurisdiction" not in self.forwarded:
-            return queryset
+            return queryset, None
 
         try:
             jurisdiction_id = self.forwarded["jurisdiction"]
         except (TypeError, IndexError):
             # if jurisdiction is not a single element list, something went wrong
             # do not filter
-            return queryset
+            return queryset, None
 
         appeal = self.forwarded.get("appeal", False)
+        jurisdiction = Jurisdiction.objects.get(pk=jurisdiction_id)
         if appeal:
-            jurisdiction = Jurisdiction.objects.get(pk=jurisdiction_id)
             if jurisdiction.level == "l":
                 # For local jurisdictions, appeal agencies may come from the
                 # parent level
-                return queryset.filter(
-                    jurisdiction_id__in=(jurisdiction.pk, jurisdiction.parent_id)
+                return (
+                    queryset.filter(
+                        jurisdiction_id__in=(jurisdiction.pk, jurisdiction.parent_id)
+                    ),
+                    jurisdiction,
                 )
 
         # otherwise just get agencies from the given jurisdiction
-        return queryset.filter(jurisdiction_id=jurisdiction_id)
+        return queryset.filter(jurisdiction_id=jurisdiction_id), jurisdiction
+
+    def _fuzzy_choices(self, query, jurisdiction, exclude):
+        """Do fuzzy matching for additional choices"""
+        choices = (
+            self.queryset.get_approved_and_pending(self.request.user)
+            .filter(jurisdiction=jurisdiction)
+            .exclude(pk__in=exclude)
+        )
+        return process.extractBests(
+            query,
+            {a: a.name for a in choices},
+            scorer=fuzz.partial_ratio,
+            score_cutoff=83,
+            limit=10,
+        )
 
 
 class AgencyComposerAutocomplete(AgencyAutocomplete):
@@ -337,7 +374,8 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
     def get_queryset(self):
         """Filter by jurisdiction"""
 
-        queryset = super().get_queryset()
+        queryset = self.get_search_results(self.queryset.all(), self.q)
+
         exclude = self.forwarded.get("self", [])
         queryset = (
             queryset.get_approved_and_pending(self.request.user)
@@ -397,21 +435,6 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
 
         # if all else fails, assume they want a federal agency
         return query, Jurisdiction.objects.get(level="f")
-
-    def _fuzzy_choices(self, query, jurisdiction, exclude):
-        """Do fuzzy matching for additional choices"""
-        choices = (
-            self.queryset.get_approved_and_pending(self.request.user)
-            .filter(jurisdiction=jurisdiction)
-            .exclude(pk__in=exclude)
-        )
-        return process.extractBests(
-            query,
-            {a: a.name for a in choices},
-            scorer=fuzz.partial_ratio,
-            score_cutoff=83,
-            limit=10,
-        )
 
     def has_add_permission(self, request):
         """Everyone may add a new agency during"""
