@@ -146,21 +146,23 @@
       </table>
 
       {% if user_can_edit and foia.portal %}
-        <div id="show-portal-info" class="action">Show Portal Info</div>
-        <table class="portal-info">
-          <tr>
-            <td>Portal Link</td>
-            <td><a href="{{foia.portal.url}}">{{foia.portal.name}}</a></td>
-          </tr>
-          <tr>
-            <td>Username</td>
-            <td>{{foia.get_request_email}}</td>
-          </tr>
-          <tr>
-            <td>Password</td>
-            <td>{{foia.portal_password}}</td>
-          </tr>
-        </table>
+        {% if request.user.is_staff or not foia.hide_portal_credentials %}
+          <div id="show-portal-info" class="action">Show Portal Info</div>
+          <table class="portal-info">
+            <tr>
+              <td>Portal Link</td>
+              <td><a href="{{foia.portal.url}}">{{foia.portal.name}}</a></td>
+            </tr>
+            <tr>
+              <td>Username</td>
+              <td>{{foia.get_request_email}}</td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td>{{foia.portal_password}}</td>
+            </tr>
+          </table>
+        {% endif %}
       {% elif request.user.is_staff %}
         <div id="show-portal-info" class="action">Show Request Info</div>
         <table class="portal-info">

@@ -156,6 +156,11 @@ class FOIARequest(models.Model):
     portal_password = models.CharField(
         max_length=20, blank=True, default=utils.generate_key
     )
+    hide_portal_credentials = models.BooleanField(
+        default=False,
+        help_text="Do not show the requester the portal email and password on the "
+        "request page.  This is useful to hide proxy IDs.",
+    )
     email = models.ForeignKey(
         "communication.EmailAddress",
         on_delete=models.SET_NULL,
