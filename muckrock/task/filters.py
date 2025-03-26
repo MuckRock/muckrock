@@ -65,6 +65,7 @@ class TaskFilterSet(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2Multiple(
             url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
         ),
+        conjoined=True,
     )
     date_created = django_filters.DateFromToRangeFilter(
         label="Date Created Range",
