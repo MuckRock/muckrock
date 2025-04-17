@@ -14,7 +14,6 @@
         {{ crowdsource.project.title }}
     </a> project{%endif%}.
   </p>
-  {% social title=crowdsource.title url=crowdsource.get_absolute_url %}
   <p>{{ crowdsource.description|markdown }}</p>
   <p>{{ crowdsource.contributor_line }}</p>
 {% endblock header %}
