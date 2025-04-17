@@ -112,11 +112,6 @@
         <h1>Share</h1>
         <div class="close action">Close</div>
       </header>
-      {% if crowdfund.foia %}
-        {% social title="Help free these docs" url=obj_url %}
-      {% elif crowdfund.project %}
-        {% social title="Help fund this project" url=obj_url %}
-      {% endif %}
     </div>
   </div>
   <div class="pending overlay">
@@ -139,12 +134,6 @@
       <p id="complete-next-steps"></p>
       <p>Subscribe to MuckRock&rsquo;s newsletter:</p>
       {% newsletter %}
-      <p>Help this crowdfund find more supporters:</p>
-      {% if crowdfund.foia %}
-        {% social title="I helped free these docs" url=obj_url %}
-      {% elif crowdfund.project %}
-        {% social title="I just funded this project" url=obj_url %}
-      {% endif %}
     </div>
   </div>
   <div class="error overlay">
