@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load tags %} 
+
+{% block title %} {{ flatpage.title }} {% endblock %}
+
+{% block content %}
+  {% evaluate flatpage.content %}
+{% endblock %}
