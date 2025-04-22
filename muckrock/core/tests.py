@@ -29,11 +29,11 @@ from muckrock.core.factories import (
     UserFactory,
 )
 from muckrock.core.fields import EmailsListField
-from muckrock.core.forms import NewsletterSignupForm, StripeForm
+from muckrock.core.forms import NewsletterSignupForm
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
 from muckrock.core.utils import new_action, notify
-from muckrock.core.views import DonationFormView, NewsletterSignupView
+from muckrock.core.views import NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.task.factories import (
