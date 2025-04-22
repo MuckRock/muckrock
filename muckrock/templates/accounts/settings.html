@@ -57,7 +57,7 @@
       {% csrf_token %}
       <input type="hidden" name="action" value="cancel-donations" />
       <h2>Recurring Donations</h2>
-      <p><a class="blue button" href="{% url 'donate' %}">Donate Now</a></p>
+      <p><a class="blue button" href="/donate/">Donate Now</a></p>
       {% if donations %}
         <div class="fields">
           {% for donation in donations %}

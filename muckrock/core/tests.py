@@ -297,41 +297,6 @@ class TestNotify(TestCase):
             ok_(notification_for_user, "Each user in the list should be notified.")
 
 
-@patch("stripe.Charge", Mock())
-@patch("stripe.Customer", Mock())
-class TestDonations(TestCase):
-    """Tests donation functionality"""
-
-    def setUp(self):
-        self.url = reverse("donate")
-        self.view = DonationFormView.as_view()
-        self.form = StripeForm
-
-    @mock.patch("muckrock.accounts.tasks.donor_tag.delay")
-    def test_donate(self, mock_mailchimp):
-        """Donations should have a token, email, and amount.
-        An email receipt should be sent for the donation."""
-        token = "test"
-        email = "example@test.com"
-        amount = 500
-        data = {
-            "stripe_token": token,
-            "stripe_email": email,
-            "stripe_amount": amount,
-            "type": "one-time",
-        }
-        form = self.form(data)
-        form.is_valid()
-        ok_(form.is_valid(), "The form should validate. %s" % form.errors)
-        response = http_post_response(self.url, self.view, data)
-        eq_(
-            response.status_code,
-            302,
-            "A successful donation will return a redirection.",
-        )
-        mock_mailchimp.assert_called_with(email)
-
-
 class TestTemplatetagsFunctional(TestCase):
     """Functional tests for templatetags"""
 
