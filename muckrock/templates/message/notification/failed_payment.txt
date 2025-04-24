@@ -1,7 +1,7 @@
 {% extends 'message/base.txt' %}
 {% load tags %}
 {% load humanize %}
-{% block body %}{% url "accounts" as url_accounts %}{% url "acct-settings" as url_acct_settings %}{% url "donate" as url_donate %}
+{% block body %}{% url "accounts" as url_accounts %}{% url "acct-settings" as url_acct_settings %}
 Hi {{user.profile.full_name}},
 {% if type == 'pro' %}{% if attempt == "final" %}
 Your Pro subscription has been cancelled.
@@ -24,7 +24,7 @@ This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 tim
 {% elif type == 'donate' %}{% if attempt == "final" %}
 Your recurring donation has been deactivated.
 
-Our final attempt to charge your card has failed and your recurring donation has been deactivated. Reactivate here: {% autologin url_donate user %}
+Our final attempt to charge your card has failed and your recurring donation has been deactivated. Reactivate here: {% autologin "/donate/" user %}
 {% else %}
 Your recurring donation payment has failed.
 

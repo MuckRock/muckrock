@@ -5,7 +5,6 @@
 {% block body %}
   {% url "accounts" as url_accounts %}
   {% url "acct-settings" as url_acct_settings %}
-  {% url "donate" as url_donate %}
     <p>Hi {{user.profile.full_name}},</p>
     {% if type == 'pro' %}
         {% if attempt == "final" %}
@@ -27,7 +26,7 @@
     {% elif type == 'donate' %}
         {% if attempt == "final" %}
             <p class="red">Your recurring donation has been deactivated.</p>
-            <p>Our final attempt to charge your card has failed and your recurring donation has been deactivated. <a href="{% autologin url_donate user %}">Reactivate</a>.</p>
+            <p>Our final attempt to charge your card has failed and your recurring donation has been deactivated. <a href="{% autologin "/donate/" user %}">Reactivate</a>.</p>
         {% else %}
             <p class="red">Your recurring donation payment has failed.</p>
             <p>This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. <a href="{% autologin url_acct_settings user %}">Update your billing information</a>.</p>

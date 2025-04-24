@@ -182,7 +182,6 @@ urlpatterns = [
     ),
     re_path(r"^news-sitemaps/", include("news_sitemaps.urls")),
     re_path(r"^__debug__/", include(debug_toolbar.urls)),
-    re_path(r"^donate/$", views.DonationFormView.as_view(), name="donate"),
     re_path(
         r"^donate/thanks/$", views.DonationThanksView.as_view(), name="donate-thanks"
     ),
