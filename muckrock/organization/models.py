@@ -72,6 +72,15 @@ class Organization(models.Model):
         help_text="This organization is a verified journalistic organization",
     )
 
+    merged = models.ForeignKey(
+        to="self",
+        on_delete=models.PROTECT,
+        related_name="+",
+        help_text="The agency this agency was merged in to",
+        blank=True,
+        null=True,
+    )
+
     def __str__(self):
         if self.individual:
             return "{} (Individual)".format(self.name)
@@ -102,6 +111,9 @@ class Organization(models.Model):
         """Set updated data from squarelet"""
 
         logger.info("update data org %s %s", self.pk, data)
+
+        if data.get("merged") and not self.merged:
+            self.merge(data["merged"])
 
         if len(data["entitlements"]) > 1:
             logger.warning(
@@ -162,6 +174,19 @@ class Organization(models.Model):
             if field in data:
                 setattr(self, field, data[field])
         self.save()
+
+    @transaction.atomic
+    def merge(self, uuid):
+        """Merge this org into another org"""
+        other = Organization.objects.get(uuid=uuid)
+        logger.info("Merge orgs: %d %d", self.pk, other.pk)
+        self.composers.update(organization=other)
+
+        # add all users not already in the other organization
+        self.memberships.exclude(user__in=other.users.all()).update(organization=other)
+        self.memberships.all().delete()
+
+        self.merged = other
 
     @transaction.atomic
     def make_requests(self, amount):
