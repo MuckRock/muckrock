@@ -34,13 +34,13 @@
       <ul class="{% if not user.is_authenticated or user.profile.is_agency_user or is_agency_user %}unauthenticated{% else %}authenticated{% endif %} section-list" id="nav-list-sections">
         {% if not user.is_authenticated and not is_agency_user %}
           <li><a class="nav-item" href="/about/">About Us</a></li>
-          <li><a class="nav-item" href="/newsletters/">Newsletters</a></li>
+          <li><a class="nav-item" href="/newsletters/">Newsletter</a></li>
           <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
           <li><a class="nav-item" href="/donate/">Donate</a></li>
           <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
         {% elif not user.profile.is_agency_user and not is_agency_user %}
           <li><a class="nav-item" href="/about/">About Us</a></li>
-          <li><a class="nav-item" href="/newsletters/">Newsletters</a></li>
+          <li><a class="nav-item" href="/newsletters/">Newsletter</a></li>
           <li class="dropdown">
             <a class="nav-item" href="{% url 'news-index' %}">News</a>
             <ul>
