@@ -3,6 +3,7 @@ Tests the models of the organization application
 """
 
 # Django
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 # Standard Library
@@ -79,11 +80,15 @@ class TestOrganization(TestCase):
         users = UserFactory.create_batch(4)
 
         org = OrganizationFactory()
-        MembershipFactory(user=users[0], organization=org)
-        MembershipFactory(user=users[1], organization=org)
+        MembershipFactory(user=users[0], organization=org, active=True)
+        MembershipFactory(user=users[1], organization=org, active=False)
         dupe_org = OrganizationFactory()
-        MembershipFactory(user=users[1], organization=dupe_org)
-        MembershipFactory(user=users[2], organization=dupe_org)
+        MembershipFactory(user=users[1], organization=dupe_org, active=True)
+        MembershipFactory(user=users[2], organization=dupe_org, active=True)
+        # set active orgs
+        users[0].profile.organization = org
+        users[1].profile.organization = dupe_org
+        users[2].profile.organization = dupe_org
 
         dupe_org.merge(org.uuid)
 
@@ -92,6 +97,10 @@ class TestOrganization(TestCase):
             assert_true(org.has_member(users[user_id]))
         # user 3 not in org
         assert_false(org.has_member(users[3]))
+
+        # all users have exactly one active org
+        for user in User.objects.all():
+            assert_true(user.profile.organization)
 
         # no users in dupe_org
         eq_(dupe_org.users.count(), 0)

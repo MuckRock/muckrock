@@ -184,6 +184,9 @@ class Organization(models.Model):
 
         # add all users not already in the other organization
         self.memberships.exclude(user__in=other.users.all()).update(organization=other)
+        other.memberships.filter(
+            user__in=self.memberships.filter(active=True).values("user")
+        ).update(active=True)
         self.memberships.all().delete()
 
         self.merged = other
