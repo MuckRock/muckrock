@@ -3,6 +3,7 @@ Tests the models of the organization application
 """
 
 # Django
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 # Standard Library
@@ -21,6 +22,7 @@ from muckrock.organization.factories import (
     OrganizationEntitlementFactory,
     OrganizationFactory,
 )
+from muckrock.organization.models import Organization
 
 
 class TestOrganization(TestCase):
@@ -72,6 +74,60 @@ class TestOrganization(TestCase):
         org.refresh_from_db()
         eq_(org.monthly_requests, 0)
         eq_(org.number_requests, 1)
+
+    def test_merge(self):
+
+        users = UserFactory.create_batch(4)
+
+        org = OrganizationFactory()
+        MembershipFactory(user=users[0], organization=org, active=True)
+        MembershipFactory(user=users[1], organization=org, active=False)
+        dupe_org = OrganizationFactory()
+        MembershipFactory(user=users[1], organization=dupe_org, active=True)
+        MembershipFactory(user=users[2], organization=dupe_org, active=True)
+        # set active orgs
+        users[0].profile.organization = org
+        users[1].profile.organization = dupe_org
+        users[2].profile.organization = dupe_org
+
+        dupe_org.merge(org.uuid)
+
+        # user 0, 1 and 2 in org
+        for user_id in range(3):
+            assert_true(org.has_member(users[user_id]))
+        # user 3 not in org
+        assert_false(org.has_member(users[3]))
+
+        # all users have exactly one active org
+        for user in User.objects.all():
+            assert_true(user.profile.organization)
+
+        # no users in dupe_org
+        eq_(dupe_org.users.count(), 0)
+
+    def test_merge_fks(self):
+        # Relations pointing to the Organization model
+        eq_(
+            len(
+                [
+                    f
+                    for f in Organization._meta.get_fields()
+                    if f.is_relation and f.auto_created
+                ]
+            ),
+            2,
+        )
+        # Many to many relations defined on the Organization model
+        eq_(
+            len(
+                [
+                    f
+                    for f in Organization._meta.get_fields()
+                    if f.many_to_many and not f.auto_created
+                ]
+            ),
+            1,
+        )
 
 
 def ent_json(entitlement, date_update):
