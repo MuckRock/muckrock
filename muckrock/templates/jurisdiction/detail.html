@@ -198,7 +198,7 @@
         </div>
         {% if foia_requests %}
           <div class="jurisdiction__requests">
-            <p class="bold nomargin">Recently completed requests <a class="see-all" href="{% url 'foia-list' %}?status=done&jurisdiction={{ jurisdiction.pk }}"><small>See All</small></a></p>
+            <p class="bold nomargin">Recently completed requests <a class="see-all" href="{% url 'foia-list' %}?status=done&jurisdiction={{ jurisdiction.pk }}-{% if jurisdiction.level == "s" %}True{% else %}False{% endif %}"><small>See All</small></a></p>
             {% for foia in foia_requests %}
               {% include 'lib/foia.html' with hide_actions=True %}
             {% endfor %}
