@@ -10,6 +10,8 @@ astroid==2.11.7
     # via pylint
 asttokens==2.0.8
     # via stack-data
+attrs==25.3.0
+    # via pytest
 autopep8==1.5.4
     # via django-silk
 backcall==0.2.0
@@ -22,7 +24,7 @@ build==0.10.0
     # via pip-tools
 certifi==2017.4.17
     # via requests
-cffi==1.14.0
+cffi==1.17.1
     # via
     #   bcrypt
     #   cryptography
@@ -71,8 +73,10 @@ freezegun==0.3.8
     # via -r pip/dev-requirements.in
 gprof2dot==2019.11.30
     # via django-silk
-idna==2.5
+idna==3.10
     # via requests
+iniconfig==2.1.0
+    # via pytest
 ipdb==0.13.9
     # via -r pip/dev-requirements.in
 ipython==8.4.0
@@ -99,10 +103,12 @@ mypy-extensions==0.4.3
     # via black
 nose==1.3.7
     # via django-nose
-packaging==23.0
+packaging==23.2
     # via
     #   black
     #   build
+    #   pytest
+    #   pytest-sugar
 paramiko==2.4.2
     # via fabric
 parso==0.7.0
@@ -121,12 +127,16 @@ platformdirs==2.5.2
     # via
     #   black
     #   pylint
+pluggy==1.6.0
+    # via pytest
 prompt-toolkit==3.0.31
     # via ipython
 ptyprocess==0.6.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
+py==1.11.0
+    # via pytest
 pyasn1==0.4.5
     # via paramiko
 pycodestyle==2.6.0
@@ -149,6 +159,15 @@ pynacl==1.3.0
     # via paramiko
 pyproject-hooks==1.0.0
     # via build
+pytest==7.1.3
+    # via
+    #   -r pip/dev-requirements.in
+    #   pytest-django
+    #   pytest-sugar
+pytest-django==4.11.1
+    # via -r pip/dev-requirements.in
+pytest-sugar==1.0.0
+    # via -r pip/dev-requirements.in
 python-dateutil==2.8.2
     # via
     #   django-silk
@@ -180,6 +199,8 @@ sqlparse==0.4.4
     #   django-silk
 stack-data==0.4.0
     # via ipython
+termcolor==3.1.0
+    # via pytest-sugar
 toml==0.10.2
     # via
     #   autopep8
@@ -190,6 +211,7 @@ tomli==2.0.1
     #   build
     #   pylint
     #   pyproject-hooks
+    #   pytest
 tomlkit==0.11.4
     # via pylint
 traitlets==5.3.0
@@ -206,7 +228,7 @@ wheel==0.38.4
     # via pip-tools
 whoosh==2.7.4
     # via -r pip/dev-requirements.in
-wrapt==1.12.1
+wrapt==1.17.2
     # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:
