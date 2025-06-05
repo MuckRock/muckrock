@@ -10,6 +10,7 @@ from django.test import TestCase
 from datetime import date
 
 # Third Party
+import pytest
 import requests_mock
 from mock import patch
 from nose.tools import assert_false, eq_, ok_
@@ -50,6 +51,7 @@ class TestManualPortal(TestCase):
         eq_(len(password), 12)
 
 
+@pytest.mark.skip("not currently used")
 class _TestNextRequestPortal(TestCase):
     """Test cases for the NextRequest portal integration"""
 

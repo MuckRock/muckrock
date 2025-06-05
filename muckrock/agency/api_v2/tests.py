@@ -9,7 +9,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 # MuckRock
-from muckrock.core.factories import AgencyFactory, JurisdictionFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.jurisdiction.factories import LocalJurisdictionFactory
 
 
 class AgencyViewSetTests(APITestCase):
@@ -19,8 +20,8 @@ class AgencyViewSetTests(APITestCase):
         """Set up test cases, creating jurisdictions, agencies, and users."""
         # Create test jurisdictions
         self.jurisdictions = [
-            JurisdictionFactory.create(name="1st Jurisdiction"),
-            JurisdictionFactory.create(name="2nd Jurisdiction"),
+            LocalJurisdictionFactory.create(name="1st Jurisdiction"),
+            LocalJurisdictionFactory.create(name="2nd Jurisdiction"),
         ]
 
         # Create agencies

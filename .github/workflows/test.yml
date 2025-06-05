@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+env:
+  DJANGO_SECRET_KEY: ${{secrets.DJANGO_SECRET_KEY}}
+  DJANGO_SETTINGS_MODULE: muckrock.settings.test
+  MUCKROCK_TOKEN: token
+  STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
+  STRIPE_PUB_KEY: ${{secrets.STRIPE_PUB_KEY}}
+  STRIPE_WEBHOOK_SECRET: ${{secrets.STRIPE_WEBHOOK_SECRET}}
+  MAILGUN_ACCESS_KEY: ""
+  USE_DOCKER: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip" # caching pip dependencies
+
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install -r pip/dev-requirements.txt
+
+      - name: Lint
+        run: pylint muckrock
+
+      - name: Isort
+        run: isort --check-only --recursive muckrock --skip ./muckrock/gloo
+
+      - name: Formatting
+        run: black --check muckrock --exclude migrations\|vendor\|gloo
+
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: muckrock
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip" # caching pip dependencies
+
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install -r pip/dev-requirements.txt
+
+      - name: Pytest
+        run: python manage.py test --settings=muckrock.settings.codeship -v 1
+        env:
+          # use the credentials for the service container
+          DATABASE_URL: postgresql://test:postgres@localhost:5432/muckrock

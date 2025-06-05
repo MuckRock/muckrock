@@ -11,6 +11,9 @@ isort # sort imports
 mock # Used for mocking objects during test
 pip-tools # Keeps the requirements up to date
 pylint-django # Pylint for Django integration
+pytest # Used for testing
+pytest-django # Used for testing
+pytest-sugar # Used for testing
 requests-mock # Mock for http requests
 whoosh # Used for search backend in development
 black # code formatter
