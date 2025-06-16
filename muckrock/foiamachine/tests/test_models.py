@@ -12,8 +12,8 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Third Party
+import pytest
 from django_hosts.resolvers import reverse
-from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
@@ -45,23 +45,21 @@ class TestFoiaMachineRequest(TestCase):
             request_language=self.request_language,
             jurisdiction=self.jurisdiction,
         )
-        ok_(foi, "The request should be created.")
-        ok_(foi.slug, "The slug should be created automatically.")
+        assert foi, "The request should be created."
+        assert foi.slug, "The slug should be created automatically."
 
     def test_unicode(self):
         """Requests should use their titles when converted to unicode."""
-        eq_(
-            str(self.foi),
-            self.foi.title,
-            "The Unicode representation should be the title.",
-        )
+        assert (
+            str(self.foi) == self.foi.title
+        ), "The Unicode representation should be the title."
 
     def test_get_absolute_url(self):
         """Request urls should include their slug and their id."""
         kwargs = {"slug": self.foi.slug, "pk": self.foi.pk}
         actual_url = self.foi.get_absolute_url()
         expected_url = reverse("foi-detail", host="foiamachine", kwargs=kwargs)
-        eq_(actual_url, expected_url)
+        assert actual_url == expected_url
 
     def test_generate_letter(self):
         """Using default information, the request should be able to generate a
@@ -74,43 +72,43 @@ class TestFoiaMachineRequest(TestCase):
         }
         expected_letter = render_to_string(template, context=context).strip()
         actual_letter = self.foi.generate_letter()
-        eq_(actual_letter, expected_letter)
+        assert actual_letter == expected_letter
 
     def test_generate_sharing_code(self):
         """The request should be able to generate a code for privately sharing urls."""
-        ok_(self.foi.generate_sharing_code())
+        assert self.foi.generate_sharing_code()
 
     def test_date_submitted(self):
         """The date submitted should be the first communication date or None."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        eq_(self.foi.date_submitted, comm.date)
+        assert self.foi.date_submitted == comm.date
 
     def test_date_due(self):
         """The date due should be the date submitted plus the jurisdiction's
         response time."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
         expected_date_due = comm.date + timedelta(self.foi.jurisdiction.days)
-        eq_(self.foi.date_due, expected_date_due)
+        assert self.foi.date_due == expected_date_due
 
-    @raises(AttributeError)
     def test_date_submitted_no_comms(self):
         """A request with no sent communications should raise an error."""
         # pylint: disable=pointless-statement
-        self.foi.date_submitted
+        with pytest.raises(AttributeError):
+            self.foi.date_submitted
 
-    @raises(AttributeError)
     def test_date_due_no_comms(self):
         """A request with no sent communications should raise an error."""
         # pylint: disable=pointless-statement
-        self.foi.date_due
+        with pytest.raises(AttributeError):
+            self.foi.date_due
 
     def test_days_until_due(self):
         """The days until due should compare the date due to today's date."""
         comm = factories.FoiaMachineCommunicationFactory(request=self.foi)
-        eq_(self.foi.days_until_due, (self.foi.date_due - timezone.now()).days)
+        assert self.foi.days_until_due == (self.foi.date_due - timezone.now()).days
         # If there is no communication, the default should be 0
         comm.delete()
-        eq_(self.foi.days_until_due, 0)
+        assert self.foi.days_until_due == 0
 
     def test_is_overdue(self):
         """The request should be overdue if days_until_due is negative."""
@@ -118,17 +116,17 @@ class TestFoiaMachineRequest(TestCase):
         comm = factories.FoiaMachineCommunicationFactory(
             request=self.foi, date=overdue_date
         )
-        ok_(self.foi.is_overdue)
+        assert self.foi.is_overdue
         # Now let's make it not overdue
         comm.date = timezone.now()
         comm.save()
-        ok_(not self.foi.is_overdue)
+        assert not self.foi.is_overdue
 
     def test_days_overdue(self):
         """Days overdue should just be the inverse of days_until_due."""
         overdue_date = timezone.now() - timedelta(self.foi.jurisdiction.days + 10)
         factories.FoiaMachineCommunicationFactory(request=self.foi, date=overdue_date)
-        eq_(self.foi.days_overdue, self.foi.days_until_due * -1)
+        assert self.foi.days_overdue == self.foi.days_until_due * -1
 
 
 class TestFoiaMachineCommunication(TestCase):
@@ -146,14 +144,14 @@ class TestFoiaMachineCommunication(TestCase):
             sender=str(self.foi.user),
             message="Lorem ipsum dolor su amit.",
         )
-        ok_(comm)
+        assert comm
 
     def test_unicode(self):
         """The string representation of a communication includes sender and
         receiver info."""
-        eq_(
-            str(self.comm),
-            "Communication from %s to %s" % (self.comm.sender, self.comm.receiver),
+        assert str(self.comm) == "Communication from %s to %s" % (
+            self.comm.sender,
+            self.comm.receiver,
         )
 
 
@@ -172,8 +170,8 @@ class TestFoiaMachineFile(TestCase):
             file=SimpleUploadedFile("filename.txt", b"Test file contents"),
             name="filename.txt",
         )
-        ok_(_file)
+        assert _file
 
     def test_unicode(self):
         """The string representation of a file should be its name."""
-        eq_(str(self.file), "%s" % self.file.name)
+        assert str(self.file) == "%s" % self.file.name

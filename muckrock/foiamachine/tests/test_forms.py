@@ -5,9 +5,6 @@ Tests for FOIA Machine forms.
 # Django
 from django.test import TestCase
 
-# Third Party
-from nose.tools import ok_
-
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.foiamachine import factories, forms
@@ -41,7 +38,7 @@ class TestFoiaMachineRequestForm(TestCase):
                 "jurisdiction": self.jurisdiction.id,
             }
         )
-        ok_(form.is_valid())
+        assert form.is_valid()
 
     def test_agency(self):
         """The form should also accept an agency input."""
@@ -54,7 +51,7 @@ class TestFoiaMachineRequestForm(TestCase):
                 "agency": self.agency.id,
             }
         )
-        ok_(form.is_valid())
+        assert form.is_valid()
 
     def test_agency_mismatch(self):
         """The form should not validate if the agency is from a different
@@ -69,4 +66,4 @@ class TestFoiaMachineRequestForm(TestCase):
                 "agency": self.agency.id,
             }
         )
-        ok_(not form.is_valid())
+        assert not form.is_valid()

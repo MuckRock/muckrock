@@ -10,9 +10,6 @@ from django.utils import timezone
 # Standard Library
 from datetime import timedelta
 
-# Third Party
-from nose.tools import eq_
-
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import (
@@ -34,67 +31,60 @@ class TestJurisdictionUnit(TestCase):
 
     def test_str(self):
         """Test Jurisdiction model's __str__ method"""
-        eq_(str(self.federal), "United States of America")
-        eq_(str(self.state), "Massachusetts")
-        eq_(str(self.local), "Boston, MA")
+        assert str(self.federal) == "United States of America"
+        assert str(self.state) == "Massachusetts"
+        assert str(self.local) == "Boston, MA"
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
-        eq_(
-            self.local.get_absolute_url(),
-            reverse(
-                "jurisdiction-detail",
-                kwargs={
-                    "local_slug": self.local.slug,
-                    "state_slug": self.state.slug,
-                    "fed_slug": self.federal.slug,
-                },
-            ),
+        assert self.local.get_absolute_url() == reverse(
+            "jurisdiction-detail",
+            kwargs={
+                "local_slug": self.local.slug,
+                "state_slug": self.state.slug,
+                "fed_slug": self.federal.slug,
+            },
         )
-        eq_(
-            self.state.get_absolute_url(),
-            reverse(
-                "jurisdiction-detail",
-                kwargs={"state_slug": self.state.slug, "fed_slug": self.federal.slug},
-            ),
+        assert self.state.get_absolute_url() == reverse(
+            "jurisdiction-detail",
+            kwargs={"state_slug": self.state.slug, "fed_slug": self.federal.slug},
         )
-        eq_(
-            self.federal.get_absolute_url(),
-            reverse("jurisdiction-detail", kwargs={"fed_slug": self.federal.slug}),
+        assert self.federal.get_absolute_url() == reverse(
+            "jurisdiction-detail", kwargs={"fed_slug": self.federal.slug}
         )
 
     def test_jurisdiction_legal(self):
         """Local jurisdictions should return state law"""
-        eq_(self.federal.legal, self.federal)
-        eq_(self.state.legal, self.state)
-        eq_(self.local.legal, self.state)
-        eq_(self.federal.get_law_name(), self.federal.law.name)
-        eq_(self.state.get_law_name(), self.state.law.name)
-        eq_(self.local.get_law_name(), self.state.law.name)
+        assert self.federal.legal == self.federal
+        assert self.state.legal == self.state
+        assert self.local.legal == self.state
+        assert self.federal.get_law_name() == self.federal.law.name
+        assert self.state.get_law_name() == self.state.law.name
+        assert self.local.get_law_name() == self.state.law.name
 
     def test_get_day_type(self):
         """Local jurisdictions should return state day type"""
-        eq_(self.federal.get_day_type(), "business")
-        eq_(self.state.get_day_type(), "business")
-        eq_(self.local.get_day_type(), "business")
+        assert self.federal.get_day_type() == "business"
+        assert self.state.get_day_type() == "business"
+        assert self.local.get_day_type() == "business"
 
     def test_jurisdiction_get_days(self):
         """Local jurisdictions should return state days"""
-        eq_(self.federal.days, self.federal.law.days)
-        eq_(self.state.days, self.state.law.days)
-        eq_(self.local.days, self.state.law.days)
+        assert self.federal.days == self.federal.law.days
+        assert self.state.days == self.state.law.days
+        assert self.local.days == self.state.law.days
 
     def test_jurisdiction_get_waiver(self):
         """Local jurisdictions should return the state waiver."""
-        eq_(self.federal.waiver, self.federal.law.waiver)
-        eq_(self.state.waiver, self.state.law.waiver)
-        eq_(self.local.waiver, self.state.law.waiver)
+        assert self.federal.waiver == self.federal.law.waiver
+        assert self.state.waiver == self.state.law.waiver
+        assert self.local.waiver == self.state.law.waiver
 
     def test_jurisdiction_can_appeal(self):
         """Local jurisdictions should return the state's appealability."""
-        eq_(self.federal.has_appeal, self.federal.law.has_appeal)
-        eq_(self.state.has_appeal, self.state.law.has_appeal)
-        eq_(self.local.has_appeal, self.state.law.has_appeal)
+        assert self.federal.has_appeal == self.federal.law.has_appeal
+        assert self.state.has_appeal == self.state.law.has_appeal
+        assert self.local.has_appeal == self.state.law.has_appeal
 
     def test_average_response_time(self):
         """
@@ -115,8 +105,10 @@ class TestJurisdictionUnit(TestCase):
             datetime_done=now,
             composer__datetime_submitted=now - timedelta(local_duration),
         )
-        eq_(self.state.average_response_time(), (local_duration + state_duration) / 2)
-        eq_(self.local.average_response_time(), local_duration)
+        assert (
+            self.state.average_response_time() == (local_duration + state_duration) / 2
+        )
+        assert self.local.average_response_time() == local_duration
 
     def test_success_rate(self):
         """
@@ -127,8 +119,8 @@ class TestJurisdictionUnit(TestCase):
             agency__jurisdiction=self.state, status="done", datetime_done=timezone.now()
         )
         FOIARequestFactory(agency__jurisdiction=self.local, status="ack")
-        eq_(self.state.success_rate(), 50.0)
-        eq_(self.local.success_rate(), 0.0)
+        assert self.state.success_rate() == 50.0
+        assert self.local.success_rate() == 0.0
 
     def test_fee_rate(self):
         """
@@ -137,8 +129,8 @@ class TestJurisdictionUnit(TestCase):
         """
         FOIARequestFactory(agency__jurisdiction=self.state, status="ack", price=0)
         FOIARequestFactory(agency__jurisdiction=self.local, status="ack", price=1.00)
-        eq_(self.state.fee_rate(), 50.0)
-        eq_(self.local.fee_rate(), 100.0)
+        assert self.state.fee_rate() == 50.0
+        assert self.local.fee_rate() == 100.0
 
     def test_total_pages(self):
         """
@@ -150,14 +142,14 @@ class TestJurisdictionUnit(TestCase):
         state_comm = FOIACommunicationFactory(foia__agency__jurisdiction=self.state)
         local_comm.files.add(FOIAFileFactory(pages=page_count))
         state_comm.files.add(FOIAFileFactory(pages=page_count))
-        eq_(self.local.total_pages(), page_count)
-        eq_(self.state.total_pages(), 2 * page_count)
+        assert self.local.total_pages() == page_count
+        assert self.state.total_pages() == 2 * page_count
 
     def test_get_proxy(self):
         """Test getting the proxy user for a state"""
-        eq_(self.state.get_proxy(), None)
+        assert self.state.get_proxy() is None
         proxy = UserFactory(profile__state=self.state.abbrev, profile__proxy=True)
-        eq_(self.state.get_proxy(), proxy)
+        assert self.state.get_proxy() == proxy
 
 
 class TestLawModel(TestCase):
@@ -172,19 +164,15 @@ class TestLawModel(TestCase):
 
     def test_unicode(self):
         """The text representation of the law should be the name of the law."""
-        eq_(
-            str(self.law),
-            self.law.name,
-            "The text representation of the law should match the name of the law.",
-        )
+        assert (
+            str(self.law) == self.law.name
+        ), "The text representation of the law should match the name of the law."
 
     def test_absolute_url(self):
         """The absolute url of the law should be the url of its jurisdiction."""
-        eq_(
-            self.law.get_absolute_url(),
-            self.law.jurisdiction.get_absolute_url(),
-            "The absolute url of the law should match the url of its jurisdicition.",
-        )
+        assert (
+            self.law.get_absolute_url() == self.law.jurisdiction.get_absolute_url()
+        ), "The absolute url of the law should match the url of its jurisdicition."
 
 
 class TestExemptionModel(TestCase):
@@ -199,12 +187,10 @@ class TestExemptionModel(TestCase):
     def test_unicode(self):
         """The text representation should be the name of the exemption and its
         jurisdiction."""
-        eq_(
-            str(self.exemption),
-            "%s exemption of %s" % (self.exemption.name, self.exemption.jurisdiction),
-            "Should include the name of the exemption and the name of the "
-            "jurisdiction.",
-        )
+        assert str(self.exemption) == "%s exemption of %s" % (
+            self.exemption.name,
+            self.exemption.jurisdiction,
+        ), "Should include the name of the exemption and the name of the jurisdiction."
 
     def test_absolute_url(self):
         """The absolute url of the exemption should be a standalone exemption
@@ -214,15 +200,10 @@ class TestExemptionModel(TestCase):
         kwargs["pk"] = self.exemption.pk
         expected_url = reverse("exemption-detail", kwargs=kwargs)
         actual_url = self.exemption.get_absolute_url()
-        eq_(
-            actual_url,
-            expected_url,
-            (
-                "The exemption should return the exemption-detail url.\n"
-                "Actual url: %s\nExpected url: %s"
-            )
-            % (actual_url, expected_url),
-        )
+        assert actual_url == expected_url, (
+            "The exemption should return the exemption-detail url.\n"
+            "Actual url: %s\nExpected url: %s"
+        ) % (actual_url, expected_url)
 
 
 class TestInvokedExemptionModel(TestCase):
@@ -243,13 +224,9 @@ class TestInvokedExemptionModel(TestCase):
             self.invoked_exemption.exemption.name,
             self.invoked_exemption.request,
         )
-        eq_(
-            actual,
-            expected,
-            (
-                "Should include the name of the exemption and the request.\n"
-                "Actual: %s\nExpected: %s" % (actual, expected)
-            ),
+        assert actual == expected, (
+            "Should include the name of the exemption and the request.\n"
+            "Actual: %s\nExpected: %s" % (actual, expected)
         )
 
     def test_absolute_url(self):
@@ -264,15 +241,10 @@ class TestInvokedExemptionModel(TestCase):
             + "#invoked-%d" % self.invoked_exemption.pk
         )
         actual_url = self.invoked_exemption.get_absolute_url()
-        eq_(
-            actual_url,
-            expected_url,
-            (
-                "The exemption should return the exemption-detail url.\n"
-                "Actual url: %s\nExpected url: %s"
-            )
-            % (actual_url, expected_url),
-        )
+        assert actual_url == expected_url, (
+            "The exemption should return the exemption-detail url.\n"
+            "Actual url: %s\nExpected url: %s"
+        ) % (actual_url, expected_url)
 
 
 class TestExampleAppealModel(TestCase):
@@ -292,13 +264,9 @@ class TestExampleAppealModel(TestCase):
             self.example_appeal.title,
             self.example_appeal.exemption,
         )
-        eq_(
-            actual,
-            expected,
-            (
-                "Should include the name of the exemption and the request.\n"
-                "Actual: %s\nExpected: %s" % (actual, expected)
-            ),
+        assert actual == expected, (
+            "Should include the name of the exemption and the request.\n"
+            "Actual: %s\nExpected: %s" % (actual, expected)
         )
 
     def test_absolute_url(self):
@@ -313,15 +281,10 @@ class TestExampleAppealModel(TestCase):
             + "#appeal-%d" % self.example_appeal.pk
         )
         actual_url = self.example_appeal.get_absolute_url()
-        eq_(
-            actual_url,
-            expected_url,
-            (
-                "The exemption should return the exemption-detail url.\n"
-                "Actual url: %s\nExpected url: %s"
-            )
-            % (actual_url, expected_url),
-        )
+        assert actual_url == expected_url, (
+            "The exemption should return the exemption-detail url.\n"
+            "Actual url: %s\nExpected url: %s"
+        ) % (actual_url, expected_url)
 
 
 class TestAppealModel(TestCase):
@@ -339,24 +302,24 @@ class TestAppealModel(TestCase):
         """The text representation should say which request the appeal is of."""
         actual = str(self.appeal)
         expected = "Appeal of %s" % self.appeal.communication.foia
-        eq_(actual, expected)
+        assert actual == expected
 
     def test_absolute_url(self):
         """The absolute url for the appeal should be the absolute url of the
         communication."""
         expected = self.appeal.communication.get_absolute_url()
         actual = self.appeal.get_absolute_url()
-        eq_(expected, actual)
+        assert expected == actual
 
     def test_unsuccessful_by_default(self):
         """By default, an appeal should be not be successful."""
-        eq_(self.appeal.is_successful(), False)
+        assert not self.appeal.is_successful()
 
     def test_successful(self):
         """The appeal was successful if a subsequent communication has a
         'Completed' status."""
         FOIACommunicationFactory(foia=self.appeal.communication.foia, status="done")
-        eq_(self.appeal.is_successful(), True)
+        assert self.appeal.is_successful()
 
     def test_another_appeal(self):
         """The appeal was unsuccessful if a subsequent communication has an
@@ -365,14 +328,14 @@ class TestAppealModel(TestCase):
             foia=self.appeal.communication.foia, status="done"
         )
         factories.AppealFactory(communication=subsequent_communication)
-        eq_(self.appeal.is_successful(), False)
+        assert not self.appeal.is_successful()
 
     def test_unfinished_by_default(self):
         """By default, an appeal should not be finished."""
-        eq_(self.appeal.is_finished(), False)
+        assert not self.appeal.is_finished()
 
     def test_finished(self):
         """The appeal was finished if a subsequent communication has a terminal
         status."""
         FOIACommunicationFactory(foia=self.appeal.communication.foia, status="rejected")
-        eq_(self.appeal.is_finished(), True)
+        assert self.appeal.is_finished()
