@@ -6,7 +6,6 @@ Test the FOIA API
 from django.test import TestCase
 
 # Third Party
-from nose.tools import eq_
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
@@ -43,7 +42,7 @@ class TestFoiaCreation(TestCase):
         request = self.factory.post(self.endpoint, data, format="json")
         force_authenticate(request, user=self.user)
         response = self.view(request)
-        eq_(response.status_code, 201)
+        assert response.status_code == 201
 
         request_ids = response.data["Requests"]
         foia = FOIARequest.objects.get(pk=request_ids[0])
@@ -61,7 +60,7 @@ class TestFoiaCreation(TestCase):
         request = self.factory.post(self.endpoint, data, format="json")
         force_authenticate(request, user=self.user)
         response = self.view(request)
-        eq_(response.status_code, 201)
+        assert response.status_code == 201
 
         request_ids = response.data["Requests"]
         foia = FOIARequest.objects.get(pk=request_ids[0])
@@ -83,4 +82,4 @@ class TestFoiaCreation(TestCase):
         request = self.factory.post(self.endpoint, data, format="json")
         force_authenticate(request, user=self.user)
         response = self.view(request)
-        eq_(response.status_code, 400)
+        assert response.status_code == 400

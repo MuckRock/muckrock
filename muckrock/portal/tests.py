@@ -13,7 +13,6 @@ from datetime import date
 import pytest
 import requests_mock
 from mock import patch
-from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
 from muckrock.foia.factories import FOIACommunicationFactory
@@ -37,18 +36,18 @@ class TestManualPortal(TestCase):
         """Sending a message should create a portal task"""
         comm = FOIACommunicationFactory(category="n")
         self.portal.send_msg(comm)
-        ok_(PortalTask.objects.filter(category="n", communication=comm).exists())
+        assert PortalTask.objects.filter(category="n", communication=comm).exists()
 
     def test_receive_msg(self):
         """Receiving a message should create a portal task"""
         comm = FOIACommunicationFactory()
         self.portal.receive_msg(comm)
-        ok_(PortalTask.objects.filter(category="i", communication=comm).exists())
+        assert PortalTask.objects.filter(category="i", communication=comm).exists()
 
     def test_get_new_password(self):
         """Should generate a random password"""
         password = self.portal.get_new_password()
-        eq_(len(password), 12)
+        assert len(password) == 12
 
 
 @pytest.mark.skip("not currently used")
@@ -77,16 +76,16 @@ class _TestNextRequestPortal(TestCase):
         )
         self.portal.receive_msg(comm)
         comm = FOIACommunication.objects.get(pk=comm.pk)
-        eq_(comm.foia.status, "processed")
-        eq_(comm.foia.current_tracking_id(), "17-1")
-        eq_(
-            comm.communication,
-            "Your first Evanston record request (request number 17-764) "
+        assert comm.foia.status == "processed"
+        assert comm.foia.current_tracking_id() == "17-1"
+        assert (
+            comm.communication
+            == "Your first Evanston record request (request number 17-764) "
             "has been submitted. It is currently unpublished and is not "
-            "available for the general public to view.\n\n",
+            "available for the general public to view.\n\n"
         )
-        assert_false(comm.hidden)
-        eq_(comm.portals.count(), 1)
+        assert not comm.hidden
+        assert comm.portals.count() == 1
 
     def test_text_reply(self):
         """Test receiving a normal reply"""
@@ -98,11 +97,11 @@ class _TestNextRequestPortal(TestCase):
             foia__status="processed",
         )
         self.portal.receive_msg(comm)
-        eq_(comm.foia.status, "processed")
-        eq_(comm.communication, "\nThis is the reply\n")
-        assert_false(comm.hidden)
-        eq_(comm.portals.count(), 1)
-        eq_(comm.responsetask_set.count(), 1)
+        assert comm.foia.status == "processed"
+        assert comm.communication == "\nThis is the reply\n"
+        assert not comm.hidden
+        assert comm.portals.count() == 1
+        assert comm.responsetask_set.count() == 1
 
     def test_due_date(self):
         """Test receiving a due date reply"""
@@ -113,14 +112,13 @@ class _TestNextRequestPortal(TestCase):
             foia__status="processed",
         )
         self.portal.receive_msg(comm)
-        eq_(comm.foia.status, "processed")
-        eq_(
-            comm.communication,
-            "The due date for record request #18-209 has "
-            "been changed to: March 16, 2018",
+        assert comm.foia.status == "processed"
+        assert (
+            comm.communication == "The due date for record request #18-209 has "
+            "been changed to: March 16, 2018"
         )
-        assert_false(comm.hidden)
-        eq_(comm.foia.date_estimate, date(2018, 3, 16))
+        assert not comm.hidden
+        assert comm.foia.date_estimate == date(2018, 3, 16)
 
 
 class TestFBIPortal(TestCase):
@@ -138,8 +136,8 @@ class TestFBIPortal(TestCase):
             subject="eFOIA Request Received", foia__status="ack"
         )
         self.portal.receive_msg(comm)
-        eq_(comm.foia.status, "processed")
-        eq_(comm.portals.count(), 1)
+        assert comm.foia.status == "processed"
+        assert comm.portals.count() == 1
 
     @requests_mock.Mocker()
     @patch("muckrock.foia.tasks.upload_document_cloud.apply_async")
@@ -156,8 +154,8 @@ class TestFBIPortal(TestCase):
             "* [file2.pdf](https://www.example.com/file2.pdf)\n",
         )
         self.portal.receive_msg(comm)
-        eq_(comm.files.count(), 2)
-        eq_(comm.files.all()[0].ffile.read(), b"File 1 Content")
-        eq_(comm.files.all()[1].ffile.read(), b"File 2 Content")
-        eq_(comm.portals.count(), 1)
-        eq_(comm.responsetask_set.count(), 1)
+        assert comm.files.count() == 2
+        assert comm.files.all()[0].ffile.read() == b"File 1 Content"
+        assert comm.files.all()[1].ffile.read() == b"File 2 Content"
+        assert comm.portals.count() == 1
+        assert comm.responsetask_set.count() == 1

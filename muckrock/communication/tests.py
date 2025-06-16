@@ -8,7 +8,7 @@ from django.forms import ValidationError
 from django.test import TestCase
 
 # Third Party
-from nose.tools import assert_false, assert_raises, eq_, ok_
+import pytest
 
 # MuckRock
 from muckrock.communication.models import EmailAddress
@@ -21,13 +21,13 @@ class TestEmailAddress(TestCase):
 
     def test_fetch(self):
         """Test the fetch query set method"""
-        ok_(isinstance(EmailAddress.objects.fetch("test@example.com"), EmailAddress))
-        ok_(EmailAddress.objects.fetch("foobar") is None)
+        assert isinstance(EmailAddress.objects.fetch("test@example.com"), EmailAddress)
+        assert EmailAddress.objects.fetch("foobar") is None
 
     def test_fetch_many(self):
         """Test the fetch_many query set method"""
-        eq_(len(EmailAddress.objects.fetch_many("a@a.com, b@b.com, foobar")), 2)
-        with assert_raises(ValidationError):
+        assert len(EmailAddress.objects.fetch_many("a@a.com, b@b.com, foobar")) == 2
+        with pytest.raises(ValidationError):
             EmailAddress.objects.fetch_many("a@a.comn, foobar", ignore_errors=False)
 
     def test_allowed(self):
@@ -56,24 +56,25 @@ class TestEmailAddress(TestCase):
             "foo@co.uk",
         ]
         for email in allowed_emails:
-            ok_(
-                EmailAddress.objects.fetch(email).allowed(foia),
-                "Allowed email failed for address %s" % email,
+            assert EmailAddress.objects.fetch(email).allowed(foia), (
+                "Allowed email failed for address %s" % email
             )
         for email in not_allowed_emails:
-            assert_false(
-                EmailAddress.objects.fetch(email).allowed(foia),
-                "Non allowed email failed for address %s" % email,
+            assert not EmailAddress.objects.fetch(email).allowed(foia), (
+                "Non allowed email failed for address %s" % email
             )
         # non foia test - any agency email
-        ok_(EmailAddress.objects.fetch("main@agency.com").allowed())
+        assert EmailAddress.objects.fetch("main@agency.com").allowed()
 
     def test_domain(self):
         """Test the domain method"""
-        eq_(EmailAddress.objects.fetch("a@a.com").domain, "a.com")
-        eq_(EmailAddress.objects.fetch('"odd_email@you"@weird.com').domain, "weird.com")
+        assert EmailAddress.objects.fetch("a@a.com").domain == "a.com"
+        assert (
+            EmailAddress.objects.fetch('"odd_email@you"@weird.com').domain
+            == "weird.com"
+        )
 
     def test_str(self):
         """Test the __str__ method"""
         email = '"John Doe" <john@doe.com>'
-        eq_(str(EmailAddress.objects.fetch(email)), email)
+        assert str(EmailAddress.objects.fetch(email)) == email

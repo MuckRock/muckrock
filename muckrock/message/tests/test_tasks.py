@@ -9,16 +9,11 @@ from django.test import TestCase
 
 # Third Party
 import mock
-import nose.tools
 
 # MuckRock
 from muckrock.core.factories import NotificationFactory, ProjectFactory, UserFactory
 from muckrock.message import tasks
 from muckrock.task.factories import FlaggedTaskFactory
-
-ok_ = nose.tools.ok_
-eq_ = nose.tools.eq_
-raises = nose.tools.raises
 
 
 class TestDailyTask(TestCase):

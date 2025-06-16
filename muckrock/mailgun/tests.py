@@ -18,7 +18,6 @@ from datetime import date, datetime
 from io import StringIO
 
 # Third Party
-import nose.tools
 import pytz
 import requests_mock
 from freezegun import freeze_time
@@ -117,21 +116,20 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         foia.refresh_from_db()
 
         last_comm = foia.communications.last()
-        nose.tools.eq_(last_comm.communication, "%s\n%s" % (text, signature))
-        nose.tools.eq_(last_comm.subject, subject)
-        nose.tools.eq_(last_comm.from_user, foia.agency.get_user())
-        nose.tools.eq_(last_comm.to_user, foia.user)
-        nose.tools.eq_(last_comm.response, True)
-        nose.tools.eq_(last_comm.full_html, False)
+        assert last_comm.communication == "%s\n%s" % (text, signature)
+        assert last_comm.subject == subject
+        assert last_comm.from_user == foia.agency.get_user()
+        assert last_comm.to_user == foia.user
+        assert last_comm.response == True
+        assert last_comm.full_html == False
         self.run_commit_hooks()
-        nose.tools.eq_(last_comm.get_raw_email().raw_email, "Raw email")
-        nose.tools.eq_(last_comm.responsetask_set.count(), 1)
-        nose.tools.eq_(foia.email, EmailAddress.objects.fetch(from_email))
-        nose.tools.eq_(
-            set(foia.cc_emails.all()),
-            set(EmailAddress.objects.fetch_many("other@agency.gov")),
+        assert last_comm.get_raw_email().raw_email == "Raw email"
+        assert last_comm.responsetask_set.count() == 1
+        assert foia.email == EmailAddress.objects.fetch(from_email)
+        assert set(foia.cc_emails.all()) == set(
+            EmailAddress.objects.fetch_many("other@agency.gov")
         )
-        nose.tools.eq_(foia.status, "processed")
+        assert foia.status == "processed"
 
     # patching asyncio.run to not run the classification on actual LLM
     @patch("asyncio.run", Mock())
@@ -158,7 +156,7 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.mailgun_route(from_, to_, subject, text, signature, reply_to=reply_to)
         foia.refresh_from_db()
 
-        nose.tools.eq_(foia.email, EmailAddress.objects.fetch(reply_to))
+        assert foia.email == EmailAddress.objects.fetch(reply_to)
 
     # patching asyncio.run to not run the classification on actual LLM
     @patch("asyncio.run", Mock())
@@ -185,7 +183,7 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.mailgun_route(from_, to_, subject, text, signature)
         foia.refresh_from_db()
 
-        nose.tools.eq_(foia.email, original_email)
+        assert foia.email == original_email
 
     def test_bad_sender(self):
         """Test receiving a message from an unauthorized sender"""
@@ -198,14 +196,12 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.mailgun_route(from_, to_, text=text, signature=signature)
 
         communication = FOIACommunication.objects.get(likely_foia=foia)
-        nose.tools.eq_(communication.communication, "%s\n%s" % (text, signature))
-        nose.tools.ok_(
-            OrphanTask.objects.filter(
-                communication=communication,
-                reason="bs",
-                address=foia.get_request_email().split("@")[0],
-            ).exists()
-        )
+        assert communication.communication == "%s\n%s" % (text, signature)
+        assert OrphanTask.objects.filter(
+            communication=communication,
+            reason="bs",
+            address=foia.get_request_email().split("@")[0],
+        ).exists()
 
     def test_block_incoming(self):
         """Test receiving a message from an unauthorized sender"""
@@ -217,14 +213,12 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.mailgun_route(to_=to_, text=text, signature=signature)
 
         communication = FOIACommunication.objects.get(likely_foia=foia)
-        nose.tools.eq_(communication.communication, "%s\n%s" % (text, signature))
-        nose.tools.ok_(
-            OrphanTask.objects.filter(
-                communication=communication,
-                reason="ib",
-                address=foia.get_request_email().split("@")[0],
-            ).exists()
-        )
+        assert communication.communication == "%s\n%s" % (text, signature)
+        assert OrphanTask.objects.filter(
+            communication=communication,
+            reason="ib",
+            address=foia.get_request_email().split("@")[0],
+        ).exists()
 
     def test_bad_addr(self):
         """Test sending to a non existent FOIA request"""
@@ -233,9 +227,7 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         text = "Test bad address."
         self.mailgun_route(to_=to_, text=text)
 
-        nose.tools.ok_(
-            OrphanTask.objects.filter(reason="ia", address="123-12345678").exists()
-        )
+        assert OrphanTask.objects.filter(reason="ia", address="123-12345678").exists()
 
     def test_attachments(self):
         """Test a message with an attachment"""
@@ -248,8 +240,8 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
             self.mailgun_route(to_=to_, attachments=attachments)
             foia.refresh_from_db()
             file_path = date.today().strftime("foia_files/%Y/%m/%d/data.pdf")
-            nose.tools.eq_(foia.get_files().count(), 1)
-            nose.tools.eq_(foia.get_files().first().ffile.name, file_path)
+            assert foia.get_files().count() == 1
+            assert foia.get_files().first().ffile.name == file_path
         finally:
             foia.communications.first().files.first().delete()
             file_path = os.path.join(settings.SITE_ROOT, "static/media/", file_path)
@@ -266,7 +258,7 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.mailgun_route(to_=to_, text=text, body=body)
 
         last_comm = foia.communications.last()
-        nose.tools.eq_(last_comm.communication, body)
+        assert last_comm.communication == body
 
     def test_bad_verify(self):
         """Test an improperly signed message"""
@@ -274,7 +266,7 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         foia = FOIARequestFactory(block_incoming=True)
         to_ = foia.get_request_email()
         response = self.mailgun_route(to_=to_, sign=False)
-        nose.tools.eq_(response.status_code, 403)
+        assert response.status_code == 403
 
     def test_deleted(self):
         """Test a message to a deleted request"""
@@ -292,11 +284,11 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         foia.refresh_from_db()
 
         # no communication should be created, and an autoreply sould be mailed out
-        nose.tools.eq_(foia.communications.count(), 0)
-        nose.tools.eq_(
-            mail.outbox[0].body, render_to_string("text/foia/deleted_autoreply.txt")
+        assert foia.communications.count() == 0
+        assert mail.outbox[0].body == render_to_string(
+            "text/foia/deleted_autoreply.txt"
         )
-        nose.tools.eq_(mail.outbox[0].to, [from_])
+        assert mail.outbox[0].to == [from_]
 
 
 class TestMailgunViewCatchAll(TestMailgunViews):
@@ -318,7 +310,7 @@ class TestMailgunViewCatchAll(TestMailgunViews):
         task = OrphanTask.objects.get(
             reason="ia", address="foobar@requests.muckrock.com"
         )
-        nose.tools.eq_(task.communication.communication, "%s\n%s" % (text, signature))
+        assert task.communication.communication == "%s\n%s" % (text, signature)
 
 
 @freeze_time("2017-01-02 12:00:00 EST", tz_offset=-5)
@@ -371,16 +363,14 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         bounces(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.ok_(
-            EmailError.objects.filter(
-                email=email,
-                datetime=datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
-                recipient=EmailAddress.objects.fetch(recipient),
-                code=code,
-                error=error,
-                event=severity,
-            ).exists()
-        )
+        assert EmailError.objects.filter(
+            email=email,
+            datetime=datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
+            recipient=EmailAddress.objects.fetch(recipient),
+            code=code,
+            error=error,
+            event=severity,
+        ).exists()
 
     def test_open(self):
         """Test an open webhook"""
@@ -436,22 +426,20 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         opened(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.ok_(
-            EmailOpen.objects.filter(
-                email=email,
-                datetime=datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
-                recipient=EmailAddress.objects.fetch(recipient),
-                city=city,
-                region=region,
-                country=country,
-                client_type=client_type,
-                client_name=client_name,
-                client_os=client_os,
-                device_type=device_type,
-                user_agent=user_agent[:255],
-                ip_address=ip_address,
-            ).exists()
-        )
+        assert EmailOpen.objects.filter(
+            email=email,
+            datetime=datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
+            recipient=EmailAddress.objects.fetch(recipient),
+            city=city,
+            region=region,
+            country=country,
+            client_type=client_type,
+            client_name=client_name,
+            client_os=client_os,
+            device_type=device_type,
+            user_agent=user_agent[:255],
+            ip_address=ip_address,
+        ).exists()
 
     def test_delivered(self):
         """Test a delivered webhook"""
@@ -474,7 +462,6 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         delivered(request)  # pylint: disable=no-value-for-parameter
         comm.refresh_from_db()
 
-        nose.tools.eq_(
-            comm.emails.first().confirmed_datetime,
-            datetime(2017, 1, 2, 17, tzinfo=pytz.utc),
+        assert comm.emails.first().confirmed_datetime == datetime(
+            2017, 1, 2, 17, tzinfo=pytz.utc
         )

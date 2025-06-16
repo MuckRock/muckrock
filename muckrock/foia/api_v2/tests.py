@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.urls import reverse
 
 # Third Party
-from nose.tools import eq_
 from rest_framework.test import APIClient
 
 # MuckRock
@@ -24,12 +23,12 @@ class TestFOIARequestViewset(TestCase):
         response = self.client.get(
             reverse("api2-requests-detail", kwargs={"pk": foia.pk}),
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_list(self):
         FOIARequestFactory.create()
         response = self.client.get(reverse("api2-requests-list"))
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_create(self):
         agency = AgencyFactory.create()
@@ -43,7 +42,7 @@ class TestFOIARequestViewset(TestCase):
                 "requested_docs": "Meeting minutes",
             },
         )
-        eq_(response.status_code, 201, response.json())
+        assert response.status_code == 201, response.json()
 
 
 class TestFOIACommunicationViewset(TestCase):
@@ -52,21 +51,21 @@ class TestFOIACommunicationViewset(TestCase):
         response = self.client.get(
             reverse("api2-communications-detail", kwargs={"pk": comm.pk}),
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_list(self):
         FOIACommunicationFactory.create()
         response = self.client.get(reverse("api2-communications-list"))
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
 
 class TestFOIAFileViewset(TestCase):
     def test_detail(self):
         file = FOIAFileFactory.create()
         response = self.client.get(reverse("api2-files-detail", kwargs={"pk": file.pk}))
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_list(self):
         FOIAFileFactory.create()
         response = self.client.get(reverse("api2-files-list"))
-        eq_(response.status_code, 200)
+        assert response.status_code == 200

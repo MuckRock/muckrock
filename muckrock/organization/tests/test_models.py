@@ -10,7 +10,7 @@ from django.test import TestCase
 from datetime import date
 
 # Third Party
-from nose.tools import assert_false, assert_raises, assert_true, eq_
+import pytest
 
 # MuckRock
 from muckrock.core.factories import UserFactory
@@ -34,8 +34,8 @@ class TestOrganization(TestCase):
         users = UserFactory.create_batch(2)
         MembershipFactory(user=users[0], organization=org)
 
-        assert_true(org.has_member(users[0]))
-        assert_false(org.has_member(users[1]))
+        assert org.has_member(users[0])
+        assert not org.has_member(users[1])
 
     def test_has_admin(self):
         """Test has_admin method"""
@@ -44,8 +44,8 @@ class TestOrganization(TestCase):
         MembershipFactory(user=users[0], organization=org, admin=True)
         MembershipFactory(user=users[1], organization=org, admin=False)
 
-        assert_true(org.has_admin(users[0]))
-        assert_false(org.has_admin(users[1]))
+        assert org.has_admin(users[0])
+        assert not org.has_admin(users[1])
 
     def test_make_requests(self):
         """Test Org make_requests method"""
@@ -53,27 +53,27 @@ class TestOrganization(TestCase):
 
         request_count = org.make_requests(5)
         org.refresh_from_db()
-        eq_(request_count, {"monthly": 5, "regular": 0})
-        eq_(org.monthly_requests, 5)
-        eq_(org.number_requests, 10)
+        assert request_count == {"monthly": 5, "regular": 0}
+        assert org.monthly_requests == 5
+        assert org.number_requests == 10
 
         request_count = org.make_requests(10)
         org.refresh_from_db()
-        eq_(request_count, {"monthly": 5, "regular": 5})
-        eq_(org.monthly_requests, 0)
-        eq_(org.number_requests, 5)
+        assert request_count == {"monthly": 5, "regular": 5}
+        assert org.monthly_requests == 0
+        assert org.number_requests == 5
 
         request_count = org.make_requests(4)
         org.refresh_from_db()
-        eq_(request_count, {"monthly": 0, "regular": 4})
-        eq_(org.monthly_requests, 0)
-        eq_(org.number_requests, 1)
+        assert request_count == {"monthly": 0, "regular": 4}
+        assert org.monthly_requests == 0
+        assert org.number_requests == 1
 
-        with assert_raises(InsufficientRequestsError):
+        with pytest.raises(InsufficientRequestsError):
             request_count = org.make_requests(2)
         org.refresh_from_db()
-        eq_(org.monthly_requests, 0)
-        eq_(org.number_requests, 1)
+        assert org.monthly_requests == 0
+        assert org.number_requests == 1
 
     def test_merge(self):
 
@@ -94,39 +94,39 @@ class TestOrganization(TestCase):
 
         # user 0, 1 and 2 in org
         for user_id in range(3):
-            assert_true(org.has_member(users[user_id]))
+            assert org.has_member(users[user_id])
         # user 3 not in org
-        assert_false(org.has_member(users[3]))
+        assert not org.has_member(users[3])
 
         # all users have exactly one active org
         for user in User.objects.all():
-            assert_true(user.profile.organization)
+            assert user.profile.organization
 
         # no users in dupe_org
-        eq_(dupe_org.users.count(), 0)
+        assert dupe_org.users.count() == 0
 
     def test_merge_fks(self):
         # Relations pointing to the Organization model
-        eq_(
+        assert (
             len(
                 [
                     f
                     for f in Organization._meta.get_fields()
                     if f.is_relation and f.auto_created
                 ]
-            ),
-            2,
+            )
+            == 2
         )
         # Many to many relations defined on the Organization model
-        eq_(
+        assert (
             len(
                 [
                     f
                     for f in Organization._meta.get_fields()
                     if f.many_to_many and not f.auto_created
                 ]
-            ),
-            1,
+            )
+            == 1
         )
 
 
@@ -160,8 +160,8 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 50)
-        eq_(organization.monthly_requests, 50)
+        assert organization.requests_per_month == 50
+        assert organization.monthly_requests == 50
 
     def test_cancel_subscription(self):
         """Cancel a subscription"""
@@ -184,8 +184,8 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 0)
-        eq_(organization.monthly_requests, 0)
+        assert organization.requests_per_month == 0
+        assert organization.monthly_requests == 0
 
     def test_upgrade_subscription(self):
         """Upgrade a subscription"""
@@ -210,8 +210,8 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 100)
-        eq_(organization.monthly_requests, 83)
+        assert organization.requests_per_month == 100
+        assert organization.monthly_requests == 83
 
     def test_downgrade_subscription(self):
         """Downgrade a subscription"""
@@ -238,8 +238,8 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 50)
-        eq_(organization.monthly_requests, 50)
+        assert organization.requests_per_month == 50
+        assert organization.monthly_requests == 50
 
     def test_increase_max_users(self):
         """Increase max users"""
@@ -262,8 +262,8 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 70)
-        eq_(organization.monthly_requests, 53)
+        assert organization.requests_per_month == 70
+        assert organization.monthly_requests == 53
 
     def test_decrease_max_users(self):
         """Decrease max users"""
@@ -286,8 +286,8 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 60)
-        eq_(organization.monthly_requests, 33)
+        assert organization.requests_per_month == 60
+        assert organization.monthly_requests == 33
 
     def test_monthly_restore(self):
         """Monthly restore"""
@@ -310,5 +310,5 @@ class TestSquareletUpdateData(TestCase):
             }
         )
         organization.refresh_from_db()
-        eq_(organization.requests_per_month, 50)
-        eq_(organization.monthly_requests, 50)
+        assert organization.requests_per_month == 50
+        assert organization.monthly_requests == 50
