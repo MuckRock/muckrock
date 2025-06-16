@@ -1,12 +1,11 @@
 """
-Tests using nose for the classifing of new communications
+Tests for the classifing of new communications
 """
 
 # Django
 from django.test import TestCase
 
 # Third Party
-import nose.tools
 from constance.test import override_config
 from mock import Mock, patch
 
@@ -43,5 +42,5 @@ class TestFOIAClassify(TestCase):
         task = ResponseTaskFactory(communication=comm)
         classify_status.apply(args=(task.pk,), throw=True)
         task.refresh_from_db()
-        nose.tools.eq_(task.predicted_status, "processed")
-        nose.tools.ok_(task.resolved)
+        assert task.predicted_status == "processed"
+        assert task.resolved

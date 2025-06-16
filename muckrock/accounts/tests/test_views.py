@@ -10,8 +10,8 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 # Third Party
+import pytest
 from mock import patch
-from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.accounts import views
@@ -51,27 +51,27 @@ class TestAccountFunctional(TestCase):
         FOIAComposerFactory(user=self.user, status="submitted")
         # account overview page
         response = http_get_response(reverse("accounts"), views.AccountsView.as_view())
-        eq_(response.status_code, 302)
+        assert response.status_code == 302
         # profile page
         request_factory = RequestFactory()
         request = request_factory.get(self.user.profile.get_absolute_url())
         request = mock_middleware(request)
         request.user = AnonymousUser()
         response = views.ProfileView.as_view()(request, username=self.user.username)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
-    @raises(Http404)
     def test_private_profile(self):
         """Test public views while not logged in"""
         # account overview page
         response = http_get_response(reverse("accounts"), views.AccountsView.as_view())
-        eq_(response.status_code, 302)
+        assert response.status_code == 302
         # profile page
         request_factory = RequestFactory()
         request = request_factory.get(self.user.profile.get_absolute_url())
         request = mock_middleware(request)
         request.user = AnonymousUser()
-        response = views.ProfileView.as_view()(request, username=self.user.username)
+        with pytest.raises(Http404):
+            response = views.ProfileView.as_view()(request, username=self.user.username)
 
     def test_unallowed_views(self):
         """Private URLs should redirect logged-out users to the log in page"""
@@ -79,18 +79,20 @@ class TestAccountFunctional(TestCase):
         get, post = http_get_post(
             reverse("acct-my-profile"), login_required(views.ProfileView.as_view()), {}
         )
-        eq_(
-            get.status_code, 302, "My profile link reponds with 302 to logged out user."
-        )
-        eq_(post.status_code, 302, "POST to my profile link responds with 302.")
+        assert (
+            get.status_code == 302
+        ), "My profile link reponds with 302 to logged out user."
+        assert post.status_code == 302, "POST to my profile link responds with 302."
         # settings
         get, post = http_get_post(
             reverse("acct-settings"), views.ProfileSettings.as_view(), {}
         )
-        eq_(get.status_code, 302, "GET /profile responds with 302 to logged out user.")
-        eq_(
-            post.status_code, 302, "POST /settings reponds with 302 to logged out user."
-        )
+        assert (
+            get.status_code == 302
+        ), "GET /profile responds with 302 to logged out user."
+        assert (
+            post.status_code == 302
+        ), "POST /settings reponds with 302 to logged out user."
 
     @patch("stripe.Customer.retrieve")
     def test_auth_views(self, mock_stripe):
@@ -99,11 +101,13 @@ class TestAccountFunctional(TestCase):
         response = http_get_response(
             reverse("acct-my-profile"), views.ProfileView.as_view(), self.user
         )
-        eq_(response.status_code, 302, "Logged in user may view their own profile.")
+        assert response.status_code == 302, "Logged in user may view their own profile."
         response = http_get_response(
             reverse("acct-settings"), views.ProfileSettings.as_view(), self.user
         )
-        eq_(response.status_code, 200, "Logged in user may view their own settings.")
+        assert (
+            response.status_code == 200
+        ), "Logged in user may view their own settings."
 
     @patch("stripe.Customer.retrieve")
     def test_settings_view(self, mock_stripe):
@@ -126,7 +130,7 @@ class TestAccountFunctional(TestCase):
         all_data.update(email_data)
         all_data.pop("action")
         for key, val in all_data.items():
-            eq_(val, getattr(profile, key))
+            assert val == getattr(profile, key)
 
 
 class TestNotificationList(TestCase):
@@ -142,37 +146,33 @@ class TestNotificationList(TestCase):
     def test_get(self):
         """The view should provide a list of notifications for the user."""
         response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200, "The view should return OK.")
+        assert response.status_code == 200, "The view should return OK."
         object_list = response.context_data["object_list"]
-        ok_(
-            self.unread_notification in object_list,
-            "The context should contain the unread notification.",
-        )
-        ok_(
-            self.read_notification in object_list,
-            "The context should contain the read notification.",
-        )
+        assert (
+            self.unread_notification in object_list
+        ), "The context should contain the unread notification."
+        assert (
+            self.read_notification in object_list
+        ), "The context should contain the read notification."
 
     def test_unauthorized_get(self):
         """Logged out users trying to access the notifications
         view should be redirected to the login view."""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 302, "The view should redirect.")
-        ok_(
-            reverse("acct-login") in response.url,
-            "Logged out users should be redirected to the login view.",
-        )
+        assert response.status_code == 302, "The view should redirect."
+        assert (
+            reverse("acct-login") in response.url
+        ), "Logged out users should be redirected to the login view."
 
     def test_mark_all_read(self):
         """Users should be able to mark all their notifications as read."""
         data = {"action": "mark_all_read"}
-        ok_(self.unread_notification.read is not True)
+        assert self.unread_notification.read is not True
         http_post_response(self.url, self.view, data, self.user)
         self.unread_notification.refresh_from_db()
-        ok_(
-            self.unread_notification.read is True,
-            "The unread notification should be marked as read.",
-        )
+        assert (
+            self.unread_notification.read is True
+        ), "The unread notification should be marked as read."
 
 
 class TestUnreadNotificationList(TestCase):
@@ -188,26 +188,23 @@ class TestUnreadNotificationList(TestCase):
     def test_get(self):
         """The view should provide a list of notifications for the user."""
         response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200, "The view should return OK.")
+        assert response.status_code == 200, "The view should return OK."
         object_list = response.context_data["object_list"]
-        ok_(
-            self.unread_notification in object_list,
-            "The context should contain the unread notification.",
-        )
-        ok_(
-            self.read_notification not in object_list,
-            "The context should not contain the read notification.",
-        )
+        assert (
+            self.unread_notification in object_list
+        ), "The context should contain the unread notification."
+        assert (
+            self.read_notification not in object_list
+        ), "The context should not contain the read notification."
 
     def test_unauthorized_get(self):
         """Logged out users trying to access the notifications
         view should be redirected to the login view."""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 302, "The view should redirect.")
-        ok_(
-            reverse("acct-login") in response.url,
-            "Logged out users should be redirected to the login view.",
-        )
+        assert response.status_code == 302, "The view should redirect."
+        assert (
+            reverse("acct-login") in response.url
+        ), "Logged out users should be redirected to the login view."
 
 
 class TestNotificationRead(TestCase):
@@ -226,7 +223,7 @@ class TestNotificationRead(TestCase):
         # Create a notification for the request
         action = new_action(agency, "completed", target=foia)
         notification = notify(self.user, action)[0]
-        ok_(not notification.read, "The notification should be unread.")
+        assert not notification.read, "The notification should be unread."
         # Try getting the view as the user
         response = http_get_response(
             foia.get_absolute_url(),
@@ -237,10 +234,10 @@ class TestNotificationRead(TestCase):
             jidx=foia.jurisdiction.pk,
             jurisdiction=foia.jurisdiction.slug,
         )
-        eq_(response.status_code, 200, "The view should response 200 OK.")
+        assert response.status_code == 200, "The view should response 200 OK."
         # Check that the notification has been read.
         notification.refresh_from_db()
-        ok_(notification.read, "The notification should be marked as read.")
+        assert notification.read, "The notification should be marked as read."
 
     def test_get_question(self):
         """Try getting the detail page for a Question with an unread notification."""
@@ -249,7 +246,7 @@ class TestNotificationRead(TestCase):
         # Create a notification for the question
         action = new_action(UserFactory(), "answered", target=question)
         notification = notify(self.user, action)[0]
-        ok_(not notification.read, "The notification should be unread.")
+        assert not notification.read, "The notification should be unread."
         # Try getting the view as the user
         response = http_get_response(
             question.get_absolute_url(),
@@ -258,7 +255,7 @@ class TestNotificationRead(TestCase):
             pk=question.pk,
             slug=question.slug,
         )
-        eq_(response.status_code, 200, "The view should respond 200 OK.")
+        assert response.status_code == 200, "The view should respond 200 OK."
         # Check that the notification has been read.
         notification.refresh_from_db()
-        ok_(notification.read, "The notification should be marked as read.")
+        assert notification.read, "The notification should be marked as read."

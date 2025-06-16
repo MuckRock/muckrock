@@ -12,7 +12,7 @@ from django.urls import reverse
 import json
 
 # Third Party
-from nose.tools import assert_in, assert_not_in, eq_, ok_, raises
+import pytest
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
@@ -49,59 +49,55 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
-        eq_(
-            self.agency1.get_absolute_url(),
-            reverse(
-                "agency-detail",
-                kwargs={
-                    "idx": self.agency1.pk,
-                    "slug": self.agency1.slug,
-                    "jurisdiction": self.agency1.jurisdiction.slug,
-                    "jidx": self.agency1.jurisdiction.pk,
-                },
-            ),
+        assert self.agency1.get_absolute_url() == reverse(
+            "agency-detail",
+            kwargs={
+                "idx": self.agency1.pk,
+                "slug": self.agency1.slug,
+                "jurisdiction": self.agency1.jurisdiction.slug,
+                "jidx": self.agency1.jurisdiction.pk,
+            },
         )
 
     def test_agency_get_email(self):
         """Test the get emails method"""
-        eq_(self.agency1.get_emails().first().email, "test@agency1.gov")
-        eq_(self.agency3.get_emails().first(), None)
+        assert self.agency1.get_emails().first().email == "test@agency1.gov"
+        assert self.agency3.get_emails().first() is None
 
     def test_agency_get_faxes(self):
         """Test the ganecy get faces method"""
-        eq_(self.agency2.get_faxes().first().number.as_national, "(987) 654-3210")
+        assert self.agency2.get_faxes().first().number.as_national == "(987) 654-3210"
 
     def test_agency_get_emails(self):
         """Test get emails method"""
-        eq_(
-            set(e.email for e in self.agency1.get_emails(email_type="cc")),
-            set(["other_a@agency1.gov", "other_b@agency1.gov"]),
+        assert set(e.email for e in self.agency1.get_emails(email_type="cc")) == set(
+            ["other_a@agency1.gov", "other_b@agency1.gov"]
         )
 
     def test_agency_get_proxy_info(self):
         """Test an agencies get_proxy_info method"""
         agency_ = AgencyFactory()
         proxy_info = agency_.get_proxy_info()
-        eq_(proxy_info["proxy"], False)
-        eq_(proxy_info["missing_proxy"], False)
-        assert_not_in("from_user", proxy_info)
-        assert_not_in("warning", proxy_info)
+        assert not proxy_info["proxy"]
+        assert not proxy_info["missing_proxy"]
+        assert "from_user" not in proxy_info
+        assert "warning" not in proxy_info
 
         agency_ = AgencyFactory(requires_proxy=True)
         proxy_info = agency_.get_proxy_info()
-        eq_(proxy_info["proxy"], True)
-        eq_(proxy_info["missing_proxy"], True)
-        assert_not_in("from_user", proxy_info)
-        assert_in("warning", proxy_info)
+        assert proxy_info["proxy"]
+        assert proxy_info["missing_proxy"]
+        assert "from_user" not in proxy_info
+        assert "warning" in proxy_info
 
         proxy = UserFactory(
             profile__proxy=True, profile__state=agency_.jurisdiction.legal.abbrev
         )
         proxy_info = agency_.get_proxy_info()
-        eq_(proxy_info["proxy"], True)
-        eq_(proxy_info["missing_proxy"], False)
-        eq_(proxy_info["from_user"], proxy)
-        assert_in("warning", proxy_info)
+        assert proxy_info["proxy"]
+        assert not proxy_info["missing_proxy"]
+        assert proxy_info["from_user"] == proxy
+        assert "warning" in proxy_info
 
     def test_agency_relations(self):
         """Pins the number of relations
@@ -109,26 +105,26 @@ class TestAgencyUnit(TestCase):
         a merge
         """
         # Relations pointing to the Agency model
-        eq_(
+        assert (
             len(
                 [
                     f
                     for f in Agency._meta.get_fields()
                     if f.is_relation and f.auto_created
                 ]
-            ),
-            18,
+            )
+            == 18
         )
         # Many to many relations defined on the agency model
-        eq_(
+        assert (
             len(
                 [
                     f
                     for f in Agency._meta.get_fields()
                     if f.many_to_many and not f.auto_created
                 ]
-            ),
-            4,
+            )
+            == 4
         )
 
     def test_agency_merge(self):
@@ -156,31 +152,29 @@ class TestAgencyUnit(TestCase):
         foia.refresh_from_db()
         composer.refresh_from_db()
 
-        eq_(bad_agency.status, "rejected")
-        eq_(foia.agency, good_agency)
-        eq_(composer.agencies.first(), good_agency)
-        eq_(appeal_agency.appeal_agency, good_agency)
+        assert bad_agency.status == "rejected"
+        assert foia.agency == good_agency
+        assert composer.agencies.first() == good_agency
+        assert appeal_agency.appeal_agency == good_agency
 
         # email that already exists is not copied over
-        eq_(good_agency.emails.count(), 1)
-        eq_(good_agency.agencyemail_set.first().email_type, "to")
+        assert good_agency.emails.count() == 1
+        assert good_agency.agencyemail_set.first().email_type == "to"
 
         # phone number that doesnt exist is copied over
-        eq_(good_agency.phones.count(), 2)
+        assert good_agency.phones.count() == 2
         # existing phone number is unaffected
-        ok_(
-            good_agency.agencyphone_set.filter(
-                phone=fax1, request_type="primary"
-            ).exists()
-        )
+        assert good_agency.agencyphone_set.filter(
+            phone=fax1, request_type="primary"
+        ).exists()
         # its type is set to none when copied over
-        ok_(
-            good_agency.agencyphone_set.filter(phone=fax2, request_type="none").exists()
-        )
+        assert good_agency.agencyphone_set.filter(
+            phone=fax2, request_type="none"
+        ).exists()
 
-        assert_in(good_agency.name, bad_agency.notes)
-        assert_in(str(good_agency.pk), bad_agency.notes)
-        assert_in(user.username, bad_agency.notes)
+        assert good_agency.name in bad_agency.notes
+        assert str(good_agency.pk) in bad_agency.notes
+        assert user.username in bad_agency.notes
 
 
 class TestAgencyManager(TestCase):
@@ -196,19 +190,20 @@ class TestAgencyManager(TestCase):
     def test_get_approved(self):
         """Manager should return all approved agencies"""
         agencies = Agency.objects.get_approved()
-        ok_(self.agency1 in agencies)
-        ok_(self.agency2 in agencies)
-        ok_(self.agency3 not in agencies)
+        assert self.agency1 in agencies
+        assert self.agency2 in agencies
+        assert self.agency3 not in agencies
 
     def test_get_siblings(self):
         """Manager should return all siblings to a given agency"""
         agencies = Agency.objects.get_siblings(self.agency1)
-        ok_(
-            self.agency1 not in agencies,
-            "The given agency shouldn't be its own sibling.",
-        )
-        ok_(self.agency2 in agencies)
-        ok_(self.agency3 not in agencies, "Unapproved agencies shouldn't be siblings.")
+        assert (
+            self.agency1 not in agencies
+        ), "The given agency shouldn't be its own sibling."
+        assert self.agency2 in agencies
+        assert (
+            self.agency3 not in agencies
+        ), "Unapproved agencies shouldn't be siblings."
 
 
 class TestAgencyViews(TestCase):
@@ -229,14 +224,14 @@ class TestAgencyViews(TestCase):
     def test_approved_ok(self):
         """An approved agency should return an 200 response."""
         response = http_get_response(self.url, self.view, self.user, **self.kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
-    @raises(Http404)
     def test_unapproved_not_found(self):
         """An unapproved agency should return a 404 response."""
         self.agency.status = "pending"
         self.agency.save()
-        http_get_response(self.url, self.view, self.user, **self.kwargs)
+        with pytest.raises(Http404):
+            http_get_response(self.url, self.view, self.user, **self.kwargs)
 
     def test_list(self):
         """The list should only contain approved agencies"""
@@ -244,11 +239,10 @@ class TestAgencyViews(TestCase):
         unapproved_agency = AgencyFactory(status="pending")
         response = http_get_response(reverse("agency-list"), AgencyList.as_view())
         agency_list = response.context_data["object_list"]
-        ok_(approved_agency in agency_list, "Approved agencies should be listed.")
-        ok_(
-            unapproved_agency not in agency_list,
-            "Unapproved agencies should not be listed.",
-        )
+        assert approved_agency in agency_list, "Approved agencies should be listed."
+        assert (
+            unapproved_agency not in agency_list
+        ), "Unapproved agencies should not be listed."
 
     def test_boilerplate(self):
         """Test the boilerplate ajax view"""
@@ -260,11 +254,11 @@ class TestAgencyViews(TestCase):
         request = mock_middleware(request)
         request.user = UserFactory(profile__full_name="John Doe")
         response = boilerplate(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
         data = json.loads(response.content)
-        assert_in("{ law name }", data["intro"])
-        assert_in("{ days }", data["outro"])
-        assert_in("{ closing }", data["outro"])
+        assert "{ law name }" in data["intro"]
+        assert "{ days }" in data["outro"]
+        assert "{ closing }" in data["outro"]
 
     def test_contact_info_anonymous(self):
         """Test the contact_info ajax view"""
@@ -276,9 +270,9 @@ class TestAgencyViews(TestCase):
         request = mock_middleware(request)
         request.user = AnonymousUser()
         response = contact_info(request, agency.pk)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
         data = json.loads(response.content)
-        eq_(data["type"], "email")
+        assert data["type"] == "email"
 
     def test_contact_info(self):
         """Test the contact_info ajax view"""
@@ -290,9 +284,9 @@ class TestAgencyViews(TestCase):
         request = mock_middleware(request)
         request.user = ProfessionalUserFactory()
         response = contact_info(request, agency.pk)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
         data = json.loads(response.content)
-        eq_(data["email"], str(agency.email))
+        assert data["email"] == str(agency.email)
 
 
 class TestAgencyForm(TestCase):
@@ -311,8 +305,8 @@ class TestAgencyForm(TestCase):
 
     def test_validate_empty_form(self):
         """The form should have a name, at least"""
-        ok_(not AgencyForm().is_valid(), "Empty AgencyForm should not validate.")
+        assert not AgencyForm().is_valid(), "Empty AgencyForm should not validate."
 
     def test_instance_form(self):
         """The form should validate given only instance data"""
-        ok_(self.form.is_valid())
+        assert self.form.is_valid()

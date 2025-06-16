@@ -13,7 +13,6 @@ import re
 
 # Third Party
 import requests_mock
-from nose.tools import assert_false, assert_true, eq_
 from rest_framework.authtoken.models import Token
 
 # MuckRock
@@ -71,13 +70,11 @@ class TestFOIAViewsetCreate(TestCase):
             content_type="application/json",
             **headers
         )
-        eq_(
-            response.status_code,
-            code,
-            "Code: {}\nResponse: {}".format(response.status_code, response),
+        assert response.status_code == code, "Code: {}\nResponse: {}".format(
+            response.status_code, response
         )
         if status:
-            eq_(response.json()["status"], status)
+            assert response.json()["status"] == status
 
         return response
 
@@ -109,8 +106,8 @@ class TestFOIAViewsetCreate(TestCase):
             content_type="application/json",
             **headers
         )
-        eq_(response.status_code, 201, response)
-        eq_(len(response.json()["Requests"]), 1)
+        assert response.status_code == 201, response
+        assert len(response.json()["Requests"]) == 1
 
     def test_simple(self):
         """Test with bare minimum data supplied"""
@@ -120,7 +117,7 @@ class TestFOIAViewsetCreate(TestCase):
         """Test with multiple agencies"""
         agencies = AgencyFactory.create_batch(3)
         response = self.api_call({"agency": [a.pk for a in agencies]})
-        eq_(len(response.json()["Requests"]), 3)
+        assert len(response.json()["Requests"]) == 3
 
     def test_bad_agency_id_format(self):
         """Test with a bad agency ID format"""
@@ -142,7 +139,7 @@ class TestFOIAViewsetCreate(TestCase):
         """Test embargoing"""
         self.api_call({"embargo": True}, user_type="pro")
         composer = FOIAComposer.objects.get()
-        eq_(composer.embargo_status, "embargo")
+        assert composer.embargo_status == "embargo"
 
     def test_embargo_bad(self):
         """Test embargoing without permissions"""
@@ -156,7 +153,7 @@ class TestFOIAViewsetCreate(TestCase):
         """Test permanent embargoing"""
         self.api_call({"permanent_embargo": True}, user_type="org")
         composer = FOIAComposer.objects.get()
-        eq_(composer.embargo_status, "permanent")
+        assert composer.embargo_status == "permanent"
 
     def test_permanent_embargo_bad(self):
         """Test permanent embargoing without permissions"""
@@ -200,7 +197,7 @@ class TestFOIAViewsetCreate(TestCase):
             }
         )
         composer = FOIAComposer.objects.get()
-        eq_(composer.pending_attachments.count(), 2)
+        assert composer.pending_attachments.count() == 2
 
     def test_attachments_bad_format(self):
         """Test attachments not given as a list"""
@@ -284,14 +281,12 @@ class TestFOIAViewsetUpdate(TestCase):
             content_type="application/json",
             **headers
         )
-        eq_(
-            response.status_code,
-            200,
-            "Code: {}\nResponse: {}".format(response.status_code, response.content),
+        assert response.status_code == 200, "Code: {}\nResponse: {}".format(
+            response.status_code, response.content
         )
 
         foia.refresh_from_db()
-        assert_true(foia.has_editor(editor))
-        assert_true(foia.has_viewer(viewer))
-        assert_false(foia.has_editor(viewer))
-        assert_false(foia.has_viewer(editor))
+        assert foia.has_editor(editor)
+        assert foia.has_viewer(viewer)
+        assert not foia.has_editor(viewer)
+        assert not foia.has_viewer(editor)
