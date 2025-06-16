@@ -3,9 +3,6 @@ from django.conf import settings
 from django.db import connection, reset_queries
 from django.test import TestCase
 
-# Third Party
-from nose.tools import eq_
-
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import FOIARequestFactory
@@ -31,4 +28,4 @@ class ExportCsvTests(TestCase):
 
             return num_queries
 
-        eq_(get_num_queries(1), get_num_queries(10))
+        assert get_num_queries(1) == get_num_queries(10)

@@ -5,9 +5,6 @@ Users should be able to attach notes to requests
 # Django
 from django.test import TestCase
 
-# Third Party
-from nose.tools import eq_
-
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.core.test_utils import http_post_response
@@ -41,8 +38,8 @@ class TestFOIANotes(TestCase):
             self.url, self.view, self.data, self.editor, **self.kwargs
         )
         self.foia.refresh_from_db()
-        eq_(response.status_code, 302)
-        eq_(self.foia.notes.count() > 0, True)
+        assert response.status_code == 302
+        assert self.foia.notes.count() > 0
 
     def test_add_sans_permission(self):
         """Normies and viewers cannot add notes."""
@@ -50,5 +47,5 @@ class TestFOIANotes(TestCase):
             self.url, self.view, self.data, self.viewer, **self.kwargs
         )
         self.foia.refresh_from_db()
-        eq_(response.status_code, 302)
-        eq_(self.foia.notes.count(), 0)
+        assert response.status_code == 302
+        assert self.foia.notes.count() == 0

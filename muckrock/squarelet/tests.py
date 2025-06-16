@@ -15,7 +15,6 @@ import uuid
 
 # Third Party
 from mock import patch
-from nose.tools import eq_
 
 # MuckRock
 from muckrock.squarelet.views import webhook
@@ -51,8 +50,8 @@ class ViewsTest(TestCase):
         request = self.request_factory.post(self.url, self.data)
         response = self.view(request)
 
-        eq_(response.status_code, 200)
-        eq_(response.content, b"OK")
+        assert response.status_code == 200
+        assert response.content == b"OK"
         for uuid_ in self.data["uuids"]:
             mock.assert_any_call(self.data["type"], uuid_)
 
@@ -63,7 +62,7 @@ class ViewsTest(TestCase):
         request = self.request_factory.post(self.url, self.data)
         response = self.view(request)
 
-        eq_(response.status_code, 403)
+        assert response.status_code == 403
         mock.assert_not_called()
 
     @patch("muckrock.squarelet.tasks.pull_data.delay")
@@ -76,7 +75,7 @@ class ViewsTest(TestCase):
         request = self.request_factory.post(self.url, self.data)
         response = self.view(request)
 
-        eq_(response.status_code, 403)
+        assert response.status_code == 403
         mock.assert_not_called()
 
     @patch("muckrock.squarelet.tasks.pull_data.delay")
@@ -89,5 +88,5 @@ class ViewsTest(TestCase):
         request = self.request_factory.post(self.url, self.data)
         response = self.view(request)
 
-        eq_(response.status_code, 403)
+        assert response.status_code == 403
         mock.assert_not_called()

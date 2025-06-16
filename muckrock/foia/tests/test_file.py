@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 # Third Party
-from nose.tools import eq_, ok_, raises
+import pytest
 
 # MuckRock
 from muckrock.core.factories import UserFactory
@@ -34,18 +34,17 @@ class TestRequestFilesView(TestCase):
 
     def test_get_ok(self):
         """The view should return 200 if the foia is viewable to the user."""
-        ok_(
-            self.foia.has_perm(self.foia.user, "view"),
-            "The user should be able to view the request",
-        )
+        assert self.foia.has_perm(
+            self.foia.user, "view"
+        ), "The user should be able to view the request"
         response = http_get_response(self.url, self.view, self.foia.user, **self.kwargs)
-        eq_(response.status_code, 200, "The view should return 200.")
+        assert response.status_code == 200, "The view should return 200."
 
-    @raises(Http404)
     def test_get_404(self):
         """The view should return 404 is the foia is not visible to the user."""
         self.foia.embargo_status = "embargo"
         self.foia.save()
         user = UserFactory()
-        ok_(not self.foia.has_perm(user, "view"))
-        http_get_response(self.url, self.view, user, **self.kwargs)
+        assert not self.foia.has_perm(user, "view")
+        with pytest.raises(Http404):
+            http_get_response(self.url, self.view, user, **self.kwargs)

@@ -5,9 +5,6 @@ Tests for the agency importer
 # Django
 from django.test import TestCase
 
-# Third Party
-from nose.tools import assert_greater_equal, assert_not_in, eq_, ok_
-
 # MuckRock
 from muckrock.agency.importer import Importer, PyReader
 from muckrock.agency.models.communication import AgencyAddress
@@ -77,37 +74,37 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.match())
 
-        eq_(data[0]["match_agency"], self.cia)
-        eq_(data[0]["agency_status"], "exact match")
+        assert data[0]["match_agency"] == self.cia
+        assert data[0]["agency_status"] == "exact match"
 
-        eq_(data[1]["match_agency"], self.cia)
-        assert_greater_equal(data[1]["match_agency_score"], 83)
-        eq_(data[1]["agency_status"], "fuzzy match")
+        assert data[1]["match_agency"] == self.cia
+        assert data[1]["match_agency_score"] >= 83
+        assert data[1]["agency_status"] == "fuzzy match"
 
-        eq_(data[2]["match_agency"], self.governor)
-        eq_(data[2]["agency_status"], "exact match")
+        assert data[2]["match_agency"] == self.governor
+        assert data[2]["agency_status"] == "exact match"
 
-        eq_(data[3]["match_agency"], self.governor)
-        assert_greater_equal(data[3]["match_agency_score"], 83)
-        eq_(data[3]["agency_status"], "fuzzy match")
+        assert data[3]["match_agency"] == self.governor
+        assert data[3]["match_agency_score"] >= 83
+        assert data[3]["agency_status"] == "fuzzy match"
 
-        eq_(data[4]["match_agency"], self.police)
-        eq_(data[4]["agency_status"], "exact match")
+        assert data[4]["match_agency"] == self.police
+        assert data[4]["agency_status"] == "exact match"
 
-        eq_(data[5]["match_agency"], self.police)
-        assert_greater_equal(data[5]["match_agency_score"], 83)
-        eq_(data[5]["agency_status"], "fuzzy match")
+        assert data[5]["match_agency"] == self.police
+        assert data[5]["match_agency_score"] >= 83
+        assert data[5]["agency_status"] == "fuzzy match"
 
-        assert_not_in("match_agency", data[6])
-        eq_(data[6]["jurisdiction_status"], "no jurisdiction")
+        assert "match_agency" not in data[6]
+        assert data[6]["jurisdiction_status"] == "no jurisdiction"
 
-        assert_not_in("match_agency", data[7])
-        eq_(data[7]["agency_status"], "no agency")
+        assert "match_agency" not in data[7]
+        assert data[7]["agency_status"] == "no agency"
 
-        eq_("missing agency", data[8]["agency_status"])
-        eq_("missing agency", data[9]["agency_status"])
-        eq_("missing agency", data[10]["agency_status"])
-        eq_("missing jurisdiction", data[10]["jurisdiction_status"])
+        assert "missing agency" == data[8]["agency_status"]
+        assert "missing agency" == data[9]["agency_status"]
+        assert "missing agency" == data[10]["agency_status"]
+        assert "missing jurisdiction" == data[10]["jurisdiction_status"]
 
     def test_import_update(self):
         """An import test where we are updating the contact information for an
@@ -137,32 +134,32 @@ class TestAgencyImporter(TestCase):
 
         self.cia.refresh_from_db()
 
-        eq_(data[0]["agency_status"], "exact match")
+        assert data[0]["agency_status"] == "exact match"
 
-        eq_(self.cia.email.email, "foia@cia.gov")
-        eq_(data[0]["email_status"], "set primary")
+        assert self.cia.email.email == "foia@cia.gov"
+        assert data[0]["email_status"] == "set primary"
 
-        eq_(self.cia.fax.number, "+1 617-555-0001")
-        eq_(data[0]["fax_status"], "set primary")
+        assert self.cia.fax.number == "+1 617-555-0001"
+        assert data[0]["fax_status"] == "set primary"
 
-        ok_(self.cia.get_phones().filter(number="+1 617-555-0000").exists())
-        eq_(data[0]["phone_status"], "set")
+        assert self.cia.get_phones().filter(number="+1 617-555-0000").exists()
+        assert data[0]["phone_status"] == "set"
 
-        eq_(self.cia.address.zip_code, "20505")
-        eq_(self.cia.address.city, "Washington")
-        eq_(self.cia.address.state, "DC")
-        eq_(data[0]["address_status"], "set primary")
+        assert self.cia.address.zip_code == "20505"
+        assert self.cia.address.city == "Washington"
+        assert self.cia.address.state == "DC"
+        assert data[0]["address_status"] == "set primary"
 
-        eq_(self.cia.portal.url, "https://www.cia.gov/portal/")
-        eq_(self.cia.portal.type, "foiaonline")
-        eq_(data[0]["portal_status"], "set")
+        assert self.cia.portal.url == "https://www.cia.gov/portal/"
+        assert self.cia.portal.type == "foiaonline"
+        assert data[0]["portal_status"] == "set"
 
-        eq_(self.cia.aliases, "CIA")
-        eq_(data[0]["aliases_status"], "set")
-        eq_(self.cia.url, "https://www.cia.gov/foia/")
-        eq_(data[0]["foia_website_status"], "set")
-        eq_(self.cia.website, "https://www.cia.gov/")
-        eq_(data[0]["website_status"], "set")
+        assert self.cia.aliases == "CIA"
+        assert data[0]["aliases_status"] == "set"
+        assert self.cia.url == "https://www.cia.gov/foia/"
+        assert data[0]["foia_website_status"] == "set"
+        assert self.cia.website == "https://www.cia.gov/"
+        assert data[0]["website_status"] == "set"
 
     def test_import_update_invalid(self):
         """Test import with some invalid data"""
@@ -187,15 +184,15 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.import_())
 
-        eq_(data[0]["agency_status"], "exact match")
+        assert data[0]["agency_status"] == "exact match"
 
-        eq_(data[0]["email_status"], "error")
-        eq_(data[0]["fax_status"], "error")
-        eq_(data[0]["phone_status"], "error")
-        eq_(data[0]["address_status"], "error")
-        eq_(data[0]["portal_status"], "error")
-        eq_(data[0]["foia_website_status"], "error")
-        eq_(data[0]["website_status"], "error")
+        assert data[0]["email_status"] == "error"
+        assert data[0]["fax_status"] == "error"
+        assert data[0]["phone_status"] == "error"
+        assert data[0]["address_status"] == "error"
+        assert data[0]["portal_status"] == "error"
+        assert data[0]["foia_website_status"] == "error"
+        assert data[0]["website_status"] == "error"
 
     def test_import_update_duplicate(self):
         """Test an import with data already on the agency"""
@@ -214,9 +211,9 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.import_())
 
-        eq_(data[0]["email_status"], "already set")
-        eq_(data[0]["fax_status"], "already set")
-        eq_(data[0]["phone_status"], "already set")
+        assert data[0]["email_status"] == "already set"
+        assert data[0]["fax_status"] == "already set"
+        assert data[0]["phone_status"] == "already set"
 
     def test_import_update_redundant(self):
         """Test an update with data different from the data already on the agency"""
@@ -250,16 +247,16 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.import_())
 
-        eq_(data[0]["email_status"], "set other")
-        ok_(self.police.emails.filter(email="other@example.com").exists())
-        ok_(self.police.emails.filter(email="foia1@example.com").exists())
-        ok_(self.police.emails.filter(email="foia2@example.com").exists())
-        eq_(data[0]["fax_status"], "set other")
-        ok_(self.police.phones.filter(number="617-555-0001").exists())
-        eq_(data[0]["address_status"], "set other")
-        ok_(self.police.addresses.filter(city="Washington").exists())
-        eq_(data[0]["portal_status"], "not set, existing")
-        eq_(self.police.portal.name, "Test Portal")
+        assert data[0]["email_status"] == "set other"
+        assert self.police.emails.filter(email="other@example.com").exists()
+        assert self.police.emails.filter(email="foia1@example.com").exists()
+        assert self.police.emails.filter(email="foia2@example.com").exists()
+        assert data[0]["fax_status"] == "set other"
+        assert self.police.phones.filter(number="617-555-0001").exists()
+        assert data[0]["address_status"] == "set other"
+        assert self.police.addresses.filter(city="Washington").exists()
+        assert data[0]["portal_status"] == "not set, existing"
+        assert self.police.portal.name == "Test Portal"
 
     def test_create(self):
         """Test creating a new agency"""
@@ -287,44 +284,40 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.import_())
 
-        eq_(data[0]["agency_status"], "created")
+        assert data[0]["agency_status"] == "created"
         agency = data[0]["match_agency"]
-        eq_(agency.name, "Foobar")
+        assert agency.name == "Foobar"
 
-        eq_(agency.email.email, "foia@new.agency.gov")
-        eq_(
-            sorted(
-                e.email
-                for e in agency.get_emails(request_type="primary", email_type="cc")
-            ),
-            ["foia1@new.agency.gov", "foia2@new.agency.gov"],
-        )
-        eq_(data[0]["email_status"], "set primary")
+        assert agency.email.email == "foia@new.agency.gov"
+        assert sorted(
+            e.email for e in agency.get_emails(request_type="primary", email_type="cc")
+        ) == ["foia1@new.agency.gov", "foia2@new.agency.gov"]
+        assert data[0]["email_status"] == "set primary"
 
-        eq_(agency.fax.number, "+1 617-555-0001")
-        eq_(data[0]["fax_status"], "set primary")
+        assert agency.fax.number == "+1 617-555-0001"
+        assert data[0]["fax_status"] == "set primary"
 
-        ok_(agency.get_phones().filter(number="+1 617-555-0000").exists())
-        eq_(data[0]["phone_status"], "set")
+        assert agency.get_phones().filter(number="+1 617-555-0000").exists()
+        assert data[0]["phone_status"] == "set"
 
-        eq_(agency.address.street, "123 Main St")
-        eq_(agency.address.zip_code, "20505")
-        eq_(agency.address.city, "Washington")
-        eq_(agency.address.state, "DC")
-        eq_(data[0]["address_status"], "set primary")
+        assert agency.address.street == "123 Main St"
+        assert agency.address.zip_code == "20505"
+        assert agency.address.city == "Washington"
+        assert agency.address.state == "DC"
+        assert data[0]["address_status"] == "set primary"
 
-        eq_(agency.portal.url, "https://www.new-agency.gov/portal/")
-        eq_(agency.portal.type, "nextrequest")
-        eq_(data[0]["portal_status"], "set")
+        assert agency.portal.url == "https://www.new-agency.gov/portal/"
+        assert agency.portal.type == "nextrequest"
+        assert data[0]["portal_status"] == "set"
 
-        assert_not_in("aliases_status", data[0])
-        eq_(agency.url, "https://www.new-agency.gov/foia/")
-        eq_(data[0]["foia_website_status"], "set")
-        eq_(agency.website, "https://www.new-agency.gov/")
-        eq_(data[0]["website_status"], "set")
+        assert "aliases_status" not in data[0]
+        assert agency.url == "https://www.new-agency.gov/foia/"
+        assert data[0]["foia_website_status"] == "set"
+        assert agency.website == "https://www.new-agency.gov/"
+        assert data[0]["website_status"] == "set"
 
-        ok_(agency.requires_proxy)
-        eq_(data[0]["requires_proxy_status"], "set true")
+        assert agency.requires_proxy
+        assert data[0]["requires_proxy_status"] == "set true"
 
     def test_create_minimal(self):
         """Test a creation with minimal contact information supplied"""
@@ -334,9 +327,9 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.import_())
 
-        eq_(data[0]["agency_status"], "created")
+        assert data[0]["agency_status"] == "created"
         agency = data[0]["match_agency"]
-        eq_(agency.name, "Foobar")
+        assert agency.name == "Foobar"
 
     def test_create_bad_jurisdiction(self):
         """Test creating an agency in a bad jurisdiction"""
@@ -344,5 +337,5 @@ class TestAgencyImporter(TestCase):
         importer = Importer(reader)
         data = list(importer.import_())
 
-        eq_(data[0]["jurisdiction_status"], "no jurisdiction")
-        assert_not_in("agency_status", data[0])
+        assert data[0]["jurisdiction_status"] == "no jurisdiction"
+        assert "agency_status" not in data[0]

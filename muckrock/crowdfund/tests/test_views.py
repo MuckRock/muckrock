@@ -15,7 +15,6 @@ from decimal import Decimal
 # Third Party
 import requests_mock
 from mock import Mock, patch
-from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.core.factories import CrowdfundFactory, ProjectFactory, UserFactory
@@ -74,13 +73,13 @@ class TestCrowdfundView(TestCase):
         """The crowdfund view should resolve and be visible to everyone."""
         request = self.request_factory.get(self.url)
         response = self.view(request, pk=self.crowdfund.pk)
-        eq_(response.status_code, 200, "The response should be 200 OK.")
+        assert response.status_code == 200, "The response should be 200 OK."
 
     def post(self, data, user=AnonymousUser(), ajax=False):
         """Helper function to post the data as the user."""
         # need a unique token for each POST
         form = CrowdfundPaymentForm(data)
-        ok_(form.is_valid(), form.errors)
+        assert form.is_valid(), form.errors
         if ajax:
             request = self.request_factory.post(
                 self.url, data=data, HTTP_X_REQUESTED_WITH="XMLHttpRequest"
@@ -90,17 +89,15 @@ class TestCrowdfundView(TestCase):
         request = mock_middleware(request)
         request.user = user
         response = self.view(request, pk=self.crowdfund.pk)
-        ok_(response, "There should be a response.")
+        assert response, "There should be a response."
         if ajax:
-            eq_(response.status_code, 200, response.content)
-            eq_(response["Content-Type"], "application/json", response.content)
+            assert response.status_code == 200, response.content
+            assert response["Content-Type"] == "application/json", response.content
         else:
-            eq_(response.status_code, 302, response.content)
-            eq_(
-                response.url,
-                self.crowdfund.get_crowdfund_object().get_absolute_url(),
-                response.content,
-            )
+            assert response.status_code == 302, response.content
+            assert (
+                response.url == self.crowdfund.get_crowdfund_object().get_absolute_url()
+            ), response.content
         return response
 
     def test_anonymous_unauthenticated(self):
@@ -110,19 +107,13 @@ class TestCrowdfundView(TestCase):
         """
         self.post(self.data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(
-            payment.user,
-            None,
-            (
-                "If the user is logged out, the returned payment"
-                " object should not reference any account."
-            ),
+        assert payment.user is None, (
+            "If the user is logged out, the returned payment"
+            " object should not reference any account."
         )
-        eq_(
-            self.crowdfund.payments.count(),
-            self.num_payments + 1,
-            "The crowdfund should have the payment added to it.",
-        )
+        assert (
+            self.crowdfund.payments.count() == self.num_payments + 1
+        ), "The crowdfund should have the payment added to it."
 
     def test_expired(self):
         """
@@ -137,7 +128,7 @@ class TestCrowdfundView(TestCase):
             "stripe_token": "test",
         }
         self.post(data)
-        eq_(crowdfund.payments.count(), 0)
+        assert crowdfund.payments.count() == 0
 
     def test_anonymous_authenticated(self):
         """
@@ -147,21 +138,15 @@ class TestCrowdfundView(TestCase):
         user = UserFactory()
         self.post(self.data, user)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(
-            payment.user.username,
-            user.username,
-            "The logged in user should be associated with the payment.",
-        )
-        eq_(
-            payment.show,
-            False,
-            "If the user wants to be anonymous, then the show flag should be false.",
-        )
-        eq_(
-            self.crowdfund.payments.count(),
-            self.num_payments + 1,
-            "The crowdfund should have the payment added to it.",
-        )
+        assert (
+            payment.user.username == user.username
+        ), "The logged in user should be associated with the payment."
+        assert (
+            not payment.show
+        ), "If the user wants to be anonymous, then the show flag should be false."
+        assert (
+            self.crowdfund.payments.count() == self.num_payments + 1
+        ), "The crowdfund should have the payment added to it."
 
     def test_authenticated(self):
         """An attributed contribution is opted-in by the user"""
@@ -169,21 +154,15 @@ class TestCrowdfundView(TestCase):
         self.data["show"] = True
         self.post(self.data, user)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(
-            payment.user.username,
-            user.username,
-            "The logged in user should be associated with the payment.",
-        )
-        eq_(
-            payment.show,
-            True,
-            "If the user wants to be attributed, then the show flag should be true.",
-        )
-        eq_(
-            self.crowdfund.payments.count(),
-            self.num_payments + 1,
-            "The crowdfund should have the payment added to it.",
-        )
+        assert (
+            payment.user.username == user.username
+        ), "The logged in user should be associated with the payment."
+        assert (
+            payment.show
+        ), "If the user wants to be attributed, then the show flag should be true."
+        assert (
+            self.crowdfund.payments.count() == self.num_payments + 1
+        ), "The crowdfund should have the payment added to it."
 
     def test_ajax(self):
         """A contribution made via AJAX should respond with JSON."""
@@ -197,8 +176,8 @@ class TestCrowdfundView(TestCase):
         """
         response = self.post(self.data, ajax=True)
         data = json.loads(response.content)
-        eq_(data["authenticated"], False)
-        eq_(data["registered"], False)
+        assert not data["authenticated"]
+        assert not data["registered"]
 
     def test_logged_in_ajax(self):
         """
@@ -208,8 +187,8 @@ class TestCrowdfundView(TestCase):
         """
         response = self.post(self.data, user=UserFactory(), ajax=True)
         data = json.loads(response.content)
-        eq_(data["authenticated"], True)
-        eq_(data["registered"], False)
+        assert data["authenticated"]
+        assert not data["registered"]
 
     @requests_mock.Mocker()
     def test_registered_ajax(self, mock_requests):
@@ -226,8 +205,8 @@ class TestCrowdfundView(TestCase):
         response = self.post(self.data, ajax=True)
         data = json.loads(response.content)
         print(data)
-        eq_(data["authenticated"], True)
-        eq_(data["registered"], True)
+        assert data["authenticated"]
+        assert data["registered"]
 
     def test_correct_amount(self):
         """
@@ -237,7 +216,7 @@ class TestCrowdfundView(TestCase):
         self.post(self.data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
         amount = Decimal(self.data["stripe_amount"] / 100)
-        eq_(payment.amount, amount)
+        assert payment.amount == amount
 
     def test_contributors(self):
         """The crowdfund can get a list of all its contibutors by parsing its
@@ -253,21 +232,15 @@ class TestCrowdfundView(TestCase):
         self.post(self.data, user2)
         # Check to see that we're counting contributors in the right way
         self.crowdfund.refresh_from_db()
-        eq_(
-            self.crowdfund.contributors_count(),
-            3,
-            "All contributions should return some kind of user",
-        )
-        eq_(
-            self.crowdfund.anonymous_contributors_count(),
-            2,
-            "There should be 2 anonymous contributors",
-        )
-        eq_(
-            len(self.crowdfund.named_contributors()),
-            1,
-            "There should be 1 named contributor",
-        )
+        assert (
+            self.crowdfund.contributors_count() == 3
+        ), "All contributions should return some kind of user"
+        assert (
+            self.crowdfund.anonymous_contributors_count() == 2
+        ), "There should be 2 anonymous contributors"
+        assert (
+            len(self.crowdfund.named_contributors()) == 1
+        ), "There should be 1 named contributor"
 
     def test_unlimit_amount(self):
         """The amount paid should be able to exceed the amount required."""
@@ -276,11 +249,9 @@ class TestCrowdfundView(TestCase):
         data["stripe_amount"] = amount_paid
         self.post(data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(
-            payment.amount,
-            200.00,
-            "The payment should be made in full despite exceeding the amount required.",
-        )
+        assert (
+            payment.amount == 200.00
+        ), "The payment should be made in full despite exceeding the amount required."
 
     def test_limit_amount(self):
         """No more than the amount required should be paid if the crowdfund is
@@ -291,11 +262,9 @@ class TestCrowdfundView(TestCase):
         data["stripe_amount"] = 20000
         self.post(data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(
-            payment.amount,
-            self.crowdfund.payment_required,
-            "The amount should be capped at the crowdfund's required payment.",
-        )
+        assert (
+            payment.amount == self.crowdfund.payment_required
+        ), "The amount should be capped at the crowdfund's required payment."
 
     def test_invalid_positive_integer(self):
         """The crowdfund should accept payments with cents."""
@@ -306,7 +275,7 @@ class TestCrowdfundView(TestCase):
         self.data["stripe_amount"] = cent_payment
         self.post(self.data)
         payment = CrowdfundPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(payment.amount, Decimal("01.05"))
+        assert payment.amount == Decimal("01.05")
 
 
 class TestCrowdfundProjectDetailView(TestCase):
@@ -330,7 +299,7 @@ class TestCrowdfundProjectDetailView(TestCase):
         """The crowdfund view should resolve and be visible to everyone."""
         request = self.request_factory.get(self.url)
         response = self.view(request, pk=self.crowdfund.pk)
-        eq_(response.status_code, 200, "The response should be 200 OK.")
+        assert response.status_code == 200, "The response should be 200 OK."
 
 
 class TestCrowdfundEmbedView(TestCase):
@@ -345,4 +314,4 @@ class TestCrowdfundEmbedView(TestCase):
     def test_get(self):
         """The embed view should render just a crowdfund widget on a standalone page."""
         response = self.client.get(self.url)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
