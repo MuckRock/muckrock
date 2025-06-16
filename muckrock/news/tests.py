@@ -1,5 +1,5 @@
 """
-Tests using nose for the news application
+Tests for the news application
 """
 
 # Django
@@ -12,7 +12,6 @@ from datetime import datetime
 
 # Third Party
 import pytz
-from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
@@ -33,22 +32,19 @@ class TestNewsUnit(TestCase):
     # models
     def test_article_model_str(self):
         """Test the Article model's __str__ method"""
-        ok_(str(self.article))
+        assert str(self.article)
 
     def test_article_model_url(self):
         """Test the Article model's get_absolute_url method"""
         pub_date = timezone.localtime(self.article.pub_date)
-        eq_(
-            self.article.get_absolute_url(),
-            reverse(
-                "news-detail",
-                kwargs={
-                    "year": pub_date.strftime("%Y"),
-                    "month": pub_date.strftime("%b").lower(),
-                    "day": pub_date.strftime("%d"),
-                    "slug": self.article.slug,
-                },
-            ),
+        assert self.article.get_absolute_url() == reverse(
+            "news-detail",
+            kwargs={
+                "year": pub_date.strftime("%Y"),
+                "month": pub_date.strftime("%b").lower(),
+                "day": pub_date.strftime("%d"),
+                "slug": self.article.slug,
+            },
         )
 
     # manager
@@ -57,16 +53,16 @@ class TestNewsUnit(TestCase):
         article1 = ArticleFactory(publish=True)
         article2 = ArticleFactory(publish=True)
         published = Article.objects.get_published()
-        ok_(article1 in published and article2 in published)
-        ok_(all(a.publish and a.pub_date <= timezone.now() for a in published))
-        eq_(published.count(), 2)
+        assert article1 in published and article2 in published
+        assert all(a.publish and a.pub_date <= timezone.now() for a in published)
+        assert published.count() == 2
 
     def test_manager_get_drafts(self):
         """Test the Article Manager's get_drafts method"""
         drafted = Article.objects.get_drafts()
-        ok_(self.article in drafted)
-        ok_(all(not a.publish for a in drafted))
-        eq_(drafted.count(), 1)
+        assert self.article in drafted
+        assert all(not a.publish for a in drafted)
+        assert drafted.count() == 1
 
 
 class TestNewsFunctional(TestCase):
@@ -89,19 +85,16 @@ class TestNewsFunctional(TestCase):
     def test_news_archive(self):
         """Should return all articles"""
         response = get_allowed(self.client, reverse("news-archive"))
-        eq_(len(response.context["object_list"]), 5)
+        assert len(response.context["object_list"]) == 5
 
     def test_news_archive_year(self):
         """Should return all articles in the given year"""
         response = get_allowed(
             self.client, reverse("news-archive-year", kwargs={"year": 1999})
         )
-        eq_(len(response.context["object_list"]), 4)
-        ok_(
-            all(
-                article.pub_date.year == 1999
-                for article in response.context["object_list"]
-            )
+        assert len(response.context["object_list"]) == 4
+        assert all(
+            article.pub_date.year == 1999 for article in response.context["object_list"]
         )
 
     def test_news_archive_month(self):
@@ -110,12 +103,10 @@ class TestNewsFunctional(TestCase):
             self.client,
             reverse("news-archive-month", kwargs={"year": 1999, "month": "jan"}),
         )
-        eq_(len(response.context["object_list"]), 3)
-        ok_(
-            all(
-                article.pub_date.year == 1999 and article.pub_date.month == 1
-                for article in response.context["object_list"]
-            )
+        assert len(response.context["object_list"]) == 3
+        assert all(
+            article.pub_date.year == 1999 and article.pub_date.month == 1
+            for article in response.context["object_list"]
         )
 
     def test_news_archive_day(self):
@@ -126,14 +117,12 @@ class TestNewsFunctional(TestCase):
                 "news-archive-day", kwargs={"year": 1999, "month": "jan", "day": 1}
             ),
         )
-        eq_(len(response.context["object_list"]), 2)
-        ok_(
-            all(
-                article.pub_date.year == 1999
-                and article.pub_date.month == 1
-                and article.pub_date.day == 1
-                for article in response.context["object_list"]
-            )
+        assert len(response.context["object_list"]) == 2
+        assert all(
+            article.pub_date.year == 1999
+            and article.pub_date.month == 1
+            and article.pub_date.day == 1
+            for article in response.context["object_list"]
         )
 
     def test_news_archive_day_empty(self):
@@ -157,7 +146,7 @@ class TestNewsFunctional(TestCase):
                 kwargs={"year": 1999, "month": "jan", "day": 1, "slug": article.slug},
             ),
         )
-        eq_(response.context["object"], article)
+        assert response.context["object"] == article
 
     def test_news_detail_404(self):
         """Should give a 404 error for a article that doesn't exist"""
@@ -208,10 +197,10 @@ class TestNewsArticleViews(TestCase):
         staff = UserFactory(is_staff=True)
         response = self.post_helper({"tags": tags}, staff)
         self.article.refresh_from_db()
-        ok_(response.status_code, 200)
-        ok_("foo" in [tag.name for tag in self.article.tags.all()])
-        ok_("bar" in [tag.name for tag in self.article.tags.all()])
-        ok_("baz" in [tag.name for tag in self.article.tags.all()])
+        assert response.status_code, 200
+        assert "foo" in [tag.name for tag in self.article.tags.all()]
+        assert "bar" in [tag.name for tag in self.article.tags.all()]
+        assert "baz" in [tag.name for tag in self.article.tags.all()]
 
     def test_set_projects(self):
         """Posting a group of projects to an article should set that article's
@@ -222,29 +211,25 @@ class TestNewsArticleViews(TestCase):
         project_form = ProjectManagerForm(
             {"projects": [project1.pk, project2.pk]}, user=staff
         )
-        ok_(project_form.is_valid(), "We want to be sure we are posting valid data.")
+        assert project_form.is_valid(), "We want to be sure we are posting valid data."
         data = {"action": "projects"}
         data.update(project_form.data)
         response = self.post_helper(data, staff)
         self.article.refresh_from_db()
         project1.refresh_from_db()
         project2.refresh_from_db()
-        ok_(response.status_code, 200)
-        ok_(
-            self.article in project1.articles.all(),
-            "The article should be added to the project.",
-        )
-        ok_(
-            self.article in project2.articles.all(),
-            "The article should be added to teh project.",
-        )
+        assert response.status_code, 200
+        assert (
+            self.article in project1.articles.all()
+        ), "The article should be added to the project."
+        assert (
+            self.article in project2.articles.all()
+        ), "The article should be added to teh project."
 
     def test_staff_only(self):
         """Non-staff users cannot edit articles."""
         user = UserFactory()
         response = self.post_helper({"tags": "hello"}, user)
-        eq_(
-            response.status_code,
-            403,
-            "The server should return a 403 Forbidden error code.",
-        )
+        assert (
+            response.status_code == 403
+        ), "The server should return a 403 Forbidden error code."

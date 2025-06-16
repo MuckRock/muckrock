@@ -11,13 +11,10 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 # Third Party
-import stripe
 from mock import Mock, patch
-from nose.tools import eq_, nottest, ok_, raises
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory
-from muckrock.core.utils import get_stripe_token
 from muckrock.crowdfund import models
 from muckrock.project.models import ProjectCrowdfunds
 from muckrock.task.models import CrowdfundTask
@@ -46,12 +43,10 @@ class TestCrowdfundAbstract(TestCase):
         crowdfund_task_count = CrowdfundTask.objects.count()
         self.crowdfund.close_crowdfund()
         self.crowdfund.refresh_from_db()
-        ok_(self.crowdfund.closed, "The closed flag should be raised.")
-        eq_(
-            CrowdfundTask.objects.count(),
-            crowdfund_task_count + 1,
-            "A new crowdfund task should be created.",
-        )
+        assert self.crowdfund.closed, "The closed flag should be raised."
+        assert (
+            CrowdfundTask.objects.count() == crowdfund_task_count + 1
+        ), "A new crowdfund task should be created."
 
 
 class TestCrowdfund(TestCase):
@@ -63,16 +58,16 @@ class TestCrowdfund(TestCase):
 
     def test_unicode(self):
         """The crowdfund should express itself concisely."""
-        eq_("%s" % self.crowdfund, self.crowdfund.name)
+        assert "%s" % self.crowdfund == self.crowdfund.name
 
     def test_unicode_characters(self):
         """The unicode method should support unicode characters"""
         self.crowdfund.name = "Test¢s Crowdfund"
-        ok_("%s" % self.crowdfund)
+        assert "%s" % self.crowdfund
 
     def test_get_crowdfund_object(self):
         """The crowdfund should have a project being crowdfunded."""
-        eq_(self.crowdfund.get_crowdfund_object(), self.project)
+        assert self.crowdfund.get_crowdfund_object() == self.project
 
 
 @patch("stripe.Charge", Mock(create=Mock(return_value=Mock(id="stripe-charge-id"))))
@@ -88,20 +83,17 @@ class TestCrowdfundPayment(TestCase):
         """Should make and return a payment object"""
         amount = Decimal(100)
         payment = self.crowdfund.make_payment(self.token, "test@email.com", amount)
-        ok_(
-            isinstance(payment, models.CrowdfundPayment),
-            "Making a payment should create and return a payment object",
-        )
+        assert isinstance(
+            payment, models.CrowdfundPayment
+        ), "Making a payment should create and return a payment object"
 
     def test_unlimit_amount(self):
         """The amount paid should be able to exceed the amount required."""
         amount = Decimal(100)
         payment = self.crowdfund.make_payment(self.token, "test@email.com", amount)
-        eq_(
-            payment.amount,
-            amount,
-            "The payment should be made in full despite exceeding the amount required.",
-        )
+        assert (
+            payment.amount == amount
+        ), "The payment should be made in full despite exceeding the amount required."
 
     def test_limit_amount(self):
         """No more than the amount required should be paid if the crowdfund is
@@ -110,33 +102,9 @@ class TestCrowdfundPayment(TestCase):
         self.crowdfund.save()
         amount = Decimal(100)
         payment = self.crowdfund.make_payment(self.token, "test@email.com", amount)
-        eq_(
-            payment.amount,
-            self.crowdfund.payment_required,
-            "The amount should be capped at the crowdfund's required payment.",
-        )
-        ok_(
-            self.crowdfund.closed,
-            "Once the cap has been reached, the crowdfund should close.",
-        )
-
-
-class TestStripeIntegration(TestCase):
-    """Test Stripe integration and error handling"""
-
-    def setUp(self):
-        self.crowdfund = create_project_crowdfund()
-        self.amount = Decimal(1)
-
-    @nottest
-    def test_make_valid_payment(self):
-        """Charge should go through when card is valid"""
-        token = get_stripe_token()
-        self.crowdfund.make_payment(token, "test@email.com", self.amount)
-
-    @nottest
-    @raises(stripe.CardError)
-    def test_make_invalid_payment(self):
-        """Charge should not go through when card is declined"""
-        token = get_stripe_token("4000000000000002")
-        self.crowdfund.make_payment(token, "test@email.com", self.amount)
+        assert (
+            payment.amount == self.crowdfund.payment_required
+        ), "The amount should be capped at the crowdfund's required payment."
+        assert (
+            self.crowdfund.closed
+        ), "Once the cap has been reached, the crowdfund should close."

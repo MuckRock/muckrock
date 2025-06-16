@@ -5,9 +5,6 @@ Tests accounts models
 # Django
 from django.test import TestCase
 
-# Third Party
-from nose.tools import assert_false, assert_true, eq_, ok_
-
 # MuckRock
 from muckrock.accounts.models import Notification, Profile
 from muckrock.core.factories import NotificationFactory, ProfileFactory, UserFactory
@@ -30,7 +27,7 @@ class TestProfileUnit(TestCase):
     def test_str(self):
         """Test profile model's str method"""
         expected = "%s's Profile" % str(self.profile.user).capitalize()
-        eq_(str(self.profile), expected)
+        assert str(self.profile) == expected
 
     def test_feature_level(self):
         """Test getting a users max feature level from their entitlements"""
@@ -44,9 +41,9 @@ class TestProfileUnit(TestCase):
             user__membership__organization__entitlement=OrganizationEntitlementFactory()
         )
 
-        eq_(free.feature_level, 0)
-        eq_(pro.feature_level, 1)
-        eq_(org.feature_level, 2)
+        assert free.feature_level == 0
+        assert pro.feature_level == 1
+        assert org.feature_level == 2
 
         MembershipFactory(
             user=free.user, organization__entitlement__name="Organization"
@@ -56,7 +53,7 @@ class TestProfileUnit(TestCase):
         free = Profile.objects.get(pk=free.pk)
 
         # if in free entitlement and org entitlement, take the larger one
-        eq_(free.feature_level, 2)
+        assert free.feature_level == 2
 
     def test_is_advanced(self):
         """Test whether the users are marked as advanced."""
@@ -70,9 +67,9 @@ class TestProfileUnit(TestCase):
             user__membership__organization__entitlement=FreeEntitlementFactory()
         )
 
-        assert_true(pro.is_advanced())
-        assert_true(org.is_advanced())
-        assert_false(free.is_advanced())
+        assert pro.is_advanced()
+        assert org.is_advanced()
+        assert not free.is_advanced()
 
 
 class TestNotifications(TestCase):
@@ -86,32 +83,31 @@ class TestNotifications(TestCase):
     def test_create_notification(self):
         """Create a notification with a user and an action."""
         notification = Notification.objects.create(user=self.user, action=self.action)
-        ok_(notification, "Notification object should create without error.")
-        ok_(isinstance(notification, Notification), "Object should be a Notification.")
-        ok_(notification.read is not True, "Notification sould be unread by default.")
+        assert notification, "Notification object should create without error."
+        assert isinstance(
+            notification, Notification
+        ), "Object should be a Notification."
+        assert notification.read is not True, "Notification sould be unread by default."
 
     def test_mark_read(self):
         """Notifications should be markable as read if unread and unread if read."""
         self.notification.mark_read()
-        ok_(self.notification.read is True, "Notification should be marked as read.")
+        assert self.notification.read is True, "Notification should be marked as read."
         self.notification.mark_unread()
-        ok_(
-            self.notification.read is not True,
-            "Notification should be marked as unread.",
-        )
+        assert (
+            self.notification.read is not True
+        ), "Notification should be marked as unread."
 
     def test_for_user(self):
         """Notifications should be filterable by a single user."""
         user_notification = NotificationFactory(user=self.user)
         user_notifications = Notification.objects.for_user(self.user)
-        ok_(
-            user_notification in user_notifications,
-            "A notification for the user should be in the set returned.",
-        )
-        ok_(
-            self.notification not in user_notifications,
-            "A notification for another user should not be in the set returned.",
-        )
+        assert (
+            user_notification in user_notifications
+        ), "A notification for the user should be in the set returned."
+        assert (
+            self.notification not in user_notifications
+        ), "A notification for another user should not be in the set returned."
 
     def test_for_model(self):
         """Notifications should be filterable by a model type."""
@@ -119,14 +115,12 @@ class TestNotifications(TestCase):
         _action = new_action(UserFactory(), "submitted", target=foia)
         object_notification = NotificationFactory(user=self.user, action=_action)
         model_notifications = Notification.objects.for_model(foia)
-        ok_(
-            object_notification in model_notifications,
-            "A notification for the model should be in the set returned.",
-        )
-        ok_(
-            self.notification not in model_notifications,
-            "A notification not including the model should not be in the set returned.",
-        )
+        assert (
+            object_notification in model_notifications
+        ), "A notification for the model should be in the set returned."
+        assert (
+            self.notification not in model_notifications
+        ), "A notification not including the model should not be in the set returned."
 
     def test_for_object(self):
         """Notifications should be filterable by a single object."""
@@ -134,25 +128,20 @@ class TestNotifications(TestCase):
         _action = new_action(UserFactory(), "submitted", target=foia)
         object_notification = NotificationFactory(user=self.user, action=_action)
         object_notifications = Notification.objects.for_object(foia)
-        ok_(
-            object_notification in object_notifications,
-            "A notification for the object should be in the set returned.",
-        )
-        ok_(
-            self.notification not in object_notifications,
-            "A notification not including the object should not be in the set "
-            "returned.",
-        )
+        assert (
+            object_notification in object_notifications
+        ), "A notification for the object should be in the set returned."
+        assert (
+            self.notification not in object_notifications
+        ), "A notification not including the object should not be in the set returned."
 
     def test_get_unread(self):
         """Notifications should be filterable by their unread status."""
         self.notification.mark_unread()
-        ok_(
-            self.notification in Notification.objects.get_unread(),
-            "Unread notifications should be in the set returned.",
-        )
+        assert (
+            self.notification in Notification.objects.get_unread()
+        ), "Unread notifications should be in the set returned."
         self.notification.mark_read()
-        ok_(
-            self.notification not in Notification.objects.get_unread(),
-            "Read notifications should not be in the set returned.",
-        )
+        assert (
+            self.notification not in Notification.objects.get_unread()
+        ), "Read notifications should not be in the set returned."

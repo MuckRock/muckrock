@@ -13,7 +13,6 @@ import logging
 
 # Third Party
 import mock
-from nose.tools import assert_false, eq_, ok_
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm
@@ -66,7 +65,7 @@ def n_plus_one_query(client, url, factory):
         try:
             settings.DEBUG = True
             response = client.get(url)
-            eq_(response.status_code, 200)
+            assert response.status_code == 200
             num_queries = len(connection.queries)
         finally:
             settings.DEBUG = False
@@ -79,7 +78,7 @@ def n_plus_one_query(client, url, factory):
     factory.create_batch(3)
     multiple_num_queries = make_request()
 
-    eq_(single_num_queries, multiple_num_queries)
+    assert single_num_queries == multiple_num_queries
 
 
 @mock.patch("muckrock.message.notifications.SlackNotification.send", mock_send)
@@ -94,36 +93,34 @@ class TaskListViewTests(TestCase):
 
     def test_login_required(self):
         response = http_get_response(self.url, self.view, follow=True)
-        eq_(response.status_code, 302)
-        eq_(response.url, "/accounts/login/?next=%s" % self.url)
+        assert response.status_code == 302
+        assert response.url == "/accounts/login/?next=%s" % self.url
 
     def test_not_staff_not_ok(self):
         response = http_get_response(self.url, self.view, UserFactory(), follow=True)
-        eq_(response.status_code, 302)
-        eq_(response.url, "/accounts/login/?next=%s" % self.url)
+        assert response.status_code == 302
+        assert response.url == "/accounts/login/?next=%s" % self.url
 
     def test_staff_ok(self):
         response = http_get_response(self.url, self.view, self.user, follow=True)
-        eq_(
-            response.status_code,
-            200,
-            (
-                "Should respond to staff requests for task list page with 200."
-                " Actually responds with %d" % response.status_code
-            ),
+        assert response.status_code == 200, (
+            "Should respond to staff requests for task list page with 200."
+            " Actually responds with %d" % response.status_code
         )
 
     def test_class_inheritance(self):
         actual = TaskList.__bases__
         expected = MRFilterListView().__class__
-        ok_(expected in actual, "Task list should inherit from MRFilterListView class")
+        assert (
+            expected in actual
+        ), "Task list should inherit from MRFilterListView class"
 
     def test_render_task_list(self):
         """The list should have rendered task widgets in its object_list
         context variable"""
         response = http_get_response(self.url, self.view, self.user, follow=True)
         obj_list = response.context_data["object_list"]
-        ok_(obj_list, "Object list should not be empty.")
+        assert obj_list, "Object list should not be empty."
 
 
 @mock.patch("muckrock.message.notifications.SlackNotification.send", mock_send)
@@ -142,25 +139,19 @@ class TaskListViewPOSTTests(TestCase):
         data = {"resolve": "truthy", "task": self.task.pk}
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
-        eq_(
-            self.task.resolved,
-            True,
-            'Tasks should be resolved by posting the task ID with a "resolve" request.',
-        )
-        eq_(
-            self.task.resolved_by,
-            self.user,
-            "Task should record the logged in user who resolved it.",
-        )
+        assert (
+            self.task.resolved
+        ), 'Tasks should be resolved by posting the task ID with a "resolve" request.'
+        assert (
+            self.task.resolved_by == self.user
+        ), "Task should record the logged in user who resolved it."
 
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {"task": self.task.pk})
         self.task.refresh_from_db()
-        eq_(
-            self.task.resolved,
-            False,
-            'Tasks should not be resolved when no "resolve" data is POSTed.',
-        )
+        assert (
+            not self.task.resolved
+        ), 'Tasks should not be resolved when no "resolve" data is POSTed.'
 
 
 @mock.patch("muckrock.message.notifications.SlackNotification.send", mock_send)
@@ -183,10 +174,8 @@ class TaskListViewBatchedPOSTTests(TestCase):
         http_post_response(self.url, self.view, data, self.user)
         for _task in self.tasks:
             _task.refresh_from_db()
-            eq_(
-                _task.resolved,
-                True,
-                "Task %d should be resolved when doing a batched resolve" % _task.pk,
+            assert _task.resolved, (
+                "Task %d should be resolved when doing a batched resolve" % _task.pk
             )
 
 
@@ -207,12 +196,12 @@ class OrphanTaskViewTests(TestCase):
     def test_get_single(self):
         """Should be able to view a single task"""
         response = self.client.get(reverse("orphan-task", kwargs={"pk": self.task.pk}))
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_get_single_404(self):
         """If the single orphan task does not exist, then 404"""
         response = self.client.get(reverse("orphan-task", kwargs={"pk": 123456789}))
-        eq_(response.status_code, 404)
+        assert response.status_code == 404
 
     def test_move(self):
         foias = FOIARequestFactory.create_batch(2)
@@ -231,58 +220,44 @@ class OrphanTaskViewTests(TestCase):
         updated_foia_2_comm_count = foias[1].communications.all().count()
         updated_task = OrphanTask.objects.get(pk=self.task.pk)
         ending_date = updated_task.communication.datetime
-        ok_(
-            updated_task.resolved,
-            "Orphan task should be resolved by posting the FOIA pks and task ID.",
-        )
-        eq_(
-            updated_foia_1_comm_count,
-            foia_1_comm_count + 1,
-            "Communication should be added to FOIA",
-        )
-        eq_(
-            updated_foia_2_comm_count,
-            foia_2_comm_count + 1,
-            "Communication should be added to FOIA",
-        )
-        eq_(
-            starting_date,
-            ending_date,
-            "The date of the communication should not change.",
-        )
+        assert (
+            updated_task.resolved
+        ), "Orphan task should be resolved by posting the FOIA pks and task ID."
+        assert (
+            updated_foia_1_comm_count == foia_1_comm_count + 1
+        ), "Communication should be added to FOIA"
+        assert (
+            updated_foia_2_comm_count == foia_2_comm_count + 1
+        ), "Communication should be added to FOIA"
+        assert (
+            starting_date == ending_date
+        ), "The date of the communication should not change."
 
     def test_reject(self):
         self.client.post(self.url, {"reject": True, "task": self.task.pk})
         updated_task = OrphanTask.objects.get(pk=self.task.pk)
-        eq_(
-            updated_task.resolved,
-            True,
-            (
-                "Orphan task should be rejected by posting any"
-                ' truthy value to the "reject" parameter and task ID.'
-            ),
+        assert updated_task.resolved, (
+            "Orphan task should be rejected by posting any"
+            ' truthy value to the "reject" parameter and task ID.'
         )
 
     def test_reject_despite_likely_foia(self):
         likely_foia = self.task.communication.likely_foia
         comm_count = likely_foia.communications.all().count()
-        ok_(likely_foia, "Communication should have a likely FOIA for this test")
+        assert likely_foia, "Communication should have a likely FOIA for this test"
         self.client.post(
             self.url, {"move": likely_foia.pk, "reject": "true", "task": self.task.pk}
         )
         updated_comm_count = likely_foia.communications.all().count()
-        eq_(
-            comm_count,
-            updated_comm_count,
-            "Rejecting an orphan with a likely FOIA should not move"
-            " the communication to that FOIA",
-        )
+        assert (
+            comm_count == updated_comm_count
+        ), "Rejecting an orphan with a likely FOIA should not move the communication to that FOIA"
 
     def test_reject_and_blacklist(self):
         self.client.post(
             self.url, {"reject": "true", "blacklist": True, "task": self.task.pk}
         )
-        ok_(BlacklistDomain.objects.filter(domain="example.com"))
+        assert BlacklistDomain.objects.filter(domain="example.com")
 
     @tag("slow")
     def _test_n_plus_one_query(self):
@@ -306,7 +281,7 @@ class SnailMailTaskViewTests(TestCase):
         response = self.client.get(
             reverse("snail-mail-task", kwargs={"pk": self.task.pk})
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_post_set_status(self):
         """Should update the status of the task's communication and associated
@@ -317,8 +292,8 @@ class SnailMailTaskViewTests(TestCase):
             self.url, {"status": new_status, "task": self.task.pk, "save": True}
         )
         updated_task = SnailMailTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.communication.status, new_status)
-        eq_(updated_task.communication.foia.status, new_status)
+        assert updated_task.communication.status == new_status
+        assert updated_task.communication.foia.status == new_status
 
     def test_post_record_check(self):
         """A payment snail mail task should record the check number."""
@@ -336,7 +311,7 @@ class SnailMailTaskViewTests(TestCase):
         )
         self.task.refresh_from_db()
         check = Check.objects.filter(communication=self.task.communication).first()
-        ok_(check, "A check should be generated.")
+        assert check, "A check should be generated."
 
     @tag("slow")
     def _test_n_plus_one_query(self):
@@ -367,7 +342,7 @@ class FlaggedTaskViewTests(TestCase):
         request.user = self.user
         request = mock_middleware(request)
         response = self.view(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def post_request(self, data):
         """Helper to post data and get a response"""
@@ -381,27 +356,26 @@ class FlaggedTaskViewTests(TestCase):
         """Staff should be able to reply to the user who raised the flag"""
         test_text = "Lorem ipsum"
         form = FlaggedTaskForm({"text": test_text})
-        ok_(form.is_valid())
+        assert form.is_valid()
         post_data = form.cleaned_data
         post_data.update({"reply": "truthy", "task": self.task.pk})
         self.post_request(post_data)
         self.task.refresh_from_db()
-        ok_(
-            not self.task.resolved,
-            "The task should not automatically resolve when replying.",
-        )
+        assert (
+            not self.task.resolved
+        ), "The task should not automatically resolve when replying."
         mock_reply.assert_called_with(test_text)
 
     def test_post_reply_resolve(self, mock_reply):
         """The task should optionally resolve when replying"""
         test_text = "Lorem ipsum"
         form = FlaggedTaskForm({"text": test_text})
-        ok_(form.is_valid())
+        assert form.is_valid()
         post_data = form.cleaned_data
         post_data.update({"reply": "truthy", "resolve": True, "task": self.task.pk})
         self.post_request(post_data)
         self.task.refresh_from_db()
-        ok_(self.task.resolved, "The task should resolve.")
+        assert self.task.resolved, "The task should resolve."
         mock_reply.assert_called_with(test_text)
 
     @tag("slow")
@@ -432,7 +406,7 @@ class ProjectReviewTaskViewTests(TestCase):
         request.user = self.user
         request = mock_middleware(request)
         response = self.view(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def post_request(self, data):
         """Helper to post data and get a response"""
@@ -446,43 +420,42 @@ class ProjectReviewTaskViewTests(TestCase):
         """Staff should be able to reply to the user who raised the flag"""
         test_text = "Lorem ipsum"
         form = ProjectReviewTaskForm({"reply": test_text})
-        ok_(form.is_valid())
+        assert form.is_valid()
         post_data = form.cleaned_data
         post_data.update({"action": "reply", "task": self.task.pk})
         self.post_request(post_data)
         self.task.refresh_from_db()
-        ok_(
-            not self.task.resolved,
-            "The task should not automatically resolve when replying.",
-        )
+        assert (
+            not self.task.resolved
+        ), "The task should not automatically resolve when replying."
         mock_reply.assert_called_with(test_text)
 
     def test_post_reply_approve(self, mock_reply):
         """The task should optionally resolve when replying"""
         test_text = "Lorem ipsum"
         form = ProjectReviewTaskForm({"reply": test_text})
-        ok_(form.is_valid())
+        assert form.is_valid()
         post_data = form.cleaned_data
         post_data.update({"action": "approve", "task": self.task.pk})
         self.post_request(post_data)
         self.task.refresh_from_db()
         self.task.project.refresh_from_db()
-        ok_(self.task.project.approved, "The project should be approved.")
-        ok_(self.task.resolved, "The task should be resolved.")
+        assert self.task.project.approved, "The project should be approved."
+        assert self.task.resolved, "The task should be resolved."
         mock_reply.assert_called_with(test_text, "approved")
 
     def test_post_reply_reject(self, mock_reply):
         """The task should optionally resolve when replying"""
         test_text = "Lorem ipsum"
         form = ProjectReviewTaskForm({"reply": test_text})
-        ok_(form.is_valid())
+        assert form.is_valid()
         post_data = form.cleaned_data
         post_data.update({"action": "reject", "task": self.task.pk})
         self.post_request(post_data)
         self.task.refresh_from_db()
         self.task.project.refresh_from_db()
-        ok_(self.task.project.private, "The project should be made private.")
-        ok_(self.task.resolved, "The task should be resolved.")
+        assert self.task.project.private, "The project should be made private."
+        assert self.task.resolved, "The task should be resolved."
         mock_reply.assert_called_with(test_text, "rejected")
 
     @tag("slow")
@@ -508,7 +481,7 @@ class NewAgencyTaskViewTests(TestCase):
         response = self.client.get(
             reverse("new-agency-task", kwargs={"pk": self.task.pk})
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_post_accept(self):
         contact_data = {
@@ -523,12 +496,12 @@ class NewAgencyTaskViewTests(TestCase):
         form = AgencyForm(
             contact_data, instance=self.task.agency, prefix=str(self.task.pk)
         )
-        ok_(form.is_valid())
+        assert form.is_valid()
         contact_data.update({"approve": True, "task": self.task.pk})
         self.client.post(self.url, contact_data)
         updated_task = NewAgencyTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.agency.status, "approved")
-        ok_(updated_task.resolved)
+        assert updated_task.agency.status == "approved"
+        assert updated_task.resolved
 
     def test_post_replace(self):
         """Rejecting the agency with a replacement agency"""
@@ -543,8 +516,8 @@ class NewAgencyTaskViewTests(TestCase):
             },
         )
         updated_task = NewAgencyTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.agency.status, "rejected")
-        eq_(updated_task.resolved, True)
+        assert updated_task.agency.status == "rejected"
+        assert updated_task.resolved == True
 
     @tag("slow")
     def _test_n_plus_one_query(self):
@@ -567,7 +540,7 @@ class ResponseTaskListViewTests(TestCase):
     def test_get_list(self):
         """Staff users should be able to view a list of tasks."""
         response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     @tag("slow")
     def _test_n_plus_one_query(self):
@@ -578,7 +551,7 @@ class ResponseTaskListViewTests(TestCase):
         """Staff users should be able to view a single task"""
         url = reverse("response-task", kwargs={"pk": self.task.pk})
         response = http_get_response(url, self.view, self.user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_post_set_price(self):
         """Setting the price should update the price on the response's request."""
@@ -589,8 +562,8 @@ class ResponseTaskListViewTests(TestCase):
         http_post_response(self.url, self.view, data, self.user)
         self.task.refresh_from_db()
         foia.refresh_from_db()
-        eq_(foia.price, float(price), "The price on the FOIA should be set.")
-        ok_(self.task.resolved, "Setting the price should resolve the task.")
+        assert foia.price == float(price), "The price on the FOIA should be set."
+        assert self.task.resolved, "Setting the price should resolve the task."
 
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then
@@ -609,13 +582,11 @@ class ResponseTaskListViewTests(TestCase):
         self.task.communication.foia.refresh_from_db()
         comm_status = self.task.communication.status
         foia_status = self.task.communication.foia.status
-        eq_(
-            comm_status,
-            status_change,
-            "The status change should be saved to the communication.",
-        )
-        eq_(foia_status, status_change, "The status of the FOIA should be set.")
-        eq_(self.task.resolved, True, "Setting the status should resolve the task")
+        assert (
+            comm_status == status_change
+        ), "The status change should be saved to the communication."
+        assert foia_status == status_change, "The status of the FOIA should be set."
+        assert self.task.resolved == True, "Setting the status should resolve the task"
 
     def test_post_set_code(self):
         """Setting the scan code should save it to the response and request, then
@@ -628,11 +599,11 @@ class ResponseTaskListViewTests(TestCase):
         task.refresh_from_db()
         task.communication.refresh_from_db()
         task.communication.foia.refresh_from_db()
-        eq_(task.communication.communication, CODES[code][2])
-        eq_(task.communication.status, CODES[code][1])
-        eq_(task.communication.foia.status, CODES[code][1])
-        eq_(task.resolved, True)
-        assert_false(task.communication.hidden)
+        assert task.communication.communication == CODES[code][2]
+        assert task.communication.status == CODES[code][1]
+        assert task.communication.foia.status == CODES[code][1]
+        assert task.resolved == True
+        assert not task.communication.hidden
 
     def test_post_set_comm_status(self):
         """Setting the status on just the communication should not influence
@@ -651,17 +622,15 @@ class ResponseTaskListViewTests(TestCase):
         self.task.communication.foia.refresh_from_db()
         comm_status = self.task.communication.status
         foia_status = self.task.communication.foia.status
-        eq_(
-            comm_status,
-            status_change,
-            "The status change should be saved to the communication.",
-        )
-        eq_(
-            foia_status,
-            existing_foia_status,
-            "The status of the FOIA should not be changed.",
-        )
-        eq_(self.task.resolved, True, "Settings the status should resolve the task.")
+        assert (
+            comm_status == status_change
+        ), "The status change should be saved to the communication."
+        assert (
+            foia_status == existing_foia_status
+        ), "The status of the FOIA should not be changed."
+        assert (
+            self.task.resolved == True
+        ), "Settings the status should resolve the task."
 
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""
@@ -677,12 +646,10 @@ class ResponseTaskListViewTests(TestCase):
         self.task.communication.refresh_from_db()
         self.task.communication.foia.refresh_from_db()
         foia_tracking = self.task.communication.foia.current_tracking_id()
-        eq_(
-            foia_tracking,
-            new_tracking_id,
-            "The new tracking number should be saved to the associated request.",
-        )
-        ok_(self.task.resolved, "Setting the tracking number should resolve the task")
+        assert (
+            foia_tracking == new_tracking_id
+        ), "The new tracking number should be saved to the associated request."
+        assert self.task.resolved, "Setting the tracking number should resolve the task"
 
     def test_post_move(self):
         """Moving the response should save it to a new request."""
@@ -698,17 +665,13 @@ class ResponseTaskListViewTests(TestCase):
         self.task.refresh_from_db()
         self.task.communication.refresh_from_db()
         ending_date = self.task.communication.datetime
-        eq_(
-            self.task.communication.foia,
-            other_foia,
-            "The response should be moved to a different FOIA.",
-        )
-        ok_(self.task.resolved, "Moving the status should resolve the task")
-        eq_(
-            starting_date,
-            ending_date,
-            "Moving the communication should not change its date.",
-        )
+        assert (
+            self.task.communication.foia == other_foia
+        ), "The response should be moved to a different FOIA."
+        assert self.task.resolved, "Moving the status should resolve the task"
+        assert (
+            starting_date == ending_date
+        ), "Moving the communication should not change its date."
 
     def test_post_move_multiple(self):
         """Moving the response to multiple requests modify all the requests."""
@@ -726,11 +689,9 @@ class ResponseTaskListViewTests(TestCase):
         http_post_response(self.url, self.view, data, self.user)
         for foia in other_foias:
             foia.refresh_from_db()
-            eq_(
-                change_tracking,
-                foia.current_tracking_id(),
-                "Tracking should update for each request in move list.",
-            )
+            assert (
+                change_tracking == foia.current_tracking_id()
+            ), "Tracking should update for each request in move list."
 
     def test_terrible_data(self):
         """Posting awful data shouldn't cause everything to collapse."""
@@ -741,7 +702,7 @@ class ResponseTaskListViewTests(TestCase):
             "task": self.task.pk,
         }
         response = http_post_response(self.url, self.view, data, self.user)
-        ok_(response)
+        assert response
 
     def test_foia_integrity(self):
         """
@@ -755,21 +716,17 @@ class ResponseTaskListViewTests(TestCase):
         foia.create_out_communication(
             from_user=foia.user, text="Just testing", user=foia.user
         )
-        eq_(
-            foia.communications.count(),
-            num_comms + 1,
-            "Should add a new communication to the FOIA.",
-        )
+        assert (
+            foia.communications.count() == num_comms + 1
+        ), "Should add a new communication to the FOIA."
         num_comms = foia.communications.count()
         # next try resolving the task with a tracking number set
         data = {"resolve": "true", "tracking_number": "12345", "task": self.task.pk}
         http_post_response(self.url, self.view, data, self.user)
         foia.refresh_from_db()
-        eq_(
-            foia.communications.count(),
-            num_comms,
-            "The number of communications should not have changed from before.",
-        )
+        assert (
+            foia.communications.count() == num_comms
+        ), "The number of communications should not have changed from before."
 
 
 class NewPortalTaskListViewTests(TestCase):
@@ -786,7 +743,7 @@ class NewPortalTaskListViewTests(TestCase):
     def test_get_list(self):
         """Staff users should be able to view a list of tasks."""
         response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     @tag("slow")
     def _test_n_plus_one_query(self):
@@ -808,7 +765,7 @@ class ReviewAgencyTaskListViewTests(TestCase):
     def test_get_list(self):
         """Staff users should be able to view a list of tasks."""
         response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
 
 class PortalTaskListViewTests(TestCase):
@@ -825,4 +782,4 @@ class PortalTaskListViewTests(TestCase):
     def test_get_list(self):
         """Staff users should be able to view a list of tasks."""
         response = http_get_response(self.url, self.view, self.user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200

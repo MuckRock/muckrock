@@ -8,9 +8,6 @@ deeper, sustained involvement with our work on those topics.
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-# Third Party
-from nose.tools import eq_, ok_
-
 # MuckRock
 from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
 from muckrock.foia.factories import FOIARequestFactory
@@ -47,19 +44,19 @@ class TestProject(TestCase):
         Projects should have a statement describing their purpose
         and an image or illustration to accompany them.
         """
-        ok_(self.project)
-        eq_(self.project.title, test_title)
-        ok_(self.project.private)
-        ok_(not self.project.approved)
+        assert self.project
+        assert self.project.title == test_title
+        assert self.project.private
+        assert not self.project.approved
         self.project.summary = test_summary
         self.project.description = test_description
         self.project.image = test_image
         self.project.save()
-        ok_(self.project)
+        assert self.project
 
     def test_project_unicode(self):
         """Projects should default to printing their title."""
-        eq_(str(self.project), test_title)
+        assert str(self.project) == test_title
 
     def test_contributors(self):
         """
@@ -69,65 +66,64 @@ class TestProject(TestCase):
         user1 = UserFactory()
         user2 = UserFactory()
         self.project.contributors.add(user1, user2)
-        ok_(
+        assert (
             user1 in self.project.contributors.all()
             and user2 in self.project.contributors.all()
         )
         self.project.contributors.clear()
-        eq_(len(self.project.contributors.all()), 0)
+        assert len(self.project.contributors.all()) == 0
 
     def test_articles(self):
         """Projects should keep a list of relevant articles."""
         article1 = ArticleFactory()
         article2 = ArticleFactory()
         self.project.articles.add(article1, article2)
-        ok_(article1 in self.project.articles.all())
-        ok_(article2 in self.project.articles.all())
+        assert article1 in self.project.articles.all()
+        assert article2 in self.project.articles.all()
         self.project.articles.clear()
-        eq_(len(self.project.articles.all()), 0)
+        assert len(self.project.articles.all()) == 0
 
     def test_requests(self):
         """Projects should keep a list of relevant FOIA requests."""
         request1 = FOIARequestFactory()
         request2 = FOIARequestFactory()
         self.project.requests.add(request1, request2)
-        ok_(request1 in self.project.requests.all())
-        ok_(request2 in self.project.requests.all())
+        assert request1 in self.project.requests.all()
+        assert request2 in self.project.requests.all()
         self.project.articles.clear()
-        eq_(len(self.project.articles.all()), 0)
+        assert len(self.project.articles.all()) == 0
 
     def test_make_public(self):
         """Projects can be made public, but they shouldn't be approved."""
         self.project.make_public()
-        ok_(not self.project.private)
-        ok_(not self.project.approved)
+        assert not self.project.private
+        assert not self.project.approved
 
     def test_has_contributors(self):
         """Projects should test to see if a given user is a contributor."""
         user1 = UserFactory()
         user2 = UserFactory()
         self.project.contributors.add(user1)
-        ok_(self.project.has_contributor(user1))
-        ok_(not self.project.has_contributor(user2))
+        assert self.project.has_contributor(user1)
+        assert not self.project.has_contributor(user2)
 
     def test_editable_by(self):
         """Projects should test to see if a given user can edit a request."""
         user1 = UserFactory()
         user2 = UserFactory()
         self.project.contributors.add(user1)
-        ok_(self.project.editable_by(user1))
-        ok_(not self.project.editable_by(user2))
+        assert self.project.editable_by(user1)
+        assert not self.project.editable_by(user2)
 
     def test_publish(self):
         """Publishing a project should make it public and submit it for approval."""
         explanation = "Test"
         task = self.project.publish(explanation)
-        eq_(self.project.private, False, "The project should be made public.")
-        eq_(self.project.approved, False, "The project should be waiting approval.")
-        ok_(
-            isinstance(task, ProjectReviewTask),
-            "A ProjectReviewTask should be created.\n\tTask: %s" % type(task),
-        )
+        assert not self.project.private, "The project should be made public."
+        assert not self.project.approved, "The project should be waiting approval."
+        assert isinstance(
+            task, ProjectReviewTask
+        ), "A ProjectReviewTask should be created.\n\tTask: %s" % type(task)
 
     def test_suggest_requests(self):
         """
@@ -144,10 +140,10 @@ class TestProject(TestCase):
         test_request = FOIARequestFactory(composer__user=user)
         test_request.tags.add(tags)
         # since they have the same user and tags, the project should suggest the request
-        ok_(test_request in self.project.suggest_requests())
+        assert test_request in self.project.suggest_requests()
         # add the request to the project, then try again. it should not be suggested
         self.project.requests.add(test_request)
-        ok_(test_request not in self.project.suggest_requests())
+        assert test_request not in self.project.suggest_requests()
 
     def test_suggest_articles(self):
         """
@@ -166,10 +162,10 @@ class TestProject(TestCase):
         test_article.tags.add(tags)
         # since they have the same user and tags, the project should suggest
         # the article.
-        ok_(test_article in self.project.suggest_articles())
+        assert test_article in self.project.suggest_articles()
         # add the article to the project, then try again. it should not be suggested
         self.project.articles.add(test_article)
-        ok_(test_article not in self.project.suggest_articles())
+        assert test_article not in self.project.suggest_articles()
 
 
 class TestProjectTagging(TestCase):
@@ -180,29 +176,29 @@ class TestProjectTagging(TestCase):
 
     def test_add_tags(self):
         """Projects should keep a list of relevant tags."""
-        eq_(len(self.project.tags.all()), 0)
+        assert len(self.project.tags.all()) == 0
         self.project.tags.add("prison", "privatization", "corrections")
-        eq_(len(self.project.tags.all()), 3)
+        assert len(self.project.tags.all()) == 3
 
     def test_add_existing_tags(self):
         """Projects should not contain duplicate tags."""
-        eq_(len(self.project.tags.all()), 0)
+        assert len(self.project.tags.all()) == 0
         self.project.tags.add("prison", "privatization", "corrections")
         self.project.tags.add("prison", "privatization", "corrections")
-        eq_(len(self.project.tags.all()), 3)
+        assert len(self.project.tags.all()) == 3
 
     def test_remove_existing_tag(self):
         """Tags should be easily removed from projects."""
-        eq_(len(self.project.tags.all()), 0)
+        assert len(self.project.tags.all()) == 0
         self.project.tags.add("prison", "privatization", "corrections")
-        eq_(len(self.project.tags.all()), 3)
+        assert len(self.project.tags.all()) == 3
         self.project.tags.remove("prison")
-        eq_(len(self.project.tags.all()), 2)
+        assert len(self.project.tags.all()) == 2
 
     def test_remove_nonexisting_tag(self):
         """Nonexisting tags cannot be removed from a project."""
-        eq_(len(self.project.tags.all()), 0)
+        assert len(self.project.tags.all()) == 0
         self.project.tags.add("prison", "privatization", "corrections")
-        eq_(len(self.project.tags.all()), 3)
+        assert len(self.project.tags.all()) == 3
         self.project.tags.remove("spongebob")
-        eq_(len(self.project.tags.all()), 3)
+        assert len(self.project.tags.all()) == 3

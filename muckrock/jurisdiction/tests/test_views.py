@@ -5,9 +5,6 @@ Test the views of jurisdiction models
 # Django
 from django.test import TestCase
 
-# Third Party
-from nose.tools import assert_is_not, eq_
-
 # MuckRock
 from muckrock.core.test_utils import http_get_response
 from muckrock.jurisdiction import factories, views
@@ -26,7 +23,7 @@ class TestJurisdictionDetailView(TestCase):
         kwargs = jurisdiction.get_slugs()
 
         response = http_get_response(url, self.view, **kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
 
 class TestExemptionDetailView(TestCase):
@@ -44,7 +41,7 @@ class TestExemptionDetailView(TestCase):
         kwargs.update({"slug": exemption.slug, "pk": exemption.pk})
 
         response = http_get_response(url, self.view, **kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_unique_for_jurisdiction(self):
         """Two exemptions may have the same name,
@@ -57,10 +54,10 @@ class TestExemptionDetailView(TestCase):
         another_jurisdiction = factories.StateJurisdictionFactory(
             parent=exemption.jurisdiction.parent
         )
-        assert_is_not(exemption.jurisdiction, another_jurisdiction)
+        assert exemption.jurisdiction is not another_jurisdiction
         factories.ExemptionFactory(jurisdiction=another_jurisdiction)
         response = http_get_response(url, self.view, **kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_local_exemptions(self):
         """An exemption at the local level should return 200."""
@@ -70,7 +67,7 @@ class TestExemptionDetailView(TestCase):
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs.update({"slug": exemption.slug, "pk": exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_state_exemptions(self):
         """An exemption at the state level should return 200."""
@@ -80,7 +77,7 @@ class TestExemptionDetailView(TestCase):
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs.update({"slug": exemption.slug, "pk": exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_federal_exemptions(self):
         """An exemption at the federal level should return 200."""
@@ -90,4 +87,4 @@ class TestExemptionDetailView(TestCase):
         kwargs = exemption.jurisdiction.get_slugs()
         kwargs.update({"slug": exemption.slug, "pk": exemption.pk})
         response = http_get_response(url, self.view, **kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
