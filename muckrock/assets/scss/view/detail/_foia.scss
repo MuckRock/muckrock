@@ -692,6 +692,10 @@ $request-breakpoint: 768px;
   margin-right: 1em;
 }
 
+.actions form {
+  display: inline;
+}
+
 .request-organizations {
   display: none;
 }

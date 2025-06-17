@@ -113,10 +113,10 @@
       {% include "foia/detail/file_download.html" %}
     {% endif %}
 
-    <form method="post" novalidate>
-      {% csrf_token %}
-      {% for action in user_actions %}
-        {% if action.test %}
+    {% for action in user_actions %}
+      {% if action.test %}
+        <form method="post">
+          {% csrf_token %}
           {% if action.link %}
             <a
               href="{{ action.link }}"
@@ -148,9 +148,9 @@
               <span class="close-modal button">Close</span>
             </div>
           {% endif %}
-        {% endif %}
-      {% endfor %}
-    </form>
+        </form>
+      {% endif %}
+    {% endfor %}
   </section>
 
 {% else %} {# unauthenticated #}
