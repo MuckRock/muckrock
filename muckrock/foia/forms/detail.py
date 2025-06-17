@@ -167,12 +167,6 @@ class FOIAFlagForm(forms.Form):
                 + PUBLIC_FLAG_CATEGORIES
             )
 
-    def clean(self):
-        """Must fill in one of the fields"""
-        cleaned_data = super().clean()
-        if not cleaned_data.get("category") and not cleaned_data.get("text"):
-            raise forms.ValidationError("Must select a category or provide text")
-
 
 class FOIAContactUserForm(forms.Form):
     """Form for contacting the owner of a request"""
