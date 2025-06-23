@@ -47,6 +47,45 @@ class StatisticsAdmin(VersionAdmin):
     formats = ["xls", "csv"]
     autocomplete_fields = ["users_today"]
 
+    def export_statistics_as_csv(self, request, queryset):
+        """Export selected Statistics records to CSV."""
+        field_names = [
+            "date",
+            "total_requests",
+            "total_requests_success",
+            "total_requests_denied",
+            "total_pages",
+            "total_users",
+            "total_agencies",
+            "total_fees",
+        ]
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=statistics_export.csv"
+
+        writer = csv.writer(response)
+        writer.writerow(field_names)
+
+        for obj in queryset:
+            writer.writerow(
+                [
+                    obj.date.isoformat() if obj.date else "",
+                    obj.total_requests,
+                    obj.total_requests_success,
+                    obj.total_requests_denied,
+                    obj.total_pages,
+                    obj.total_users,
+                    obj.total_agencies,
+                    obj.total_fees,
+                ]
+            )
+
+        return response
+
+    export_statistics_as_csv.short_description = "Export selected statistics to CSV"
+
+    actions = [export_statistics_as_csv]
+
 
 class ProfileAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
