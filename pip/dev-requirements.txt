@@ -6,7 +6,7 @@
 #
 asgiref==3.6.0
     # via django
-astroid==2.11.7
+astroid==2.15.8
     # via pylint
 asttokens==2.0.8
     # via stack-data
@@ -43,7 +43,7 @@ decorator==4.3.0
     # via
     #   ipdb
     #   ipython
-dill==0.3.5.1
+dill==0.4.0
     # via pylint
 dj-inmemorystorage==2.1.0
     # via -r pip/dev-requirements.in
@@ -143,7 +143,7 @@ pygments==2.13.0
     # via
     #   django-silk
     #   ipython
-pylint==2.14.5
+pylint==2.17.7
     # via
     #   pylint-django
     #   pylint-plugin-utils
@@ -215,7 +215,9 @@ traitlets==5.3.0
     #   ipython
     #   matplotlib-inline
 typing-extensions==4.12.2
-    # via black
+    # via
+    #   astroid
+    #   black
 urllib3==1.26.16
     # via requests
 wcwidth==0.1.7
