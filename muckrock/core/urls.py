@@ -125,6 +125,11 @@ router_v2.register(
     r"users", muckrock.accounts.api_v2.viewsets.UserViewSet, "api2-users"
 )
 router_v2.register(
+    r"statistics",
+    muckrock.accounts.api_v2.viewsets.StatisticsViewSet,
+    "api2-statistics",
+)
+router_v2.register(
     r"organizations",
     muckrock.organization.api_v2.viewsets.OrganizationViewSet,
     "api2-organizations",

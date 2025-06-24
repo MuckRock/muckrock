@@ -5,11 +5,13 @@ from django.contrib.auth.models import User
 
 # Third Party
 import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 # MuckRock
-from muckrock.accounts.api_v2.serializers import UserSerializer
+from muckrock.accounts.api_v2.serializers import StatisticsSerializer, UserSerializer
+from muckrock.accounts.models import Statistics
 from muckrock.core.views import AuthenticatedAPIMixin
 
 
@@ -65,3 +67,16 @@ class UserViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
         if self.kwargs["pk"] == "me" and self.request.user.is_authenticated:
             return self.request.user  # Return the current user
         return super().get_object()
+
+
+class StatisticsViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for viewing Statistics.
+    Restricted to admin users only.
+    """
+
+    queryset = Statistics.objects.all()
+    serializer_class = StatisticsSerializer
+    permission_classes = [IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["date"]
