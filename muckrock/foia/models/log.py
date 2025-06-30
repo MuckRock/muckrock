@@ -63,7 +63,7 @@ class FOIALogEntry(models.Model):
     requester_organization = models.CharField(max_length=255, blank=True)
     subject = models.TextField()
     exemptions = models.CharField(max_length=255, blank=True)
-    date_requested = models.DateField(blank=True, null=True)
+    date_requested = models.DateField(blank=True, null=True, db_index=True)
     date_completed = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=12, choices=STATUS, blank=True)
     request_url = models.URLField(max_length=255, blank=True)

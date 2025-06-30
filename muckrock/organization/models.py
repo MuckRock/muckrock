@@ -76,7 +76,7 @@ class Organization(models.Model):
         to="self",
         on_delete=models.PROTECT,
         related_name="+",
-        help_text="The agency this agency was merged in to",
+        help_text="The organization this organization was merged in to",
         blank=True,
         null=True,
     )

@@ -154,6 +154,8 @@ def flag(request, foia):
         messages.success(request, "Problem succesfully reported")
         if request.user.is_authenticated:
             new_action(request.user, "flagged", target=foia)
+    else:
+        messages.error(request, f"Error: {form.errors}")
 
     return _get_redirect(request, foia)
 
