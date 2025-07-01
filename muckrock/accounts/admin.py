@@ -49,15 +49,35 @@ class StatisticsAdmin(VersionAdmin):
 
     def export_statistics_as_csv(self, request, queryset):
         """Export selected Statistics records to CSV."""
+
+        excluded_fields = {
+            "users_today",  # exclude the ManyToManyField
+            "stale_agencies",
+            "total_deferred_generic_tasks",
+            "total_generic_tasks",
+            "total_deferred_tasks",
+            "total_deferred_snailmail_tasks",
+            "total_deferred_orphan_tasks",
+            "total_deferred_rejected_tasks",
+            "total_staleagency_tasks",
+            "total_unresolved_staleagency_tasks",
+            "total_deferred_staleagency_tasks",
+            "total_deferred_flagged_tasks",
+            "total_deferred_newagency_tasks",
+            "total_deferred_response_tasks",
+            "total_deferred_faxfail_tasks",
+            "total_deferred_payment_tasks",
+            "total_crowdfundpayment_tasks",
+            "total_unresolved_crowdfundpayment_tasks",
+            "total_deferred_crowdfundpayment_tasks",
+            "total_deferred_reviewagency_tasks",
+            "total_deferred_portal_tasks",
+        }
+
         field_names = [
-            "date",
-            "total_requests",
-            "total_requests_success",
-            "total_requests_denied",
-            "total_pages",
-            "total_users",
-            "total_agencies",
-            "total_fees",
+            field.name
+            for field in Statistics._meta.get_fields()
+            if not field.auto_created and field.name not in excluded_fields
         ]
 
         response = HttpResponse(content_type="text/csv")
@@ -67,18 +87,14 @@ class StatisticsAdmin(VersionAdmin):
         writer.writerow(field_names)
 
         for obj in queryset:
-            writer.writerow(
-                [
-                    obj.date.isoformat() if obj.date else "",
-                    obj.total_requests,
-                    obj.total_requests_success,
-                    obj.total_requests_denied,
-                    obj.total_pages,
-                    obj.total_users,
-                    obj.total_agencies,
-                    obj.total_fees,
-                ]
-            )
+            row = []
+            for field_name in field_names:
+                value = getattr(obj, field_name)
+                if field_name == "date":
+                    row.append(value.isoformat() if value else "")
+                else:
+                    row.append(value)
+            writer.writerow(row)
 
         return response
 
