@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% load humanize %}
+{% load static %}
+{% load foia_tags %}
+{% load news_tags %}
+{% load tags %}
+{% load cache %}
+
+{% block content %}
+<div class="homepage-2025">
+	<div class="homepage-section" id="about-us">
+    <div class="text-column">
+      <h2>We give you the tools to keep government transparent and accountable</h2>
+      <p>MuckRock Foundation is a nonprofit, collaborative news site that brings together journalists, researchers and the public to request, analyze and share government information, making politics more transparent and democracy more informed.</p>
+      <ul class="actions-list">
+        <li><a href="" class="ghost button red">Make a donation</a></li>
+        <li><a href="" class="ghost button primary">Shop merch</a></li>
+        <li><a href="" class="ghost button primary">Subscribe for updates</a></li>
+        <li><a href="" class="ghost button primary">Learn more about our mission and impact</a></li>
+      </ul>
+    </div>
+	</div>
+  <div class="tab-container" id="products">
+    <ul class="tabs">
+      <li class="tab active" data-tab="muckrock-requests">MuckRock Requests</li>
+      <li class="tab" data-tab="documentcloud">DocumentCloud</li>
+      <li class="tab" data-tab="data-liberation-project">The Data Liberation Project</li>
+    </ul>
+    <div class="billboard-viewer">
+      <div class="tab-content billboard active" id="muckrock-requests">
+        <h3>File, track, and share public records requests</h3>
+        <a href="{% url 'foia-create' %}" class="primary button">File a request</a>
+      </div>
+      <div class="tab-content billboard" id="documentcloud">
+        <h3>Upload, analyze, share and embed primary source documents</h3>
+        <a href="{% url 'foia-create' %}" class="primary button">Upload a document</a>
+      </div>
+      <div class="tab-content billboard" id="data-liberation-project">
+        <h3> An initiative to identify, obtain, reformat, clean, document, publish, and disseminate government datasets of public interest</h3>
+        <a href="https://www.data-liberation-project.org/get-involved/" class="primary button">Get involved</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

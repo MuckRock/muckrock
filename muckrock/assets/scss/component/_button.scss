@@ -109,3 +109,31 @@ $shadow-active: 0px;
 .button.w100 {
     width: 100%;
 }
+
+.ghost.button {
+    background: transparent;
+    color: currentColor;
+    border: none;
+    font-weight: $bold;
+    text-shadow: none;
+    box-shadow: none;
+    &:link, &:hover, &:active, &:visited {
+        box-shadow: none;
+        @include transform(none);
+    }
+    &.red, &.failure {
+        color: $color-red;
+        &:hover {
+            color: darken($color-red, 10%);
+            background-color: lighten($color-red, 30%);
+        }
+    }
+    &.blue, &.primary {
+        color: $color-blue;
+        &:hover {
+            color: darken($color-blue, 10%);
+            background-color: lighten($color-blue, 30%);
+        }
+        
+    }
+}

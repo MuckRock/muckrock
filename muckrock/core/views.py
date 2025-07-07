@@ -441,7 +441,7 @@ def homepage(request):
     context = {}
     for name, value in Homepage().get_cached_values():
         context[name] = value()
-    return render(request, "homepage.html", context)
+    return render(request, "homepage-2025.html", context)
 
 
 @user_passes_test(lambda u: u.is_staff)
