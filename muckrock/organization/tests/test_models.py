@@ -190,7 +190,8 @@ class TestSquareletUpdateData(TestCase):
     def test_upgrade_subscription(self):
         """Upgrade a subscription"""
         ent = EntitlementFactory(
-            name="Plus", resources=dict(minimum_users=5, base_requests=100)
+            name="Plus",
+            resources={"minimum_users": 5, "base_requests": 100},
         )
         organization = OrganizationFactory(
             entitlement=OrganizationEntitlementFactory(),
@@ -218,7 +219,8 @@ class TestSquareletUpdateData(TestCase):
         # Downgrades only happen at monthly restore
         ent = OrganizationEntitlementFactory()
         plus = EntitlementFactory(
-            name="Plus", resources=dict(minimum_users=5, base_requests=100)
+            name="Plus",
+            resources={"minimum_users": 5, "base_requests": 100},
         )
         organization = OrganizationFactory(
             entitlement=plus,

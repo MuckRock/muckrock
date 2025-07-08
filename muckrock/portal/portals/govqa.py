@@ -6,7 +6,6 @@ Automate some parts of GovQA portal handling
 from django.conf import settings
 
 # Standard Library
-import cgi
 import logging
 import sys
 
@@ -18,6 +17,7 @@ from govqa.base import GovQA
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
+from muckrock.core.utils import parse_header
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.file import get_path
 from muckrock.portal.portals.manual import ManualPortal
@@ -183,7 +183,7 @@ class GovQAPortal(ManualPortal):
             upload_attachments = self._get_attachments(request, comm)
 
             for attachment in upload_attachments:
-                value, params = cgi.parse_header(attachment["content-disposition"])
+                value, params = parse_header(attachment["content-disposition"])
                 if value == "attachment" and "filename" in params:
                     file_name = params["filename"]
                 else:
@@ -228,7 +228,7 @@ class GovQAPortal(ManualPortal):
             )
 
             # stream the download to not overflow RAM on large files
-            with requests.get(url, stream=True) as resp:
+            with requests.get(url, stream=True, timeout=10) as resp:
                 if resp.status_code != 200:
                     logger.warning(
                         "[GOVQA] Communication: %d Download failed: %s %s Status: %d "

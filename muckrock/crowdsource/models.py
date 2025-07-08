@@ -162,10 +162,10 @@ class Crowdsource(models.Model):
                 for choice_order, value in enumerate(field_data["values"]):
                     field.choices.update_or_create(
                         choice=cleaner.clean(value["label"])[:255],
-                        defaults=dict(
-                            value=cleaner.clean(value["value"])[:255],
-                            order=choice_order,
-                        ),
+                        defaults={
+                            "value": cleaner.clean(value["value"])[:255],
+                            "order": choice_order,
+                        },
                     )
         # any field which has no order after all fields are
         # re-created has been deleted
