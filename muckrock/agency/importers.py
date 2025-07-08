@@ -77,10 +77,10 @@ def import_schools(file_name):
                     slug=slugify(row[DISTRICT]),
                     jurisdiction=county,
                     status="approved",
-                    defaults=dict(
-                        contact_first_name=row[FIRST_NAME],
-                        contact_last_name=row[LAST_NAME],
-                    ),
+                    defaults={
+                        "contact_first_name": row[FIRST_NAME],
+                        "contact_last_name": row[LAST_NAME],
+                    },
                 )
                 if not created:
                     print("agency already existed")

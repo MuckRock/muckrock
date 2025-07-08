@@ -231,7 +231,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         total_size = 0
         for attm_path in attachments[:3]:
             try:
-                res = requests.get(attm_path)
+                res = requests.get(attm_path, timeout=10)
             except requests.exceptions.RequestException:
                 raise forms.ValidationError(
                     "Error downloading attachment: {}".format(attm_path)

@@ -97,9 +97,10 @@ class OrphanTaskTests(TestCase):
         )
 
     def test_task_creates_successfully(self):
-        assert (
-            self.task
-        ), "Orphan tasks given reason and communication arguments should create successfully"
+        assert self.task, (
+            "Orphan tasks given reason and communication arguments should "
+            "create successfully"
+        )
 
     def test_move(self):
         """Should move the communication to the listed requests and create a
@@ -135,7 +136,8 @@ class OrphanTaskTests(TestCase):
         assert BlacklistDomain.objects.filter(domain="muckrock.com")
 
     def test_resolve_after_blacklisting(self):
-        """After blacklisting, other orphan tasks from the sender should be resolved."""
+        """After blacklisting, other orphan tasks from the sender
+        should be resolved."""
         other_task = OrphanTask.objects.create(
             reason="ib", communication=self.comm, address="Whatever Who Cares"
         )
@@ -207,7 +209,8 @@ class FlaggedTaskTests(TestCase):
     @mock.patch("muckrock.message.tasks.support.delay")
     @mock.patch("muckrock.task.tasks.create_ticket.delay", mock.Mock())
     def test_reply(self, mock_support):
-        """Given a message, a support notification should be sent to the task's user."""
+        """Given a message, a support notification should
+        be sent to the task's user."""
         flagged_task = FlaggedTaskFactory()
         reply = "Lorem ipsum"
         flagged_task.reply(reply)
@@ -289,9 +292,10 @@ class SnailMailTaskTests(TestCase):
         )
 
     def test_task_creates_successfully(self):
-        assert (
-            self.task
-        ), "Snail mail tasks should create successfully given a category and a communication"
+        assert self.task, (
+            "Snail mail tasks should create successfully given a category "
+            "and a communication"
+        )
 
     def test_set_status(self):
         new_status = "ack"
@@ -299,12 +303,14 @@ class SnailMailTaskTests(TestCase):
         assert (
             self.task.communication.status == new_status
         ), "Setting status should update status of associated communication"
-        assert (
-            self.task.communication.foia.status == new_status
-        ), "Setting status should update status of associated communication's foia request"
+        assert self.task.communication.foia.status == new_status, (
+            "Setting status should update status of associated "
+            "communication's foia request"
+        )
 
     def test_update_text(self):
-        """Snail mail tasks should be able to update the text of their communication."""
+        """Snail mail tasks should be able to update the
+        text of their communication."""
         comm = self.task.communication
         new_text = "test"
         self.task.update_text(new_text)
@@ -400,9 +406,10 @@ class ResponseTaskTests(TestCase):
 
     def test_set_status_to_ack(self):
         self.form.set_status("ack", True, [self.task.communication])
-        assert (
-            self.task.communication.foia.datetime_done is None
-        ), "The FOIA should not be set to done if the status does not indicate it is done."
+        assert self.task.communication.foia.datetime_done is None, (
+            "The FOIA should not be set to done if the status does not "
+            "indicate it is done."
+        )
         assert (
             self.task.communication.status == "ack"
         ), "The communication should be set to the proper status."

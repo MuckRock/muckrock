@@ -120,8 +120,8 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         assert last_comm.subject == subject
         assert last_comm.from_user == foia.agency.get_user()
         assert last_comm.to_user == foia.user
-        assert last_comm.response == True
-        assert last_comm.full_html == False
+        assert last_comm.response
+        assert not last_comm.full_html
         self.run_commit_hooks()
         assert last_comm.get_raw_email().raw_email == "Raw email"
         assert last_comm.responsetask_set.count() == 1
