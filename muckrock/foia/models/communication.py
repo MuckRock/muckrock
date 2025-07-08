@@ -540,7 +540,7 @@ class RawEmail(models.Model):
 
     def _get_body(self, msg, type_):
         """Get the decoded body for the given type from the message"""
-        body = msg.get_body(preferencelist=(type_))
+        body = msg.get_body(preferencelist=(type_,))
         if body:
             return body.get_content()
         return ""

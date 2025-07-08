@@ -249,9 +249,10 @@ class OrphanTaskViewTests(TestCase):
             self.url, {"move": likely_foia.pk, "reject": "true", "task": self.task.pk}
         )
         updated_comm_count = likely_foia.communications.all().count()
-        assert (
-            comm_count == updated_comm_count
-        ), "Rejecting an orphan with a likely FOIA should not move the communication to that FOIA"
+        assert comm_count == updated_comm_count, (
+            "Rejecting an orphan with a likely FOIA should not move the "
+            "communication to that FOIA"
+        )
 
     def test_reject_and_blacklist(self):
         self.client.post(
@@ -517,7 +518,7 @@ class NewAgencyTaskViewTests(TestCase):
         )
         updated_task = NewAgencyTask.objects.get(pk=self.task.pk)
         assert updated_task.agency.status == "rejected"
-        assert updated_task.resolved == True
+        assert updated_task.resolved
 
     @tag("slow")
     def _test_n_plus_one_query(self):
@@ -586,7 +587,7 @@ class ResponseTaskListViewTests(TestCase):
             comm_status == status_change
         ), "The status change should be saved to the communication."
         assert foia_status == status_change, "The status of the FOIA should be set."
-        assert self.task.resolved == True, "Setting the status should resolve the task"
+        assert self.task.resolved, "Setting the status should resolve the task"
 
     def test_post_set_code(self):
         """Setting the scan code should save it to the response and request, then
@@ -602,7 +603,7 @@ class ResponseTaskListViewTests(TestCase):
         assert task.communication.communication == CODES[code][2]
         assert task.communication.status == CODES[code][1]
         assert task.communication.foia.status == CODES[code][1]
-        assert task.resolved == True
+        assert task.resolved
         assert not task.communication.hidden
 
     def test_post_set_comm_status(self):
@@ -628,9 +629,7 @@ class ResponseTaskListViewTests(TestCase):
         assert (
             foia_status == existing_foia_status
         ), "The status of the FOIA should not be changed."
-        assert (
-            self.task.resolved == True
-        ), "Settings the status should resolve the task."
+        assert self.task.resolved, "Settings the status should resolve the task."
 
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""
