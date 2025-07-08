@@ -3,12 +3,14 @@ Utilities for handling incoming mail
 """
 
 # Standard Library
-import cgi
 import logging
 import re
 
 # Third Party
 import requests
+
+# MuckRock
+from muckrock.core.utils import parse_header
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +38,11 @@ def download_links(communication):
             link = downloader.preprocess(link)
             logger.info("[DL:%s] Trying to download %s", communication.pk, link)
             try:
-                response = requests.get(link)
+                response = requests.get(link, timeout=10)
                 response.raise_for_status()
             except requests.exceptions.RequestException as exc:
                 logger.info("[DL:%s] Error %s", communication.pk, exc)
-            _, params = cgi.parse_header(
-                response.headers.get("content-disposition", "")
-            )
+            _, params = parse_header(response.headers.get("content-disposition", ""))
             name = params.get("filename", "Untitled")
             logger.info("[DL:%s] Saving file %s", communication.pk, name)
             content = response.content

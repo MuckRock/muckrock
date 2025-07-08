@@ -1275,7 +1275,7 @@ def import_doccloud_file(file_pk):
 
     if document.access == "public":
         with ffile.ffile.open("wb") as out_file, requests.get(
-            document.pdf_url, stream=True
+            document.pdf_url, stream=True, timeout=10
         ) as response:
             response.raise_for_status()
             for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):

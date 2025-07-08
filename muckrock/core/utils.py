@@ -17,6 +17,7 @@ import string
 import sys
 import time
 import uuid
+from email.message import Message
 
 # Third Party
 import actstream
@@ -202,7 +203,13 @@ def get_squarelet_access_token():
                 data = {"grant_type": "client_credentials"}
                 headers = {"X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET}
                 logger.info(token_url)
-                resp = requests.post(token_url, data=data, auth=auth, headers=headers)
+                resp = requests.post(
+                    token_url,
+                    data=data,
+                    auth=auth,
+                    headers=headers,
+                    timeout=10,
+                )
                 resp.raise_for_status()
                 resp_json = resp.json()
                 access_token = resp_json["access_token"]
@@ -226,14 +233,14 @@ def _squarelet(method, path, **kwargs):
 
 def squarelet_post(path, data):
     """Make a post request to squarlet"""
-    return _squarelet(requests.post, path, data=data)
+    return _squarelet(requests.post, path, data=data, timeout=10)
 
 
 def squarelet_get(path, params=None):
     """Make a get request to squarlet"""
     if params is None:
         params = {}
-    return _squarelet(requests.get, path, params=params)
+    return _squarelet(requests.get, path, params=params, timeout=10)
 
 
 def _zoho(method, path, **kwargs):
@@ -305,3 +312,11 @@ def custom_preprocessing_hook(endpoints):
         if "api_v2" in path:
             filtered.append((path, path_regex, method, callback))
     return filtered
+
+
+def parse_header(header):
+    """Replacement for deprecated cgi parse_header"""
+    msg = Message()
+    msg["content-type"] = header
+    params = msg.get_params()
+    return (params[0][0], dict(params[1:]))
