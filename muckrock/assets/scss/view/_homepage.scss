@@ -185,6 +185,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     display: flex;
     align-items: flex-start;
     align-self: stretch;
+    justify-content: center;
     gap: 2rem 3rem;
     margin: 0;
     padding: 3rem 2rem; 
@@ -221,6 +222,8 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     flex: 1 0 0;
     align-self: stretch;
 
+    font-weight: 500;
+
     &.active {
         border: none;
         border-bottom: 2px solid var(--blue-3, #4294F0);
@@ -252,6 +255,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     flex-direction: column;
     align-items: flex-start;
     align-self: stretch;
+    margin: 0;
 }
 
 .billboard-viewer {
@@ -286,5 +290,233 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         font-weight: 600;
         line-height: 2rem; /* 133.333% */
     }
+
+    &-content {
+        display: flex;
+        padding: 2rem 0rem;
+        flex-direction: column;
+        align-items: center;
+        max-width: 48rem;
+        margin: 0 auto;
+    }
+    &-heading {
+        display: flex;
+        padding: 2rem 3rem;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    &-main {
+        display: flex;
+        padding: 0rem 1rem;
+        align-items: flex-start;
+        align-content: flex-start;
+        align-self: stretch;
+        flex-wrap: wrap;
+    }
+    &-actions {
+        display: flex;
+        min-width: 15rem;
+        padding: 1rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.625rem;
+        flex: 1 0 0;
+
+        & .button {
+            width: 100%;
+            display: block;
+            box-shadow: none;
+        }
+    }
+    &-stats {
+        display: flex;
+        height: 8.875rem;
+        min-width: 15rem;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: 1rem 0.5rem;
+        flex: 1 0 0;
+        flex-wrap: wrap;
+    }
+
+    &#muckrock-requests {
+        background: lighten($color-red, 40%);
+        border-bottom: 1px solid lighten($color-red-dark, 20%);
+    }
+    &#documentcloud {
+        background: lighten($color-blue, 40%);
+        border-bottom: 1px solid lighten($color-blue-dark, 20%);
+    }
+    &#data-liberation-project {
+        background: lighten($color-yellow, 40%);
+        border-bottom: 1px solid lighten($color-yellow-dark, 20%);
+    }
 }
 
+.homepage-2025 .account {
+    display: flex;
+    margin: 0;
+    padding: 1.5rem 2rem;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    align-self: stretch;
+
+    h3 {
+        margin: 0;
+        color: #000;
+        text-align: center;
+        font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+
+        /* Title */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-lg, 1.25rem);
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+    &-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.625rem;
+    }
+}
+
+.homepage-2025 .stat {
+    margin-bottom: 0;
+    display: flex;
+    min-width: 7.5rem;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1 0 0;
+
+    & .number {
+        color: #000;
+        text-align: center;
+        font-feature-settings: 'liga' off, 'clig' off;
+
+        /* Subtitle */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-lg, 1.25rem);
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+    & .label {
+        color: #000;
+        text-align: center;
+
+        /* Small Label */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-sm, 0.875rem);
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+}
+
+.homepage-2025 #expertise {
+    flex-direction: column;
+
+    & header {
+        display: flex;
+        margin: 0;
+        padding: 1.5rem 2rem;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        align-self: stretch;
+    }
+    & h3 {
+        color: #000;
+        text-align: center;
+        font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: 1.75rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 2rem; /* 114.286% */
+    }
+    & .expertise-grid {
+        display: grid;
+        min-height: 40rem;
+        max-width: 72rem;
+        margin: 0 auto;
+        height: auto;
+        padding: 2rem;
+        row-gap: 3rem;
+        column-gap: 3rem;
+        align-self: stretch;
+
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, auto);
+        @media (min-width: 48rem) {
+            grid-template-columns: repeat(2, minmax(20rem, 1fr));
+            grid-template-rows: repeat(2, auto);
+        }
+    }
+    & .expertise-item {
+        display: flex;
+        min-width: 20rem;
+        max-width: 32rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        flex: 1 0 0;
+        align-self: stretch;
+
+        &-title {
+            margin: 0;
+            color: #000;
+            font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+
+            /* Title */
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: var(--font-xl, 1.5rem);
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+        }
+
+        &-subtitle {
+            margin: 0;
+            color: #000;
+            font-feature-settings: 'liga' off, 'clig' off;
+
+            /* Subtitle */
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: var(--font-lg, 1.25rem);
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
+
+        &-description {
+            margin: 0;
+            color: #000;
+            font-feature-settings: 'liga' off, 'clig' off;
+
+            /* Body */
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: var(--font-md, 1rem);
+            font-style: normal;
+            font-weight: 400;
+            line-height: var(--font-xl, 1.5rem); /* 150% */
+        }
+        &-links {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+    }
+}

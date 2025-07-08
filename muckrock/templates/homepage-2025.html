@@ -14,31 +14,158 @@
       <h2>We give you the tools to keep government transparent and accountable</h2>
       <p>MuckRock Foundation is a nonprofit, collaborative news site that brings together journalists, researchers and the public to request, analyze and share government information, making politics more transparent and democracy more informed.</p>
       <ul class="actions-list">
-        <li><a href="" class="ghost button red">Make a donation</a></li>
+        <li><a href="" class="ghost button red">Donate</a></li>
         <li><a href="" class="ghost button primary">Shop merch</a></li>
-        <li><a href="" class="ghost button primary">Subscribe for updates</a></li>
+        <li><a href="" class="ghost button primary">Subscribe to the newsletter</a></li>
         <li><a href="" class="ghost button primary">Learn more about our mission and impact</a></li>
       </ul>
     </div>
 	</div>
   <div class="tab-container" id="products">
+    {% if not user.is_authenticated %}
+    <div class="account" id="muckrock-account">
+      <h3>Access tools from MuckRock and our partners with a single account</h3>
+      <div class="account-actions">
+        <a href="{% url 'accounts-signup' %}" class="primary button">Sign up</a>
+        <a href="{% url 'acct-login' %}" class="primary ghost button">Sign in</a>
+      </div>
+    </div>
+    {% endif %}
     <ul class="tabs">
       <li class="tab active" data-tab="muckrock-requests">MuckRock Requests</li>
       <li class="tab" data-tab="documentcloud">DocumentCloud</li>
       <li class="tab" data-tab="data-liberation-project">The Data Liberation Project</li>
     </ul>
     <div class="billboard-viewer">
-      <div class="tab-content billboard active" id="muckrock-requests">
-        <h3>File, track, and share public records requests</h3>
-        <a href="{% url 'foia-create' %}" class="primary button">File a request</a>
+      <div class="tab-content billboard active" data-tab="muckrock-requests" id="muckrock-requests">
+        <div class="billboard-content">
+          <div class="billboard-heading">
+            <h3>File, track, and share public records requests</h3>
+          </div>
+          <div class="billboard-main">
+            <div class="billboard-actions">
+              <a href="{% url 'foia-create' %}" class="primary button">File a request</a>
+              <a href="" class="primary ghost button">Search requests</a>
+              <a href="" class="primary ghost button">Learn how it works</a>
+            </div>
+            <div class="billboard-stats">
+              <div class="stat">
+                <span class="number">{{ stats.request_count|intcomma }}</span>
+                <span class="label">filed requests</span>
+              </div>
+              <div class="stat">
+                <span class="number">{{ stats.agency_count|intcomma }}</span>
+                <span class="label">agencies</span>
+              </div>
+              <div class="stat">
+                <span class="number">{{ stats.completed_count|intcomma }}</span>
+                <span class="label">fulfilled requests</span>
+              </div>
+              <div class="stat">
+                <span class="number">{{ stats.page_count|intcomma }}</span>
+                <span class="label">pages released</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="tab-content billboard" id="documentcloud">
-        <h3>Upload, analyze, share and embed primary source documents</h3>
-        <a href="{% url 'foia-create' %}" class="primary button">Upload a document</a>
+      <div class="tab-content billboard" data-tab="documentcloud" id="documentcloud">
+        <div class="billboard-content">
+          <div class="billboard-heading">
+            <h3>Upload, analyze, share and embed primary source documents</h3>
+          </div>
+          <div class="billboard-main">
+            <div class="billboard-actions">
+              <a href="" class="primary button">Upload a document</a>
+              <a href="" class="primary ghost button">Search public documents</a>
+              <a href="" class="primary ghost button">Learn how it works</a>
+            </div>
+            <div class="billboard-stats">
+              <div class="stat">
+                <span class="number">{{ 6362593|intcomma }}</span>
+                <span class="label">public documents</span>
+              </div>
+              <div class="stat">
+                <span class="number">{{ 108791198|intcomma }}</span>
+                <span class="label">public pages</span>
+              </div>
+              <div class="stat">
+                <span class="number">{{ 530102|intcomma }}</span>
+                <span class="label">public notes</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="tab-content billboard" id="data-liberation-project">
-        <h3> An initiative to identify, obtain, reformat, clean, document, publish, and disseminate government datasets of public interest</h3>
-        <a href="https://www.data-liberation-project.org/get-involved/" class="primary button">Get involved</a>
+      <div class="tab-content billboard" data-tab="data-liberation-project" id="data-liberation-project">
+        <div class="billboard-content">
+          <div class="billboard-heading">
+            <h3>An initiative to identify, obtain, reformat, clean, document, publish, and disseminate government datasets of public interest</h3>
+          </div>
+          <div class="billboard-main">
+            <div class="billboard-actions">
+              <a href="" class="primary button">Get involved</a>
+              <a href="" class="primary ghost button">Search datasets</a>
+              <a href="" class="primary ghost button">Learn how it works</a>
+            </div>
+            <div class="billboard-stats">
+              <div class="stat">
+                <span class="number">{{ 1019|intcomma }}</span>
+                <span class="label">participants</span>
+              </div>
+              <div class="stat">
+                <span class="number">140 GB</span>
+                <span class="label">data liberated</span>
+              </div>
+              <div class="stat">
+                <span class="number">44</span>
+                <span class="label">total datasets</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="homepage-section" id="expertise">
+    <header>
+      <h3>Expert knowledge and community participation</h3>
+    </header>
+    <div class="expertise-grid">
+      <div class="expertise-item">
+        <h4 class="expertise-item-title">FOIAFriday</h4>
+        <p class="expertise-item-subtitle">A community podcast about all things FOIA and public records</p>
+        <p class="expertise-item-description">We gather once a month to share updates on public records laws and rulings, techniques, tricks and insider tips from fellow requesters.</p>
+        <ul class="expertise-item-links">
+          <li><a href="" class="primary ghost button">Watch the latest episode</a></li>
+          <li><a href="" class="primary ghost button">Join our next call</a></li>
+        </ul>
+      </div>
+      <div class="expertise-item">
+        <h4 class="expertise-item-title">Consulting &amp; research</h4>
+        <p class="expertise-item-subtitle">On-demand access to experts in public record research methods</p>
+        <p class="expertise-item-description">We've partnered with Sunlight Research Center to offer consulting and expertise to newsrooms and businesses.</p>
+        <ul class="expertise-item-links">
+          <li><a href="" class="primary ghost button">Contact us to learn more</a></li>
+        </ul>
+      </div>
+      <div class="expertise-item">
+        <h4 class="expertise-item-title">Workshops &amp; trainings</h4>
+        <p class="expertise-item-subtitle">Get live instruction in transparency</p>
+        <p class="expertise-item-description">Learn how to use MuckRock Requests, DocumentCloud, and other tools to investigate government.</p>
+        <ul class="expertise-item-links">
+          <li><a href="" class="primary ghost button">View workshop calendar</a></li>
+          <li><a href="" class="primary ghost button">Schedule a training</a></li>
+        </ul>
+      </div>
+      <div class="expertise-item">
+        <h4 class="expertise-item-title">Guides &amp; case studies</h4>
+        <p class="expertise-item-subtitle">Learn about our research techniques and technologies</p>
+        <p class="expertise-item-description">Learn how to use MuckRock Requests, DocumentCloud, and other tools to investigate government.</p>
+        <ul class="expertise-item-links">
+          <li><a href="" class="primary ghost button">FOIA 101: Tips and Tricks to Make You a Transparency Master</a></li>
+          <li><a href="" class="primary ghost button">50 States of FOI: Your Guide to State Records Laws</a></li>
+        </ul>
       </div>
     </div>
   </div>
