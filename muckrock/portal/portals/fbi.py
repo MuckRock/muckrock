@@ -62,7 +62,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         comm = FOIACommunication.objects.get(pk=comm_pk)
         p_document_link = re.compile(r"\* \[(?P<name>[^\]]+)\]\((?P<url>.*)\)")
         for name, url in p_document_link.findall(comm.communication):
-            reply = requests.get(url)
+            reply = requests.get(url, timeout=10)
             if reply.status_code != 200:
                 ManualPortal.receive_msg(
                     self, comm, reason="Error downloading file: {}".format(name)
