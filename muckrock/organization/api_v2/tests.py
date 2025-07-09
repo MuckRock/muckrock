@@ -126,4 +126,4 @@ class OrganizationViewSetTests(TestCase):
         response = self.client.get(
             reverse("api2-organizations-detail", args=[self.organization1.uuid])
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
