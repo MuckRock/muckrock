@@ -225,8 +225,8 @@ def project_manager(context, mr_object):
 def newsletter(context, list_id=None, label=None, cta=None):
     """Template tag to insert a newsletter signup form."""
     list_id = settings.MAILCHIMP_LIST_DEFAULT if list_id is None else list_id
-    label = "Newsletter" if label is None else label
-    cta = "Want the latest investigative and FOIA news?" if cta is None else cta
+    label = "For the Record" if label is None else label
+    cta = "Keep up on new releases, projects and reporting with MuckRock's weekly newsletter" if cta is None else cta
     is_default = list_id == settings.MAILCHIMP_LIST_DEFAULT
     request = context["request"]
     initial_data = {"list": list_id}

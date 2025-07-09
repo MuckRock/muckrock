@@ -142,10 +142,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 }
 */
 
-.newsletter-widget {
-    margin-bottom: $vr;
-}
-
 .homepage {
     .articles {
         padding-left: $vr/2;
@@ -519,4 +515,9 @@ If the browser support multiplying backgrounds, use that instead of the banner b
             align-items: flex-start;
         }
     }
+}
+
+.homepage-2025 .newsletter-widget {
+    max-width: 72rem;
+    margin: 0 auto;
 }

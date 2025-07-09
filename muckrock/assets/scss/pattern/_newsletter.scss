@@ -1,22 +1,101 @@
 .newsletter-widget {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
-    margin-bottom: 0;
-    background: $color-blue-light;
-    color: $color-blue-dark;
-    padding: $vr/2;
+    display: flex;
+    padding: 3rem 2rem;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    gap: 2rem;
+    align-self: stretch;
+    flex-wrap: wrap;
 
-    .call-to-action, .oneline-form {
-        @include flex(1 1 20em);
-        margin-bottom: 0;
+    .call-to-action {
+        display: flex;
+        min-width: 20rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        flex: 1 0 0;
+        margin: 0;
     }
 
-    .call-to-action p {
-        margin-bottom: 0;
+    .title {
+        margin: 0;
+        font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+
+        /* Title */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-xl, 1.5rem);
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
     }
 
-    @include media($medium-bp){
-        padding: $vr/2 $vr;
+    .subtitle {
+        margin: 0;
+        font-feature-settings: 'liga' off, 'clig' off;
+
+        /* Subtitle */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-lg, 1.25rem);
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+
+    .oneline-form {
+        display: flex;
+        min-width: 20rem;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 0.625rem;
+        flex: 1 0 0;
+        margin: 0;
+    }
+
+    .primary.button {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 0;
+        box-shadow: none;
+    }
+
+    label {
+        font-feature-settings: 'ss04' on;
+
+        /* Label */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-md, 1rem);
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+
+    .email-field {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        align-self: stretch;
+        margin: 0;
+    }
+
+    .email-field input {
+        align-self: stretch;
+        flex: 1 0 0;
+    }
+
+    .help-text {
+        opacity: .7;
+        /* Caption */
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-size: var(--font-xs, 0.75rem);
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        a {
+            color: $color-blue;
+        }
     }
 }
