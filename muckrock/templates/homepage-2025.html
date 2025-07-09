@@ -7,6 +7,104 @@
 {% load tags %}
 {% load cache %}
 
+{% block scripts %}
+<script>
+  function initializeTabSwitcher() {
+      const tabs = document.querySelectorAll('.tab');
+      const billboards = document.querySelectorAll('.billboard');
+      let isUserScrolling = false;
+      
+      function updateActiveTab(targetTab) {
+          // Remove active class from all tabs
+          tabs.forEach(t => t.classList.remove('active'));
+          
+          // Remove active class from all billboards
+          billboards.forEach(b => b.classList.remove('active'));
+          
+          // Add active class to target tab
+          const targetTabElement = document.querySelector(`[data-tab="${targetTab}"]`);
+          if (targetTabElement) {
+              targetTabElement.classList.add('active');
+          }
+          
+          // Add active class to corresponding billboard
+          const targetBillboard = document.getElementById(targetTab);
+          if (targetBillboard) {
+              targetBillboard.classList.add('active');
+          }
+      }
+      
+      function switchToTab(targetTab) {
+          updateActiveTab(targetTab);
+          
+          // Scroll the billboard into view
+          const targetBillboard = document.getElementById(targetTab);
+          if (targetBillboard) {
+              targetBillboard.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'nearest'
+              });
+          }
+      }
+      
+      // Set up Intersection Observer to detect visible billboards
+      function initializeScrollSync() {
+          const observerOptions = {
+              root: null,
+                rootMargin: '0px 0px 0px -20%', // Trigger when billboard is 20% from the left edge
+              threshold: 0.1
+          };
+          
+          const observer = new IntersectionObserver((entries) => {
+              if (isUserScrolling) return; // Skip updates during programmatic scrolling
+              
+              entries.forEach(entry => {
+                  if (entry.isIntersecting) {
+                      const billboardId = entry.target.id;
+                      updateActiveTab(billboardId);
+                  }
+              });
+          }, observerOptions);
+          
+          // Observe all billboards
+          billboards.forEach(billboard => {
+              if (billboard.id) {
+                  observer.observe(billboard);
+              }
+          });
+      }
+      
+      // Attach click handlers to tabs
+      tabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+              const targetTab = this.getAttribute('data-tab');
+              
+              // Set flag to prevent scroll sync during programmatic scrolling
+              isUserScrolling = true;
+              switchToTab(targetTab);
+              
+              // Reset flag after scroll animation completes
+              setTimeout(() => {
+                  isUserScrolling = false;
+              }, 800); // Slightly longer than typical smooth scroll duration
+          });
+      });
+      
+      // Initialize scroll synchronization
+      initializeScrollSync();
+      
+      // Return API for external use
+      return {
+          switchToTab: switchToTab
+      };
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      initializeTabSwitcher();
+  });
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="homepage-2025">
 	<div class="homepage-section" id="about-us">
