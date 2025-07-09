@@ -9,6 +9,7 @@ from muckrock.agency.api_v2.serializers import AgencySerializer
 from muckrock.agency.models import Agency
 from muckrock.core.views import AuthenticatedAPIMixin
 
+
 # pylint: disable=too-few-public-methods
 class AgencyFilter(django_filters.FilterSet):
     """API Filter for Agencies"""
@@ -36,7 +37,7 @@ class AgencyViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     filter_backends = [
         django_filters.rest_framework.DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter
+        filters.OrderingFilter,
     ]
     ordering_fields = ["name", "status"]
     search_fields = [
@@ -51,4 +52,3 @@ class AgencyViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
         if not self.request.user.is_staff:
             qs = qs.filter(status="approved")
         return qs
-

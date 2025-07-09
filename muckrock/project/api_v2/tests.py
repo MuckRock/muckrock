@@ -1,9 +1,10 @@
 # Django
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory, UserFactory
+
 
 class TestProjectViewSet(TestCase):
     def setUp(self):

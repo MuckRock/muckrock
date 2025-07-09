@@ -45,7 +45,9 @@ class JurisdictionViewSetTests(TestCase):
 
         # Access the response data
         response_data = response.json()
-        jurisdiction_names = [jurisdiction["name"] for jurisdiction in response_data["results"]]
+        jurisdiction_names = [
+            jurisdiction["name"] for jurisdiction in response_data["results"]
+        ]
 
         for name in [
             "Springfield",
@@ -64,7 +66,9 @@ class JurisdictionViewSetTests(TestCase):
 
         # Access the response data
         response_data = response.json()
-        jurisdiction_names = [jurisdiction["name"] for jurisdiction in response_data["results"]]
+        jurisdiction_names = [
+            jurisdiction["name"] for jurisdiction in response_data["results"]
+        ]
 
         # Check that both jurisdictions are present in the response
         self.assertIn("Springfield", jurisdiction_names)
@@ -96,7 +100,9 @@ class JurisdictionViewSetTests(TestCase):
 
         # Access the response data
         response_data = response.json()
-        jurisdiction_levels = [jurisdiction["level"] for jurisdiction in response_data["results"]]
+        jurisdiction_levels = [
+            jurisdiction["level"] for jurisdiction in response_data["results"]
+        ]
 
         # Check that the expected jurisdiction is present
         self.assertIn("s", jurisdiction_levels)
