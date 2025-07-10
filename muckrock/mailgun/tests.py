@@ -18,10 +18,12 @@ from datetime import date, datetime
 from io import StringIO
 
 # Third Party
+import boto3
 import pytz
 import requests_mock
 from freezegun import freeze_time
 from mock import Mock, patch
+from moto import mock_aws
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
@@ -92,10 +94,15 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         mail.outbox = []
 
     # patching asyncio.run to not run the classification on actual LLM
+    @mock_aws
     @patch("asyncio.run", Mock())
     @requests_mock.Mocker()
     def test_normal(self, mock_requests):
         """Test a normal succesful response"""
+
+        s3 = boto3.client("s3")
+        s3.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
         url = "https://www.example.com/raw_email/"
         mock_requests.get(
             settings.MAILGUN_API_URL + "/events",
