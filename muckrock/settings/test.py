@@ -50,3 +50,7 @@ CLEAN_S3_ON_FOIA_DELETE = False
 
 # do not use external apis during test
 ZENDESK_TOKEN = "token"
+
+# don't use real AWS credentials for tests
+AWS_ACCESS_KEY_ID = "placeholder"
+AWS_SECRET_ACCESS_KEY = "placeholder"

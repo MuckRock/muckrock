@@ -20,6 +20,13 @@ bcrypt==3.1.6
     # via paramiko
 black==24.4.2
     # via -r pip/dev-requirements.in
+boto3==1.26.138
+    # via moto
+botocore==1.29.138
+    # via
+    #   boto3
+    #   moto
+    #   s3transfer
 build==0.10.0
     # via pip-tools
 certifi==2017.4.17
@@ -38,7 +45,9 @@ click==8.1.3
 coverage==4.2
     # via -r pip/dev-requirements.in
 cryptography==38.0.4
-    # via paramiko
+    # via
+    #   moto
+    #   paramiko
 decorator==4.3.0
     # via
     #   ipdb
@@ -86,7 +95,13 @@ isort==4.3.21
 jedi==0.17.1
     # via ipython
 jinja2==2.11.2
-    # via django-silk
+    # via
+    #   django-silk
+    #   moto
+jmespath==1.0.1
+    # via
+    #   boto3
+    #   botocore
 lazy-object-proxy==1.4.3
     # via astroid
 markupsafe==1.1.1
@@ -96,6 +111,8 @@ matplotlib-inline==0.1.6
 mccabe==0.6.1
     # via pylint
 mock==2.0.0
+    # via -r pip/dev-requirements.in
+moto[s3]==5.1.8
     # via -r pip/dev-requirements.in
 mypy-extensions==0.4.3
     # via black
@@ -133,6 +150,8 @@ pure-eval==0.2.2
     # via stack-data
 py==1.11.0
     # via pytest
+py-partiql-parser==0.6.1
+    # via moto
 pyasn1==0.4.5
     # via paramiko
 pycodestyle==2.6.0
@@ -166,17 +185,29 @@ pytest-sugar==1.0.0
     # via -r pip/dev-requirements.in
 python-dateutil==2.8.2
     # via
+    #   botocore
     #   django-silk
     #   fake-factory
     #   freezegun
+    #   moto
 pytz==2024.2
     # via django-silk
+pyyaml==6.0.2
+    # via
+    #   moto
+    #   responses
 requests==2.31.0
     # via
     #   django-silk
+    #   moto
     #   requests-mock
+    #   responses
 requests-mock==1.3.0
     # via -r pip/dev-requirements.in
+responses==0.25.7
+    # via moto
+s3transfer==0.6.2
+    # via boto3
 six==1.15.0
     # via
     #   asttokens
@@ -219,15 +250,22 @@ typing-extensions==4.12.2
     #   astroid
     #   black
 urllib3==1.26.16
-    # via requests
+    # via
+    #   botocore
+    #   requests
+    #   responses
 wcwidth==0.1.7
     # via prompt-toolkit
+werkzeug==2.1.2
+    # via moto
 wheel==0.38.4
     # via pip-tools
 whoosh==2.7.4
     # via -r pip/dev-requirements.in
 wrapt==1.17.2
     # via astroid
+xmltodict==0.14.2
+    # via moto
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

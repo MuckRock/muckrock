@@ -8,6 +8,7 @@ freezegun # Control time during testing
 ipdb # interactive debugger
 isort # sort imports
 mock # Used for mocking objects during test
+moto[s3] # Used for mocking S3
 pip-tools # Keeps the requirements up to date
 pylint-django # Pylint for Django integration
 pytest # Used for testing
