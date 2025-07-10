@@ -121,32 +121,32 @@
 	</div>
   <div class="tab-container" id="products">
     {% if not user.is_authenticated %}
-    <div class="account" id="muckrock-account">
+    <header class="account" id="muckrock-account">
       <h3>Access tools from MuckRock and our partners with a single account</h3>
       <div class="account-actions">
         <a href="{% url 'accounts-signup' %}" class="primary button">Sign up</a>
         <a href="{% url 'acct-login' %}" class="primary ghost button">Sign in</a>
       </div>
-    </div>
+    </header>
     {% endif %}
     <ul class="tabs">
       <li class="tab active" data-tab="muckrock-requests">MuckRock Requests</li>
       <li class="tab" data-tab="documentcloud">DocumentCloud</li>
       <li class="tab" data-tab="data-liberation-project">The Data Liberation Project</li>
     </ul>
-    <div class="billboard-viewer">
-      <div class="tab-content billboard active" data-tab="muckrock-requests" id="muckrock-requests">
-        <div class="billboard-content">
-          <div class="billboard-heading">
+    <div class="tab-viewer">
+      <div class="tab-content product active" data-tab="muckrock-requests" id="muckrock-requests">
+        <div class="product-content">
+          <div class="product-heading">
             <h3>File, track, and share public records requests</h3>
           </div>
-          <div class="billboard-main">
-            <div class="billboard-actions">
+          <div class="product-main">
+            <div class="product-actions">
               <a href="{% url 'foia-create' %}" class="primary button">File a request</a>
               <a href="" class="primary ghost button">Search requests</a>
               <a href="" class="primary ghost button">Learn how it works</a>
             </div>
-            <div class="billboard-stats">
+            <div class="product-stats">
               <div class="stat">
                 <span class="number">{{ stats.request_count|intcomma }}</span>
                 <span class="label">filed requests</span>
@@ -167,18 +167,18 @@
           </div>
         </div>
       </div>
-      <div class="tab-content billboard" data-tab="documentcloud" id="documentcloud">
-        <div class="billboard-content">
-          <div class="billboard-heading">
+      <div class="tab-content product" data-tab="documentcloud" id="documentcloud">
+        <div class="product-content">
+          <div class="product-heading">
             <h3>Upload, analyze, share and embed primary source documents</h3>
           </div>
-          <div class="billboard-main">
-            <div class="billboard-actions">
+          <div class="product-main">
+            <div class="product-actions">
               <a href="" class="primary button">Upload a document</a>
               <a href="" class="primary ghost button">Search public documents</a>
               <a href="" class="primary ghost button">Learn how it works</a>
             </div>
-            <div class="billboard-stats">
+            <div class="product-stats">
               <div class="stat">
                 <span class="number">{{ 6362593|intcomma }}</span>
                 <span class="label">public documents</span>
@@ -195,18 +195,18 @@
           </div>
         </div>
       </div>
-      <div class="tab-content billboard" data-tab="data-liberation-project" id="data-liberation-project">
-        <div class="billboard-content">
-          <div class="billboard-heading">
+      <div class="tab-content product" data-tab="data-liberation-project" id="data-liberation-project">
+        <div class="product-content">
+          <div class="product-heading">
             <h3>An initiative to identify, obtain, reformat, clean, document, publish, and disseminate government datasets of public interest</h3>
           </div>
-          <div class="billboard-main">
-            <div class="billboard-actions">
+          <div class="product-main">
+            <div class="product-actions">
               <a href="" class="primary button">Get involved</a>
               <a href="" class="primary ghost button">Search datasets</a>
               <a href="" class="primary ghost button">Learn how it works</a>
             </div>
-            <div class="billboard-stats">
+            <div class="product-stats">
               <div class="stat">
                 <span class="number">{{ 1019|intcomma }}</span>
                 <span class="label">participants</span>
@@ -226,6 +226,50 @@
     </div>
   </div>
   {% newsletter %}
+  <div class="tab-container" id="investigations">
+    <header>
+      <h3>Award-winning investigations and editorial collaborations</h3>
+    </header>
+    <ul class="tabs">
+      <li class="tab active" data-tab="air-we-breathe">The Air We Breathe</li>
+      <li class="tab" data-tab="behind-the-badge">Behind the Badge</li>
+      <li class="tab" data-tab="anti-trans-actions">Tracking Anti-Trans Federal Actions</li>
+    </ul>
+    <div class="tab-viewer">
+      <div class="tab-content project active" data-tab="air-we-breathe" id="air-we-breathe">
+        <div class="project-details">
+          <img src="" alt="The Air We Breathe project image" class="project-image" />
+          <h4 class="project-title">The Air We Breathe</h4>
+          <p class="project-subtitle">How industry is polluting Cicero’s air</p>
+          <p class="project-collaboration">In collaboration with <a href="" target="_blank">Cicero Independiente</a></p>
+          <p class="project-description">"The Air We Breathe" is a yearlong investigative project by two nonprofit newsrooms, the Cicero Independiente and MuckRock, who have been monitoring air pollution in Cicero. What we found: Cicero’s air quality is much worse than surrounding Cook County neighborhoods, and it’s worse than what the Environmental Protection Agency and pilot programs run by the city and Microsoft have routinely reported.</p>
+        </div>
+        <div class="project-articles">
+          <ul class="articles-list">
+            <li class="article-item">
+              <a href="{{ article.url }}" class="article-link">
+                <img src="" alt="{{ article.title }}" class="article-image" />
+                <h5 class="article-title">{{ article.title }}</h5>
+                <div class="article-meta">
+                  <p class="article-date">{{ article.date|date:"F j, Y" }}</p>
+                  <p class="article-author">{{ article.author }}</p>
+                </div>
+              </a>
+            </li>
+            <li class="article-item">
+              <a href="{{ article.url }}" class="article-link">
+                <img src="" alt="{{ article.title }}" class="article-image" />
+                <h5 class="article-title">{{ article.title }}</h5>
+                <div class="article-meta">
+                  <p class="article-date">{{ article.date|date:"F j, Y" }}</p>
+                  <p class="article-author">{{ article.author }}</p>
+                </div>
+              </a>
+            </li>
+          </ul>
+      </div>
+    </div>
+  </div>
   <div class="homepage-section" id="expertise">
     <header>
       <h3>Expert knowledge and community participation</h3>
