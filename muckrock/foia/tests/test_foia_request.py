@@ -3,6 +3,7 @@ Tests for the FOIA application
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.test import TestCase
@@ -14,10 +15,12 @@ import re
 from datetime import date, datetime, timedelta
 
 # Third Party
+import boto3
 import pytz
 import requests_mock
 from actstream.actions import follow
 from freezegun import freeze_time
+from moto import mock_aws
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, AppealAgencyFactory, UserFactory
@@ -140,9 +143,14 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
         foia.set_mail_id()
         assert mail_id == foia.mail_id
 
+    @mock_aws
     def test_foia_followup(self):
         """Make sure the follow up date is set correctly"""
         # pylint: disable=protected-access
+
+        s3 = boto3.client("s3")
+        s3.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
         foia = FOIARequestFactory(
             composer__datetime_submitted=timezone.now(),
             status="processed",
@@ -198,8 +206,12 @@ class TestFOIARequestUnit(RunCommitHooksMixin, TestCase):
                     "payment",
                 ]
 
+    @mock_aws
     def test_soft_delete(self):
         """Test the soft delete method"""
+        s3 = boto3.client("s3")
+        s3.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
         foia = FOIARequestFactory(status="processed")
         FOIAFileFactory.create_batch(size=3, comm__foia=foia)
         user = UserFactory(is_superuser=True)
@@ -387,10 +399,15 @@ class TestFOIARequestAppeal(RunCommitHooksMixin, TestCase):
         self.agency = AgencyFactory(status="approved", appeal_agency=self.appeal_agency)
         self.foia = FOIARequestFactory(agency=self.agency, status="rejected")
 
+    @mock_aws
     def test_appeal(self):
         """Sending an appeal to the agency should require the message for the appeal,
         which is then turned into a communication to the correct agency. In this case,
         the correct agency is the same one that received the message."""
+
+        s3 = boto3.client("s3")
+        s3.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
         assert self.foia.has_perm(
             self.foia.user, "appeal"
         ), "The request should be appealable."
@@ -414,8 +431,13 @@ class TestFOIARequestAppeal(RunCommitHooksMixin, TestCase):
         assert appeal_comm.to_user == self.agency.get_user()
         assert appeal_comm.emails.exists()
 
+    @mock_aws
     def test_appeal_jurisdiction(self):
         """Set the appeal agency via the jurisdiction"""
+
+        s3 = boto3.client("s3")
+        s3.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
         new_appeal_agency = AppealAgencyFactory()
         self.agency.jurisdiction.appeal_agency = new_appeal_agency
         self.agency.jurisdiction.save()
