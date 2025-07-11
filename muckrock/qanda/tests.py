@@ -71,5 +71,6 @@ class TestQandA(TestCase):
         """Get the question index view"""
         request = RequestFactory().get(reverse("question-index"))
         request = mock_middleware(request)
+        request.user = UserFactory()
         response = QuestionList.as_view()(request)
         nose.tools.eq_(response.status_code, 200)
