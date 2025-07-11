@@ -259,6 +259,25 @@ class MRListView(PaginationMixin, TitleMixin, ListView):
 
     template_name = "base_list.html"
 
+    def get(self, request, *args, **kwargs):
+        try:
+            page = int(request.GET.get("page", 1))
+        except ValueError:
+            page = 1
+        if request.user.is_anonymous and page > 10:
+            context = {
+                "error": "Please create an account and log in to see "
+                "results for pages beyond the first 10"
+            }
+            return render(
+                request,
+                "base_list.html",
+                context,
+                status=401,
+            )
+
+        return super().get(request, *args, **kwargs)
+
 
 class MROrderedListView(OrderedSortMixin, MRListView):
     """Adds ordering to a list view."""
