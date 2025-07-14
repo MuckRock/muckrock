@@ -393,7 +393,15 @@ class Homepage:
 
     def featured_projects(self):
         """Get the featured projects for the front page"""
-        return Project.objects.get_public().optimize().filter(featured=True)[:4]
+        return lambda: Project.objects.filter(id__in=[1168, 1177, 1179]) \
+            .prefetch_related(
+                Prefetch(
+                    'articles',
+                    queryset=Article.objects.get_published().prefetch_authors(),
+                    to_attr='items'
+                ),
+                'articles__authors'
+            )
 
     def completed_requests(self):
         """Get recently completed requests"""

@@ -5,42 +5,52 @@
 {% load foia_tags %}
 {% load news_tags %}
 {% load tags %}
+{% load thumbnail %}
 {% load cache %}
 
 {% block scripts %}
 <script>
   function initializeTabSwitcher() {
       const tabs = document.querySelectorAll('.tab');
-      const billboards = document.querySelectorAll('.billboard');
+      const contents = document.querySelectorAll('.tab-content');
       let isUserScrolling = false;
       
       function updateActiveTab(targetTab) {
           // Remove active class from all tabs
           tabs.forEach(t => t.classList.remove('active'));
           
-          // Remove active class from all billboards
-          billboards.forEach(b => b.classList.remove('active'));
+          // Remove active class from all contents
+          contents.forEach(c => c.classList.remove('active'));
           
           // Add active class to target tab
           const targetTabElement = document.querySelector(`[data-tab="${targetTab}"]`);
           if (targetTabElement) {
               targetTabElement.classList.add('active');
           }
+
+          // Scroll the active tab into view horizontally if needed
+          if (targetTabElement && typeof targetTabElement.scrollIntoView === 'function') {
+            targetTabElement.scrollIntoView({
+              behavior: 'smooth',
+              inline: 'center',
+              block: 'nearest'
+            });
+          }
           
-          // Add active class to corresponding billboard
-          const targetBillboard = document.getElementById(targetTab);
-          if (targetBillboard) {
-              targetBillboard.classList.add('active');
+          // Add active class to corresponding content
+          const targetContent = document.getElementById(targetTab);
+          if (targetContent) {
+              targetContent.classList.add('active');
           }
       }
       
       function switchToTab(targetTab) {
           updateActiveTab(targetTab);
-          
-          // Scroll the billboard into view
-          const targetBillboard = document.getElementById(targetTab);
-          if (targetBillboard) {
-              targetBillboard.scrollIntoView({
+
+          // Scroll the content into view
+          const targetContent = document.getElementById(targetTab);
+          if (targetContent) {
+              targetContent.scrollIntoView({
                   behavior: 'smooth',
                   block: 'nearest'
               });
@@ -60,16 +70,16 @@
               
               entries.forEach(entry => {
                   if (entry.isIntersecting) {
-                      const billboardId = entry.target.id;
-                      updateActiveTab(billboardId);
+                      const contentId = entry.target.id;
+                      updateActiveTab(contentId);
                   }
               });
           }, observerOptions);
           
-          // Observe all billboards
-          billboards.forEach(billboard => {
-              if (billboard.id) {
-                  observer.observe(billboard);
+          // Observe all contents
+          contents.forEach(content => {
+              if (content.id) {
+                  observer.observe(content);
               }
           });
       }
@@ -107,18 +117,18 @@
 
 {% block content %}
 <div class="homepage-2025">
-	<div class="homepage-section" id="about-us">
+  <div class="homepage-section" id="about-us">
     <div class="text-column">
       <h2>We give you the tools to keep government transparent and accountable</h2>
       <p>MuckRock Foundation is a nonprofit, collaborative news site that brings together journalists, researchers and the public to request, analyze and share government information, making politics more transparent and democracy more informed.</p>
       <ul class="actions-list">
-        <li><a href="" class="ghost button red">Donate</a></li>
-        <li><a href="" class="ghost button primary">Shop merch</a></li>
-        <li><a href="" class="ghost button primary">Subscribe to the newsletter</a></li>
+        <li><a href="" class="ghost button red">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
+        <li><a href="" class="ghost button primary">{% include 'lib/component/icon/merch.svg' %}Shop merch</a></li>
+        <li><a href="" class="ghost button primary">{% include 'lib/component/icon/mail.svg' %}Subscribe to the newsletter</a></li>
         <li><a href="" class="ghost button primary">Learn more about our mission and impact</a></li>
       </ul>
     </div>
-	</div>
+  </div>
   <div class="tab-container" id="products">
     {% if not user.is_authenticated %}
     <header class="account" id="muckrock-account">
@@ -130,21 +140,21 @@
     </header>
     {% endif %}
     <ul class="tabs">
-      <li class="tab active" data-tab="muckrock-requests">MuckRock Requests</li>
-      <li class="tab" data-tab="documentcloud">DocumentCloud</li>
-      <li class="tab" data-tab="data-liberation-project">The Data Liberation Project</li>
+      <li class="tab active" data-tab="muckrock-requests" title="MuckRock Requests">{% include 'lib/component/logo/muckrock-requests.svg' %}</li>
+      <li class="tab" data-tab="documentcloud" title="DocumentCloud">{% include 'lib/component/logo/documentcloud.svg' %}</li>
+      <li class="tab" data-tab="data-liberation-project" title="Data Liberation Project">{% include 'lib/component/logo/data-liberation-project.svg' %}</li>
     </ul>
     <div class="tab-viewer">
-      <div class="tab-content product active" data-tab="muckrock-requests" id="muckrock-requests">
+      <div class="tab-content product active" data-tab="muckrock-requests" id="muckrock-requests" style="background-image: url('{% static 'img/homepage/muckrock-requests.jpg' %}');">
         <div class="product-content">
           <div class="product-heading">
             <h3>File, track, and share public records requests</h3>
           </div>
           <div class="product-main">
             <div class="product-actions">
-              <a href="{% url 'foia-create' %}" class="primary button">File a request</a>
-              <a href="" class="primary ghost button">Search requests</a>
-              <a href="" class="primary ghost button">Learn how it works</a>
+              <a href="{% url 'foia-create' %}" class="primary button">{% include 'lib/component/icon/plus.svg' %}File a request</a>
+              <a href="" class="primary ghost button">{% include 'lib/component/icon/search-octicon.svg' %}Search requests</a>
+              <a href="" class="primary ghost button">{% include 'lib/component/icon/book.svg' %}Learn how it works</a>
             </div>
             <div class="product-stats">
               <div class="stat">
@@ -167,16 +177,16 @@
           </div>
         </div>
       </div>
-      <div class="tab-content product" data-tab="documentcloud" id="documentcloud">
+      <div class="tab-content product" data-tab="documentcloud" id="documentcloud" style="background-image: url('{% static 'img/homepage/documentcloud.jpg' %}');">
         <div class="product-content">
           <div class="product-heading">
             <h3>Upload, analyze, share and embed primary source documents</h3>
           </div>
           <div class="product-main">
             <div class="product-actions">
-              <a href="" class="primary button">Upload a document</a>
-              <a href="" class="primary ghost button">Search public documents</a>
-              <a href="" class="primary ghost button">Learn how it works</a>
+              <a href="" class="primary button">{% include 'lib/component/icon/plus.svg' %}Upload a document</a>
+              <a href="" class="primary ghost button">{% include 'lib/component/icon/search-octicon.svg' %}Search public documents</a>
+              <a href="" class="primary ghost button">{% include 'lib/component/icon/book.svg' %}Learn how it works</a>
             </div>
             <div class="product-stats">
               <div class="stat">
@@ -195,16 +205,16 @@
           </div>
         </div>
       </div>
-      <div class="tab-content product" data-tab="data-liberation-project" id="data-liberation-project">
+      <div class="tab-content product" data-tab="data-liberation-project" id="data-liberation-project" style="background-image: url('{% static 'img/homepage/data-liberation-project.jpg' %}');">
         <div class="product-content">
           <div class="product-heading">
             <h3>An initiative to identify, obtain, reformat, clean, document, publish, and disseminate government datasets of public interest</h3>
           </div>
           <div class="product-main">
             <div class="product-actions">
-              <a href="" class="primary button">Get involved</a>
-              <a href="" class="primary ghost button">Search datasets</a>
-              <a href="" class="primary ghost button">Learn how it works</a>
+              <a href="" class="primary button">{% include 'lib/component/icon/plus.svg' %}Get involved</a>
+              <a href="" class="primary ghost button">{% include 'lib/component/icon/search-octicon.svg' %}Search datasets</a>
+              <a href="" class="primary ghost button">{% include 'lib/component/icon/book.svg' %}Learn how it works</a>
             </div>
             <div class="product-stats">
               <div class="stat">
@@ -231,43 +241,41 @@
       <h3>Award-winning investigations and editorial collaborations</h3>
     </header>
     <ul class="tabs">
-      <li class="tab active" data-tab="air-we-breathe">The Air We Breathe</li>
-      <li class="tab" data-tab="behind-the-badge">Behind the Badge</li>
-      <li class="tab" data-tab="anti-trans-actions">Tracking Anti-Trans Federal Actions</li>
+      {% for project in featured_projects %}
+      <li class="tab {% if forloop.first %}active{% endif %}" data-tab="{{project.slug}}">{{project.title}}</li>
+      {% endfor %}
     </ul>
     <div class="tab-viewer">
-      <div class="tab-content project active" data-tab="air-we-breathe" id="air-we-breathe">
-        <div class="project-details">
-          <img src="" alt="The Air We Breathe project image" class="project-image" />
-          <h4 class="project-title">The Air We Breathe</h4>
-          <p class="project-subtitle">How industry is polluting Cicero’s air</p>
-          <p class="project-collaboration">In collaboration with <a href="" target="_blank">Cicero Independiente</a></p>
-          <p class="project-description">"The Air We Breathe" is a yearlong investigative project by two nonprofit newsrooms, the Cicero Independiente and MuckRock, who have been monitoring air pollution in Cicero. What we found: Cicero’s air quality is much worse than surrounding Cook County neighborhoods, and it’s worse than what the Environmental Protection Agency and pilot programs run by the city and Microsoft have routinely reported.</p>
+      {% for project in featured_projects %}
+      <div class="tab-content project {% if forloop.first %}active{% endif %}" data-tab="{{project.slug}}" id="{{project.slug}}">
+        <div class="project-container">
+          <div class="project-details">
+            <a href="{{project.get_absolute_url}}"><img src="{% thumbnail project.image 1200x600 crop %}" alt="{{ project.name }} project image" class="project-image" /></a>
+            <h4 class="project-title"><a href="{{project.get_absolute_url}}">{{ project.title }}<span class="arrow">&nbsp;&rarr;</span></a></h4>
+            <p class="project-summary">{{ project.summary }}</p>
+          </div>
+          <div class="project-articles">
+            <ul class="articles-list">
+              {% for article in project.articles.all|slice:4 %}
+              <li class="article-item">
+                <a href="{{ article.get_absolute_url }}" class="article-link">
+                  <div class="article-text">
+                    <h5 class="article-title">{{ article.title }}</h5>
+                    <div class="article-meta">
+                      <p class="article-date">{{ article.pub_date|date:"F j, Y" }}</p>
+                      {% if article.authors.all %}
+                      <p class="article-author">by {% for author in article.authors.all %}{{ author.profile.full_name }}{% if forloop.revcounter == 2 %} and {% elif not forloop.last %}, {% endif %}{% endfor %}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
-        <div class="project-articles">
-          <ul class="articles-list">
-            <li class="article-item">
-              <a href="{{ article.url }}" class="article-link">
-                <img src="" alt="{{ article.title }}" class="article-image" />
-                <h5 class="article-title">{{ article.title }}</h5>
-                <div class="article-meta">
-                  <p class="article-date">{{ article.date|date:"F j, Y" }}</p>
-                  <p class="article-author">{{ article.author }}</p>
-                </div>
-              </a>
-            </li>
-            <li class="article-item">
-              <a href="{{ article.url }}" class="article-link">
-                <img src="" alt="{{ article.title }}" class="article-image" />
-                <h5 class="article-title">{{ article.title }}</h5>
-                <div class="article-meta">
-                  <p class="article-date">{{ article.date|date:"F j, Y" }}</p>
-                  <p class="article-author">{{ article.author }}</p>
-                </div>
-              </a>
-            </li>
-          </ul>
       </div>
+      {% endfor %}
     </div>
   </div>
   <div class="homepage-section" id="expertise">
@@ -280,8 +288,8 @@
         <p class="expertise-item-subtitle">A community podcast about all things FOIA and public records</p>
         <p class="expertise-item-description">We gather once a month to share updates on public records laws and rulings, techniques, tricks and insider tips from fellow requesters.</p>
         <ul class="expertise-item-links">
-          <li><a href="" class="primary ghost button">Watch the latest episode</a></li>
-          <li><a href="" class="primary ghost button">Join our next call</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/play.svg' %}Watch the latest episode</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/mic.svg' %}Join our next call</a></li>
         </ul>
       </div>
       <div class="expertise-item">
@@ -289,7 +297,7 @@
         <p class="expertise-item-subtitle">On-demand access to experts in public record research methods</p>
         <p class="expertise-item-description">We've partnered with Sunlight Research Center to offer consulting and expertise to newsrooms and businesses.</p>
         <ul class="expertise-item-links">
-          <li><a href="" class="primary ghost button">Contact us to learn more</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/send.svg' %}Contact us to learn more</a></li>
         </ul>
       </div>
       <div class="expertise-item">
@@ -297,8 +305,8 @@
         <p class="expertise-item-subtitle">Get live instruction in transparency</p>
         <p class="expertise-item-description">Learn how to use MuckRock Requests, DocumentCloud, and other tools to investigate government.</p>
         <ul class="expertise-item-links">
-          <li><a href="" class="primary ghost button">View workshop calendar</a></li>
-          <li><a href="" class="primary ghost button">Schedule a training</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/calendar.svg' %}View workshop calendar</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/calendar.svg' %}Schedule a training</a></li>
         </ul>
       </div>
       <div class="expertise-item">
@@ -306,8 +314,8 @@
         <p class="expertise-item-subtitle">Learn about our research techniques and technologies</p>
         <p class="expertise-item-description">Learn how to use MuckRock Requests, DocumentCloud, and other tools to investigate government.</p>
         <ul class="expertise-item-links">
-          <li><a href="" class="primary ghost button">FOIA 101: Tips and Tricks to Make You a Transparency Master</a></li>
-          <li><a href="" class="primary ghost button">50 States of FOI: Your Guide to State Records Laws</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/bookmark.svg' %}FOIA 101: Tips and Tricks to Make You a Transparency Master</a></li>
+          <li><a href="" class="primary ghost button">{% include 'lib/component/icon/book.svg' %}50 States of FOI: Your Guide to State Records Laws</a></li>
         </ul>
       </div>
     </div>

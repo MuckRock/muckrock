@@ -27,7 +27,10 @@ $shadow-active: 0px;
     $color-light: lighten($color, $color-darken-amount);
     $color-dark: darken($color, $color-darken-amount);
     // Metrics
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
     margin: $vr/4 0;
     border: 1px solid $color-dark;
     border-radius: $border-radius;
@@ -90,6 +93,10 @@ $shadow-active: 0px;
     &.green, &.success  { @include button-color($color-green);    }
     &.red, &.failure    { @include button-color($color-red);      }
     &.yellow, &.warning { @include button-color($color-yellow);   }
+
+    svg {
+        fill: currentColor;
+    }
 }
 
 .button.basic {
@@ -111,17 +118,26 @@ $shadow-active: 0px;
 }
 
 .ghost.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
     background: transparent;
     color: currentColor;
     border: none;
-    font-weight: $bold;
+    font-weight: 500;
     text-shadow: none;
     box-shadow: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-font-
+
     &:link, &:hover, &:active, &:visited {
+        border: none;
         box-shadow: none;
         @include transform(none);
     }
     &.red, &.failure {
+        box-shadow: none;
         color: $color-red;
         &:hover {
             color: darken($color-red, 10%);
@@ -129,11 +145,15 @@ $shadow-active: 0px;
         }
     }
     &.blue, &.primary {
+        box-shadow: none;
         color: $color-blue;
         &:hover {
             color: darken($color-blue, 10%);
             background-color: lighten($color-blue, 30%);
         }
         
+    }
+    svg {
+        fill: currentColor;
     }
 }
