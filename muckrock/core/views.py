@@ -415,7 +415,7 @@ class Homepage:
         # This is hardcoded for now, and will be made dynamic
         # https://github.com/MuckRock/muckrock/issues/2014
         return lambda: Project.objects.filter(
-            id__in=[1168, 1177, 1179]
+            id__in=[348, 84, 123]
         ).prefetch_related(
             Prefetch(
                 "articles",
