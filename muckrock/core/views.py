@@ -414,9 +414,7 @@ class Homepage:
         """Get the featured projects for the front page"""
         # This is hardcoded for now, and will be made dynamic
         # https://github.com/MuckRock/muckrock/issues/2014
-        return lambda: Project.objects.filter(
-            id__in=[348, 84, 123]
-        ).prefetch_related(
+        return lambda: Project.objects.filter(id__in=[348, 84, 123]).prefetch_related(
             Prefetch(
                 "articles",
                 queryset=Article.objects.get_published().prefetch_authors(),
