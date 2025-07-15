@@ -1,23 +1,19 @@
 <div class="newsletter-widget">
     <div class="call-to-action">
-        <p class="label"><strong>{{label}}</strong></p>
-        <p class="cta">{{cta}}</p>
+        <p class="title"><strong>{{label}}</strong></p>
+        <p class="subtitle">{{cta}}</p>
     </div>
     <form class="oneline-form" method="post" action="{% url 'newsletter' %}?next={{request.get_full_path}}" onsubmit="ga('send', 'event', 'Newsletter', 'Subscription', window.location.pathname)">
         {% csrf_token %}
         {{newsletter_form.list}}
-        <div class="field">
-            {{newsletter_form.email}}
-            <button class="basic blue button" type="submit">
-                {% include 'lib/component/icon/email.svg' %}
-        	    <span class="label">Subscribe</span>
-            </button>
+        <label for="{{newsletter_form.email.id_for_label}}">Subscribe with your email address</label>
+        <div class="email-field">
+          {{newsletter_form.email}}
+          <button class="primary button" type="submit">
+            {% include 'lib/component/icon/email.svg' %}
+            <span class="label">Subscribe</span>
+          </button>
         </div>
-        {% if not is_default %}
-        <label for="{{newsletter_form.default.label_id}}">
-            {{newsletter_form.default}}
-            Also get MuckRock's weekly newsletter
-        </label>
-        {% endif %}
+        <p class="help-text">By subscribing, you agree to MuckRock's <a href="/tos">Terms of Service</a> and <a href="/privacy-policy">Privacy Policy</a>.</p>
     </form>
 </div>
