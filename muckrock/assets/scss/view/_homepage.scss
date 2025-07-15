@@ -207,6 +207,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     align-self: stretch;
     border-bottom: 1px solid var(--gray-3, #E0E0E0);
     overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .homepage-2025 .tab {

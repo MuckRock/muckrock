@@ -1,9 +1,10 @@
 .newsletter-widget {
     display: flex;
-    padding: 3rem 2rem;
     justify-content: center;
     align-items: center;
     align-content: center;
+    margin: 0;
+    padding: 3rem 2rem;
     gap: 2rem;
     align-self: stretch;
     flex-wrap: wrap;
@@ -11,6 +12,7 @@
     .call-to-action {
         display: flex;
         min-width: 20rem;
+        max-width: 32rem;
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
@@ -46,6 +48,7 @@
     .oneline-form {
         display: flex;
         min-width: 20rem;
+        max-width: 32rem;
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
