@@ -19,14 +19,17 @@
       let tabViewerScrollTimeout = null;
 
       function updateActiveTab(targetTab) {
-          // Remove active class from all tabs
-          tabs.forEach(t => t.classList.remove('active'));
-
-          // Remove active class from all contents
-          contents.forEach(c => c.classList.remove('active'));
+          // Get target element, container, and all its tabs
+          const targetTabElement = document.querySelector(`[data-tab="${targetTab}"]`);
+          const targetTabContainer = targetTabElement ? targetTabElement.closest('.tabs') : null;
+          const targetTabContainerTabs = targetTabContainer ? targetTabContainer.querySelectorAll('.tab') : [];
+          const targetTabContainerContent = targetTabContainer ? targetTabContainer.querySelectorAll('.tab-content') : [];
+          
+          // Remove active class from all tabs and contents in container
+          targetTabContainerTabs.forEach(t => t.classList.remove('active'));
+          targetTabContainerContent.forEach(c => c.classList.remove('active'));
 
           // Add active class to target tab
-          const targetTabElement = document.querySelector(`[data-tab="${targetTab}"]`);
           if (targetTabElement) {
               targetTabElement.classList.add('active');
           }
