@@ -75,3 +75,14 @@ footer.website-footer {
         margin-bottom: 0;
     }
 }
+
+footer.website-footer .newsletter-widget {
+    color: var(--blue-5, #053775);
+    background: var(--blue-1, #EEF3F9);
+    margin-bottom: 0;
+}
+
+footer.website-footer .donation-widget {
+    color: $color-white;
+    background: var(--blue-5, #053775);
+}

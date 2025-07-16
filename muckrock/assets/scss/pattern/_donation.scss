@@ -1,0 +1,65 @@
+.donation-widget {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 6rem 2rem;
+    gap: 1.5rem 3rem;
+    align-self: stretch;
+
+    .donation-form {
+        max-width: 27.5rem;
+        min-width: 20rem;
+        flex: 1 0 0;
+    }
+
+    .donation-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        min-width: 20rem;
+        max-width: 44.5rem;
+        flex: 1 0 0;
+
+        font-feature-settings: 'liga' off, 'clig' off;
+        font-family: var(--font-sans, "Source Sans Pro");
+        font-style: normal;
+        line-height: normal;
+
+        a {
+            color: currentColor;
+            text-decoration: underline;
+        }
+    }
+
+    .donation-title {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .donation-subtitle {
+        margin: 0;
+        font-size: var(--font-lg, 1.25rem);
+        font-weight: 400;
+    }
+
+    .donation-body {
+        font-size: var(--font-md, 1rem);
+        font-weight: 400;
+        line-height: var(--font-xl, 1.5rem); /* 150% */
+    }
+
+    .donation-methods {
+        margin: 0;
+        list-style-type: disc;
+        padding-left: 1rem;
+    }
+
+    #paypal form {
+        text-align: left;
+        margin: 1rem;
+    }
+}
