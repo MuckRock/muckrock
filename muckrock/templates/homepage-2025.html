@@ -13,15 +13,18 @@
   function initializeTabSwitcher() {
       const tabs = document.querySelectorAll('.tab');
       const contents = document.querySelectorAll('.tab-content');
+      const tabViewers = document.querySelectorAll('.tab-viewer');
       let isUserScrolling = false;
-      
+      let isTabViewerScrolling = false;
+      let tabViewerScrollTimeout = null;
+
       function updateActiveTab(targetTab) {
           // Remove active class from all tabs
           tabs.forEach(t => t.classList.remove('active'));
-          
+
           // Remove active class from all contents
           contents.forEach(c => c.classList.remove('active'));
-          
+
           // Add active class to target tab
           const targetTabElement = document.querySelector(`[data-tab="${targetTab}"]`);
           if (targetTabElement) {
@@ -36,14 +39,14 @@
               block: 'nearest'
             });
           }
-          
+
           // Add active class to corresponding content
           const targetContent = document.getElementById(targetTab);
           if (targetContent) {
               targetContent.classList.add('active');
           }
       }
-      
+
       function switchToTab(targetTab) {
           updateActiveTab(targetTab);
 
@@ -56,18 +59,20 @@
               });
           }
       }
-      
+
       // Set up Intersection Observer to detect visible billboards
       function initializeScrollSync() {
           const observerOptions = {
               root: null,
-                rootMargin: '0px 0px 0px -20%', // Trigger when billboard is 20% from the left edge
+              rootMargin: '0px 0px 0px -20%', // Trigger when billboard is 20% from the left edge
               threshold: 0.1
           };
-          
+
           const observer = new IntersectionObserver((entries) => {
-              if (isUserScrolling) return; // Skip updates during programmatic scrolling
-              
+              // Only trigger if user is scrolling the tab-viewer,
+              // not the page, and not during programmatic tab switch
+              if (!isTabViewerScrolling || isUserScrolling) return;
+
               entries.forEach(entry => {
                   if (entry.isIntersecting) {
                       const contentId = entry.target.id;
@@ -75,7 +80,7 @@
                   }
               });
           }, observerOptions);
-          
+
           // Observe all contents
           contents.forEach(content => {
               if (content.id) {
@@ -83,26 +88,39 @@
               }
           });
       }
-      
+
+      // Listen for scroll events on all .tab-viewer elements
+      tabViewers.forEach(tabViewer => {
+          tabViewer.addEventListener('scroll', function() {
+              isTabViewerScrolling = true;
+              if (tabViewerScrollTimeout) {
+                  clearTimeout(tabViewerScrollTimeout);
+              }
+              tabViewerScrollTimeout = setTimeout(() => {
+                  isTabViewerScrolling = false;
+              }, 150);
+          });
+      });
+
       // Attach click handlers to tabs
       tabs.forEach(tab => {
           tab.addEventListener('click', function() {
               const targetTab = this.getAttribute('data-tab');
-              
+
               // Set flag to prevent scroll sync during programmatic scrolling
               isUserScrolling = true;
               switchToTab(targetTab);
-              
+
               // Reset flag after scroll animation completes
               setTimeout(() => {
                   isUserScrolling = false;
               }, 800); // Slightly longer than typical smooth scroll duration
           });
       });
-      
+
       // Initialize scroll synchronization
       initializeScrollSync();
-      
+
       // Return API for external use
       return {
           switchToTab: switchToTab
@@ -314,7 +332,7 @@
       <div class="expertise-item">
         <h4 class="expertise-item-title">Guides &amp; case studies</h4>
         <p class="expertise-item-subtitle">Learn about our research techniques and technologies</p>
-        <p class="expertise-item-description">Learn how to use MuckRock Requests, DocumentCloud, and other tools to investigate government.</p>
+        <p class="expertise-item-description">MuckRock users shine a light on important issues every day. Here are some of their stories and resources to help your own work.</p>
         <ul class="expertise-item-links">
           <li><a href="/project/foia-101-tips-and-tricks-to-make-you-a-transparency-master-234/" class="primary ghost button">{% include 'lib/component/icon/bookmark.svg' %}FOIA 101: tips and tricks to make you a transparency master</a></li>
           <li><a href="/place/" class="primary ghost button">{% include 'lib/component/icon/book.svg' %}50 States: your guide to state records laws</a></li>
