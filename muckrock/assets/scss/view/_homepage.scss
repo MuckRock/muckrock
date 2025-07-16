@@ -547,6 +547,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 
 .homepage-2025 .account {
     display: flex;
+    flex-wrap: wrap;
     margin: 0;
     padding: 1.5rem 2rem;
     justify-content: center;
@@ -556,7 +557,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 
     h3 {
         margin: 0;
-        color: #000;
         text-align: center;
         font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
 
@@ -586,7 +586,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     flex: 1 0 0;
 
     & .number {
-        color: #000;
         text-align: center;
         font-feature-settings: 'liga' off, 'clig' off;
 
@@ -599,7 +598,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     }
 
     & .label {
-        color: #000;
         text-align: center;
 
         /* Small Label */
@@ -624,7 +622,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         align-self: stretch;
     }
     & h3 {
-        color: #000;
         text-align: center;
         font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
         font-family: var(--font-sans, "Source Sans Pro");
@@ -663,7 +660,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 
         &-title {
             margin: 0;
-            color: #000;
             font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
 
             /* Title */
@@ -676,7 +672,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 
         &-subtitle {
             margin: 0;
-            color: #000;
             font-feature-settings: 'liga' off, 'clig' off;
 
             /* Subtitle */
@@ -689,7 +684,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 
         &-description {
             margin: 0;
-            color: #000;
             font-feature-settings: 'liga' off, 'clig' off;
 
             /* Body */
