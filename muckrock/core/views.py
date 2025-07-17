@@ -54,8 +54,6 @@ from muckrock.core.models import HomePage
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.news.models import Article, HomepageOverride
-from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
 

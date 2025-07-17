@@ -15,7 +15,7 @@ from reversion.admin import VersionAdmin
 # MuckRock
 from muckrock.core import autocomplete
 from muckrock.foia.models import FOIARequest
-from muckrock.news.models import Article, Authorship, HomepageOverride, Photo
+from muckrock.news.models import Article, Authorship, Photo
 
 
 class AuthorListFilter(admin.SimpleListFilter):
@@ -123,21 +123,5 @@ class ArticleAdmin(VersionAdmin):
         return super().get_queryset(request).prefetch_related("authors")
 
 
-class HomepageOverrideAdmin(VersionAdmin):
-    """Admin for Override"""
-
-    list_display = ["slot", "article"]
-    autocomplete_fields = ["article"]
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        cache.delete(make_template_fragment_key("homepage_bottom"))
-
-    def delete_model(self, request, obj):
-        super().delete_model(request, obj)
-        cache.delete(make_template_fragment_key("homepage_bottom"))
-
-
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)
-admin.site.register(HomepageOverride, HomepageOverrideAdmin)
