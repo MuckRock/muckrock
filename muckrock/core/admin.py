@@ -3,19 +3,20 @@ from django import forms
 from django.contrib import admin, flatpages
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.flatpages.views import render_flatpage
+from django.db.models import TextField
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import re_path
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
-from django.db.models import TextField
 
 # Third Party
 from simple_history import register
 from simple_history.admin import SimpleHistoryAdmin
 
+# MuckRock
 # Local
-from muckrock.core.models import HomePage, FeaturedProjectSlot
+from muckrock.core.models import FeaturedProjectSlot, HomePage
 from muckrock.news.models import Article
 
 
