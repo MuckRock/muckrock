@@ -140,8 +140,8 @@
 <div class="homepage-2025">
   <div class="homepage-section" id="about-us">
     <div class="text-column">
-      <h2>We give you the tools to keep government transparent and accountable</h2>
-      <p>MuckRock Foundation is a nonprofit, collaborative organization and newsroom that brings together journalists, researchers and the public to request, analyze and share government information, making politics more transparent and democracy more informed.</p>
+      <h2>{{homepage.about_heading}}</h2>
+      <p>{{homepage.about_text}}</p>
       <ul class="actions-list">
         <li><a href="#footer-donation" class="ghost button red">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
         <li><a href="/store/" class="ghost button primary">{% include 'lib/component/icon/merch.svg' %}Shop merch</a></li>
@@ -264,12 +264,15 @@
       <h3>Award-winning investigations and editorial collaborations</h3>
     </header>
     <ul class="tabs">
-      {% for project in featured_projects %}
+      {% for featured_project in featured_project_slots.all %}
+      {% with project=featured_project.project %}
       <li class="tab {% if forloop.first %}active{% endif %}" data-tab="{{project.slug}}">{{project.title}}</li>
+      {% endwith %}
       {% endfor %}
     </ul>
     <div class="tab-viewer">
-      {% for project in featured_projects %}
+      {% for featured_project in featured_project_slots.all %}
+      {% with project=featured_project.project %}
       <div class="tab-content project {% if forloop.first %}active{% endif %}" data-tab="{{project.slug}}" id="{{project.slug}}">
         <div class="project-container">
           <div class="project-details">
@@ -279,7 +282,7 @@
           </div>
           <div class="project-articles">
             <ul class="articles-list">
-              {% for article in project.articles.all|slice:4 %}
+              {% for article in featured_project.articles.all|slice:4 %}
               <li class="article-item">
                 <a href="{{ article.get_absolute_url }}" class="article-link">
                   <div class="article-text">
@@ -298,6 +301,7 @@
           </div>
         </div>
       </div>
+      {% endwith %}
       {% endfor %}
     </div>
   </div>

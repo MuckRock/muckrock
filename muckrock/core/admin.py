@@ -3,7 +3,7 @@ from django import forms
 from django.contrib import admin, flatpages
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.flatpages.views import render_flatpage
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import re_path
 from django.utils.encoding import force_str
@@ -12,6 +12,10 @@ from django.utils.translation import gettext as _
 # Third Party
 from simple_history import register
 from simple_history.admin import SimpleHistoryAdmin
+
+# Local
+from muckrock.core.models import HomePage, FeaturedProjectSlot
+from muckrock.news.models import Article
 
 
 class FlatpageForm(flatpages.admin.FlatpageForm):
@@ -139,7 +143,83 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     @property
     def singleton_instance_id(self):
-        return getattr(self.model, 'singleton_instance_id', self.singleton_instance_id)
+        return getattr(self.model, 'singleton_instance_id', type(self).singleton_instance_id)
+
+
+class FeaturedProjectSlotInline(admin.TabularInline):
+    model = FeaturedProjectSlot
+    extra = 1
+    fields = ('order', 'project', 'articles')
+    ordering = ('order',)
+
+    class Media:
+        js = ('js/admin-featured-project-slot.js',)
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        original_init = formset.__init__
+        
+        def formset_init(self, *args, **kwargs):
+            original_init(self, *args, **kwargs)
+            for form in self.forms:
+                instance = getattr(form, 'instance', None)
+                if instance and instance.pk and instance.project_id:
+                    form.fields['articles'].queryset = Article.objects.filter(projects__id=instance.project_id)
+                # For new objects, get project from POST data
+                elif request.method == 'POST':
+                    prefix = form.prefix  # e.g. featuredprojectslot_set-0
+                    project_field = f'{prefix}-project'
+                    project_id = request.POST.get(project_field)
+                    if project_id:
+                        form.fields['articles'].queryset = Article.objects.filter(projects__id=project_id)
+                    else:
+                        form.fields['articles'].queryset = Article.objects.none()
+                else: 
+                    form.fields['articles'].queryset = Article.objects.none()
+        formset.__init__ = formset_init
+        return formset
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == 'articles':
+            project_id = None
+            if request is not None:
+                data = request.POST or request.GET
+                for key, value in data.items():
+                    if key.endswith('-project') and value:
+                        project_id = value
+                        break
+            if project_id:
+                from muckrock.news.models import Article
+                kwargs['queryset'] = Article.objects.filter(projects__id=project_id)
+            else:
+                from muckrock.news.models import Article
+                kwargs['queryset'] = Article.objects.none()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
+@admin.register(HomePage)
+class HomePageAdmin(SingletonModelAdmin):
+    inlines = [FeaturedProjectSlotInline]
+    fields = ('about_heading', 'about_paragraph')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            re_path(
+                r'^get-articles-for-project/$',
+                self.admin_site.admin_view(self.get_articles_for_project),
+                name='get_articles_for_project'
+            ),
+        ]
+        return custom_urls + urls
+
+    def get_articles_for_project(self, request):
+        project_id = request.GET.get('project_id')
+        articles = []
+        if project_id:
+            qs = Article.objects.filter(projects__id=project_id)
+            articles = [{'id': a.id, 'title': a.title} for a in qs]
+        return JsonResponse({'articles': articles})
 
 
 admin.site.unregister(FlatPage)

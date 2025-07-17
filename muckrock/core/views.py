@@ -49,6 +49,7 @@ from muckrock.accounts.utils import (
 )
 from muckrock.agency.models import Agency
 from muckrock.core.forms import DonateForm, NewsletterSignupForm, SearchForm
+from muckrock.core.models import HomePage
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
@@ -468,7 +469,11 @@ class Homepage:
 
 def homepage(request):
     """Get all the details needed for the homepage"""
-    context = {}
+    homepage_obj = HomePage.load()
+    context = {
+        "homepage": homepage_obj,
+        "featured_project_slots": homepage_obj.featured_project_slots.select_related("project").prefetch_related("articles")
+    }
     for name, value in Homepage().get_cached_values():
         context[name] = value()
     return render(request, "homepage-2025.html", context)
