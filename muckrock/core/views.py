@@ -13,7 +13,6 @@ from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage
 from django.db.models import F, Q, Sum
-from django.db.models.query import Prefetch
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string

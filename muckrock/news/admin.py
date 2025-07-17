@@ -6,8 +6,6 @@ Admin registration for news models
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.core.cache import cache
-from django.core.cache.utils import make_template_fragment_key
 
 # Third Party
 from reversion.admin import VersionAdmin

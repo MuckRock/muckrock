@@ -75,9 +75,10 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         """
-        Overridden default get_urls to directly display change form instead of List Display
+        Overridden default get_urls to directly display
+        change form instead of List Display
         """
-        urls = super(SingletonModelAdmin, self).get_urls()
+        urls = super().get_urls()
         model_name = self.model._meta.model_name
 
         url_name_prefix = "%(app_name)s_%(model_name)s" % {
@@ -103,7 +104,8 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     def response_change(self, request, obj):
         """
-        Overridden default response_change to redirect to home page instead of list display page
+        Overridden default response_change to redirect
+        to home page instead of list display page
         """
         msg = _("%(obj)s was changed successfully.") % {"obj": force_str(obj)}
         if "_continue" in request.POST:
@@ -115,16 +117,17 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """
-        Overridden default change_view to display change form for the default singleton instance id
+        Overridden default change_view to display change
+        form for the default singleton instance id
         """
         if object_id == str(self.singleton_instance_id):
             self.model.objects.get_or_create(pk=self.singleton_instance_id)
 
         if not extra_context:
-            extra_context = dict()
+            extra_context = {}
         extra_context["skip_object_list_page"] = True
 
-        return super(SingletonModelAdmin, self).change_view(
+        return super().change_view(
             request,
             object_id,
             form_url=form_url,
@@ -133,18 +136,20 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     def history_view(self, request, object_id, extra_context=None):
         """
-        Overridden default change_view to display hostory of the default singleton instance id
+        Overridden default change_view to display
+        history of the default singleton instance id
         """
         if not extra_context:
-            extra_context = dict()
+            extra_context = {}
         extra_context["skip_object_list_page"] = True
 
-        return super(SingletonModelAdmin, self).history_view(
+        return super().history_view(
             request,
             object_id,
             extra_context=extra_context,
         )
 
+    # pylint: disable=function-redefined
     @property
     def singleton_instance_id(self):
         return getattr(
@@ -200,12 +205,8 @@ class FeaturedProjectSlotInline(admin.TabularInline):
                         project_id = value
                         break
             if project_id:
-                from muckrock.news.models import Article
-
                 kwargs["queryset"] = Article.objects.filter(projects__id=project_id)
             else:
-                from muckrock.news.models import Article
-
                 kwargs["queryset"] = Article.objects.none()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
