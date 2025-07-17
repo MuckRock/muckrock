@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import re_path
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
+from django.db.models import TextField
 
 # Third Party
 from simple_history import register
@@ -200,7 +201,10 @@ class FeaturedProjectSlotInline(admin.TabularInline):
 @admin.register(HomePage)
 class HomePageAdmin(SingletonModelAdmin):
     inlines = [FeaturedProjectSlotInline]
-    fields = ('about_heading', 'about_paragraph')
+    fields = ('about_heading', 'about_paragraph', 'product_stats', 'expertise_sections')
+    formfield_overrides = {
+        TextField: {'widget': admin.widgets.AdminTextareaWidget}
+    }
 
     def get_urls(self):
         urls = super().get_urls()

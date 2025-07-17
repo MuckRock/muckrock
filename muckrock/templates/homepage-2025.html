@@ -141,7 +141,7 @@
   <div class="homepage-section" id="about-us">
     <div class="text-column">
       <h2>{{homepage.about_heading}}</h2>
-      <p>{{homepage.about_text}}</p>
+      <p>{{homepage.about_paragraph}}</p>
       <ul class="actions-list">
         <li><a href="#footer-donation" class="ghost button red">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
         <li><a href="/store/" class="ghost button primary">{% include 'lib/component/icon/merch.svg' %}Shop merch</a></li>
@@ -179,19 +179,19 @@
             </div>
             <div class="product-stats">
               <div class="stat">
-                <span class="number">{{ stats.request_count|intcomma }}</span>
+                <span class="number">{{ foia_stats.request_count|intcomma }}</span>
                 <span class="label">filed requests</span>
               </div>
               <div class="stat">
-                <span class="number">{{ stats.agency_count|intcomma }}</span>
+                <span class="number">{{ foia_stats.agency_count|intcomma }}</span>
                 <span class="label">agencies</span>
               </div>
               <div class="stat">
-                <span class="number">{{ stats.completed_count|intcomma }}</span>
+                <span class="number">{{ foia_stats.completed_count|intcomma }}</span>
                 <span class="label">fulfilled requests</span>
               </div>
               <div class="stat">
-                <span class="number">{{ stats.page_count|intcomma }}</span>
+                <span class="number">{{ foia_stats.page_count|intcomma }}</span>
                 <span class="label">pages released</span>
               </div>
             </div>
@@ -211,15 +211,15 @@
             </div>
             <div class="product-stats">
               <div class="stat">
-                <span class="number">{{ 6362593|intcomma }}</span>
+                <span class="number">{{ product_stats.documentcloud.documents|intcomma }}</span>
                 <span class="label">public documents</span>
               </div>
               <div class="stat">
-                <span class="number">{{ 108791198|intcomma }}</span>
+                <span class="number">{{ product_stats.documentcloud.pages|intcomma }}</span>
                 <span class="label">public pages</span>
               </div>
               <div class="stat">
-                <span class="number">{{ 530102|intcomma }}</span>
+                <span class="number">{{ product_stats.documentcloud.notes|intcomma }}</span>
                 <span class="label">public notes</span>
               </div>
             </div>
@@ -239,7 +239,7 @@
             </div>
             <div class="product-stats">
               <div class="stat">
-                <span class="number">{{ 1123|intcomma }}</span>
+                <span class="number">{{ product_stats.dataliberation.participants|intcomma }}</span>
                 <span class="label">participants</span>
               </div>
               <!-- Holding this stat until we have the actual amount
@@ -249,7 +249,7 @@
               </div>
               -->
               <div class="stat">
-                <span class="number">20</span>
+                <span class="number">{{ product_stats.dataliberation.datasets|intcomma }}</span>
                 <span class="label">total datasets</span>
               </div>
             </div>
@@ -310,41 +310,22 @@
       <h3>Expert knowledge and community participation</h3>
     </header>
     <div class="expertise-grid">
+      {% for section in expertise_sections %}
       <div class="expertise-item">
-        <h4 class="expertise-item-title">FOIAFriday</h4>
-        <p class="expertise-item-subtitle">A community podcast about all things FOIA and public records</p>
-        <p class="expertise-item-description">We gather once a month to share updates on public records laws and rulings, techniques, tricks and insider tips from fellow requesters.</p>
+        <h4 class="expertise-item-title">{{ section.title }}</h4>
+        <p class="expertise-item-subtitle">{{ section.subtitle }}</p>
+        <p class="expertise-item-description">{{ section.description }}</p>
         <ul class="expertise-item-links">
-          <li><a title="FOIAFriday playlist on YouTube" href="https://www.youtube.com/playlist?list=PLBGm5TjywchNbi1z3UBPS9DATtvDdATnX" target="_blank" class="primary ghost button">{% include 'lib/component/icon/play.svg' %}Watch the latest episode</a></li>
-          <li><a title="FOIAFriday registration link on Zoom" href="https://us02web.zoom.us/meeting/register/wYoIcLjLQ_6vWa4UhAE-7g#/registration" target="_blank" class="primary ghost button">{% include 'lib/component/icon/mic.svg' %}Join our next call</a></li>
+          {% for link in section.links %}
+          <li>
+            <a href="{{ link.href }}" title="{{ link.title }}" class="primary ghost button"{% if link.target %} target="{{ link.target }}"{% endif %}>
+              {% if link.icon %}{% include link.icon %}{% endif %}{{ link.text }}
+            </a>
+          </li>
+          {% endfor %}
         </ul>
       </div>
-      <div class="expertise-item">
-        <h4 class="expertise-item-title">Consulting &amp; research</h4>
-        <p class="expertise-item-subtitle">On-demand access to experts in public record research methods</p>
-        <p class="expertise-item-description">We've partnered with Sunlight Research Center to offer consulting and expertise to newsrooms and businesses.</p>
-        <ul class="expertise-item-links">
-          <li><a href="mailto:info@muckrock.com?subject=Consulting%20Inquiry" class="primary ghost button">{% include 'lib/component/icon/send.svg' %}Contact us to learn more</a></li>
-        </ul>
-      </div>
-      <div class="expertise-item">
-        <h4 class="expertise-item-title">Workshops &amp; trainings</h4>
-        <p class="expertise-item-subtitle">Get live instruction in transparency</p>
-        <p class="expertise-item-description">Learn how to use MuckRock Requests, DocumentCloud, and other tools to investigate government.</p>
-        <ul class="expertise-item-links">
-          <li><a title="Training registration on Zoom" href="https://us02web.zoom.us/meeting/register/tZErd-GvqDktGdNqm5fygZcLphAZ47_SUgXZ?_x_zm_rtaid=hb4QYoTURwSeT3VIfw3lSA.1733155069804.69ee40022a576d06fd1e00e532686633&_x_zm_rhtaid=345#/registration" class="primary ghost button">{% include 'lib/component/icon/calendar.svg' %}Join our next training</a></li>
-          <li><a href="mailto:info@muckrock.com?subject=Workshop%20Inquiry" class="primary ghost button">{% include 'lib/component/icon/calendar.svg' %}Schedule a workshop</a></li>
-        </ul>
-      </div>
-      <div class="expertise-item">
-        <h4 class="expertise-item-title">Guides &amp; case studies</h4>
-        <p class="expertise-item-subtitle">Learn about our research techniques and technologies</p>
-        <p class="expertise-item-description">MuckRock users shine a light on important issues every day. Here are some of their stories and resources to help your own work.</p>
-        <ul class="expertise-item-links">
-          <li><a href="/project/foia-101-tips-and-tricks-to-make-you-a-transparency-master-234/" class="primary ghost button">{% include 'lib/component/icon/bookmark.svg' %}FOIA 101: tips and tricks to make you a transparency master</a></li>
-          <li><a href="/place/" class="primary ghost button">{% include 'lib/component/icon/book.svg' %}50 States: your guide to state records laws</a></li>
-        </ul>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </div>

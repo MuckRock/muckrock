@@ -24,6 +24,7 @@ from django.views.generic import FormView, ListView, TemplateView, View
 
 # Standard Library
 import csv
+import json
 import logging
 import operator
 import sys
@@ -380,102 +381,39 @@ class LandingView(TemplateView):
     template_name = "flatpages/landing.html"
 
 
-class Homepage:
-    """Control caching for the homepage"""
-
-    def get_cached_values(self):
-        """Return all the methods used to generate the cached values"""
-        return [
-            ("articles", self.articles),
-            ("featured_projects", self.featured_projects),
-            ("completed_requests", self.completed_requests),
-            ("stats", self.stats),
-        ]
-
-    def articles(self):
-        """Get the articles for the front page"""
-        articles = list(Article.objects.get_published().prefetch_authors()[:5])
-        overrides = (
-            HomepageOverride.objects.all()
-            .select_related("article")
-            .prefetch_related(
-                Prefetch(
-                    "article__authors",
-                    queryset=User.objects.select_related("profile").order_by(
-                        "authorship__order"
-                    ),
-                ),
-            )
-        )
-        for override in overrides:
-            articles[override.slot - 1] = override
-        return articles
-
-    def featured_projects(self):
-        """Get the featured projects for the front page"""
-        # This is hardcoded for now, and will be made dynamic
-        # https://github.com/MuckRock/muckrock/issues/2014
-        return lambda: Project.objects.filter(
-            id__in=[1168, 1177, 1179]
-        ).prefetch_related(
-            Prefetch(
-                "articles",
-                queryset=Article.objects.get_published().prefetch_authors(),
-                to_attr="items",
-            ),
-            "articles__authors",
-        )
-
-    def completed_requests(self):
-        """Get recently completed requests"""
-        return lambda: (
-            FOIARequest.objects.get_public()
-            .get_done()
-            .order_by("-datetime_done", "pk")
-            .select_related(
-                "agency__jurisdiction__parent__parent", "composer__user__profile"
-            )
-            .only(
-                "status",
-                "slug",
-                "title",
-                "agency__name",
-                "agency__slug",
-                "agency__jurisdiction__slug",
-                "agency__jurisdiction__level",
-                "agency__jurisdiction__name",
-                "agency__jurisdiction__parent__abbrev",
-                "agency__jurisdiction__parent__name",
-                "agency__jurisdiction__parent__slug",
-                "agency__jurisdiction__parent__parent__slug",
-                "composer__user__username",
-                "composer__user__profile__full_name",
-            )
-            .get_public_file_count(limit=6)
-        )
-
-    def stats(self):
-        """Get some stats to show on the front page"""
-        # pylint: disable=unnecessary-lambda
-        return {
-            "request_count": lambda: FOIARequest.objects.count(),
-            "completed_count": lambda: FOIARequest.objects.get_done().count(),
-            "page_count": lambda: FOIAFile.objects.aggregate(pages=Sum("pages"))[
-                "pages"
-            ],
-            "agency_count": lambda: Agency.objects.get_approved().count(),
-        }
-
-
 def homepage(request):
     """Get all the details needed for the homepage"""
     homepage_obj = HomePage.load()
+    parsed_product_stats = {}
+    expertise_sections = []
+    if homepage_obj.product_stats:
+        try:
+            parsed_product_stats = json.loads(homepage_obj.product_stats)
+            expertise_sections = json.loads(homepage_obj.expertise_sections)
+        except json.JSONDecodeError:
+            logger.error(
+                "Invalid JSON in product_stats field of HomePage: %s",
+                homepage_obj.product_stats,
+            )
+            messages.error(
+                request, "There was an error loading the product stats."
+            )
+            parsed_product_stats = {}
+            expertise_sections = []
     context = {
         "homepage": homepage_obj,
-        "featured_project_slots": homepage_obj.featured_project_slots.select_related("project").prefetch_related("articles")
+        "foia_stats": {
+            "request_count": FOIARequest.objects.count(),
+            "completed_count": FOIARequest.objects.get_done().count(),
+            "page_count": FOIAFile.objects.aggregate(pages=Sum("pages"))[
+                "pages"
+            ],
+            "agency_count": Agency.objects.get_approved().count(),
+        },
+        "product_stats": parsed_product_stats,
+        "featured_project_slots": homepage_obj.featured_project_slots.select_related("project").prefetch_related("articles"),
+        "expertise_sections": expertise_sections,
     }
-    for name, value in Homepage().get_cached_values():
-        context[name] = value()
     return render(request, "homepage-2025.html", context)
 
 
