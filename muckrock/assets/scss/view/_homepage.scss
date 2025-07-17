@@ -175,192 +175,250 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     @include flex-direction(column);
     @include align-items(center);
     background-color: $color-white;
-}
+    
+    .homepage-section {
+        display: flex;
+        align-items: flex-start;
+        align-self: stretch;
+        justify-content: center;
+        gap: 2rem 3rem;
+        margin: 0;
+        padding: 3rem 2rem; 
 
-.homepage-2025 .homepage-section {
-    display: flex;
-    align-items: flex-start;
-    align-self: stretch;
-    justify-content: center;
-    gap: 2rem 3rem;
-    margin: 0;
-    padding: 3rem 2rem; 
-
-    h2 {
-        color: var(--black, #0C1E27);
-        font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
-        font-family: var(--font-sans, "Source Sans Pro");
-        font-size: 2rem;
-        font-style: normal;
-        font-weight: 600;
-        line-height: normal;
+        h2 {
+            color: var(--black, #0C1E27);
+            font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: 2rem;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+        }
     }
-}
 
-.homepage-2025 .tabs {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    align-self: stretch;
-    border-bottom: 1px solid var(--gray-3, #E0E0E0);
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-.homepage-2025 .tab {
-    display: flex;
-    min-width: 20rem;
-    padding: 1rem 3rem;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 1 0 0;
-    align-self: stretch;
-    border-bottom: 3px solid transparent;
-
-    font-weight: 500;
-
-    &.active {
-        border: none;
-        border-bottom: 3px solid var(--blue-3, #4294F0);
-        background: transparent;
-        color: currentColor;
-    }
-}
-
-.text-column {
-    display: flex;
-    max-width: 56.25rem;
-    flex-direction: column;
-    align-items: flex-start;
-    flex: 1 0 0;
-}
-
-.actions-list {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    display: flex;
-    align-items: flex-start;
-    align-content: flex-start;
-    gap: 1rem;
-    align-self: stretch;
-    flex-wrap: wrap;
-}
-
-.tab-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    align-self: stretch;
-    margin: 0;
-}
-
-.tab-viewer {
-    max-width: 100vw;
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-
-    & > * {
-        scroll-snap-align: start;
-    }
-}
-
-.product, .project {
-    flex: 0 0 100vw;
-    width: 100vw;
-    margin: 0;
-    padding: 1rem;
-    gap: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.product {
-
-    h3 {
+    .tabs {
         width: 100%;
-        text-align: center;
-        font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
-        font-family: var(--font-sans, "Source Sans Pro");
-        font-size: var(--font-xl, 1.5rem);
-        font-style: normal;
-        font-weight: 600;
-        line-height: 2rem; /* 133.333% */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+        border-bottom: 1px solid var(--gray-3, #E0E0E0);
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 
-    &-content {
+    .tab {
         display: flex;
-        padding: 2rem 0rem;
-        flex-direction: column;
-        align-items: center;
-        max-width: 48rem;
-        margin: 0 auto;
-    }
-    &-heading {
-        display: flex;
-        padding: 2rem 3rem;
-        flex-direction: column;
+        min-width: 20rem;
+        padding: 1rem 3rem;
         justify-content: center;
         align-items: center;
+        gap: 0.5rem;
+        flex: 1 0 0;
+        align-self: stretch;
+        border-bottom: 3px solid transparent;
+
+        font-weight: 500;
+
+        &.active {
+            border: none;
+            border-bottom: 3px solid var(--blue-3, #4294F0);
+            background: transparent;
+            color: currentColor;
+        }
     }
-    &-main {
+
+    .text-column {
         display: flex;
-        padding: 0rem 1rem;
+        max-width: 56.25rem;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1 0 0;
+    }
+
+    .actions-list {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        display: flex;
         align-items: flex-start;
         align-content: flex-start;
+        gap: 1rem;
         align-self: stretch;
         flex-wrap: wrap;
     }
-    &-actions {
-        display: flex;
-        min-width: 15rem;
-        padding: 1rem;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.625rem;
-        flex: 1 0 0;
 
-        & .button {
-            width: 100%;
-            display: flex;
-            box-shadow: none;
+    .tab-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        align-self: stretch;
+        margin: 0;
+    }
+
+    .tab-viewer {
+        max-width: 100vw;
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+
+        & > * {
+            scroll-snap-align: start;
         }
     }
-    &-stats {
+
+    .product, .project {
+        flex: 0 0 100vw;
+        width: 100vw;
+        margin: 0;
+        padding: 1rem;
+        gap: 1rem;
         display: flex;
-        height: 8.875rem;
-        min-width: 15rem;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        align-content: center;
-        gap: 1rem 0.5rem;
-        flex: 1 0 0;
-        flex-wrap: wrap;
     }
 
-    background-position: center center !important;
-    background-repeat: no-repeat !important;
-    background-size: cover !important;
-    background-blend-mode: soft-light;
+    .product {
 
-    &#muckrock-requests {
-        background: lighten($color-red, 40%);
-        border-bottom: 1px solid lighten($color-red-dark, 20%);
+        h3 {
+            width: 100%;
+            text-align: center;
+            font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: var(--font-xl, 1.5rem);
+            font-style: normal;
+            font-weight: 600;
+            line-height: 2rem; /* 133.333% */
+        }
+
+        &-content {
+            display: flex;
+            padding: 2rem 0rem;
+            flex-direction: column;
+            align-items: center;
+            max-width: 48rem;
+            margin: 0 auto;
+        }
+        &-heading {
+            display: flex;
+            padding: 2rem 3rem;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        &-main {
+            display: flex;
+            padding: 0rem 1rem;
+            align-items: flex-start;
+            align-content: flex-start;
+            align-self: stretch;
+            flex-wrap: wrap;
+        }
+        &-actions {
+            display: flex;
+            min-width: 15rem;
+            padding: 1rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.625rem;
+            flex: 1 0 0;
+
+            & .button {
+                width: 100%;
+                display: flex;
+                box-shadow: none;
+            }
+        }
+        &-stats {
+            display: flex;
+            height: 8.875rem;
+            min-width: 15rem;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            gap: 1rem 0.5rem;
+            flex: 1 0 0;
+            flex-wrap: wrap;
+        }
+
+        background-position: center center !important;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        background-blend-mode: soft-light;
+
+        &#muckrock-requests {
+            background: lighten($color-red, 40%);
+            border-bottom: 1px solid lighten($color-red-dark, 20%);
+        }
+        &#documentcloud {
+            background: lighten($color-blue, 40%);
+            border-bottom: 1px solid lighten($color-blue-dark, 20%);
+        }
+        &#data-liberation-project {
+            background: lighten($color-yellow, 40%);
+            border-bottom: 1px solid lighten($color-yellow-dark, 20%);
+        }
     }
-    &#documentcloud {
-        background: lighten($color-blue, 40%);
-        border-bottom: 1px solid lighten($color-blue-dark, 20%);
-    }
-    &#data-liberation-project {
-        background: lighten($color-yellow, 40%);
-        border-bottom: 1px solid lighten($color-yellow-dark, 20%);
+
+    .project {
+        width: 100vw;
+        
+        &-container {
+            max-width: 72rem;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            flex-flow: row wrap;
+            align-items: stretch;
+        }
+        &-details, &-articles {
+            display: flex;
+            min-width: 20rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            flex: 1 0 0;
+        }
+        &-image {
+            width: 100%;
+            align-self: stretch;
+            aspect-ratio: 2/1;
+            margin: 0;
+            object-fit: cover;
+        }
+        &-title {
+            margin: 0;
+            font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: 2rem;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+            
+            a {
+                color: currentColor;
+            }
+
+            .arrow {
+                color: #744AF0;
+                transition: transform .25s ease-in-out;
+            }
+
+            &:hover .arrow {
+                transform: translateX(2px) scale(1.1);
+            }
+        }
+        &-summary {
+            margin: 0;
+            font-family: var(--font-sans, "Source Sans Pro");
+            font-size: var(--font-md, 1rem);
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+        }
     }
 }
 
@@ -398,63 +456,6 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         font-size: var(--font-lg, 1.25rem);
         font-style: normal;
         font-weight: 600;
-        line-height: normal;
-    }
-}
-.project {
-    width: 100vw;
-    
-    &-container {
-        max-width: 72rem;
-        margin: 0 auto;
-        display: flex;
-        gap: 1rem;
-        flex-flow: row wrap;
-        align-items: stretch;
-    }
-    &-details, &-articles {
-        display: flex;
-        min-width: 20rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        flex: 1 0 0;
-    }
-    &-image {
-        width: 100%;
-        align-self: stretch;
-        aspect-ratio: 2/1;
-        margin: 0;
-        object-fit: cover;
-    }
-    &-title {
-        margin: 0;
-        font-feature-settings: 'ss04' on, 'liga' off, 'clig' off;
-        font-family: var(--font-sans, "Source Sans Pro");
-        font-size: 2rem;
-        font-style: normal;
-        font-weight: 600;
-        line-height: normal;
-        
-        a {
-            color: currentColor;
-        }
-
-        .arrow {
-            color: #744AF0;
-            transition: transform .25s ease-in-out;
-        }
-
-        &:hover .arrow {
-            transform: translateX(2px) scale(1.1);
-        }
-    }
-    &-summary {
-        margin: 0;
-        font-family: var(--font-sans, "Source Sans Pro");
-        font-size: var(--font-md, 1rem);
-        font-style: normal;
-        font-weight: 400;
         line-height: normal;
     }
 }
