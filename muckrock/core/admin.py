@@ -64,6 +64,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
     """
     Admin class for singleton models.
     """
+
     singleton_instance_id = 1
 
     def has_add_permission(self, request):
@@ -79,47 +80,49 @@ class SingletonModelAdmin(admin.ModelAdmin):
         urls = super(SingletonModelAdmin, self).get_urls()
         model_name = self.model._meta.model_name
 
-        url_name_prefix = '%(app_name)s_%(model_name)s' % {
-            'app_name': self.model._meta.app_label,
-            'model_name': model_name,
+        url_name_prefix = "%(app_name)s_%(model_name)s" % {
+            "app_name": self.model._meta.app_label,
+            "model_name": model_name,
         }
         custom_urls = [
-            re_path(r'^history/$',
-                    self.admin_site.admin_view(self.history_view),
-                    {'object_id': str(self.singleton_instance_id)},
-                    name='%s_history' % url_name_prefix),
-            re_path(r'^$',
-                    self.admin_site.admin_view(self.change_view),
-                    {'object_id': str(self.singleton_instance_id)},
-                    name='%s_change' % url_name_prefix),
+            re_path(
+                r"^history/$",
+                self.admin_site.admin_view(self.history_view),
+                {"object_id": str(self.singleton_instance_id)},
+                name="%s_history" % url_name_prefix,
+            ),
+            re_path(
+                r"^$",
+                self.admin_site.admin_view(self.change_view),
+                {"object_id": str(self.singleton_instance_id)},
+                name="%s_change" % url_name_prefix,
+            ),
         ]
 
         return custom_urls + urls
-    
+
     def response_change(self, request, obj):
         """
         Overridden default response_change to redirect to home page instead of list display page
         """
-        msg = _('%(obj)s was changed successfully.') % {
-            'obj': force_str(obj)}
-        if '_continue' in request.POST:
-            self.message_user(request, msg + ' ' +
-                              _('You may edit it again below.'))
+        msg = _("%(obj)s was changed successfully.") % {"obj": force_str(obj)}
+        if "_continue" in request.POST:
+            self.message_user(request, msg + " " + _("You may edit it again below."))
             return HttpResponseRedirect(request.path)
         else:
             self.message_user(request, msg)
             return HttpResponseRedirect("../../")
 
-    def change_view(self, request, object_id, form_url='', extra_context=None):
+    def change_view(self, request, object_id, form_url="", extra_context=None):
         """
-         Overridden default change_view to display change form for the default singleton instance id
+        Overridden default change_view to display change form for the default singleton instance id
         """
         if object_id == str(self.singleton_instance_id):
             self.model.objects.get_or_create(pk=self.singleton_instance_id)
 
         if not extra_context:
             extra_context = dict()
-        extra_context['skip_object_list_page'] = True
+        extra_context["skip_object_list_page"] = True
 
         return super(SingletonModelAdmin, self).change_view(
             request,
@@ -134,7 +137,7 @@ class SingletonModelAdmin(admin.ModelAdmin):
         """
         if not extra_context:
             extra_context = dict()
-        extra_context['skip_object_list_page'] = True
+        extra_context["skip_object_list_page"] = True
 
         return super(SingletonModelAdmin, self).history_view(
             request,
@@ -144,86 +147,93 @@ class SingletonModelAdmin(admin.ModelAdmin):
 
     @property
     def singleton_instance_id(self):
-        return getattr(self.model, 'singleton_instance_id', type(self).singleton_instance_id)
+        return getattr(
+            self.model, "singleton_instance_id", type(self).singleton_instance_id
+        )
 
 
 class FeaturedProjectSlotInline(admin.TabularInline):
     model = FeaturedProjectSlot
     extra = 1
-    fields = ('order', 'project', 'articles')
-    ordering = ('order',)
+    fields = ("order", "project", "articles")
+    ordering = ("order",)
 
     class Media:
-        js = ('js/admin-featured-project-slot.js',)
+        js = ("js/admin-featured-project-slot.js",)
 
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
         original_init = formset.__init__
-        
+
         def formset_init(self, *args, **kwargs):
             original_init(self, *args, **kwargs)
             for form in self.forms:
-                instance = getattr(form, 'instance', None)
+                instance = getattr(form, "instance", None)
                 if instance and instance.pk and instance.project_id:
-                    form.fields['articles'].queryset = Article.objects.filter(projects__id=instance.project_id)
+                    form.fields["articles"].queryset = Article.objects.filter(
+                        projects__id=instance.project_id
+                    )
                 # For new objects, get project from POST data
-                elif request.method == 'POST':
+                elif request.method == "POST":
                     prefix = form.prefix  # e.g. featuredprojectslot_set-0
-                    project_field = f'{prefix}-project'
+                    project_field = f"{prefix}-project"
                     project_id = request.POST.get(project_field)
                     if project_id:
-                        form.fields['articles'].queryset = Article.objects.filter(projects__id=project_id)
+                        form.fields["articles"].queryset = Article.objects.filter(
+                            projects__id=project_id
+                        )
                     else:
-                        form.fields['articles'].queryset = Article.objects.none()
-                else: 
-                    form.fields['articles'].queryset = Article.objects.none()
+                        form.fields["articles"].queryset = Article.objects.none()
+                else:
+                    form.fields["articles"].queryset = Article.objects.none()
+
         formset.__init__ = formset_init
         return formset
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == 'articles':
+        if db_field.name == "articles":
             project_id = None
             if request is not None:
                 data = request.POST or request.GET
                 for key, value in data.items():
-                    if key.endswith('-project') and value:
+                    if key.endswith("-project") and value:
                         project_id = value
                         break
             if project_id:
                 from muckrock.news.models import Article
-                kwargs['queryset'] = Article.objects.filter(projects__id=project_id)
+
+                kwargs["queryset"] = Article.objects.filter(projects__id=project_id)
             else:
                 from muckrock.news.models import Article
-                kwargs['queryset'] = Article.objects.none()
+
+                kwargs["queryset"] = Article.objects.none()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(HomePage)
 class HomePageAdmin(SingletonModelAdmin):
     inlines = [FeaturedProjectSlotInline]
-    fields = ('about_heading', 'about_paragraph', 'product_stats', 'expertise_sections')
-    formfield_overrides = {
-        TextField: {'widget': admin.widgets.AdminTextareaWidget}
-    }
+    fields = ("about_heading", "about_paragraph", "product_stats", "expertise_sections")
+    formfield_overrides = {TextField: {"widget": admin.widgets.AdminTextareaWidget}}
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             re_path(
-                r'^get-articles-for-project/$',
+                r"^get-articles-for-project/$",
                 self.admin_site.admin_view(self.get_articles_for_project),
-                name='get_articles_for_project'
+                name="get_articles_for_project",
             ),
         ]
         return custom_urls + urls
 
     def get_articles_for_project(self, request):
-        project_id = request.GET.get('project_id')
+        project_id = request.GET.get("project_id")
         articles = []
         if project_id:
             qs = Article.objects.filter(projects__id=project_id)
-            articles = [{'id': a.id, 'title': a.title} for a in qs]
-        return JsonResponse({'articles': articles})
+            articles = [{"id": a.id, "title": a.title} for a in qs]
+        return JsonResponse({"articles": articles})
 
 
 admin.site.unregister(FlatPage)

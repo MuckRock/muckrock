@@ -11,8 +11,9 @@ from django.db.models import (
     IntegerField,
     ManyToManyField,
     Model,
-    TextField
+    TextField,
 )
+
 
 # This is in django but does not support intervals until django 2.0
 class ExtractDay(Func):
@@ -36,6 +37,7 @@ class SingletonModel(Model):
     """
     Abstract base class for singleton models.
     """
+
     singleton_instance_id = 1
 
     class Meta:
@@ -62,7 +64,7 @@ class SingletonModel(Model):
 class HomePage(SingletonModel):
     about_heading = CharField(
         max_length=255,
-        default="We give you the tools to keep government transparent and accountable"
+        default="We give you the tools to keep government transparent and accountable",
     )
     about_paragraph = TextField(
         blank=True,
@@ -71,18 +73,18 @@ class HomePage(SingletonModel):
             "newsroom that brings together journalists, researchers and the "
             "public to request, analyze and share government information, "
             "making politics more transparent and democracy more informed."
-        )
+        ),
     )
     product_stats = TextField(
         blank=True,
         default='{"documentcloud": {"documents": 0, "pages": 0, "notes": 0}, "dataliberation": {"participants": 0, "datasets": 0}}',
-        help_text="JSON object for DocumentCloud and Data Liberation Project stats"
+        help_text="JSON object for DocumentCloud and Data Liberation Project stats",
     )
 
     expertise_sections = TextField(
         blank=True,
-        default='[]',
-        help_text="JSON array of expertise sections, each with title, subtitle, description, and links (title, href, text, icon)"
+        default="[]",
+        help_text="JSON array of expertise sections, each with title, subtitle, description, and links (title, href, text, icon)",
     )
 
     class Meta:
@@ -94,10 +96,16 @@ class HomePage(SingletonModel):
 
 
 class FeaturedProjectSlot(Model):
-    homepage = ForeignKey(HomePage, on_delete=CASCADE, related_name="featured_project_slots")
+    homepage = ForeignKey(
+        HomePage, on_delete=CASCADE, related_name="featured_project_slots"
+    )
     order = IntegerField(default=0, help_text="Order of appearance on homepage")
-    project = ForeignKey('project.Project', on_delete=CASCADE, related_name="homepage_slots")
-    articles = ManyToManyField('news.Article', blank=True, related_name="featured_in_slots")
+    project = ForeignKey(
+        "project.Project", on_delete=CASCADE, related_name="homepage_slots"
+    )
+    articles = ManyToManyField(
+        "news.Article", blank=True, related_name="featured_in_slots"
+    )
 
     class Meta:
         ordering = ["order"]

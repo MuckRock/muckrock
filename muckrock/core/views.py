@@ -393,9 +393,7 @@ def homepage(request):
                 "Invalid JSON in product_stats field of HomePage: %s",
                 homepage_obj.product_stats,
             )
-            messages.error(
-                request, "There was an error loading the product stats."
-            )
+            messages.error(request, "There was an error loading the product stats.")
             parsed_product_stats = {}
             expertise_sections = []
     context = {
@@ -403,13 +401,13 @@ def homepage(request):
         "foia_stats": {
             "request_count": FOIARequest.objects.count(),
             "completed_count": FOIARequest.objects.get_done().count(),
-            "page_count": FOIAFile.objects.aggregate(pages=Sum("pages"))[
-                "pages"
-            ],
+            "page_count": FOIAFile.objects.aggregate(pages=Sum("pages"))["pages"],
             "agency_count": Agency.objects.get_approved().count(),
         },
         "product_stats": parsed_product_stats,
-        "featured_project_slots": homepage_obj.featured_project_slots.select_related("project").prefetch_related("articles"),
+        "featured_project_slots": homepage_obj.featured_project_slots.select_related(
+            "project"
+        ).prefetch_related("articles"),
         "expertise_sections": expertise_sections,
     }
     return render(request, "homepage-2025.html", context)
