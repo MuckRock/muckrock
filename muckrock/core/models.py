@@ -79,9 +79,8 @@ class HomePage(SingletonModel):
         blank=True,
         default="{}",
         help_text=(
-            "JSON object for DocumentCloud and "
-            "Data Liberation Project stats",
-        )
+            "JSON object for DocumentCloud and " "Data Liberation Project stats",
+        ),
     )
 
     expertise_sections = TextField(
@@ -90,7 +89,7 @@ class HomePage(SingletonModel):
         help_text=(
             "JSON array of expertise sections, each with title, subtitle, "
             "description, and links (title, href, text, icon)",
-        )
+        ),
     )
 
     class Meta:
