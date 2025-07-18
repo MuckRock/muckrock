@@ -78,9 +78,7 @@ class HomePage(SingletonModel):
     product_stats = TextField(
         blank=True,
         default="{}",
-        help_text=(
-            "JSON object for DocumentCloud and Data Liberation Project stats",
-        ),
+        help_text=("JSON object for DocumentCloud and Data Liberation Project stats",),
     )
 
     expertise_sections = TextField(
