@@ -79,7 +79,7 @@ class HomePage(SingletonModel):
         blank=True,
         default="{}",
         help_text=(
-            "JSON object for DocumentCloud and " "Data Liberation Project stats",
+            "JSON object for DocumentCloud and Data Liberation Project stats",
         ),
     )
 
