@@ -54,6 +54,7 @@ CONFIG = [
                 "development environment should be installed in parallel to MuckRock",
                 "envvars": [("SQUARELET_KEY", ""), ("SQUARELET_SECRET", "")],
             },
+            {"name": "JWT", "envvars": [("JWT_VERIFYING_KEY", "")]},
             {
                 "name": "DocumentCloud",
                 "url": "https://www.documentcloud.org",
