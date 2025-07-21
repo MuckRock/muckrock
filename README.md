@@ -33,18 +33,32 @@ This will create files with the environment variables needed to run the developm
 -   `JWT_VERIFYING_KEY`  Retrieve the value for JWT_VERIFYING_KEY by opening the Squarelet Django shell using `inv shell`and copying the settings.SIMPLE_JWT['VERIFYING_KEY'] (remove the leading b' and the trailing ', leave the \n portions as-is). 
 -   `OPENAI_API_KEY` For local testing, you can make this value "test". If you intend on testing aspects that actually require AI functionality, then provide a real OPENAI API key. 
 
-7. Start the docker images - `inv up`
+7. Start the docker images - `inv up`.
 This will build and start all of the docker images using docker-compose.
+
+<strong>Note: </strong>
+If you cloned this directory using `gh repo clone MuckRock/muckrock` instead of  `git clone --recurse-submodules git@github.com:MuckRock/muckrock.git` then you will receive an error that the gloo app isn't available. To fix this, 
+Enter the muckrock/muckrock/gloo directory `cd muckrock/gloo`. Run `git submodule init` and then `git submodule update` to clone the gloo app as well. 
+
+
 8. Set `dev.muckrock.com` to point to localhost - `echo "127.0.0.1   dev.muckrock.com" | sudo tee -a /etc/hosts`
 9. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
 
-10. You must restart the Docker Compose session (via the command `inv down` followed by `inv up`) each time you change a `.django` file for it to take effect.
+Note: You must restart the Docker Compose session (via the command `inv down` followed by `inv up`) each time you change a `.django` file for it to take effect.
 
-You should now be able to log in to MuckRock using your Squarelet account.
+10. Log in to `dev.muckrock.com` with the credentials for your Squarelet superuser account. 
 
-Note:
-If you cloned this directory using `gh repo clone MuckRock/muckrock` instead of  `git clone --recurse-submodules git@github.com:MuckRock/muckrock.git` then you will receive an error that gloo isn't available. To fix this, 
-Enter the muckrock/muckrock/gloo directory `cd muckrock/gloo`. Run `git submodule init` and then `git submodule update` to clone the gloo app.
+11. We need to set a superuser for the MuckRock Django app so that you can access the admin backend. 
+Open a Django shell in the folder for MuckRock using `inv shell` and run the following commands:
+ ```
+      tempUser = User.objects.all()[0]
+      tempUser.is_superuser = True
+      tempUser.save()
+      tempUser.is_staff = True
+      tempUser.save()
+```
+
+You will now be able to access dev.muckrock.com/admin
 
 ## Docker info
 
