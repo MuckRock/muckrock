@@ -152,7 +152,10 @@ class SingletonModelAdmin(admin.ModelAdmin):
     # pylint: disable=function-redefined
     @property
     def singleton_instance_id(self):
-        """This property allows the singleton_instance_id to be overridden in subclasses."""
+        """
+        This property allows the singleton_instance_id
+        to be overridden in subclasses.
+        """
         return getattr(
             self.model, "singleton_instance_id", type(self).singleton_instance_id
         )
