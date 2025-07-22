@@ -5,14 +5,14 @@ from invoke import task
 def get_project_name():
     path = ".envs/.local/.compose"
     if not os.path.exists(path):
-        return os.getcwd()
+        return os.path.basename(os.getcwd())
     with open(path) as f:
         for line in f:
             if line.startswith("COMPOSE_PROJECT_NAME="):
                 project_name = line.strip().split("=", 1)[1]
                 return project_name
     print(f"DEBUG: COMPOSE_PROJECT_NAME not found in {path}, defaulting to the current working directory's name")
-    return os.getcwd()
+    return os.path.basename(os.getcwd())
 
 
 PROJECT_NAME = get_project_name()
