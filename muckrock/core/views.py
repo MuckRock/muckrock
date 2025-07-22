@@ -380,7 +380,12 @@ class LandingView(TemplateView):
 
 def homepage(request):
     """Get all the details needed for the homepage"""
-    homepage_obj = HomePage.load()
+    # Heavily cache homepage data
+    homepage_obj = cache.get("homepage_obj")
+    if homepage_obj is None:
+        homepage_obj = HomePage.load()
+        cache.set("homepage_obj", homepage_obj, 60 * 30)  # 30 min
+
     parsed_product_stats = {}
     expertise_sections = []
     if homepage_obj.product_stats:
@@ -395,18 +400,29 @@ def homepage(request):
             messages.error(request, "There was an error loading the product stats.")
             parsed_product_stats = {}
             expertise_sections = []
-    context = {
-        "homepage": homepage_obj,
-        "foia_stats": {
+
+    foia_stats = cache.get("homepage_foia_stats")
+    if foia_stats is None:
+        foia_stats = {
             "request_count": FOIARequest.objects.count(),
             "completed_count": FOIARequest.objects.get_done().count(),
             "page_count": FOIAFile.objects.aggregate(pages=Sum("pages"))["pages"],
             "agency_count": Agency.objects.get_approved().count(),
-        },
-        "product_stats": parsed_product_stats,
-        "featured_project_slots": homepage_obj.featured_project_slots.select_related(
+        }
+        cache.set("homepage_foia_stats", foia_stats, 60 * 30)  # 30 min
+
+    featured_project_slots = cache.get("homepage_featured_project_slots")
+    if featured_project_slots is None:
+        featured_project_slots = homepage_obj.featured_project_slots.select_related(
             "project"
-        ).prefetch_related("articles"),
+        ).prefetch_related("articles")
+        cache.set("homepage_featured_project_slots", featured_project_slots, 60 * 30)
+
+    context = {
+        "homepage": homepage_obj,
+        "foia_stats": foia_stats,
+        "product_stats": parsed_product_stats,
+        "featured_project_slots": featured_project_slots,
         "expertise_sections": expertise_sections,
     }
     return render(request, "homepage-2025.html", context)

@@ -3,6 +3,7 @@
 # pylint: disable=abstract-method
 
 # Django
+from django.core.cache import cache
 from django.db.models import (
     CASCADE,
     CharField,
@@ -93,6 +94,12 @@ class HomePage(SingletonModel):
     class Meta:
         verbose_name = "Home Page"
         verbose_name_plural = "Home Page"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Invalidate homepage caches on save
+        cache.delete("homepage_obj")
+        cache.delete("homepage_featured_project_slots")
 
     def __str__(self):
         return "Home Page"
