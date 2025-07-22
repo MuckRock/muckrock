@@ -9,6 +9,7 @@ from django.db.models import (
     CharField,
     ForeignKey,
     Func,
+    JSONField,
     IntegerField,
     ManyToManyField,
     Model,
@@ -76,15 +77,15 @@ class HomePage(SingletonModel):
             "making politics more transparent and democracy more informed."
         ),
     )
-    product_stats = TextField(
+    product_stats = JSONField(
         blank=True,
-        default="{}",
+        default=dict,
         help_text=("JSON object for DocumentCloud and Data Liberation Project stats",),
     )
 
-    expertise_sections = TextField(
+    expertise_sections = JSONField(
         blank=True,
-        default="[]",
+        default=list,
         help_text=(
             "JSON array of expertise sections, each with title, subtitle, "
             "description, and links (title, href, text, icon)",

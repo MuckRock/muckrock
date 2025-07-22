@@ -13,10 +13,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="homepage",
             name="product_stats",
-            field=models.TextField(
+            field=models.JSONField(
                 blank=True,
-                default='{"documentcloud": {"documents": 0, "pages": 0, "notes": 0}, "dataliberation": {"participants": 0, "datasets": 0}}',
+                default=dict,
                 help_text="JSON object for DocumentCloud and Data Liberation Project stats",
+            ),
+        ),
+        migrations.AddField(
+            model_name="homepage",
+            name="expertise_sections",
+            field=models.JSONField(
+                blank=True,
+                default=list,
+                help_text="JSON array of expertise sections, each with title, subtitle, description, and links (title, href, text, icon)",
             ),
         ),
     ]
