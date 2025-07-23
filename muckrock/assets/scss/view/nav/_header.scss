@@ -13,6 +13,7 @@ since we break it into two pieces.
 */
 .global-header {
   margin-bottom: 0;
+  flex-wrap: nowrap;
   & + * {
     /* The top margin accounts for the fixed top navigation. */
     margin-top: 2.6875em !important;
@@ -74,13 +75,16 @@ They supply the sizing for the element and the hover behaviors.
 Nav items usually contain just an anchor or a span element, sometimes with an icon and a label.
 */
 .nav-item {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: $vr/4;
   width: auto;
   height: 42px;
   min-width: 42px;
+  white-space: nowrap;
   margin-bottom: 0;
   padding: $vr/2;
-  vertical-align: middle;
   font-weight: $bold;
   text-align: center;
   cursor: pointer;
@@ -112,6 +116,16 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       background: darken($color-blue, $color-darken-amount);
     }
   }
+  &.red {
+    color: $color-red;
+    .icon, svg {
+        fill: currentColor;
+    }
+    &:hover {
+        background: $color-red;
+        color: $color-white;
+    }
+  }
   &.black {
     background: $color-black;
     color: $color-white;
@@ -139,6 +153,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
     .label {
       max-width: 12em;
     }
+  }
+  &.justify-center {
+    justify-content: center;
   }
 }
 
@@ -259,6 +276,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
 
 .global-navigation {
   max-height: 42px;
+  flex-wrap: nowrap;
   ul {
     display: flex;
     align-items: center;
@@ -314,11 +332,11 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       border: 0;
     }
     /*
-    When a list item is hovered, display the dropdown.
+    When a list item is hovered or focused, display the dropdown.
     Also, if it has a .hover class (we do this on mobile).
     Except, don't do this on mobile, since it behaves in a dumb way.
     */
-    &:hover, &.hover {
+    &:hover, &.hover, &:focus, &:focus-within {
       ul:not(.no-hover-display) {
         display: block;
       }
@@ -415,6 +433,7 @@ We use rich nav items to display images behind nav items, like for news articles
 #site-nav {
   flex: 1 1 auto;
   position: relative;
+  flex-wrap: nowrap;
   background-color: $nav-background;
   @media($bottom-nav-bp-max) {
     position: fixed;
