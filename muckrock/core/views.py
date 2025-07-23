@@ -23,7 +23,6 @@ from django.views.generic import FormView, ListView, TemplateView, View
 
 # Standard Library
 import csv
-import json
 import logging
 import operator
 import sys
