@@ -3,12 +3,14 @@
 # pylint: disable=abstract-method
 
 # Django
+from django.core.cache import cache
 from django.db.models import (
     CASCADE,
     CharField,
     ForeignKey,
     Func,
     IntegerField,
+    JSONField,
     ManyToManyField,
     Model,
     TextField,
@@ -75,15 +77,15 @@ class HomePage(SingletonModel):
             "making politics more transparent and democracy more informed."
         ),
     )
-    product_stats = TextField(
+    product_stats = JSONField(
         blank=True,
-        default="{}",
+        default=dict,
         help_text=("JSON object for DocumentCloud and Data Liberation Project stats",),
     )
 
-    expertise_sections = TextField(
+    expertise_sections = JSONField(
         blank=True,
-        default="[]",
+        default=list,
         help_text=(
             "JSON array of expertise sections, each with title, subtitle, "
             "description, and links (title, href, text, icon)",
@@ -93,6 +95,12 @@ class HomePage(SingletonModel):
     class Meta:
         verbose_name = "Home Page"
         verbose_name_plural = "Home Page"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Invalidate homepage caches on save
+        cache.delete("homepage_obj")
+        cache.delete("homepage_featured_project_slots")
 
     def __str__(self):
         return "Home Page"

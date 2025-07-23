@@ -15,7 +15,6 @@ from simple_history import register
 from simple_history.admin import SimpleHistoryAdmin
 
 # MuckRock
-# Local
 from muckrock.core.models import FeaturedProjectSlot, HomePage
 from muckrock.news.models import Article
 
@@ -153,6 +152,10 @@ class SingletonModelAdmin(admin.ModelAdmin):
     # pylint: disable=function-redefined
     @property
     def singleton_instance_id(self):
+        """
+        This property allows the singleton_instance_id
+        to be overridden in subclasses.
+        """
         return getattr(
             self.model, "singleton_instance_id", type(self).singleton_instance_id
         )
@@ -168,18 +171,25 @@ class FeaturedProjectSlotInline(admin.TabularInline):
         js = ("js/admin-featured-project-slot.js",)
 
     def get_formset(self, request, obj=None, **kwargs):
+        """
+        Override get_formset to dynamically set the queryset for the articles field
+        based on the project selected in the form. This allows the admin to filter
+        articles based on the project selected in each slot.
+        """
         formset = super().get_formset(request, obj, **kwargs)
         original_init = formset.__init__
 
         def formset_init(self, *args, **kwargs):
             original_init(self, *args, **kwargs)
+            # After initializing the formset, we can get
+            # the articles for each project in the form
             for form in self.forms:
                 instance = getattr(form, "instance", None)
                 if instance and instance.pk and instance.project_id:
                     form.fields["articles"].queryset = Article.objects.filter(
                         projects__id=instance.project_id
                     )
-                # For new objects, get project from POST data
+                # When adding new entries, we need to get project from POST data
                 elif request.method == "POST":
                     prefix = form.prefix  # e.g. featuredprojectslot_set-0
                     project_field = f"{prefix}-project"
