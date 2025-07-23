@@ -9,10 +9,22 @@ import random
 import string
 
 
-def random_string(n):
-    return "".join(
-        random.choice(string.ascii_letters + string.digits) for _ in range(n)
-    )
+COMPOSE_ENV_PATH = ".envs/.local/.compose"
+
+def random_string(n=5):
+    return "".join(random.choice(string.ascii_lowercase + string.digits) for _ in range(n))
+
+def write_env_file(filepath, env_vars):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, "w") as f:
+        for k, v in env_vars.items():
+            f.write(f"{k}={v}\n")
+
+def generate_and_save_compose_project_name():
+    project_name = os.path.basename(os.getcwd()).lower() + "_" + random_string(5)
+    write_env_file(COMPOSE_ENV_PATH, {"COMPOSE_PROJECT_NAME": project_name})
+    print(f"Generated and saved COMPOSE_PROJECT_NAME={project_name} in {COMPOSE_ENV_PATH}")
+    return project_name
 
 
 PGUSER = random_string(30)
@@ -42,6 +54,7 @@ CONFIG = [
                 "development environment should be installed in parallel to MuckRock",
                 "envvars": [("SQUARELET_KEY", ""), ("SQUARELET_SECRET", "")],
             },
+            {"name": "JWT", "envvars": [("JWT_VERIFYING_KEY", "")]},
             {
                 "name": "DocumentCloud",
                 "url": "https://www.documentcloud.org",
@@ -111,6 +124,12 @@ CONFIG = [
                     ("PLAID_ACCESS_TOKEN", ""),
                 ],
             },
+            {
+                "name": "OPENAI_API_KEY", 
+                "url": "https://openai.com/",
+                "description": "We use OpenAI to automate some support tasks",
+                "envvars": [("OPENAI_API_KEY", "")]
+            },
         ],
     },
     {
@@ -137,7 +156,7 @@ CONFIG = [
 
 
 def main():
-    print("Initializing the dot env environment for Squarelet development")
+    print("Initializing the dot env environment for MuckRock development")
     os.makedirs(".envs/.local/", 0o775)
     print("Created the directories")
     for file_config in CONFIG:
@@ -153,6 +172,7 @@ def main():
                     )
                 file_.write("\n")
         print("Created file .envs/.local/{}".format(file_config["name"]))
+    generate_and_save_compose_project_name()
     print("Initialization Complete")
 
 
