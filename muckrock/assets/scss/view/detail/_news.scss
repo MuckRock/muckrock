@@ -80,8 +80,10 @@
         gap: 0;
 
         .call-to-action {
-            width: 100%;
             @include flex(1 1 20em);
+            width: 100%;
+            max-width: unset;
+            padding: 1rem;
             margin-bottom: 0;
             gap: 0;
         }
