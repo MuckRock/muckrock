@@ -13,7 +13,6 @@ from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage
 from django.db.models import F, Q, Sum
-from django.db.models.query import Prefetch
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -49,11 +48,10 @@ from muckrock.accounts.utils import (
 )
 from muckrock.agency.models import Agency
 from muckrock.core.forms import DonateForm, NewsletterSignupForm, SearchForm
+from muckrock.core.models import HomePage
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.foia.models import FOIAFile, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.news.models import Article, HomepageOverride
-from muckrock.project.models import Project
 
 logger = logging.getLogger(__name__)
 
@@ -379,98 +377,40 @@ class LandingView(TemplateView):
     template_name = "flatpages/landing.html"
 
 
-class Homepage:
-    """Control caching for the homepage"""
-
-    def get_cached_values(self):
-        """Return all the methods used to generate the cached values"""
-        return [
-            ("articles", self.articles),
-            ("featured_projects", self.featured_projects),
-            ("completed_requests", self.completed_requests),
-            ("stats", self.stats),
-        ]
-
-    def articles(self):
-        """Get the articles for the front page"""
-        articles = list(Article.objects.get_published().prefetch_authors()[:5])
-        overrides = (
-            HomepageOverride.objects.all()
-            .select_related("article")
-            .prefetch_related(
-                Prefetch(
-                    "article__authors",
-                    queryset=User.objects.select_related("profile").order_by(
-                        "authorship__order"
-                    ),
-                ),
-            )
-        )
-        for override in overrides:
-            articles[override.slot - 1] = override
-        return articles
-
-    def featured_projects(self):
-        """Get the featured projects for the front page"""
-        # This is hardcoded for now, and will be made dynamic
-        # https://github.com/MuckRock/muckrock/issues/2014
-        return lambda: Project.objects.filter(
-            id__in=[1168, 1177, 1179]
-        ).prefetch_related(
-            Prefetch(
-                "articles",
-                queryset=Article.objects.get_published().prefetch_authors(),
-                to_attr="items",
-            ),
-            "articles__authors",
-        )
-
-    def completed_requests(self):
-        """Get recently completed requests"""
-        return lambda: (
-            FOIARequest.objects.get_public()
-            .get_done()
-            .order_by("-datetime_done", "pk")
-            .select_related(
-                "agency__jurisdiction__parent__parent", "composer__user__profile"
-            )
-            .only(
-                "status",
-                "slug",
-                "title",
-                "agency__name",
-                "agency__slug",
-                "agency__jurisdiction__slug",
-                "agency__jurisdiction__level",
-                "agency__jurisdiction__name",
-                "agency__jurisdiction__parent__abbrev",
-                "agency__jurisdiction__parent__name",
-                "agency__jurisdiction__parent__slug",
-                "agency__jurisdiction__parent__parent__slug",
-                "composer__user__username",
-                "composer__user__profile__full_name",
-            )
-            .get_public_file_count(limit=6)
-        )
-
-    def stats(self):
-        """Get some stats to show on the front page"""
-        # pylint: disable=unnecessary-lambda
-        return {
-            "request_count": lambda: FOIARequest.objects.count(),
-            "completed_count": lambda: FOIARequest.objects.get_done().count(),
-            "page_count": lambda: FOIAFile.objects.aggregate(pages=Sum("pages"))[
-                "pages"
-            ],
-            "agency_count": lambda: Agency.objects.get_approved().count(),
-        }
-
-
 def homepage(request):
     """Get all the details needed for the homepage"""
-    context = {}
-    for name, value in Homepage().get_cached_values():
-        context[name] = value()
+    # Heavily cache homepage data
+    homepage_obj = cache.get("homepage_obj")
+    if homepage_obj is None:
+        homepage_obj = HomePage.load()
+        cache.set("homepage_obj", homepage_obj, 60 * 30)  # 30 min
+
+    parsed_product_stats = homepage_obj.product_stats
+    expertise_sections = homepage_obj.expertise_sections
+    foia_stats = cache.get("homepage_foia_stats")
+    if foia_stats is None:
+        foia_stats = {
+            "request_count": FOIARequest.objects.count(),
+            "completed_count": FOIARequest.objects.get_done().count(),
+            "page_count": FOIAFile.objects.aggregate(pages=Sum("pages"))["pages"],
+            "agency_count": Agency.objects.get_approved().count(),
+        }
+        cache.set("homepage_foia_stats", foia_stats, 60 * 30)  # 30 min
+
+    featured_project_slots = cache.get("homepage_featured_project_slots")
+    if featured_project_slots is None:
+        featured_project_slots = homepage_obj.featured_project_slots.select_related(
+            "project"
+        ).prefetch_related("articles")
+        cache.set("homepage_featured_project_slots", featured_project_slots, 60 * 30)
+
+    context = {
+        "homepage": homepage_obj,
+        "foia_stats": foia_stats,
+        "product_stats": parsed_product_stats,
+        "featured_project_slots": featured_project_slots,
+        "expertise_sections": expertise_sections,
+    }
     return render(request, "homepage-2025.html", context)
 
 
