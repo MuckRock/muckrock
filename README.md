@@ -24,19 +24,41 @@ MuckRock depends on Squarelet for user authentication. As the services need to c
 2. Enter the directory - `cd muckrock`
 3. Run the dotenv initialization script - `python initialize_dotenvs.py`
 This will create files with the environment variables needed to run the development environment.
-4. Set an environment variable that directs `docker-compose` to use the `local.yml` file - `export COMPOSE_FILE=local.yml`
-5. Set up the javascript run `inv npm "install"` and `inv npm "run build"`
-6. Start the docker images - `inv up`
+4. Set a local environment variable that directs `docker compose` to use the `local.yml` file - `export COMPOSE_FILE=local.yml`
+5. Set up the Javascript runtime. Run `inv npm "install"` and then `inv npm "run build"`. 
+6. In  `.envs/.local/.django` set the following environment variables:
+
+-   `SQUARELET_KEY`  Set this to the value of Client ID from the Squarelet Client.
+-   `SQUARELET_SECRET`  Set this to the value of Client SECRET from the Squarelet Client.
+-   `JWT_VERIFYING_KEY`  Retrieve the value for JWT_VERIFYING_KEY by opening the Squarelet Django shell using `inv shell`and copying the settings.SIMPLE_JWT['VERIFYING_KEY'] (remove the leading b' and the trailing ', leave the \n portions as-is). 
+-   `OPENAI_API_KEY` For local testing, you can make this value "test". If you intend on testing aspects that actually require AI functionality, then provide a real OPENAI API key. 
+
+7. Start the docker images - `inv up`.
 This will build and start all of the docker images using docker-compose.
-7. Set `dev.muckrock.com` to point to localhost - `echo "127.0.0.1   dev.muckrock.com" | sudo tee -a /etc/hosts`
-8. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
-9. In  `.envs/.local/.django` set the following environment variables:
 
--   `SQUARELET_KEY`  to the value of Client ID from the Squarelet Client
--   `SQUARELET_SECRET`  to the value of Client SECRET from the Squarelet Client
-10. You must restart the Docker Compose session (via the command `docker-compose down` followed by `docker-compose up`) each time you change a `.django` file for it to take effect.
+<strong>Note: </strong>
+If you cloned this directory using `gh repo clone MuckRock/muckrock` instead of  `git clone --recurse-submodules git@github.com:MuckRock/muckrock.git` then you will receive an error that the gloo app isn't available. To fix this, 
+Enter the muckrock/muckrock/gloo directory `cd muckrock/gloo`. Run `git submodule init` and then `git submodule update` to clone the gloo app as well. 
 
-You should now be able to log in to MuckRock using your Squarelet account.
+
+8. Set `dev.muckrock.com` to point to localhost - `echo "127.0.0.1   dev.muckrock.com" | sudo tee -a /etc/hosts`
+9. Enter `dev.muckrock.com` into your browser - you should see the MuckRock home page.
+
+Note: You must restart the Docker Compose session (via the command `inv down` followed by `inv up`) each time you change a `.django` file for it to take effect.
+
+10. Log in to `dev.muckrock.com` with the credentials for your Squarelet superuser account. 
+
+11. We need to set a superuser for the MuckRock Django app so that you can access the admin backend. 
+Open a Django shell in the folder for MuckRock using `inv shell` and run the following commands:
+ ```
+      tempUser = User.objects.all()[0]
+      tempUser.is_superuser = True
+      tempUser.save()
+      tempUser.is_staff = True
+      tempUser.save()
+```
+
+You will now be able to access dev.muckrock.com/admin
 
 ## Docker info
 
@@ -59,7 +81,7 @@ This is the [Django][django] application
 * Celery Beat
 The celery beat image is responsible for queueing up periodic celery tasks.
 
-All systems can be brought up using `inv up`.  You can rebuild all images using `inv build`.  There are various other invoke commands for common tasks interacting with docker, which you can view in the `tasks.py` file.
+All systems can be brought up using `inv up`.  Similarly, all systems can be brought down using `inv down`. You can rebuild all images using `inv build`.  There are various other invoke commands for common tasks interacting with docker, which you can view in the `tasks.py` file.
 
 ### Networking Setup
 
