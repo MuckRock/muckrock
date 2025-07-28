@@ -215,7 +215,15 @@ class TaskList(MRFilterListView):
                 self.task_post_helper(request, task)
         except ValueError as exception:
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                return JsonResponse(exception.args[0], status=400)
+                return JsonResponse(
+                    {
+                        "message": exception.args[0],
+                        "errors": (
+                            exception.args[1] if len(exception.args) > 1 else None
+                        ),
+                    },
+                    status=400,
+                )
             else:
                 messages.warning(self.request, exception)
                 return redirect(self.get_redirect_url())
@@ -430,7 +438,9 @@ class NewAgencyTaskList(TaskList):
         if new_agency_form.is_valid():
             new_agency_form.save()
         else:
-            raise ValueError("The agency info form is invalid.")
+            raise ValueError(
+                "The agency info form is invalid.", dict(new_agency_form.errors)
+            )
         task.approve()
         form_data = new_agency_form.cleaned_data
         # phone numbers must be strings not phone number objects to serialize

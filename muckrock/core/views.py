@@ -259,6 +259,25 @@ class MRListView(PaginationMixin, TitleMixin, ListView):
 
     template_name = "base_list.html"
 
+    def get(self, request, *args, **kwargs):
+        try:
+            page = int(request.GET.get("page", 1))
+        except ValueError:
+            page = 1
+        if request.user.is_anonymous and page > 10:
+            context = {
+                "error": "Please create an account and log in to see "
+                "results for pages beyond the first 10"
+            }
+            return render(
+                request,
+                "base_list.html",
+                context,
+                status=401,
+            )
+
+        return super().get(request, *args, **kwargs)
+
 
 class MROrderedListView(OrderedSortMixin, MRListView):
     """Adds ordering to a list view."""
@@ -393,7 +412,18 @@ class Homepage:
 
     def featured_projects(self):
         """Get the featured projects for the front page"""
-        return Project.objects.get_public().optimize().filter(featured=True)[:4]
+        # This is hardcoded for now, and will be made dynamic
+        # https://github.com/MuckRock/muckrock/issues/2014
+        return lambda: Project.objects.filter(
+            id__in=[1168, 1177, 1179]
+        ).prefetch_related(
+            Prefetch(
+                "articles",
+                queryset=Article.objects.get_published().prefetch_authors(),
+                to_attr="items",
+            ),
+            "articles__authors",
+        )
 
     def completed_requests(self):
         """Get recently completed requests"""
@@ -441,7 +471,7 @@ def homepage(request):
     context = {}
     for name, value in Homepage().get_cached_values():
         context[name] = value()
-    return render(request, "homepage.html", context)
+    return render(request, "homepage-2025.html", context)
 
 
 @user_passes_test(lambda u: u.is_staff)

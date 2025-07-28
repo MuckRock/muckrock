@@ -67,7 +67,29 @@
             height: 100%;
         }
     }
+
+    .newsletter-widget {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        margin-bottom: 0;
+        background: $color-blue-light;
+        color: $color-blue-dark;
+        padding: $vr/2;
+        margin: 1rem 0;
+        gap: 0;
+
+        .call-to-action {
+            @include flex(1 1 20em);
+            width: 100%;
+            max-width: unset;
+            padding: 1rem;
+            margin-bottom: 0;
+            gap: 0;
+        }
+    }
 }
+
 .news__aside {
     @include flex(1 1 16em);
     @include padding;

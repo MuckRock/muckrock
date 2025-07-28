@@ -1,27 +1,36 @@
 footer.website-footer {
-    display: block;
+    width: 100%;
+}
+
+footer.website-footer .global-footer {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: stretch;
     width: 100%;
     margin: 0;
-    color: $color-grey-6;
+    padding: 3rem;
+    gap: 2rem 3rem;
+
+    color: $color-white;
     background-color: $color-black;
 
-    .logo {
+    .logotype {
         display: inline-block;
         margin-bottom: $vr;
+        color: $color-white;
         svg {
-            fill: $color-white;
+            fill: currentColor;
+            width: auto;
             height: 2rem;
-            width: 2rem;
         }
         &:hover {
-            svg {
-                fill: $color-blue;
-            }
+            color: $color-blue;
         }
     }
 
     a {
-        color: $color-grey-6;
+        color: $color-grey-7;
         &:hover {
             color: $color-blue;
             text-decoration: none;
@@ -48,30 +57,67 @@ footer.website-footer {
     li {
         font-size: $size-3;
         line-height: $lh;
-        margin-bottom: $vr/2;
+        margin-bottom: 0;
     }
 
-    .footer {
-        padding: $vr 0;
-    }
-
-    .footer, .links {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-    }
-
-    .brand, .link-group {
-        padding: 0 $vr;
-    }
-
-    .brand {
-        @include flex(1 1 20em);
-        max-width: 20em;
+    .info, .links {
+        flex: 1 1 20rem;
+        max-width: 36rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .link-group {
-        @include flex(1 1 10em);
         margin-bottom: 0;
+        padding: 2rem 0;
     }
+
+    .link-group ul {
+        display: flex;
+        align-items: baseline;
+        align-content: center;
+        gap: 1rem 2rem;
+        align-self: stretch;
+        flex-wrap: wrap;
+    }
+
+    .donation {
+        & .button {
+            margin-bottom: 1rem;
+        }
+        & p {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .memberships {
+        display: flex;
+        align-items: center;
+        gap: 1.75rem;
+    }
+
+    .membership {
+        display: block;
+        width: 6rem;
+        height: auto;
+
+        img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+    }
+}
+
+footer.website-footer .newsletter-widget {
+    color: var(--blue-5, #053775);
+    background: var(--blue-1, #EEF3F9);
+    margin-bottom: 0;
+}
+
+footer.website-footer .donation-widget {
+    color: $color-white;
+    background: var(--blue-5, #053775);
+    margin-bottom: 0;
 }
