@@ -29,4 +29,4 @@ class TestSlackNotifications(TestCase):
         endpoint = self.slack.endpoint
         data = json.dumps(self.slack.payload)
         self.slack.send()
-        mock_post.assert_called_with(endpoint, data=data)
+        mock_post.assert_called_with(endpoint, data=data, timeout=10)

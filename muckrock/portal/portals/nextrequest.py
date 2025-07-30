@@ -296,7 +296,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
     def confirm_account_task(self, comm_pk, link):
         """Do the confirmation in a task"""
         comm = FOIACommunication.objects.get(pk=comm_pk)
-        reply = requests.get(link)
+        reply = requests.get(link, timeout=10)
         if reply.status_code == 200:
             # If there were initial files on the request,
             # they must be uploaded after confirming the account

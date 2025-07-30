@@ -8,8 +8,8 @@ from django.http import Http404
 from django.test import TestCase
 
 # Third Party
+import pytest
 from django_hosts.resolvers import reverse
-from nose.tools import eq_, ok_, raises
 
 # MuckRock
 from muckrock.core.factories import UserFactory
@@ -28,15 +28,15 @@ class TestHomepage(TestCase):
     def test_unauthenticated(self):
         """The homepage should return 200."""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_authenticated(self):
         """If the user is authenticated, the homepage should redirect to their
         profile."""
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
-        eq_(response.status_code, 302)
-        eq_(response.url, reverse("profile", host="foiamachine"))
+        assert response.status_code == 302
+        assert response.url == reverse("profile", host="foiamachine")
 
 
 class TestProfile(TestCase):
@@ -49,18 +49,16 @@ class TestProfile(TestCase):
     def test_unauthenticated(self):
         """Authentication should be required to view the profile page."""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 302, "The view should redirect.")
-        eq_(
-            response.url,
-            reverse("login", host="foiamachine") + "?next=" + self.url,
-            "The redirect should point to the login view, with this as the next view.",
-        )
+        assert response.status_code == 302, "The view should redirect."
+        assert (
+            response.url == reverse("login", host="foiamachine") + "?next=" + self.url
+        ), "The redirect should point to the login view, with this as the next view."
 
     def test_authenticated(self):
         """When authenticated, the view should return 200."""
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
 
 class TestFoiaMachineRequestCreateView(TestCase):
@@ -74,18 +72,16 @@ class TestFoiaMachineRequestCreateView(TestCase):
     def test_unauthenticated(self):
         """Unauthenticated users should be redirected to the login screen."""
         response = http_get_response(self.url, self.view)
-        eq_(response.status_code, 302, "The view should redirect.")
-        eq_(
-            response.url,
-            reverse("login", host="foiamachine") + "?next=" + self.url,
-            "The redirect should point to the login view, with this as the next view.",
-        )
+        assert response.status_code == 302, "The view should redirect."
+        assert (
+            response.url == reverse("login", host="foiamachine") + "?next=" + self.url
+        ), "The redirect should point to the login view, with this as the next view."
 
     def test_authenticated(self):
         """When authenticated, the view should return 200."""
         user = UserFactory()
         response = http_get_response(self.url, self.view, user)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_create(self):
         """Posting a valid creation form should create a request and redirect to it."""
@@ -100,16 +96,14 @@ class TestFoiaMachineRequestCreateView(TestCase):
                 "jurisdiction": jurisdiction,
             }
         )
-        ok_(form.is_valid())
+        assert form.is_valid()
         response = http_post_response(self.url, self.view, form.data, self.user)
-        eq_(
-            response.status_code,
-            302,
-            "When successful the view should redirect to the request.",
-        )
+        assert (
+            response.status_code == 302
+        ), "When successful the view should redirect to the request."
         foi = models.FoiaMachineRequest.objects.first()
-        eq_(response.url, foi.get_absolute_url())
-        ok_(foi.communications.count() == 1, "A communication should be created.")
+        assert response.url == foi.get_absolute_url()
+        assert foi.communications.count() == 1, "A communication should be created."
 
 
 class TestFoiaMachineRequestDetailView(TestCase):
@@ -124,19 +118,19 @@ class TestFoiaMachineRequestDetailView(TestCase):
     def test_owner_get(self):
         """Only the owner can see the post without a share url."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_shared_get(self):
         """Anyone else can see the request if it has the share url."""
         sharing_code = self.foi.generate_sharing_code()
         sharing_url = self.url + "?sharing=" + sharing_code
         response = http_get_response(sharing_url, self.view, **self.kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
-    @raises(Http404)
     def test_deny_others(self):
         """Anyone else should not be able to see the request."""
-        http_get_response(self.url, self.view, **self.kwargs)
+        with pytest.raises(Http404):
+            http_get_response(self.url, self.view, **self.kwargs)
 
 
 class TestFoiaMachineRequestShareView(TestCase):
@@ -151,44 +145,41 @@ class TestFoiaMachineRequestShareView(TestCase):
     def test_anonymous(self):
         """Logged out users should be redirected to the login view."""
         response = http_get_response(self.url, self.view, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(
-            response.url,
-            (
-                reverse("login", host="foiamachine")
-                + "?next="
-                + reverse("foi-share", host="foiamachine", kwargs=self.kwargs)
-            ),
+        assert response.status_code == 302
+        assert response.url == (
+            reverse("login", host="foiamachine")
+            + "?next="
+            + reverse("foi-share", host="foiamachine", kwargs=self.kwargs)
         )
 
     def test_not_owner(self):
         """Users who are not the owner should be redirected to the FOI detail view."""
         not_owner = UserFactory()
         response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.foi.get_absolute_url())
+        assert response.status_code == 302
+        assert response.url == self.foi.get_absolute_url()
 
     def test_owner(self):
         """Getting the share view should just redirect to the request detail view."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.foi.get_absolute_url() + "#share")
+        assert response.status_code == 302
+        assert response.url == self.foi.get_absolute_url() + "#share"
 
     def test_post_enable(self):
         """Posting enable should turn on link sharing."""
         data = {"action": "enable"}
         http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
         self.foi.refresh_from_db()
-        ok_(self.foi.sharing_code)
+        assert self.foi.sharing_code
 
     def test_post_disable(self):
         """Posting disable should turn off link sharing."""
         self.foi.generate_sharing_code()
-        ok_(self.foi.sharing_code)
+        assert self.foi.sharing_code
         data = {"action": "disable"}
         http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
         self.foi.refresh_from_db()
-        ok_(not self.foi.sharing_code)
+        assert not self.foi.sharing_code
 
 
 class TestFoiaMachineRequestUpdateView(TestCase):
@@ -203,27 +194,24 @@ class TestFoiaMachineRequestUpdateView(TestCase):
     def test_anonymous(self):
         """Logged out users should be redirected to the login view."""
         response = http_get_response(self.url, self.view, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(
-            response.url,
-            (
-                reverse("login", host="foiamachine")
-                + "?next="
-                + reverse("foi-update", host="foiamachine", kwargs=self.kwargs)
-            ),
+        assert response.status_code == 302
+        assert response.url == (
+            reverse("login", host="foiamachine")
+            + "?next="
+            + reverse("foi-update", host="foiamachine", kwargs=self.kwargs)
         )
 
     def test_not_owner(self):
         """Users who are not the owner should be redirected to the FOI detail view."""
         not_owner = UserFactory()
         response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.foi.get_absolute_url())
+        assert response.status_code == 302
+        assert response.url == self.foi.get_absolute_url()
 
     def test_owner(self):
         """The owner should be able to get the request."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_post(self):
         """Posting updated request info should update the request!"""
@@ -235,19 +223,21 @@ class TestFoiaMachineRequestUpdateView(TestCase):
             "jurisdiction": new_jurisdiction.id,
         }
         form = forms.FoiaMachineRequestForm(data, instance=self.foi)
-        ok_(form.is_valid())
+        assert form.is_valid()
         response = http_post_response(
             self.url, self.view, data, self.foi.user, **self.kwargs
         )
         self.foi.refresh_from_db()
         # we have to update the slug, because the title changed
         self.kwargs["slug"] = self.foi.slug
-        eq_(response.status_code, 302)
-        eq_(response.url, reverse("foi-detail", host="foiamachine", kwargs=self.kwargs))
-        eq_(self.foi.title, data["title"])
-        eq_(self.foi.status, data["status"])
-        eq_(self.foi.request_language, data["request_language"])
-        eq_(self.foi.jurisdiction, new_jurisdiction)
+        assert response.status_code == 302
+        assert response.url == reverse(
+            "foi-detail", host="foiamachine", kwargs=self.kwargs
+        )
+        assert self.foi.title == data["title"]
+        assert self.foi.status == data["status"]
+        assert self.foi.request_language == data["request_language"]
+        assert self.foi.jurisdiction == new_jurisdiction
 
 
 class TestFoiaMachineRequestDeleteView(TestCase):
@@ -262,34 +252,31 @@ class TestFoiaMachineRequestDeleteView(TestCase):
     def test_anonymous(self):
         """Logged out users should be redirected to the login view."""
         response = http_get_response(self.url, self.view, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(
-            response.url,
-            (
-                reverse("login", host="foiamachine")
-                + "?next="
-                + reverse("foi-delete", host="foiamachine", kwargs=self.kwargs)
-            ),
+        assert response.status_code == 302
+        assert response.url == (
+            reverse("login", host="foiamachine")
+            + "?next="
+            + reverse("foi-delete", host="foiamachine", kwargs=self.kwargs)
         )
 
     def test_not_owner(self):
         """Users who are not the owner should be redirected to the FOI detail view."""
         not_owner = UserFactory()
         response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.foi.get_absolute_url())
+        assert response.status_code == 302
+        assert response.url == self.foi.get_absolute_url()
 
     def test_owner(self):
         """The owner should be able to get the request."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
-    @raises(ObjectDoesNotExist)
     def test_post(self):
         """Posting to the delete view should delete the request."""
         data = {}
         http_post_response(self.url, self.view, data, self.foi.user, **self.kwargs)
-        self.foi.refresh_from_db()
+        with pytest.raises(ObjectDoesNotExist):
+            self.foi.refresh_from_db()
 
 
 class TestFoiaMachineCommunicationCreateView(TestCase):
@@ -304,27 +291,24 @@ class TestFoiaMachineCommunicationCreateView(TestCase):
     def test_anonymous(self):
         """Logged out users should be redirected to the login view."""
         response = http_get_response(self.url, self.view, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(
-            response.url,
-            (
-                reverse("login", host="foiamachine")
-                + "?next="
-                + reverse("comm-create", host="foiamachine", kwargs=self.kwargs)
-            ),
+        assert response.status_code == 302
+        assert response.url == (
+            reverse("login", host="foiamachine")
+            + "?next="
+            + reverse("comm-create", host="foiamachine", kwargs=self.kwargs)
         )
 
     def test_not_owner(self):
         """Users who are not the owner should be redirected to the FOI detail view."""
         not_owner = UserFactory()
         response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.foi.get_absolute_url())
+        assert response.status_code == 302
+        assert response.url == self.foi.get_absolute_url()
 
     def test_owner(self):
         """The owner should be able to get the request."""
         response = http_get_response(self.url, self.view, self.foi.user, **self.kwargs)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
 
 class TestFoiaMachineCommunicationUpdateView(TestCase):
@@ -344,29 +328,26 @@ class TestFoiaMachineCommunicationUpdateView(TestCase):
     def test_anonymous(self):
         """Logged out users should be redirected to the login view."""
         response = http_get_response(self.url, self.view, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(
-            response.url,
-            (
-                reverse("login", host="foiamachine")
-                + "?next="
-                + reverse("comm-update", host="foiamachine", kwargs=self.kwargs)
-            ),
+        assert response.status_code == 302
+        assert response.url == (
+            reverse("login", host="foiamachine")
+            + "?next="
+            + reverse("comm-update", host="foiamachine", kwargs=self.kwargs)
         )
 
     def test_not_owner(self):
         """Users who are not the owner should be redirected to the FOI detail view."""
         not_owner = UserFactory()
         response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.comm.request.get_absolute_url())
+        assert response.status_code == 302
+        assert response.url == self.comm.request.get_absolute_url()
 
     def test_owner(self):
         """The owner should be able to get the request."""
         response = http_get_response(
             self.url, self.view, self.comm.request.user, **self.kwargs
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
 
 class TestFoiaMachineCommunicationDeleteView(TestCase):
@@ -386,34 +367,31 @@ class TestFoiaMachineCommunicationDeleteView(TestCase):
     def test_anonymous(self):
         """Logged out users should be redirected to the login view."""
         response = http_get_response(self.url, self.view, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(
-            response.url,
-            (
-                reverse("login", host="foiamachine")
-                + "?next="
-                + reverse("comm-delete", host="foiamachine", kwargs=self.kwargs)
-            ),
+        assert response.status_code == 302
+        assert response.url == (
+            reverse("login", host="foiamachine")
+            + "?next="
+            + reverse("comm-delete", host="foiamachine", kwargs=self.kwargs)
         )
 
     def test_not_owner(self):
         """Users who are not the owner should be redirected to the FOI detail view."""
         not_owner = UserFactory()
         response = http_get_response(self.url, self.view, not_owner, **self.kwargs)
-        eq_(response.status_code, 302)
-        eq_(response.url, self.comm.request.get_absolute_url())
+        assert response.status_code == 302
+        assert response.url == self.comm.request.get_absolute_url()
 
     def test_owner(self):
         """The owner should be able to get the request."""
         response = http_get_response(
             self.url, self.view, self.comm.request.user, **self.kwargs
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
-    @raises(ObjectDoesNotExist)
     def test_post(self):
         """Posting to the delete view should delete the communication."""
         data = {}
         user = self.comm.request.user
         http_post_response(self.url, self.view, data, user, **self.kwargs)
-        self.comm.refresh_from_db()
+        with pytest.raises(ObjectDoesNotExist):
+            self.comm.refresh_from_db()

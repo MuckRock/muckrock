@@ -1,5 +1,5 @@
 # # syntax = docker/dockerfile:experimental
-FROM python:3.9.19
+FROM python:3.11
 
 ENV PYTHONUNBUFFERED 1
 

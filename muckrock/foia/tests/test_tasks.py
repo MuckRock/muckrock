@@ -4,7 +4,8 @@ from django.db import connection, reset_queries
 from django.test import TestCase
 
 # Third Party
-from nose.tools import eq_
+import boto3
+from moto import mock_aws
 
 # MuckRock
 from muckrock.core.factories import UserFactory
@@ -14,8 +15,11 @@ from muckrock.foia.tasks import ExportCsv
 
 class ExportCsvTests(TestCase):
 
+    @mock_aws
     def test_db_calls(self):
         user = UserFactory()
+        s3 = boto3.client("s3")
+        s3.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
 
         def get_num_queries(batch_size):
             foias = FOIARequestFactory.create_batch(batch_size)
@@ -31,4 +35,4 @@ class ExportCsvTests(TestCase):
 
             return num_queries
 
-        eq_(get_num_queries(1), get_num_queries(10))
+        assert get_num_queries(1) == get_num_queries(10)

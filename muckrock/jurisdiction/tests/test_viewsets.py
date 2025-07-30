@@ -8,7 +8,6 @@ from django.urls import reverse
 
 # Third Party
 import mock
-from nose.tools import eq_, ok_
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
@@ -38,9 +37,9 @@ class TestExemptionList(TestCase):
         exemption2 = ExemptionFactory(name="Exemption Two")
         request = self.factory.get(self.endpoint)
         response = self.view(request)
-        eq_(response.status_code, 200)
-        ok_(ExemptionSerializer(exemption1).data in response.data["results"])
-        ok_(ExemptionSerializer(exemption2).data in response.data["results"])
+        assert response.status_code == 200
+        assert ExemptionSerializer(exemption1).data in response.data["results"]
+        assert ExemptionSerializer(exemption2).data in response.data["results"]
 
     def test_list_query_filter(self):
         """The list should be filterable by a query."""
@@ -48,15 +47,13 @@ class TestExemptionList(TestCase):
         exemption_bar = ExemptionFactory(name="Bar")
         request = self.factory.get(self.endpoint, {"q": "Foo"})
         response = self.view(request)
-        eq_(response.status_code, 200)
-        ok_(
-            ExemptionSerializer(exemption_foo).data in response.data["results"],
-            "An exemption matching the query should be included in the list.",
-        )
-        ok_(
-            ExemptionSerializer(exemption_bar).data not in response.data["results"],
-            "An exemption not matching the query should not be included in the list.",
-        )
+        assert response.status_code == 200
+        assert (
+            ExemptionSerializer(exemption_foo).data in response.data["results"]
+        ), "An exemption matching the query should be included in the list."
+        assert (
+            ExemptionSerializer(exemption_bar).data not in response.data["results"]
+        ), "An exemption not matching the query should not be included in the list."
 
     def test_list_jurisdiction_filter(self):
         """The list should be filterable by a jurisdiction."""
@@ -66,15 +63,13 @@ class TestExemptionList(TestCase):
         exemption_wa = ExemptionFactory(jurisdiction=washington)
         request = self.factory.get(self.endpoint, {"jurisdiction": massachusetts.pk})
         response = self.view(request)
-        eq_(response.status_code, 200)
-        ok_(
-            ExemptionSerializer(exemption_ma).data in response.data["results"],
-            "An exemption for the jurisdiction should be included in the list.",
-        )
-        ok_(
-            ExemptionSerializer(exemption_wa).data not in response.data["results"],
-            "An exemption not for the jurisdiction should not be included in the list.",
-        )
+        assert response.status_code == 200
+        assert (
+            ExemptionSerializer(exemption_ma).data in response.data["results"]
+        ), "An exemption for the jurisdiction should be included in the list."
+        assert (
+            ExemptionSerializer(exemption_wa).data not in response.data["results"]
+        ), "An exemption not for the jurisdiction should not be included in the list."
 
 
 @mock.patch("muckrock.task.tasks.create_ticket.delay", mock.Mock())
@@ -98,29 +93,29 @@ class TestExemptionCreation(TestCase):
         """If the request is unauthenticated, the view should return a 401 status."""
         request = self.factory.post(self.endpoint, self.data, format="json")
         response = self.view(request)
-        eq_(response.status_code, 401)
+        assert response.status_code == 401
 
     def test_authenticated(self):
         """If the request is authenticated, the view should return a 200 status."""
         request = self.factory.post(self.endpoint, self.data, format="json")
         force_authenticate(request, user=self.user)
         response = self.view(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_task_created(self):
         """A FlaggedTask should be created."""
-        eq_(FlaggedTask.objects.count(), 0)
+        assert FlaggedTask.objects.count() == 0
         request = self.factory.post(self.endpoint, self.data, format="json")
         force_authenticate(request, user=self.user)
         response = self.view(request)
         # Check that the task was created
-        eq_(FlaggedTask.objects.count(), 1)
+        assert FlaggedTask.objects.count() == 1
         task = FlaggedTask.objects.first()
-        eq_(task.foia, self.foia)
-        eq_(task.text, self.data["language"])
-        eq_(task.user, self.user)
+        assert task.foia == self.foia
+        assert task.text == self.data["language"]
+        assert task.user == self.user
         # Check that the task was included in the response
-        eq_(FlaggedTaskSerializer(task).data, response.data)
+        assert FlaggedTaskSerializer(task).data == response.data
 
     def test_missing_data(self):
         """If the request is missing data, the form should return a validation error."""
@@ -130,7 +125,7 @@ class TestExemptionCreation(TestCase):
         )
         force_authenticate(request, user=self.user)
         response = self.view(request)
-        eq_(response.status_code, 400)
+        assert response.status_code == 400
 
 
 class TestTemplateEndpoint(TestCase):
@@ -150,4 +145,4 @@ class TestTemplateEndpoint(TestCase):
             reverse("api-jurisdiction-template", kwargs={"pk": jurisdiction.pk})
         )
         response = self.view(request, pk=jurisdiction.pk)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200

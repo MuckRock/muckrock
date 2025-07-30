@@ -9,9 +9,6 @@ from django.urls import reverse
 # Standard Library
 import json
 
-# Third Party
-from nose.tools import assert_false, eq_
-
 # MuckRock
 from muckrock.core.factories import UserFactory
 from muckrock.fine_uploader import views
@@ -31,11 +28,11 @@ class TestFineUploaderSuccessView(TestCase):
         )
         request.user = foia.user
         response = views.success_request(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
         attachment = OutboundRequestAttachment.objects.get(foia=foia)
-        eq_(attachment.ffile.name, "file_key")
-        eq_(attachment.user, foia.user)
-        assert_false(attachment.sent)
+        assert attachment.ffile.name == "file_key"
+        assert attachment.user == foia.user
+        assert not attachment.sent
 
     def test_success_bad_comm(self):
         """Test a post to the success view with a non-existent foia"""
@@ -45,7 +42,7 @@ class TestFineUploaderSuccessView(TestCase):
         )
         request.user = UserFactory()
         response = views.success_request(request)
-        eq_(response.status_code, 400)
+        assert response.status_code == 400
 
     def test_success_bad_user(self):
         """Test a post to the success view with a bad user"""
@@ -56,7 +53,7 @@ class TestFineUploaderSuccessView(TestCase):
         )
         request.user = UserFactory()
         response = views.success_request(request)
-        eq_(response.status_code, 403)
+        assert response.status_code == 403
 
     def test_success_bad_data(self):
         """Test a post to the success view with missing data"""
@@ -67,7 +64,7 @@ class TestFineUploaderSuccessView(TestCase):
         )
         request.user = foia.user
         response = views.success_request(request)
-        eq_(response.status_code, 400)
+        assert response.status_code == 400
 
 
 class TestFineUploaderSessionView(TestCase):
@@ -89,15 +86,15 @@ class TestFineUploaderSessionView(TestCase):
         )
         request.user = foia.user
         response = views.session_request(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
         attm_data = json.loads(response.content)
         attm_data.sort(key=lambda f: f["uuid"])
         attachments.sort(key=lambda f: f.pk)
         for attm_datum, attm in zip(attm_data, attachments):
-            eq_(attm_datum["name"], attm.name())
-            eq_(attm_datum["uuid"], attm.pk)
-            eq_(attm_datum["size"], attm.ffile.size)
-            eq_(attm_datum["s3Key"], attm.ffile.name)
+            assert attm_datum["name"] == attm.name()
+            assert attm_datum["uuid"] == attm.pk
+            assert attm_datum["size"] == attm.ffile.size
+            assert attm_datum["s3Key"] == attm.ffile.name
 
     def test_session_bad_comm(self):
         """Test a post to the session view with a non-existent foia"""
@@ -107,7 +104,7 @@ class TestFineUploaderSessionView(TestCase):
         )
         request.user = UserFactory()
         response = views.session_request(request)
-        eq_(response.status_code, 400)
+        assert response.status_code == 400
 
     def test_session_bad_user(self):
         """Test a post to the session view with a bad user"""
@@ -119,7 +116,7 @@ class TestFineUploaderSessionView(TestCase):
         )
         request.user = UserFactory()
         response = views.session_request(request)
-        eq_(response.status_code, 403)
+        assert response.status_code == 403
 
 
 class TestFineUploaderDeleteView(TestCase):
@@ -135,8 +132,8 @@ class TestFineUploaderDeleteView(TestCase):
         )
         request.user = attm.user
         response = views.delete_request(request, attm.pk)
-        eq_(response.status_code, 200)
-        assert_false(OutboundRequestAttachment.objects.filter(pk=attm.pk).exists())
+        assert response.status_code == 200
+        assert not OutboundRequestAttachment.objects.filter(pk=attm.pk).exists()
 
     def test_delete_bad_file(self):
         """Test a post to the delete view with a non-existent file"""
@@ -146,7 +143,7 @@ class TestFineUploaderDeleteView(TestCase):
         )
         request.user = UserFactory()
         response = views.delete_request(request, 123456)
-        eq_(response.status_code, 400)
+        assert response.status_code == 400
 
     def test_delete_bad_user(self):
         """Test a post to the delete view with a bad user"""
@@ -159,7 +156,7 @@ class TestFineUploaderDeleteView(TestCase):
         attm.user = request.user
         attm.save()
         response = views.delete_request(request, attm.pk)
-        eq_(response.status_code, 403)
+        assert response.status_code == 403
 
 
 class TestFineUploaderSignView(TestCase):
@@ -179,4 +176,4 @@ class TestFineUploaderBlankView(TestCase):
         request = request_factory.get(reverse("fine-uploader-blank"))
         request.user = UserFactory()
         response = views.blank(request)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
