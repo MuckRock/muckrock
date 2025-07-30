@@ -8,7 +8,7 @@
 <header class="global-header {% if request|is_hijacked %}global-header-hijacked{% endif %}">
   <nav class="global-navigation space-between mb0" id="nav">
     <div class="nav-section align-center mb0" id="site-nav">
-      <a href="{% if user.profile.is_agency_user %}{% url "foia-agency-list" %}{% elif is_agency_user %}#{% else %}{% url "index" %}{% endif %}" class="nav-item brand" id="nav-brand">
+      <a href="{% if user.profile.is_agency_user %}{% url "foia-agency-list" %}{% elif is_agency_user %}#{% else %}{% url "index" %}{% endif %}" class="nav-item justify-center brand" id="nav-brand">
         <span class="logotype">
           {% include 'lib/component/icon/logotype.svg' %}
         </span>
@@ -28,19 +28,65 @@
       <span class="nav-item section-toggle" id="toggle-sections" data-for="#nav-list-sections">
         {% include 'lib/component/icon/sections-lines.svg' %}
       </span>
-
-
-
       <ul class="{% if not user.is_authenticated or user.profile.is_agency_user or is_agency_user %}unauthenticated{% else %}authenticated{% endif %} section-list" id="nav-list-sections">
         {% if not user.is_authenticated and not is_agency_user %}
-          <li><a class="nav-item" href="/about/">About Us</a></li>
+          <li><a class="nav-item red" href="/donate/">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
+          <li class="dropdown" id="services">
+            <span class="nav-item" tabindex="0">Tools</span>
+            <ul>
+              <li><a class="nav-item justify-center" href="{% url 'foia-root' %}" title="MuckRock Requests">{% include 'lib/component/logo/muckrock-requests.svg' %}</a></li>
+              <li><a class="nav-item justify-center" href="https://www.documentcloud.org" title="DocumentCloud">{% include 'lib/component/logo/documentcloud.svg' %}</a></li>
+              <li><a class="nav-item justify-center" href="https://www.data-liberation-project.org" title="Data Liberation Project">{% include 'lib/component/logo/data-liberation-project.svg' %}</a></li>
+            </ul>
+          </li>
           <li><a class="nav-item" href="/newsletters/">Newsletter</a></li>
-          <li><a class="nav-item" href="{% url 'news-index' %}">News</a></li>
-          <li><a class="nav-item" href="/donate/">Donate</a></li>
-          <li><a class="nav-item" href="{% url 'foia-root' %}">Requests</a></li>
+          <li><a class="nav-item" href="{% url 'news-index' %}">Investigations</a></li>
+          <!-- TODO: Flatpages for these areas of expertise
+          <li class="dropdown">
+            <span class="nav-item" tabindex="0">Expertise</span>
+            <ul>
+              <li><a class="nav-item" href="/foia-friday/">FOIA Friday</a></li>
+              <li><a class="nav-item" href="/consulting/">Consulting &amp; research</a></li>
+              <li><a class="nav-item" href="/workshops/">Workshops &amp; trainings</a></li>
+              <li><a class="nav-item" href="/guides/">Guides &amp; case studies</a></li>
+            </ul>
+          </li>-->
+          <li class="dropdown">
+            <span class="nav-item" tabindex="0">About Us</span>
+            <ul>
+              <li><a class="nav-item" href="/about/">Mission</a></li>
+              <li><a class="nav-item" href="/staff/">Staff &amp; Board</a></li>
+              <li><a class="nav-item" href="https://help.muckrock.com/19ef88926963814ea7e8e947b7fb6222" target="_blank">FAQ</a></li>
+              <li><a class="nav-item" href="/store/">Merch Store</a></li>
+              <li><a class="nav-item red" href="/donate/">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
+            </ul>
+          </li>
         {% elif not user.profile.is_agency_user and not is_agency_user %}
-          <li><a class="nav-item" href="/about/">About Us</a></li>
-          <li><a class="nav-item" href="/newsletters/">Newsletter</a></li>
+        <li class="dropdown">
+            <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
+            <ul>
+              <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
+              <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist-drafts' %}">Drafts</a></li>
+              {% if user_organization and not user_organization.individual %}
+                <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
+              {% endif %}
+              {% if user.profile.proxy %}
+                <li><a class="nav-item" class="nav-item" href="{% url 'foia-proxy-list' %}">Proxy&nbsp;Requests</a></li>
+              {% endif %}
+              <li class="separator"><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
+              {% if user.is_staff %}
+                <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
+                <li class="separator"><a class="nav-item" href="{% url 'communication-list' %}">Communications</a></li>
+              {% endif %}
+              <li><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
+              <li><a class="nav-item" href="{% url 'jurisdiction-explore' %}">Jurisdictions</a></li>
+              <li>
+                <a class="nav-item" href="{% url 'foia-logs-landing' %}">
+                  <span class="small blue badge">NEW</span>&nbsp;FOIA Logs
+                </a>
+              </li>
+            </ul>
+          </li>
           <li class="dropdown">
             <a class="nav-item" href="{% url 'news-index' %}">News</a>
             <ul>
@@ -57,30 +103,14 @@
               <li><a class="nav-item" href="{% url 'news-archive' %}">Archive</a></li>
             </ul>
           </li>
-          <li><a class="nav-item" href="/donate/">Donate</a></li>
+          <li><a class="nav-item" href="/newsletters/">Newsletter</a></li>
           <li class="dropdown">
-            <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
+            <span class="nav-item" tabindex="0">About Us</span>
             <ul>
-              <li class="touch--show"><a class="nav-item" href="{% url 'foia-root' %}">Explore</a></li>
-              <li><a class="nav-item" href="{% url 'foia-list' %}">All&nbsp;Requests</a></li>
-              <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist' %}">Your&nbsp;Requests</a></li>
-              <li><a class="nav-item" class="nav-item" href="{% url 'foia-mylist-drafts' %}">Drafts</a></li>
-              {% if user_organization and not user_organization.individual %}
-                <li><a class="nav-item" class="nav-item" href="{% url 'foia-org-list' %}">Organization&nbsp;Requests</a></li>
-              {% endif %}
-              {% if user.profile.proxy %}
-                <li><a class="nav-item" class="nav-item" href="{% url 'foia-proxy-list' %}">Proxy&nbsp;Requests</a></li>
-              {% endif %}
-              <li><a class="nav-item" href="{% url 'foia-list-following' %}">Following</a></li>
-              {% if user.is_staff %}
-                <li><a class="nav-item" href="{% url 'foia-list-processing' %}">Processing</a></li>
-                <li><a class="nav-item" href="{% url 'communication-list' %}">Communications</a></li>
-              {% endif %}
-              <li>
-                <a class="nav-item" href="{% url 'foia-logs-landing' %}">
-                  <span class="small blue badge">NEW</span>&nbsp;FOIA Logs
-                </a>
-              </li>
+              <li><a class="nav-item" href="/about/">Mission</a></li>
+              <li><a class="nav-item" href="/staff/">Staff &amp; Board</a></li>
+              <li><a class="nav-item" href="https://help.muckrock.com/19ef88926963814ea7e8e947b7fb6222" target="_blank">FAQ</a></li>
+              <li><a class="nav-item red" href="/donate/">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
             </ul>
           </li>
         {% endif %}
@@ -104,14 +134,10 @@
             </ul>
           </li>
         {% endif %}
-        {% if not user.profile.is_agency_user and not is_agency_user %}
+        {% if user.is_authenticated and not user.profile.is_agency_user and not is_agency_user %}
           <li class="dropdown" id="more-sections">
-            <span class="nav-item">{% include 'lib/component/icon/sections-dots.svg' %} <span class="label">More</span></span>
+            <span class="nav-item justify-center">{% include 'lib/component/icon/sections-dots.svg' %} <span class="label">More</span></span>
             <ul>
-              <li><a class="nav-item" href="{% url 'jurisdiction-explore' %}">Jurisdictions</a></li>
-              <li class="separator"><a class="nav-item" href="{% url 'agency-list' %}">Agencies</a></li>
-              <li><a class="nav-item" href="/staff/">Staff</a></li>
-              <li><a class="nav-item" href="https://help.muckrock.com/19ef88926963814ea7e8e947b7fb6222">FAQ</a></li>
               <li><a class="nav-item" href="{% url 'crowdsource-index' %}">Assignments</a></li>
               <li><a class="nav-item" href="{% url 'project' %}">Projects</a></li>
               <li><a class="nav-item" href="https://help.muckrock.com/19ef8892696381e88627c50e4ee90ed4">API</a></li>
@@ -158,7 +184,7 @@
       <ul>
         {% if not user.profile.is_agency_user and not is_agency_user %}
           <li>
-            <a class="blue nav-item" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
+            <a class="blue nav-item justify-center" href="{% url 'foia-create'%}" onclick="ga('send', 'event', 'Requests', 'File', window.location.pathname)">
               {% include 'lib/component/icon/create-request.svg' %}
               <span class="label">File<span class="extended"> Request</span></span>
             </a>
@@ -279,17 +305,17 @@
             <li>
               {% with unread_notifications_count=unread_notifications.count %}
                 {% if unread_notifications_count > 0 %}
-                  <a href="{% url 'acct-notifications-unread' %}" class="black unread nav-item">
+                  <a href="{% url 'acct-notifications-unread' %}" class="black unread nav-item justify-center">
                     <span class="blue counter">{{unread_notifications_count}}</span>
                   {% else %}
-                    <a href="{% url 'acct-notifications' %}" class="black nav-item">
+                    <a href="{% url 'acct-notifications' %}" class="black nav-item justify-center">
                     {% endif %}
                   {% endwith %}
                   {% include 'lib/component/icon/notification.svg' %}
                     </a>
             </li>
             <li class="dropdown dropdown--right">
-              <span class="black nav-item" data-for="#options-dropdown">{% include 'lib/component/icon/options.svg' %}</span>
+              <span class="black nav-item justify-center" data-for="#options-dropdown">{% include 'lib/component/icon/options.svg' %}</span>
               <ul id="options-dropdown">
                 {% if user.is_staff %}
                   <li>
@@ -305,8 +331,8 @@
               </ul>
             </li>
           {% else %}
-            <li><a href="{% url 'accounts-signup' %}" class="sign-up black nav-item">Sign&nbsp;Up</a></li>
-            <li><a href="{% url "acct-login" %}?next={{ request.get_full_path }}" class="log-in black nav-item">Log&nbsp;In</a></li>
+            <li><a href="{% url 'accounts-signup' %}" class="sign-up black nav-item justify-center">Sign&nbsp;Up</a></li>
+            <li><a href="{% url "acct-login" %}?next={{ request.get_full_path }}" class="log-in black nav-item justify-center">Log&nbsp;In</a></li>
           {% endif %}
         {% elif user.profile.is_agency_user %} {# for agency users #}
           <li class="dropdown dropdown--right">
