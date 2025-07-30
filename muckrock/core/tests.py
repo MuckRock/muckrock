@@ -31,7 +31,7 @@ from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
-from muckrock.core.utils import new_action, notify
+from muckrock.core.utils import new_action, notify, parse_header
 from muckrock.core.views import NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
 from muckrock.foia.factories import FOIARequestFactory
@@ -298,3 +298,17 @@ class TestTemplatetagsFunctional(TestCase):
 
         assert tags.company_title("one\ntwo\nthree") == "one, et al"
         assert tags.company_title("company") == "company"
+
+
+def test_parse_header():
+    """Test the parse header util function"""
+
+    assert parse_header("application/json") == ("application/json", {})
+    assert parse_header('application/json; charset="utf8"') == (
+        "application/json",
+        {"charset": "utf8"},
+    )
+    assert parse_header('application/json; charset="utf8"; a="b"') == (
+        "application/json",
+        {"charset": "utf8", "a": "b"},
+    )
