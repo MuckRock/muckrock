@@ -22,12 +22,21 @@ env:
   SQUARELET_SECRET: ${{secrets.SQUARELET_SECRET}}
   AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-  AWS_STORAGE_BUCKET_NAME: muckrock-staging
 
 jobs:
   check:
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,6 +64,16 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
       postgres:
         image: postgres
         env:
@@ -73,6 +92,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+            submodules: recursive
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
