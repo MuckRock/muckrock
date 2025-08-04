@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - actions
 
 env:
   DJANGO_SECRET_KEY: ${{secrets.DJANGO_SECRET_KEY}}
