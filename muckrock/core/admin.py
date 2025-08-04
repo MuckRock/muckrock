@@ -3,12 +3,15 @@ from django import forms
 from django.contrib import admin, flatpages
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.flatpages.views import render_flatpage
-from django.db.models import TextField
+from django.db.models import TextField, JSONField
+from django.forms import widgets
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import re_path
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
+
+import json
 
 # Third Party
 from simple_history import register
@@ -17,6 +20,22 @@ from simple_history.admin import SimpleHistoryAdmin
 # MuckRock
 from muckrock.core.models import FeaturedProjectSlot, HomePage
 from muckrock.news.models import Article
+
+
+# https://stackoverflow.com/questions/48145992/showing-json-field-in-django-admin
+# https://github.com/MuckRock/documentcloud/blob/master/documentcloud/addons/admin.py#L26-L38
+class PrettyJSONWidget(widgets.Textarea):
+    def format_value(self, value):
+        try:
+            value = json.dumps(json.loads(value), indent=2, sort_keys=True)
+            # these lines will try to adjust size of TextArea to fit to content
+            row_lengths = [len(r) for r in value.split("\n")]
+            self.attrs["rows"] = min(max(len(row_lengths) + 2, 10), 30)
+            self.attrs["cols"] = min(max(max(row_lengths) + 2, 40), 120)
+            self.attrs["readonly"] = True
+            return value
+        except Exception:  # pylint: disable=broad-except
+            return super().format_value(value)
 
 
 class FlatpageForm(flatpages.admin.FlatpageForm):
@@ -215,7 +234,10 @@ class FeaturedProjectSlotInline(admin.TabularInline):
 class HomePageAdmin(SingletonModelAdmin):
     inlines = [FeaturedProjectSlotInline]
     fields = ("about_heading", "about_paragraph", "product_stats", "expertise_sections")
-    formfield_overrides = {TextField: {"widget": admin.widgets.AdminTextareaWidget}}
+    formfield_overrides = {
+        TextField: {"widget": admin.widgets.AdminTextareaWidget},
+        JSONField: {"widget": PrettyJSONWidget},
+    }
 
     def get_urls(self):
         urls = super().get_urls()

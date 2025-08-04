@@ -80,7 +80,7 @@ class HomePage(SingletonModel):
     product_stats = JSONField(
         blank=True,
         default=dict,
-        help_text=("JSON object for DocumentCloud and Data Liberation Project stats",),
+        help_text="JSON object for DocumentCloud and Data Liberation Project stats",
     )
 
     expertise_sections = JSONField(
