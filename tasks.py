@@ -1,6 +1,9 @@
+# Standard Library
 import os
+
 # Third Party
 from invoke import task
+
 
 def get_project_name():
     path = ".envs/.local/.compose"
@@ -11,7 +14,9 @@ def get_project_name():
             if line.startswith("COMPOSE_PROJECT_NAME="):
                 project_name = line.strip().split("=", 1)[1]
                 return project_name
-    print(f"DEBUG: COMPOSE_PROJECT_NAME not found in {path}, defaulting to the current working directory's name")
+    print(
+        f"DEBUG: COMPOSE_PROJECT_NAME not found in {path}, defaulting to the current working directory's name"
+    )
     return os.path.basename(os.getcwd())
 
 
@@ -57,24 +62,7 @@ def staging(c):
 
 
 @task
-def test(c, test_path="", reuse="0", capture=False, warning=False, failed=False):
-    """Run all tests, or a specific subset of tests"""
-    cmd = DOCKER_COMPOSE_RUN_OPT_USER.format(
-        opt="-e REUSE_DB={reuse}".format(reuse=reuse),
-        service="muckrock_django",
-        cmd="python {warn} manage.py test {test_path} {capture} {failed} "
-        "--settings=muckrock.settings.test".format(
-            warn="-Wd" if warning else "",
-            test_path=test_path,
-            failed="--failed" if failed else "",
-            capture="--nologcapture" if not capture else "",
-        ),
-    )
-    c.run(cmd)
-
-
-@task
-def pytest(c, path="muckrock", create_db=False, ipdb=False, warnings=False):
+def test(c, path="muckrock", create_db=False, ipdb=False, warnings=False):
     """Run the test suite"""
     create_switch = "--create-db" if create_db else ""
     ipdb_switch = "--pdb --pdbcls=IPython.terminal.debugger:Pdb" if ipdb else ""
@@ -92,7 +80,7 @@ def pytest(c, path="muckrock", create_db=False, ipdb=False, warnings=False):
 
 @task
 def test_codeship(c, v=1):
-    c.run(f"python manage.py test --settings=muckrock.settings.codeship -v {v}")
+    c.run(f"pytest -c muckrock")
 
 
 @task
@@ -171,12 +159,14 @@ def up(c):
     project = get_project_name()
     c.run(f"docker compose -p {project} up -d ")
 
+
 @task
 def down(c):
     """Shut down the docker images using the correct project name"""
     project = get_project_name()
     print(f"Bringing down containers for project: {project}")
     c.run(f"docker compose -p {project} down")
+
 
 @task
 def runserver(c):
