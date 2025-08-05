@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - actions
 
 env:
   SECRET_KEY: ${{secrets.SECRET_KEY}}
@@ -108,6 +107,6 @@ jobs:
         run: python manage.py test --settings=muckrock.settings.codeship -v 1
         env:
           # use the credentials for the service container
-          PG_USER: test
-          PG_PASSWORD: postgres
+          PG_USER: ${{secrets.PG_USER}}
+          PG_PASSWORD: ${{secrets.PG_PASSWORD}}
           DATABASE_URL: postgresql://test:postgres@localhost:5432/muckrock
