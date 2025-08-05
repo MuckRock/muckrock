@@ -10,38 +10,45 @@ from muckrock.agency.models import Agency
 from muckrock.core.views import AuthenticatedAPIMixin
 
 
+# pylint: disable=too-few-public-methods
+class AgencyFilter(django_filters.FilterSet):
+    """API Filter for Agencies"""
+
+    jurisdiction__id = django_filters.NumberFilter(
+        field_name="jurisdiction__id", label="Jurisdiction ID"
+    )
+    name = django_filters.CharFilter(
+        field_name="name", lookup_expr="icontains", label="Agency Name"
+    )
+
+    class Meta:
+        """Filters"""
+
+        model = Agency
+        fields = ("name", "jurisdiction__id")
+
+
 # pylint: disable=too-few-public-methods, too-many-ancestors
 class AgencyViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for Agency"""
 
-    queryset = Agency.objects.order_by("id")
     serializer_class = AgencySerializer
-
-    # Limit ordering fields to just name and status
-    ordering_fields = ["name", "status"]
 
     filter_backends = [
         django_filters.rest_framework.DjangoFilterBackend,
         filters.SearchFilter,
+        filters.OrderingFilter,
     ]
+    ordering_fields = ["name", "status"]
     search_fields = [
         "name",
     ]
 
-    class Filter(django_filters.FilterSet):
-        """API Filter for Agencies"""
+    filterset_class = AgencyFilter
 
-        jurisdiction__id = django_filters.NumberFilter(
-            field_name="jurisdiction__id", label="Jurisdiction ID"
-        )
-        name = django_filters.CharFilter(
-            field_name="name", lookup_expr="icontains", label="Agency Name"
-        )
-
-        class Meta:
-            """Filters"""
-
-            model = Agency
-            fields = ("name", "jurisdiction__id")
-
-    filterset_class = Filter
+    def get_queryset(self):
+        """Filter out non-approved agencies for non-staff"""
+        qs = Agency.objects.all()
+        if not self.request.user.is_staff:
+            qs = qs.filter(status="approved")
+        return qs
