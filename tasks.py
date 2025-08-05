@@ -79,23 +79,6 @@ def test(c, path="muckrock", create_db=False, ipdb=False, warnings=False):
 
 
 @task
-def pytest(c, path="muckrock", create_db=False, ipdb=False, warnings=False):
-    """Run the test suite"""
-    create_switch = "--create-db" if create_db else ""
-    ipdb_switch = "--pdb --pdbcls=IPython.terminal.debugger:Pdb" if ipdb else ""
-    warnings = "-e PYTHONWARNINGS=always" if warnings else ""
-
-    c.run(
-        DOCKER_COMPOSE_RUN_OPT_USER.format(
-            opt=f"-e DJANGO_SETTINGS_MODULE=muckrock.settings.test {warnings}",
-            service="muckrock_django",
-            cmd=f"pytest {create_switch} {ipdb_switch} {path}",
-        ),
-        pty=True,
-    )
-
-
-@task
 def test_codeship(c, v=1):
     c.run(f"pytest -c muckrock")
 
