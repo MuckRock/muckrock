@@ -1,23 +1,24 @@
 # Django
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
-# Third Party
-from rest_framework.test import APIClient
-
 # MuckRock
-from muckrock.core.factories import ProjectFactory
+from muckrock.core.factories import ProjectFactory, UserFactory
 
 
 class TestProjectViewSet(TestCase):
     def setUp(self):
-        self.client = APIClient()
-        self.project1 = ProjectFactory(title="Project 1", slug="project-1")
-        self.project2 = ProjectFactory(title="Project 2", slug="project-2")
-        self.project3 = ProjectFactory(title="Project 3", slug="project-3")
+        self.client = Client()
+        self.user = UserFactory()
+        self.client.force_login(self.user)
+        self.project1 = ProjectFactory(title="Project 1", private=False, approved=True)
+        self.project2 = ProjectFactory(title="Project 2", private=False, approved=True)
+        self.project3 = ProjectFactory(title="Project 3", private=False, approved=True)
+
+        self.list_url = reverse("api2-projects-list")
 
     def test_list_projects(self):
-        response = self.client.get(reverse("api2-projects-list"))
+        response = self.client.get(self.list_url)
         assert response.status_code == 200
         results = response.json()["results"]
         assert len(results) == 3
@@ -31,7 +32,7 @@ class TestProjectViewSet(TestCase):
 
     def test_list_projects_filtered(self):
         response = self.client.get(
-            reverse("api2-projects-list"), {"id": self.project1.pk}
+            reverse("api2-projects-list"), {"title": self.project1.title}
         )
         assert response.status_code == 200
         results = response.json()["results"]
