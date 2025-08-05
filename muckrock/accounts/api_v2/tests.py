@@ -39,7 +39,7 @@ class UserViewSetTests(TestCase):
 
         # Verify both users are returned
         response_data = response.json()
-        usernames = [user["username"] for user in response_data]
+        usernames = [user["username"] for user in response_data["results"]]
         self.assertIn("jdoe", usernames)
         self.assertIn("asmith", usernames)
 
@@ -51,7 +51,7 @@ class UserViewSetTests(TestCase):
 
         # Verify filtered result
         response_data = response.json()
-        usernames = [user["username"] for user in response_data]
+        usernames = [user["username"] for user in response_data["results"]]
         self.assertIn("jdoe", usernames)
         self.assertNotIn("asmith", usernames)
 
@@ -76,7 +76,7 @@ class UserViewSetTests(TestCase):
 
         # Verify that the regular user only sees themselves
         response_data = response.json()
-        usernames = [user["username"] for user in response_data]
+        usernames = [user["username"] for user in response_data["results"]]
         self.assertIn("jdoe", usernames)
         self.assertNotIn("asmith", usernames)  # Ensure they can't see other users
 
@@ -87,7 +87,7 @@ class UserViewSetTests(TestCase):
 
         # Verify that the staff user can see both users
         response_data = response.json()
-        usernames = [user["username"] for user in response_data]
+        usernames = [user["username"] for user in response_data["results"]]
         self.assertIn("jdoe", usernames)
         self.assertIn("asmith", usernames)
         self.assertIn("admin", usernames)
