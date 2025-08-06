@@ -80,7 +80,7 @@ def test(c, path="muckrock", create_db=False, ipdb=False, warnings=False):
 
 @task
 def test_codeship(c, v=1):
-    c.run(f"pytest -c muckrock")
+    c.run("pytest --create-db muckrock")
 
 
 @task
