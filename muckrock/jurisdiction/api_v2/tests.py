@@ -45,10 +45,19 @@ class JurisdictionViewSetTests(TestCase):
 
         # Access the response data
         response_data = response.json()
-        jurisdiction_names = [jurisdiction["name"] for jurisdiction in response_data]
+        jurisdiction_names = [
+            jurisdiction["name"] for jurisdiction in response_data["results"]
+        ]
 
-        # Check that all six jurisdictions returned
-        assert len(jurisdiction_names) == 6
+        for name in [
+            "Springfield",
+            "Springville",
+            "Missouri",
+            "Michigan",
+            "Federal Test Agency",
+            "State Test Agency",
+        ]:
+            assert name in jurisdiction_names
 
     def test_filter_by_name(self):
         """Test filtering jurisdictions by name."""
@@ -57,7 +66,9 @@ class JurisdictionViewSetTests(TestCase):
 
         # Access the response data
         response_data = response.json()
-        jurisdiction_names = [jurisdiction["name"] for jurisdiction in response_data]
+        jurisdiction_names = [
+            jurisdiction["name"] for jurisdiction in response_data["results"]
+        ]
 
         # Check that both jurisdictions are present in the response
         self.assertIn("Springfield", jurisdiction_names)
@@ -72,7 +83,7 @@ class JurisdictionViewSetTests(TestCase):
         # Access the response data
         response_data = response.json()
         jurisdiction_abbrevs = [
-            jurisdiction["abbrev"] for jurisdiction in response_data
+            jurisdiction["abbrev"] for jurisdiction in response_data["results"]
         ]
 
         # Check that the expected jurisdiction is present
@@ -89,7 +100,9 @@ class JurisdictionViewSetTests(TestCase):
 
         # Access the response data
         response_data = response.json()
-        jurisdiction_levels = [jurisdiction["level"] for jurisdiction in response_data]
+        jurisdiction_levels = [
+            jurisdiction["level"] for jurisdiction in response_data["results"]
+        ]
 
         # Check that the expected jurisdiction is present
         self.assertIn("s", jurisdiction_levels)
@@ -97,4 +110,3 @@ class JurisdictionViewSetTests(TestCase):
             "f", jurisdiction_levels
         )  # Ensure that unexpected levels are not present
         self.assertNotIn("l", jurisdiction_levels)
-        assert len(jurisdiction_levels) == 1

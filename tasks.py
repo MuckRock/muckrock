@@ -169,14 +169,6 @@ def down(c):
 
 
 @task
-def down(c):
-    """Shut down the docker images using the correct project name"""
-    project = get_project_name()
-    print(f"Bringing down containers for project: {project}")
-    c.run(f"docker compose -p {project} down")
-
-
-@task
 def runserver(c):
     """Run the development server"""
     c.run(
