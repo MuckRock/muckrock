@@ -13,7 +13,6 @@ import re
 # Third Party
 import requests_mock
 from mock.mock import Mock
-from nose.tools import eq_, ok_
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin
@@ -47,15 +46,13 @@ class TestMiniregister(TestCase):
         form = Mock()
         mixin.request = mock_middleware(request.get(reverse("foia-create")))
         user = mixin.miniregister(form, self.full_name, self.email)
-        ok_(isinstance(user, User), "A user should be created and returned.")
-        ok_(user.profile, "A profile should be created for the user.")
-        ok_(user.is_authenticated, "The user should be logged in.")
-        eq_(user.profile.full_name, "Lou Reed")
-        eq_(
-            user.username,
-            "LouReed",
-            "The username should remove the spaces from the full name.",
-        )
+        assert isinstance(user, User), "A user should be created and returned."
+        assert user.profile, "A profile should be created for the user."
+        assert user.is_authenticated, "The user should be logged in."
+        assert user.profile.full_name == "Lou Reed"
+        assert (
+            user.username == "LouReed"
+        ), "The username should remove the spaces from the full name."
 
 
 class TestUniqueUsername(TestCase):
@@ -63,22 +60,18 @@ class TestUniqueUsername(TestCase):
 
     def test_clean_username(self):
         """The username should sanitize the input name."""
-        eq_(unique_username("Allan Lasser"), "AllanLasser", "Spaces should be removed.")
-        eq_(
-            unique_username("allan@muckrock.com"),
-            "allan@muckrock.com",
-            "Emails should be valid usernames.",
-        )
-        eq_(
-            unique_username("???dark$$$money!!!"),
-            "darkmoney",
-            "Illegal symbols should be removed.",
-        )
-        eq_(
-            unique_username("?security=vulnerability"),
-            "securityvulnerability",
-            "Names that are URL keyword arguments are DEFINITELY not allowed.",
-        )
+        assert (
+            unique_username("Allan Lasser") == "AllanLasser"
+        ), "Spaces should be removed."
+        assert (
+            unique_username("allan@muckrock.com") == "allan@muckrock.com"
+        ), "Emails should be valid usernames."
+        assert (
+            unique_username("???dark$$$money!!!") == "darkmoney"
+        ), "Illegal symbols should be removed."
+        assert (
+            unique_username("?security=vulnerability") == "securityvulnerability"
+        ), "Names that are URL keyword arguments are DEFINITELY not allowed."
 
     def test_existing_username(self):
         """
@@ -90,7 +83,7 @@ class TestUniqueUsername(TestCase):
         name = "Highlander"  # there can only be one!
         username = unique_username(name)
         user = UserFactory(username=username)
-        eq_(user.username, "Highlander")
-        ok_(re.match(name + r"_[a-zA-Z]{8}", unique_username(name)))
+        assert user.username == "Highlander"
+        assert re.match(name + r"_[a-zA-Z]{8}", unique_username(name))
         lower_name = name.lower()
-        ok_(re.match(lower_name + r"_[a-zA-Z]{8}", unique_username(lower_name)))
+        assert re.match(lower_name + r"_[a-zA-Z]{8}", unique_username(lower_name))

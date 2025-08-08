@@ -515,6 +515,7 @@ class RawEmailQuerySet(models.QuerySet):
             settings.MAILGUN_API_URL + "/events",
             auth=("api", settings.MAILGUN_ACCESS_KEY),
             params={"event": "stored", "message-id": message_id},
+            timeout=10,
         )
         response.raise_for_status()
         items = response.json()["items"]
@@ -529,6 +530,7 @@ class RawEmailQuerySet(models.QuerySet):
             url,
             auth=("api", settings.MAILGUN_ACCESS_KEY),
             headers={"Accept": "message/rfc2822"},
+            timeout=10,
         )
         response.raise_for_status()
 

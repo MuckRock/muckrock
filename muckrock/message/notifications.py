@@ -38,7 +38,7 @@ class SlackNotification:
             # or the requests module will throw errors like woah
             return 0
         data = json.dumps(self.payload)
-        response = requests.post(self.endpoint, data=data)
+        response = requests.post(self.endpoint, data=data, timeout=10)
         if response.status_code == 200:
             return 1
         else:

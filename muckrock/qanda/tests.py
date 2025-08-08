@@ -7,9 +7,6 @@ from django.core import mail
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-# Third Party
-import nose.tools
-
 # MuckRock
 from muckrock.core.factories import AnswerFactory, QuestionFactory, UserFactory
 from muckrock.core.test_utils import mock_middleware
@@ -31,9 +28,7 @@ class TestQandA(TestCase):
             question=question, user__username="Charlie", user__is_active=False
         )
         AnswerFactory(question=question, user=answer1.user)
-        nose.tools.eq_(
-            set(question.answer_authors()), set([answer1.user, answer2.user])
-        )
+        assert set(question.answer_authors()) == set([answer1.user, answer2.user])
 
     def test_block_user(self):
         """Test blocking a user"""
@@ -45,11 +40,11 @@ class TestQandA(TestCase):
         request = mock_middleware(request)
         request.user = UserFactory(is_staff=True)
 
-        nose.tools.ok_(question.user.is_active)
+        assert question.user.is_active
         block_user(request, "question", question.pk)
         question.user.refresh_from_db()
-        nose.tools.assert_false(question.user.is_active)
-        nose.tools.eq_(len(mail.outbox), 1)
+        assert not question.user.is_active
+        assert len(mail.outbox) == 1
 
     def test_report_spam(self):
         """Test reporting spam"""
@@ -61,11 +56,11 @@ class TestQandA(TestCase):
         request = mock_middleware(request)
         request.user = UserFactory()
 
-        nose.tools.ok_(answer.user.is_active)
+        assert answer.user.is_active
         report_spam(request, "answer", answer.pk)
         answer.refresh_from_db()
-        nose.tools.ok_(answer.user.is_active)
-        nose.tools.eq_(len(mail.outbox), 1)
+        assert answer.user.is_active
+        assert len(mail.outbox) == 1
 
     def test_get_question_index(self):
         """Get the question index view"""
@@ -73,4 +68,4 @@ class TestQandA(TestCase):
         request = mock_middleware(request)
         request.user = UserFactory()
         response = QuestionList.as_view()(request)
-        nose.tools.eq_(response.status_code, 200)
+        assert response.status_code == 200

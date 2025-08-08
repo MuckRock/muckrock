@@ -6,9 +6,6 @@ Tests for tags
 from django import test
 from django.urls import reverse
 
-# Third Party
-from nose.tools import eq_
-
 # MuckRock
 from muckrock.tags import views
 from muckrock.tags.models import Tag, normalize
@@ -24,7 +21,9 @@ class TestTagModel(test.TestCase):
         dirty_string = "HELLO"
         expected_clean_string = "hello"
         clean_string = normalize(dirty_string)
-        eq_(clean_string, expected_clean_string, "The tag should lowercase its name.")
+        assert (
+            clean_string == expected_clean_string
+        ), "The tag should lowercase its name."
 
     def test_strip_whitespace(self):
         """The tag should strip extra whitespace from the beginning and end of
@@ -32,11 +31,9 @@ class TestTagModel(test.TestCase):
         dirty_string = " hello "
         expected_clean_string = "hello"
         clean_string = normalize(dirty_string)
-        eq_(
-            clean_string,
-            expected_clean_string,
-            "The tag should strip extra whitespace from the beginning and end of "
-            "the name.",
+        assert clean_string == expected_clean_string, (
+            "The tag should strip extra whitespace from the beginning and end "
+            "of the name."
         )
 
     def test_collapse_whitespace(self):
@@ -44,11 +41,9 @@ class TestTagModel(test.TestCase):
         dirty_string = "hello    world"
         expected_clean_string = "hello world"
         clean_string = normalize(dirty_string)
-        eq_(
-            clean_string,
-            expected_clean_string,
-            "The tag should strip extra whitespace from between words.",
-        )
+        assert (
+            clean_string == expected_clean_string
+        ), "The tag should strip extra whitespace from between words."
 
 
 class TestTagListView(test.TestCase):
@@ -68,13 +63,13 @@ class TestTagListView(test.TestCase):
         """The tag list url should resolve."""
         tag_url = reverse("tag-list")
         response = self.client.get(tag_url)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
 
     def test_list_all_tags(self):
         """The tag list should list all the tags that are used."""
         tag_list = views.list_all_tags()
-        eq_(len(Tag.objects.all()), 3, "There should be 3 tag items.")
-        eq_(len(tag_list), 0, "But none should be listed since they aren't used")
+        assert len(Tag.objects.all()) == 3, "There should be 3 tag items."
+        assert len(tag_list) == 0, "But none should be listed since they aren't used"
 
 
 class TestTagDetailView(test.TestCase):
@@ -91,4 +86,4 @@ class TestTagDetailView(test.TestCase):
         """The tag detail url should resolve."""
         tag_url = reverse("tag-detail", kwargs={"slug": self.tag_foo.slug})
         response = self.client.get(tag_url)
-        eq_(response.status_code, 200)
+        assert response.status_code == 200

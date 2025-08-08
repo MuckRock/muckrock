@@ -16,10 +16,6 @@ CACHES["default"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
 
 PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 
-INSTALLED_APPS += ("django_nose",)
-
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
-
 SITE_ID = 1
 
 # minimal middleware for speed
@@ -54,3 +50,7 @@ CLEAN_S3_ON_FOIA_DELETE = False
 
 # do not use external apis during test
 ZENDESK_TOKEN = "token"
+
+# don't use real AWS credentials for tests
+AWS_ACCESS_KEY_ID = "placeholder"
+AWS_SECRET_ACCESS_KEY = "placeholder"

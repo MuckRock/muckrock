@@ -9,7 +9,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 # MuckRock
-from muckrock.core.factories import AgencyFactory, JurisdictionFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.jurisdiction.factories import LocalJurisdictionFactory
 
 
 class AgencyViewSetTests(APITestCase):
@@ -19,8 +20,8 @@ class AgencyViewSetTests(APITestCase):
         """Set up test cases, creating jurisdictions, agencies, and users."""
         # Create test jurisdictions
         self.jurisdictions = [
-            JurisdictionFactory.create(name="1st Jurisdiction"),
-            JurisdictionFactory.create(name="2nd Jurisdiction"),
+            LocalJurisdictionFactory.create(name="1st Jurisdiction"),
+            LocalJurisdictionFactory.create(name="2nd Jurisdiction"),
         ]
 
         # Create agencies
@@ -33,7 +34,7 @@ class AgencyViewSetTests(APITestCase):
             AgencyFactory.create(
                 name="Unapproved Agency",
                 jurisdiction=self.jurisdictions[0],
-                status="unapproved",
+                status="rejected",
             ),
             AgencyFactory.create(
                 name="Second Approved Agency",
@@ -43,7 +44,7 @@ class AgencyViewSetTests(APITestCase):
         ]
 
         # URL for the agency list
-        self.url = reverse("agency-list")
+        self.url = reverse("api2-agencies-list")
 
         # Create users
         self.user1 = UserFactory(username="adam", is_staff=True)
@@ -78,7 +79,7 @@ class AgencyViewSetTests(APITestCase):
 
         self.assertNotIn("Second Approved Agency", agency_names)
 
-    def test_non_approved_agencies_hidden(self):
+    def test_rejected_agencies_hidden(self):
         """Test that non-approved agencies are hidden for non-staff users."""
         self.client.force_login(self.user2)  # Ensure we are logged in as non-staff user
         response = self.client.get(self.url)
@@ -105,6 +106,7 @@ class AgencyViewSetTests(APITestCase):
 
     def test_ordering(self):
         """Test that agencies are returned in the correct order."""
+        self.client.force_login(self.user1)
         response = self.client.get(self.url, {"ordering": "name"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

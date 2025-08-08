@@ -8,9 +8,6 @@ from django import test
 # Standard Library
 from datetime import date, timedelta
 
-# Third Party
-from nose.tools import ok_
-
 # MuckRock
 from muckrock.crowdfund import models, tasks
 from muckrock.project.models import Project
@@ -31,10 +28,9 @@ class TestRecurringTasks(test.TestCase):
         )
         tasks.close_expired()
         updated_crowdfund = models.Crowdfund.objects.get(pk=crowdfund.pk)
-        ok_(
-            updated_crowdfund.closed,
-            "Any crowdfund past its date due should be closed.",
-        )
+        assert (
+            updated_crowdfund.closed
+        ), "Any crowdfund past its date due should be closed."
 
     def test_do_not_close_today(self):
         """Projects with a due date of today should not be clsoed."""
@@ -46,7 +42,6 @@ class TestRecurringTasks(test.TestCase):
         crowdfund.save()
         tasks.close_expired()
         updated_crowdfund = models.Crowdfund.objects.get(pk=crowdfund.pk)
-        ok_(
-            not updated_crowdfund.closed,
-            "Crowdfunds with a due date of today should not be closed.",
-        )
+        assert (
+            not updated_crowdfund.closed
+        ), "Crowdfunds with a due date of today should not be closed."

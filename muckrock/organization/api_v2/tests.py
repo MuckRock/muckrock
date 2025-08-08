@@ -53,7 +53,7 @@ class OrganizationViewSetTests(TestCase):
 
         # Verify that both organizations are returned
         response_data = response.json()
-        organization_names = [org["name"] for org in response_data]
+        organization_names = [org["name"] for org in response_data["results"]]
         self.assertIn("Example Organization 1", organization_names)
         self.assertIn("Example Organization 2", organization_names)
 
@@ -65,7 +65,7 @@ class OrganizationViewSetTests(TestCase):
 
         # Verify that user2 only sees the organizations they belong to
         response_data = response.json()
-        organization_names = [org["name"] for org in response_data]
+        organization_names = [org["name"] for org in response_data["results"]]
         self.assertIn("Example Organization 2", organization_names)
         self.assertNotIn("Example Organization 1", organization_names)
 
@@ -77,7 +77,7 @@ class OrganizationViewSetTests(TestCase):
 
         # Verify that the filtered organization is returned
         response_data = response.json()
-        organization_names = [org["name"] for org in response_data]
+        organization_names = [org["name"] for org in response_data["results"]]
         self.assertIn("Example Organization 1", organization_names)
         self.assertNotIn("Example Organization 2", organization_names)
 
@@ -89,7 +89,7 @@ class OrganizationViewSetTests(TestCase):
 
         # Verify that the filtered organization is returned
         response_data = response.json()
-        organization_slugs = [org["slug"] for org in response_data]
+        organization_slugs = [org["slug"] for org in response_data["results"]]
         self.assertIn("example-org-1", organization_slugs)
         self.assertNotIn("example-org-2", organization_slugs)
 
@@ -103,7 +103,7 @@ class OrganizationViewSetTests(TestCase):
 
         # Verify that the filtered organization is returned
         response_data = response.json()
-        organization_uuids = [org["uuid"] for org in response_data]
+        organization_uuids = [org["uuid"] for org in response_data["results"]]
         self.assertIn(str(self.organization1.uuid), organization_uuids)
         self.assertNotIn(str(self.organization2.uuid), organization_uuids)
 
@@ -111,7 +111,7 @@ class OrganizationViewSetTests(TestCase):
         """Test that non-staff users can access their own organization details."""
         self.client.force_login(self.user1)
         response = self.client.get(
-            reverse("api2-organizations-detail", args=[self.organization1.uuid])
+            reverse("api2-organizations-detail", args=[self.organization1.id])
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -124,6 +124,6 @@ class OrganizationViewSetTests(TestCase):
         """Test that non-staff users cannot access organizations they don't belong to."""
         self.client.force_login(self.user2)
         response = self.client.get(
-            reverse("api2-organizations-detail", args=[self.organization1.uuid])
+            reverse("api2-organizations-detail", args=[self.organization1.id])
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

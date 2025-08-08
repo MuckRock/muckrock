@@ -1,44 +1,44 @@
 # Django
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
-# Third Party
-from nose.tools import eq_
-from rest_framework.test import APIClient
-
 # MuckRock
-from muckrock.core.factories import ProjectFactory
+from muckrock.core.factories import ProjectFactory, UserFactory
 
 
 class TestProjectViewSet(TestCase):
     def setUp(self):
-        self.client = APIClient()
-        self.project1 = ProjectFactory(title="Project 1", slug="project-1")
-        self.project2 = ProjectFactory(title="Project 2", slug="project-2")
-        self.project3 = ProjectFactory(title="Project 3", slug="project-3")
+        self.client = Client()
+        self.user = UserFactory()
+        self.client.force_login(self.user)
+        self.project1 = ProjectFactory(title="Project 1", private=False, approved=True)
+        self.project2 = ProjectFactory(title="Project 2", private=False, approved=True)
+        self.project3 = ProjectFactory(title="Project 3", private=False, approved=True)
+
+        self.list_url = reverse("api2-projects-list")
 
     def test_list_projects(self):
-        response = self.client.get(reverse("api2-projects-list"))
-        eq_(response.status_code, 200)
+        response = self.client.get(self.list_url)
+        assert response.status_code == 200
         results = response.json()["results"]
-        eq_(len(results), 3)
+        assert len(results) == 3
 
     def test_retrieve_project(self):
         response = self.client.get(
             reverse("api2-projects-detail", kwargs={"pk": self.project1.pk})
         )
-        eq_(response.status_code, 200)
-        eq_(response.json()["id"], self.project1.pk)
+        assert response.status_code == 200
+        assert response.json()["id"] == self.project1.pk
 
     def test_list_projects_filtered(self):
         response = self.client.get(
-            reverse("api2-projects-list"), {"id": self.project1.pk}
+            reverse("api2-projects-list"), {"title": self.project1.title}
         )
-        eq_(response.status_code, 200)
+        assert response.status_code == 200
         results = response.json()["results"]
-        eq_(len(results), 1)
-        eq_(results[0]["id"], self.project1.pk)
+        assert len(results) == 1
+        assert results[0]["id"] == self.project1.pk
 
     def test_retrieve_project_not_found(self):
         response = self.client.get(reverse("api2-projects-detail", kwargs={"pk": 9999}))
-        eq_(response.status_code, 404)
+        assert response.status_code == 404
