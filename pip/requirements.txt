@@ -436,8 +436,6 @@ pyjwt==2.3.0
     # via
     #   djangorestframework-simplejwt
     #   social-auth-core
-pylibmc==1.6.3
-    # via -r pip/requirements.in
 pymdown-extensions==7.1
     # via -r pip/requirements.in
 pyopenssl==22.0.0
