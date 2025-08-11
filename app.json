@@ -1,0 +1,4 @@
+"buildpacks": [
+  { "url": "https://github.com/dmathieu/heroku-buildpack-submodules" },
+  { "url": "heroku/python" }
+]
