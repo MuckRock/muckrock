@@ -1,6 +1,8 @@
 {
   "buildpacks": [
     { "url": "https://github.com/SectorLabs/heroku-buildpack-git-submodule" },
-    { "url": "heroku/python" }
+    { "url": "heroku/python" },
+    { "url": "https://github.com/heroku/heroku-buildpack-nginx" },
+    { "url": "heroku/nodejs" }
   ]
 }
