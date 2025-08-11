@@ -1,6 +1,6 @@
 {
   "buildpacks": [
-    { "url": "https://github.com/dmathieu/heroku-buildpack-submodules" },
+    { "url": "https://github.com/SectorLabs/heroku-buildpack-git-submodule" },
     { "url": "heroku/python" }
   ]
 }
