@@ -90,15 +90,30 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
             submodules: recursive
-      - uses: actions/setup-python@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.16.0'
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Install Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip" # caching pip dependencies
 
-      - name: Install
+      - name: Install requirements
         run: |
           pip install -r requirements.txt
           pip install -r pip/dev-requirements.txt
