@@ -35,9 +35,9 @@ class PrettyJSONWidget(widgets.Textarea):
                 return ""
             else:
                 data = json.loads(value)
-            
+
             pretty = json.dumps(data, indent=2, sort_keys=True)
-            
+
             # these lines will try to adjust size of TextArea to fit to content
             row_lengths = [len(r) for r in pretty.split("\n")]
             self.attrs["rows"] = min(max(len(row_lengths) + 2, 10), 30)
