@@ -25,7 +25,6 @@ from muckrock.news.models import Article
 
 # https://stackoverflow.com/questions/48145992/showing-json-field-in-django-admin
 # https://github.com/MuckRock/documentcloud/blob/master/documentcloud/addons/admin.py#L26-L38
-# FIXME: This makes the field read-only.
 class PrettyJSONWidget(widgets.Textarea):
     def format_value(self, value):
         try:
