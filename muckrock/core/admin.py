@@ -28,13 +28,21 @@ from muckrock.news.models import Article
 class PrettyJSONWidget(widgets.Textarea):
     def format_value(self, value):
         try:
-            value = json.dumps(json.loads(value), indent=2, sort_keys=True)
+            # Accept Python objects and JSON strings
+            if isinstance(value, (dict, list)):
+                data = value
+            elif value in (None, ""):
+                return ""
+            else:
+                data = json.loads(value)
+
+            pretty = json.dumps(data, indent=2, sort_keys=True)
+
             # these lines will try to adjust size of TextArea to fit to content
-            row_lengths = [len(r) for r in value.split("\n")]
+            row_lengths = [len(r) for r in pretty.split("\n")]
             self.attrs["rows"] = min(max(len(row_lengths) + 2, 10), 30)
             self.attrs["cols"] = min(max(max(row_lengths) + 2, 40), 120)
-            self.attrs["readonly"] = True
-            return value
+            return pretty
         except Exception:  # pylint: disable=broad-except
             return super().format_value(value)
 
