@@ -29,6 +29,8 @@ asgiref==3.6.0
     # via
     #   django
     #   scout-apm
+asttokens==3.0.0
+    # via stack-data
 async-timeout==4.0.3
     # via aiohttp
 attrs==23.1.0
@@ -111,9 +113,7 @@ cssutils==2.7.1
 daily-active-users==0.1.2
     # via -r pip/requirements.in
 decorator==4.3.0
-    # via
-    #   ipython
-    #   traitlets
+    # via ipython
 defusedxml==0.7.0rc1
     # via
     #   python3-openid
@@ -240,6 +240,8 @@ ecdsa==0.15
     # via python-jose
 emoji==0.6.0
     # via -r pip/requirements.in
+executing==2.2.0
+    # via stack-data
 fastjsonschema==2.19.1
     # via python-documentcloud
 filelock==3.13.1
@@ -296,10 +298,8 @@ inflection==0.5.1
     # via drf-spectacular
 iniconfig==2.0.0
     # via pytest
-ipython==7.16.1
+ipython==8.4.0
     # via -r pip/requirements.in
-ipython-genutils==0.2.0
-    # via traitlets
 jedi==0.19.2
     # via ipython
 jmespath==0.10.0
@@ -331,6 +331,8 @@ markdown==3.2.2
     # via
     #   -r pip/requirements.in
     #   pymdown-extensions
+matplotlib-inline==0.1.7
+    # via ipython
 memoize==1.0.0
     # via -r pip/requirements.in
 multidict==6.0.4
@@ -403,6 +405,8 @@ psycopg2-binary==2.9.10
     # via -r pip/requirements.in
 ptyprocess==0.6.0
     # via pexpect
+pure-eval==0.2.3
+    # via stack-data
 py==1.11.0
     # via pytest
 pyasn1==0.4.2
@@ -556,7 +560,6 @@ six==1.15.0
     #   pyjwkest
     #   python-dateutil
     #   python-jose
-    #   traitlets
     #   zenpy
 smart-open==1.6.0
     # via -r pip/requirements.in
@@ -580,6 +583,8 @@ sqlparse==0.4.4
     # via
     #   django
     #   django-debug-toolbar
+stack-data==0.6.3
+    # via ipython
 stripe==1.75.0
     # via -r pip/requirements.in
 tenacity==8.2.3
@@ -594,8 +599,10 @@ tqdm==4.66.1
     # via
     #   huggingface-hub
     #   openai
-traitlets==4.3.2
-    # via ipython
+traitlets==5.14.3
+    # via
+    #   ipython
+    #   matplotlib-inline
 typeguard==4.1.5
     # via baml
 types-regex==2023.12.25.20240106
