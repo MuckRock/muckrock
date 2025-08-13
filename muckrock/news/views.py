@@ -17,6 +17,7 @@ from django.views.generic.dates import (
     YearArchiveView,
 )
 
+# Third Party
 from fuzzywuzzy import fuzz, process
 
 # MuckRock
@@ -24,7 +25,7 @@ from muckrock.core.utils import cache_get_or_set
 from muckrock.core.views import (
     MRAutocompleteView,
     MRSearchFilterListView,
-    PaginationMixin
+    PaginationMixin,
 )
 from muckrock.news.filters import ArticleDateRangeFilterSet
 from muckrock.news.models import Article
