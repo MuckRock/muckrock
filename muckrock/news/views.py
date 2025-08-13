@@ -24,8 +24,7 @@ from muckrock.core.utils import cache_get_or_set
 from muckrock.core.views import (
     MRAutocompleteView,
     MRSearchFilterListView,
-    PaginationMixin,
-    jurisdiction,
+    PaginationMixin
 )
 from muckrock.news.filters import ArticleDateRangeFilterSet
 from muckrock.news.models import Article
