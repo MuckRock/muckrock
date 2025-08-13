@@ -3,20 +3,50 @@ from django import forms
 from django.contrib import admin, flatpages
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.flatpages.views import render_flatpage
-from django.db.models import TextField
+from django.db.models import JSONField, TextField
+from django.forms import widgets
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import re_path
 from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 
+# Standard Library
+import json
+
 # Third Party
 from simple_history import register
 from simple_history.admin import SimpleHistoryAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.core.models import FeaturedProjectSlot, HomePage
 from muckrock.news.models import Article
+from muckrock.project.models import Project
+
+
+# https://stackoverflow.com/questions/48145992/showing-json-field-in-django-admin
+# https://github.com/MuckRock/documentcloud/blob/master/documentcloud/addons/admin.py#L26-L38
+class PrettyJSONWidget(widgets.Textarea):
+    def format_value(self, value):
+        try:
+            # Accept Python objects and JSON strings
+            if isinstance(value, (dict, list)):
+                data = value
+            elif value in (None, ""):
+                return ""
+            else:
+                data = json.loads(value)
+
+            pretty = json.dumps(data, indent=2, sort_keys=True)
+
+            # these lines will try to adjust size of TextArea to fit to content
+            row_lengths = [len(r) for r in pretty.split("\n")]
+            self.attrs["rows"] = min(max(len(row_lengths) + 2, 10), 30)
+            self.attrs["cols"] = min(max(max(row_lengths) + 2, 40), 120)
+            return pretty
+        except Exception:  # pylint: disable=broad-except
+            return super().format_value(value)
 
 
 class FlatpageForm(flatpages.admin.FlatpageForm):
@@ -150,72 +180,48 @@ class SingletonModelAdmin(admin.ModelAdmin):
         )
 
 
+class FeaturedProjectSlotForm(forms.ModelForm):
+
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        required=True,
+        widget=autocomplete.ModelSelect2(
+            url="project-autocomplete",
+            attrs={"data-placeholder": "Select a project", "data-width": None},
+        ),
+    )
+
+    articles = forms.ModelMultipleChoiceField(
+        queryset=Article.objects.get_published(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="article-autocomplete",
+            forward="project",
+            attrs={"data-placeholder": "Select articles", "data-width": None},
+        ),
+    )
+
+    class Meta:
+        model = FeaturedProjectSlot
+        fields = ("order", "project", "articles")
+
+
 class FeaturedProjectSlotInline(admin.TabularInline):
     model = FeaturedProjectSlot
+    form = FeaturedProjectSlotForm
     extra = 1
     fields = ("order", "project", "articles")
     ordering = ("order",)
-
-    class Media:
-        js = ("js/admin-featured-project-slot.js",)
-
-    def get_formset(self, request, obj=None, **kwargs):
-        """
-        Override get_formset to dynamically set the queryset for the articles field
-        based on the project selected in the form. This allows the admin to filter
-        articles based on the project selected in each slot.
-        """
-        formset = super().get_formset(request, obj, **kwargs)
-        original_init = formset.__init__
-
-        def formset_init(self, *args, **kwargs):
-            original_init(self, *args, **kwargs)
-            # After initializing the formset, we can get
-            # the articles for each project in the form
-            for form in self.forms:
-                instance = getattr(form, "instance", None)
-                if instance and instance.pk and instance.project_id:
-                    form.fields["articles"].queryset = Article.objects.filter(
-                        projects__id=instance.project_id
-                    )
-                # When adding new entries, we need to get project from POST data
-                elif request.method == "POST":
-                    prefix = form.prefix  # e.g. featuredprojectslot_set-0
-                    project_field = f"{prefix}-project"
-                    project_id = request.POST.get(project_field)
-                    if project_id:
-                        form.fields["articles"].queryset = Article.objects.filter(
-                            projects__id=project_id
-                        )
-                    else:
-                        form.fields["articles"].queryset = Article.objects.none()
-                else:
-                    form.fields["articles"].queryset = Article.objects.none()
-
-        formset.__init__ = formset_init
-        return formset
-
-    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == "articles":
-            project_id = None
-            if request is not None:
-                data = request.POST or request.GET
-                for key, value in data.items():
-                    if key.endswith("-project") and value:
-                        project_id = value
-                        break
-            if project_id:
-                kwargs["queryset"] = Article.objects.filter(projects__id=project_id)
-            else:
-                kwargs["queryset"] = Article.objects.none()
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(HomePage)
 class HomePageAdmin(SingletonModelAdmin):
     inlines = [FeaturedProjectSlotInline]
     fields = ("about_heading", "about_paragraph", "product_stats", "expertise_sections")
-    formfield_overrides = {TextField: {"widget": admin.widgets.AdminTextareaWidget}}
+    formfield_overrides = {
+        TextField: {"widget": admin.widgets.AdminTextareaWidget},
+        JSONField: {"widget": PrettyJSONWidget},
+    }
 
     def get_urls(self):
         urls = super().get_urls()
