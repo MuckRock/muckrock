@@ -18,7 +18,6 @@ from dateutil.relativedelta import relativedelta
 from requests.exceptions import RequestException
 
 # MuckRock
-from muckrock.accounts.models import RecurringDonation
 from muckrock.core.utils import stripe_retry_on_error
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
 from muckrock.message import digests, receipts
@@ -206,27 +205,12 @@ def get_subscription_type(invoice):
 @shared_task(name="muckrock.message.tasks.failed_payment")
 def failed_payment(invoice_id):
     """Notify a customer about a failed subscription invoice."""
-    # pylint: disable=too-many-branches
     invoice = stripe_retry_on_error(stripe.Invoice.retrieve, invoice_id)
     attempt = invoice.attempt_count
     subscription_type = get_subscription_type(invoice)
-    recurring_donation = None
     crowdfund = None
     email_to = []
-    if subscription_type == "donate":
-        recurring_donation = RecurringDonation.objects.filter(
-            subscription_id=invoice.subscription
-        ).first()
-        if recurring_donation:
-            user = recurring_donation.user
-            if user is None:
-                email_to = [recurring_donation.email]
-            recurring_donation.payment_failed = True
-            recurring_donation.save()
-        else:
-            user = None
-            logger.error("No recurring crowdfund found for %s", invoice.subscription)
-    elif subscription_type.startswith("crowdfund"):
+    if subscription_type.startswith("crowdfund"):
         recurring_payment = RecurringCrowdfundPayment.objects.filter(
             subscription_id=invoice.subscription
         ).first()
@@ -250,9 +234,7 @@ def failed_payment(invoice_id):
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed
         # payment flag
-        if subscription_type == "donate" and recurring_donation:
-            recurring_donation.cancel()
-        elif subscription_type.startswith("crowdfund") and recurring_payment:
+        if subscription_type.startswith("crowdfund") and recurring_payment:
             recurring_payment.cancel()
         logger.info("%s subscription has been cancelled due to failed payment", user)
         subject = "Your %s subscription has been cancelled" % subscription_type

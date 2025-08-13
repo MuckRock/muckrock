@@ -11,7 +11,6 @@ from django.db.models import Max, Sum
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from django.urls import reverse
-from django.utils import timezone
 
 # Standard Library
 import logging
@@ -28,7 +27,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 # MuckRock
 from muckrock.accounts.querysets import ProfileQuerySet
-from muckrock.core.utils import cache_get_or_set, squarelet_get, stripe_retry_on_error
+from muckrock.core.utils import cache_get_or_set, squarelet_get
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
@@ -259,35 +258,6 @@ class Profile(models.Model):
     def verified_journalist(self):
         """Is this user a member of a verified journalistic organization?"""
         return self.user.organizations.filter(verified_journalist=True).exists()
-
-
-class RecurringDonation(models.Model):
-    """Keep track of our recurring donations"""
-
-    user = models.ForeignKey(
-        User, blank=True, null=True, related_name="donations", on_delete=models.SET_NULL
-    )
-    email = models.EmailField()
-    amount = models.PositiveIntegerField()
-    customer_id = models.CharField(max_length=255)
-    subscription_id = models.CharField(unique=True, max_length=255)
-    payment_failed = models.BooleanField(default=False)
-    active = models.BooleanField(default=True)
-    created_datetime = models.DateTimeField(auto_now_add=True)
-    deactivated_datetime = models.DateTimeField(blank=True, null=True)
-
-    def __str__(self):
-        return "Donation: ${}/Month by {}".format(self.amount, self.email)
-
-    def cancel(self):
-        """Cancel the recurring donation"""
-        self.active = False
-        self.deactivated_datetime = timezone.now()
-        self.save()
-        subscription = stripe_retry_on_error(
-            stripe.Subscription.retrieve, self.subscription_id
-        )
-        stripe_retry_on_error(subscription.delete)
 
 
 class NotificationQuerySet(models.QuerySet):

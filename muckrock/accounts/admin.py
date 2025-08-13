@@ -20,12 +20,7 @@ import csv
 from reversion.admin import VersionAdmin
 
 # MuckRock
-from muckrock.accounts.models import (
-    Profile,
-    RecurringDonation,
-    Statistics,
-    StockResponse,
-)
+from muckrock.accounts.models import Profile, Statistics, StockResponse
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
@@ -258,66 +253,6 @@ class MRUserAdmin(UserAdmin):
         return response
 
 
-class RecurringDonationAdminForm(forms.ModelForm):
-    """Form to include custom choice fields"""
-
-    user = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        required=False,
-        widget=autocomplete.ModelSelect2(
-            url="user-autocomplete",
-            attrs={"data-placeholder": "User?", "data-width": None},
-        ),
-    )
-
-    class Meta:
-        model = RecurringDonation
-        fields = "__all__"
-
-
-# this move to squarelet in the future
-
-
-class RecurringDonationAdmin(VersionAdmin):
-    """Recurring donation admin options"""
-
-    model = RecurringDonation
-    list_display = (
-        "email",
-        "user",
-        "amount",
-        "payment_failed",
-        "active",
-        "created_datetime",
-    )
-    list_select_related = ("user",)
-    search_fields = ("email", "user__username")
-    form = RecurringDonationAdminForm
-    date_hierarchy = "created_datetime"
-    list_filter = ("active", "payment_failed")
-    readonly_fields = (
-        "email",
-        "created_datetime",
-        "amount",
-        "customer_id",
-        "subscription_id",
-        "deactivated_datetime",
-    )
-
-    def get_readonly_fields(self, request, obj=None):
-        """Return read only fields"""
-        if obj.active:
-            return self.readonly_fields
-        else:
-            return self.readonly_fields + ("active",)
-
-    def save_model(self, request, obj, form, change):
-        """Cancel the subscription if manually deactivated"""
-        if not obj.active:
-            obj.cancel()
-        return super().save_model(request, obj, form, change)
-
-
 class StockResponseAdmin(VersionAdmin):
     model = StockResponse
     list_display = ("title", "type")
@@ -327,5 +262,4 @@ class StockResponseAdmin(VersionAdmin):
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
 admin.site.register(User, MRUserAdmin)
-admin.site.register(RecurringDonation, RecurringDonationAdmin)
 admin.site.register(StockResponse, StockResponseAdmin)

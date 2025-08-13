@@ -42,7 +42,7 @@ from muckrock.accounts.forms import (
     OrgPreferencesForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
-from muckrock.accounts.models import Notification, RecurringDonation
+from muckrock.accounts.models import Notification
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
 from muckrock.core.views import MRAutocompleteView, MRFilterListView
@@ -160,14 +160,12 @@ class ProfileSettings(TemplateView):
         email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
         org_form = OrgPreferencesForm(instance=user_profile)
         # these move to squarelet in the future
-        donations = RecurringDonation.objects.filter(user=self.request.user)
         crowdfunds = RecurringCrowdfundPayment.objects.filter(user=self.request.user)
         context.update(
             {
                 "squarelet_url": settings.SQUARELET_URL,
                 "email_form": email_form,
                 "org_form": org_form,
-                "donations": donations,
                 "crowdfunds": crowdfunds,
             }
         )
