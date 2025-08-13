@@ -92,7 +92,7 @@ isort==4.3.21
     # via
     #   -r pip/dev-requirements.in
     #   pylint
-jedi==0.17.1
+jedi==0.19.2
     # via ipython
 jinja2==2.11.2
     # via
@@ -124,7 +124,7 @@ packaging==23.2
     #   pytest-sugar
 paramiko==2.4.2
     # via fabric
-parso==0.7.0
+parso==0.8.4
     # via jedi
 pathspec==0.9.0
     # via black

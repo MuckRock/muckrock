@@ -300,7 +300,7 @@ ipython==7.16.1
     # via -r pip/requirements.in
 ipython-genutils==0.2.0
     # via traitlets
-jedi==0.17.1
+jedi==0.19.2
     # via ipython
 jmespath==0.10.0
     # via
@@ -368,7 +368,7 @@ packaging==23.2
     #   huggingface-hub
     #   pikepdf
     #   pytest
-parso==0.7.0
+parso==0.8.4
     # via jedi
 pdfrw==0.4
     # via -r pip/requirements.in
