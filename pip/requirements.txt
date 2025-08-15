@@ -43,7 +43,7 @@ backcall==0.2.0
     # via ipython
 baml==0.18.0
     # via -r pip/requirements.in
-beautifulsoup4==4.6.0
+beautifulsoup4==4.13.4
     # via
     #   -r pip/requirements.in
     #   pyembed
@@ -579,6 +579,8 @@ social-auth-core[openidconnect]==4.1.0
     #   social-auth-app-django
 sorl-thumbnail==12.9.0
     # via -r pip/requirements.in
+soupsieve==2.7
+    # via beautifulsoup4
 sqlparse==0.4.4
     # via
     #   django
@@ -614,6 +616,7 @@ types-urllib3==1.26.25.14
 typing-extensions==4.12.2
     # via
     #   anthropic
+    #   beautifulsoup4
     #   huggingface-hub
     #   openai
     #   opentelemetry-sdk
