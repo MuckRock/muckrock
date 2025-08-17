@@ -395,7 +395,12 @@ def homepage(request):
             "page_count": FOIAFile.objects.aggregate(pages=Sum("pages"))["pages"],
             "agency_count": Agency.objects.get_approved().count(),
         }
-        cache.set("homepage_foia_stats", foia_stats, 60 * 30)  # 30 min
+        cache.set("homepage_foia_stats", foia_stats, 60 * 30)  # 30 mins
+
+    documentcloud_stats = cache.get("homepage_documentcloud_stats")
+    if documentcloud_stats is None:
+        documentcloud_stats = homepage_obj.documentcloud_stats
+        cache.set("homepage_documentcloud_stats", documentcloud_stats, 60 * 60 * 24)
 
     featured_project_slots = cache.get("homepage_featured_project_slots")
     if featured_project_slots is None:
@@ -407,6 +412,7 @@ def homepage(request):
     context = {
         "homepage": homepage_obj,
         "foia_stats": foia_stats,
+        "documentcloud_stats": documentcloud_stats,
         "product_stats": parsed_product_stats,
         "featured_project_slots": featured_project_slots,
         "expertise_sections": expertise_sections,
