@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.db.models import (
     CASCADE,
     CharField,
+    DateField,
     ForeignKey,
     Func,
     IntegerField,
@@ -81,10 +82,16 @@ class HomePage(SingletonModel):
             "making politics more transparent and democracy more informed."
         ),
     )
-    product_stats = JSONField(
+    dlp_stats = JSONField(
         blank=True,
         default=dict,
-        help_text="JSON object for DocumentCloud and Data Liberation Project stats",
+        help_text="JSON object for Data Liberation Project stats",
+    )
+
+    documentcloud_stats = JSONField(
+        blank=True,
+        default=dict,
+        help_text="JSON object for  latest DocumentCloud stats",
     )
 
     expertise_sections = JSONField(
