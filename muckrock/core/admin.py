@@ -196,7 +196,7 @@ class FeaturedProjectSlotForm(forms.ModelForm):
         required=False,
         widget=autocomplete.ModelSelect2Multiple(
             url="article-autocomplete",
-            forward="project",
+            forward=("project",),
             attrs={"data-placeholder": "Select articles", "data-width": None},
         ),
     )

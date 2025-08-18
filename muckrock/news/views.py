@@ -17,9 +17,6 @@ from django.views.generic.dates import (
     YearArchiveView,
 )
 
-# Third Party
-from fuzzywuzzy import fuzz, process
-
 # MuckRock
 from muckrock.core.utils import cache_get_or_set
 from muckrock.core.views import (
@@ -246,44 +243,7 @@ class ArticleAutocomplete(MRAutocompleteView):
 
         queryset = super().get_queryset()
 
-        queryset, project = self._filter_by_project(queryset)
+        if "project" in self.forwarded:
+            queryset = queryset.filter(projects=self.forwarded["project"])
 
-        exclude = self.forwarded.get("self", [])
-        queryset = queryset.exclude(pk__in=exclude).order_by("-pub_date")[:10]
-
-        if project:
-            fuzzy_choices = self._fuzzy_choices(self.q, project, exclude)
-            return self.queryset.filter(
-                pk__in=[a.pk for a in queryset] + [a[2].pk for a in fuzzy_choices]
-            ).order_by("-pub_date")
-        else:
-            return queryset
-
-    def _filter_by_project(self, queryset):
-        """If a project is forwarded, filter by it"""
-        if "project" not in self.forwarded:
-            return queryset, None
-
-        try:
-            project_id = self.forwarded["project"]
-        except (TypeError, IndexError):
-            # if project is not a single element list, something went wrong
-            # do not filter
-            return queryset, None
-
-        try:
-            project = Project.objects.get(pk=project_id)
-            return project
-        except Project.DoesNotExist:
-            return queryset, None
-
-    def _fuzzy_choices(self, query, project, exclude):
-        """Do fuzzy matching for additional choices"""
-        choices = self.queryset.filter(project=project).exclude(pk__in=exclude)
-        return process.extractBests(
-            query,
-            {a: a.name for a in choices},
-            scorer=fuzz.partial_ratio,
-            score_cutoff=83,
-            limit=10,
-        )
+        return queryset
