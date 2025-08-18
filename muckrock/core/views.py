@@ -385,7 +385,7 @@ def homepage(request):
         homepage_obj = HomePage.load()
         cache.set("homepage_obj", homepage_obj, 60 * 30)  # 30 min
 
-    parsed_product_stats = homepage_obj.product_stats
+    dlp_stats = homepage_obj.dlp_stats
     expertise_sections = homepage_obj.expertise_sections
     foia_stats = cache.get("homepage_foia_stats")
     if foia_stats is None:
@@ -413,7 +413,7 @@ def homepage(request):
         "homepage": homepage_obj,
         "foia_stats": foia_stats,
         "documentcloud_stats": documentcloud_stats,
-        "product_stats": parsed_product_stats,
+        "dlp_stats": dlp_stats,
         "featured_project_slots": featured_project_slots,
         "expertise_sections": expertise_sections,
     }

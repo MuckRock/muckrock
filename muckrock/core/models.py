@@ -91,7 +91,7 @@ class HomePage(SingletonModel):
     documentcloud_stats = JSONField(
         blank=True,
         default=dict,
-        help_text="JSON object for  latest DocumentCloud stats",
+        help_text="JSON object for latest DocumentCloud stats",
     )
 
     expertise_sections = JSONField(
