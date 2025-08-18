@@ -19,8 +19,10 @@ from simple_history import register
 from simple_history.admin import SimpleHistoryAdmin
 
 # MuckRock
+from muckrock.core import autocomplete
 from muckrock.core.models import FeaturedProjectSlot, HomePage
 from muckrock.news.models import Article
+from muckrock.project.models import Project
 
 
 # https://stackoverflow.com/questions/48145992/showing-json-field-in-django-admin
@@ -178,65 +180,38 @@ class SingletonModelAdmin(admin.ModelAdmin):
         )
 
 
+class FeaturedProjectSlotForm(forms.ModelForm):
+
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        required=True,
+        widget=autocomplete.ModelSelect2(
+            url="project-autocomplete",
+            attrs={"data-placeholder": "Select a project", "data-width": None},
+        ),
+    )
+
+    articles = forms.ModelMultipleChoiceField(
+        queryset=Article.objects.get_published(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(
+            url="article-autocomplete",
+            forward=("project",),
+            attrs={"data-placeholder": "Select articles", "data-width": None},
+        ),
+    )
+
+    class Meta:
+        model = FeaturedProjectSlot
+        fields = ("order", "project", "articles")
+
+
 class FeaturedProjectSlotInline(admin.TabularInline):
     model = FeaturedProjectSlot
+    form = FeaturedProjectSlotForm
     extra = 1
     fields = ("order", "project", "articles")
     ordering = ("order",)
-
-    class Media:
-        js = ("js/admin-featured-project-slot.js",)
-
-    def get_formset(self, request, obj=None, **kwargs):
-        """
-        Override get_formset to dynamically set the queryset for the articles field
-        based on the project selected in the form. This allows the admin to filter
-        articles based on the project selected in each slot.
-        """
-        formset = super().get_formset(request, obj, **kwargs)
-        original_init = formset.__init__
-
-        def formset_init(self, *args, **kwargs):
-            original_init(self, *args, **kwargs)
-            # After initializing the formset, we can get
-            # the articles for each project in the form
-            for form in self.forms:
-                instance = getattr(form, "instance", None)
-                if instance and instance.pk and instance.project_id:
-                    form.fields["articles"].queryset = Article.objects.filter(
-                        projects__id=instance.project_id
-                    )
-                # When adding new entries, we need to get project from POST data
-                elif request.method == "POST":
-                    prefix = form.prefix  # e.g. featuredprojectslot_set-0
-                    project_field = f"{prefix}-project"
-                    project_id = request.POST.get(project_field)
-                    if project_id:
-                        form.fields["articles"].queryset = Article.objects.filter(
-                            projects__id=project_id
-                        )
-                    else:
-                        form.fields["articles"].queryset = Article.objects.none()
-                else:
-                    form.fields["articles"].queryset = Article.objects.none()
-
-        formset.__init__ = formset_init
-        return formset
-
-    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == "articles":
-            project_id = None
-            if request is not None:
-                data = request.POST or request.GET
-                for key, value in data.items():
-                    if key.endswith("-project") and value:
-                        project_id = value
-                        break
-            if project_id:
-                kwargs["queryset"] = Article.objects.filter(projects__id=project_id)
-            else:
-                kwargs["queryset"] = Article.objects.none()
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(HomePage)

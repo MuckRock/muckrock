@@ -237,3 +237,13 @@ class ArticleAutocomplete(MRAutocompleteView):
     )
     search_fields = ["title", "tags__name"]
     template = "autocomplete/article.html"
+
+    def get_queryset(self):
+        """Filter by project"""
+
+        queryset = super().get_queryset()
+
+        if "project" in self.forwarded:
+            queryset = queryset.filter(projects=self.forwarded["project"])
+
+        return queryset
