@@ -110,7 +110,7 @@ class AsyncFileDownloadTask:
 
 @shared_task(
     ignore_result=True,
-    name="muckrock.stats.tasks.fetch_documentcloud_stats",
+    name="muckrock.stats.tasks.fetch_and_load_documentcloud_stats",
     autoretry_for=(Exception,),
     retry_backoff=60,
     retry_kwargs={"max_retries": 5},
