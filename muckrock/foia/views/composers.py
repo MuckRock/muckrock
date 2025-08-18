@@ -448,6 +448,7 @@ def autosave(request, idx):
                 "action",
                 "embargo",
                 "permanent_embargo",
+                "certified",
             )
         }
         if form.cleaned_data.get("permanent_embargo"):
