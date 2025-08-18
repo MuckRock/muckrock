@@ -218,7 +218,13 @@ class FeaturedProjectSlotInline(admin.TabularInline):
 @admin.register(HomePage)
 class HomePageAdmin(SingletonModelAdmin):
     inlines = [FeaturedProjectSlotInline]
-    fields = ("about_heading", "about_paragraph", "documentcloud_stats", "dlp_stats", "expertise_sections")
+    fields = (
+        "about_heading",
+        "about_paragraph",
+        "documentcloud_stats",
+        "dlp_stats",
+        "expertise_sections",
+    )
     formfield_overrides = {
         TextField: {"widget": admin.widgets.AdminTextareaWidget},
         JSONField: {"widget": PrettyJSONWidget},
