@@ -15,6 +15,7 @@ from django.utils.translation import gettext as _
 import json
 
 # Third Party
+from reversion.admin import VersionAdmin
 from simple_history import register
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -90,9 +91,9 @@ class FlatpageAdmin(SimpleHistoryAdmin, flatpages.admin.FlatPageAdmin):
         return render_flatpage(request, flatpage)
 
 
-class SingletonModelAdmin(admin.ModelAdmin):
+class SingletonModelAdmin(VersionAdmin):
     """
-    Admin class for singleton models.
+    Admin class for singleton models with version control.
     """
 
     singleton_instance_id = 1

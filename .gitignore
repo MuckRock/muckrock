@@ -35,3 +35,4 @@ celerybeat-schedule
 .envrc
 .vscode
 /src
+CLAUDE.md
