@@ -75,7 +75,7 @@ MANAGERS = ADMINS
 TIME_ZONE = "America/New_York"
 USE_TZ = True
 
-ENV = env("DJANGO_ENV", default="staging")
+ENV = os.environ.get("DJANGO_ENV", "staging")
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
