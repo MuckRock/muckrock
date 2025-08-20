@@ -427,6 +427,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "muckrock.task.tasks.cleanup_status_change",
         "schedule": crontab(hour=3, minute=0),
     },
+    "grab_documentcloud_stats": {
+        "task": "muckrock.stats.tasks.fetch_and_load_documentcloud_stats",
+        "schedule": crontab(hour=3, minute=0),
+    },
 }
 
 

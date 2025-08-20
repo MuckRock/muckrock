@@ -42,7 +42,7 @@ def merge_back_to_product_stats(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0003_homepage_product_stats"),
+        ("core", "0004_add_stats_fields"),
     ]
 
     operations = [
