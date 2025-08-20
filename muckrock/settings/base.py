@@ -75,6 +75,8 @@ MANAGERS = ADMINS
 TIME_ZONE = "America/New_York"
 USE_TZ = True
 
+ENV = os.environ.get("DJANGO_ENV", "staging")
+
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = "en-us"
@@ -646,10 +648,22 @@ SIMPLE_JWT = {
     "USER_ID_FIELD": "profile__uuid",
 }
 
+
+# handle preview deploys
+HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME", "")
+
+if ENV == "staging" and HEROKU_APP_NAME:
+    MUCKROCK_URL = f"https://{HEROKU_APP_NAME}.herokuapp.com"
+
 if "ALLOWED_HOSTS" in os.environ:
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
     ALLOWED_HOSTS = []
+
+# Add the heroku app name to allowed hosts
+if ENV == "staging" and HEROKU_APP_NAME:
+    ALLOWED_HOSTS.append(f"{HEROKU_APP_NAME}.herokuapp.com")
+
 
 ACTSTREAM_SETTINGS = {"MANAGER": "muckrock.core.managers.MRActionManager"}
 
