@@ -13,7 +13,7 @@ from furl import furl
 # MuckRock
 from muckrock.core.views import MRFilterCursorListView, class_view_decorator
 from muckrock.foia.filters import FOIACommunicationFilterSet
-from muckrock.foia.forms.comms import AgencyPasscodeForm
+from muckrock.foia.forms.comms import AgencyEmailLinkForm
 from muckrock.foia.models import FOIACommunication
 
 
@@ -40,9 +40,14 @@ class AdminCommunicationView(MRFilterCursorListView):
 
 
 class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
-    """View to redirect agency users to communication"""
+    """View to redirect agency users to communication
 
-    form_class = AgencyPasscodeForm
+    If the request is not embargoed, this just redirects to the request
+    If it is embargoed, this displays the form for the agency user to obtain
+    a login link so they may view and directly upload to the request.
+    """
+
+    form_class = AgencyEmailLinkForm
     model = FOIACommunication
     pk_url_kwarg = "idx"
     template_name = "foia/communication/agency.html"
@@ -51,22 +56,14 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
         super().__init__(*args, **kwargs)
         self.object = None
 
-    def get_success_url(self):
-        """URL for the communication, with a parameter marking this is an agency user"""
-        url = furl(self.object.get_absolute_url())
-        url.args["agency"] = 1
-        return url.url
-
     def get(self, request, *args, **kwargs):
         """Check if the communication requires a passcode"""
         self.object = self.get_object()
 
         if self.object.foia.has_perm(request.user, "view"):
-            return redirect(self.get_success_url())
-
-        key = f"foiapasscode:{self.object.foia.pk}"
-        if request.session.get(key):
-            return redirect(self.get_success_url())
+            url = furl(self.object.get_absolute_url())
+            url.args["agency"] = 1
+            return redirect(url.url)
 
         return super().get(request, *args, **kwargs)
 
@@ -75,13 +72,12 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        """Save the passcode to the session"""
-        self.request.session[f"foiapasscode:{self.object.foia.pk}"] = True
-        self.request.session.set_expiry(settings.AGENCY_SESSION_TIME)
-        return redirect(self.get_success_url())
+        """Send the email the login link"""
+        form.send_link()
+        return redirect("communication-direct-agency")
 
     def get_form_kwargs(self):
-        """Pass the communication to the form"""
+        """Pass the request to the form"""
         kwargs = super().get_form_kwargs()
         kwargs.update({"foia": self.object.foia})
         return kwargs

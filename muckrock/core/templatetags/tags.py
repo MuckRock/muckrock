@@ -122,7 +122,7 @@ def fieldtype(field):
 
 
 @register.filter
-def redact_emails(text, passcode):
+def redact_emails(text):
     """Redact various information from text"""
     # redact special request emails
     text = email_re.sub(email_redactor, text)
@@ -130,9 +130,6 @@ def redact_emails(text, passcode):
     text = login_link.sub("https://www.muckrock.com/", text)
     # redact agency direct upload links
     text = upload_link.sub("https://www.muckrock.com/", text)
-    # redact agency direct upload passcodes
-    if passcode:
-        text = text.replace(passcode, "\u2022" * 8)
     return text
 
 

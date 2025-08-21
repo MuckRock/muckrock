@@ -17,7 +17,6 @@ from django.utils import timezone
 import json
 import os
 import urllib
-from functools import wraps
 
 # Third Party
 import boto3
@@ -33,33 +32,6 @@ from muckrock.foia.models import (
     OutboundRequestAttachment,
 )
 from muckrock.foia.utils import file_name_trim
-
-
-def login_or_agency_required(function):
-    """Allow semi-authenticated agency users to upload files"""
-
-    @wraps(function)
-    def wrapper(request, *args, **kwargs):
-        """If the user has a valid passcode for the request, treat them as the
-        agency user for this view
-        """
-        if not request.user.is_authenticated:
-            try:
-                if request.method == "POST":
-                    data = request.POST
-                else:
-                    data = request.GET
-                foia = FOIARequest.objects.get(pk=data["id"])
-            except (FOIARequest.DoesNotExist, KeyError):
-                return HttpResponseForbidden()
-            if request.session.get(f"foiapasscode:{foia.pk}"):
-                request.user = foia.agency.get_user()
-            else:
-                return HttpResponseForbidden()
-
-        return function(request, *args, **kwargs)
-
-    return wrapper
 
 
 def _complete_chunked_upload(key, upload_id, chunks):
@@ -106,7 +78,7 @@ def _success(request, model, attachment_model, fk_name):
     return JsonResponse({"id": attachment.id})
 
 
-@login_or_agency_required
+@login_required
 def success_request(request):
     """File has been succesfully uploaded to a FOIA"""
     return _success(request, FOIARequest, OutboundRequestAttachment, "foia")
@@ -186,7 +158,7 @@ def _session(request, model):
     return JsonResponse(data, safe=False)
 
 
-@login_or_agency_required
+@login_required
 def session_request(request):
     """Get the initial file list for a request"""
     return _session(request, FOIARequest)
@@ -207,10 +179,6 @@ def _delete(request, model, idx):
 
     if request.user.is_authenticated:
         user = request.user
-    elif model is OutboundRequestAttachment and request.session.get(
-        f"foiapasscode:{attm.foia_id}"
-    ):
-        user = attm.foia.agency.get_user()
 
     if attm.user != user:
         return HttpResponseForbidden()
@@ -344,7 +312,7 @@ def _preupload(request, model, id_name=None):
     return JsonResponse(response_data)
 
 
-@login_or_agency_required
+@login_required
 def preupload_request(request):
     """Generate upload info for a FOIA Request"""
     return _preupload(request, OutboundRequestAttachment, "foia_id")
@@ -362,7 +330,7 @@ def preupload_comm(request):
     return _preupload(request, FOIAFile)
 
 
-@login_or_agency_required
+@login_required
 def upload_chunk(request):
     """Generate an upload URL for a chunk"""
     key = request.POST.get("key")
@@ -379,7 +347,7 @@ def upload_chunk(request):
     return JsonResponse(response)
 
 
-@login_or_agency_required
+@login_required
 def blank(request):
     """Workaround for IE9 and older"""
     return HttpResponse()

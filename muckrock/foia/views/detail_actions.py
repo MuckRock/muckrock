@@ -1,7 +1,6 @@
 """Handle POST actions for the FOIA detail view"""
 
 # Django
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -40,7 +39,7 @@ from muckrock.foia.forms import (
     ResendForm,
     TrackingNumberForm,
 )
-from muckrock.foia.forms.comms import AgencyPasscodeForm
+from muckrock.foia.forms.comms import AgencyEmailLinkForm
 from muckrock.foia.models import STATUS, FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.tasks import import_doccloud_file, upload_user_document_cloud
 from muckrock.jurisdiction.forms import AppealForm
@@ -521,9 +520,8 @@ def change_owner(request, foia):
 def agency_reply(request, foia):
     """Agency reply directly through the site"""
     has_perm = foia.has_perm(request.user, "agency_reply")
-    valid_passcode = request.session.get(f"foiapasscode:{foia.pk}")
 
-    if has_perm or valid_passcode:
+    if has_perm:
         form = FOIAAgencyReplyForm(request.POST)
         if form.is_valid():
             agency_user = (
@@ -733,15 +731,15 @@ def status_comm(request, foia):
     return _get_redirect(request, foia)
 
 
-def agency_passcode(request, foia):
-    """Allow an agency to authenticate using the passcode"""
-    form = AgencyPasscodeForm(request.POST, foia=foia)
+def agency_email_link(request, foia):
+    """Email the agency user a login link"""
+    form = AgencyEmailLinkForm(request.POST, foia=foia)
     if form.is_valid():
-        request.session[f"foiapasscode:{foia.pk}"] = True
-        request.session.set_expiry(settings.AGENCY_SESSION_TIME)
+        messages.success(request, "Your login link has been mailed to you")
+        form.send_link()
         return _get_redirect(request, foia)
     else:
-        raise FoiaFormError("agency_passcode_form", form)
+        raise FoiaFormError("agency_email_form", form)
 
 
 def import_dc_file(request, foia):

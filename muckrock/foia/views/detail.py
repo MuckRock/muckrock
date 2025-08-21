@@ -44,7 +44,7 @@ from muckrock.foia.forms import (
     StaffFOIANoteForm,
     TrackingNumberForm,
 )
-from muckrock.foia.forms.comms import AgencyPasscodeForm
+from muckrock.foia.forms.comms import AgencyEmailLinkForm
 from muckrock.foia.models import (
     END_STATUS,
     STATUS,
@@ -82,11 +82,10 @@ class Detail(DetailView):
     def __init__(self, *args, **kwargs):
         self.foia = None
         self.agency_reply_form = FOIAAgencyReplyForm()
-        self.agency_passcode_form = None
+        self.agency_email_form = None
         self.admin_fix_form = None
         self.resend_forms = None
         self.fee_form = None
-        self.valid_passcode = False
         super().__init__(*args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -107,7 +106,7 @@ class Detail(DetailView):
         self.fee_form = RequestFeeForm(
             user=self.request.user, initial={"amount": self.foia.get_stripe_amount()}
         )
-        self.agency_passcode_form = AgencyPasscodeForm(foia=self.foia)
+        self.agency_email_form = AgencyEmailLinkForm(foia=self.foia)
         if request.POST:
             try:
                 return self.post(request)
@@ -169,9 +168,8 @@ class Detail(DetailView):
             compare_digest(self.request.GET.get("key", ""), foia.access_key)
             and foia.access_key != ""
         )
-        self.valid_passcode = self.request.session.get(f"foiapasscode:{foia.pk}")
         has_perm = foia.has_perm(self.request.user, "view")
-        if not has_perm and not valid_access_key and not self.valid_passcode:
+        if not has_perm and not valid_access_key:
             raise Http404()
         return foia
 
@@ -213,8 +211,8 @@ class Detail(DetailView):
         context["access_form"] = FOIAAccessForm()
         context["owner_form"] = FOIAOwnerForm()
         context["admin_fix_form"] = self.admin_fix_form
-        context["agency_passcode_form"] = self.agency_passcode_form
         context["agency_reply_form"] = self.agency_reply_form
+        context["agency_email_form"] = self.agency_email_form
         context["appeal_contact_info_form"] = ContactInfoForm(
             foia=self.foia, appeal=True, prefix="appeal"
         )
@@ -354,21 +352,16 @@ class Detail(DetailView):
     def _get_agency_context_data(self, context):
         """Get context data for agency users"""
 
-        context["can_agency_reply"] = (
-            self.foia.has_perm(self.request.user, "agency_reply") or self.valid_passcode
+        context["can_agency_reply"] = self.foia.has_perm(
+            self.request.user, "agency_reply"
         )
         context["is_agency_user"] = (
             self.request.user.is_authenticated
             and self.request.user.profile.is_agency_user
-        ) or (
-            not self.request.user.is_authenticated
-            and (self.valid_passcode or "agency" in self.request.GET)
-        )
+        ) or (not self.request.user.is_authenticated and "agency" in self.request.GET)
         context["agency_status_choices"] = AGENCY_STATUS
         context["unauthenticated_agency"] = (
-            not self.request.user.is_authenticated
-            and "agency" in self.request.GET
-            and not self.valid_passcode
+            not self.request.user.is_authenticated and "agency" in self.request.GET
         )
 
     def get(self, request, *args, **kwargs):
