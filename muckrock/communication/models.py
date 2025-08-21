@@ -131,6 +131,8 @@ class EmailAddress(models.Model):
         # MuckRock
         from muckrock.agency.models import AgencyEmail
 
+        # XXX
+
         allowed_tlds = [
             ".%s.us" % a.lower()
             for (a, _) in list(STATE_CHOICES)
