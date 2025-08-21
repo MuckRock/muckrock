@@ -1,9 +1,5 @@
 {% load humanize%}{% autoescape off %}View request history, {% if attachments %}see {{ attachments|length|apnumber }} related attachment{{ attachments|length|pluralize }}, {% endif %}upload responsive documents, and report problems here:
 {{ reply_link }}
-{% if passcode %}
-If prompted for a passcode, please enter:
-{{ passcode }}
-{% endif %}
 {% if attachments %}Attachments:{% endif %}{% for attachment in attachments %}
 • {{ attachment }}{% endfor %}
 

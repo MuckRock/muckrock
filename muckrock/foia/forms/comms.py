@@ -6,9 +6,6 @@ FOIA forms for dealing with communications
 from django import forms
 from django.contrib.auth.models import User
 
-# Standard Library
-from hmac import compare_digest
-
 # Third Party
 from phonenumber_field.formfields import PhoneNumberField
 
@@ -18,6 +15,7 @@ from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.fields import EmptyLastModelChoiceField
 from muckrock.foia.models import FOIACommunication
+from muckrock.message.email import TemplateEmail
 
 AGENCY_STATUS = [
     ("processed", "Further Response Coming"),
@@ -71,23 +69,6 @@ class FOIAAgencyReplyForm(forms.Form):
                 "You must set a price when setting the status to payment required",
             )
         return cleaned_data
-
-
-class AgencyPasscodeForm(forms.Form):
-    """A form for agencies to enter their passcode to view embargoed requests"""
-
-    passcode = forms.CharField(label="Passcode", max_length=8)
-
-    def __init__(self, *args, **kwargs):
-        self.foia = kwargs.pop("foia")
-        super().__init__(*args, **kwargs)
-
-    def clean_passcode(self):
-        """Compare the passcode"""
-        passcode = self.cleaned_data["passcode"].upper()
-        if not compare_digest(passcode, self.foia.get_passcode()):
-            raise forms.ValidationError("Incorrect passcode")
-        return self.cleaned_data["passcode"]
 
 
 class SendViaForm(forms.Form):
@@ -341,3 +322,40 @@ class ContactInfoForm(SendViaForm):
             return self.cleaned_data["other_fax"].as_international
         else:
             return self.cleaned_data["other_fax"]
+
+
+class AgencyEmailLinkForm(forms.Form):
+    """Form for agency users to obtain a direct login link via email"""
+
+    email = forms.EmailField()
+
+    def __init__(self, *args, **kwargs):
+        self.foia = kwargs.pop("foia")
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        """Is this email allowed to receive a login link?"""
+        email = EmailAddress.objects.fetch(self.cleaned_data["email"])
+
+        if not email.allowed(self.foia):
+            raise forms.ValidationError(
+                "That email does not have permission to receive a loglin link for "
+                "this request"
+            )
+
+        return self.cleaned_data["email"]
+
+    def send_link(self):
+        """Send the login link via email"""
+        email = TemplateEmail(
+            to=[self.cleaned_data["email"]],
+            extra_context={
+                "link": self.foia.get_agency_reply_link(
+                    email=self.cleaned_data["email"]
+                )
+            },
+            subject="Requested Login Link",
+            text_template="message/agency/loginlink.txt",
+            html_template="message/agency/loginlink.html",
+        )
+        email.send(fail_silently=False)
