@@ -112,9 +112,9 @@
         {% endif %}
         {% if communication.foia %}
           {% if communication.full_html %}
-            {{ communication.communication|redact_emails:communication.foia.passcode|safe }}
+            {{ communication.communication|redact_emails|safe }}
           {% else %}
-            {{ communication.communication|redact_emails:communication.foia.passcode|urlize|linebreaks }}
+            {{ communication.communication|redact_emails|urlize|linebreaks }}
           {% endif %}
         {% else %}
           {% if communication.full_html %}
