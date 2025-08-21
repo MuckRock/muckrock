@@ -395,16 +395,17 @@ Sincerely,
           <div class="composer" id="inactive">
             <form class="composer-input" method="post">
               <header>
-                To reply to this request, enter the 8 letter security code that was
-                included with the request letter.
+                To reply to this request, enter an email address associated
+                with this request.  You will receive an email with a link to
+                log you in.
               </header>
               {% csrf_token %}
-              {% include "lib/pattern/form.html" with form=agency_passcode_form %}
+              {% include "lib/pattern/form.html" with form=agency_email_form %}
               <div class="buttons">
                 <button
                   type="submit"
                   name="action"
-                  value="agency_passcode"
+                  value="agency_email_link"
                   class="primary button"
                 >OK</button>
               </div>
