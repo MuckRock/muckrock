@@ -16,6 +16,9 @@ from django.db.models import (
     TextField,
 )
 
+# Third Party
+import reversion
+
 
 # This is in django but does not support intervals until django 2.0
 class ExtractDay(Func):
@@ -63,6 +66,7 @@ class SingletonModel(Model):
         return getattr(obj, field_name, default_value)
 
 
+@reversion.register()
 class HomePage(SingletonModel):
     about_heading = CharField(
         max_length=255,
@@ -106,6 +110,7 @@ class HomePage(SingletonModel):
         return "Home Page"
 
 
+@reversion.register()
 class FeaturedProjectSlot(Model):
     homepage = ForeignKey(
         HomePage, on_delete=CASCADE, related_name="featured_project_slots"
