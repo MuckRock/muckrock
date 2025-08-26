@@ -480,7 +480,7 @@ class UserAutocomplete(MRAutocompleteView):
     def get_queryset(self):
         """Filter by jurisdiction"""
 
-        queryset = super(sk).get_queryset()
+        queryset = super().get_queryset()
 
         if "authors" in self.forwarded:
             queryset = queryset.annotate(

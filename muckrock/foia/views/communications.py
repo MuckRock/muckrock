@@ -1,7 +1,6 @@
 """Views for handling communications"""
 
 # Django
-from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.views.generic.detail import SingleObjectMixin
