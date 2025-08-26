@@ -149,6 +149,7 @@ django==4.2
     #   django-picklefield
     #   django-redis
     #   django-reversion
+    #   django-sesame
     #   django-sslify
     #   django-storages
     #   django-taggit
@@ -210,6 +211,8 @@ django-redis==5.1.0
 django-reversion==4.0.1
     # via -r pip/requirements.in
 django-robots==5.0
+    # via -r pip/requirements.in
+django-sesame==3.2.3
     # via -r pip/requirements.in
 django-simple-history==3.2.0
     # via -r pip/requirements.in
