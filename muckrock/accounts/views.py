@@ -32,6 +32,7 @@ from urllib.parse import urlencode
 # Third Party
 import stripe
 from rest_framework.authtoken.models import Token
+from sesame.decorators import authenticate
 
 # MuckRock
 from muckrock.accounts.filters import ProxyFilterSet
@@ -433,6 +434,7 @@ class ProxyList(MRFilterListView):
         return objects.filter(profile__proxy=True).select_related("profile")
 
 
+@authenticate(required=False, permanent=True, override=False)
 def agency_redirect_login(request, agency_slug, agency_idx, foia_slug, foia_idx):
     """View to redirect agency users to the correct page or offer to resend
     them their login token"""
@@ -478,7 +480,7 @@ class UserAutocomplete(MRAutocompleteView):
     def get_queryset(self):
         """Filter by jurisdiction"""
 
-        queryset = super().get_queryset()
+        queryset = super(sk).get_queryset()
 
         if "authors" in self.forwarded:
             queryset = queryset.annotate(

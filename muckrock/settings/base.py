@@ -461,6 +461,7 @@ AUTHENTICATION_BACKENDS = (
     "rules.permissions.ObjectPermissionBackend",
     "muckrock.accounts.backends.SquareletBackend",
     "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend",
 )
 ABSOLUTE_URL_OVERRIDES = {
     "auth.user": lambda u: reverse("acct-profile", kwargs={"username": u.username})
@@ -468,7 +469,7 @@ ABSOLUTE_URL_OVERRIDES = {
 
 DBSETTINGS_USE_SITES = False
 
-SESAME_MAX_AGE = 60 * 60 * 24 * 2
+SESAME_MAX_AGE = 60 * 10
 
 ASSETS_DEBUG = False
 

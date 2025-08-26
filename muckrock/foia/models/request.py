@@ -26,6 +26,7 @@ from datetime import date, timedelta
 from hashlib import md5
 
 # Third Party
+import sesame
 from actstream.models import followers
 from anymail.exceptions import AnymailError
 from constance import config
@@ -1180,25 +1181,16 @@ class FOIARequest(models.Model):
 
     def get_agency_reply_link(self, email=None):
         """Get the link for the agency user to log in"""
-        # XXX update sesame
-        agency = self.agency
-        agency_user_profile = agency.get_user().profile
-        if email is None:
-            email_args = {}
-        else:
-            email_args = {"email": email.encode("utf8")}
-        return agency_user_profile.wrap_url(
-            reverse(
-                "acct-agency-redirect-login",
-                kwargs={
-                    "agency_slug": agency.slug,
-                    "agency_idx": agency.pk,
-                    "foia_slug": self.slug,
-                    "foia_idx": self.pk,
-                },
-            ),
-            **email_args,
+        link = settings.MUCKROCK_URL + reverse(
+            "acct-agency-redirect-login",
+            kwargs={
+                "agency_slug": self.agency.slug,
+                "agency_idx": self.agency.pk,
+                "foia_slug": self.slug,
+                "foia_idx": self.pk,
+            },
         )
+        return link + sesame.utils.get_query_string(self.agency.get_user())
 
     def update_tags(self, tags):
         """Update the requests tags"""
