@@ -349,11 +349,7 @@ class AgencyEmailLinkForm(forms.Form):
         """Send the login link via email"""
         email = TemplateEmail(
             to=[self.cleaned_data["email"]],
-            extra_context={
-                "link": self.foia.get_agency_reply_link(
-                    email=self.cleaned_data["email"]
-                )
-            },
+            extra_context={"link": self.foia.get_agency_reply_link()},
             subject="Requested Login Link",
             text_template="message/agency/loginlink.txt",
             html_template="message/agency/loginlink.html",

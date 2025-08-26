@@ -310,8 +310,9 @@ class PortalTaskNode(TaskNode):
             extra_context["status"] = foia.models.STATUS
             if foia_.portal and not foia_.portal_password:
                 extra_context["password"] = foia_.portal.get_new_password()
-            extra_context["reply_link"] = foia_.get_agency_reply_link(
-                email=foia_.email.email if foia_.email else None
+            extra_context["reply_link"] = settings.MUCKROCK_URL + reverse(
+                "communication-direct-agency",
+                kwargs={"idx": self.task.communication.pk},
             )
 
         return extra_context
