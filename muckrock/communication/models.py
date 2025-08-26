@@ -131,8 +131,6 @@ class EmailAddress(models.Model):
         # MuckRock
         from muckrock.agency.models import AgencyEmail
 
-        # XXX
-
         allowed_tlds = [
             ".%s.us" % a.lower()
             for (a, _) in list(STATE_CHOICES)
@@ -140,8 +138,8 @@ class EmailAddress(models.Model):
         ]
         allowed_tlds.extend([".gov", ".mil"])
 
-        # from the same domain as the FOIA email
-        if foia and foia.email and self.domain == foia.email.domain:
+        # This requests primary email address
+        if foia and foia.email == self:
             return True
 
         # the email is a known email for this FOIA's agency
