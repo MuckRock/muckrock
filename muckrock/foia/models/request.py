@@ -1179,7 +1179,7 @@ class FOIARequest(models.Model):
         else:
             return config.FOLLOWUP_DAYS_OTHER
 
-    def get_agency_reply_link(self, email=None):
+    def get_agency_reply_link(self):
         """Get the link for the agency user to log in"""
         link = settings.MUCKROCK_URL + reverse(
             "acct-agency-redirect-login",
