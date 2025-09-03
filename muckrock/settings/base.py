@@ -13,8 +13,10 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+# Third Party
 # Sentry
 import sentry_sdk
+
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -23,10 +25,11 @@ def boolcheck(setting):
     else:
         return bool(setting)
 
+
 sentry_sdk.init(
     dsn=os.environ.get("SENTRY_DSN", ""),
     send_default_pii=True,
- )
+)
 
 
 # monkey patch celery to prevent Timed out waiting for UP message errors
@@ -485,7 +488,7 @@ MONTHLY_REQUESTS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
-    "root": {"level": "WARNING", "handlers": ["console", "sentry"]},
+    "root": {"level": "WARNING", "handlers": ["console"]},
     "formatters": {
         "verbose": {
             "format": "%(levelname)s %(asctime)s %(module)s %(process)d "
@@ -514,18 +517,18 @@ LOGGING = {
     "loggers": {
         "django": {"handlers": ["null"], "propagate": True, "level": "INFO"},
         "django.request": {
-            "handlers": ["console", "sentry"],
+            "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
         },
         "muckrock": {
-            "handlers": ["console", "sentry"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
         "django.db.backends": {
             "level": "ERROR",
-            "handlers": ["console", "sentry"],
+            "handlers": ["console"],
             "propagate": False,
         },
         "dogslow": {"level": "WARNING", "handlers": ["dogslow"]},

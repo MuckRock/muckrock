@@ -5,7 +5,6 @@ from celery import shared_task
 
 # Standard Library
 import csv
-import os
 
 # Third Party
 from smart_open.smart_open_lib import smart_open
@@ -15,6 +14,7 @@ from muckrock.agency.importer import CSVReader, Importer
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.foia.models import FOIARequest
 from muckrock.task.models import ReviewAgencyTask
+
 
 @shared_task
 def stale():

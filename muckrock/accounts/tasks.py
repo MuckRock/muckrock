@@ -12,7 +12,6 @@ from django.utils import timezone
 
 # Standard Library
 import logging
-import os
 from datetime import date, datetime, time, timedelta
 
 # MuckRock
@@ -47,6 +46,7 @@ from muckrock.task.models import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 @shared_task
 def store_statistics():
