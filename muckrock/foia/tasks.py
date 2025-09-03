@@ -41,8 +41,6 @@ from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
 from phaxio import PhaxioApi
 from phaxio.exceptions import PhaxioError
-from raven import Client
-from raven.contrib.celery import register_logger_signal, register_signal
 from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
@@ -72,10 +70,6 @@ from muckrock.task.pdf import LobPDF
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 
 logger = logging.getLogger(__name__)
-
-client = Client(os.environ.get("SENTRY_DSN"))
-register_logger_signal(client)
-register_signal(client)
 
 lob.api_key = settings.LOB_SECRET_KEY
 

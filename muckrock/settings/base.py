@@ -13,6 +13,8 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+# Sentry
+import sentry_sdk
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -20,6 +22,11 @@ def boolcheck(setting):
         return setting.lower() in ("yes", "true", "t", "1")
     else:
         return bool(setting)
+
+sentry_sdk.init(
+    dsn=os.environ.get("SENTRY_DSN", ""),
+    send_default_pii=True,
+ )
 
 
 # monkey patch celery to prevent Timed out waiting for UP message errors
@@ -281,7 +288,6 @@ INSTALLED_APPS = (
     "localflavor",
     "mathfilters",
     "news_sitemaps",
-    "raven.contrib.django",
     "rest_framework",
     "rest_framework.authtoken",
     "reversion",
@@ -500,14 +506,9 @@ LOGGING = {
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
         },
-        "sentry": {
-            "level": "ERROR",
-            "class": "raven.contrib.django.handlers.SentryHandler",
-            "filters": ["require_debug_false"],
-        },
         "dogslow": {
             "level": "WARNING",
-            "class": "raven.contrib.django.handlers.SentryHandler",
+            "class": "sentry_sdk.integrations.logging.EventHandler",
         },
     },
     "loggers": {
@@ -525,12 +526,6 @@ LOGGING = {
         "django.db.backends": {
             "level": "ERROR",
             "handlers": ["console", "sentry"],
-            "propagate": False,
-        },
-        "raven": {"level": "WARNING", "handlers": ["console"], "propagate": False},
-        "sentry.errors": {
-            "level": "WARNING",
-            "handlers": ["console"],
             "propagate": False,
         },
         "dogslow": {"level": "WARNING", "handlers": ["dogslow"]},
