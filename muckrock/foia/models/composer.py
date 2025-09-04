@@ -31,7 +31,7 @@ from constance import config
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock.core.utils import TempDisconnectSignal
+from muckrock.core.utils import TempDisconnectSignal, mailchimp_journey
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import EMBARGO_CHOICES
@@ -165,8 +165,19 @@ class FOIAComposer(models.Model):
         logger.info("Composer approved: %s", self.pk)
         for foia in self.foias.all():
             foia.submit(contact_info=contact_info)
+
+        previously_filed = FOIAComposer.objects.filter(
+            user=self.user, status="filed"
+        ).exists()
+
         self.status = "filed"
         self.save()
+
+        if not previously_filed:
+            logger.info(
+                "Sending user %s to Mailchimp first_request journey", self.user.pk
+            )
+            mailchimp_journey(self.user.email, journey="first_request")
 
     def has_perm(self, user, perm):
         """Short cut for checking a FOIA composer permission"""
