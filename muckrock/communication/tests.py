@@ -41,8 +41,8 @@ class TestEmailAddress(TestCase):
         WhitelistDomain.objects.create(domain="whitehat.edu")
 
         allowed_emails = [
-            "bar@bar.com",  # same domain
-            "BAR@BAR.COM",  # case insensitive
+            "foo@bar.com",  # primary email
+            "foo@BAR.COM",  # case insensitive
             "foo@baz.com",  # other email
             "foo@agency.com",  # agency email
             "any@usa.gov",  # any government tld
