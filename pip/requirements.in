@@ -69,12 +69,12 @@ python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
 python-documentcloud # for uploading to documentcloud
 python-redis-lock[django] # use a redis cache with a locking mechanism
-raven # Sentry integration
 redis # Redis integration - for use with celery
 reportlab # Used for adding text to PDFs for form filling in
 requests # HTTP for humans
 rules # Rule based permissions
 scout-apm # performance monitoring
+sentry-sdk[django, celery] # Sentry integration for exception monitoring
 simplejson # json decoder for requests
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
