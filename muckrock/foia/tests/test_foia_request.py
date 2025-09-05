@@ -24,7 +24,7 @@ from moto import mock_aws
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, AppealAgencyFactory, UserFactory
-from muckrock.core.test_utils import RunCommitHooksMixin, mock_squarelet
+from muckrock.core.test_utils import RunCommitHooksMixin, mock_mailchimp, mock_squarelet
 from muckrock.core.utils import new_action
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
@@ -251,6 +251,7 @@ class TestFOIAIntegration(RunCommitHooksMixin, TestCase):
         FOIATemplateFactory.create()
 
         mock_squarelet(mock_request)
+        mock_mailchimp(mock_request)
         mail.outbox = []
         user = UserFactory(membership__organization__number_requests=1)
         agency = AgencyFactory(email=None, fax=None)

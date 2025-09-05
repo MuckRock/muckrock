@@ -105,6 +105,23 @@ def mock_squarelet(mock_requests, requests_json=None):
     )
 
 
+def mock_mailchimp(mock_requests):
+    """Set up default mock for Mailchimp member PUT requests"""
+    mock_requests.put(
+        re.compile(r"https://us2\.api\.mailchimp\.com/3\.0/lists/.*/members/.*"),
+        status_code=200,
+        json={"id": "mocked_member_id"},
+    )
+    mock_requests.post(
+        re.compile(
+            r"https://us2\.api\.mailchimp\.com/3\.0/customer-journeys/"
+            r".*/actions/trigger"
+        ),
+        status_code=200,
+        json={"status": "triggered"},
+    )
+
+
 class RunCommitHooksMixin:
     """Mixin to include run commit hooks for test cases"""
 

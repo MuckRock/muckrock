@@ -22,7 +22,7 @@ from muckrock.core.factories import (
     ProfessionalUserFactory,
     UserFactory,
 )
-from muckrock.core.test_utils import mock_squarelet
+from muckrock.core.test_utils import mock_mailchimp, mock_squarelet
 from muckrock.foia.factories import FOIARequestFactory, FOIATemplateFactory
 from muckrock.foia.models import FOIAComposer
 
@@ -33,6 +33,7 @@ class TestFOIAViewsetCreate(TestCase):
     def setUp(self):
         self.mocker = requests_mock.Mocker()
         mock_squarelet(self.mocker)
+        mock_mailchimp(self.mocker)
         self.mocker.start()
         self.addCleanup(self.mocker.stop)
         FOIATemplateFactory.create()
