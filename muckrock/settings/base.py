@@ -13,10 +13,6 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
-# Third Party
-# Sentry
-import sentry_sdk
-
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -24,12 +20,6 @@ def boolcheck(setting):
         return setting.lower() in ("yes", "true", "t", "1")
     else:
         return bool(setting)
-
-
-sentry_sdk.init(
-    dsn=os.environ.get("SENTRY_DSN", ""),
-    send_default_pii=True,
-)
 
 
 # monkey patch celery to prevent Timed out waiting for UP message errors
