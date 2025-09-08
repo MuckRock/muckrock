@@ -20,12 +20,15 @@ def get_access_token():
     resp.raise_for_status()
     return resp.json()["access_token"]
 
-def patch_redirect_uri(client_id, redirect_uri):
+def patch_redirect_uri(client_id, redirect_uri, action):
     """PATCH the client redirect URIs on squarelet staging"""
+    if action not in ("add", "remove"):
+        raise ValueError("Action must be 'add' or 'remove'")
+    
     access_token = get_access_token()
     endpoint = f"{SQUARELET_URL}/api/clients/{client_id}/redirect_uris/"
     payload = {
-        "action": "add",
+        "action": action,
         "redirect_uris": [redirect_uri],
     }
     headers = {
@@ -34,8 +37,13 @@ def patch_redirect_uri(client_id, redirect_uri):
     }
     resp = requests.patch(endpoint, json=payload, headers=headers)
     resp.raise_for_status()
-    print(f"Successfully added redirect URI: {redirect_uri}")
+    print(f"Successfully {action}ed redirect URI: {redirect_uri}")
     print(resp.json())
 
 if __name__ == "__main__":
-    patch_redirect_uri(CLIENT_ID, REVIEW_APP_URL)
+    if len(sys.argv) < 2:
+        print("Usage: ./script.py <add|remove>")
+        sys.exit(1)
+    
+    action = sys.argv[1].lower()
+    patch_redirect_uri(CLIENT_ID, REVIEW_APP_URL, action)
