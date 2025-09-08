@@ -7,7 +7,6 @@ Imports from the heroku settings
 # pylint: disable=unused-wildcard-import
 
 # Standard Library
-# Standard
 import logging
 import os
 
