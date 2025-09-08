@@ -10,6 +10,7 @@ CLIENT_ID = 1  # Add redirect URIs to MuckRock client
 REVIEW_APP_URL = f"https://{os.environ['HEROKU_APP_NAME']}.herokuapp.com/"
 GITHUB_CLIENT = os.environ["GITHUB_ACTIONS_CLIENT"]
 GITHUB_SECRET = os.environ["GITHUB_ACTIONS_SECRET"]
+os.environ["https_proxy"] = os.environ["FIXIE_URL"]
 
 def get_access_token():
     """Fetch an access token using client_credentials grant"""
