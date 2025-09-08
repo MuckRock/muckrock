@@ -6,6 +6,7 @@
     { "url": "heroku/nodejs" }
   ],
   "scripts": {
-    "postdeploy": "./postdeploy.sh"
+    "postdeploy": "./postdeploy.sh",
+    "pr-predestroy": "./teardown.sh"
   }
 }
