@@ -11,7 +11,7 @@ if [ -n "$HEROKU_APP_NAME" ] && [ "$DJANGO_ENV" = "staging" ]; then
   # Copy the data from the staging app database to the review app database.
   heroku pg:copy muckrock-staging::DATABASE_URL DATABASE_URL --app $HEROKU_APP_NAME --confirm $HEROKU_APP_NAME
   # Call the Python postdeploy script to add the review app redirect URI
-  python3 "$(dirname "$0")/postdeploy.py add"
+  python3 "$(dirname "$0")/postdeploy.py" add
 fi
 
 # No matter what environment we're in, ensure we run any Django migrations.
