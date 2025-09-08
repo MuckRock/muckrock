@@ -283,7 +283,6 @@ INSTALLED_APPS = (
     "localflavor",
     "mathfilters",
     "news_sitemaps",
-    "raven.contrib.django",
     "rest_framework",
     "rest_framework.authtoken",
     "reversion",
@@ -481,7 +480,7 @@ MONTHLY_REQUESTS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
-    "root": {"level": "WARNING", "handlers": ["console", "sentry"]},
+    "root": {"level": "WARNING", "handlers": ["console"]},
     "formatters": {
         "verbose": {
             "format": "%(levelname)s %(asctime)s %(module)s %(process)d "
@@ -502,36 +501,25 @@ LOGGING = {
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
         },
-        "sentry": {
-            "level": "ERROR",
-            "class": "raven.contrib.django.handlers.SentryHandler",
-            "filters": ["require_debug_false"],
-        },
         "dogslow": {
             "level": "WARNING",
-            "class": "raven.contrib.django.handlers.SentryHandler",
+            "class": "sentry_sdk.integrations.logging.EventHandler",
         },
     },
     "loggers": {
         "django": {"handlers": ["null"], "propagate": True, "level": "INFO"},
         "django.request": {
-            "handlers": ["console", "sentry"],
+            "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
         },
         "muckrock": {
-            "handlers": ["console", "sentry"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
         "django.db.backends": {
             "level": "ERROR",
-            "handlers": ["console", "sentry"],
-            "propagate": False,
-        },
-        "raven": {"level": "WARNING", "handlers": ["console"], "propagate": False},
-        "sentry.errors": {
-            "level": "WARNING",
             "handlers": ["console"],
             "propagate": False,
         },

@@ -5,11 +5,8 @@ from celery import shared_task
 
 # Standard Library
 import csv
-import os
 
 # Third Party
-from raven import Client
-from raven.contrib.celery import register_logger_signal, register_signal
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
@@ -17,10 +14,6 @@ from muckrock.agency.importer import CSVReader, Importer
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.foia.models import FOIARequest
 from muckrock.task.models import ReviewAgencyTask
-
-client = Client(os.environ.get("SENTRY_DSN"))
-register_logger_signal(client)
-register_signal(client)
 
 
 @shared_task

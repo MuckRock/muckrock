@@ -12,12 +12,7 @@ from django.utils import timezone
 
 # Standard Library
 import logging
-import os
 from datetime import date, datetime, time, timedelta
-
-# Third Party
-from raven import Client
-from raven.contrib.celery import register_logger_signal, register_signal
 
 # MuckRock
 from muckrock.accounts.models import Statistics
@@ -51,10 +46,6 @@ from muckrock.task.models import (
 )
 
 logger = logging.getLogger(__name__)
-
-client = Client(os.environ.get("SENTRY_DSN"))
-register_logger_signal(client)
-register_signal(client)
 
 
 @shared_task

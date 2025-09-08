@@ -69,11 +69,13 @@ celery==5.4.0
     # via
     #   -r pip/requirements.in
     #   django-celery-email
+    #   sentry-sdk
 certifi==2017.4.17
     # via
     #   httpcore
     #   httpx
     #   requests
+    #   sentry-sdk
     #   urllib3
 cffi==1.17.1
     # via cryptography
@@ -157,6 +159,7 @@ django==4.2
     #   drf-spectacular
     #   easy-thumbnails
     #   jsonfield
+    #   sentry-sdk
 django-activity-stream==1.4.2
     # via -r pip/requirements.in
 django-anymail[mailgun]==9.1
@@ -487,8 +490,6 @@ pyyaml==6.0.1
     #   python-documentcloud
 ratelimit==2.2.1
     # via python-documentcloud
-raven==6.10.0
-    # via -r pip/requirements.in
 rcssmin==1.1.1
     # via django-compressor
 redis==3.5.3
@@ -545,6 +546,8 @@ scout-apm==2.16.2
     # via -r pip/requirements.in
 scrapelib==2.2.0
     # via govqa
+sentry-sdk[celery,django]==2.35.2
+    # via -r pip/requirements.in
 simplejson==3.16.0
     # via -r pip/requirements.in
 six==1.15.0
@@ -640,6 +643,7 @@ urllib3[secure]==1.26.16
     #   requests
     #   scout-apm
     #   scrapelib
+    #   sentry-sdk
 urllib3-secure-extra==0.1.0
     # via urllib3
 vine==5.1.0
