@@ -3,9 +3,12 @@
     MuckRock staging client on Squarelet staging
 """
 
+# Standard Library
 #!/usr/bin/env python3
 import os
 import sys
+
+# Third Party
 import requests
 
 SQUARELET_URL = os.environ["SQUARELET_URL"]
@@ -18,13 +21,17 @@ GITHUB_CLIENT = os.environ["GITHUB_ACTIONS_CLIENT"]
 GITHUB_SECRET = os.environ["GITHUB_ACTIONS_SECRET"]
 os.environ["https_proxy"] = os.environ["FIXIE_URL"]
 
+
 def get_access_token():
     """Fetch an access token using client_credentials grant"""
     token_url = f"{SQUARELET_URL}/openid/token"
     data = {"grant_type": "client_credentials"}
-    resp = requests.post(token_url, auth=(GITHUB_CLIENT, GITHUB_SECRET), data=data, timeout=20)
+    resp = requests.post(
+        token_url, auth=(GITHUB_CLIENT, GITHUB_SECRET), data=data, timeout=20
+    )
     resp.raise_for_status()
     return resp.json()["access_token"]
+
 
 def patch_redirect_uri(client_id, redirect_uri, cmd_action):
     """PATCH the client redirect URIs on squarelet staging"""
@@ -45,6 +52,7 @@ def patch_redirect_uri(client_id, redirect_uri, cmd_action):
     resp.raise_for_status()
     print(f"Successfully {cmd_action}ed redirect URI: {redirect_uri}")
     print(resp.json())
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
