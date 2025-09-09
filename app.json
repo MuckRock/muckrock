@@ -4,5 +4,9 @@
     { "url": "heroku/python" },
     { "url": "https://github.com/heroku/heroku-buildpack-nginx" },
     { "url": "heroku/nodejs" }
-  ]
+  ],
+  "scripts": {
+    "postdeploy": "./postdeploy.sh",
+    "pr-predestroy": "./teardown.sh"
+  }
 }
