@@ -18,6 +18,7 @@ import sys
 import time
 import uuid
 from email.message import Message
+from hashlib import md5
 
 # Third Party
 import actstream
@@ -320,3 +321,56 @@ def parse_header(header):
     msg["content-type"] = header
     params = msg.get_params()
     return (params[0][0], dict(params[1:]))
+
+
+def mailchimp_journey(email, journey):
+    """Trigger a mailchimp journey for the given email address"""
+
+    # IDs for our journeys
+    journey_map = {
+        "first_request": (50, 435, "20aa4a931d"),
+    }
+    journey_id, step_id, list_id = journey_map[journey]
+
+    subscriber_hash = md5(email.lower().encode()).hexdigest()
+
+    # first ensure they are in the proper audience
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"apikey {settings.MAILCHIMP_API_KEY}",
+    }
+    api_url = f"{settings.MAILCHIMP_API_ROOT}/lists/{list_id}/members/{subscriber_hash}"
+    data = {
+        "email_address": email,
+        "status": "subscribed",
+    }
+    response = None
+    try:
+        response = retry_on_error(
+            requests.ConnectionError, requests.put, api_url, json=data, headers=headers
+        )
+        if response.status_code >= 400:
+            raise ValueError(
+                f"Error adding {email} to audience: "
+                f"{response.status_code} {response.text}"
+            )
+    except (requests.ConnectionError, ValueError):
+        logger.error("[JOURNEY] Error adding to audience", exc_info=sys.exc_info())
+
+    api_url = (
+        f"{settings.MAILCHIMP_API_ROOT}/customer-journeys/journeys/"
+        f"{journey_id}/steps/{step_id}/actions/trigger"
+    )
+    data = {"email_address": email}
+    try:
+        response = retry_on_error(
+            requests.ConnectionError, requests.post, api_url, json=data, headers=headers
+        )
+        if response.status_code >= 400:
+            raise ValueError(
+                f"Error starting journey for {email}: "
+                f"{response.status_code} {response.text}"
+            )
+    except (requests.ConnectionError, ValueError):
+        logger.error("[JOURNEY] Error starting journey", exc_info=sys.exc_info())
+    return response
