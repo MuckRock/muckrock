@@ -1,4 +1,27 @@
 {
+  "name": "requests",
+  "description": "Public records request service MuckRock Requests",
+  "repository": "https://github.com/muckrock/muckrock",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "standard-1x"
+    },
+    "beat": {
+      "quantity": 1,
+      "size": "standard-1x"
+    },
+    "worker": {
+      "quantity": 1,
+      "size": "standard-2x"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:essential-1",
+    "heroku-redis:mini",
+    "papertrail:choklad",
+    "fixie:cruiser"
+  ],
   "buildpacks": [
     { "url": "https://github.com/SectorLabs/heroku-buildpack-git-submodule" },
     { "url": "heroku/python" },
