@@ -7,6 +7,7 @@
 # 
 # By checking that we're in a "staging" environment, we have confidence that we're
 # only copying staging data into an environment that expects to receive it.
+set -e
 if [ -n "$HEROKU_APP_NAME" ] && [ "$DJANGO_ENV" = "staging" ]; then
   # Copy the data from the staging app database to the review app database.
   heroku pg:copy muckrock-staging::DATABASE_URL DATABASE_URL --app $HEROKU_APP_NAME --confirm $HEROKU_APP_NAME
