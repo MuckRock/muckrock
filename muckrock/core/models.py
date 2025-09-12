@@ -135,11 +135,11 @@ class FeaturedProjectSlot(Model):
 @reversion.register()
 class GiveButterCampaign(SingletonModel):
     """Singleton model to store the current GiveButter campaign ID"""
-    
+
     campaign_id = CharField(
         max_length=50,
         default="g6R32g",
-        help_text="GiveButter campaign ID (e.g., 'g6R32g')"
+        help_text="GiveButter campaign ID (e.g., 'g6R32g')",
     )
 
     class Meta:

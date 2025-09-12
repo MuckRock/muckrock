@@ -49,4 +49,8 @@ def cache_timeout(request):
 
 def givebutter_campaign(request):
     """Add GiveButter campaign ID to the context"""
-    return {"givebutter_campaign_id": GiveButterCampaign.get_field_value("campaign_id", "g6R32g")}
+    return {
+        "givebutter_campaign_id": GiveButterCampaign.get_field_value(
+            "campaign_id", "g6R32g"
+        )
+    }
