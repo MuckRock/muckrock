@@ -21,7 +21,7 @@ from simple_history.admin import SimpleHistoryAdmin
 
 # MuckRock
 from muckrock.core import autocomplete
-from muckrock.core.models import FeaturedProjectSlot, HomePage
+from muckrock.core.models import FeaturedProjectSlot, GiveButterCampaign, HomePage
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 
@@ -242,6 +242,11 @@ class HomePageAdmin(SingletonModelAdmin):
             qs = Article.objects.filter(projects__id=project_id)
             articles = [{"id": a.id, "title": a.title} for a in qs]
         return JsonResponse({"articles": articles})
+
+
+@admin.register(GiveButterCampaign)
+class GiveButterCampaignAdmin(SingletonModelAdmin):
+    fields = ("campaign_id",)
 
 
 admin.site.unregister(FlatPage)

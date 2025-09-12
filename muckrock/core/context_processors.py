@@ -6,6 +6,9 @@ Site-wide context processors
 from django.conf import settings as django_settings
 from django.utils.functional import SimpleLazyObject
 
+# MuckRock
+from muckrock.core.models import GiveButterCampaign
+
 
 def domain(request):
     """Add the domain to the context for constructing absolute urls."""
@@ -42,3 +45,8 @@ def mixpanel(request):
 def cache_timeout(request):
     """Cache timeout settings"""
     return {"cache_timeout": django_settings.DEFAULT_CACHE_TIMEOUT}
+
+
+def givebutter_campaign(request):
+    """Add GiveButter campaign ID to the context"""
+    return {"givebutter_campaign_id": GiveButterCampaign.get_field_value("campaign_id", "g6R32g")}
