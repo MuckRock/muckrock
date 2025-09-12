@@ -207,6 +207,7 @@ TEMPLATES = [
                 "muckrock.core.context_processors.domain",
                 "muckrock.core.context_processors.settings",
                 "muckrock.core.context_processors.cache_timeout",
+                "muckrock.core.context_processors.givebutter_campaign",
             ],
             "libraries": {"thumbnail": "easy_thumbnails.templatetags.thumbnail"},
             "debug": True,
