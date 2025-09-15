@@ -130,21 +130,3 @@ class FeaturedProjectSlot(Model):
 
     def __str__(self):
         return f"{self.project} (Order: {self.order})"
-
-
-@reversion.register()
-class GiveButterCampaign(SingletonModel):
-    """Singleton model to store the current GiveButter campaign ID"""
-
-    campaign_id = CharField(
-        max_length=50,
-        default="g6R32g",
-        help_text="GiveButter campaign ID (e.g., 'g6R32g')",
-    )
-
-    class Meta:
-        verbose_name = "GiveButter Campaign"
-        verbose_name_plural = "GiveButter Campaign"
-
-    def __str__(self):
-        return "GiveButter Campaign Settings"
