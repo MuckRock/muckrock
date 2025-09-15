@@ -11,7 +11,7 @@ from django.utils.timezone import now
 # Standard Library
 import logging
 import sys
-from datetime import date, datetime
+from datetime import date, timedelta
 from hashlib import md5
 from time import time
 
@@ -117,7 +117,7 @@ class AsyncFileDownloadTask:
 )
 def fetch_and_load_documentcloud_stats():
     """Fetch yesterday's statistics from DocumentCloud."""
-    yesterday = (date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
     logger.info("Fetching DocumentCloud stats for %s", yesterday)
 
     # Instantiate client with creds
