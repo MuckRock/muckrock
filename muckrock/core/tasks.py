@@ -122,6 +122,8 @@ def fetch_and_load_documentcloud_stats():
 
     # Instantiate client with creds
     client = DocumentCloud(
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
         username=settings.DOCUMENTCLOUD_BETA_USERNAME,
         password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
     )
