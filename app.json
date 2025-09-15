@@ -10,7 +10,8 @@
     "scheduler": {
       "quantity": 1,
       "size": "standard-2x"
-    },
+    }
+  },
   "addons": [
     "heroku-postgresql:essential-1",
     "heroku-redis:mini",
