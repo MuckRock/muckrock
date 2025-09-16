@@ -6,6 +6,9 @@ Site-wide context processors
 from django.conf import settings as django_settings
 from django.utils.functional import SimpleLazyObject
 
+# Third Party
+from constance import config
+
 
 def domain(request):
     """Add the domain to the context for constructing absolute urls."""
@@ -46,4 +49,4 @@ def cache_timeout(request):
 
 def givebutter_campaign(request):
     """Add GiveButter campaign ID to the context"""
-    return {"givebutter_campaign_id": django_settings.GIVEBUTTER_CAMPAIGN_ID}
+    return {"givebutter_campaign_id": config.GIVEBUTTER_CAMPAIGN_ID}

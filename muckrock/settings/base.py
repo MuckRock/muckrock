@@ -540,8 +540,6 @@ STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
-GIVEBUTTER_CAMPAIGN_ID = os.environ.get("GIVEBUTTER_CAMPAIGN_ID", "g6R32g")
-
 MAILCHIMP_API_KEY = os.environ.get("MAILCHIMP_API_KEY", "")
 MAILCHIMP_API_ROOT = "https://us2.api.mailchimp.com/3.0"
 MAILCHIMP_LIST_DEFAULT = "20aa4a931d"
@@ -758,7 +756,7 @@ CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
     [
-        ("GIVEBUTTER_CAMPAIGN_ID", (GIVEBUTTER_CAMPAIGN_ID, "GiveButter Campaign ID")),
+        ("GIVEBUTTER_CAMPAIGN_ID", ("g6R32g", "GiveButter Campaign ID")),
         ("ENABLE_FOLLOWUP", (True, "Enable automated followups")),
         (
             "ENABLE_WEEKEND_FOLLOWUP",
