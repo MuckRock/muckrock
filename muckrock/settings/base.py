@@ -207,6 +207,7 @@ TEMPLATES = [
                 "muckrock.core.context_processors.domain",
                 "muckrock.core.context_processors.settings",
                 "muckrock.core.context_processors.cache_timeout",
+                "muckrock.core.context_processors.givebutter_campaign",
             ],
             "libraries": {"thumbnail": "easy_thumbnails.templatetags.thumbnail"},
             "debug": True,
@@ -759,6 +760,7 @@ CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 CONSTANCE_SUPERUSER_ONLY = False
 CONSTANCE_CONFIG = OrderedDict(
     [
+        ("GIVEBUTTER_CAMPAIGN_ID", ("g6R32g", "GiveButter Campaign ID")),
         ("ENABLE_FOLLOWUP", (True, "Enable automated followups")),
         (
             "ENABLE_WEEKEND_FOLLOWUP",
@@ -851,6 +853,7 @@ CONSTANCE_CONFIG = OrderedDict(
     ]
 )
 CONSTANCE_CONFIG_FIELDSETS = {
+    "General Options": ("GIVEBUTTER_CAMPAIGN_ID",),
     "FOIA Options": (
         "ENABLE_FOLLOWUP",
         "ENABLE_WEEKEND_FOLLOWUP",
