@@ -26,6 +26,7 @@ from datetime import date, timedelta
 from hashlib import md5
 
 # Third Party
+import sesame
 from actstream.models import followers
 from anymail.exceptions import AnymailError
 from constance import config
@@ -219,7 +220,6 @@ class FOIARequest(models.Model):
         User, related_name="edit_access", blank=True
     )
     access_key = models.CharField(blank=True, max_length=255)
-    passcode = models.CharField(blank=True, max_length=8)
 
     proxy = models.ForeignKey(
         User,
@@ -374,25 +374,6 @@ class FOIARequest(models.Model):
         self.save()
         logger.info("New access key generated for %s", self)
         return key
-
-    def get_passcode(self):
-        """Get a passcode for agency users"""
-        logger.info("PASSCODE start: %s", self.pk)
-        if self.passcode:
-            logger.info("PASSCODE have: %s %s", self.pk, self.passcode)
-            return self.passcode
-
-        key = utils.generate_key(8, "ABCEFGHJKLMNPRUVWXY")
-        with transaction.atomic():
-            foia = FOIARequest.objects.select_for_update().get(pk=self.pk)
-            if foia.passcode:
-                logger.info("PASSCODE other: %s %s", self.pk, foia.passcode)
-                self.passcode = foia.passcode
-                return self.passcode
-            self.passcode = foia.passcode = key
-            foia.save()
-        logger.info("PASSCODE mine: %s %s", self.pk, key)
-        return self.passcode
 
     def get_files(self):
         """Get all files under this FOIA"""
@@ -913,7 +894,6 @@ class FOIARequest(models.Model):
 
         body = self.render_msg_body(
             comm=comm,
-            is_email=True,
             switch=kwargs.get("switch"),
             appeal=kwargs.get("appeal"),
         )
@@ -1069,7 +1049,6 @@ class FOIARequest(models.Model):
     def render_msg_body(
         self,
         comm,
-        is_email=False,
         switch=False,
         appeal=False,
         include_address=True,
@@ -1099,13 +1078,9 @@ class FOIARequest(models.Model):
             else:
                 agency = self.agency
             context["address"] = self.address.format(agency, appeal=appeal)
-        if is_email:
-            context["reply_link"] = self.get_agency_reply_link(self.email.email)
-        else:
-            context["reply_link"] = settings.MUCKROCK_URL + reverse(
-                "communication-direct-agency", kwargs={"idx": comm.pk}
-            )
-        context["passcode"] = comm.foia.get_passcode()
+        context["reply_link"] = settings.MUCKROCK_URL + reverse(
+            "communication-direct-agency", kwargs={"idx": comm.pk}
+        )
         context["attachments"] = comm.files.values_list("title", flat=True)
         if switch:
             first_request = self.communications.all()[0]
@@ -1204,26 +1179,18 @@ class FOIARequest(models.Model):
         else:
             return config.FOLLOWUP_DAYS_OTHER
 
-    def get_agency_reply_link(self, email=None):
+    def get_agency_reply_link(self):
         """Get the link for the agency user to log in"""
-        agency = self.agency
-        agency_user_profile = agency.get_user().profile
-        if email is None:
-            email_args = {}
-        else:
-            email_args = {"email": email.encode("utf8")}
-        return agency_user_profile.wrap_url(
-            reverse(
-                "acct-agency-redirect-login",
-                kwargs={
-                    "agency_slug": agency.slug,
-                    "agency_idx": agency.pk,
-                    "foia_slug": self.slug,
-                    "foia_idx": self.pk,
-                },
-            ),
-            **email_args,
+        link = settings.MUCKROCK_URL + reverse(
+            "acct-agency-redirect-login",
+            kwargs={
+                "agency_slug": self.agency.slug,
+                "agency_idx": self.agency.pk,
+                "foia_slug": self.slug,
+                "foia_idx": self.pk,
+            },
         )
+        return link + sesame.utils.get_query_string(self.agency.get_user())
 
     def update_tags(self, tags):
         """Update the requests tags"""

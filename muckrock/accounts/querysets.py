@@ -28,6 +28,9 @@ class ProfileQuerySet(models.QuerySet):
             raise ValueError("Missing required fields: {}".format(missing))
 
         user, created = self._squarelet_update_or_create_user(uuid, data)
+        if created:
+            user.set_unusable_password()
+            user.save()
 
         profile = self._squarelet_update_or_create_profile(uuid, data, user)
 
