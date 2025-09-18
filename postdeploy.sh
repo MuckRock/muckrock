@@ -9,8 +9,11 @@
 # only copying staging data into an environment that expects to receive it.
 set -e
 if [ -n "$HEROKU_APP_NAME" ] && [ "$DJANGO_ENV" = "staging" ]; then
-  # Copy the data from the staging app database to the review app database.
-  heroku pg:copy muckrock-staging::DATABASE_URL DATABASE_URL --app $HEROKU_APP_NAME --confirm $HEROKU_APP_NAME
+  # Restore the data from the staging app database backup to the review app database.
+  LATEST_BACKUP=$(heroku pg:backups --app squarelet-staging | awk '/b[0-9]+/ {print $1; exit}')
+  heroku pg:backups:restore "muckrock-staging::$LATEST_BACKUP" DATABASE_URL \
+    --app "$HEROKU_APP_NAME" \
+    --confirm "$HEROKU_APP_NAME"
   # Call the Python postdeploy script to add the review app redirect URI
   python3 "$(dirname "$0")/postdeploy.py" add
 fi
