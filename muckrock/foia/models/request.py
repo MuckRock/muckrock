@@ -887,7 +887,6 @@ class FOIARequest(models.Model):
 
     def send_delayed_email(self, comm, **kwargs):
         """Send the message as an email"""
-        import os
 
         from_email, _ = EmailAddress.objects.get_or_create(
             email=self.get_request_email()
