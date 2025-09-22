@@ -887,6 +887,7 @@ class FOIARequest(models.Model):
 
     def send_delayed_email(self, comm, **kwargs):
         """Send the message as an email"""
+        import os
 
         from_email, _ = EmailAddress.objects.get_or_create(
             email=self.get_request_email()
@@ -908,6 +909,7 @@ class FOIARequest(models.Model):
         # celery email backend directly.  Otherwise just use the default email backend
         backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
         logger.info("sending mail with backend: %s", backend)
+        logger.info("env: dsm: %s", os.environ.get("DJANGO_SETTINGS_MODULE"))
         headers = kwargs.get("headers", {})
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
