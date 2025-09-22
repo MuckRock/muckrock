@@ -906,11 +906,11 @@ class FOIARequest(models.Model):
 
         # if we are using celery email, we want to not use it here, and use the
         # celery email backend directly.  Otherwise just use the default email backend
-        backend = getattr(settings, "CELERY_EMAIL_BACKEND", settings.EMAIL_BACKEND)
+        if settings.EMAIL_BACKEND == "djcelery_email.backends.CeleryEmailBackend":
+            backend = settings.CELERY_EMAIL_BACKEND
+        else:
+            backend = settings.EMAIL_BACKEND
         logger.info("sending mail with backend: %s", backend)
-        logger.info("eb: %s", settings.EMAIL_BACKEND)
-        logger.info("ceb: %s", getattr(settings, "CELERY_EMAIL_BACKEND", "--default--"))
-        logger.info("env: dsm: %s", os.environ.get("DJANGO_SETTINGS_MODULE"))
         headers = kwargs.get("headers", {})
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
