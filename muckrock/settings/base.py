@@ -863,6 +863,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FOLLOWUP_DAYS_OTHER",
         "MODERATION_KEYWORDS",
         "MODERATION_REGEX",
+        "NOREPLY_EMAILS",
     ),
     "Lob Options": ("AUTO_LOB", "AUTO_LOB_PAY", "AUTO_LOB_APPEAL"),
     "Machine Learning Options": (
