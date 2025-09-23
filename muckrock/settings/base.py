@@ -646,9 +646,6 @@ SIMPLE_JWT = {
 # handle preview deploys
 HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME", "")
 
-if ENV == "staging" and HEROKU_APP_NAME:
-    MUCKROCK_URL = f"https://{HEROKU_APP_NAME}.herokuapp.com"
-
 if "ALLOWED_HOSTS" in os.environ:
     ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
@@ -695,6 +692,9 @@ DOCCLOUD_API_URL = os.environ.get(
 DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
 )
+
+if ENV == "staging" and HEROKU_APP_NAME:
+    MUCKROCK_URL = f"https://{HEROKU_APP_NAME}.herokuapp.com"
 
 # Limit CORS support to just API endpoints
 CORS_URLS_REGEX = r"^/api(_v\d)?/.*$"
