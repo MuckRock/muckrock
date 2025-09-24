@@ -279,7 +279,7 @@ def clear_cloudfront_cache(file_names):
     distributions = [
         d
         for d in cloudfront.list_distributions()["DistributionList"]["Items"]
-        if settings.AWS_S3_CUSTOM_DOMAIN in d["Aliases"]["Items"]
+        if settings.AWS_S3_CUSTOM_DOMAIN in d.get("Aliases", {}).get("Items", [])
     ]
     if distributions:
         cloudfront.create_invalidation(
