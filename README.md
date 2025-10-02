@@ -58,7 +58,9 @@ Open a Django shell in the folder for MuckRock using `inv shell` and run the fol
       tempUser.save()
 ```
 
-You will now be able to access dev.muckrock.com/admin
+You will now be able to access dev.muckrock.com/admin/. 
+
+Note: If dev.muckrock.com/admin (without a trailing /) does not work and throws an error stating that the Site is missing, you will need to add `dev.muckrock.com` and `dev.foiamachine.org` as sites in the admin panel. 
 
 ## Docker info
 

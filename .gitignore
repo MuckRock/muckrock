@@ -36,3 +36,4 @@ celerybeat-schedule
 .vscode
 /src
 CLAUDE.md
+/data
