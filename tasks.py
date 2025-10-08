@@ -5,24 +5,7 @@ import os
 from invoke import task
 
 
-def get_project_name():
-    path = ".envs/.local/.compose"
-    if not os.path.exists(path):
-        return os.path.basename(os.getcwd())
-    with open(path) as f:
-        for line in f:
-            if line.startswith("COMPOSE_PROJECT_NAME="):
-                project_name = line.strip().split("=", 1)[1]
-                return project_name
-    print(
-        f"DEBUG: COMPOSE_PROJECT_NAME not found in {path}, defaulting to the current working directory's name"
-    )
-    return os.path.basename(os.getcwd())
-
-
-PROJECT_NAME = get_project_name()
-
-DOCKER_COMPOSE_RUN_OPT = f"docker compose -p {PROJECT_NAME} -f local.yml run {{opt}} --rm {{service}} {{cmd}}"
+DOCKER_COMPOSE_RUN_OPT = f"docker compose -f local.yml run {{opt}} --rm {{service}} {{cmd}}"
 
 DOCKER_COMPOSE_RUN_OPT_USER = DOCKER_COMPOSE_RUN_OPT.format(
     opt="-u $(id -u):$(id -g) {opt}", service="{service}", cmd="{cmd}"
@@ -156,16 +139,13 @@ def format_check(c):
 @task
 def up(c):
     """Start the docker images"""
-    project = get_project_name()
-    c.run(f"docker compose -p {project} up -d ")
+    c.run(f"docker compose up -d ")
 
 
 @task
 def down(c):
-    """Shut down the docker images using the correct project name"""
-    project = get_project_name()
-    print(f"Bringing down containers for project: {project}")
-    c.run(f"docker compose -p {project} down")
+    """Shut down the docker images"""
+    c.run(f"docker compose down")
 
 
 @task

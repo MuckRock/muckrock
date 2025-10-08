@@ -1,4 +1,5 @@
 version: '3.8'
+name: ${COMPOSE_PROJECT_NAME:-muckrock}
 
 volumes:
   postgres15_data_local: {}
