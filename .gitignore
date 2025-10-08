@@ -37,3 +37,4 @@ celerybeat-schedule
 /src
 CLAUDE.md
 /data
+.env
