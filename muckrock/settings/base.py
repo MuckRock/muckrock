@@ -433,8 +433,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "muckrock.stats.tasks.fetch_and_load_documentcloud_stats",
         "schedule": crontab(hour=3, minute=0),
     },
+    "permission_digest": {
+        "task": "muckrock.accounts.tasks.permission_digest",
+        "schedule": crontab(day_of_week="mon", hour=7, minute=0),
+    },
 }
 
+PERMISSIONS_DIGEST_EMAILS = os.environ.get(
+    "PERMISSIONS_DIGEST_EMAILS", default=""
+).split(",")
 
 CELERY_SEND_EVENT = True
 CELERY_TASK_IGNORE_RESULTS = True
