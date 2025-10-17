@@ -2,6 +2,9 @@
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 
+# Standard Library
+from datetime import date
+
 # MuckRock
 from muckrock.message.email import TemplateEmail
 
@@ -15,7 +18,7 @@ class PermissionsDigest(TemplateEmail):
     def __init__(self, **kwargs):
         kwargs["to"] = settings.PERMISSIONS_DIGEST_EMAILS
         kwargs["extra_context"] = self.get_context()
-        kwargs["subject"] = "Permissions Digest"
+        kwargs["subject"] = f"{date.today()} MuckRock Permissions Digest"
         super().__init__(**kwargs)
 
     def get_context(self):
