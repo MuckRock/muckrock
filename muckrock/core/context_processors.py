@@ -2,9 +2,15 @@
 Site-wide context processors
 """
 
+# Standard Library
+import hashlib
+
 # Django
 from django.conf import settings as django_settings
 from django.utils.functional import SimpleLazyObject
+
+# Local
+from muckrock.core.models import HomePage
 
 # Third Party
 from constance import config
@@ -50,3 +56,24 @@ def cache_timeout(request):
 def givebutter_campaign(request):
     """Add GiveButter campaign ID to the context"""
     return {"givebutter_campaign_id": config.GIVEBUTTER_CAMPAIGN_ID}
+
+
+def banner(request):
+    """Add banner message and hash to the context"""
+    homepage = HomePage.load()
+    banner_message = homepage.banner_message
+
+    # Generate MD5 hash of the banner message for tracking dismissals
+    banner_hash = ""
+    if banner_message:
+        banner_hash = hashlib.md5(banner_message.encode("utf-8")).hexdigest()
+
+    # Check if user has dismissed this banner in their session
+    dismissed_banners = request.session.get("dismissed_banners", [])
+    show_banner = bool(banner_message and banner_hash not in dismissed_banners)
+
+    return {
+        "banner_message": banner_message,
+        "banner_message_hash": banner_hash,
+        "show_banner": show_banner,
+    }
