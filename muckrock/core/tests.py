@@ -330,9 +330,7 @@ class BannerContextProcessorTest(TestCase):
         homepage.banner_message = "This is a test banner message"
         homepage.save()
 
-        banner_hash = hashlib.md5(
-            homepage.banner_message.encode("utf-8")
-        ).hexdigest()
+        banner_hash = hashlib.md5(homepage.banner_message.encode("utf-8")).hexdigest()
 
         request = self.factory.get("/")
         request.session = {}
@@ -364,9 +362,7 @@ class BannerContextProcessorTest(TestCase):
         homepage.banner_message = "This is a test banner message"
         homepage.save()
 
-        banner_hash = hashlib.md5(
-            homepage.banner_message.encode("utf-8")
-        ).hexdigest()
+        banner_hash = hashlib.md5(homepage.banner_message.encode("utf-8")).hexdigest()
 
         request = self.factory.get("/")
         request.session = {"dismissed_banners": [banner_hash]}

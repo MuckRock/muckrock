@@ -2,18 +2,19 @@
 Site-wide context processors
 """
 
-# Standard Library
-import hashlib
-
 # Django
 from django.conf import settings as django_settings
 from django.utils.functional import SimpleLazyObject
 
-# Local
-from muckrock.core.models import HomePage
+# Standard Library
+import hashlib
 
 # Third Party
 from constance import config
+
+# MuckRock
+# Local
+from muckrock.core.models import HomePage
 
 
 def domain(request):
