@@ -1,6 +1,6 @@
 .banner {
     margin: 0;
-    background: $color-blue-light;
+    background: lighten($color-blue-light, 10%);
     color: $color-blue-dark;
     padding: .5rem;
     border-bottom: 1px solid #90caf9;
