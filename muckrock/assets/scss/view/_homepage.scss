@@ -343,6 +343,17 @@ If the browser support multiplying backgrounds, use that instead of the banner b
             flex: 1 0 0;
             flex-wrap: wrap;
         }
+        &-description {
+            display: flex;
+            flex-direction: column;
+            min-width: 15rem;
+            gap: 1rem 0.5rem;
+            flex: 1 0 0;
+            padding: 1rem;
+        }
+        &-description p {
+            margin: 0;
+        }
 
         background-position: center center !important;
         background-repeat: no-repeat !important;
@@ -360,6 +371,10 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         &#data-liberation-project {
             background: lighten($color-yellow, 40%);
             border-bottom: 1px solid lighten($color-yellow-dark, 20%);
+        }
+        &#sunlight-research-center {
+            background: lighten($color-orange, 30%);
+            border-bottom: 1px solid lighten($color-orange-dark, 20%);
         }
     }
 
