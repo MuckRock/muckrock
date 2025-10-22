@@ -1,0 +1,70 @@
+{% extends "message/base.txt" %}
+
+{% block body %}
+  Accounts Permissions Digest
+
+  Superusers
+  The following users are implicitly granted all permissions:
+  
+    {% for user in superusers %}
+      
+        
+          {{ user.username }}
+        
+      
+    {% endfor %}
+  
+
+  Staff
+  The following users are may access the Django backend:
+  
+    {% for user in staff %}
+      
+        
+          {{ user.username }}
+        
+      
+    {% endfor %}
+  
+
+  Groups
+  
+    All groups and which users they include.  You may check the permissions
+    they grant on the backend.
+  
+  {% for group in groups %}
+    
+        
+          {{ group.name }}
+        
+    
+    
+      {% for user in group.user_set.all %}
+        
+          
+            {{ user.username }}
+          
+        
+      {% endfor %}
+    
+  {% endfor %}
+
+  {% if user_permissions %}
+    Individual Permissions
+    
+      The following users are assigned individual permissions.  All permissions
+      should be assigned through groups.
+    
+    
+      {% for user_perm in user_permissions %}
+        
+          
+            {{ user_perm.user.username }}
+           -
+          {{ user_perm.permission }}
+        
+      {% endfor %}
+    
+  {% endif %}
+
+{% endblock %}

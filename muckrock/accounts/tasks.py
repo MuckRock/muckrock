@@ -15,6 +15,7 @@ import logging
 from datetime import date, datetime, time, timedelta
 
 # MuckRock
+from muckrock.accounts.mail import PermissionsDigest
 from muckrock.accounts.models import Statistics
 from muckrock.accounts.utils import mailchimp_donor_tag
 from muckrock.agency.models import Agency
@@ -602,3 +603,8 @@ def db_cleanup():
 @shared_task(ignore_results=True, name="muckrock.accounts.tasks.donor_tag")
 def donor_tag(email):
     mailchimp_donor_tag(email)
+
+
+@shared_task
+def permission_digest():
+    PermissionsDigest().send()

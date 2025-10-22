@@ -1,0 +1,70 @@
+{% extends "message/base.html" %}
+
+{% block body %}
+  <h1>MuckRock Permissions Digest</h1>
+
+  <h2>Superusers</h2>
+  <p>The following users are implicitly granted all permissions:</p>
+  <ul>
+    {% for user in superusers %}
+      <li>
+        <a href="{% url "admin:auth_user_change" user.pk %}">
+          {{ user.username }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Staff</h2>
+  <p>The following users are may access the Django backend:</p>
+  <ul>
+    {% for user in staff %}
+      <li>
+        <a href="{% url "admin:auth_user_change" user.pk %}">
+          {{ user.username }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h2>Groups</h2>
+  <p>
+    All groups and which users they include.  You may check the permissions
+    they grant on the backend.
+  </p>
+  {% for group in groups %}
+    <h3>
+        <a href="{% url "admin:auth_group_change" group.pk %}">
+          {{ group.name }}
+        </a>
+    </h3>
+    <ul>
+      {% for user in group.user_set.all %}
+        <li>
+          <a href="{% url "admin:auth_user_change" user.pk %}">
+            {{ user.username }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+
+  {% if user_permissions %}
+    <h2>Individual Permissions</h2>
+    <p>
+      The following users are assigned individual permissions.  All permissions
+      should be assigned through groups.
+    </p>
+    <ul>
+      {% for user_perm in user_permissions %}
+        <li>
+          <a href="{% url "admin:auth_user_change" user_perm.user.pk %}">
+            {{ user_perm.user.username }}
+          </a> &mdash;
+          {{ user_perm.permission }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock %}
