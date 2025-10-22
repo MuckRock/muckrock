@@ -13,6 +13,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage
 from django.db.models import F, Q, Sum
+from django.http import JsonResponse
 from django.http.response import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -734,3 +735,18 @@ def user_export(request):
         writer.writerow([user.username, user.profile.full_name, user.email])
 
     return response
+
+
+def dismiss_banner(request):
+    """Remember dismissed banners in session"""
+    if request.method == "POST":
+        banner_hash = request.POST.get("banner_hash")
+        if banner_hash:
+            dismissed_banner = request.session.get("dismissed_banner", "")
+            if banner_hash != dismissed_banner:
+                request.session["dismissed_banner"] = banner_hash
+            return JsonResponse({"success": True})
+        return JsonResponse(
+            {"success": False, "error": "No banner_hash provided"}, status=400
+        )
+    return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)

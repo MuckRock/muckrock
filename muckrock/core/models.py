@@ -69,10 +69,21 @@ class SingletonModel(Model):
 
 @reversion.register()
 class HomePage(SingletonModel):
+
+    banner_message = TextField(
+        blank=True,
+        default="",
+        help_text=(
+            "Site-wide banner message. Supports Markdown. "
+            "Will be shown at the top of all pages. Users can dismiss it."
+        ),
+    )
+
     about_heading = CharField(
         max_length=255,
         default="We give you the tools to keep government transparent and accountable",
     )
+
     about_paragraph = TextField(
         blank=True,
         default=(
@@ -82,6 +93,7 @@ class HomePage(SingletonModel):
             "making politics more transparent and democracy more informed."
         ),
     )
+
     dlp_stats = JSONField(
         blank=True,
         default=dict,

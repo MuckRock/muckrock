@@ -208,6 +208,7 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    re_path(r"^dismiss-banner/$", views.dismiss_banner, name="dismiss-banner"),
 ]
 
 if settings.DEBUG:

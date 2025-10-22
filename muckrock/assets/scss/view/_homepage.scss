@@ -175,6 +175,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     @include flex-direction(column);
     @include align-items(center);
     background-color: $color-white;
+    margin-top: 2.5rem;
     
     .homepage-section {
         display: flex;

@@ -1,0 +1,70 @@
+{% load tags %}
+{% if show_banner %}
+<div class="banner" id="site-banner" data-banner-hash="{{ banner_message_hash }}">
+    <div class="banner-content">
+        <div class="banner-text">
+            {{ banner_message|markdown }}
+        </div>
+        <button class="banner-dismiss" aria-label="Dismiss banner">
+            {% include 'lib/component/icon/x.svg' %}
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<script>
+(function() {
+    const banner = document.getElementById('site-banner');
+    if (!banner) return;
+
+    const bannerHash = banner.getAttribute('data-banner-hash');
+    const storageKey = 'dismissed_banner_' + bannerHash;
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Check if this banner has been dismissed in sessionStorage
+    if (sessionStorage.getItem(storageKey)) {
+        banner.style.display = 'none';
+        return; // Keep banner hidden
+    }
+
+    // Handle dismiss button
+    const dismissButton = banner.querySelector('.banner-dismiss');
+    if (dismissButton) {
+        dismissButton.addEventListener('click', function() {
+            // Immediately hide banner for instant feedback
+            banner.style.display = 'none';
+
+            // Store in sessionStorage as backup
+            sessionStorage.setItem(storageKey, 'true');
+
+            // Sync with server session
+            fetch('/dismiss-banner/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: 'banner_hash=' + encodeURIComponent(bannerHash)
+            }).catch(function(error) {
+                // If server sync fails, sessionStorage will still work
+                console.error('Failed to sync banner dismissal with server:', error);
+            });
+        });
+    }
+})();
+</script>

@@ -6,10 +6,11 @@ Tests for site level functionality and helper functions for application tests
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.test import RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
 # Standard Library
+import hashlib
 import logging
 
 # Third Party
@@ -20,6 +21,7 @@ from mock import ANY, Mock, patch
 
 # MuckRock
 from muckrock.accounts.models import Notification
+from muckrock.core.context_processors import banner
 from muckrock.core.factories import (
     AgencyFactory,
     AnswerFactory,
@@ -29,6 +31,7 @@ from muckrock.core.factories import (
 )
 from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm
+from muckrock.core.models import HomePage
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
 from muckrock.core.utils import new_action, notify, parse_header
@@ -312,3 +315,133 @@ def test_parse_header():
         "application/json",
         {"charset": "utf8", "a": "b"},
     )
+
+
+class BannerContextProcessorTest(TestCase):
+    """Test the banner context processor"""
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.homepage = None
+
+    def test_banner_with_message(self):
+        """Test banner context processor with a banner message"""
+        homepage = HomePage.load()
+        homepage.banner_message = "This is a test banner message"
+        homepage.save()
+
+        banner_hash = hashlib.md5(homepage.banner_message.encode("utf-8")).hexdigest()
+
+        request = self.factory.get("/")
+        request.session = {}
+
+        context = banner(request)
+
+        assert context["banner_message"] == "This is a test banner message"
+        assert context["show_banner"] is True
+        assert context["banner_message_hash"] == banner_hash
+
+    def test_banner_without_message(self):
+        """Test banner context processor without a banner message"""
+        homepage = HomePage.load()
+        homepage.banner_message = ""
+        homepage.save()
+
+        request = self.factory.get("/")
+        request.session = {}
+
+        context = banner(request)
+
+        assert context["banner_message"] == ""
+        assert context["show_banner"] is False
+        assert context["banner_message_hash"] == ""
+
+    def test_banner_dismissed_in_session(self):
+        """Test banner context processor with dismissed banner in session"""
+        homepage = HomePage.load()
+        homepage.banner_message = "This is a test banner message"
+        homepage.save()
+
+        banner_hash = hashlib.md5(homepage.banner_message.encode("utf-8")).hexdigest()
+
+        request = self.factory.get("/")
+        request.session = {"dismissed_banner": banner_hash}
+
+        context = banner(request)
+
+        assert context["banner_message"] == "This is a test banner message"
+        assert context["show_banner"] is False
+        assert context["banner_message_hash"] == banner_hash
+
+
+class DismissBannerViewTest(TestCase):
+    """Test the dismiss_banner view"""
+
+    def test_dismiss_banner_success(self):
+        """Test successfully dismissing a banner"""
+        client = Client()
+        response = client.post(
+            reverse("dismiss-banner"),
+            data={"banner_hash": "abc123"},
+        )
+
+        assert response.status_code == 200
+        json_data = response.json()
+        assert json_data["success"] is True
+
+    def test_dismiss_banner_stores_in_session(self):
+        """Test that dismissing a banner stores hash in session"""
+        client = Client()
+        response = client.post(
+            reverse("dismiss-banner"),
+            data={"banner_hash": "abc123"},
+        )
+
+        assert response.status_code == 200
+        session = client.session
+        assert "dismissed_banner" in session
+        assert "abc123" == session["dismissed_banner"]
+
+    def test_dismiss_banner_multiple_hashes(self):
+        """Test dismissing multiple banners replaces the hash"""
+        client = Client()
+
+        # Dismiss first banner
+        client.post(reverse("dismiss-banner"), data={"banner_hash": "hash1"})
+        # Dismiss second banner
+        client.post(reverse("dismiss-banner"), data={"banner_hash": "hash2"})
+
+        session = client.session
+        assert "hash1" != session["dismissed_banner"]
+        assert "hash2" == session["dismissed_banner"]
+
+    def test_dismiss_banner_duplicate_hash(self):
+        """Test dismissing same banner twice doesn't duplicate"""
+        client = Client()
+
+        # Dismiss same banner twice
+        client.post(reverse("dismiss-banner"), data={"banner_hash": "hash1"})
+        client.post(reverse("dismiss-banner"), data={"banner_hash": "hash1"})
+
+        session = client.session
+        assert session["dismissed_banner"] == "hash1"
+
+    def test_dismiss_banner_no_hash(self):
+        """Test dismissing without banner_hash returns error"""
+        client = Client()
+        response = client.post(reverse("dismiss-banner"), data={})
+
+        assert response.status_code == 400
+        json_data = response.json()
+        assert json_data["success"] is False
+        assert "No banner_hash provided" in json_data["error"]
+
+    def test_dismiss_banner_get_method(self):
+        """Test that GET method is not allowed"""
+        client = Client()
+        response = client.get(reverse("dismiss-banner"))
+
+        assert response.status_code == 405
+        json_data = response.json()
+        assert json_data["success"] is False
+        assert "Method not allowed" in json_data["error"]

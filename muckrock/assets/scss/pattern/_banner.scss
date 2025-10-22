@@ -1,0 +1,52 @@
+.banner {
+    margin: 0;
+    background: $color-blue-light;
+    color: $color-blue-dark;
+    padding: .5rem;
+    border-bottom: 1px solid #90caf9;
+}
+
+.banner-content {
+    display: flex;
+    align-items: flex-start;
+    max-width: 75rem;
+    margin: 0 auto;
+    gap: 1rem;
+}
+
+.banner-text {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.banner-text p {
+    margin: 0;
+}
+
+.banner-text p:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+.banner-dismiss {
+    height: 1.5rem;
+    width: 1.5rem;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.banner-dismiss:hover {
+    opacity: 1;
+}
+
+.banner-dismiss svg {
+    display: block;
+    fill: currentColor;
+}

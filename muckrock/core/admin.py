@@ -219,6 +219,7 @@ class FeaturedProjectSlotInline(admin.TabularInline):
 class HomePageAdmin(SingletonModelAdmin):
     inlines = [FeaturedProjectSlotInline]
     fields = (
+        "banner_message",
         "about_heading",
         "about_paragraph",
         "documentcloud_stats",
