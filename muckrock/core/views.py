@@ -742,10 +742,9 @@ def dismiss_banner(request):
     if request.method == "POST":
         banner_hash = request.POST.get("banner_hash")
         if banner_hash:
-            dismissed_banners = request.session.get("dismissed_banners", [])
-            if banner_hash not in dismissed_banners:
-                dismissed_banners.append(banner_hash)
-                request.session["dismissed_banners"] = dismissed_banners
+            dismissed_banner = request.session.get("dismissed_banner", "")
+            if banner_hash != dismissed_banner:
+                request.session["dismissed_banner"] = banner_hash
             return JsonResponse({"success": True})
         return JsonResponse(
             {"success": False, "error": "No banner_hash provided"}, status=400

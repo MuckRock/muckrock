@@ -13,7 +13,6 @@ import hashlib
 from constance import config
 
 # MuckRock
-# Local
 from muckrock.core.models import HomePage
 
 
@@ -70,8 +69,8 @@ def banner(request):
         banner_hash = hashlib.md5(banner_message.encode("utf-8")).hexdigest()
 
     # Check if user has dismissed this banner in their session
-    dismissed_banners = request.session.get("dismissed_banners", [])
-    show_banner = bool(banner_message and banner_hash not in dismissed_banners)
+    dismissed_banner = request.session.get("dismissed_banner", "")
+    show_banner = bool(banner_message and banner_hash != dismissed_banner)
 
     return {
         "banner_message": banner_message,

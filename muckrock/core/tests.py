@@ -365,7 +365,7 @@ class BannerContextProcessorTest(TestCase):
         banner_hash = hashlib.md5(homepage.banner_message.encode("utf-8")).hexdigest()
 
         request = self.factory.get("/")
-        request.session = {"dismissed_banners": [banner_hash]}
+        request.session = {"dismissed_banner": banner_hash}
 
         context = banner(request)
 
@@ -399,11 +399,11 @@ class DismissBannerViewTest(TestCase):
 
         assert response.status_code == 200
         session = client.session
-        assert "dismissed_banners" in session
-        assert "abc123" in session["dismissed_banners"]
+        assert "dismissed_banner" in session
+        assert "abc123" == session["dismissed_banner"]
 
     def test_dismiss_banner_multiple_hashes(self):
-        """Test dismissing multiple banners accumulates hashes"""
+        """Test dismissing multiple banners replaces the hash"""
         client = Client()
 
         # Dismiss first banner
@@ -412,9 +412,8 @@ class DismissBannerViewTest(TestCase):
         client.post(reverse("dismiss-banner"), data={"banner_hash": "hash2"})
 
         session = client.session
-        assert "hash1" in session["dismissed_banners"]
-        assert "hash2" in session["dismissed_banners"]
-        assert len(session["dismissed_banners"]) == 2
+        assert "hash1" != session["dismissed_banner"]
+        assert "hash2" == session["dismissed_banner"]
 
     def test_dismiss_banner_duplicate_hash(self):
         """Test dismissing same banner twice doesn't duplicate"""
@@ -425,7 +424,7 @@ class DismissBannerViewTest(TestCase):
         client.post(reverse("dismiss-banner"), data={"banner_hash": "hash1"})
 
         session = client.session
-        assert session["dismissed_banners"].count("hash1") == 1
+        assert session["dismissed_banner"] == "hash1"
 
     def test_dismiss_banner_no_hash(self):
         """Test dismissing without banner_hash returns error"""
