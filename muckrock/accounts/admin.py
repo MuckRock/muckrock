@@ -5,9 +5,11 @@ Admin registration for accounts models
 # Django
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.filters import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.db.models.aggregates import Count
+from django.db.models.query_utils import Q
 from django.http.response import HttpResponse
 from django.urls import reverse
 from django.urls.conf import re_path
@@ -29,6 +31,24 @@ from muckrock.accounts.models import (
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
+
+
+class PermissionFilter(SimpleListFilter):
+    """Filter for users by permission"""
+
+    title = "Permission"
+    parameter_name = "permission"
+    template = "admin/dropdown_filter.html"
+
+    def lookups(self, request, model_admin):
+        return Permission.objects.values_list("pk", "name")
+
+    def queryset(self, request, queryset):
+        return queryset.filter(
+            Q(user_permissions=self.value())
+            | Q(groups__permissions=self.value())
+            | Q(is_superuser=True)
+        ).distinct()
 
 
 class StatisticsAdmin(VersionAdmin):
@@ -179,7 +199,7 @@ class MRUserAdmin(UserAdmin):
         "is_staff",
         "is_superuser",
     )
-    list_filter = UserAdmin.list_filter
+    list_filter = UserAdmin.list_filter + (PermissionFilter,)
     list_select_related = ("profile",)
     inlines = [ProfileInline]
     fieldsets = (
