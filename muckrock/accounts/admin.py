@@ -202,7 +202,7 @@ class MRUserAdmin(UserAdmin):
     list_filter = UserAdmin.list_filter + (PermissionFilter,)
     list_select_related = ("profile",)
     inlines = [ProfileInline]
-    fieldsets = (
+    superuser_fieldsets = (
         (None, {"fields": ("username", "password")}),
         ("Personal info", {"fields": ("email",)}),
         (
@@ -219,7 +219,28 @@ class MRUserAdmin(UserAdmin):
         ),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        ("Personal info", {"fields": ("email",)}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                )
+            },
+        ),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
+    )
     readonly_fields = ("username", "email")
+
+    def get_fieldsets(self, request, obj=None):
+        """Remove permission settings for non-super users"""
+        if request.user.is_superuser:
+            return self.superuser_fieldsets
+        else:
+            return self.fieldsets
 
     def full_name(self, obj):
         """Show full name from profile"""
