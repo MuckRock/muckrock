@@ -283,10 +283,21 @@ class CommunicationAutocomplete(MRAutocompleteView):
 class EmailAutocomplete(CommunicationAutocomplete):
     """Autocomplete for emails"""
 
-    queryset = EmailAddress.objects.filter(status="good").order_by("email")
     search_fields = ["email", "name"]
     create_field = "email"
     create_error = '"{text}" is not a valid email'
+
+    def get_queryset(self):
+        foia_id = self.request.GET["foia"]
+        from muckrock.foia.models import FOIARequest
+
+        foia = FOIARequest.objects.get(pk=foia_id)
+
+        return EmailAddress.objects.filter(
+            status="good"
+        ).filter(
+            Q(pk=foia.email_id) | Q(pk__in=foia.cc_emails.values_list("id", flat=True))
+        ).order_by("email")
 
     def create_object(self, text):
         """Use email address fetch to create the object"""
