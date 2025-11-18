@@ -10,7 +10,10 @@
 set -e
 if [ -n "$HEROKU_APP_NAME" ] && [ "$DJANGO_ENV" = "staging" ]; then
   # Restore the data from the staging app database backup to the review app database.
-  LATEST_BACKUP=$(heroku pg:backups --app muckrock-staging | awk '/b[0-9]+/ {print $1; exit}')
+  LATEST_BACKUP=$(heroku pg:backups --app muckrock-staging \
+    | awk '/Completed/ {print $1}' \
+    | head -n 1)
+  echo "Restoring backup $LATEST_BACKUP from staging to review app $HEROKU_APP_NAME..."
   heroku pg:backups:restore "muckrock-staging::$LATEST_BACKUP" DATABASE_URL \
     --app "$HEROKU_APP_NAME" \
     --confirm "$HEROKU_APP_NAME"
