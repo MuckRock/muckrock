@@ -64,7 +64,9 @@ botocore==1.29.138
 bz2file==0.98
     # via smart-open
 cachetools==3.1.1
-    # via zenpy
+    # via
+    #   google-auth
+    #   zenpy
 celery==5.4.0
     # via
     #   -r pip/requirements.in
@@ -270,6 +272,10 @@ fuzzywuzzy==0.18.0
     # via -r pip/requirements.in
 google-api-python-client==1.6.5
     # via -r pip/requirements.in
+google-auth==2.43.0
+    # via google-genai
+google-genai==1.2.0
+    # via -r pip/requirements.in
 gunicorn==23.0.0
     # via -r pip/requirements.in
 h11==0.14.0
@@ -422,7 +428,9 @@ pyasn1==0.4.2
     #   python-jose
     #   rsa
 pyasn1-modules==0.2.1
-    # via oauth2client
+    # via
+    #   google-auth
+    #   oauth2client
 pycparser==2.20
     # via cffi
 pycryptodome==3.18.0
@@ -433,6 +441,7 @@ pydantic==2.4.0
     # via
     #   anthropic
     #   baml
+    #   google-genai
     #   openai
 pydantic-core==2.10.0
     # via pydantic
@@ -514,6 +523,7 @@ requests[security]==2.31.0
     # via
     #   -r pip/requirements.in
     #   django-anymail
+    #   google-genai
     #   huggingface-hub
     #   lob
     #   plaid-python
@@ -539,6 +549,7 @@ rpds-py==0.18.0
     #   referencing
 rsa==3.4.2
     # via
+    #   google-auth
     #   oauth2client
     #   python-jose
 rules==2.2
@@ -623,6 +634,7 @@ typing-extensions==4.12.2
     # via
     #   anthropic
     #   beautifulsoup4
+    #   google-genai
     #   huggingface-hub
     #   openai
     #   opentelemetry-sdk
@@ -658,6 +670,8 @@ wcwidth==0.1.7
     # via prompt-toolkit
 webencodings==0.5.1
     # via bleach
+websockets==14.2
+    # via google-genai
 wrapt==1.17.2
     # via
     #   deprecated
