@@ -339,3 +339,96 @@ class TestAppealModel(TestCase):
         status."""
         FOIACommunicationFactory(foia=self.appeal.communication.foia, status="rejected")
         assert self.appeal.is_finished()
+
+
+class TestJurisdictionResourceModel(TestCase):
+    """
+    The JurisdictionResource model contains knowledge files associated with
+    a jurisdiction for the FOIA Coach feature.
+    """
+
+    def setUp(self):
+        self.resource = factories.JurisdictionResourceFactory()
+
+    def test_unicode(self):
+        """The text representation should include jurisdiction and display name."""
+        actual = str(self.resource)
+        expected = f"{self.resource.jurisdiction.name} - {self.resource.display_name}"
+        assert actual == expected, (
+            f"The text representation should match the expected format.\n"
+            f"Actual: {actual}\nExpected: {expected}"
+        )
+
+    def test_default_status(self):
+        """New resources should have pending status by default."""
+        assert (
+            self.resource.index_status == "pending"
+        ), "New resources should start with pending status"
+
+    def test_is_active_default(self):
+        """New resources should be active by default."""
+        assert (
+            self.resource.is_active is True
+        ), "New resources should be active by default"
+
+    def test_ordering(self):
+        """Resources should be ordered by jurisdiction, order, then display_name."""
+        # pylint: disable=import-outside-toplevel
+        from muckrock.jurisdiction.models import JurisdictionResource
+
+        resource1 = factories.JurisdictionResourceFactory(
+            display_name="Z Resource", order=0
+        )
+        # Create additional resources with different orderings
+        factories.JurisdictionResourceFactory(
+            jurisdiction=resource1.jurisdiction,
+            display_name="A Resource",
+            order=1,
+        )
+        factories.JurisdictionResourceFactory(
+            jurisdiction=resource1.jurisdiction,
+            display_name="M Resource",
+            order=0,
+        )
+
+        resources = list(
+            JurisdictionResource.objects.filter(
+                jurisdiction=resource1.jurisdiction
+            ).values_list("display_name", flat=True)
+        )
+
+        # Should be ordered by order first, then display_name
+        assert resources.index("M Resource") < resources.index(
+            "Z Resource"
+        ), "Resources with same order should be sorted by display_name"
+        assert resources.index("Z Resource") < resources.index(
+            "A Resource"
+        ), "Resources should be sorted by order field first"
+
+
+class TestGeminiFileSearchStoreModel(TestCase):
+    """
+    The GeminiFileSearchStore model tracks configuration for Gemini File Search.
+    """
+
+    def setUp(self):
+        self.store = factories.GeminiFileSearchStoreFactory()
+
+    def test_unicode(self):
+        """The text representation should be the display name."""
+        assert str(self.store) == self.store.display_name
+
+    def test_unique_store_name(self):
+        """Store names should be unique."""
+        # pylint: disable=import-outside-toplevel
+        # Django
+        from django.db import IntegrityError
+
+        with self.assertRaises(IntegrityError):
+            factories.GeminiFileSearchStoreFactory(store_name=self.store.store_name)
+
+    def test_default_values(self):
+        """Test default values for store."""
+        assert self.store.is_active is True
+        assert self.store.total_files == 0
+        assert self.store.last_sync_at is None

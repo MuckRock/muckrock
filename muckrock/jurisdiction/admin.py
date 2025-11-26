@@ -26,9 +26,11 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import (
     ExampleAppeal,
     Exemption,
+    GeminiFileSearchStore,
     InvokedExemption,
     Jurisdiction,
     JurisdictionPage,
+    JurisdictionResource,
     Law,
 )
 from muckrock.jurisdiction.views import detail
@@ -229,6 +231,113 @@ class JurisdictionPageAdmin(SimpleHistoryAdmin):
         )
 
 
+class JurisdictionResourceAdminForm(forms.ModelForm):
+    """Form to include jurisdiction autocomplete"""
+
+    jurisdiction = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(level="s"),
+        widget=autocomplete.ModelSelect2(
+            url="jurisdiction-autocomplete",
+            attrs={"data-placeholder": "Jurisdiction?", "data-width": None},
+        ),
+    )
+
+    class Meta:
+        model = JurisdictionResource
+        fields = "__all__"
+
+
+class JurisdictionResourceAdmin(admin.ModelAdmin):
+    """Admin for JurisdictionResource"""
+
+    list_display = (
+        "display_name",
+        "jurisdiction",
+        "resource_type",
+        "index_status",
+        "is_active",
+        "created_at",
+    )
+    list_filter = ["jurisdiction", "resource_type", "index_status", "is_active"]
+    search_fields = ["display_name", "description", "jurisdiction__name"]
+    readonly_fields = [
+        "gemini_file_id",
+        "gemini_display_name",
+        "indexed_at",
+        "created_at",
+        "updated_at",
+    ]
+    form = JurisdictionResourceAdminForm
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "jurisdiction",
+                    "display_name",
+                    "description",
+                    "resource_type",
+                    "file",
+                    "order",
+                    "is_active",
+                )
+            },
+        ),
+        (
+            "Gemini Integration",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "index_status",
+                    "gemini_file_id",
+                    "gemini_display_name",
+                    "indexed_at",
+                ),
+            },
+        ),
+        (
+            "Metadata",
+            {
+                "classes": ("collapse",),
+                "fields": ("created_at", "updated_at"),
+            },
+        ),
+    )
+
+
+class GeminiFileSearchStoreAdmin(admin.ModelAdmin):
+    """Admin for GeminiFileSearchStore"""
+
+    list_display = (
+        "display_name",
+        "store_name",
+        "is_active",
+        "total_files",
+        "last_sync_at",
+    )
+    readonly_fields = ["created_at"]
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "display_name",
+                    "store_name",
+                    "is_active",
+                )
+            },
+        ),
+        (
+            "Stats",
+            {
+                "fields": ("total_files", "last_sync_at", "created_at"),
+            },
+        ),
+    )
+
+
 admin.site.register(Exemption, ExemptionAdmin)
 admin.site.register(Jurisdiction, JurisdictionAdmin)
 admin.site.register(JurisdictionPage, JurisdictionPageAdmin)
+admin.site.register(JurisdictionResource, JurisdictionResourceAdmin)
+admin.site.register(GeminiFileSearchStore, GeminiFileSearchStoreAdmin)

@@ -12,8 +12,10 @@ from .models import (
     Appeal,
     ExampleAppeal,
     Exemption,
+    GeminiFileSearchStore,
     InvokedExemption,
     Jurisdiction,
+    JurisdictionResource,
     Law,
 )
 
@@ -121,3 +123,32 @@ class AppealFactory(factory.django.DjangoModelFactory):
     communication = factory.SubFactory(
         "muckrock.foia.factories.FOIACommunicationFactory"
     )
+
+
+class JurisdictionResourceFactory(factory.django.DjangoModelFactory):
+    """JurisdictionResource factory"""
+
+    class Meta:
+        model = JurisdictionResource
+
+    jurisdiction = factory.SubFactory(
+        StateJurisdictionFactory, name="Colorado", abbrev="CO"
+    )
+    display_name = factory.Sequence(lambda n: f"Resource {n}")
+    description = factory.Faker("paragraph")
+    file = factory.django.FileField(filename="test_resource.txt", data=b"Test content")
+    resource_type = "general"
+    is_active = True
+    order = 0
+
+
+class GeminiFileSearchStoreFactory(factory.django.DjangoModelFactory):
+    """GeminiFileSearchStore factory"""
+
+    class Meta:
+        model = GeminiFileSearchStore
+
+    store_name = factory.Sequence(lambda n: f"store_{n}")
+    display_name = factory.Sequence(lambda n: f"Store {n}")
+    is_active = True
+    total_files = 0
