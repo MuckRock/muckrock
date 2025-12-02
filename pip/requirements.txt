@@ -583,7 +583,7 @@ social-auth-core[openidconnect]==4.1.0
     # via
     #   -r pip/requirements.in
     #   social-auth-app-django
-sorl-thumbnail==12.9.0
+sorl-thumbnail==12.11.0
     # via -r pip/requirements.in
 soupsieve==2.7
     # via beautifulsoup4
