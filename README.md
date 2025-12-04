@@ -138,7 +138,7 @@ FOIAMachine is our free FOIA filing tool, that allows you to track your requests
 
 ## Update search index
 
-MuckRock uses [watson][watson] for search.  The index should stay updated. If a new model is registered with watson, then build the index (`fab manage:buildwatson`). This command should be run on any staging or production servers when pushing code that updates the registration.
+MuckRock uses [watson][watson] for search.  The index should stay updated. If a new model is registered with watson, then build the index (`python manage.py buildwatson`). This command should be run on any staging or production servers when pushing code that updates the registration. If you are only updating a single model, like FOIALog entries, you can specify the specific model instead of running buildwatson on everything. For example, `python manage.py buildwatson foia.FOIALogEntry` will update only the FOIALogEntries. You can see which models are indexed by peeking in apps.py for that directory. 
 
 
 [docker]: https://docs.docker.com/
