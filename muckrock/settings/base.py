@@ -583,6 +583,12 @@ LOB_BANK_ACCOUNT_ID = os.environ.get("LOB_BANK_ACCOUNT_ID")
 
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 
+# Gemini API settings for FOIA Coach
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_FILE_SEARCH_STORE_NAME = os.environ.get(
+    "GEMINI_FILE_SEARCH_STORE_NAME", "StatePublicRecordsStore"
+)
+
 PUBLICATION_NAME = "MuckRock"
 PUBLICATION_TIME_ZONE = "-05:00"
 

@@ -48,7 +48,7 @@ fpdf # Used to generate PDFs
 furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
 google-api-python-client # Google analytics
-google-genai # Google GenAI SDK
+google-genai==1.2.0 # Google GenAI SDK - pinned to avoid httpx conflicts
 gunicorn # Python WSGI app server
 img2pdf # convert images to PDFs
 ipython # better python shell

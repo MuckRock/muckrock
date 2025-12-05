@@ -7,6 +7,7 @@ import logging
 import sys
 
 # Django
+from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
@@ -20,24 +21,32 @@ logger = logging.getLogger(__name__)
 def upload_resource_to_gemini(sender, instance, created, **kwargs):
     """Automatically upload/update resource in Gemini when saved"""
     # pylint: disable=unused-argument,import-outside-toplevel,broad-exception-caught
-    # Avoid circular import
-    try:
-        from muckrock.jurisdiction.services.gemini_service import (
-            GeminiFileSearchService,
-        )
 
-        if instance.file and instance.is_active:
-            service = GeminiFileSearchService()
-            service.upload_and_index_resource(instance)
-    except Exception as exc:
-        logger.error(
-            "Error uploading resource to Gemini: %s",
-            exc,
-            exc_info=sys.exc_info(),
-        )
-        # Update status to error
-        instance.index_status = "error"
-        JurisdictionResource.objects.filter(pk=instance.pk).update(index_status="error")
+    def do_upload():
+        """Perform the upload after transaction commits"""
+        try:
+            # Avoid circular import
+            from muckrock.jurisdiction.services.gemini_service import (
+                GeminiFileSearchService,
+            )
+
+            if instance.file and instance.is_active:
+                service = GeminiFileSearchService()
+                service.upload_resource(instance)
+        except Exception as exc:
+            logger.error(
+                "Error uploading resource to Gemini: %s",
+                exc,
+                exc_info=sys.exc_info(),
+            )
+            # Update status to error
+            JurisdictionResource.objects.filter(pk=instance.pk).update(
+                index_status="error"
+            )
+
+    # Schedule upload to run after transaction commits
+    # This ensures the resource is fully saved before we try to update it
+    transaction.on_commit(do_upload)
 
 
 @receiver(post_delete, sender=JurisdictionResource)
