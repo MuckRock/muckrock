@@ -24,5 +24,8 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
 
+# Celery 6+ startup retry fix
+app.conf.broker_connection_retry_on_startup = True
+
 if settings.USE_SCOUT:
     scout_apm.celery.install(app)
