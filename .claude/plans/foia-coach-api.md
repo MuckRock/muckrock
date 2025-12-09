@@ -1,5 +1,22 @@
 # FOIA Coach Standalone API Service - Implementation Plan
 
+## Progress Tracker
+
+**Last Updated:** 2025-12-09
+
+| Phase | Status | Completed | Notes |
+|-------|--------|-----------|-------|
+| Phase 0: Rollback Phase 1 & 2 | ✅ Complete | 2025-12-09 | All code backed up, migration rolled back, main app clean |
+| Phase 1: Django Scaffold | ⏳ Pending | - | Next phase |
+| Phase 2: Docker Configuration | ⏳ Pending | - | |
+| Phase 3: Models & API Client | ⏳ Pending | - | |
+| Phase 4a: Gemini Service & Signals | ⏳ Pending | - | |
+| Phase 4b: Management Commands & Tests | ⏳ Pending | - | |
+| Phase 5: REST API Endpoints | ⏳ Pending | - | |
+| Phase 6: Integration & Documentation | ⏳ Pending | - | |
+
+---
+
 ## Executive Summary
 
 Create a standalone Django API service to resolve dependency conflicts while preserving completed Phase 1 & 2 work. The service will run in its own Docker container, share the PostgreSQL database with the main MuckRock app, and expose REST APIs for the SvelteKit UI.
@@ -197,12 +214,24 @@ These need to be removed from the main app before creating the standalone servic
 
 #### Deliverables
 
-- [ ] Migration 0032 rolled back
-- [ ] Migration file deleted
-- [ ] Code backed up to /tmp/
-- [ ] Models removed from main app
-- [ ] Main app still functional
-- [ ] Changes committed
+- [x] Migration 0032 rolled back
+- [x] Migration file deleted
+- [x] Code backed up to /tmp/
+- [x] Models removed from main app
+- [x] Main app still functional
+- [x] Changes committed
+
+**Status: ✅ COMPLETED (2025-12-09)**
+
+**Notes:**
+- All Phase 1 & 2 code successfully backed up to `/tmp/` (6 files total)
+- Migration rolled back cleanly to 0031
+- Removed `JurisdictionResource` and `GeminiFileSearchStore` models from main app
+- Deleted entire `services/` directory, `signals.py`, all Gemini management commands, and test file
+- Updated `admin.py` to remove Gemini admin classes
+- Updated `apps.py` to remove signal import
+- Main app passes Django checks (0 errors, 2 pre-existing warnings)
+- All changes committed to git
 
 #### Success Criteria
 
