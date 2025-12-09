@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+# Parse DATABASE_URL to extract connection details
+if [ -n "$DATABASE_URL" ]; then
+    # Extract host and port from DATABASE_URL
+    # Format: postgres://user:password@host:port/database
+    DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\(.*\):.*/\1/p')
+    DB_PORT=$(echo $DATABASE_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+else
+    # Fallback to individual environment variables
+    DB_HOST=${POSTGRES_HOST:-muckrock_postgres}
+    DB_PORT=${POSTGRES_PORT:-5432}
+fi
+
+echo "Waiting for PostgreSQL at $DB_HOST:$DB_PORT..."
+
+# Wait for PostgreSQL to be ready
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "${POSTGRES_USER:-muckrock}"; do
+    echo "PostgreSQL is unavailable - sleeping"
+    sleep 1
+done
+
+echo "PostgreSQL is up - continuing..."
+
+# Validate required environment variables
+if [ -z "$DJANGO_SETTINGS_MODULE" ]; then
+    echo "ERROR: DJANGO_SETTINGS_MODULE environment variable is not set"
+    exit 1
+fi
+
+if [ -z "$GEMINI_API_KEY" ]; then
+    echo "WARNING: GEMINI_API_KEY environment variable is not set"
+fi
+
+# Execute the passed command
+exec "$@"

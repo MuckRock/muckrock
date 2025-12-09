@@ -36,6 +36,25 @@ services:
           - internal.dev.muckrock.com
           - internal.dev.foiamachine.org
 
+  foia_coach_api:
+    build:
+      context: ./foia-coach-api
+      dockerfile: ./compose/local/Dockerfile
+    image: muckrock_foia_coach_api_local
+    container_name: foia_coach_api_local
+    depends_on:
+      - muckrock_postgres
+    volumes:
+      - ./foia-coach-api:/app:z
+    env_file:
+      - ./.envs/.local/.postgres
+      - ./.envs/.local/.foia_coach_api
+    ports:
+      - "8001:8000"
+    command: /start
+    networks:
+      - default
+
   muckrock_postgres:
     build:
       context: .
