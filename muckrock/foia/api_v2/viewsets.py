@@ -106,6 +106,17 @@ class FOIARequestViewSet(
             field_name="title", lookup_expr="icontains", label="Title of the request"
         )
 
+        datetime_submitted__gte = django_filters.DateTimeFilter(
+            field_name="composer__datetime_submitted",
+            lookup_expr="gte",
+            label="Requests submitted on or after this date",
+        )
+        datetime_submitted__lte = django_filters.DateTimeFilter(
+            field_name="composer__datetime_submitted",
+            lookup_expr="lte",
+            label="Requests submitted on or before this date",
+        )
+
         order_by_field = "ordering"
         ordering = django_filters.OrderingFilter(
             fields=(
@@ -124,14 +135,13 @@ class FOIARequestViewSet(
             """Filters"""
 
             model = FOIARequest
-            fields = (
-                "user",
-                "title",
-                "status",
-                "embargo_status",
-                "jurisdiction",
-                "agency",
-            )
+            fields = {
+                "title": ["icontains"],
+                "status": ["exact"],
+                "embargo_status": ["exact"],
+                "agency": ["exact"],
+                "datetime_done": ["gte", "lte"],
+            }
 
     filterset_class = Filter
 
