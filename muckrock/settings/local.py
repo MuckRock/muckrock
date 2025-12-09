@@ -86,4 +86,7 @@ ALLOWED_HOSTS = [
     "[::1]",
     "dev.muckrock.com",
     "dev.foiamachine.org",
+    "internal.dev.muckrock.com",  # Docker network alias for FOIA Coach API
+    "internal.dev.foiamachine.org",  # Docker network alias
+    "muckrock_django",  # Docker container name
 ]

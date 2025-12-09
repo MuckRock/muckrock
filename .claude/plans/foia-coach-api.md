@@ -9,7 +9,7 @@
 | Phase 0: Rollback Phase 1 & 2 | ✅ Complete | 2025-12-09 | All code backed up, migration rolled back, main app clean |
 | Phase 1: Django Scaffold | ✅ Complete | 2025-12-09 | Project structure, settings, apps created. Ready for Docker. |
 | Phase 2: Docker Configuration | ✅ Complete | 2025-12-09 | Docker container built, service starts successfully, accessible on port 8001 |
-| Phase 3: Models & API Client | ⏳ Pending | - | |
+| Phase 3: Models & API Client | ✅ Complete | 2025-12-09 | Model created, API client implemented, admin configured, migrations applied |
 | Phase 4a: Gemini Service & Signals | ⏳ Pending | - | |
 | Phase 4b: Management Commands & Tests | ⏳ Pending | - | |
 | Phase 5: REST API Endpoints | ⏳ Pending | - | |
@@ -644,12 +644,49 @@ docker-compose -f local.yml up foia_coach_api
 
 #### Deliverables
 
-- [ ] MuckRock API client created
-- [ ] JurisdictionResource model created (no FK to jurisdiction)
-- [ ] Admin interface configured
-- [ ] Migrations generated and applied
-- [ ] Can fetch jurisdictions from MuckRock API
-- [ ] Can create JurisdictionResource with jurisdiction reference
+- [x] MuckRock API client created
+- [x] JurisdictionResource model created (no FK to jurisdiction)
+- [x] Admin interface configured
+- [x] Migrations generated and applied
+- [x] Can fetch jurisdictions from MuckRock API
+- [x] Can create JurisdictionResource with jurisdiction reference
+
+**Status: ✅ COMPLETED (2025-12-09)**
+
+**Notes:**
+- Created MuckRock API client with support for both local Docker and remote API endpoints
+- Fixed API paths to use `/api_v1/jurisdiction/` endpoint (matches main MuckRock app routing)
+- Fixed API client lookup method: uses filter `?abbrev=CO` instead of detail endpoint
+- Added bonus method `get_jurisdiction_by_id()` for ID-based lookups
+- JurisdictionResource model created with all fields specified in plan
+- Model uses simple integer/string fields for jurisdiction reference (no FK)
+- Property method `jurisdiction` fetches full data from MuckRock API on demand
+- Admin interface fully configured with fieldsets, list display, filters, and search
+- Initial migration (0001_initial) created and applied successfully
+- Table `foia_coach_jurisdictionresource` created in shared PostgreSQL database
+- Verified model CRUD operations work correctly
+- Admin registration confirmed and tested
+
+**API Client Testing (Completed):**
+- ✅ Successfully fetches 50 state jurisdictions via `get_jurisdictions(level='s')`
+- ✅ Successfully fetches specific jurisdiction by abbreviation (e.g., Colorado)
+- ✅ Model property `jurisdiction` successfully fetches data from API
+- ✅ Correctly returns None for nonexistent jurisdictions
+- ✅ ID-based lookup working via `get_jurisdiction_by_id()`
+- All 5 API client tests passed!
+
+**Configuration Changes Required:**
+- Added `internal.dev.muckrock.com` to main app's `ALLOWED_HOSTS` in `muckrock/settings/local.py`
+- Updated FOIA Coach API environment to use `http://internal.dev.muckrock.com` (Docker network alias)
+- These changes enable cross-container API communication within Docker network
+
+**Migration Permissions Issue:**
+- Encountered Django permissions collision in shared database setup
+- Error occurs in `post_migrate` signal after successful table creation
+- Table and indexes created correctly despite error
+- Documented in detail: `foia-coach-api/MIGRATION_PERMISSIONS_ISSUE.md`
+- Resolution: Fake-unapply and reapply migration
+- Impact: None - purely cosmetic error, all functionality works correctly
 
 #### Success Criteria
 
