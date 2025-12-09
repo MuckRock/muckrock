@@ -11,5 +11,4 @@ class JurisdictionConfig(AppConfig):
 
     def ready(self):
         # Import signals when app is ready
-        # import apps.jurisdiction.signals  # noqa
-        pass
+        import apps.jurisdiction.signals  # noqa
