@@ -23,7 +23,7 @@ from random import choice
 
 # Third Party
 from bleach.sanitizer import Cleaner
-from pkg_resources import resource_filename
+from importlib.resources import files
 from pyembed.core import PyEmbed
 from pyembed.core.consumer import PyEmbedConsumerError
 from pyembed.core.discovery import AutoDiscoverer, ChainingDiscoverer, FileDiscoverer
@@ -298,7 +298,7 @@ class CrowdsourceData(models.Model):
                         discoverer=ChainingDiscoverer(
                             [
                                 FileDiscoverer(
-                                    resource_filename(__name__, "oembed_providers.json")
+                                    files(__package__).joinpath("oembed_providers.json")
                                 ),
                                 AutoDiscoverer(),
                             ]
