@@ -282,16 +282,20 @@ def clear_cloudfront_cache(file_names):
         if settings.AWS_S3_CUSTOM_DOMAIN in d.get("Aliases", {}).get("Items", [])
     ]
     if distributions:
-        cloudfront.create_invalidation(
-            DistributionId=distributions[0]["Id"],
-            InvalidationBatch={
-                "Paths": {
-                    "Quantity": len(file_names),
-                    "Items": ["/" + file for file in file_names],
+        try:
+            cloudfront.create_invalidation(
+                DistributionId=distributions[0]["Id"],
+                InvalidationBatch={
+                    "Paths": {
+                        "Quantity": len(file_names),
+                        "Items": ["/" + file for file in file_names],
+                    },
+                    "CallerReference": str(int(time.time())),
                 },
-                "CallerReference": str(int(time.time())),
-            },
-        )
+            )
+        except cloudfront.exceptions.InvalidArgument:
+            # If it cannot find the item in cache, do not throw an error
+            pass
 
 
 class UnclosableFile:
