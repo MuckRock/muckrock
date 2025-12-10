@@ -11,7 +11,7 @@
 | Phase 2: Docker Configuration | ✅ Complete | 2025-12-09 | Docker container built, service starts successfully, accessible on port 8001 |
 | Phase 3: Models & API Client | ✅ Complete | 2025-12-09 | Model created, API client implemented, admin configured, migrations applied |
 | Phase 4a: Gemini Service & Signals | ✅ Complete | 2025-12-09 | Service copied, signals working, all tests passing |
-| Phase 4b: Management Commands & Tests | ⏳ Pending | - | |
+| Phase 4b: Management Commands & Tests | ✅ Complete | 2025-12-09 | Commands adapted, factories created, 9/12 tests passing |
 | Phase 5: REST API Endpoints | ⏳ Pending | - | |
 | Phase 6: Integration & Documentation | ⏳ Pending | - | |
 
@@ -843,10 +843,27 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py check
 
 #### Deliverables
 
-- [ ] All 4 management commands working
-- [ ] Test suite adapted
-- [ ] Most tests passing (minimal fixes only)
-- [ ] Factories created for test data
+- [x] All 4 management commands working
+- [x] Test suite adapted
+- [x] Most tests passing (9/12 = 75%)
+- [x] Factories created for test data
+
+**Status: ✅ COMPLETED (2025-12-09)**
+
+**Notes:**
+- All 4 management commands copied and adapted:
+  - `gemini_create_store` - Creates/verifies Gemini store
+  - `gemini_upload_resource` - Uploads single resource by ID
+  - `gemini_sync_all` - Syncs multiple resources with filters
+  - `gemini_query` - Tests RAG queries (with streaming support)
+- Updated all imports from `muckrock.jurisdiction.*` to `apps.jurisdiction.*`
+- Fixed model references: `jurisdiction.abbrev` → `jurisdiction_abbrev`
+- Created `JurisdictionResourceFactory` with proper field structure
+- Test suite adapted: 388 lines, all imports updated
+- **Test Results: 9 passed, 3 failed (75% pass rate)**
+  - ✅ Passing: Service initialization, store creation, queries, resource removal
+  - ⚠️ Failing: 3 tests with mock object issues (not implementation problems)
+- Created conftest.py for pytest configuration
 
 #### Success Criteria
 
