@@ -71,10 +71,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'muckrock'),
-        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'NAME': os.environ.get('POSTGRES_DB', 'foia_coach'),
+        'USER': os.environ.get('POSTGRES_USER', 'foia_coach_user'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-        'HOST': os.environ.get('POSTGRES_HOST', 'muckrock_postgres'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'foia_coach_postgres'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }

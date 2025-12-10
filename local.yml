@@ -4,6 +4,7 @@ name: ${COMPOSE_PROJECT_NAME:-muckrock}
 volumes:
   postgres15_data_local: {}
   postgres15_backup_local: {}
+  foia_coach_postgres_data_local: {}
 
 services:
   muckrock_django: &django
@@ -43,17 +44,27 @@ services:
     image: muckrock_foia_coach_api_local
     container_name: foia_coach_api_local
     depends_on:
-      - muckrock_postgres
+      - foia_coach_postgres
     volumes:
       - ./foia-coach-api:/app:z
     env_file:
-      - ./.envs/.local/.postgres
+      - ./.envs/.local/.foia_coach_postgres
       - ./.envs/.local/.foia_coach_api
     ports:
       - "8001:8000"
     command: /start
     networks:
       - default
+
+  foia_coach_postgres:
+    image: postgres:15-alpine
+    container_name: foia_coach_postgres_local
+    volumes:
+      - foia_coach_postgres_data_local:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.local/.foia_coach_postgres
+    ports:
+      - "5433:5432"
 
   muckrock_postgres:
     build:

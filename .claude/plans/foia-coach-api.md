@@ -38,27 +38,31 @@ Standalone service with independent dependencies, sharing only the PostgreSQL da
 ### Service Topology
 
 ```
-┌─────────────────────────────────┐
-│   Main MuckRock Django App      │
-│   Port: 8000                    │
-│   - baml/ollama/httpx<0.28      │
-│   - Full MuckRock features      │
+┌─────────────────────────────────┐      ┌──────────────────────┐
+│   Main MuckRock Django App      │      │  MuckRock PostgreSQL │
+│   Port: 8000                    │◄────►│  Port: 5432          │
+│   - baml/ollama/httpx<0.28      │      │  DB: muckrock        │
+│   - Full MuckRock features      │      └──────────────────────┘
 │   - Owns: jurisdiction table    │
-└────────────┬────────────────────┘
-             │
-             ├─── PostgreSQL (shared) ───┐
-             │                           │
-┌────────────▼────────────────────┐     │
-│   FOIA Coach API Service        │     │
-│   Port: 8001                    │     │
-│   - google-genai>=1.49/httpx>=0.28   │
-│   - Minimal Django              │     │
-│   - Owns: resource tables       │◄────┘
-│   - Read-only: jurisdiction     │
-└────────────┬────────────────────┘
-             │
-┌────────────▼────────────────────┐
-│   SvelteKit UI (Phase 4)        │
+│   - Exposes: /api/v1/           │
+└─────────────┬───────────────────┘
+              │
+              │ HTTP API calls
+              │ (jurisdiction data)
+              │
+┌─────────────▼───────────────────┐      ┌──────────────────────┐
+│   FOIA Coach API Service        │      │ FOIA Coach Postgres  │
+│   Port: 8001                    │◄────►│ Port: 5433           │
+│   - google-genai>=1.49/httpx≥0.28│     │ DB: foia_coach       │
+│   - Minimal Django              │      └──────────────────────┘
+│   - Owns: resource tables       │
+│   - Fetches jurisdiction via API│
+└─────────────┬───────────────────┘
+              │
+              │ REST API
+              │
+┌─────────────▼───────────────────┐
+│   SvelteKit UI (Future)         │
 │   Port: 5173                    │
 │   - Consumes FOIA Coach API     │
 └─────────────────────────────────┘
@@ -66,14 +70,20 @@ Standalone service with independent dependencies, sharing only the PostgreSQL da
 
 ### Database Strategy
 
-**Phase 1 (Initial Development):**
-- FOIA Coach API shares PostgreSQL container with main app (for speed of iteration)
-- Owns new tables: `foia_coach_jurisdictionresource`
-- Accesses Jurisdiction data via main MuckRock API (no direct DB access to jurisdiction table)
+**✅ Implemented (2025-12-10): Separate Databases**
+- FOIA Coach API has its own dedicated PostgreSQL database (`foia_coach`)
+- Complete isolation from main MuckRock database
+- Owns tables: `foia_coach_jurisdictionresource` + Django core tables
+- Accesses Jurisdiction data via main MuckRock API (HTTP calls, no DB coupling)
+- Benefits:
+  - No Django permissions conflicts
+  - Clean migrations
+  - True microservice independence
+  - Easier deployment and scaling
 
-**Phase 2 (Flexible Deployment):**
+**Flexible API Configuration:**
 - FOIA Coach API can point to different MuckRock API endpoints:
-  - Local dev: `http://muckrock_django/api/...` (in Docker network)
+  - Local dev: `http://internal.dev.muckrock.com/api/...` (Docker network)
   - Remote dev: `https://dev.muckrock.com/api/...`
   - Production: `https://muckrock.com/api/...`
 - Configured via `MUCKROCK_API_URL` and `MUCKROCK_API_TOKEN` environment variables
@@ -1047,11 +1057,18 @@ docker compose -f local.yml run --rm foia_coach_api pytest
   - ✅ `POST /api/v1/query/query/` - RAG query endpoint (tested, API quota hit)
   - ✅ CORS headers verified for SvelteKit origin
 
-**Known Issue:**
-- Django migrations fail with permissions error (same as Phase 3)
-- Workaround: Start server manually without migrations: `docker compose -f local.yml run --rm -p 8001:8000 foia_coach_api python manage.py runserver 0.0.0.0:8000`
-- Tables are already created from earlier phases, so this doesn't affect functionality
-- See `foia-coach-api/MIGRATION_PERMISSIONS_ISSUE.md` for details
+**Post-Phase 5 Improvement: Separate Database (2025-12-10)**
+- ✅ Migrated to dedicated PostgreSQL database (`foia_coach_postgres`)
+- ✅ Fixed all migration permissions errors
+- ✅ True microservice isolation achieved
+- ✅ Service can now start normally with `/start` command
+- ✅ All API endpoints verified working with new database
+- Configuration changes:
+  - Added `foia_coach_postgres` service to `local.yml`
+  - Created `.envs/.local/.foia_coach_postgres` environment file
+  - Updated database defaults in `config/settings/base.py`
+  - New database accessible on host port 5433
+- Benefits: Clean migrations, true independence, easier deployment
 
 #### Success Criteria
 
