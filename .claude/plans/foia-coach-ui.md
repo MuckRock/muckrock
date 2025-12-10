@@ -1,12 +1,22 @@
 # FOIA Coach SvelteKit UI - Implementation Plan
 
+## How to Use This Plan
+
+This plan is designed for **incremental implementation across multiple Claude Code sessions**:
+
+1. **Start each session** by referencing this document: `@.claude/plans/foia-coach-ui.md`
+2. **Focus on one phase per session** to keep context clean and manageable
+3. **Update progress** in the Progress Tracker table after completing each phase
+4. **Mark tasks complete** with ✅ and add completion notes
+5. **Docker-first approach**: All development happens in containers to avoid Node version conflicts
+
 ## Progress Tracker
 
 **Last Updated:** 2025-12-10
 
 | Phase | Status | Completed | Notes |
 |-------|--------|-----------|-------|
-| Phase 1: SvelteKit Project Scaffold | ⏳ Not Started | - | Initialize SvelteKit with Svelte 5 |
+| Phase 1: SvelteKit Project Scaffold | ✅ Complete | 2025-12-10 | Docker setup with Node 20, basic routes, navigation |
 | Phase 2: API Client & Settings | ⏳ Not Started | - | Create API client and settings management |
 | Phase 3: Chat UI Components | ⏳ Not Started | - | Build chat message display components |
 | Phase 4: Query Form & Integration | ⏳ Not Started | - | Connect form to API with loading/error states |
@@ -122,134 +132,110 @@ Each phase is designed to:
 
 ---
 
-### Phase 1: SvelteKit Project Scaffold (30-45 minutes)
+### Phase 1: SvelteKit Project Scaffold (30-45 minutes) ✅ COMPLETE
 
-**Goal:** Initialize SvelteKit project with basic structure and routing.
+**Goal:** Initialize SvelteKit project with basic structure and routing in Docker container.
 
-**Note:** Start simple - just get the project running with basic pages.
+**Note:** Using Docker with Node 20 to avoid conflicts with main MuckRock project (Node 18).
 
-#### Tasks
+#### Docker Setup (COMPLETED)
 
-1. **Create SvelteKit project**
-   ```bash
-   cd /Users/allan/Developer/Studio/muckrock/muckrock
-   npm create svelte@latest foia-coach-ui
-   # Select:
-   # - Skeleton project
-   # - TypeScript: Yes
-   # - ESLint: Yes
-   # - Prettier: Yes
-   # - Playwright: No
-   # - Vitest: No
-   ```
+**Files Created:**
+- `foia-coach-ui/compose/local/Dockerfile` - Node 20 Alpine container
+- Updated `local.yml` with `foia_coach_ui` service
 
-2. **Install dependencies**
-   ```bash
-   cd foia-coach-ui
-   npm install
-   ```
+**Docker Configuration:**
+```yaml
+foia_coach_ui:
+  build:
+    context: ./foia-coach-ui
+    dockerfile: ./compose/local/Dockerfile
+  image: muckrock_foia_coach_ui_local
+  container_name: foia_coach_ui_local
+  volumes:
+    - ./foia-coach-ui:/app:z
+    - /app/node_modules
+  ports:
+    - "5173:5173"
+  command: npm run dev -- --host 0.0.0.0
+```
 
-3. **Create basic route structure**
+**Important:** Updated `package.json` to use `@types/node@^20.19.0` for Vite 7 compatibility.
+
+#### Tasks (COMPLETED)
+
+1. **Create SvelteKit project** ✅
+   - Used `npx sv create foia-coach-ui`
+   - Selected: Skeleton project, TypeScript, ESLint, Prettier
+
+2. **Install dependencies in Docker** ✅
+   - Fixed `@types/node` version conflict (18 → 20)
+   - Built container: `docker compose -f local.yml build foia_coach_ui`
+
+3. **Create basic route structure** ✅
    - Main page: `src/routes/+page.svelte` (chat interface)
    - Settings page: `src/routes/settings/+page.svelte`
 
-4. **Create basic layout** (src/routes/+layout.svelte)
+4. **Create basic layout** ✅ (src/routes/+layout.svelte)
    ```svelte
-   <script>
-     import '../app.css';
-   </script>
+   - Layout includes navigation and global styles
+   - Uses Svelte 5 syntax with `{@render children()}`
 
-   <div class="app">
-     <nav>
-       <a href="/">Chat</a>
-       <a href="/settings">Settings</a>
-     </nav>
-     <main>
-       <slot />
-     </main>
-   </div>
+5. **Create placeholder pages** ✅
+   - Main page: "FOIA Coach" heading with placeholder text
+   - Settings page: "Settings" heading with placeholder text
 
-   <style>
-     .app {
-       max-width: 1200px;
-       margin: 0 auto;
-       padding: 1rem;
-     }
-     nav {
-       display: flex;
-       gap: 1rem;
-       margin-bottom: 2rem;
-       padding: 1rem;
-       border-bottom: 1px solid #ccc;
-     }
-   </style>
-   ```
+6. **Add basic global styles** ✅ (src/app.css)
+   - Reset styles, typography, link colors
 
-5. **Create placeholder pages**
-
-   **Main page (src/routes/+page.svelte):**
-   ```svelte
-   <script>
-     let { data } = $props();
-   </script>
-
-   <h1>FOIA Coach</h1>
-   <p>Chat interface coming soon...</p>
-   ```
-
-   **Settings page (src/routes/settings/+page.svelte):**
-   ```svelte
-   <h1>Settings</h1>
-   <p>Settings form coming soon...</p>
-   ```
-
-6. **Add basic global styles** (src/app.css)
-   ```css
-   * {
-     box-sizing: border-box;
-   }
-
-   body {
-     margin: 0;
-     font-family: system-ui, -apple-system, sans-serif;
-     line-height: 1.5;
-   }
-
-   a {
-     color: #0066cc;
-     text-decoration: none;
-   }
-
-   a:hover {
-     text-decoration: underline;
-   }
-   ```
-
-7. **Test development server**
+7. **Test development server** ✅
    ```bash
-   npm run dev
+   docker compose -f local.yml up foia_coach_ui -d
+   docker compose -f local.yml logs foia_coach_ui
    # Visit http://localhost:5173
    ```
 
 #### Deliverables
 
-- [ ] SvelteKit project initialized
-- [ ] Dependencies installed
-- [ ] Basic routing configured (/ and /settings)
-- [ ] Layout with navigation
-- [ ] Dev server running
-- [ ] Can navigate between pages
+- ✅ SvelteKit project initialized
+- ✅ Dependencies installed in Docker container
+- ✅ Basic routing configured (/ and /settings)
+- ✅ Layout with navigation
+- ✅ Dev server running in Docker
+- ✅ Can navigate between pages
 
 #### Success Criteria
 
 ```bash
-npm run dev
-# Output: SvelteKit running at http://localhost:5173
+# Start container
+docker compose -f local.yml up foia_coach_ui -d
+
+# Check logs
+docker compose -f local.yml logs foia_coach_ui
 
 # Browser test:
-# 1. Visit http://localhost:5173 - Shows "FOIA Coach" heading
-# 2. Click "Settings" link - Navigates to settings page
-# 3. Click "Chat" link - Returns to main page
+# 1. Visit http://localhost:5173 - Shows "FOIA Coach" heading ✅
+# 2. Click "Settings" link - Navigates to settings page ✅
+# 3. Click "Chat" link - Returns to main page ✅
+```
+
+#### Key Docker Commands
+
+```bash
+# Build container
+docker compose -f local.yml build foia_coach_ui
+
+# Start container
+docker compose -f local.yml up foia_coach_ui -d
+
+# Stop container
+docker compose -f local.yml stop foia_coach_ui
+
+# View logs
+docker compose -f local.yml logs foia_coach_ui --tail=50
+
+# Restart container (after code changes that need rebuild)
+docker compose -f local.yml restart foia_coach_ui
 ```
 
 ---
@@ -2020,12 +2006,39 @@ Once this UI is complete:
 **Problem:** TypeScript errors during build
 **Solution:**
 1. Ensure all types are properly imported
-2. Run `npm run check` to see type errors
+2. Run `npm run check` inside container: `docker compose -f local.yml exec foia_coach_ui npm run check`
 3. Add `// @ts-ignore` for problematic lines (temporary)
+
+### Docker Container Issues
+
+**Problem:** Container won't start or build fails
+**Solution:**
+1. Check logs: `docker compose -f local.yml logs foia_coach_ui --tail=100`
+2. Rebuild container: `docker compose -f local.yml build --no-cache foia_coach_ui`
+3. Remove and recreate: `docker compose -f local.yml down && docker compose -f local.yml up foia_coach_ui -d`
+
+**Problem:** `@types/node` version conflict during build
+**Solution:**
+1. Verify `foia-coach-ui/package.json` has `@types/node@^20.19.0` (not ^18)
+2. Rebuild container after fixing: `docker compose -f local.yml build foia_coach_ui`
+
+**Problem:** Code changes not reflecting in browser
+**Solution:**
+1. Vite hot reload should work automatically with volume mount
+2. If not working, check volume mount in `local.yml`: `- ./foia-coach-ui:/app:z`
+3. Hard refresh browser: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
+4. Restart container if needed: `docker compose -f local.yml restart foia_coach_ui`
 
 ---
 
 ## Architecture Decisions
+
+### Why Docker?
+- **Node version isolation**: Main MuckRock project uses Node 18, but Vite 7 requires Node 20+
+- **Consistent environment**: Same setup for all developers
+- **No local Node conflicts**: Avoids `@types/node` version conflicts with parent project
+- **Easy cleanup**: Can remove entire container without affecting host system
+- **Production-ready**: Same containerization strategy as other services (foia_coach_api)
 
 ### Why Svelte 5?
 - Latest version with improved reactivity (runes)

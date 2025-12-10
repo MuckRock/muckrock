@@ -63,6 +63,21 @@ services:
     networks:
       - default
 
+  foia_coach_ui:
+    build:
+      context: ./foia-coach-ui
+      dockerfile: ./compose/local/Dockerfile
+    image: muckrock_foia_coach_ui_local
+    container_name: foia_coach_ui_local
+    volumes:
+      - ./foia-coach-ui:/app:z
+      - /app/node_modules  # Prevent host node_modules from overriding container
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - default
+
   foia_coach_postgres:
     image: postgres:15-alpine
     container_name: foia_coach_postgres_local
