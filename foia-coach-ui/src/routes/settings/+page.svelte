@@ -1,2 +1,8 @@
+<script>
+	import Settings from '$lib/components/Settings.svelte';
+</script>
+
 <h1>Settings</h1>
-<p>Settings form coming soon...</p>
+<p>Configure your FOIA Coach API connection</p>
+
+<Settings />

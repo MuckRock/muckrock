@@ -1,0 +1,156 @@
+<script lang="ts">
+	import { settingsStore } from '$lib/stores/settings.svelte';
+	import { apiClient } from '$lib/api/client';
+
+	let testing = $state(false);
+	let testResult = $state<string | null>(null);
+
+	async function testConnection() {
+		testing = true;
+		testResult = null;
+
+		try {
+			const success = await apiClient.testConnection();
+			testResult = success ? 'Connection successful!' : 'Connection failed';
+		} catch (e) {
+			testResult = `Error: ${e.message}`;
+		} finally {
+			testing = false;
+		}
+	}
+
+	function handleSubmit(event: Event) {
+		event.preventDefault();
+		settingsStore.save();
+		alert('Settings saved!');
+	}
+
+	function handleReset() {
+		if (confirm('Reset to default settings?')) {
+			settingsStore.reset();
+		}
+	}
+</script>
+
+<form onsubmit={handleSubmit}>
+	<div class="field">
+		<label for="apiUrl">FOIA Coach API URL</label>
+		<input
+			id="apiUrl"
+			type="text"
+			bind:value={settingsStore.settings.apiUrl}
+			placeholder="http://localhost:8001"
+			required
+		/>
+		<small>Base URL for the FOIA Coach API service</small>
+	</div>
+
+	<div class="field">
+		<label for="apiToken">API Token (optional)</label>
+		<input
+			id="apiToken"
+			type="password"
+			bind:value={settingsStore.settings.apiToken}
+			placeholder="Leave blank for local development"
+		/>
+		<small>Optional token for remote deployments (not needed for local development)</small>
+	</div>
+
+	<div class="field">
+		<label for="geminiModel">Gemini Model</label>
+		<input
+			id="geminiModel"
+			type="text"
+			bind:value={settingsStore.settings.geminiModel}
+			placeholder="gemini-2.0-flash-001"
+			required
+		/>
+		<small>Gemini model identifier (backend configuration)</small>
+	</div>
+
+	<div class="actions">
+		<button type="submit">Save Settings</button>
+		<button type="button" onclick={handleReset}>Reset to Defaults</button>
+		<button type="button" onclick={testConnection} disabled={testing}>
+			{testing ? 'Testing...' : 'Test Connection'}
+		</button>
+	</div>
+
+	{#if testResult}
+		<div class="test-result" class:success={testResult.includes('successful')}>
+			{testResult}
+		</div>
+	{/if}
+</form>
+
+<style>
+	form {
+		max-width: 600px;
+	}
+
+	.field {
+		margin-bottom: 1.5rem;
+	}
+
+	label {
+		display: block;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+	}
+
+	input {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		font-size: 1rem;
+	}
+
+	small {
+		display: block;
+		color: #666;
+		margin-top: 0.25rem;
+	}
+
+	.actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	button {
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 1rem;
+	}
+
+	button[type='submit'] {
+		background: #0066cc;
+		color: white;
+	}
+
+	button[type='button'] {
+		background: #f0f0f0;
+		color: #333;
+	}
+
+	button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.test-result {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		border-radius: 4px;
+		background: #ffebee;
+		color: #c62828;
+	}
+
+	.test-result.success {
+		background: #e8f5e9;
+		color: #2e7d32;
+	}
+</style>
