@@ -94,7 +94,8 @@ class QueryViewSet(viewsets.ViewSet):
         {
             "question": "What is the response time in Colorado?",
             "state": "CO",  # optional
-            "context": {}   # optional additional context
+            "context": {},  # optional additional context
+            "model": "gemini-2.0-flash-live"  # optional model selection
         }
         """
         serializer = QueryRequestSerializer(data=request.data)
@@ -103,13 +104,15 @@ class QueryViewSet(viewsets.ViewSet):
         question = serializer.validated_data['question']
         state = serializer.validated_data.get('state')
         context = serializer.validated_data.get('context')
+        model = serializer.validated_data.get('model')
 
         try:
             service = GeminiFileSearchService()
             result = service.query(
                 question=question,
                 state=state,
-                context=context
+                context=context,
+                model=model
             )
 
             response_serializer = QueryResponseSerializer(result)

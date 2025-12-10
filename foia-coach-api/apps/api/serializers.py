@@ -78,6 +78,11 @@ class QueryRequestSerializer(serializers.Serializer):
         required=False,
         help_text="Optional additional context as JSON object"
     )
+    model = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Optional Gemini model to use (e.g., 'gemini-2.0-flash-live', 'gemini-1.5-pro'). Defaults to GEMINI_MODEL setting."
+    )
 
 
 class QueryResponseSerializer(serializers.Serializer):

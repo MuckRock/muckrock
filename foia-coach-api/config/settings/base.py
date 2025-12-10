@@ -136,6 +136,10 @@ GEMINI_FILE_SEARCH_STORE_NAME = os.environ.get(
     'GEMINI_FILE_SEARCH_STORE_NAME',
     'StatePublicRecordsStore'
 )
+GEMINI_MODEL = os.environ.get(
+    'GEMINI_MODEL',
+    'gemini-2.0-flash-exp'  # Default model for testing
+)
 
 # MuckRock API Configuration
 MUCKROCK_API_URL = os.environ.get(

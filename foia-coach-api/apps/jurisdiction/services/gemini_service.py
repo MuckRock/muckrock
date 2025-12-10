@@ -233,7 +233,8 @@ NEVER:
         self,
         question: str,
         state: Optional[str] = None,
-        context: Optional[dict] = None
+        context: Optional[dict] = None,
+        model: Optional[str] = None
     ) -> dict:
         """
         Query the RAG system with a question
@@ -242,6 +243,7 @@ NEVER:
             question: The user's question
             state: Optional state filter (e.g., 'CO', 'GA', 'TN')
             context: Optional additional context
+            model: Optional Gemini model to use (defaults to settings.GEMINI_MODEL)
 
         Returns:
             Dict with 'answer', 'citations', and optional 'state'
@@ -249,6 +251,9 @@ NEVER:
         try:
             # Get the File Search store
             store_name = self.get_or_create_store()
+
+            # Use provided model or fall back to settings
+            model_name = model or settings.GEMINI_MODEL
 
             # Build the prompt with optional state filter
             prompt = question
@@ -258,7 +263,7 @@ NEVER:
             # Generate content with File Search grounding
             # Note: Using dict-based config because types.FileSearch not available in v1.2.0
             response = self.client.models.generate_content(
-                model='gemini-2.0-flash-exp',
+                model=model_name,
                 contents=prompt,
                 config={
                     "system_instruction": self.SYSTEM_INSTRUCTION,
@@ -297,7 +302,8 @@ NEVER:
         self,
         question: str,
         state: Optional[str] = None,
-        context: Optional[dict] = None
+        context: Optional[dict] = None,
+        model: Optional[str] = None
     ) -> Generator[dict, None, None]:
         """
         Query the RAG system with streaming response
@@ -306,6 +312,7 @@ NEVER:
             question: The user's question
             state: Optional state filter (e.g., 'CO', 'GA', 'TN')
             context: Optional additional context
+            model: Optional Gemini model to use (defaults to settings.GEMINI_MODEL)
 
         Yields:
             Dicts with incremental response data:
@@ -317,6 +324,9 @@ NEVER:
             # Get the File Search store
             store_name = self.get_or_create_store()
 
+            # Use provided model or fall back to settings
+            model_name = model or settings.GEMINI_MODEL
+
             # Build the prompt with optional state filter
             prompt = question
             if state:
@@ -325,7 +335,7 @@ NEVER:
             # Generate content with File Search streaming
             # Note: Using dict-based config because types.FileSearch not available in v1.2.0
             response_stream = self.client.models.generate_content_stream(
-                model='gemini-2.0-flash-exp',
+                model=model_name,
                 contents=prompt,
                 config={
                     "system_instruction": self.SYSTEM_INSTRUCTION,
