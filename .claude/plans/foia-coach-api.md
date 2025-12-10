@@ -13,7 +13,7 @@
 | Phase 4a: Gemini Service & Signals | ✅ Complete | 2025-12-09 | Service copied, signals working, all tests passing |
 | Phase 4b: Management Commands & Tests | ✅ Complete | 2025-12-09 | Commands adapted, factories created, 9/12 tests passing |
 | Phase 5: REST API Endpoints | ✅ Complete | 2025-12-10 | All API endpoints working, CORS configured, manual testing successful |
-| Phase 6: Integration & Documentation | ⏳ Pending | - | |
+| Phase 6: Integration & Documentation | ✅ Complete | 2025-12-10 | End-to-end validation complete, API documentation created |
 
 ---
 
@@ -1125,10 +1125,96 @@ curl -X POST http://localhost:8001/api/v1/query/query/ \
 
 #### Deliverables
 
-- [ ] Test data loaded and working
-- [ ] End-to-end flow validated
-- [ ] Integration checklist complete
-- [ ] Basic API documentation created
+- [x] Test data loaded and working
+- [x] End-to-end flow validated
+- [x] Integration checklist complete
+- [x] Basic API documentation created
+
+**Status: ✅ COMPLETED (2025-12-10)**
+
+**Notes:**
+- **Docker Compose Environment Fix Applied:**
+  - Discovered docker-compose was loading `.postgres` env file unexpectedly
+  - Fixed by adding explicit `environment:` section to override inherited env vars
+  - Service now correctly connects to `foia_coach` database on `foia_coach_postgres` host
+
+- **Test Data Successfully Created:**
+  - Colorado CORA guide uploaded (Resource ID: 1)
+  - Signal auto-upload to Gemini: SUCCESSFUL
+  - Status: `ready`
+  - Gemini File ID: `fileSearchStores/.../co-colorado-open-records-ac-2xlly8gvdt78`
+
+- **End-to-End Validation Complete:**
+  - ✅ Created resource via Django shell
+  - ✅ Signal triggered automatic upload to Gemini
+  - ✅ Resource indexed successfully (status: ready)
+  - ✅ API returns resource with all fields populated
+  - ✅ Jurisdiction data fetched from main MuckRock API
+
+- **Integration Checklist:**
+  - ✅ Can read jurisdictions from main MuckRock API (50 states)
+  - ✅ Can create resources in separate foia_coach database
+  - ✅ Signals trigger upload to Gemini automatically
+  - ✅ Management commands work (gemini_create_store, gemini_upload_resource)
+  - ✅ API endpoints return correct data
+  - ✅ CORS allows SvelteKit origin (http://localhost:5173)
+  - ✅ Both services run simultaneously (8000 and 8001)
+
+- **API Documentation Created:**
+  - Comprehensive API documentation: `foia-coach-api/API_DOCUMENTATION.md`
+  - Documents all 5 endpoints with examples
+  - Includes curl and Python usage examples
+  - Management commands reference
+  - Troubleshooting guide
+  - Known issues and limitations
+
+- **Bug Fixes Applied in Phase 6:**
+  - Fixed MIME type issue in gemini_service.py (added `mime_type: 'text/markdown'` to config)
+  - Fixed docker-compose environment variable inheritance (explicit env vars in local.yml)
+  - Changed temp file suffix from `.txt` to `.md` for proper MIME detection
+
+- **Post-Phase 6 Enhancement: Dynamic MIME Type Detection (2025-12-10):**
+  - Removed hardcoded `text/markdown` MIME type
+  - Implemented dynamic MIME type detection using Python's `mimetypes` module
+  - Added custom MIME type mappings for common file formats:
+    - Markdown: `.md`, `.markdown` → `text/markdown`
+    - Word: `.docx` → `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+    - Word (legacy): `.doc` → `application/msword`
+    - Excel: `.xlsx` → `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+    - Excel (legacy): `.xls` → `application/vnd.ms-excel`
+    - PowerPoint: `.pptx` → `application/vnd.openxmlformats-officedocument.presentationml.presentation`
+    - PowerPoint (legacy): `.ppt` → `application/vnd.ms-powerpoint`
+  - Unknown file types default to `text/plain`
+  - Service now supports PDF, DOCX, TXT, MD, XLSX, PPTX and other common document formats
+  - File extension automatically extracted from resource.file.name for temp files
+  - Tested and verified: Upload works correctly with detected MIME types
+
+**Manual Testing Results:**
+```bash
+# Jurisdictions API - ✅ PASSED
+curl http://localhost:8001/api/v1/jurisdictions/
+# Returns: 50 state jurisdictions with resource counts
+
+# Resources API - ✅ PASSED
+curl http://localhost:8001/api/v1/resources/
+# Returns: 1 resource (Colorado CORA guide) with all fields
+
+# Resources API with filter - ✅ PASSED
+curl http://localhost:8001/api/v1/resources/?jurisdiction_abbrev=CO
+# Returns: Filtered results for Colorado only
+
+# CORS headers - ✅ PASSED
+curl -I -H "Origin: http://localhost:5173" http://localhost:8001/api/v1/resources/
+# Returns: Access-Control-Allow-Origin: http://localhost:5173
+
+# Both services running - ✅ PASSED
+docker compose -f local.yml ps
+# Shows: muckrock_django (8000) and foia_coach_api (8001) both Up
+```
+
+**Query Endpoint Testing:**
+- Not tested due to Gemini API quota limits (hit daily limit during development)
+- Endpoint structure verified, will test in next session with fresh quota
 
 #### Success Criteria
 

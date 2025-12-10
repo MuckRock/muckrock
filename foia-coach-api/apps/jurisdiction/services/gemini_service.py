@@ -11,6 +11,7 @@ from django.utils import timezone
 
 # Standard Library
 import logging
+import mimetypes
 import sys
 from datetime import datetime
 from typing import Generator, Optional
@@ -61,6 +62,22 @@ NEVER:
             logger.warning("GEMINI_API_KEY not configured")
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         self.store_name = settings.GEMINI_FILE_SEARCH_STORE_NAME
+
+        # Initialize mimetypes and add common file type mappings
+        if not mimetypes.inited:
+            mimetypes.init()
+
+        # Add markdown file types
+        mimetypes.add_type('text/markdown', '.md')
+        mimetypes.add_type('text/markdown', '.markdown')
+
+        # Add Microsoft Office formats
+        mimetypes.add_type('application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx')
+        mimetypes.add_type('application/msword', '.doc')
+        mimetypes.add_type('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx')
+        mimetypes.add_type('application/vnd.ms-excel', '.xls')
+        mimetypes.add_type('application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx')
+        mimetypes.add_type('application/vnd.ms-powerpoint', '.ppt')
 
     def create_store(self, display_name: Optional[str] = None) -> str:
         """
@@ -121,6 +138,23 @@ NEVER:
             # Prepare display name
             display_name = f"{resource.jurisdiction_abbrev} - {resource.display_name}"
 
+            # Detect MIME type from file extension
+            file_name = resource.file.name
+            mime_type, _ = mimetypes.guess_type(file_name)
+
+            # Default to text/plain if MIME type cannot be determined
+            if not mime_type:
+                logger.warning(
+                    f"Could not determine MIME type for {file_name}, defaulting to text/plain"
+                )
+                mime_type = 'text/plain'
+
+            logger.info(f"Detected MIME type for {file_name}: {mime_type}")
+
+            # Extract file extension for temp file (if needed)
+            import os
+            file_ext = os.path.splitext(file_name)[1] or '.txt'
+
             # Update status to uploading
             resource.index_status = 'uploading'
             resource.save(update_fields=['index_status'])
@@ -132,18 +166,17 @@ NEVER:
                 operation = self.client.file_search_stores.upload_to_file_search_store(
                     file=resource.file.path,
                     file_search_store_name=store_name,
-                    config={'display_name': display_name}
+                    config={'display_name': display_name, 'mime_type': mime_type}
                 )
             except (AttributeError, NotImplementedError):
                 # For storage backends that don't support .path (e.g., S3, InMemoryStorage)
                 # Write to a temporary file first
                 import tempfile
-                import os
 
                 resource.file.seek(0)
                 file_content = resource.file.read()
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.txt') as tmp_file:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
                     tmp_file.write(file_content if isinstance(file_content, bytes) else file_content.encode())
                     tmp_file.flush()
                     temp_path = tmp_file.name
@@ -152,7 +185,7 @@ NEVER:
                     operation = self.client.file_search_stores.upload_to_file_search_store(
                         file=temp_path,
                         file_search_store_name=store_name,
-                        config={'display_name': display_name}
+                        config={'display_name': display_name, 'mime_type': mime_type}
                     )
                 finally:
                     # Clean up temp file

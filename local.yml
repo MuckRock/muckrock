@@ -50,6 +50,13 @@ services:
     env_file:
       - ./.envs/.local/.foia_coach_postgres
       - ./.envs/.local/.foia_coach_api
+    environment:
+      # Explicitly set database connection to override any inherited env vars
+      - POSTGRES_HOST=foia_coach_postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=foia_coach
+      - POSTGRES_USER=foia_coach_user
+      - POSTGRES_PASSWORD=foia_coach_dev_password_change_in_production
     ports:
       - "8001:8000"
     command: /start
