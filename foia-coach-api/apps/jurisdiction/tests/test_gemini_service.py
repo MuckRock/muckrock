@@ -17,7 +17,8 @@ from apps.jurisdiction.services.gemini_service import GeminiFileSearchService
 
 @override_settings(
     GEMINI_API_KEY="test_api_key",
-    GEMINI_FILE_SEARCH_STORE_NAME="TestStore"
+    GEMINI_FILE_SEARCH_STORE_NAME="TestStore",
+    GEMINI_REAL_API_ENABLED=True  # Enable for tests (but API client is mocked)
 )
 class TestGeminiFileSearchService(TestCase):
     """Tests for GeminiFileSearchService"""

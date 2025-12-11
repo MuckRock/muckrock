@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 class GeminiFileSearchService:
     """Service for managing Gemini File Search integration"""
 
+    # Class-level request tracking (shared across all instances in this process)
+    _request_count = 0
+    _request_history = []  # List of timestamps for rate limiting
+    _max_requests_per_session = 200  # Alert threshold for development
+    _max_requests_per_minute = 50  # Conservative limit (Gemini free tier: 60 QPM)
+
     # System instruction for the FOIA Coach expert persona
     SYSTEM_INSTRUCTION = """
 You are the State Public Records & FOIA Coach. Your role is to provide
@@ -60,7 +66,17 @@ NEVER:
         """Initialize the Gemini client"""
         if not settings.GEMINI_API_KEY:
             logger.warning("GEMINI_API_KEY not configured")
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+        # Check if real API calls are enabled
+        self.real_api_enabled = getattr(settings, 'GEMINI_REAL_API_ENABLED', False)
+
+        if not self.real_api_enabled:
+            logger.warning(
+                "⚠️  GEMINI_REAL_API_ENABLED is False - Real API calls are DISABLED. "
+                "Set GEMINI_REAL_API_ENABLED=true in environment to enable."
+            )
+
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY) if self.real_api_enabled else None
         self.store_name = settings.GEMINI_FILE_SEARCH_STORE_NAME
 
         # Initialize mimetypes and add common file type mappings
@@ -79,15 +95,82 @@ NEVER:
         mimetypes.add_type('application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx')
         mimetypes.add_type('application/vnd.ms-powerpoint', '.ppt')
 
+    @classmethod
+    def _track_request(cls):
+        """Track an API request and check rate limits"""
+        import time
+
+        current_time = time.time()
+        cls._request_count += 1
+        cls._request_history.append(current_time)
+
+        # Clean up old request history (older than 1 minute)
+        one_minute_ago = current_time - 60
+        cls._request_history = [t for t in cls._request_history if t > one_minute_ago]
+
+        # Check session limit
+        if cls._request_count > cls._max_requests_per_session:
+            logger.error(
+                f"⚠️  GEMINI API USAGE WARNING: {cls._request_count} requests made this session! "
+                f"This is likely a bug (infinite loop or missing mocks in tests)."
+            )
+        elif cls._request_count % 50 == 0:
+            logger.warning(
+                f"Gemini API: {cls._request_count} requests made this session. "
+                f"{len(cls._request_history)} requests in the last minute."
+            )
+
+        # Check rate limit (requests per minute)
+        if len(cls._request_history) > cls._max_requests_per_minute:
+            logger.error(
+                f"⚠️  RATE LIMIT WARNING: {len(cls._request_history)} requests in the last minute! "
+                f"Gemini free tier limit is 60 QPM. You may get 429 errors."
+            )
+
+    @classmethod
+    def get_request_stats(cls) -> dict:
+        """Get current request statistics for debugging"""
+        import time
+        one_minute_ago = time.time() - 60
+        recent_requests = [t for t in cls._request_history if t > one_minute_ago]
+
+        return {
+            'total_requests_this_session': cls._request_count,
+            'requests_last_minute': len(recent_requests),
+            'rate_limit_threshold': cls._max_requests_per_minute,
+            'session_limit_threshold': cls._max_requests_per_session,
+        }
+
+    @classmethod
+    def reset_request_tracking(cls):
+        """Reset request tracking (useful for tests)"""
+        cls._request_count = 0
+        cls._request_history = []
+
+    def _check_api_enabled(self):
+        """Check if real API calls are enabled, raise error if not"""
+        if not self.real_api_enabled:
+            raise RuntimeError(
+                "Gemini API calls are disabled. "
+                "Set GEMINI_REAL_API_ENABLED=true in environment to enable real API calls. "
+                "This safety check prevents accidental API usage during development."
+            )
+
     def create_store(self, display_name: Optional[str] = None) -> str:
         """
         Create a new File Search store.
         Returns the name of the created store.
         """
+        # Check if API calls are enabled
+        self._check_api_enabled()
+
         if display_name is None:
             display_name = self.store_name
 
         try:
+            # Track API request
+            self._track_request()
+
             # Create a new File Search store
             store = self.client.file_search_stores.create(
                 config={'display_name': display_name}
@@ -108,7 +191,13 @@ NEVER:
         Get existing store or create if it doesn't exist.
         Returns the store name.
         """
+        # Check if API calls are enabled
+        self._check_api_enabled()
+
         try:
+            # Track API request
+            self._track_request()
+
             # List existing file search stores to check if our store exists
             stores = list(self.client.file_search_stores.list())
             for store in stores:
@@ -131,6 +220,9 @@ NEVER:
         """
         Upload a resource file directly to File Search store.
         """
+        # Check if API calls are enabled
+        self._check_api_enabled()
+
         try:
             # Get or create the File Search store
             store_name = self.get_or_create_store()
@@ -158,6 +250,9 @@ NEVER:
             # Update status to uploading
             resource.index_status = 'uploading'
             resource.save(update_fields=['index_status'])
+
+            # Track API request for upload
+            self._track_request()
 
             # Upload file directly to File Search store
             # Try to use path if available, otherwise create temp file
@@ -198,6 +293,7 @@ NEVER:
                 import time
                 while not operation.done():
                     time.sleep(1)
+                    self._track_request()  # Track each polling request
                     operation = self.client.operations.get(name=operation.name)
                 file_ref = operation.response
             else:
@@ -232,6 +328,9 @@ NEVER:
         """
         Remove a resource from File Search store (for delete signal)
         """
+        # Check if API calls are enabled
+        self._check_api_enabled()
+
         try:
             if not resource.gemini_file_id:
                 logger.warning(
@@ -241,6 +340,9 @@ NEVER:
 
             # Get the File Search store
             store_name = self.get_or_create_store()
+
+            # Track API request for deletion
+            self._track_request()
 
             # Delete the file from File Search store
             self.client.file_search_stores.delete_file(
@@ -281,6 +383,9 @@ NEVER:
         Returns:
             Dict with 'answer', 'citations', and optional 'state'
         """
+        # Check if API calls are enabled
+        self._check_api_enabled()
+
         try:
             # Get the File Search store
             store_name = self.get_or_create_store()
@@ -292,6 +397,9 @@ NEVER:
             prompt = question
             if state:
                 prompt = f"[Context: {state}] {question}"
+
+            # Track API request for query
+            self._track_request()
 
             # Generate content with File Search grounding
             # Note: Using dict-based config because types.FileSearch not available in v1.2.0
@@ -353,6 +461,9 @@ NEVER:
             - {'type': 'citations', 'citations': [...]} for final citations
             - {'type': 'done'} when complete
         """
+        # Check if API calls are enabled
+        self._check_api_enabled()
+
         try:
             # Get the File Search store
             store_name = self.get_or_create_store()
@@ -364,6 +475,9 @@ NEVER:
             prompt = question
             if state:
                 prompt = f"[Context: {state}] {question}"
+
+            # Track API request for streaming query
+            self._track_request()
 
             # Generate content with File Search streaming
             # Note: Using dict-based config because types.FileSearch not available in v1.2.0

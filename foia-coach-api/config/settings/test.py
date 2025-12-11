@@ -36,5 +36,10 @@ LOGGING = {
 # Media files in temp directory
 MEDIA_ROOT = '/tmp/foia-coach-api-test-media'
 
+# Disable real Gemini API calls in tests (CRITICAL SAFETY MEASURE)
+# This prevents tests from consuming API quota
+# Override in specific tests if needed (with mocked API client)
+GEMINI_REAL_API_ENABLED = False
+
 # Disable signal handlers in tests (can be overridden in specific tests)
 # Tests should explicitly enable signals when needed

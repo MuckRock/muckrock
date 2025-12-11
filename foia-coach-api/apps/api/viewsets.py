@@ -85,6 +85,29 @@ class QueryViewSet(viewsets.ViewSet):
     ViewSet for RAG query operations using Gemini File Search.
     """
 
+    @action(detail=False, methods=['get'])
+    def status(self, request):
+        """
+        Check Gemini API status and configuration.
+
+        Returns information about whether the API is enabled and ready to use.
+        """
+        from django.conf import settings
+
+        api_enabled = getattr(settings, 'GEMINI_REAL_API_ENABLED', False)
+
+        return Response({
+            'gemini_api_enabled': api_enabled,
+            'status': 'ready' if api_enabled else 'disabled',
+            'message': (
+                'Gemini API is enabled and ready to accept queries.'
+                if api_enabled else
+                'Gemini API is currently disabled for safety. '
+                'Set GEMINI_REAL_API_ENABLED=true to enable.'
+            ),
+            'documentation': 'README_GEMINI_SAFETY.md'
+        })
+
     @action(detail=False, methods=['post'])
     def query(self, request):
         """
@@ -117,6 +140,26 @@ class QueryViewSet(viewsets.ViewSet):
 
             response_serializer = QueryResponseSerializer(result)
             return Response(response_serializer.data)
+
+        except RuntimeError as exc:
+            # Check if this is the API disabled error
+            error_message = str(exc)
+            if 'Gemini API calls are disabled' in error_message:
+                return Response(
+                    {
+                        'error': 'Gemini API is currently disabled',
+                        'error_type': 'api_disabled',
+                        'details': (
+                            'Real Gemini API calls are disabled for safety. '
+                            'To enable: Set GEMINI_REAL_API_ENABLED=true in environment variables '
+                            'and restart the service.'
+                        ),
+                        'documentation': 'See README_GEMINI_SAFETY.md for details'
+                    },
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            # Re-raise other RuntimeErrors
+            raise
 
         except Exception as exc:
             # Check if this is a quota/rate limit error (429)

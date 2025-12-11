@@ -141,6 +141,11 @@ GEMINI_MODEL = os.environ.get(
     'gemini-1.5-flash'  # Default stable model with good free tier quotas
 )
 
+# Safety flag: Disable real Gemini API calls by default in development
+# Set to 'true' or '1' in environment to enable real API calls
+# This prevents accidental API usage during development and testing
+GEMINI_REAL_API_ENABLED = os.environ.get('GEMINI_REAL_API_ENABLED', 'false').lower() in ('true', '1', 'yes')
+
 # MuckRock API Configuration
 MUCKROCK_API_URL = os.environ.get(
     'MUCKROCK_API_URL',

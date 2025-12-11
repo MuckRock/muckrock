@@ -52,17 +52,27 @@ class APIClient {
 			try {
 				const errorData = await response.json();
 				if (errorData.error) {
+					// If it's an API disabled error, provide detailed message
+					if (errorData.error_type === 'api_disabled') {
+						throw new Error(
+							`${errorData.error}: ${errorData.details || ''}`
+						);
+					}
 					// If it's a quota error, provide helpful message
 					if (response.status === 429 && errorData.retry_after) {
 						throw new Error(
 							`${errorData.error} Please try again in ${errorData.retry_after} seconds.`
 						);
 					}
-					throw new Error(errorData.error);
+					// Include details if available
+					const errorMessage = errorData.details
+						? `${errorData.error}: ${errorData.details}`
+						: errorData.error;
+					throw new Error(errorMessage);
 				}
 			} catch (e) {
 				// If JSON parsing fails, fall back to status text
-				if (e instanceof Error && e.message.startsWith('API quota')) {
+				if (e instanceof Error && (e.message.includes('API') || e.message.includes('disabled'))) {
 					throw e; // Re-throw our custom error
 				}
 			}
