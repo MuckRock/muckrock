@@ -1,6 +1,8 @@
 <script>
 	import ChatHistory from '$lib/components/ChatHistory.svelte';
+	import QueryForm from '$lib/components/QueryForm.svelte';
 	import { chatStore } from '$lib/stores/chat.svelte';
+	import { contextStore } from '$lib/stores/context.svelte';
 
 	// Add some test messages for visualization
 	function addTestMessages() {
@@ -23,29 +25,44 @@
 			state: 'CO'
 		});
 	}
+
+	function clearChat() {
+		chatStore.clear();
+		contextStore.clear();
+	}
 </script>
 
 <div class="page">
 	<div class="header">
 		<h1>FOIA Coach</h1>
 		<button onclick={addTestMessages}>Add Test Messages</button>
-		<button onclick={() => chatStore.clear()}>Clear Chat</button>
+		<button onclick={clearChat}>Clear Chat</button>
 	</div>
 
+	<QueryForm />
 	<ChatHistory />
 </div>
 
 <style>
 	.page {
-		max-width: 900px;
+		max-width: 1000px;
 		margin: 0 auto;
+		padding: 2rem 1rem;
 	}
 
 	.header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 2rem;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.header h1 {
+		margin: 0;
+		font-size: 2rem;
+		color: #2196f3;
 	}
 
 	button {
@@ -54,9 +71,26 @@
 		border-radius: 4px;
 		background: #f0f0f0;
 		cursor: pointer;
+		font-size: 0.9rem;
+		transition: background-color 0.2s;
 	}
 
 	button:hover {
 		background: #e0e0e0;
+	}
+
+	@media (max-width: 768px) {
+		.page {
+			padding: 1rem 0.5rem;
+		}
+
+		.header {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.header h1 {
+			font-size: 1.5rem;
+		}
 	}
 </style>
