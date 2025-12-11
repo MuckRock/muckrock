@@ -48,6 +48,24 @@ class APIClient {
 		});
 
 		if (!response.ok) {
+			// Try to parse error response body
+			try {
+				const errorData = await response.json();
+				if (errorData.error) {
+					// If it's a quota error, provide helpful message
+					if (response.status === 429 && errorData.retry_after) {
+						throw new Error(
+							`${errorData.error} Please try again in ${errorData.retry_after} seconds.`
+						);
+					}
+					throw new Error(errorData.error);
+				}
+			} catch (e) {
+				// If JSON parsing fails, fall back to status text
+				if (e instanceof Error && e.message.startsWith('API quota')) {
+					throw e; // Re-throw our custom error
+				}
+			}
 			throw new Error(`API error: ${response.status} ${response.statusText}`);
 		}
 
@@ -60,6 +78,18 @@ class APIClient {
 		});
 
 		if (!response.ok) {
+			// Try to parse error response body
+			try {
+				const errorData = await response.json();
+				if (errorData.error) {
+					throw new Error(errorData.error);
+				}
+			} catch (e) {
+				// If JSON parsing fails, fall back to status text
+				if (e instanceof Error && e.message !== `API error: ${response.status}`) {
+					throw e; // Re-throw our custom error
+				}
+			}
 			throw new Error(`API error: ${response.status}`);
 		}
 

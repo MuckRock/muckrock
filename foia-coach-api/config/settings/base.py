@@ -138,7 +138,7 @@ GEMINI_FILE_SEARCH_STORE_NAME = os.environ.get(
 )
 GEMINI_MODEL = os.environ.get(
     'GEMINI_MODEL',
-    'gemini-2.0-flash-exp'  # Default model for testing
+    'gemini-1.5-flash'  # Default stable model with good free tier quotas
 )
 
 # MuckRock API Configuration

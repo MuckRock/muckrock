@@ -2,32 +2,19 @@
 	import { apiClient } from '$lib/api/client';
 	import { chatStore } from '$lib/stores/chat.svelte';
 	import { contextStore } from '$lib/stores/context.svelte';
-	import type { Jurisdiction } from '$lib/api/client';
+	import { jurisdictionsStore } from '$lib/stores/jurisdictions.svelte';
 
 	let question = $state('');
 	let selectedState = $state('');
-	let jurisdictions = $state<Jurisdiction[]>([]);
-	let loadingJurisdictions = $state(true);
 	let submitting = $state(false);
 	let error = $state<string | null>(null);
 
-	// Load jurisdictions on mount
+	// Load jurisdictions on mount (uses cache if available)
 	$effect(() => {
-		loadJurisdictions();
-	});
-
-	async function loadJurisdictions() {
-		try {
-			loadingJurisdictions = true;
-			error = null;
-			jurisdictions = await apiClient.getJurisdictions();
-		} catch (e) {
+		jurisdictionsStore.load().catch((e) => {
 			error = `Failed to load jurisdictions: ${e instanceof Error ? e.message : String(e)}`;
-			console.error('Error loading jurisdictions:', e);
-		} finally {
-			loadingJurisdictions = false;
-		}
-	}
+		});
+	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -95,15 +82,15 @@
 	<div class="form-row">
 		<div class="jurisdiction-selector">
 			<label for="state">State (optional):</label>
-			{#if loadingJurisdictions}
+			{#if jurisdictionsStore.loading}
 				<select id="state" disabled>
 					<option>Loading...</option>
 				</select>
 			{:else}
 				<select id="state" bind:value={selectedState} disabled={submitting}>
 					<option value="">All States</option>
-					{#each jurisdictions as jurisdiction}
-						<option value={jurisdiction.state}>{jurisdiction.name}</option>
+					{#each jurisdictionsStore.jurisdictions as jurisdiction}
+						<option value={jurisdiction.abbrev}>{jurisdiction.name}</option>
 					{/each}
 				</select>
 			{/if}
@@ -115,12 +102,15 @@
 			bind:value={question}
 			placeholder="Ask a question about public records laws..."
 			rows="3"
-			disabled={submitting || loadingJurisdictions}
+			disabled={submitting || jurisdictionsStore.loading}
 		></textarea>
 	</div>
 
 	<div class="form-row">
-		<button type="submit" disabled={submitting || loadingJurisdictions || !question.trim()}>
+		<button
+			type="submit"
+			disabled={submitting || jurisdictionsStore.loading || !question.trim()}
+		>
 			{submitting ? 'Sending...' : 'Ask Question'}
 		</button>
 	</div>

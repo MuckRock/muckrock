@@ -119,9 +119,29 @@ class QueryViewSet(viewsets.ViewSet):
             return Response(response_serializer.data)
 
         except Exception as exc:
+            # Check if this is a quota/rate limit error (429)
+            error_message = str(exc)
+            if '429' in error_message or 'RESOURCE_EXHAUSTED' in error_message:
+                # Extract retry delay if available
+                import re
+                retry_match = re.search(r'retry in ([\d.]+)s', error_message)
+                retry_after = int(float(retry_match.group(1))) if retry_match else 60
+
+                return Response(
+                    {
+                        'error': 'API quota exceeded. Please try again later.',
+                        'error_type': 'quota_exceeded',
+                        'retry_after': retry_after,
+                        'details': 'The Gemini API free tier quota has been reached. Please wait a few minutes and try again.'
+                    },
+                    status=status.HTTP_429_TOO_MANY_REQUESTS
+                )
+
+            # Other errors
             return Response(
                 {
                     'error': f'Query failed: {str(exc)}',
+                    'error_type': 'server_error',
                     'question': question,
                     'state': state
                 },
