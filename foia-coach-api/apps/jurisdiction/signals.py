@@ -10,21 +10,25 @@ import sys
 from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 # Local
-from apps.jurisdiction.models import JurisdictionResource
+from apps.jurisdiction.models import JurisdictionResource, ResourceProviderUpload
 
 logger = logging.getLogger(__name__)
 
 
-@receiver(post_save, sender=JurisdictionResource)
+@receiver(post_save, sender=ResourceProviderUpload)
 def upload_resource_to_provider(sender, instance, created, **kwargs):
-    """Automatically upload/update resource to configured RAG provider when saved"""
+    """
+    Automatically upload resource to provider when ResourceProviderUpload status is 'pending'.
+
+    This signal triggers when a ResourceProviderUpload record is created or updated
+    with index_status='pending', initiating the upload process.
+    """
     # pylint: disable=unused-argument,import-outside-toplevel,broad-exception-caught
 
     # Only upload if status is 'pending' to avoid infinite recursion
-    # The upload_resource method will update the status, which would otherwise
-    # trigger this signal again
     if instance.index_status != 'pending':
         return
 
@@ -32,62 +36,83 @@ def upload_resource_to_provider(sender, instance, created, **kwargs):
         """Perform the upload after transaction commits"""
         try:
             # Avoid circular import
-            from apps.jurisdiction.services.providers.helpers import get_provider
+            from apps.jurisdiction.services.providers.factory import RAGProviderFactory
 
-            if instance.file and instance.is_active:
-                # Get provider for this resource
-                provider = get_provider(instance.provider)
+            # Update status to 'uploading'
+            instance.index_status = 'uploading'
+            instance.save(update_fields=['index_status', 'updated_at'])
 
-                # Upload resource
-                result = provider.upload_resource(instance)
+            # Get provider and upload
+            provider = RAGProviderFactory.get_provider(instance.provider)
+            result = provider.upload_resource(instance.resource)
 
-                # Update resource with provider metadata
-                instance.provider_file_id = result.get('file_id')
-                instance.provider_store_id = result.get('store_id')
-                instance.provider_metadata = result.get('metadata', {})
+            # Update with success
+            instance.provider_file_id = result['file_id']
+            instance.provider_store_id = result['store_id']
+            instance.provider_metadata = result.get('metadata', {})
+            instance.index_status = 'ready'
+            instance.indexed_at = timezone.now()
+            instance.error_message = ''
+            instance.save()
 
-                # For backward compatibility: sync to legacy gemini_file_id
-                if instance.provider == 'gemini':
-                    instance.gemini_file_id = instance.provider_file_id
-
-                # Save is already handled by the provider.upload_resource method
-                # which updates index_status and indexed_at
+            logger.info(
+                "Successfully uploaded resource %s to %s provider",
+                instance.resource_id,
+                instance.provider
+            )
 
         except Exception as exc:
             logger.error(
-                "Error uploading resource to provider %s: %s",
+                "Failed to upload resource %s to %s: %s",
+                instance.resource_id,
                 instance.provider,
                 exc,
                 exc_info=sys.exc_info(),
             )
-            # Update status to error
-            JurisdictionResource.objects.filter(pk=instance.pk).update(
-                index_status="error"
-            )
+            instance.index_status = 'error'
+            instance.error_message = str(exc)[:1000]  # Limit error message length
+            instance.save(update_fields=['index_status', 'error_message', 'updated_at'])
 
     # Schedule upload to run after transaction commits
-    # This ensures the resource is fully saved before we try to update it
     transaction.on_commit(do_upload)
 
 
-@receiver(post_delete, sender=JurisdictionResource)
+@receiver(post_delete, sender=ResourceProviderUpload)
 def remove_resource_from_provider(sender, instance, **kwargs):
-    """Remove resource from configured RAG provider when deleted"""
+    """
+    Remove resource from provider when ResourceProviderUpload is deleted.
+
+    This signal handles cleanup when an upload record is explicitly deleted,
+    removing the resource from the provider's file store.
+    """
     # pylint: disable=unused-argument,import-outside-toplevel,broad-exception-caught
-    try:
-        # Avoid circular import
-        from apps.jurisdiction.services.providers.helpers import get_provider
 
-        # Only try to remove if we have a provider_file_id
-        # (or legacy gemini_file_id for backward compatibility)
-        if instance.provider_file_id or instance.gemini_file_id:
-            provider = get_provider(instance.provider)
-            provider.remove_resource(instance)
+    # Only try to remove if the upload was successful and we have a file ID
+    if not instance.provider_file_id or instance.index_status != 'ready':
+        return
 
-    except Exception as exc:
-        logger.error(
-            "Error removing resource from provider %s: %s",
-            instance.provider,
-            exc,
-            exc_info=sys.exc_info(),
-        )
+    def do_remove():
+        """Perform the removal after transaction commits"""
+        try:
+            # Avoid circular import
+            from apps.jurisdiction.services.providers.factory import RAGProviderFactory
+
+            provider = RAGProviderFactory.get_provider(instance.provider)
+            provider.remove_resource(instance.resource, instance.provider_file_id)
+
+            logger.info(
+                "Successfully removed resource %s from %s provider",
+                instance.resource_id,
+                instance.provider
+            )
+
+        except Exception as exc:
+            logger.error(
+                "Failed to remove resource from %s: %s",
+                instance.provider,
+                exc,
+                exc_info=sys.exc_info(),
+            )
+
+    # Schedule removal to run after transaction commits
+    transaction.on_commit(do_remove)

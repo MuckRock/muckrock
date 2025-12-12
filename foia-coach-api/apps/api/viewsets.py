@@ -9,7 +9,11 @@ from rest_framework.filters import OrderingFilter
 
 from apps.jurisdiction.models import JurisdictionResource
 from apps.jurisdiction.services.muckrock_client import MuckRockAPIClient
-from apps.jurisdiction.services.providers.helpers import get_provider, list_available_providers
+from apps.jurisdiction.services.providers.helpers import (
+    get_provider,
+    list_available_providers,
+    query_with_fallback
+)
 from .serializers import (
     JurisdictionSerializer,
     JurisdictionResourceSerializer,
@@ -138,10 +142,11 @@ class QueryViewSet(viewsets.ViewSet):
         model = serializer.validated_data.get('model')
 
         try:
-            provider = get_provider(provider_name)
-            result = provider.query(
+            # Use query_with_fallback for automatic provider fallback
+            result = query_with_fallback(
                 question=question,
                 state=state,
+                provider_name=provider_name,
                 context=context,
                 model=model
             )

@@ -23,22 +23,25 @@ def disconnect_provider_signals():
     """
     Disconnect signal handlers that trigger provider uploads.
     Prevents automatic API calls when test models are created.
+
+    Note: Signals are now attached to ResourceProviderUpload model,
+    not JurisdictionResource.
     """
-    from apps.jurisdiction.models import JurisdictionResource
+    from apps.jurisdiction.models import ResourceProviderUpload
     from apps.jurisdiction.signals import (
         upload_resource_to_provider,
         remove_resource_from_provider
     )
 
     # Disconnect signals
-    post_save.disconnect(upload_resource_to_provider, sender=JurisdictionResource)
-    post_delete.disconnect(remove_resource_from_provider, sender=JurisdictionResource)
+    post_save.disconnect(upload_resource_to_provider, sender=ResourceProviderUpload)
+    post_delete.disconnect(remove_resource_from_provider, sender=ResourceProviderUpload)
 
     yield
 
     # Reconnect signals after test
-    post_save.connect(upload_resource_to_provider, sender=JurisdictionResource)
-    post_delete.connect(remove_resource_from_provider, sender=JurisdictionResource)
+    post_save.connect(upload_resource_to_provider, sender=ResourceProviderUpload)
+    post_delete.connect(remove_resource_from_provider, sender=ResourceProviderUpload)
 
 
 @pytest.fixture

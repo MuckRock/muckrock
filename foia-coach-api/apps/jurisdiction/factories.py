@@ -1,13 +1,16 @@
 """
 Factory classes for testing jurisdiction models
 """
+# Standard Library
+import uuid
+
 # Third Party
 import factory
 from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 
 # Local
-from apps.jurisdiction.models import JurisdictionResource
+from apps.jurisdiction.models import JurisdictionResource, ResourceProviderUpload
 
 
 class JurisdictionResourceFactory(DjangoModelFactory):
@@ -39,6 +42,26 @@ class JurisdictionResourceFactory(DjangoModelFactory):
         'general'
     ])
 
-    index_status = 'pending'
     is_active = True
     order = factory.Sequence(lambda n: n)
+
+
+class ResourceProviderUploadFactory(DjangoModelFactory):
+    """Factory for creating ResourceProviderUpload test instances"""
+
+    class Meta:
+        model = ResourceProviderUpload
+
+    resource = factory.SubFactory(JurisdictionResourceFactory)
+    provider = factory.Iterator(['openai', 'gemini', 'mock'])
+
+    provider_file_id = factory.LazyAttribute(
+        lambda obj: f'{obj.provider}-file-{uuid.uuid4()}'
+    )
+    provider_store_id = factory.LazyAttribute(
+        lambda obj: f'{obj.provider}-store-{uuid.uuid4()}'
+    )
+    provider_metadata = factory.Dict({'uploaded': True})
+
+    index_status = 'pending'
+    error_message = ''

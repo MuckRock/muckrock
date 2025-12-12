@@ -165,3 +165,142 @@ def validate_provider_config(provider_name: Optional[str] = None) -> tuple[bool,
     except Exception as exc:
         logger.error(f"Unexpected error validating provider: {exc}", exc_info=True)
         return False, f"Unexpected error: {exc}"
+
+
+def query_with_fallback(
+    question: str,
+    state: Optional[str] = None,
+    provider_name: Optional[str] = None,
+    context: Optional[dict] = None,
+    model: Optional[str] = None
+) -> dict:
+    """
+    Execute a RAG query with automatic provider fallback.
+
+    If the requested provider doesn't have resources uploaded for the state,
+    automatically falls back to another provider that does. This enables
+    seamless multi-provider support while maintaining the user's preferred
+    provider as the default.
+
+    Args:
+        question: The question to query
+        state: Optional state abbreviation filter (e.g., 'CO', 'GA')
+        provider_name: Preferred provider (defaults to RAG_PROVIDER setting)
+        context: Optional additional context dict
+        model: Optional model selection
+
+    Returns:
+        Query result dict with these keys:
+        - answer: The answer text
+        - citations: List of citation dicts
+        - provider: The actual provider used
+        - model: The model used
+        - state: The state filter (if provided)
+        - fallback_used: Boolean indicating if fallback occurred
+        - requested_provider: The originally requested provider (if fallback occurred)
+        - actual_provider: The provider actually used (if fallback occurred)
+
+    Raises:
+        RuntimeError: If no provider has resources available for the query
+
+    Example:
+        >>> result = query_with_fallback(
+        ...     "What is the response time?",
+        ...     state="CO",
+        ...     provider_name="openai"
+        ... )
+        >>> print(result['answer'])
+        >>> if result['fallback_used']:
+        ...     print(f"Fell back from {result['requested_provider']} "
+        ...           f"to {result['actual_provider']}")
+    """
+    from apps.jurisdiction.models import ResourceProviderUpload
+
+    # Determine primary provider
+    primary_provider = provider_name or getattr(settings, 'RAG_PROVIDER', 'openai')
+
+    logger.info(
+        f"Query with fallback: question='{question[:50]}...', "
+        f"state={state}, primary_provider={primary_provider}"
+    )
+
+    # Check if primary provider has resources for this query
+    if state:
+        has_resources = ResourceProviderUpload.objects.filter(
+            resource__jurisdiction_abbrev=state,
+            resource__is_active=True,
+            provider=primary_provider,
+            index_status='ready'
+        ).exists()
+    else:
+        has_resources = ResourceProviderUpload.objects.filter(
+            resource__is_active=True,
+            provider=primary_provider,
+            index_status='ready'
+        ).exists()
+
+    # Try primary provider first
+    if has_resources:
+        try:
+            logger.info(f"Querying primary provider: {primary_provider}")
+            provider = get_provider(primary_provider)
+            result = provider.query(question, state, context, model)
+            result['fallback_used'] = False
+            result['requested_provider'] = primary_provider
+            return result
+        except Exception as exc:
+            # Log error but continue to fallback
+            logger.warning(
+                f"Primary provider {primary_provider} failed: {exc}. "
+                "Attempting fallback..."
+            )
+
+    # Fallback: find another provider with resources
+    logger.info(f"Primary provider {primary_provider} unavailable, attempting fallback")
+    fallback_providers = ['openai', 'gemini', 'mock']
+
+    # Remove primary provider from fallback list
+    if primary_provider in fallback_providers:
+        fallback_providers.remove(primary_provider)
+
+    for fallback in fallback_providers:
+        # Check if this fallback provider has resources
+        if state:
+            has_resources = ResourceProviderUpload.objects.filter(
+                resource__jurisdiction_abbrev=state,
+                resource__is_active=True,
+                provider=fallback,
+                index_status='ready'
+            ).exists()
+        else:
+            has_resources = ResourceProviderUpload.objects.filter(
+                resource__is_active=True,
+                provider=fallback,
+                index_status='ready'
+            ).exists()
+
+        if has_resources:
+            try:
+                logger.info(f"Trying fallback provider: {fallback}")
+                provider = get_provider(fallback)
+                result = provider.query(question, state, context, model)
+                result['fallback_used'] = True
+                result['requested_provider'] = primary_provider
+                result['actual_provider'] = fallback
+                logger.info(
+                    f"Successfully used fallback provider {fallback} "
+                    f"(requested: {primary_provider})"
+                )
+                return result
+            except Exception as exc:
+                logger.warning(f"Fallback provider {fallback} failed: {exc}")
+                continue
+
+    # No provider has resources available
+    state_msg = f"state '{state}'" if state else "all states"
+    error_msg = (
+        f"No resources available for {state_msg} across any provider. "
+        f"Requested provider: {primary_provider}"
+    )
+    logger.error(error_msg)
+    raise RuntimeError(error_msg)
