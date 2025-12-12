@@ -247,9 +247,7 @@ NEVER:
             import os
             file_ext = os.path.splitext(file_name)[1] or '.txt'
 
-            # Update status to uploading
-            resource.index_status = 'uploading'
-            resource.save(update_fields=['index_status'])
+            # Note: Status is now managed by the signal handler, not here
 
             # Track API request for upload
             self._track_request()
@@ -303,10 +301,12 @@ NEVER:
             # Extract the document name/ID from the response
             # Response has document_name attribute
             file_id = file_ref.document_name if hasattr(file_ref, 'document_name') else file_ref.name
+
+            # Update legacy gemini_file_id field for backward compatibility
             resource.gemini_file_id = file_id
-            resource.index_status = 'ready'
-            resource.indexed_at = timezone.now()
-            resource.save(update_fields=['gemini_file_id', 'index_status', 'indexed_at'])
+            resource.save(update_fields=['gemini_file_id'])
+
+            # Note: index_status and indexed_at are now managed by the signal handler
 
             logger.info(
                 f"Uploaded resource {resource.id} to File Search store: {file_id}"
@@ -320,8 +320,7 @@ NEVER:
                 exc,
                 exc_info=sys.exc_info(),
             )
-            resource.index_status = 'error'
-            resource.save(update_fields=['index_status'])
+            # Note: index_status is now managed by the signal handler, not here
             raise
 
     def remove_resource(self, resource) -> None:

@@ -226,12 +226,29 @@ def query_with_fallback(
 
     # Check if primary provider has resources for this query
     if state:
-        has_resources = ResourceProviderUpload.objects.filter(
-            resource__jurisdiction_abbrev=state,
-            resource__is_active=True,
-            provider=primary_provider,
-            index_status='ready'
-        ).exists()
+        query_filter = {
+            'resource__jurisdiction_abbrev': state,
+            'resource__is_active': True,
+            'provider': primary_provider,
+            'index_status': 'ready'
+        }
+        has_resources = ResourceProviderUpload.objects.filter(**query_filter).exists()
+
+        # Debug logging
+        if not has_resources:
+            total_uploads = ResourceProviderUpload.objects.filter(
+                resource__jurisdiction_abbrev=state,
+                provider=primary_provider
+            ).count()
+            ready_uploads = ResourceProviderUpload.objects.filter(
+                resource__jurisdiction_abbrev=state,
+                provider=primary_provider,
+                index_status='ready'
+            ).count()
+            logger.warning(
+                f"No ready resources for state={state}, provider={primary_provider}. "
+                f"Total uploads for state: {total_uploads}, Ready: {ready_uploads}"
+            )
     else:
         has_resources = ResourceProviderUpload.objects.filter(
             resource__is_active=True,

@@ -92,10 +92,7 @@ class MockProvider(RAGProviderBase):
             'store_id': store_id,
         }
 
-        # Update resource status
-        resource.index_status = 'ready'
-        resource.indexed_at = None  # Would be set by real provider
-        resource.save(update_fields=['index_status', 'indexed_at'])
+        # Note: Status is managed by the signal handler, not here
 
         logger.info(f"Mock: Uploaded resource {resource.id} as {file_id}")
 
@@ -109,23 +106,30 @@ class MockProvider(RAGProviderBase):
             }
         }
 
-    def remove_resource(self, resource) -> None:
-        """Remove a mock resource"""
+    def remove_resource(self, resource, file_id: str = None) -> None:
+        """
+        Remove a mock resource.
+
+        Args:
+            resource: The JurisdictionResource being removed
+            file_id: The provider-specific file ID to remove (from ResourceProviderUpload)
+        """
         if self.should_fail:
             raise ProviderConfigError(self.fail_message)
 
-        file_id = resource.provider_file_id or resource.gemini_file_id
+        # Use provided file_id or fall back to legacy fields (for backward compatibility)
+        file_to_delete = file_id or getattr(resource, 'provider_file_id', None) or resource.gemini_file_id
 
-        if not file_id:
+        if not file_to_delete:
             logger.warning(f"Mock: Resource {resource.id} has no file_id, skipping")
             return
 
         # Remove from internal state
-        if file_id in self._files:
-            del self._files[file_id]
-            logger.info(f"Mock: Removed resource {resource.id} file {file_id}")
+        if file_to_delete in self._files:
+            del self._files[file_to_delete]
+            logger.info(f"Mock: Removed resource {resource.id} file {file_to_delete}")
         else:
-            logger.warning(f"Mock: File {file_id} not found in mock state")
+            logger.warning(f"Mock: File {file_to_delete} not found in mock state")
 
     def query(
         self,

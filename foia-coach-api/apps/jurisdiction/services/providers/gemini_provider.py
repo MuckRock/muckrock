@@ -94,9 +94,7 @@ class GeminiProvider(RAGProviderBase):
         self._check_api_enabled()
 
         try:
-            # Update status
-            resource.index_status = 'uploading'
-            resource.save(update_fields=['index_status'])
+            # Note: Status is managed by the signal handler, not here
 
             # Upload using the wrapped service
             file_id = self.service.upload_resource(resource)
@@ -124,26 +122,41 @@ class GeminiProvider(RAGProviderBase):
                 exc,
                 exc_info=sys.exc_info()
             )
-            resource.index_status = 'error'
-            resource.save(update_fields=['index_status'])
+            # Note: Don't update status here - the signal handler manages status
             raise ProviderAPIError(f"Failed to upload resource: {exc}")
 
-    def remove_resource(self, resource) -> None:
-        """Remove a resource from File Search store"""
+    def remove_resource(self, resource, file_id: str = None) -> None:
+        """
+        Remove a resource from File Search store.
+
+        Args:
+            resource: The JurisdictionResource being removed
+            file_id: The provider-specific file ID to remove (from ResourceProviderUpload)
+        """
         self._check_api_enabled()
 
         try:
-            # Check for provider_file_id (new field) or gemini_file_id (legacy)
-            file_id = getattr(resource, 'provider_file_id', None) or resource.gemini_file_id
+            # Use provided file_id or fall back to legacy fields (for backward compatibility)
+            file_to_delete = file_id or getattr(resource, 'provider_file_id', None) or resource.gemini_file_id
 
-            if not file_id:
+            if not file_to_delete:
                 logger.warning(
                     f"Resource {resource.id} has no file_id, skipping removal"
                 )
                 return
 
             # Remove using the wrapped service
+            # Note: The service expects the resource to have gemini_file_id set
+            # so we temporarily set it if needed
+            original_gemini_id = resource.gemini_file_id
+            if not resource.gemini_file_id and file_to_delete:
+                resource.gemini_file_id = file_to_delete
+
             self.service.remove_resource(resource)
+
+            # Restore original value
+            resource.gemini_file_id = original_gemini_id
+
             logger.info(f"Removed resource {resource.id} from Gemini File Search store")
 
         except Exception as exc:

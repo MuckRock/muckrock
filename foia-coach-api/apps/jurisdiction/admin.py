@@ -4,10 +4,15 @@ from .models import JurisdictionResource, ResourceProviderUpload
 
 
 class ResourceProviderUploadInline(admin.TabularInline):
-    """Inline admin for ResourceProviderUpload model."""
+    """
+    Inline admin for ResourceProviderUpload model.
+
+    Adding a new provider here will automatically trigger an upload
+    (status defaults to 'pending' which triggers the upload signal).
+    """
 
     model = ResourceProviderUpload
-    extra = 0
+    extra = 0  # Don't show blank forms by default
     readonly_fields = [
         'provider_file_id',
         'provider_store_id',
@@ -24,6 +29,8 @@ class ResourceProviderUploadInline(admin.TabularInline):
         'error_message'
     ]
     can_delete = True
+    verbose_name = "Provider Upload"
+    verbose_name_plural = "Provider Uploads"
 
     def has_add_permission(self, request, obj=None):
         """Allow manual creation of upload records."""

@@ -38,22 +38,26 @@ def upload_resource_to_provider(sender, instance, created, **kwargs):
             # Avoid circular import
             from apps.jurisdiction.services.providers.factory import RAGProviderFactory
 
-            # Update status to 'uploading'
-            instance.index_status = 'uploading'
-            instance.save(update_fields=['index_status', 'updated_at'])
+            # Update status to 'uploading' using QuerySet.update() to avoid triggering signals
+            ResourceProviderUpload.objects.filter(pk=instance.pk).update(
+                index_status='uploading',
+                updated_at=timezone.now()
+            )
 
             # Get provider and upload
             provider = RAGProviderFactory.get_provider(instance.provider)
             result = provider.upload_resource(instance.resource)
 
-            # Update with success
-            instance.provider_file_id = result['file_id']
-            instance.provider_store_id = result['store_id']
-            instance.provider_metadata = result.get('metadata', {})
-            instance.index_status = 'ready'
-            instance.indexed_at = timezone.now()
-            instance.error_message = ''
-            instance.save()
+            # Update with success using QuerySet.update() to avoid triggering signals
+            ResourceProviderUpload.objects.filter(pk=instance.pk).update(
+                provider_file_id=result['file_id'],
+                provider_store_id=result['store_id'],
+                provider_metadata=result.get('metadata', {}),
+                index_status='ready',
+                indexed_at=timezone.now(),
+                error_message='',
+                updated_at=timezone.now()
+            )
 
             logger.info(
                 "Successfully uploaded resource %s to %s provider",
@@ -69,9 +73,12 @@ def upload_resource_to_provider(sender, instance, created, **kwargs):
                 exc,
                 exc_info=sys.exc_info(),
             )
-            instance.index_status = 'error'
-            instance.error_message = str(exc)[:1000]  # Limit error message length
-            instance.save(update_fields=['index_status', 'error_message', 'updated_at'])
+            # Update error status using QuerySet.update() to avoid triggering signals
+            ResourceProviderUpload.objects.filter(pk=instance.pk).update(
+                index_status='error',
+                error_message=str(exc)[:1000],
+                updated_at=timezone.now()
+            )
 
     # Schedule upload to run after transaction commits
     transaction.on_commit(do_upload)

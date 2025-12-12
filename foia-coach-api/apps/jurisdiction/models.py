@@ -56,8 +56,8 @@ class ResourceProviderUpload(models.Model):
             ('ready', 'Ready'),
             ('error', 'Error')
         ],
-        default='not_uploaded',
-        help_text='Upload and indexing status'
+        default='pending',
+        help_text='Upload and indexing status (defaults to pending to trigger automatic upload)'
     )
     error_message = models.TextField(
         blank=True,

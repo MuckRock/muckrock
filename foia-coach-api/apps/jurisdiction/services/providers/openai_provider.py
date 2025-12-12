@@ -108,9 +108,7 @@ class OpenAIProvider(RAGProviderBase):
             # Get or create vector store
             store_id = self.get_or_create_store()
 
-            # Update status
-            resource.index_status = 'uploading'
-            resource.save(update_fields=['index_status'])
+            # Note: Status is managed by the signal handler, not here
 
             # Upload file to OpenAI
             # Try to use path if available
@@ -171,8 +169,16 @@ class OpenAIProvider(RAGProviderBase):
                 time.sleep(2)
                 elapsed += 2
 
+            # Check if we timed out
+            if elapsed >= max_wait and vector_store_file.status != 'completed':
+                logger.warning(
+                    f"File {file_obj.id} processing timeout after {max_wait}s "
+                    f"(status: {vector_store_file.status}). Continuing anyway."
+                )
+
             logger.info(
-                f"Uploaded resource {resource.id} to vector store: {file_obj.id}"
+                f"Uploaded resource {resource.id} to vector store: {file_obj.id} "
+                f"(status: {vector_store_file.status})"
             )
 
             return {
@@ -192,24 +198,32 @@ class OpenAIProvider(RAGProviderBase):
                 exc,
                 exc_info=sys.exc_info()
             )
-            resource.index_status = 'error'
-            resource.save(update_fields=['index_status'])
+            # Note: Don't update status here - the signal handler manages status
             raise ProviderAPIError(f"Failed to upload resource: {exc}")
 
-    def remove_resource(self, resource) -> None:
-        """Remove a resource from vector store"""
+    def remove_resource(self, resource, file_id: str = None) -> None:
+        """
+        Remove a resource from vector store.
+
+        Args:
+            resource: The JurisdictionResource being removed
+            file_id: The provider-specific file ID to remove (from ResourceProviderUpload)
+        """
         self._check_api_enabled()
 
         try:
-            if not resource.provider_file_id:
+            # Use provided file_id or fall back to legacy field (for backward compatibility)
+            file_to_delete = file_id or getattr(resource, 'provider_file_id', None)
+
+            if not file_to_delete:
                 logger.warning(
-                    f"Resource {resource.id} has no provider_file_id, skipping"
+                    f"Resource {resource.id} has no file_id to delete, skipping"
                 )
                 return
 
             # Delete file from OpenAI
-            self.client.files.delete(resource.provider_file_id)
-            logger.info(f"Removed resource {resource.id} file: {resource.provider_file_id}")
+            self.client.files.delete(file_to_delete)
+            logger.info(f"Removed resource {resource.id} file: {file_to_delete}")
 
         except Exception as exc:
             logger.error(
