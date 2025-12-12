@@ -146,6 +146,25 @@ GEMINI_MODEL = os.environ.get(
 # This prevents accidental API usage during development and testing
 GEMINI_REAL_API_ENABLED = os.environ.get('GEMINI_REAL_API_ENABLED', 'false').lower() in ('true', '1', 'yes')
 
+# OpenAI API Configuration
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+OPENAI_VECTOR_STORE_NAME = os.environ.get(
+    'OPENAI_VECTOR_STORE_NAME',
+    'StatePublicRecordsStore'
+)
+OPENAI_MODEL = os.environ.get(
+    'OPENAI_MODEL',
+    'gpt-4.1'  # Latest model with Responses API support
+)
+
+# Safety flag: Disable real OpenAI API calls by default in development
+OPENAI_REAL_API_ENABLED = os.environ.get(
+    'OPENAI_REAL_API_ENABLED', 'false'
+).lower() in ('true', '1', 'yes')
+
+# Default RAG provider
+RAG_PROVIDER = os.environ.get('RAG_PROVIDER', 'openai')
+
 # MuckRock API Configuration
 MUCKROCK_API_URL = os.environ.get(
     'MUCKROCK_API_URL',

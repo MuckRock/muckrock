@@ -5,6 +5,9 @@ psycopg2-binary
 # Google Gemini (latest without conflicts!)
 google-genai>=1.49.0
 
+# OpenAI
+openai>=1.54.0
+
 # Django REST Framework
 djangorestframework
 django-filter
