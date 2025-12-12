@@ -27,8 +27,8 @@ class TestGeminiFileSearchService(TestCase):
         """Set up test fixtures"""
         # Disconnect the signal to prevent automatic uploads during tests
         from django.db.models.signals import post_save
-        from apps.jurisdiction.signals import upload_resource_to_gemini
-        post_save.disconnect(upload_resource_to_gemini, sender=JurisdictionResource)
+        from apps.jurisdiction.signals import upload_resource_to_provider
+        post_save.disconnect(upload_resource_to_provider, sender=JurisdictionResource)
 
         # Create a test file
         test_content = b"Colorado Public Records Act guide content..."
@@ -42,8 +42,8 @@ class TestGeminiFileSearchService(TestCase):
         """Clean up after tests"""
         # Reconnect the signal after tests
         from django.db.models.signals import post_save
-        from apps.jurisdiction.signals import upload_resource_to_gemini
-        post_save.connect(upload_resource_to_gemini, sender=JurisdictionResource)
+        from apps.jurisdiction.signals import upload_resource_to_provider
+        post_save.connect(upload_resource_to_provider, sender=JurisdictionResource)
 
     @patch('apps.jurisdiction.services.gemini_service.genai.Client')
     def test_service_initialization(self, mock_client):

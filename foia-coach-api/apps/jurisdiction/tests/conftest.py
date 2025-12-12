@@ -13,37 +13,32 @@ def enable_db_access_for_all_tests(db):
     pass
 
 
-@pytest.fixture(autouse=True)
-def disable_real_gemini_api_calls():
-    """
-    Disable real Gemini API calls for all tests.
-    This is a critical safety measure to prevent tests from consuming API quota.
-    """
-    with override_settings(GEMINI_REAL_API_ENABLED=False):
-        yield
+# Note: Real API calls are disabled by default in config/settings/test.py
+# Individual tests can override settings if needed for testing specific scenarios
+# (e.g., testing with mocked API clients)
 
 
 @pytest.fixture(autouse=True)
-def disconnect_gemini_signals():
+def disconnect_provider_signals():
     """
-    Disconnect signal handlers that trigger Gemini uploads.
+    Disconnect signal handlers that trigger provider uploads.
     Prevents automatic API calls when test models are created.
     """
     from apps.jurisdiction.models import JurisdictionResource
     from apps.jurisdiction.signals import (
-        upload_resource_to_gemini,
-        remove_resource_from_gemini
+        upload_resource_to_provider,
+        remove_resource_from_provider
     )
 
     # Disconnect signals
-    post_save.disconnect(upload_resource_to_gemini, sender=JurisdictionResource)
-    post_delete.disconnect(remove_resource_from_gemini, sender=JurisdictionResource)
+    post_save.disconnect(upload_resource_to_provider, sender=JurisdictionResource)
+    post_delete.disconnect(remove_resource_from_provider, sender=JurisdictionResource)
 
     yield
 
     # Reconnect signals after test
-    post_save.connect(upload_resource_to_gemini, sender=JurisdictionResource)
-    post_delete.connect(remove_resource_from_gemini, sender=JurisdictionResource)
+    post_save.connect(upload_resource_to_provider, sender=JurisdictionResource)
+    post_delete.connect(remove_resource_from_provider, sender=JurisdictionResource)
 
 
 @pytest.fixture
