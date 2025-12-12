@@ -1,20 +1,21 @@
 """
-Management command to sync all pending resources to Gemini
+Management command to sync all pending resources to RAG provider
 """
 
 # Django
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 # Standard Library
 import sys
 
 # Local
 from apps.jurisdiction.models import JurisdictionResource
-from apps.jurisdiction.services.gemini_service import GeminiFileSearchService
+from apps.jurisdiction.services.providers.helpers import get_provider
 
 
 class Command(BaseCommand):
-    help = "Sync all pending jurisdiction resources to Gemini"
+    help = "Sync all pending jurisdiction resources to RAG provider"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -27,12 +28,22 @@ class Command(BaseCommand):
             type=str,
             help="Sync only resources for a specific state (e.g., CO, GA, TN)",
         )
+        parser.add_argument(
+            "--provider",
+            type=str,
+            help=f"RAG provider to use (default: {settings.RAG_PROVIDER})",
+        )
 
     def handle(self, *args, **options):
         sync_all = options.get("all", False)
         state_filter = options.get("state")
+        provider_name = options.get("provider")
 
         try:
+            provider = get_provider(provider_name)
+
+            self.stdout.write(f"Using provider: {provider.PROVIDER_NAME}")
+
             # Build queryset
             queryset = JurisdictionResource.objects.filter(is_active=True)
 
@@ -55,11 +66,10 @@ class Command(BaseCommand):
                 return
 
             self.stdout.write(
-                f"Syncing {total_count} resource(s) to Gemini..."
+                f"Syncing {total_count} resource(s) to {provider.PROVIDER_NAME}..."
             )
 
             # Sync each resource
-            service = GeminiFileSearchService()
             success_count = 0
             error_count = 0
 
@@ -71,7 +81,7 @@ class Command(BaseCommand):
                         ending=""
                     )
 
-                    service.upload_resource(resource)
+                    provider.upload_resource(resource)
                     success_count += 1
 
                     self.stdout.write(self.style.SUCCESS("✓"))

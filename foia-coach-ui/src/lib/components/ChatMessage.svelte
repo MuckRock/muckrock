@@ -26,6 +26,11 @@
 		{#if message.state}
 			<span class="state-badge">{message.state}</span>
 		{/if}
+		{#if message.provider}
+			<span class="provider-badge" title="{message.model || message.provider}">
+				{message.provider}
+			</span>
+		{/if}
 	</div>
 
 	<div class="message-content">
@@ -38,8 +43,15 @@
 			<ul>
 				{#each message.citations as citation}
 					<li>
-						<strong>{citation.source}</strong>
-						<p>{citation.content}</p>
+						<strong>{citation.display_name || citation.source}</strong>
+						{#if citation.jurisdiction_abbrev}
+							<span class="cite-state">{citation.jurisdiction_abbrev}</span>
+						{/if}
+						{#if citation.content}
+							<p>{citation.content}</p>
+						{:else}
+							<p class="cite-source">{citation.source}</p>
+						{/if}
 					</li>
 				{/each}
 			</ul>
@@ -86,6 +98,29 @@
 		background: #fff3cd;
 		border-radius: 4px;
 		font-size: 0.75rem;
+	}
+
+	.provider-badge {
+		padding: 0.125rem 0.5rem;
+		background: #e3f2fd;
+		border-radius: 4px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		cursor: help;
+	}
+
+	.cite-state {
+		display: inline-block;
+		padding: 0.125rem 0.375rem;
+		background: #2196f3;
+		color: white;
+		border-radius: 3px;
+		font-size: 0.7rem;
+		margin-left: 0.5rem;
+	}
+
+	.cite-source {
+		font-style: italic;
 	}
 
 	.message-content {

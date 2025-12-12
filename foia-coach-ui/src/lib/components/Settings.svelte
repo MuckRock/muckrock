@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { settingsStore } from '$lib/stores/settings.svelte';
 	import { apiClient } from '$lib/api/client';
+	import { goto } from '$app/navigation';
 
 	let testing = $state(false);
 	let testResult = $state<string | null>(null);
@@ -22,7 +23,7 @@
 	function handleSubmit(event: Event) {
 		event.preventDefault();
 		settingsStore.save();
-		alert('Settings saved!');
+		goto('/');
 	}
 
 	function handleReset() {
@@ -57,15 +58,37 @@
 	</div>
 
 	<div class="field">
-		<label for="geminiModel">Gemini Model</label>
+		<label for="provider">AI Provider</label>
+		<select
+			id="provider"
+			bind:value={settingsStore.settings.provider}
+			required
+		>
+			<option value="openai">OpenAI</option>
+			<option value="gemini">Google Gemini</option>
+			<option value="mock">Mock (Testing)</option>
+		</select>
+		<small>Select which AI provider to use for queries</small>
+	</div>
+
+	<div class="field">
+		<label for="model">Model</label>
 		<input
-			id="geminiModel"
+			id="model"
 			type="text"
-			bind:value={settingsStore.settings.geminiModel}
-			placeholder="gemini-2.0-flash-001"
+			bind:value={settingsStore.settings.model}
+			placeholder={settingsStore.settings.provider === 'openai' ? 'gpt-4o' : 'gemini-2.0-flash-001'}
 			required
 		/>
-		<small>Gemini model identifier (backend configuration)</small>
+		<small>
+			{#if settingsStore.settings.provider === 'openai'}
+				OpenAI model (e.g., gpt-4o, gpt-4o-mini)
+			{:else if settingsStore.settings.provider === 'gemini'}
+				Gemini model (e.g., gemini-2.0-flash-001, gemini-1.5-pro)
+			{:else}
+				Model identifier
+			{/if}
+		</small>
 	</div>
 
 	<div class="actions">
@@ -98,7 +121,8 @@
 		margin-bottom: 0.5rem;
 	}
 
-	input {
+	input,
+	select {
 		width: 100%;
 		padding: 0.5rem;
 		border: 1px solid #ccc;

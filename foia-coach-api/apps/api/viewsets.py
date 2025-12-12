@@ -9,7 +9,7 @@ from rest_framework.filters import OrderingFilter
 
 from apps.jurisdiction.models import JurisdictionResource
 from apps.jurisdiction.services.muckrock_client import MuckRockAPIClient
-from apps.jurisdiction.services.gemini_service import GeminiFileSearchService
+from apps.jurisdiction.services.providers.helpers import get_provider, list_available_providers
 from .serializers import (
     JurisdictionSerializer,
     JurisdictionResourceSerializer,
@@ -88,24 +88,30 @@ class QueryViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def status(self, request):
         """
-        Check Gemini API status and configuration.
+        Check RAG provider status and configuration.
 
-        Returns information about whether the API is enabled and ready to use.
+        Returns information about available providers and their status.
         """
         from django.conf import settings
 
-        api_enabled = getattr(settings, 'GEMINI_REAL_API_ENABLED', False)
+        available_providers = list_available_providers()
+        current_provider = getattr(settings, 'RAG_PROVIDER', 'openai')
+
+        # Check API enabled flags
+        openai_enabled = getattr(settings, 'OPENAI_REAL_API_ENABLED', False)
+        gemini_enabled = getattr(settings, 'GEMINI_REAL_API_ENABLED', False)
 
         return Response({
-            'gemini_api_enabled': api_enabled,
-            'status': 'ready' if api_enabled else 'disabled',
-            'message': (
-                'Gemini API is enabled and ready to accept queries.'
-                if api_enabled else
-                'Gemini API is currently disabled for safety. '
-                'Set GEMINI_REAL_API_ENABLED=true to enable.'
-            ),
-            'documentation': 'README_GEMINI_SAFETY.md'
+            'current_provider': current_provider,
+            'available_providers': available_providers,
+            'api_status': {
+                'openai': 'enabled' if openai_enabled else 'disabled',
+                'gemini': 'enabled' if gemini_enabled else 'disabled',
+                'mock': 'always_enabled'
+            },
+            'status': 'ready',
+            'message': f'Using {current_provider} provider. Set RAG_PROVIDER environment variable to change provider.',
+            'documentation': 'See README for provider configuration details'
         })
 
     @action(detail=False, methods=['post'])
@@ -117,8 +123,9 @@ class QueryViewSet(viewsets.ViewSet):
         {
             "question": "What is the response time in Colorado?",
             "state": "CO",  # optional
+            "provider": "openai",  # optional, defaults to RAG_PROVIDER setting
             "context": {},  # optional additional context
-            "model": "gemini-2.0-flash-live"  # optional model selection
+            "model": "gpt-4o"  # optional model selection
         }
         """
         serializer = QueryRequestSerializer(data=request.data)
@@ -126,12 +133,13 @@ class QueryViewSet(viewsets.ViewSet):
 
         question = serializer.validated_data['question']
         state = serializer.validated_data.get('state')
+        provider_name = serializer.validated_data.get('provider')
         context = serializer.validated_data.get('context')
         model = serializer.validated_data.get('model')
 
         try:
-            service = GeminiFileSearchService()
-            result = service.query(
+            provider = get_provider(provider_name)
+            result = provider.query(
                 question=question,
                 state=state,
                 context=context,
@@ -144,17 +152,17 @@ class QueryViewSet(viewsets.ViewSet):
         except RuntimeError as exc:
             # Check if this is the API disabled error
             error_message = str(exc)
-            if 'Gemini API calls are disabled' in error_message:
+            if 'API calls are disabled' in error_message:
                 return Response(
                     {
-                        'error': 'Gemini API is currently disabled',
+                        'error': f'{provider_name} API is currently disabled',
                         'error_type': 'api_disabled',
                         'details': (
-                            'Real Gemini API calls are disabled for safety. '
-                            'To enable: Set GEMINI_REAL_API_ENABLED=true in environment variables '
+                            f'Real {provider_name} API calls are disabled for safety. '
+                            f'To enable: Set {provider_name.upper()}_REAL_API_ENABLED=true in environment variables '
                             'and restart the service.'
                         ),
-                        'documentation': 'See README_GEMINI_SAFETY.md for details'
+                        'documentation': 'See README for provider configuration details'
                     },
                     status=status.HTTP_503_SERVICE_UNAVAILABLE
                 )
@@ -175,7 +183,7 @@ class QueryViewSet(viewsets.ViewSet):
                         'error': 'API quota exceeded. Please try again later.',
                         'error_type': 'quota_exceeded',
                         'retry_after': retry_after,
-                        'details': 'The Gemini API free tier quota has been reached. Please wait a few minutes and try again.'
+                        'details': 'The API free tier quota has been reached. Please wait a few minutes and try again.'
                     },
                     status=status.HTTP_429_TOO_MANY_REQUESTS
                 )
@@ -186,7 +194,8 @@ class QueryViewSet(viewsets.ViewSet):
                     'error': f'Query failed: {str(exc)}',
                     'error_type': 'server_error',
                     'question': question,
-                    'state': state
+                    'state': state,
+                    'provider': provider_name
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

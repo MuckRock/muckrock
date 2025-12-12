@@ -46,6 +46,7 @@ class JurisdictionResourceSerializer(serializers.ModelSerializer):
             'display_name',
             'description',
             'resource_type',
+            'provider',
             'index_status',
             'indexed_at',
             'is_active',
@@ -78,10 +79,15 @@ class QueryRequestSerializer(serializers.Serializer):
         required=False,
         help_text="Optional additional context as JSON object"
     )
+    provider = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Optional RAG provider to use (e.g., 'openai', 'gemini', 'mock'). Defaults to RAG_PROVIDER setting."
+    )
     model = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Optional Gemini model to use (e.g., 'gemini-2.0-flash-live', 'gemini-1.5-pro'). Defaults to GEMINI_MODEL setting."
+        help_text="Optional model to use (e.g., 'gemini-2.0-flash-live', 'gpt-4o'). Defaults to provider's default model."
     )
 
 
@@ -89,10 +95,20 @@ class QueryResponseSerializer(serializers.Serializer):
     """
     Serializer for RAG query responses.
     """
-    answer = serializers.CharField(help_text="The generated answer from Gemini")
+    answer = serializers.CharField(help_text="The generated answer from the RAG provider")
     citations = serializers.ListField(
         child=serializers.DictField(),
         help_text="List of source documents cited in the answer"
+    )
+    provider = serializers.CharField(
+        required=False,
+        allow_null=True,
+        help_text="RAG provider that generated the response"
+    )
+    model = serializers.CharField(
+        required=False,
+        allow_null=True,
+        help_text="Model used to generate the response"
     )
     state = serializers.CharField(
         required=False,

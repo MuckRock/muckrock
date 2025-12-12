@@ -60,7 +60,7 @@ class OpenAIProvider(RAGProviderBase):
         self._check_api_enabled()
 
         try:
-            vector_store = self.client.beta.vector_stores.create(
+            vector_store = self.client.vector_stores.create(
                 name=display_name
             )
             logger.info(f"Created vector store: {vector_store.id}")
@@ -83,7 +83,7 @@ class OpenAIProvider(RAGProviderBase):
 
         try:
             # List existing vector stores
-            vector_stores = self.client.beta.vector_stores.list()
+            vector_stores = self.client.vector_stores.list()
             for store in vector_stores.data:
                 if store.name == display_name:
                     logger.info(f"Found existing vector store: {store.id}")
@@ -148,7 +148,7 @@ class OpenAIProvider(RAGProviderBase):
                     os.unlink(temp_path)
 
             # Add file to vector store
-            self.client.beta.vector_stores.files.create(
+            self.client.vector_stores.files.create(
                 vector_store_id=store_id,
                 file_id=file_obj.id
             )
@@ -158,7 +158,7 @@ class OpenAIProvider(RAGProviderBase):
             max_wait = 60  # seconds
             elapsed = 0
             while elapsed < max_wait:
-                vector_store_file = self.client.beta.vector_stores.files.retrieve(
+                vector_store_file = self.client.vector_stores.files.retrieve(
                     vector_store_id=store_id,
                     file_id=file_obj.id
                 )

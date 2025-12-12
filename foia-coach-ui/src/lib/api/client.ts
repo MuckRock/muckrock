@@ -3,16 +3,35 @@ import { settingsStore } from '$lib/stores/settings.svelte';
 export interface QueryRequest {
 	question: string;
 	state?: string;
+	provider?: string;
+	model?: string;
 	context?: any;
+}
+
+export interface Citation {
+	display_name: string;
+	source: string;
+	jurisdiction_abbrev?: string;
 }
 
 export interface QueryResponse {
 	answer: string;
-	citations: Array<{
-		source: string;
-		content: string;
-	}>;
+	citations: Citation[];
+	provider?: string;
+	model?: string;
 	state?: string;
+}
+
+export interface ProviderStatus {
+	current_provider: string;
+	available_providers: string[];
+	api_status: {
+		openai: 'enabled' | 'disabled';
+		gemini: 'enabled' | 'disabled';
+		mock: 'always_enabled';
+	};
+	status: string;
+	message: string;
 }
 
 export interface Jurisdiction {
@@ -41,10 +60,17 @@ class APIClient {
 	}
 
 	async query(request: QueryRequest): Promise<QueryResponse> {
+		// Add provider and model from settings if not specified
+		const requestWithProvider = {
+			...request,
+			provider: request.provider || settingsStore.settings.provider,
+			model: request.model || settingsStore.settings.model
+		};
+
 		const response = await fetch(`${this.getBaseUrl()}/api/v1/query/query/`, {
 			method: 'POST',
 			headers: this.getHeaders(),
-			body: JSON.stringify(request)
+			body: JSON.stringify(requestWithProvider)
 		});
 
 		if (!response.ok) {
@@ -105,6 +131,18 @@ class APIClient {
 
 		const data = await response.json();
 		return data.results || data;
+	}
+
+	async getProviderStatus(): Promise<ProviderStatus> {
+		const response = await fetch(`${this.getBaseUrl()}/api/v1/query/status/`, {
+			headers: this.getHeaders()
+		});
+
+		if (!response.ok) {
+			throw new Error(`Failed to get provider status: ${response.status}`);
+		}
+
+		return response.json();
 	}
 
 	async testConnection(): Promise<boolean> {

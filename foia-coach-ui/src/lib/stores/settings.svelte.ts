@@ -4,14 +4,16 @@ import { browser } from '$app/environment';
 export interface Settings {
 	apiUrl: string;
 	apiToken: string;
-	geminiModel: string;
+	provider: 'openai' | 'gemini' | 'mock';
+	model: string;
 }
 
 // Default settings
 const defaultSettings: Settings = {
 	apiUrl: 'http://localhost:8001',
 	apiToken: '',
-	geminiModel: 'gemini-2.0-flash-001'
+	provider: 'openai',
+	model: 'gpt-4o-mini'
 };
 
 // Load from localStorage or use defaults

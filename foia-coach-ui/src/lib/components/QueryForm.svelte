@@ -56,7 +56,9 @@
 				role: 'assistant',
 				content: response.answer,
 				citations: response.citations,
-				state: response.state
+				state: response.state,
+				provider: response.provider,
+				model: response.model
 			});
 
 			// Update context with assistant message

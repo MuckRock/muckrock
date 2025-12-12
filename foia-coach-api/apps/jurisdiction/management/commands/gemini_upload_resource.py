@@ -1,20 +1,21 @@
 """
-Management command to upload a specific resource to Gemini
+Management command to upload a specific resource to RAG provider
 """
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
 
 # Standard Library
 import sys
 
 # Local
 from apps.jurisdiction.models import JurisdictionResource
-from apps.jurisdiction.services.gemini_service import GeminiFileSearchService
+from apps.jurisdiction.services.providers.helpers import get_provider
 
 
 class Command(BaseCommand):
-    help = "Upload and index a specific jurisdiction resource to Gemini"
+    help = "Upload and index a specific jurisdiction resource to RAG provider"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -27,12 +28,22 @@ class Command(BaseCommand):
             action="store_true",
             help="Force re-upload even if already indexed",
         )
+        parser.add_argument(
+            "--provider",
+            type=str,
+            help=f"RAG provider to use (default: {settings.RAG_PROVIDER})",
+        )
 
     def handle(self, *args, **options):
         resource_id = options["resource_id"]
         force = options.get("force", False)
+        provider_name = options.get("provider")
 
         try:
+            provider = get_provider(provider_name)
+
+            self.stdout.write(f"Using provider: {provider.PROVIDER_NAME}")
+
             # Get the resource
             try:
                 resource = JurisdictionResource.objects.get(id=resource_id)
@@ -55,8 +66,7 @@ class Command(BaseCommand):
             )
 
             # Upload and index
-            service = GeminiFileSearchService()
-            service.upload_resource(resource)
+            provider.upload_resource(resource)
 
             self.stdout.write(
                 self.style.SUCCESS(

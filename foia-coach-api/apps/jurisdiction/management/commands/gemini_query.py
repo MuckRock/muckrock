@@ -1,19 +1,20 @@
 """
-Management command to test queries against the Gemini RAG system
+Management command to test queries against the RAG system
 """
 
 # Django
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 # Standard Library
 import sys
 
 # Local
-from apps.jurisdiction.services.gemini_service import GeminiFileSearchService
+from apps.jurisdiction.services.providers.helpers import get_provider
 
 
 class Command(BaseCommand):
-    help = "Test a query against the Gemini RAG system"
+    help = "Test a query against the RAG system"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -31,15 +32,22 @@ class Command(BaseCommand):
             action="store_true",
             help="Use streaming response",
         )
+        parser.add_argument(
+            "--provider",
+            type=str,
+            help=f"RAG provider to use (default: {settings.RAG_PROVIDER})",
+        )
 
     def handle(self, *args, **options):
         question = options["question"]
         state = options.get("state")
         use_stream = options.get("stream", False)
+        provider_name = options.get("provider")
 
         try:
-            service = GeminiFileSearchService()
+            provider = get_provider(provider_name)
 
+            self.stdout.write(f"Provider: {provider.PROVIDER_NAME}")
             self.stdout.write(f"Question: {question}")
             if state:
                 self.stdout.write(f"State filter: {state}")
@@ -51,7 +59,7 @@ class Command(BaseCommand):
                 self.stdout.write("-" * 60)
 
                 citations = []
-                for chunk in service.query_stream(question, state=state):
+                for chunk in provider.query_stream(question, state=state):
                     if chunk['type'] == 'chunk':
                         self.stdout.write(chunk['text'], ending="")
                         self.stdout.flush()
@@ -79,7 +87,7 @@ class Command(BaseCommand):
 
             else:
                 # Regular response
-                result = service.query(question, state=state)
+                result = provider.query(question, state=state)
 
                 self.stdout.write("Answer:")
                 self.stdout.write("-" * 60)

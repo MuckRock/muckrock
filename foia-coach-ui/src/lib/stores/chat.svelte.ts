@@ -1,13 +1,19 @@
+export interface Citation {
+	display_name: string;
+	source: string;
+	jurisdiction_abbrev?: string;
+	content?: string; // For backward compatibility
+}
+
 export interface ChatMessage {
 	id: string;
 	role: 'user' | 'assistant';
 	content: string;
 	timestamp: Date;
-	citations?: Array<{
-		source: string;
-		content: string;
-	}>;
+	citations?: Citation[];
 	state?: string;
+	provider?: string;
+	model?: string;
 }
 
 class ChatStore {
