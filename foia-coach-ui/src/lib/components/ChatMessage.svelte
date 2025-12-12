@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ChatMessage } from '$lib/stores/chat.svelte';
+	import { marked } from 'marked';
 
 	interface Props {
 		message: ChatMessage;
@@ -12,6 +13,11 @@
 			hour: 'numeric',
 			minute: '2-digit'
 		});
+	}
+
+	// Parse markdown content into HTML
+	function renderMarkdown(content: string): string {
+		return marked.parse(content) as string;
 	}
 </script>
 
@@ -34,7 +40,7 @@
 	</div>
 
 	<div class="message-content">
-		{message.content}
+		{@html renderMarkdown(message.content)}
 	</div>
 
 	{#if message.citations && message.citations.length > 0}
@@ -124,8 +130,127 @@
 	}
 
 	.message-content {
-		white-space: pre-wrap;
 		word-wrap: break-word;
+		line-height: 1.6;
+	}
+
+	/* Markdown Typography */
+	.message-content :global(h1),
+	.message-content :global(h2),
+	.message-content :global(h3),
+	.message-content :global(h4),
+	.message-content :global(h5),
+	.message-content :global(h6) {
+		margin: 1rem 0 0.5rem 0;
+		font-weight: 600;
+	}
+
+	.message-content :global(h1) {
+		font-size: 1.5rem;
+	}
+	.message-content :global(h2) {
+		font-size: 1.3rem;
+	}
+	.message-content :global(h3) {
+		font-size: 1.1rem;
+	}
+
+	.message-content :global(p) {
+		margin: 0.5rem 0;
+	}
+
+	.message-content :global(p:first-child) {
+		margin-top: 0;
+	}
+
+	.message-content :global(p:last-child) {
+		margin-bottom: 0;
+	}
+
+	/* Lists */
+	.message-content :global(ul),
+	.message-content :global(ol) {
+		margin: 0.5rem 0;
+		padding-left: 1.5rem;
+	}
+
+	.message-content :global(li) {
+		margin: 0.25rem 0;
+	}
+
+	/* Code blocks and inline code */
+	.message-content :global(code) {
+		background: rgba(0, 0, 0, 0.05);
+		padding: 0.125rem 0.25rem;
+		border-radius: 3px;
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 0.9em;
+	}
+
+	.message-content :global(pre) {
+		background: rgba(0, 0, 0, 0.05);
+		padding: 0.75rem;
+		border-radius: 4px;
+		overflow-x: auto;
+		margin: 0.5rem 0;
+	}
+
+	.message-content :global(pre code) {
+		background: none;
+		padding: 0;
+	}
+
+	/* Links */
+	.message-content :global(a) {
+		color: #2196f3;
+		text-decoration: underline;
+	}
+
+	.message-content :global(a:hover) {
+		color: #1976d2;
+	}
+
+	/* Blockquotes */
+	.message-content :global(blockquote) {
+		border-left: 3px solid #ddd;
+		padding-left: 1rem;
+		margin: 0.5rem 0;
+		color: #666;
+	}
+
+	/* Tables */
+	.message-content :global(table) {
+		border-collapse: collapse;
+		width: 100%;
+		margin: 0.5rem 0;
+	}
+
+	.message-content :global(th),
+	.message-content :global(td) {
+		border: 1px solid #ddd;
+		padding: 0.5rem;
+		text-align: left;
+	}
+
+	.message-content :global(th) {
+		background: rgba(0, 0, 0, 0.05);
+		font-weight: 600;
+	}
+
+	/* Horizontal rule */
+	.message-content :global(hr) {
+		border: none;
+		border-top: 1px solid #ddd;
+		margin: 1rem 0;
+	}
+
+	/* Strong and emphasis */
+	.message-content :global(strong) {
+		font-weight: 600;
+	}
+
+	.message-content :global(em) {
+		font-style: italic;
 	}
 
 	.citations {
