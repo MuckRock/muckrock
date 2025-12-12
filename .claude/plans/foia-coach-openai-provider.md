@@ -10,7 +10,7 @@
 | Phase 2: OpenAI Provider Implementation | ✅ Complete | 2025-12-12 | OpenAI provider with Vector Stores + Responses API (commit: eea812dda) |
 | Phase 3: Refactor Gemini to Provider Pattern | ✅ Complete | 2025-12-12 | Gemini provider wrapping existing service (pending commit) |
 | Phase 4: Provider Configuration & Selection | ✅ Complete | 2025-12-12 | Helper utilities, validation, and test command (pending commit) |
-| Phase 5: Update Models & Signals | 🔲 Not Started | - | Provider-agnostic metadata fields |
+| Phase 5: Update Models & Signals | ✅ Complete | 2025-12-12 | Provider-agnostic fields, migration, and updated signals (pending commit) |
 | Phase 6: Test Infrastructure & Mocking | 🔲 Not Started | - | Ensure no live API calls in tests |
 | Phase 7: Management Commands & API Updates | 🔲 Not Started | - | Provider-aware commands and endpoints |
 | Phase 8: Documentation & Testing | 🔲 Not Started | - | Complete docs and end-to-end validation |

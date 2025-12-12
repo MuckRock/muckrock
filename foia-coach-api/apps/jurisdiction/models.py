@@ -26,9 +26,34 @@ class JurisdictionResource(models.Model):
     display_name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
 
-    # Gemini integration metadata
-    gemini_file_id = models.CharField(max_length=255, blank=True, null=True)
-    gemini_display_name = models.CharField(max_length=255, blank=True, null=True)
+    # Provider-agnostic integration metadata
+    provider = models.CharField(
+        max_length=20,
+        choices=[
+            ('openai', 'OpenAI'),
+            ('gemini', 'Gemini'),
+            ('mock', 'Mock (Testing)')
+        ],
+        default='openai',
+        help_text='RAG provider used for this resource'
+    )
+    provider_file_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Provider-specific file/document ID'
+    )
+    provider_store_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Provider-specific store/vector store ID'
+    )
+    provider_metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Provider-specific metadata'
+    )
     indexed_at = models.DateTimeField(blank=True, null=True)
     index_status = models.CharField(
         max_length=20,
@@ -40,6 +65,20 @@ class JurisdictionResource(models.Model):
             ('error', 'Error')
         ],
         default='pending'
+    )
+
+    # Legacy Gemini-specific fields (deprecated - use provider_* fields instead)
+    gemini_file_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='DEPRECATED: Use provider_file_id instead'
+    )
+    gemini_display_name = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='DEPRECATED: Kept for backward compatibility'
     )
 
     resource_type = models.CharField(
@@ -77,3 +116,19 @@ class JurisdictionResource(models.Model):
         from .services.muckrock_client import MuckRockAPIClient
         client = MuckRockAPIClient()
         return client.get_jurisdiction(self.jurisdiction_abbrev)
+
+    def save(self, *args, **kwargs):
+        """
+        Override save to ensure backward compatibility between legacy
+        gemini_file_id and new provider_file_id fields.
+        """
+        # Sync legacy gemini_file_id with provider_file_id for Gemini provider
+        if self.provider == 'gemini':
+            if self.provider_file_id and not self.gemini_file_id:
+                # New field has data, sync to legacy field
+                self.gemini_file_id = self.provider_file_id
+            elif self.gemini_file_id and not self.provider_file_id:
+                # Legacy field has data, sync to new field
+                self.provider_file_id = self.gemini_file_id
+
+        super().save(*args, **kwargs)
