@@ -94,17 +94,18 @@ Refactor the FOIA Coach API to support multiple LLM service providers (OpenAI, G
 
 ## OpenAI vs Gemini API Comparison
 
-| Feature | Gemini File Search | OpenAI File Search |
+| Feature | Gemini File Search | OpenAI File Search (Responses API) |
 |---------|-------------------|-------------------|
 | **Storage** | File Search Store | Vector Store |
 | **File Upload** | Direct to store | Upload file, then add to vector store |
-| **Querying** | generate_content() with tools | Assistants API with threads |
-| **Streaming** | generate_content_stream() | Run stream with Assistant |
-| **Context** | Inline in prompt | Thread messages |
-| **Citations** | grounding_metadata | annotations in response |
-| **Rate Limits (Free)** | 60 RPM, 2M TPM | 500 RPM, 200K TPM |
-| **File Size Limit** | 10 MB | 512 MB |
-| **Supported Formats** | Text, PDF, DOCX, etc. | Text, PDF, DOCX, XLSX, etc. |
+| **Querying** | generate_content() with tools | responses.create() with file_search tool |
+| **Streaming** | generate_content_stream() | responses.create(stream=True) |
+| **Context** | Inline in prompt | Inline in input parameter |
+| **Citations** | grounding_metadata | annotations in message content |
+| **Rate Limits (Free tier)** | 60 RPM, 2M TPM | 100 RPM (Tier 1) |
+| **File Size Limit** | 10 MB | 512 MB per file |
+| **Supported Formats** | Text, PDF, DOCX, etc. | Text, PDF, DOCX, XLSX, PPTX, code files |
+| **API Complexity** | Medium | Simple (no assistants/threads) |
 
 ---
 
@@ -439,7 +440,7 @@ Each phase is designed to:
            if provider_name == 'openai':
                config = {
                    'api_key': settings.OPENAI_API_KEY,
-                   'model': getattr(settings, 'OPENAI_MODEL', 'gpt-4o'),
+                   'model': getattr(settings, 'OPENAI_MODEL', 'gpt-4.1'),
                    'vector_store_name': getattr(
                        settings, 'OPENAI_VECTOR_STORE_NAME',
                        'StatePublicRecordsStore'
@@ -539,9 +540,9 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
 
 ### Phase 2: OpenAI Provider Implementation (60-90 minutes)
 
-**Goal:** Implement OpenAI provider using Vector Stores and Assistants API.
+**Goal:** Implement OpenAI provider using Vector Stores and Responses API.
 
-**Note:** Largest phase - full OpenAI integration. Will be the new primary provider.
+**Note:** Largest phase - full OpenAI integration. Uses the simpler Responses API (not Assistants API). Will be the new primary provider.
 
 #### Tasks
 
@@ -560,7 +561,7 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
 2. **Create OpenAI provider** (apps/jurisdiction/services/providers/openai_provider.py)
    ```python
    """
-   OpenAI provider implementation using Vector Stores and Assistants API.
+   OpenAI provider implementation using Vector Stores and Responses API.
    """
    from django.utils import timezone
    from typing import Optional, Generator, Dict, Any
@@ -569,8 +570,6 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
    import os
 
    from openai import OpenAI
-   from openai.types.beta import Assistant
-   from openai.types.beta.threads import Run
 
    from .base import RAGProviderBase, ProviderError, ProviderConfigError, ProviderAPIError
 
@@ -579,7 +578,9 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
 
    class OpenAIProvider(RAGProviderBase):
        """
-       OpenAI provider implementation using Vector Stores and Assistants API.
+       OpenAI provider implementation using Vector Stores and Responses API.
+
+       Uses the simpler Responses API instead of Assistants API - no threads needed!
        """
 
        PROVIDER_NAME = 'openai'
@@ -593,7 +594,7 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
            if not self.api_key:
                logger.warning("OPENAI_API_KEY not configured")
 
-           self.model = self.config.get('model', 'gpt-4o')
+           self.model = self.config.get('model', 'gpt-4.1')
            self.vector_store_name = self.config.get(
                'vector_store_name', 'StatePublicRecordsStore'
            )
@@ -607,7 +608,6 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
 
            # Initialize OpenAI client
            self.client = OpenAI(api_key=self.api_key) if self.real_api_enabled else None
-           self.assistant_id = None  # Will be created/retrieved as needed
 
        def _check_api_enabled(self):
            """Check if real API calls are enabled"""
@@ -782,52 +782,6 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
                )
                # Don't raise - deletion should proceed
 
-       def _get_or_create_assistant(self, store_id: str) -> Assistant:
-           """Get or create the FOIA Coach assistant"""
-           try:
-               # List assistants to find existing one
-               assistants = self.client.beta.assistants.list()
-               for assistant in assistants.data:
-                   if assistant.name == "FOIA Coach":
-                       # Update vector store ID if needed
-                       if (
-                           not assistant.tool_resources or
-                           not assistant.tool_resources.file_search or
-                           store_id not in assistant.tool_resources.file_search.vector_store_ids
-                       ):
-                           assistant = self.client.beta.assistants.update(
-                               assistant.id,
-                               tool_resources={
-                                   "file_search": {
-                                       "vector_store_ids": [store_id]
-                                   }
-                               }
-                           )
-                       return assistant
-
-               # Create new assistant
-               assistant = self.client.beta.assistants.create(
-                   name="FOIA Coach",
-                   instructions=self.SYSTEM_INSTRUCTION,
-                   model=self.model,
-                   tools=[{"type": "file_search"}],
-                   tool_resources={
-                       "file_search": {
-                           "vector_store_ids": [store_id]
-                       }
-                   }
-               )
-               logger.info(f"Created assistant: {assistant.id}")
-               return assistant
-
-           except Exception as exc:
-               logger.error(
-                   "Failed to get or create assistant: %s",
-                   exc,
-                   exc_info=sys.exc_info()
-               )
-               raise ProviderAPIError(f"Failed to get or create assistant: {exc}")
-
        def query(
            self,
            question: str,
@@ -835,62 +789,50 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
            context: Optional[dict] = None,
            model: Optional[str] = None
        ) -> Dict[str, Any]:
-           """Query using Assistants API"""
+           """Query using Responses API with file search"""
            self._check_api_enabled()
 
            try:
-               # Get vector store and assistant
+               # Get vector store
                store_id = self.get_or_create_store()
-               assistant = self._get_or_create_assistant(store_id)
 
-               # Build prompt with state filter
-               prompt = question
+               # Build input with state filter and system instruction
+               input_text = question
                if state:
-                   prompt = f"[Context: {state}] {question}"
+                   input_text = f"[Context: {state}] {question}"
 
-               # Create thread
-               thread = self.client.beta.threads.create()
-
-               # Add user message
-               self.client.beta.threads.messages.create(
-                   thread_id=thread.id,
-                   role="user",
-                   content=prompt
+               # Use Responses API with file_search tool
+               response = self.client.responses.create(
+                   model=model or self.model,
+                   input=f"{self.SYSTEM_INSTRUCTION}\n\n{input_text}",
+                   tools=[{
+                       "type": "file_search",
+                       "vector_store_ids": [store_id]
+                   }],
+                   include=["file_search_call.results"]  # Include search results for citations
                )
 
-               # Run assistant
-               run = self.client.beta.threads.runs.create_and_poll(
-                   thread_id=thread.id,
-                   assistant_id=assistant.id
-               )
-
-               if run.status != 'completed':
-                   raise ProviderAPIError(f"Run failed with status: {run.status}")
-
-               # Get messages
-               messages = self.client.beta.threads.messages.list(
-                   thread_id=thread.id
-               )
-
-               # Extract answer and citations
+               # Extract answer and citations from response
                answer = ""
                citations = []
 
-               for message in messages.data:
-                   if message.role == "assistant":
-                       for content in message.content:
-                           if content.type == "text":
-                               answer = content.text.value
+               # Process output items
+               for item in response.output:
+                   if item.type == "message" and item.role == "assistant":
+                       # Extract message content
+                       for content in item.content:
+                           if content.type == "output_text":
+                               answer = content.text
+
                                # Extract citations from annotations
-                               if hasattr(content.text, 'annotations'):
-                                   for annotation in content.text.annotations:
-                                       if hasattr(annotation, 'file_citation'):
-                                           citation = annotation.file_citation
+                               if hasattr(content, 'annotations') and content.annotations:
+                                   for annotation in content.annotations:
+                                       if annotation.type == "file_citation":
                                            citations.append({
-                                               'source': citation.file_id,
-                                               'content': citation.quote or ""
+                                               'source': annotation.filename,
+                                               'file_id': annotation.file_id,
+                                               'content': ""  # Quote not available in basic annotations
                                            })
-                       break
 
                result = {
                    'answer': answer,
@@ -922,70 +864,96 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
            context: Optional[dict] = None,
            model: Optional[str] = None
        ) -> Generator[Dict[str, Any], None, None]:
-           """Query with streaming response"""
+           """
+           Query with streaming response using Responses API.
+
+           Note: Streaming support for Responses API needs verification from OpenAI docs.
+           If streaming is not supported, this falls back to non-streaming query.
+           """
            self._check_api_enabled()
 
            try:
-               # Get vector store and assistant
+               # Get vector store
                store_id = self.get_or_create_store()
-               assistant = self._get_or_create_assistant(store_id)
 
-               # Build prompt
-               prompt = question
+               # Build input with state filter and system instruction
+               input_text = question
                if state:
-                   prompt = f"[Context: {state}] {question}"
+                   input_text = f"[Context: {state}] {question}"
 
-               # Create thread
-               thread = self.client.beta.threads.create()
+               # Attempt to use streaming if supported
+               # Note: Verify if client.responses.create supports stream=True parameter
+               try:
+                   stream = self.client.responses.create(
+                       model=model or self.model,
+                       input=f"{self.SYSTEM_INSTRUCTION}\n\n{input_text}",
+                       tools=[{
+                           "type": "file_search",
+                           "vector_store_ids": [store_id]
+                       }],
+                       include=["file_search_call.results"],
+                       stream=True  # May need verification
+                   )
 
-               # Add user message
-               self.client.beta.threads.messages.create(
-                   thread_id=thread.id,
-                   role="user",
-                   content=prompt
-               )
+                   citations = []
+                   for chunk in stream:
+                       # Stream text chunks
+                       if hasattr(chunk, 'output'):
+                           for item in chunk.output:
+                               if item.type == "message" and item.role == "assistant":
+                                   for content in item.content:
+                                       if content.type == "output_text" and content.text:
+                                           yield {
+                                               'type': 'chunk',
+                                               'text': content.text
+                                           }
 
-               # Stream assistant response
-               citations = []
-               with self.client.beta.threads.runs.stream(
-                   thread_id=thread.id,
-                   assistant_id=assistant.id
-               ) as stream:
-                   for event in stream:
-                       # Handle text delta events
-                       if event.event == 'thread.message.delta':
-                           for content in event.data.delta.content:
-                               if content.type == 'text':
-                                   yield {
-                                       'type': 'chunk',
-                                       'text': content.text.value
-                                   }
+                                       # Collect citations
+                                       if hasattr(content, 'annotations') and content.annotations:
+                                           for annotation in content.annotations:
+                                               if annotation.type == "file_citation":
+                                                   citations.append({
+                                                       'source': annotation.filename,
+                                                       'file_id': annotation.file_id,
+                                                       'content': ""
+                                                   })
 
-                       # Handle annotations/citations
-                       elif event.event == 'thread.message.completed':
-                           for content in event.data.content:
-                               if content.type == 'text' and hasattr(content.text, 'annotations'):
-                                   for annotation in content.text.annotations:
-                                       if hasattr(annotation, 'file_citation'):
-                                           citation = annotation.file_citation
-                                           citations.append({
-                                               'source': citation.file_id,
-                                               'content': citation.quote or ""
-                                           })
+                   # Send citations
+                   yield {
+                       'type': 'citations',
+                       'citations': citations,
+                       'state': state
+                   }
 
-               # Send citations
-               yield {
-                   'type': 'citations',
-                   'citations': citations,
-                   'state': state
-               }
+                   # Send done
+                   yield {
+                       'type': 'done',
+                       'provider': self.PROVIDER_NAME,
+                       'model': model or self.model
+                   }
 
-               # Send done
-               yield {
-                   'type': 'done',
-                   'provider': self.PROVIDER_NAME,
-                   'model': model or self.model
-               }
+               except (TypeError, AttributeError) as stream_error:
+                   # Streaming not supported, fall back to non-streaming
+                   logger.warning(
+                       f"Streaming not supported, using non-streaming query: {stream_error}"
+                   )
+                   result = self.query(question, state, context, model)
+
+                   # Yield full response as single chunk
+                   yield {
+                       'type': 'chunk',
+                       'text': result['answer']
+                   }
+                   yield {
+                       'type': 'citations',
+                       'citations': result['citations'],
+                       'state': state
+                   }
+                   yield {
+                       'type': 'done',
+                       'provider': self.PROVIDER_NAME,
+                       'model': model or self.model
+                   }
 
                logger.info("Streaming query completed")
 
@@ -1033,7 +1001,7 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
    )
    OPENAI_MODEL = os.environ.get(
        'OPENAI_MODEL',
-       'gpt-4o'  # Latest model with file search
+       'gpt-4.1'  # Latest model with Responses API support
    )
 
    # Safety flag: Disable real OpenAI API calls by default in development
@@ -1050,7 +1018,7 @@ docker compose -f local.yml run --rm foia_coach_api python manage.py shell
    # OpenAI Configuration
    OPENAI_API_KEY=your_openai_api_key_here
    OPENAI_VECTOR_STORE_NAME=StatePublicRecordsStore
-   OPENAI_MODEL=gpt-4o
+   OPENAI_MODEL=gpt-4.1
    OPENAI_REAL_API_ENABLED=false
 
    # RAG Provider Selection
@@ -1399,13 +1367,13 @@ GEMINI_REAL_API_ENABLED=false
 
 | Feature | OpenAI | Gemini |
 |---------|--------|--------|
-| **API Style** | Assistants + Threads | Generate Content |
+| **API Style** | Responses API | Generate Content |
 | **Cost (Free Tier)** | Limited free credits | 60 RPM free |
 | **Rate Limits** | 500 RPM, 200K TPM | 60 RPM, 2M TPM |
 | **Max File Size** | 512 MB | 10 MB |
 | **Streaming** | ✅ Native | ✅ Native |
 | **Citations** | File annotations | Grounding metadata |
-| **Context Window** | 128K tokens (gpt-4o) | 1M tokens (flash) |
+| **Context Window** | 128K tokens (gpt-4.1) | 1M tokens (flash) |
 
 ---
 
