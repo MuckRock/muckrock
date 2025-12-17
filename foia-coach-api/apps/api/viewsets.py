@@ -4,6 +4,7 @@ ViewSets for FOIA Coach API
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
@@ -17,6 +18,7 @@ from apps.jurisdiction.services.providers.helpers import (
 from .serializers import (
     JurisdictionSerializer,
     JurisdictionResourceSerializer,
+    JurisdictionResourceUploadSerializer,
     QueryRequestSerializer,
     QueryResponseSerializer,
 )
@@ -82,6 +84,44 @@ class JurisdictionResourceViewSet(viewsets.ReadOnlyModelViewSet):
         """Return active resources by default"""
         queryset = JurisdictionResource.objects.filter(is_active=True)
         return queryset
+
+    @action(
+        detail=False,
+        methods=['post'],
+        parser_classes=[MultiPartParser, FormParser],
+        serializer_class=JurisdictionResourceUploadSerializer
+    )
+    def upload(self, request):
+        """
+        Upload a single PDF resource file.
+
+        Accepts multipart/form-data with:
+        - file: PDF file (required)
+        - jurisdiction_abbrev: State abbreviation (required)
+        - jurisdiction_id: Jurisdiction ID (required)
+        - provider: Provider to upload to (optional, defaults to 'openai')
+        - display_name: Display name (optional, auto-generated from filename)
+        - description: Description (optional, generic default)
+        - resource_type: Resource type (optional, defaults to 'general')
+
+        Returns created resource with upload status.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Save creates the resource
+        resource = serializer.save()
+
+        # Initiate upload to specified provider (triggers signal)
+        provider = request.data.get('provider', 'openai')
+        resource.initiate_upload(provider)
+
+        # Return resource with upload status
+        response_serializer = JurisdictionResourceSerializer(resource)
+        return Response(
+            response_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
 
 class QueryViewSet(viewsets.ViewSet):

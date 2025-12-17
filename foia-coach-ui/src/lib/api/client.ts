@@ -9,9 +9,24 @@ export interface QueryRequest {
 }
 
 export interface Citation {
-	display_name: string;
-	source: string;
+	// Core fields (source is optional for backward compatibility with old data)
+	source?: string;
+	file_id?: string;
+
+	// Inline positioning fields
+	text?: string;
+	start_index?: number;
+	end_index?: number;
+	index?: number;
+
+	// Quote/content fields
+	quote?: string;
+	content?: string;
+
+	// Resource metadata
+	display_name?: string;
 	jurisdiction_abbrev?: string;
+	file_url?: string;
 }
 
 export interface QueryResponse {
@@ -39,6 +54,31 @@ export interface Jurisdiction {
 	name: string;
 	abbrev: string;
 	level: string;
+}
+
+export interface ResourceUploadRequest {
+	file: File;
+	jurisdiction_abbrev: string;
+	jurisdiction_id: number;
+	provider?: string;
+	display_name?: string;
+	description?: string;
+	resource_type?: string;
+}
+
+export interface ResourceUploadResponse {
+	id: number;
+	jurisdiction_id: number;
+	jurisdiction_abbrev: string;
+	display_name: string;
+	description: string;
+	resource_type: string;
+	file_url: string;
+	is_active: boolean;
+	created_at: string;
+	upload_status: {
+		[provider: string]: string;
+	};
 }
 
 class APIClient {
@@ -153,6 +193,47 @@ class APIClient {
 			console.error('Connection test failed:', e);
 			return false;
 		}
+	}
+
+	async uploadResource(request: ResourceUploadRequest): Promise<ResourceUploadResponse> {
+		const formData = new FormData();
+		formData.append('file', request.file);
+		formData.append('jurisdiction_abbrev', request.jurisdiction_abbrev);
+		formData.append('jurisdiction_id', request.jurisdiction_id.toString());
+
+		if (request.provider) formData.append('provider', request.provider);
+		if (request.display_name) formData.append('display_name', request.display_name);
+		if (request.description) formData.append('description', request.description);
+		if (request.resource_type) formData.append('resource_type', request.resource_type);
+
+		const response = await fetch(`${this.getBaseUrl()}/api/v1/resources/upload/`, {
+			method: 'POST',
+			headers: {
+				// No Content-Type - browser sets it with boundary for FormData
+				...(settingsStore.settings.apiToken && {
+					Authorization: `Token ${settingsStore.settings.apiToken}`
+				})
+			},
+			body: formData
+		});
+
+		if (!response.ok) {
+			try {
+				const errorData = await response.json();
+				if (errorData.error) throw new Error(errorData.error);
+				if (errorData.details) {
+					const errors = Object.entries(errorData.details)
+						.map(([field, msgs]) => `${field}: ${msgs}`)
+						.join(', ');
+					throw new Error(errors);
+				}
+			} catch (e) {
+				if (e instanceof Error && e.message !== '') throw e;
+			}
+			throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+		}
+
+		return response.json();
 	}
 }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ChatMessage } from '$lib/stores/chat.svelte';
+	import type { Citation } from '$lib/api/client';
 	import { marked } from 'marked';
 
 	interface Props {
@@ -19,6 +20,143 @@
 	function renderMarkdown(content: string): string {
 		return marked.parse(content) as string;
 	}
+
+	/**
+	 * Parse and link citation markers like [1], [2] in the text
+	 * Used when OpenAI provides citation numbers in text but no positioning info
+	 */
+	function parseAndLinkCitationMarkers(content: string, citations: Citation[]): string {
+		if (!content || !citations.length) return renderMarkdown(content);
+
+		let processedContent = content;
+
+		// Replace citation markers [1], [2], etc. with clickable links
+		// Match patterns like [1], [2], [3], etc. but not markdown links
+		const citationPattern = /\[(\d+)\](?!\()/g;
+
+		processedContent = processedContent.replace(citationPattern, (match, number) => {
+			const citationNum = parseInt(number, 10);
+			// Citation numbers are 1-indexed, array is 0-indexed
+			const citation = citations[citationNum - 1];
+
+			if (!citation) return match; // Keep original if no matching citation
+
+			// Build title for hover
+			const titleParts = [];
+			if (citation.display_name || citation.source) {
+				titleParts.push(citation.display_name || citation.source);
+			}
+			if (citation.quote) {
+				const truncatedQuote = citation.quote.substring(0, 100) + (citation.quote.length > 100 ? '...' : '');
+				titleParts.push(`"${truncatedQuote}"`);
+			}
+			const title = titleParts.join(' - ') || 'Citation';
+
+			// Create clickable link or span
+			if (citation.file_url) {
+				return `<a href="${citation.file_url}" target="_blank" class="citation-link" title="${title}" data-citation="${citationNum}">[${citationNum}]</a>`;
+			} else {
+				return `<span class="citation-marker" title="${title}" data-citation="${citationNum}">[${citationNum}]</span>`;
+			}
+		});
+
+		return renderMarkdown(processedContent);
+	}
+
+	/**
+	 * Process content with inline citations
+	 * Replaces citation markers with clickable links
+	 */
+	function renderContentWithCitations(content: string, citations: Citation[] | undefined): string {
+		if (!content) return '';
+		if (!citations || !Array.isArray(citations) || citations.length === 0) {
+			return renderMarkdown(content);
+		}
+
+		// Check if citations have positioning information
+		const hasPositioning = citations.some(
+			(c) => c && typeof c === 'object' && c.start_index !== undefined && c.end_index !== undefined
+		);
+
+		// Try to parse citation markers from text even without positioning
+		if (!hasPositioning) {
+			return parseAndLinkCitationMarkers(content, citations);
+		}
+
+		// Sort citations by start_index in reverse order to replace from end to start
+		// This prevents index shifting issues when replacing text
+		const sortedCitations = [...citations]
+			.filter((c) => c && typeof c === 'object' && c.start_index !== undefined && c.end_index !== undefined)
+			.sort((a, b) => (b.start_index || 0) - (a.start_index || 0));
+
+		let processedContent = content;
+
+		// Replace each citation marker with a link
+		sortedCitations.forEach((citation, idx) => {
+			if (!citation) return;
+
+			const { start_index, end_index, text, display_name, file_url, quote, source } = citation;
+
+			if (start_index === undefined || end_index === undefined) return;
+
+			// Validate indices are within bounds
+			if (start_index < 0 || end_index > processedContent.length || start_index >= end_index) {
+				return;
+			}
+
+			// Get the citation text (the marker like "[1]" or "【4:0†source】")
+			const citationText = text || processedContent.substring(start_index, end_index);
+
+			// Create the citation number (use index from citations array)
+			const citationNum = sortedCitations.length - idx;
+
+			// Build the citation link with title attribute for hover
+			const titleParts = [];
+			if (display_name || source) {
+				titleParts.push(display_name || source);
+			}
+			if (quote) {
+				const truncatedQuote = quote.substring(0, 100) + (quote.length > 100 ? '...' : '');
+				titleParts.push(`"${truncatedQuote}"`);
+			}
+			const title = titleParts.join(' - ') || 'Citation';
+
+			const citationLink = file_url
+				? `<a href="${file_url}" target="_blank" class="citation-link" title="${title}" data-citation="${citationNum}">[${citationNum}]</a>`
+				: `<span class="citation-marker" title="${title}" data-citation="${citationNum}">[${citationNum}]</span>`;
+
+			// Replace the citation marker in the content
+			processedContent =
+				processedContent.substring(0, start_index) +
+				citationLink +
+				processedContent.substring(end_index);
+		});
+
+		return renderMarkdown(processedContent);
+	}
+
+	// Deduplicate citations by file_id or source
+	function getUniqueCitations(citations: Citation[] | undefined): Citation[] {
+		if (!citations || !Array.isArray(citations)) return [];
+
+		const seen = new Set<string>();
+		return citations.filter((citation) => {
+			// Handle both old and new citation formats
+			if (!citation || typeof citation !== 'object') return false;
+
+			const key = citation.file_id || citation.source || citation.display_name || '';
+			if (!key || seen.has(key)) return false;
+
+			seen.add(key);
+			return true;
+		});
+	}
+
+	let uniqueCitations = $derived(getUniqueCitations(message?.citations));
+	let hasInlineCitations = $derived(
+		uniqueCitations.length > 0 &&
+		uniqueCitations.some((c) => c && c.start_index !== undefined && c.end_index !== undefined)
+	);
 </script>
 
 <div
@@ -40,25 +178,41 @@
 	</div>
 
 	<div class="message-content">
-		{@html renderMarkdown(message.content)}
+		{@html renderContentWithCitations(message.content, message.citations)}
 	</div>
 
-	{#if message.citations && message.citations.length > 0}
+	{#if uniqueCitations.length > 0}
 		<div class="citations">
 			<h4>Sources:</h4>
 			<ul>
-				{#each message.citations as citation}
-					<li>
-						<strong>{citation.display_name || citation.source}</strong>
-						{#if citation.jurisdiction_abbrev}
-							<span class="cite-state">{citation.jurisdiction_abbrev}</span>
-						{/if}
-						{#if citation.content}
-							<p>{citation.content}</p>
-						{:else}
-							<p class="cite-source">{citation.source}</p>
-						{/if}
-					</li>
+				{#each uniqueCitations as citation, idx}
+					{#if citation}
+						<li>
+							{#if citation.file_url}
+								<a href={citation.file_url} target="_blank" class="citation-source-link">
+									<strong>{citation.display_name || citation.source || 'Unknown Source'}</strong>
+								</a>
+							{:else}
+								<strong>{citation.display_name || citation.source || 'Unknown Source'}</strong>
+							{/if}
+
+							{#if citation.jurisdiction_abbrev}
+								<span class="cite-state">{citation.jurisdiction_abbrev}</span>
+							{/if}
+
+							{#if hasInlineCitations}
+								<span class="citation-number">[{idx + 1}]</span>
+							{/if}
+
+							{#if citation.quote}
+								<p class="citation-quote">"{citation.quote}"</p>
+							{:else if citation.content}
+								<p>{citation.content}</p>
+							{:else if !citation.file_url && citation.source}
+								<p class="cite-source">{citation.source}</p>
+							{/if}
+						</li>
+					{/if}
 				{/each}
 			</ul>
 		</div>
@@ -210,6 +364,32 @@
 		color: #1976d2;
 	}
 
+	/* Inline citation links */
+	.message-content :global(a.citation-link),
+	.message-content :global(span.citation-marker) {
+		display: inline-block;
+		background: #e3f2fd;
+		color: #1976d2;
+		padding: 0 0.25rem;
+		margin: 0 0.125rem;
+		border-radius: 3px;
+		font-size: 0.75em;
+		font-weight: 600;
+		text-decoration: none;
+		vertical-align: super;
+		line-height: 1;
+		cursor: help;
+	}
+
+	.message-content :global(a.citation-link:hover) {
+		background: #bbdefb;
+		color: #0d47a1;
+	}
+
+	.message-content :global(span.citation-marker) {
+		cursor: default;
+	}
+
 	/* Blockquotes */
 	.message-content :global(blockquote) {
 		border-left: 3px solid #ddd;
@@ -278,5 +458,34 @@
 		margin: 0.25rem 0 0 0;
 		font-size: 0.875rem;
 		color: #666;
+	}
+
+	.citation-source-link {
+		color: #2196f3;
+		text-decoration: none;
+	}
+
+	.citation-source-link:hover {
+		text-decoration: underline;
+	}
+
+	.citation-number {
+		display: inline-block;
+		background: #e3f2fd;
+		color: #1976d2;
+		padding: 0.125rem 0.375rem;
+		border-radius: 3px;
+		font-size: 0.7rem;
+		font-weight: 600;
+		margin-left: 0.5rem;
+	}
+
+	.citation-quote {
+		font-style: italic;
+		color: #555;
+		background: #f9f9f9;
+		padding: 0.5rem;
+		border-left: 3px solid #ddd;
+		margin-top: 0.5rem !important;
 	}
 </style>

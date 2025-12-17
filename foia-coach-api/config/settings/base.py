@@ -109,6 +109,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Backend API URL for constructing absolute file URLs
+# Used for generating full URLs to media files in API responses
+BACKEND_API_URL = os.environ.get('BACKEND_API_URL', 'http://localhost:8000')
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

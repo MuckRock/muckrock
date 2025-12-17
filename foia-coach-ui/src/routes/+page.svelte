@@ -35,8 +35,11 @@
 <div class="page">
 	<div class="header">
 		<h1>FOIA Coach</h1>
-		<button onclick={addTestMessages}>Add Test Messages</button>
-		<button onclick={clearChat}>Clear Chat</button>
+		<div class="header-actions">
+			<a href="/upload" class="link-button">Upload Resources</a>
+			<button onclick={addTestMessages}>Add Test Messages</button>
+			<button onclick={clearChat}>Clear Chat</button>
+		</div>
 	</div>
 
 	<QueryForm />
@@ -63,6 +66,28 @@
 		margin: 0;
 		font-size: 2rem;
 		color: #2196f3;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.link-button {
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		background: #f0f0f0;
+		cursor: pointer;
+		font-size: 0.9rem;
+		text-decoration: none;
+		color: inherit;
+		display: inline-block;
+		transition: background-color 0.2s;
+	}
+
+	.link-button:hover {
+		background: #e0e0e0;
 	}
 
 	button {

@@ -103,6 +103,7 @@ class JurisdictionResource(models.Model):
 
     file = models.FileField(
         upload_to='foia_coach/jurisdiction_resources/%Y/%m/',
+        max_length=255,
         help_text='Text or Markdown file with state-specific FOIA knowledge'
     )
     display_name = models.CharField(max_length=255)

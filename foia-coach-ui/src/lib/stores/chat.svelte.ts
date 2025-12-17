@@ -1,9 +1,4 @@
-export interface Citation {
-	display_name: string;
-	source: string;
-	jurisdiction_abbrev?: string;
-	content?: string; // For backward compatibility
-}
+import type { Citation } from '$lib/api/client';
 
 export interface ChatMessage {
 	id: string;

@@ -23,6 +23,44 @@ class OpenAIProvider(RAGProviderBase):
 
     PROVIDER_NAME = 'openai'
 
+    # Override system instruction to request inline citations
+    SYSTEM_INSTRUCTION = """
+You are the State Public Records & FOIA Coach. Your role is to provide
+accurate, well-cited guidance about state public records laws and best
+practices for requesting public records.
+
+CRITICAL RULES:
+1. Base ALL responses strictly on the documents in your knowledge base
+2. ALWAYS cite the source document inline for every piece of information using numbered citations like [1], [2], etc.
+3. Place citation numbers immediately after the relevant statement or fact
+4. If information is not in your knowledge base, explicitly say so
+5. Do NOT generate request language - provide knowledge and coaching only
+6. Focus on helping users understand the law and process
+7. Highlight state-specific requirements, deadlines, and exemptions
+8. Provide context about common pitfalls and best practices
+
+CITATION FORMAT:
+- Use inline numbered citations: "The request must be in writing [1]."
+- Place citations after the relevant information
+- Use the same number for repeated references to the same source
+- Cite every factual claim
+
+When answering questions:
+- Quote relevant law sections with citations
+- Explain deadlines and response times with citations
+- Describe exemptions and their proper use with citations
+- Suggest what information users should research further
+- Encourage specificity in their requests
+- Note any jurisdiction-specific procedures with citations
+
+NEVER:
+- Generate full request text
+- Make legal claims beyond what's in documents
+- Provide information from outside your knowledge base
+- Make assumptions about unstated facts
+- Make statements without proper inline citations
+"""
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize OpenAI provider"""
         super().__init__(config)
@@ -276,15 +314,99 @@ class OpenAIProvider(RAGProviderBase):
                         if content.type == "output_text":
                             answer = content.text
 
+                            logger.info("=" * 80)
+                            logger.info("OPENAI RESPONSE DEBUG")
+                            logger.info("=" * 80)
+                            logger.info(f"Answer text (first 500 chars): {answer[:500]}")
+                            logger.info(f"Answer text length: {len(answer)} characters")
+
                             # Extract citations from annotations
                             if hasattr(content, 'annotations') and content.annotations:
-                                for annotation in content.annotations:
+                                logger.info(f"\nFound {len(content.annotations)} annotations")
+
+                                for idx, annotation in enumerate(content.annotations):
+                                    logger.info(f"\n--- Annotation #{idx + 1} ---")
+                                    logger.info(f"Type: {annotation.type}")
+                                    logger.info(f"Available attributes: {dir(annotation)}")
+
                                     if annotation.type == "file_citation":
-                                        citations.append({
+                                        citation = {
                                             'source': annotation.filename,
                                             'file_id': annotation.file_id,
-                                            'content': ""  # Quote not available in basic annotations
-                                        })
+                                        }
+
+                                        logger.info(f"Filename: {annotation.filename}")
+                                        logger.info(f"File ID: {annotation.file_id}")
+
+                                        # Extract index information for inline citations
+                                        if hasattr(annotation, 'text'):
+                                            citation['text'] = annotation.text
+                                            logger.info(f"Text: {annotation.text}")
+                                        else:
+                                            logger.info("Text: NOT PRESENT")
+
+                                        if hasattr(annotation, 'start_index'):
+                                            citation['start_index'] = annotation.start_index
+                                            logger.info(f"Start index: {annotation.start_index}")
+                                        else:
+                                            logger.info("Start index: NOT PRESENT")
+
+                                        if hasattr(annotation, 'end_index'):
+                                            citation['end_index'] = annotation.end_index
+                                            logger.info(f"End index: {annotation.end_index}")
+                                        else:
+                                            logger.info("End index: NOT PRESENT")
+
+                                        if hasattr(annotation, 'index'):
+                                            citation['index'] = annotation.index
+                                            idx_pos = annotation.index
+                                            logger.info(f"Index: {idx_pos}")
+                                            # Show what's at that position in the text
+                                            if 0 <= idx_pos < len(answer):
+                                                context_start = max(0, idx_pos - 20)
+                                                context_end = min(len(answer), idx_pos + 20)
+                                                context = answer[context_start:context_end]
+                                                logger.info(f"Text at index {idx_pos}: '...{context}...'")
+                                                logger.info(f"Character at index: '{answer[idx_pos]}'")
+                                        else:
+                                            logger.info("Index: NOT PRESENT")
+
+                                        # Extract quote if available
+                                        if hasattr(annotation, 'quote'):
+                                            citation['quote'] = annotation.quote
+                                            logger.info(f"Quote: {annotation.quote[:100]}...")
+                                        elif hasattr(annotation, 'file_citation') and hasattr(annotation.file_citation, 'quote'):
+                                            citation['quote'] = annotation.file_citation.quote
+                                            logger.info(f"Quote (from file_citation): {annotation.file_citation.quote[:100]}...")
+                                        else:
+                                            logger.info("Quote: NOT PRESENT")
+
+                                        citations.append(citation)
+                                        logger.info(f"Citation object: {citation}")
+                            else:
+                                logger.info("\nNo annotations found in response")
+
+                            logger.info("=" * 80)
+
+            # Insert inline citation markers into answer text
+            if citations and answer:
+                answer = self._insert_citation_markers(answer, citations)
+
+            # Enrich citations with resource metadata
+            citations = self._enrich_citations_with_resources(citations)
+
+            logger.info("\n" + "=" * 80)
+            logger.info("ENRICHED CITATIONS")
+            logger.info("=" * 80)
+            for idx, citation in enumerate(citations):
+                logger.info(f"\nCitation #{idx + 1}:")
+                logger.info(f"  Display Name: {citation.get('display_name')}")
+                logger.info(f"  File URL: {citation.get('file_url')}")
+                logger.info(f"  Jurisdiction: {citation.get('jurisdiction_abbrev')}")
+                logger.info(f"  Has start_index: {citation.get('start_index') is not None}")
+                logger.info(f"  Has end_index: {citation.get('end_index') is not None}")
+                logger.info(f"  Full citation: {citation}")
+            logger.info("=" * 80 + "\n")
 
             result = {
                 'answer': answer,
@@ -308,6 +430,111 @@ class OpenAIProvider(RAGProviderBase):
                 exc_info=sys.exc_info()
             )
             raise ProviderAPIError(f"Failed to query OpenAI: {exc}")
+
+    def _insert_citation_markers(self, answer: str, citations: list) -> str:
+        """
+        Insert numbered citation markers like [1], [2] into the answer text.
+
+        OpenAI provides index positions but doesn't add the markers, so we do it ourselves.
+        """
+        if not citations or not answer:
+            return answer
+
+        # Filter citations that have index positions
+        indexed_citations = [c for c in citations if c.get('index') is not None]
+        if not indexed_citations:
+            return answer
+
+        # Sort citations by index in REVERSE order (to avoid index shifting when inserting)
+        sorted_citations = sorted(indexed_citations, key=lambda c: c['index'], reverse=True)
+
+        # Create mapping of file_id to citation number (for consistency)
+        file_id_to_num = {}
+        citation_num = 1
+        # Process in forward order to assign numbers
+        for citation in sorted(indexed_citations, key=lambda c: c['index']):
+            file_id = citation.get('file_id')
+            if file_id and file_id not in file_id_to_num:
+                file_id_to_num[file_id] = citation_num
+                citation_num += 1
+
+        # Insert citation markers working backwards
+        modified_answer = answer
+        for citation in sorted_citations:
+            idx = citation['index']
+            file_id = citation.get('file_id')
+
+            if file_id and file_id in file_id_to_num and 0 <= idx <= len(modified_answer):
+                num = file_id_to_num[file_id]
+                marker = f" [{num}]"
+
+                # Insert marker after the index position
+                modified_answer = modified_answer[:idx + 1] + marker + modified_answer[idx + 1:]
+
+        logger.info(f"Inserted {len(file_id_to_num)} unique citation markers into answer")
+        return modified_answer
+
+    def _enrich_citations_with_resources(self, citations: list) -> list:
+        """
+        Enrich citations with JurisdictionResource metadata.
+
+        Maps OpenAI file_ids to JurisdictionResource objects and adds:
+        - display_name: Human-readable resource name
+        - jurisdiction_abbrev: State abbreviation
+        - file_url: URL to the uploaded PDF file
+        """
+        from django.conf import settings
+        from apps.jurisdiction.models import ResourceProviderUpload
+
+        if not citations:
+            return citations
+
+        # Get all file_ids from citations
+        file_ids = [c.get('file_id') for c in citations if c.get('file_id')]
+
+        if not file_ids:
+            return citations
+
+        # Look up ResourceProviderUpload objects by file_id
+        uploads = ResourceProviderUpload.objects.filter(
+            provider=self.PROVIDER_NAME,
+            provider_file_id__in=file_ids
+        ).select_related('resource')
+
+        # Get the backend API URL for constructing absolute URLs
+        backend_url = settings.BACKEND_API_URL.rstrip('/')
+
+        # Create a mapping of file_id to resource data
+        file_id_to_resource = {}
+        for upload in uploads:
+            resource = upload.resource
+            # Build absolute URL for the file
+            file_url = None
+            if resource.file:
+                relative_url = resource.file.url
+                # If it's already an absolute URL, use it as is
+                if relative_url.startswith('http://') or relative_url.startswith('https://'):
+                    file_url = relative_url
+                else:
+                    # Construct absolute URL
+                    file_url = f"{backend_url}{relative_url}"
+
+            file_id_to_resource[upload.provider_file_id] = {
+                'display_name': resource.display_name or resource.file.name,
+                'jurisdiction_abbrev': resource.jurisdiction_abbrev,
+                'file_url': file_url,
+            }
+
+        # Enrich each citation with resource metadata
+        enriched_citations = []
+        for citation in citations:
+            file_id = citation.get('file_id')
+            if file_id and file_id in file_id_to_resource:
+                resource_data = file_id_to_resource[file_id]
+                citation.update(resource_data)
+            enriched_citations.append(citation)
+
+        return enriched_citations
 
     def query_stream(
         self,
@@ -364,11 +591,31 @@ class OpenAIProvider(RAGProviderBase):
                                     if hasattr(content, 'annotations') and content.annotations:
                                         for annotation in content.annotations:
                                             if annotation.type == "file_citation":
-                                                citations.append({
+                                                citation = {
                                                     'source': annotation.filename,
                                                     'file_id': annotation.file_id,
-                                                    'content': ""
-                                                })
+                                                }
+
+                                                # Extract index information for inline citations
+                                                if hasattr(annotation, 'text'):
+                                                    citation['text'] = annotation.text
+                                                if hasattr(annotation, 'start_index'):
+                                                    citation['start_index'] = annotation.start_index
+                                                if hasattr(annotation, 'end_index'):
+                                                    citation['end_index'] = annotation.end_index
+                                                if hasattr(annotation, 'index'):
+                                                    citation['index'] = annotation.index
+
+                                                # Extract quote if available
+                                                if hasattr(annotation, 'quote'):
+                                                    citation['quote'] = annotation.quote
+                                                elif hasattr(annotation, 'file_citation') and hasattr(annotation.file_citation, 'quote'):
+                                                    citation['quote'] = annotation.file_citation.quote
+
+                                                citations.append(citation)
+
+                # Enrich citations with resource metadata
+                citations = self._enrich_citations_with_resources(citations)
 
                 # Send citations
                 yield {
