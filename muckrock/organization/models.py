@@ -81,6 +81,32 @@ class Organization(models.Model):
         null=True,
     )
 
+    members = models.ManyToManyField(
+        to="self",
+        related_name="groups",
+        help_text=(
+            "Organizations which are members of this organization "
+            "(useful for trade associations or other member groups)"
+        ),
+        blank=True,
+        symmetrical=False,
+    )
+    parent = models.ForeignKey(
+        to="self",
+        on_delete=models.PROTECT,
+        related_name="children",
+        help_text="The parent organization",
+        blank=True,
+        null=True,
+    )
+    share_resources = models.BooleanField(
+        default=True,
+        help_text=(
+            "Share resources (subscriptions, credits) with all children and member "
+            "organizations. Global toggle that applies to all relationships."
+        ),
+    )
+
     def __str__(self):
         if self.individual:
             return "{} (Individual)".format(self.name)
@@ -107,6 +133,7 @@ class Organization(models.Model):
         """Is the user an admin of this organization?"""
         return self.users.filter(pk=user.pk, memberships__admin=True).exists()
 
+    @transaction.atomic
     def update_data(self, data):
         """Set updated data from squarelet"""
 
@@ -159,6 +186,16 @@ class Organization(models.Model):
             self.monthly_requests = self.requests_per_month
             self.date_update = date_update
 
+        # set relationships
+        if data.get("parent"):
+            pull_data("organization", data["parent"])
+            self.parent = Organization.objects.filter(uuid=data["parent"]).first()
+
+        if data.get("groups"):
+            for group in data["groups"]:
+                pull_data("organization", group)
+            self.groups.set(Organization.objects.filter(uuid__in=data["groups"]))
+
         # update the remaining fields
         fields = [
             "name",
@@ -169,6 +206,7 @@ class Organization(models.Model):
             "payment_failed",
             "avatar_url",
             "verified_journalist",
+            "share_resources",
         ]
         for field in fields:
             if field in data:
@@ -189,6 +227,16 @@ class Organization(models.Model):
         ).update(active=True)
         self.memberships.all().delete()
 
+        self.children.update(parent=other)
+
+        groups = self.groups.all()
+        other.groups.add(*groups)
+        self.groups.all().delete()
+
+        members = self.members.all()
+        other.members.add(*members)
+        self.members.all().delete()
+
         self.merged = other
 
     @transaction.atomic
@@ -196,6 +244,13 @@ class Organization(models.Model):
         """Try to deduct requests from the organization's balance"""
         request_count = {"monthly": 0, "regular": 0}
         organization = Organization.objects.select_for_update().get(pk=self.pk)
+        if organization.parent and organization.parent.share_resources:
+            parent = Organization.objects.select_for_update().get(
+                pk=organization.parent_id
+            )
+        else:
+            parent = None
+        groups = organization.groups.filter(share_resources=True).select_for_update()
 
         request_count["monthly"] = min(amount, organization.monthly_requests)
         amount -= request_count["monthly"]
@@ -203,12 +258,41 @@ class Organization(models.Model):
         request_count["regular"] = min(amount, organization.number_requests)
         amount -= request_count["regular"]
 
-        if amount > 0:
-            raise InsufficientRequestsError(amount)
-
         organization.monthly_requests -= request_count["monthly"]
         organization.number_requests -= request_count["regular"]
         organization.save()
+
+        if parent:
+            parent_monthly = min(amount, parent.monthly_requests)
+            request_count["monthly"] += parent_monthly
+            amount -= parent_monthly
+            parent.monthly_requests -= parent_monthly
+
+            parent_regular = min(amount, parent.number_requests)
+            request_count["regular"] += parent_regular
+            amount -= parent_regular
+            parent.number_requests -= parent_regular
+            parent.save()
+
+        for group in groups:
+            # This is taking from groups in an arbitrary order
+            # This is not ideal, but having multiple groups should be rare
+            # This code should also be replaced soon with a way to let the user
+            # choose the source
+            group_monthly = min(amount, group.monthly_requests)
+            request_count["monthly"] += group_monthly
+            amount -= group_monthly
+            group.monthly_requests -= group_monthly
+
+            group_regular = min(amount, group.number_requests)
+            request_count["regular"] += group_regular
+            amount -= group_regular
+            group.number_requests -= group_regular
+            group.save()
+
+        if amount > 0:
+            raise InsufficientRequestsError(amount)
+
         return request_count
 
     def return_requests(self, amounts):
@@ -221,6 +305,22 @@ class Organization(models.Model):
         """Add requests"""
         self.number_requests = F("number_requests") + amount
         self.save()
+
+    def get_total_number_requests(self):
+        number_requests = self.number_requests
+        if self.parent and self.parent.share_resources:
+            number_requests += self.parent.number_requests
+        for group in self.groups.filter(share_resources=True):
+            number_requests += group.number_requests
+        return number_requests
+
+    def get_total_monthly_requests(self):
+        monthly_requests = self.monthly_requests
+        if self.parent and self.parent.share_resources:
+            monthly_requests += self.parent.monthly_requests
+        for group in self.groups.filter(share_resources=True):
+            monthly_requests += group.monthly_requests
+        return monthly_requests
 
     def pay(self, amount, description, token, save_card, metadata, fee_amount=0):
         """Pay via Squarelet API"""

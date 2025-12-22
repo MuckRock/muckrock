@@ -112,8 +112,8 @@ class GenericComposer(BuyRequestsMixin):
                 )
             )
             requests_left = {
-                "regular": organization.number_requests,
-                "monthly": organization.monthly_requests,
+                "regular": organization.get_total_number_requests(),
+                "monthly": organization.get_total_monthly_requests(),
             }
             context["sidebar_admin_url"] = reverse(
                 "admin:foia_foiacomposer_change", args=(self.object.pk,)
