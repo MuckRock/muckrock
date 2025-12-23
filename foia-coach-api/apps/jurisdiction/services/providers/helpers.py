@@ -172,7 +172,8 @@ def query_with_fallback(
     state: Optional[str] = None,
     provider_name: Optional[str] = None,
     context: Optional[dict] = None,
-    model: Optional[str] = None
+    model: Optional[str] = None,
+    system_prompt: Optional[str] = None
 ) -> dict:
     """
     Execute a RAG query with automatic provider fallback.
@@ -188,6 +189,7 @@ def query_with_fallback(
         provider_name: Preferred provider (defaults to RAG_PROVIDER setting)
         context: Optional additional context dict
         model: Optional model selection
+        system_prompt: Optional custom system instruction (overrides provider default)
 
     Returns:
         Query result dict with these keys:
@@ -261,7 +263,7 @@ def query_with_fallback(
         try:
             logger.info(f"Querying primary provider: {primary_provider}")
             provider = get_provider(primary_provider)
-            result = provider.query(question, state, context, model)
+            result = provider.query(question, state, context, model, system_prompt)
             result['fallback_used'] = False
             result['requested_provider'] = primary_provider
             return result
@@ -300,7 +302,7 @@ def query_with_fallback(
             try:
                 logger.info(f"Trying fallback provider: {fallback}")
                 provider = get_provider(fallback)
-                result = provider.query(question, state, context, model)
+                result = provider.query(question, state, context, model, system_prompt)
                 result['fallback_used'] = True
                 result['requested_provider'] = primary_provider
                 result['actual_provider'] = fallback

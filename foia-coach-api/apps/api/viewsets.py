@@ -180,6 +180,7 @@ class QueryViewSet(viewsets.ViewSet):
         provider_name = serializer.validated_data.get('provider')
         context = serializer.validated_data.get('context')
         model = serializer.validated_data.get('model')
+        system_prompt = serializer.validated_data.get('system_prompt')
 
         try:
             # Use query_with_fallback for automatic provider fallback
@@ -188,7 +189,8 @@ class QueryViewSet(viewsets.ViewSet):
                 state=state,
                 provider_name=provider_name,
                 context=context,
-                model=model
+                model=model,
+                system_prompt=system_prompt
             )
 
             response_serializer = QueryResponseSerializer(result)

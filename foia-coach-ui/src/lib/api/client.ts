@@ -6,6 +6,7 @@ export interface QueryRequest {
 	provider?: string;
 	model?: string;
 	context?: any;
+	system_prompt?: string;
 }
 
 export interface Citation {
@@ -100,11 +101,12 @@ class APIClient {
 	}
 
 	async query(request: QueryRequest): Promise<QueryResponse> {
-		// Add provider and model from settings if not specified
+		// Add provider, model, and system_prompt from settings if not specified
 		const requestWithProvider = {
 			...request,
 			provider: request.provider || settingsStore.settings.provider,
-			model: request.model || settingsStore.settings.model
+			model: request.model || settingsStore.settings.model,
+			system_prompt: request.system_prompt || settingsStore.settings.systemPrompt
 		};
 
 		const response = await fetch(`${this.getBaseUrl()}/api/v1/query/query/`, {

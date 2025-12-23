@@ -91,6 +91,21 @@
 		</small>
 	</div>
 
+	<div class="field">
+		<label for="systemPrompt">System Prompt</label>
+		<textarea
+			id="systemPrompt"
+			bind:value={settingsStore.settings.systemPrompt}
+			rows={10}
+			placeholder="System instruction for the AI coach..."
+			required
+		></textarea>
+		<small>
+			The system instruction that defines the AI's behavior and response style.
+			This applies to all providers (OpenAI, Gemini, Mock).
+		</small>
+	</div>
+
 	<div class="actions">
 		<button type="submit">Save Settings</button>
 		<button type="button" onclick={handleReset}>Reset to Defaults</button>
@@ -128,6 +143,18 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		font-size: 1rem;
+	}
+
+	textarea {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		font-size: 0.95rem;
+		font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+		line-height: 1.5;
+		resize: vertical;
+		min-height: 200px;
 	}
 
 	small {

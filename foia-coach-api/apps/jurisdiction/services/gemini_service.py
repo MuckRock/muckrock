@@ -368,7 +368,8 @@ NEVER:
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> dict:
         """
         Query the RAG system with a question
@@ -378,6 +379,7 @@ NEVER:
             state: Optional state filter (e.g., 'CO', 'GA', 'TN')
             context: Optional additional context
             model: Optional Gemini model to use (defaults to settings.GEMINI_MODEL)
+            system_prompt: Optional custom system instruction (overrides SYSTEM_INSTRUCTION)
 
         Returns:
             Dict with 'answer', 'citations', and optional 'state'
@@ -391,6 +393,9 @@ NEVER:
 
             # Use provided model or fall back to settings
             model_name = model or settings.GEMINI_MODEL
+
+            # Use custom prompt or fall back to class default
+            active_prompt = system_prompt or self.SYSTEM_INSTRUCTION
 
             # Build the prompt with optional state filter
             prompt = question
@@ -406,7 +411,7 @@ NEVER:
                 model=model_name,
                 contents=prompt,
                 config={
-                    "system_instruction": self.SYSTEM_INSTRUCTION,
+                    "system_instruction": active_prompt,
                     "tools": [{
                         "file_search": {
                             "file_search_store_names": [store_name]
@@ -443,7 +448,8 @@ NEVER:
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Generator[dict, None, None]:
         """
         Query the RAG system with streaming response
@@ -453,6 +459,7 @@ NEVER:
             state: Optional state filter (e.g., 'CO', 'GA', 'TN')
             context: Optional additional context
             model: Optional Gemini model to use (defaults to settings.GEMINI_MODEL)
+            system_prompt: Optional custom system instruction (overrides SYSTEM_INSTRUCTION)
 
         Yields:
             Dicts with incremental response data:
@@ -470,6 +477,9 @@ NEVER:
             # Use provided model or fall back to settings
             model_name = model or settings.GEMINI_MODEL
 
+            # Use custom prompt or fall back to class default
+            active_prompt = system_prompt or self.SYSTEM_INSTRUCTION
+
             # Build the prompt with optional state filter
             prompt = question
             if state:
@@ -484,7 +494,7 @@ NEVER:
                 model=model_name,
                 contents=prompt,
                 config={
-                    "system_instruction": self.SYSTEM_INSTRUCTION,
+                    "system_instruction": active_prompt,
                     "tools": [{
                         "file_search": {
                             "file_search_store_names": [store_name]

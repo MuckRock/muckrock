@@ -277,7 +277,8 @@ NEVER:
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Dict[str, Any]:
         """Query using Responses API with file search"""
         self._check_api_enabled()
@@ -285,6 +286,9 @@ NEVER:
         try:
             # Get vector store
             store_id = self.get_or_create_store()
+
+            # Use custom prompt or fall back to class default
+            active_prompt = system_prompt or self.SYSTEM_INSTRUCTION
 
             # Build input with state filter and system instruction
             input_text = question
@@ -294,7 +298,7 @@ NEVER:
             # Use Responses API with file_search tool
             response = self.client.responses.create(
                 model=model or self.model,
-                input=f"{self.SYSTEM_INSTRUCTION}\n\n{input_text}",
+                input=f"{active_prompt}\n\n{input_text}",
                 tools=[{
                     "type": "file_search",
                     "vector_store_ids": [store_id]
@@ -541,7 +545,8 @@ NEVER:
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Generator[Dict[str, Any], None, None]:
         """
         Query with streaming response using Responses API.
@@ -555,6 +560,9 @@ NEVER:
             # Get vector store
             store_id = self.get_or_create_store()
 
+            # Use custom prompt or fall back to class default
+            active_prompt = system_prompt or self.SYSTEM_INSTRUCTION
+
             # Build input with state filter and system instruction
             input_text = question
             if state:
@@ -565,7 +573,7 @@ NEVER:
             try:
                 stream = self.client.responses.create(
                     model=model or self.model,
-                    input=f"{self.SYSTEM_INSTRUCTION}\n\n{input_text}",
+                    input=f"{active_prompt}\n\n{input_text}",
                     tools=[{
                         "type": "file_search",
                         "vector_store_ids": [store_id]

@@ -173,7 +173,8 @@ class GeminiProvider(RAGProviderBase):
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Dict[str, Any]:
         """Query using Gemini File Search"""
         self._check_api_enabled()
@@ -184,7 +185,8 @@ class GeminiProvider(RAGProviderBase):
                 question=question,
                 state=state,
                 context=context,
-                model=model or self.model
+                model=model or self.model,
+                system_prompt=system_prompt
             )
 
             # Adapt response to match provider interface
@@ -217,7 +219,8 @@ class GeminiProvider(RAGProviderBase):
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Generator[Dict[str, Any], None, None]:
         """Query with streaming response using Gemini File Search"""
         self._check_api_enabled()
@@ -228,7 +231,8 @@ class GeminiProvider(RAGProviderBase):
                 question=question,
                 state=state,
                 context=context,
-                model=model or self.model
+                model=model or self.model,
+                system_prompt=system_prompt
             ):
                 # Pass through chunks as-is (already in correct format)
                 if chunk['type'] == 'chunk':

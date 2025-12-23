@@ -192,6 +192,12 @@ class QueryRequestSerializer(serializers.Serializer):
         allow_blank=True,
         help_text="Optional model to use (e.g., 'gemini-2.0-flash-live', 'gpt-4o'). Defaults to provider's default model."
     )
+    system_prompt = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Optional custom system instruction to override default FOIA Coach prompt"
+    )
 
 
 class CitationSerializer(serializers.Serializer):

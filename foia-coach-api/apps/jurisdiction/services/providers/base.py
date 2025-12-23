@@ -131,7 +131,8 @@ NEVER:
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Query the RAG system with a question.
@@ -141,6 +142,7 @@ NEVER:
             state: Optional state filter (e.g., 'CO', 'GA', 'TN')
             context: Optional conversation context
             model: Optional model override
+            system_prompt: Optional custom system instruction (overrides SYSTEM_INSTRUCTION)
 
         Returns:
             Dict with standardized response format:
@@ -163,7 +165,8 @@ NEVER:
         question: str,
         state: Optional[str] = None,
         context: Optional[dict] = None,
-        model: Optional[str] = None
+        model: Optional[str] = None,
+        system_prompt: Optional[str] = None
     ) -> Generator[Dict[str, Any], None, None]:
         """
         Query the RAG system with streaming response.
@@ -173,6 +176,7 @@ NEVER:
             state: Optional state filter
             context: Optional conversation context
             model: Optional model override
+            system_prompt: Optional custom system instruction (overrides SYSTEM_INSTRUCTION)
 
         Yields:
             Dicts with incremental response:
