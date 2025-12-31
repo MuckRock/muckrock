@@ -4,6 +4,17 @@
 import os
 
 
+def sanitize_surrogates(text):
+    """Remove surrogate characters that cannot be encoded in UTF-8.
+
+    Surrogates (U+D800 to U+DFFF) are invalid in UTF-8 and cause
+    UnicodeEncodeError when trying to encode strings containing them.
+    """
+    if not text:
+        return text
+    return text.encode("utf-8", "replace").decode("utf-8")
+
+
 def file_name_trim(name):
     """
     Total name cannot be longer than 255, but we limit the base name to 100
