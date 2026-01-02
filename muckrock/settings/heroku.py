@@ -19,6 +19,14 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 # MuckRock
 from muckrock.settings.base import *
 
+# Vite configuration for production
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": False,
+        "manifest_path": os.path.join(SITE_ROOT, "assets/dist/manifest.json"),
+    }
+}
+
 INSTALLED_APPS = ("scout_apm.django",) + INSTALLED_APPS
 USE_SCOUT = True
 

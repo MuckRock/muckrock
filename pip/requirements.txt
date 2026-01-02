@@ -226,7 +226,7 @@ django-taggit==3.1.0
     # via -r pip/requirements.in
 django-watson==1.5.5
     # via -r pip/requirements.in
-django-webpack-loader==1.8.1
+django-vite==3.0.4
     # via -r pip/requirements.in
 djangorestframework==3.14.0
     # via
