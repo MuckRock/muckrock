@@ -94,12 +94,8 @@ COMPRESS_ROOT = ASSETS_ROOT
 
 STATICFILES_DIRS = (os.path.join(SITE_ROOT, "assets"),)
 
-WEBPACK_LOADER = {
-    "DEFAULT": {
-        "BUNDLE_DIR_NAME": "bundles/",
-        "STATS_FILE": os.path.join(SITE_ROOT, "assets/webpack-stats.json"),
-    }
-}
+# DJANGO_VITE configuration is defined in environment-specific settings
+# (local.py, production.py, etc.) to properly reference DEBUG
 
 COMPRESS_OFFLINE = True
 
@@ -293,7 +289,7 @@ INSTALLED_APPS = (
     "storages",
     "taggit",
     "watson",
-    "webpack_loader",
+    "django_vite",
     "django_hosts",
     "hijack",
     "django_filters",

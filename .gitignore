@@ -22,6 +22,7 @@ bundles
 style.*.css
 .vagrant
 node_modules
+muckrock/assets/dist
 .settings.sh
 webpack-stats.json
 npm-debug.log
@@ -38,3 +39,4 @@ celerybeat-schedule
 CLAUDE.md
 /data
 .env
+.claude

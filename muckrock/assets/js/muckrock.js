@@ -20,8 +20,8 @@ import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
 import '../vendor/stacktable';
-import qq from '../vendor/fine-uploader';
-window.qq = qq;
+import '../vendor/fine-uploader';  // UMD module, attaches to window.qq
+// Note: autocomplete_light scripts are loaded via Django static files in templates
 
 import './account';
 import './checkout';
