@@ -330,6 +330,9 @@ INSTALLED_APPS = (
     "drf_spectacular",
 )
 
+# django.contrib.sites configuration
+SITE_ID = 1
+
 
 def show_toolbar(request):
     """show toolbar on the site"""
