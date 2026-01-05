@@ -35,10 +35,10 @@
                 <dfn>Sections</dfn>
                 <ul>
                     <li><a href="{% url 'news-index'%}">News</a></li>
-                    <li><a href="{% url 'project-list' %}">Projects</a></li>
-                    <li><a href="{% url 'foia-list'%}">Requests</a></li>
+                    <li><a href="{% url 'project' %}">Projects</a></li>
+                    <li><a href="{% url 'foia-root'%}">Requests</a></li>
                     <li><a href="{% url 'agency-list'%}">Agencies</a></li>
-                    <li><a href="{% url 'jurisdiction-list'%}">Jurisdictions</a></li>
+                    <li><a href="{% url 'jurisdiction-explore'%}">Jurisdictions</a></li>
                     {% if user.is_staff %}
                     <li><a href="{% url 'task-list' %}">Tasks</a></li>
                     {% endif %}
