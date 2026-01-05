@@ -36,6 +36,7 @@ celerybeat-schedule
 .vscode
 /src
 CLAUDE.md
+.claude
 /data
 .env
 foia-coach-api/media
