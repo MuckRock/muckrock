@@ -421,7 +421,7 @@ class TestOrganizationCollective(TestCase):
         group2.members.add(member)
 
         # Use resources from both groups (arbitrary order)
-        request_count = member.make_requests(20)
+        member.make_requests(20)
         member.refresh_from_db()
         group1.refresh_from_db()
         group2.refresh_from_db()
@@ -455,7 +455,7 @@ class TestOrganizationCollective(TestCase):
         group.members.add(org)
 
         # Use own, then parent, then group resources
-        request_count = org.make_requests(40)
+        org.make_requests(40)
         org.refresh_from_db()
         parent.refresh_from_db()
         group.refresh_from_db()

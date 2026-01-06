@@ -21,6 +21,7 @@ import stripe
 from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.querysets import OrganizationQuerySet
+from muckrock.squarelet.tasks import pull_data
 
 logger = logging.getLogger(__name__)
 stripe.api_version = "2015-10-16"
