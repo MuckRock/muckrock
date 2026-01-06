@@ -943,8 +943,7 @@ THUMBNAIL_PRESERVE_FORMAT = True
 # For easy thumbnails
 THUMBNAIL_PRESERVE_EXTENSIONS = ("png",)
 
-# Google Tag Manager
-USE_GOOGLE_TAG_MANAGER = boolcheck(os.environ.get("USE_GOOGLE_TAG_MANAGER", False))
+
 
 # Plaid allows programtic access to our bank account transactions
 PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")
