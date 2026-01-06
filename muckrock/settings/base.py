@@ -944,7 +944,6 @@ THUMBNAIL_PRESERVE_FORMAT = True
 THUMBNAIL_PRESERVE_EXTENSIONS = ("png",)
 
 
-
 # Plaid allows programtic access to our bank account transactions
 PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")
 PLAID_SECRET = os.environ.get("PLAID_SECRET")
