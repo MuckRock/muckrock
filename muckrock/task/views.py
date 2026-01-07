@@ -293,6 +293,7 @@ class SnailMailTaskList(TaskList):
                 task.communication.pk,
                 task.switch,
                 {"amount": task.amount},
+                None,
                 force=True,
             )
             return task
