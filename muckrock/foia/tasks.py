@@ -564,6 +564,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             batch_collision_avoidance=True,
             callback_url=callback_url,
             tags_dict={"fax_id": fax.pk, "error_count": error_count},
+            test_fail=kwargs.get("test_fail"),
         )
         fax.fax_id = results.data.id
         fax.save()
