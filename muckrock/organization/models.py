@@ -253,43 +253,31 @@ class Organization(models.Model):
             parent = None
         groups = organization.groups.filter(share_resources=True).select_for_update()
 
-        request_count["monthly"] = min(amount, organization.monthly_requests)
-        amount -= request_count["monthly"]
+        def deduct_requests(amount, organization, field):
+            # amount is the number of requests left to deduct
+            # get the minimum of that and how many are left in the field
+            # we are currently looking at
+            deduct_amount = min(amount, getattr(organization, field))
+            # deduct that amount from both amount and the organization field
+            amount -= deduct_amount
+            setattr(organization, field, getattr(organization, field) - deduct_amount)
+            return amount, deduct_amount
 
-        request_count["regular"] = min(amount, organization.number_requests)
-        amount -= request_count["regular"]
-
-        organization.monthly_requests -= request_count["monthly"]
-        organization.number_requests -= request_count["regular"]
-        organization.save()
-
+        organizations = [organization]
         if parent:
-            parent_monthly = min(amount, parent.monthly_requests)
-            request_count["monthly"] += parent_monthly
-            amount -= parent_monthly
-            parent.monthly_requests -= parent_monthly
+            organizations.append(parent)
+        organizations.extend(groups)
 
-            parent_regular = min(amount, parent.number_requests)
-            request_count["regular"] += parent_regular
-            amount -= parent_regular
-            parent.number_requests -= parent_regular
-            parent.save()
-
-        for group in groups:
-            # This is taking from groups in an arbitrary order
-            # This is not ideal, but having multiple groups should be rare
-            # This code should also be replaced soon with a way to let the user
-            # choose the source
-            group_monthly = min(amount, group.monthly_requests)
-            request_count["monthly"] += group_monthly
-            amount -= group_monthly
-            group.monthly_requests -= group_monthly
-
-            group_regular = min(amount, group.number_requests)
-            request_count["regular"] += group_regular
-            amount -= group_regular
-            group.number_requests -= group_regular
-            group.save()
+        for current_organization in organizations:
+            for field, count in [
+                ("monthly_requests", "monthly"),
+                ("number_requests", "regular"),
+            ]:
+                amount, deduct_amount = deduct_requests(
+                    amount, current_organization, field
+                )
+                request_count[count] += deduct_amount
+                current_organization.save()
 
         if amount > 0:
             raise InsufficientRequestsError(amount)
