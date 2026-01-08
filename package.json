@@ -6,7 +6,7 @@
   "main": "muckrock/assets/entry.js",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build --logLevel warn",
     "preview": "vite preview",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
     "heroku-postbuild": "npm run build"
