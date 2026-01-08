@@ -242,8 +242,30 @@ class Organization(models.Model):
 
     @transaction.atomic
     def make_requests(self, amount):
-        """Try to deduct requests from the organization's balance"""
+        """Try to deduct requests from the organization's balance
+
+        Consumes requests in priority order:
+        1. Own monthly requests
+        2. Own regular (purchased) requests
+        3. Parent monthly requests (if parent.share_resources=True)
+        4. Parent regular requests (if parent.share_resources=True)
+        5. Group monthly requests (for each group where group.share_resources=True)
+        6. Group regular requests (for each group where group.share_resources=True)
+
+        Args:
+            amount: Number of requests to consume
+
+        Returns:
+            dict: {"monthly": count, "regular": count} - breakdown of consumed requests
+
+        Raises:
+            InsufficientRequestsError: If not enough requests available across
+            all sources
+        """
         request_count = {"monthly": 0, "regular": 0}
+
+        # Lock this organization and related organizations for update to prevent
+        # race conditions
         organization = Organization.objects.select_for_update().get(pk=self.pk)
         if organization.parent and organization.parent.share_resources:
             parent = Organization.objects.select_for_update().get(
@@ -254,21 +276,24 @@ class Organization(models.Model):
         groups = organization.groups.filter(share_resources=True).select_for_update()
 
         def deduct_requests(amount, organization, field):
-            # amount is the number of requests left to deduct
-            # get the minimum of that and how many are left in the field
-            # we are currently looking at
+            """Helper to deduct requests from a specific field on an organization"""
+            # Calculate how much to deduct: take up to the amount requested,
+            # but no more than what's available in this field
             deduct_amount = min(amount, getattr(organization, field))
-            # deduct that amount from both amount and the organization field
             amount -= deduct_amount
             setattr(organization, field, getattr(organization, field) - deduct_amount)
+            # Return remaining amount needed and how much we deducted
             return amount, deduct_amount
 
+        # Build list of organizations to consume from in priority order
         organizations = [organization]
         if parent:
             organizations.append(parent)
         organizations.extend(groups)
 
+        # Consume requests from each organization in priority order
         for current_organization in organizations:
+            # For each organization, consume monthly requests first, then regular
             for field, count in [
                 ("monthly_requests", "monthly"),
                 ("number_requests", "regular"),
@@ -277,9 +302,15 @@ class Organization(models.Model):
                     amount, current_organization, field
                 )
                 request_count[count] += deduct_amount
-                current_organization.save()
+                if amount == 0:
+                    break
+            current_organization.save()
+            if amount == 0:
+                break
 
         if amount > 0:
+            # Raising an error here will cancel the current atomic transaction
+            # No changes to the organizations will be committed to the database
             raise InsufficientRequestsError(amount)
 
         return request_count
