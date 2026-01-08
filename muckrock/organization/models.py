@@ -81,6 +81,32 @@ class Organization(models.Model):
         null=True,
     )
 
+    members = models.ManyToManyField(
+        to="self",
+        related_name="groups",
+        help_text=(
+            "Organizations which are members of this organization "
+            "(useful for trade associations or other member groups)"
+        ),
+        blank=True,
+        symmetrical=False,
+    )
+    parent = models.ForeignKey(
+        to="self",
+        on_delete=models.PROTECT,
+        related_name="children",
+        help_text="The parent organization",
+        blank=True,
+        null=True,
+    )
+    share_resources = models.BooleanField(
+        default=True,
+        help_text=(
+            "Share resources (subscriptions, credits) with all children and member "
+            "organizations. Global toggle that applies to all relationships."
+        ),
+    )
+
     def __str__(self):
         if self.individual:
             return "{} (Individual)".format(self.name)
@@ -107,9 +133,9 @@ class Organization(models.Model):
         """Is the user an admin of this organization?"""
         return self.users.filter(pk=user.pk, memberships__admin=True).exists()
 
+    @transaction.atomic
     def update_data(self, data):
         """Set updated data from squarelet"""
-
         logger.info("update data org %s %s", self.pk, data)
 
         if data.get("merged") and not self.merged:
@@ -159,6 +185,12 @@ class Organization(models.Model):
             self.monthly_requests = self.requests_per_month
             self.date_update = date_update
 
+        # set relationships
+        if data.get("parent"):
+            self.parent, _ = Organization.objects.squarelet_update_or_create(
+                data["parent"]["uuid"], data["parent"]
+            )
+
         # update the remaining fields
         fields = [
             "name",
@@ -169,11 +201,21 @@ class Organization(models.Model):
             "payment_failed",
             "avatar_url",
             "verified_journalist",
+            "share_resources",
         ]
         for field in fields:
             if field in data:
                 setattr(self, field, data[field])
         self.save()
+
+        if data.get("groups"):
+            groups = []
+            for group_data in data["groups"]:
+                group, _ = Organization.objects.squarelet_update_or_create(
+                    group_data["uuid"], group_data
+                )
+                groups.append(group)
+            self.groups.set(groups)
 
     @transaction.atomic
     def merge(self, uuid):
@@ -189,26 +231,91 @@ class Organization(models.Model):
         ).update(active=True)
         self.memberships.all().delete()
 
+        self.children.update(parent=other)
+
+        groups = self.groups.all()
+        other.groups.add(*groups)
+        self.groups.all().delete()
+
+        members = self.members.all()
+        other.members.add(*members)
+        self.members.all().delete()
+
         self.merged = other
 
     @transaction.atomic
     def make_requests(self, amount):
-        """Try to deduct requests from the organization's balance"""
+        """Try to deduct requests from the organization's balance
+
+        Consumes requests in priority order:
+        1. Own monthly requests
+        2. Own regular (purchased) requests
+        3. Parent monthly requests (if parent.share_resources=True)
+        4. Parent regular requests (if parent.share_resources=True)
+        5. Group monthly requests (for each group where group.share_resources=True)
+        6. Group regular requests (for each group where group.share_resources=True)
+
+        Args:
+            amount: Number of requests to consume
+
+        Returns:
+            dict: {"monthly": count, "regular": count} - breakdown of consumed requests
+
+        Raises:
+            InsufficientRequestsError: If not enough requests available across
+            all sources
+        """
         request_count = {"monthly": 0, "regular": 0}
+
+        # Lock this organization and related organizations for update to prevent
+        # race conditions
         organization = Organization.objects.select_for_update().get(pk=self.pk)
+        if organization.parent and organization.parent.share_resources:
+            parent = Organization.objects.select_for_update().get(
+                pk=organization.parent_id
+            )
+        else:
+            parent = None
+        groups = organization.groups.filter(share_resources=True).select_for_update()
 
-        request_count["monthly"] = min(amount, organization.monthly_requests)
-        amount -= request_count["monthly"]
+        def deduct_requests(amount, organization, field):
+            """Helper to deduct requests from a specific field on an organization"""
+            # Calculate how much to deduct: take up to the amount requested,
+            # but no more than what's available in this field
+            deduct_amount = min(amount, getattr(organization, field))
+            amount -= deduct_amount
+            setattr(organization, field, getattr(organization, field) - deduct_amount)
+            # Return remaining amount needed and how much we deducted
+            return amount, deduct_amount
 
-        request_count["regular"] = min(amount, organization.number_requests)
-        amount -= request_count["regular"]
+        # Build list of organizations to consume from in priority order
+        organizations = [organization]
+        if parent:
+            organizations.append(parent)
+        organizations.extend(groups)
+
+        # Consume requests from each organization in priority order
+        for current_organization in organizations:
+            # For each organization, consume monthly requests first, then regular
+            for field, count in [
+                ("monthly_requests", "monthly"),
+                ("number_requests", "regular"),
+            ]:
+                amount, deduct_amount = deduct_requests(
+                    amount, current_organization, field
+                )
+                request_count[count] += deduct_amount
+                if amount == 0:
+                    break
+            current_organization.save()
+            if amount == 0:
+                break
 
         if amount > 0:
+            # Raising an error here will cancel the current atomic transaction
+            # No changes to the organizations will be committed to the database
             raise InsufficientRequestsError(amount)
 
-        organization.monthly_requests -= request_count["monthly"]
-        organization.number_requests -= request_count["regular"]
-        organization.save()
         return request_count
 
     def return_requests(self, amounts):
@@ -221,6 +328,22 @@ class Organization(models.Model):
         """Add requests"""
         self.number_requests = F("number_requests") + amount
         self.save()
+
+    def get_total_number_requests(self):
+        number_requests = self.number_requests
+        if self.parent and self.parent.share_resources:
+            number_requests += self.parent.number_requests
+        for group in self.groups.filter(share_resources=True):
+            number_requests += group.number_requests
+        return number_requests
+
+    def get_total_monthly_requests(self):
+        monthly_requests = self.monthly_requests
+        if self.parent and self.parent.share_resources:
+            monthly_requests += self.parent.monthly_requests
+        for group in self.groups.filter(share_resources=True):
+            monthly_requests += group.monthly_requests
+        return monthly_requests
 
     def pay(self, amount, description, token, save_card, metadata, fee_amount=0):
         """Pay via Squarelet API"""
