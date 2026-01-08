@@ -1,7 +1,6 @@
 {% load hosts %}
-{% load compress %}
 {% load static %}
-{% load render_bundle from webpack_loader %}
+{% load django_vite %}
 
 <!doctype html>
 <html>
@@ -13,14 +12,12 @@
         <meta name="description" content="{% block description %}{% endblock %}">
         <meta name="author" content="{% block content_author %}FOIA Machine{% endblock %}">
         <title>{% block title %}FOIA Machine{% endblock %}</title>
-        {% compress css %}
+            <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+            <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
+            <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+            {% vite_asset 'muckrock/foiamachine/assets/entry.js' %}
             {% block styles %}
-                <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
-                <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
-                <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
-                {% render_bundle 'foiamachine' 'css' %}
             {% endblock %}
-        {% endcompress %}
         <link rel="shortcut icon" href="{% static 'foiamachine/icons/favicon.ico' %}" />
         <link rel="apple-touch-icon-precomposed" href="{% static 'foiamachine/icons/favicon-152.png' %}">
         <link rel="mask-icon" href="{% static 'foiamachine/icons/favicon.svg' %}" color="#fb5238" />
@@ -77,14 +74,11 @@ mixpanel.init("{{ mp_token }}", {debug:true});</script><!-- end Mixpanel -->
         </nav>
         <!-- Scripts -->
 
-        {% compress js %}
             {% block scripts %}
-                {% render_bundle 'foiamachine' 'js' %}
                 <script type="text/javascript" src="{% static 'vendor/autocomplete_light/select2.full.js' %}"></script>
                 <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete_light.js' %}"></script>
                 <script type="text/javascript" src="{% static 'vendor/autocomplete_light/select2.js' %}"></script>
             {% endblock %}
-        {% endcompress %}
         {% if request.session.session_state %}
           <iframe src="{% url "acct-rp-iframe" %}" frameborder="0" width="0" height="0"></iframe>
       {% endif %}

@@ -90,27 +90,12 @@ USE_I18N = False
 STATIC_ROOT = os.path.join(SITE_ROOT, "static")
 MEDIA_ROOT = os.path.join(STATIC_ROOT, "media")
 ASSETS_ROOT = os.path.join(SITE_ROOT, "assets")
-COMPRESS_ROOT = ASSETS_ROOT
 
 STATICFILES_DIRS = (os.path.join(SITE_ROOT, "assets"),)
 
-WEBPACK_LOADER = {
-    "DEFAULT": {
-        "BUNDLE_DIR_NAME": "bundles/",
-        "STATS_FILE": os.path.join(SITE_ROOT, "assets/webpack-stats.json"),
-    }
-}
+# DJANGO_VITE configuration is defined in environment-specific settings
+# (local.py, production.py, etc.) to properly reference DEBUG
 
-COMPRESS_OFFLINE = True
-
-COMPRESS_CSS_FILTERS = [
-    "compressor.filters.css_default.CssAbsoluteFilter",
-    "compressor.filters.cssmin.CSSMinFilter",
-]
-# Don't do any JS compression here
-# 1. It can cause bugs which means the resulting JS has a syntax error
-# 2. We compress the javascript in the webpack config when built for production
-COMPRESS_JS_FILTERS = []
 
 THUMBNAIL_CACHE_DIMENSIONS = True
 
@@ -122,17 +107,9 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "muckrock.core.storage.CachedS3Boto3Storage",
     },
-    "compressor": {
-        "BACKEND": "muckrock.core.storage.CachedS3Boto3Storage",
-    },
-    "compressor-offline": {
-        "BACKEND": "muckrock.core.storage.OfflineManifestFileStorage",
-    },
 }
 THUMBNAIL_DEFAULT_STORAGE = STORAGES["default"]["BACKEND"]
 THUMBNAIL_STORAGE = STORAGES["default"]["BACKEND"]
-COMPRESS_STORAGE = STORAGES["compressor"]["BACKEND"]
-COMPRESS_OFFLINE_MANIFEST_STORAGE = STORAGES["compressor-offline"]["BACKEND"]
 CLEAN_S3_ON_FOIA_DELETE = True
 
 # Settings for static bucket storage
@@ -147,8 +124,6 @@ STATIC_URL = (
     if AWS_S3_CUSTOM_DOMAIN
     else f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
 )
-COMPRESS_URL = STATIC_URL
-COMPRESS_ENABLED = True
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_HEADERS = {
@@ -185,7 +160,6 @@ else:
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    "compressor.finders.CompressorFinder",
 )
 
 TEMPLATES = [
@@ -274,7 +248,6 @@ INSTALLED_APPS = (
     "django.contrib.humanize",
     "django.contrib.staticfiles",
     "django.forms",
-    "compressor",
     "corsheaders",
     "debug_toolbar",
     "django_premailer",
@@ -293,7 +266,7 @@ INSTALLED_APPS = (
     "storages",
     "taggit",
     "watson",
-    "webpack_loader",
+    "django_vite",
     "django_hosts",
     "hijack",
     "django_filters",

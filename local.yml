@@ -23,6 +23,8 @@ services:
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
+    ports:
+      - "8000:80"
     command: /start
     networks:
       default:
@@ -75,6 +77,28 @@ services:
         aliases: []
       squarelet_default:
         aliases: []
+
+  muckrock_vite:
+    build:
+      context: .
+      dockerfile: ./compose/local/vite.Dockerfile
+    image: muckrock_local_vite
+    restart: always
+    ports:
+      - "4201:4200"
+    command: "npm run dev"
+    volumes:
+      - ".:/app"
+      - "/app/node_modules"
+    networks:
+      default:
+        aliases:
+          - internal.dev.muckrock.com
+          - internal.dev.foiamachine.org
+      squarelet_default:
+        aliases:
+          - internal.dev.muckrock.com
+          - internal.dev.foiamachine.org
 
 networks:
   squarelet_default:

@@ -14,6 +14,14 @@ from muckrock.settings.base import *
 COMPRESS_ENABLED = False
 CACHES["default"]["BACKEND"] = "django.core.cache.backends.dummy.DummyCache"
 
+# Vite configuration for tests - use built manifest
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": False,
+        "manifest_path": os.path.join(SITE_ROOT, "assets/dist/manifest.json"),
+    }
+}
+
 PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 
 SITE_ID = 1

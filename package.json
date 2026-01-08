@@ -1,15 +1,15 @@
 {
   "name": "muckrock",
   "version": "1.0.0",
+  "type": "module",
   "description": "Frontend code for MuckRock",
   "main": "muckrock/assets/entry.js",
   "scripts": {
-    "build": "webpack --config config/webpack.config.js --progress --color",
-    "build:production": "NODE_ENV=production webpack --config config/webpack.config.production.js --color",
-    "build:staging": "NODE_ENV=staging webpack --config config/webpack.config.production.js --color",
-    "watch": "webpack --config config/webpack.config.js --progress --color --watch",
+    "dev": "vite --host",
+    "build": "vite build --logLevel warn",
+    "preview": "vite preview",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
-    "heroku-postbuild": "npm run build:production"
+    "heroku-postbuild": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -22,29 +22,12 @@
   },
   "homepage": "https://github.com/MuckRock/muckrock#readme",
   "engines": {
-    "node": "18.16.0"
+    "node": "22"
   },
   "devDependencies": {
-    "@babel/core": "^7.21.5",
-    "@babel/preset-env": "^7.21.5",
-    "@babel/preset-react": "^7.18.6",
-    "babel-loader": "^9.1.2",
-    "core-js": "^3.30.1",
-    "css-loader": "^6.7.3",
     "eslint": "^2.7.0",
-    "expose-loader": "^4.1.0",
-    "file-loader": "^6.2.0",
-    "json-loader": "^0.5.7",
-    "mini-css-extract-plugin": "^2.7.5",
-    "node-sass": "^9.0.0",
-    "sass-loader": "^14.0.0",
-    "style-loader": "^0.13.0",
-    "terser-webpack-plugin": "^5.3.8",
-    "url-loader": "^0.5.8",
-    "webpack": "^5.81.0",
-    "webpack-bundle-tracker": "^1.8.1",
-    "webpack-cli": "^5.0.2",
-    "webpack-merge": "^0.14.1"
+    "sass": "^1.77.0",
+    "vite": "^7.0.0"
   },
   "dependencies": {
     "autonumeric": "^1.9.43",

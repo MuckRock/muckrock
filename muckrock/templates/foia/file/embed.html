@@ -1,5 +1,4 @@
-{% load compress %}
-{% load render_bundle from webpack_loader %}
+{% load django_vite %}
 {% load static %}
 {% with file=object %}
 <!doctype html>
@@ -7,25 +6,7 @@
     <head>
         <title>{{file.title}} &bull; MuckRock</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {% compress css %}
-        {% render_bundle 'docViewer' 'css' %}
-        <style type="text/css">
-            /* Typefaces are loaded inside the base template so that they can be referenced
-            by the correct URL. In production, the typefaces should be served from a CDN. */
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
-                font-weight: 400;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Source Sans Pro';
-                src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
-                font-weight: 500 600;
-                font-style: normal;
-            }
-        </style>
-        {% endcompress %}
+        {% vite_asset 'muckrock/assets/js/docViewer.js' %}
     </head>
     <body>
         <header class="mb0">

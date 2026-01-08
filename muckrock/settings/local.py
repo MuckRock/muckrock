@@ -10,6 +10,17 @@ from muckrock.settings.base import *
 
 DEBUG = True
 
+# Vite configuration for local development
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": DEBUG,
+        "dev_server_protocol": "http",
+        "dev_server_host": "localhost",
+        "dev_server_port": 4201,
+        "manifest_path": os.path.join(SITE_ROOT, "assets/dist/manifest.json"),
+    }
+}
+
 # Loads static files locally
 STORAGES["staticfiles"][
     "BACKEND"
