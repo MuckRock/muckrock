@@ -136,8 +136,6 @@ class Organization(models.Model):
     @transaction.atomic
     def update_data(self, data):
         """Set updated data from squarelet"""
-        from muckrock.squarelet.tasks import pull_data
-
         logger.info("update data org %s %s", self.pk, data)
 
         if data.get("merged") and not self.merged:
@@ -189,13 +187,9 @@ class Organization(models.Model):
 
         # set relationships
         if data.get("parent"):
-            pull_data("organization", data["parent"])
-            self.parent = Organization.objects.filter(uuid=data["parent"]).first()
-
-        if data.get("groups"):
-            for group in data["groups"]:
-                pull_data("organization", group)
-            self.groups.set(Organization.objects.filter(uuid__in=data["groups"]))
+            self.parent, _ = Organization.objects.squarelet_update_or_create(
+                data["parent"]["uuid"], data["parent"]
+            )
 
         # update the remaining fields
         fields = [
@@ -213,6 +207,15 @@ class Organization(models.Model):
             if field in data:
                 setattr(self, field, data[field])
         self.save()
+
+        if data.get("groups"):
+            groups = []
+            for group_data in data["groups"]:
+                group, _ = Organization.objects.squarelet_update_or_create(
+                    group_data["uuid"], group_data
+                )
+                groups.append(group)
+            self.groups.set(groups)
 
     @transaction.atomic
     def merge(self, uuid):
