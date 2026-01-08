@@ -13,7 +13,6 @@ django-anymail[mailgun] # Use for sending email on production
 django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
-django-compressor # Compress all JS and CSS assets into a single file
 django-constance[database] # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-debug-toolbar # Toolbar for debugging
@@ -34,8 +33,8 @@ django-simple-history # Jurisdiction page history
 django-sslify # Force SSL everywhere
 django-storages # Store files on S3
 django-taggit # Used for tagging
+django-vite # Used for loading Vite bundles
 django-watson # Used for search
-django-webpack-loader # Used for loading Webpack bundles
 django<5.0 # Django is kinda important...
 djangorestframework # The API framework
 djangorestframework_simplejwt # JWT auth for DRF

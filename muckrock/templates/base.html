@@ -1,5 +1,4 @@
 {% load static %}
-{% load compress %}
 {% load django_vite %}
 {% load hijack_tags %}
 {% load opensearch_tags %}
@@ -23,46 +22,10 @@
     <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
     <link rel="mask-icon"           href="{% static 'icons/favicon.svg' %}" color="#367AF0" />
     <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
-    {% compress css %}
-      <style type="text/css">
-/* Typefaces are loaded inside the base template so that they can be referenced
-   by the correct URL. In production, the typefaces should be served from a CDN. */
-@font-face {
-  font-family: 'Source Sans Pro';
-  src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
-  font-weight: 400;
-  font-style: normal;
-}
-            @font-face {
-              font-family: 'Source Sans Pro';
-              src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
-              font-weight: 400;
-              font-style: italic;
-            }
-            @font-face {
-              font-family: 'Source Sans Pro';
-              src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
-              font-weight: 500 600;
-              font-style: normal;
-            }
-            @font-face {
-              font-family: 'Source Sans Pro';
-              src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
-              font-weight: 500 600;
-              font-style: italic;
-            }
-            @font-face {
-              font-family: 'Source Code Pro';
-              src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
-              font-weight: normal;
-              font-style: normal;
-            }
-      </style>
-      <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
-      <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
-      <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
-      <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
-    {% endcompress %}
+    <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
+    <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+    <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
+    <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
     {% vite_asset 'muckrock/assets/entry.js' %}
     {% block styles %}
     {% endblock %}

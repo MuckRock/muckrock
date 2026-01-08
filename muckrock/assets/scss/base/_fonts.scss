@@ -1,0 +1,46 @@
+/*
+** _fonts.scss
+**
+** Font-face declarations for Source Sans Pro and Source Code Pro
+** Note: Font files are served from Django's static directory, not bundled by Vite
+*/
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/static/fonts/SourceSansPro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/static/fonts/SourceSansPro-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/static/fonts/SourceSansPro-Semibold.ttf') format('truetype');
+  font-weight: 500 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans Pro';
+  src: url('/static/fonts/SourceSansPro-SemiboldItalic.ttf') format('truetype');
+  font-weight: 500 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Code Pro';
+  src: url('/static/fonts/SourceCodePro-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
