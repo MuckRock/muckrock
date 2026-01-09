@@ -473,46 +473,6 @@ def classify_status(task_pk, **kwargs):
             resolve_gloo_if_possible(resp_task, extracted_data)
             resp_task.save()
 
-
-def _handle_fax_exception(exc, fax, comm, error_count):
-    """Internal helper to handle errors from the Phaxio API call."""
-    error_type = getattr(exc, "error_type", None)
-    error_code = str(getattr(exc, "error_code", exc))
-
-    FaxError.objects.create(
-        fax=fax,
-        datetime=timezone.now(),
-        recipient=comm.foia.fax,
-        error_type=error_type or "apiError",
-        error_code=error_code,
-    )
-
-    review_task_codes = {"115", "73", "49", "34"}
-    if error_code in review_task_codes:
-        comm.foia.fax.status = "error"
-        comm.foia.fax.save()
-        ReviewAgencyTask.objects.ensure_one_created(
-            agency=comm.foia.agency,
-            resolved=False,
-            source="fax",
-        )
-    elif error_type in {"documentConversionError", "generalError", "fatalError"}:
-        raise exc
-    else:
-        logger.warning("Send fax error, will retry: %s", exc, exc_info=True)
-        send_fax.retry(
-            countdown=300,
-            args=[
-                comm.pk,
-                fax.communication.subject,
-                fax.communication.body,
-                error_count,
-            ],
-            kwargs={},
-            exc=exc,
-        )
-
-
 @shared_task(
     ignore_result=True,
     max_retries=5,
@@ -571,7 +531,7 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
 
     # There is no exception type provided by the wrapper, so we have raise general
     except Exception as exc:  # pylint: disable=broad-except
-        _handle_fax_exception(exc, fax, comm, error_count)
+        raise exc
     finally:
         if os.path.exists(tmp_file_path):
             os.remove(tmp_file_path)
