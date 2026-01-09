@@ -48,7 +48,6 @@ from muckrock.communication.models import (
     Check,
     EmailCommunication,
     FaxCommunication,
-    FaxError,
     MailCommunication,
     PortalCommunication,
 )
@@ -64,7 +63,7 @@ from muckrock.foia.models import (
     RawEmail,
 )
 from muckrock.gloo.app.process_request import RequestStatus, process_request
-from muckrock.task.models import ResponseTask, ReviewAgencyTask, SnailMailTask
+from muckrock.task.models import ResponseTask, SnailMailTask
 from muckrock.task.pdf import LobPDF
 
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
@@ -473,6 +472,7 @@ def classify_status(task_pk, **kwargs):
             resolve_gloo_if_possible(resp_task, extracted_data)
             resp_task.save()
 
+
 @shared_task(
     ignore_result=True,
     max_retries=5,
@@ -528,10 +528,6 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
         )
         fax.fax_id = results.data.id
         fax.save()
-
-    # There is no exception type provided by the wrapper, so we have raise general
-    except Exception as exc:  # pylint: disable=broad-except
-        raise exc
     finally:
         if os.path.exists(tmp_file_path):
             os.remove(tmp_file_path)
