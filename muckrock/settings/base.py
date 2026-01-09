@@ -130,7 +130,14 @@ AWS_HEADERS = {
     "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
     "Cache-Control": "max-age=94608000",
 }
+# Note: AWS_DEFAULT_ACL is kept for backwards compatibility with other storage classes
+# but CachedS3Boto3Storage overrides this to None to work with modern S3 security
 AWS_DEFAULT_ACL = os.environ.get("AWS_STORAGE_DEFAULT_ACL", "public-read")
+# Modern way to set object parameters for S3
+# Works with AWS S3 buckets that have "Block Public Access" enabled
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": "max-age=94608000",
+}
 AWS_S3_MAX_MEMORY_SIZE = int(os.environ.get("AWS_S3_MAX_MEMORY_SIZE", 16 * 1024 * 1024))
 AWS_S3_MIN_PART_SIZE = int(os.environ.get("AWS_S3_MIN_PART_SIZE", 16 * 1024 * 1024))
 

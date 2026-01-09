@@ -15,10 +15,11 @@ from storages.backends.s3boto3 import S3Boto3Storage
 class CachedS3Boto3Storage(S3Boto3Storage):
     """
     S3 storage backend for static files that also saves files locally.
+    Files inherit the bucket's public access policy rather than setting per-object ACLs.
+    This works with modern AWS S3 security settings that block public ACLs.
     """
 
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-    default_acl = settings.AWS_DEFAULT_ACL
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
