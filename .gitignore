@@ -38,3 +38,5 @@ celerybeat-schedule
 CLAUDE.md
 /data
 .env
+.claude
+foia-coach-*
