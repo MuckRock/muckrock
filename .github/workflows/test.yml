@@ -19,8 +19,6 @@ env:
   JWT_VERIFYING_KEY: 'tk'
   OPENAI_API_KEY: 'tk'
   SQUARELET_SECRET: ${{secrets.SQUARELET_SECRET}}
-  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-  AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
 jobs:
   check:
@@ -124,7 +122,4 @@ jobs:
       - name: Pytest
         run: pytest muckrock
         env:
-          # use the credentials for the service container
-          PG_USER: ${{secrets.PG_USER}}
-          PG_PASSWORD: ${{secrets.PG_PASSWORD}}
           DATABASE_URL: postgresql://test:postgres@localhost:5432/muckrock
