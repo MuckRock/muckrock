@@ -4,10 +4,12 @@ Automate some parts of GovQA portal handling
 
 # Django
 from django.conf import settings
+from django.utils import timezone
 
 # Standard Library
 import logging
 import sys
+from datetime import timedelta
 
 # Third Party
 import dateutil
@@ -94,6 +96,21 @@ class GovQAPortal(ManualPortal):
     def receive_msg(self, comm, **kwargs):
         """Check for attachments upon receiving a communication"""
         super().receive_msg(comm, **kwargs)
+        recent_comms_amt = comm.foia.communications.filter(
+            datetime__gt=timezone.now()
+            - timedelta(minutes=settings.GOVQA_DISABLE_TIME_LIMIT)
+        ).count()
+        if recent_comms_amt > settings.GOVQA_DISABLE_AMOUNT:
+            logger.warning(
+                "[GOVQA] FOIA: %d Comm: %d - Disabling due to %d communications in "
+                "last %d minutes.",
+                comm.foia_id,
+                comm.pk,
+                recent_comms_amt,
+                settings.GOVQA_DISABLE_TIME_LIMIT,
+            )
+            self.portal.disable_automation = True
+            self.portal.save()
         if not self.portal.disable_automation:
             portal_task.delay(self.portal.pk, "receive_msg_task", [comm.pk], kwargs)
 
