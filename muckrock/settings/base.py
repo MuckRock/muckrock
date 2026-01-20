@@ -979,3 +979,7 @@ SEND_STAFF_DIGEST = boolcheck(os.environ.get("SEND_STAFF_DIGEST", True))
 SECURE_CROSS_ORIGIN_OPENER_POLICY = os.environ.get(
     "SECURE_CROSS_ORIGIN_OPENER_POLICY", "same-origin"
 )
+
+# Settings to auto-disable the GovQA automation
+GOVQA_DISABLE_TIME_LIMIT = os.environ.get("GOVQA_DISABLE_TIME_LIMIT", 5)
+GOVQA_DISABLE_AMOUNT = os.environ.get("GOVQA_DISABLE_TIME_LIMIT", 3)
