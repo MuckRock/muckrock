@@ -982,4 +982,4 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = os.environ.get(
 
 # Settings to auto-disable the GovQA automation
 GOVQA_DISABLE_TIME_LIMIT = os.environ.get("GOVQA_DISABLE_TIME_LIMIT", 5)
-GOVQA_DISABLE_AMOUNT = os.environ.get("GOVQA_DISABLE_TIME_LIMIT", 3)
+GOVQA_DISABLE_AMOUNT = os.environ.get("GOVQA_DISABLE_AMOUNT", 3)
