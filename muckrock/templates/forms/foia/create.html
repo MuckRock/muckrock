@@ -176,7 +176,7 @@
               </p>
               <p>
                 You have
-                {% if organization.requests_per_month > 0 %}
+                {% if organization.get_total_monthly_requests > 0 %}
                   <strong>{{ requests_left.monthly }}</strong>
                   monthly requests left and
                 {% endif %}
