@@ -26,6 +26,7 @@ import os
 import os.path
 import re
 import sys
+import tempfile
 from datetime import date, datetime, time
 from random import randint
 
@@ -40,7 +41,6 @@ from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
 from phaxio import PhaxioApi
-from phaxio.exceptions import PhaxioError
 from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
@@ -48,7 +48,6 @@ from muckrock.communication.models import (
     Check,
     EmailCommunication,
     FaxCommunication,
-    FaxError,
     MailCommunication,
     PortalCommunication,
 )
@@ -64,7 +63,7 @@ from muckrock.foia.models import (
     RawEmail,
 )
 from muckrock.gloo.app.process_request import RequestStatus, process_request
-from muckrock.task.models import ResponseTask, ReviewAgencyTask, SnailMailTask
+from muckrock.task.models import ResponseTask, SnailMailTask
 from muckrock.task.pdf import LobPDF
 
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
@@ -482,7 +481,8 @@ def classify_status(task_pk, **kwargs):
 )
 def send_fax(comm_id, subject, body, error_count, **kwargs):
     """Send a fax using the Phaxio API"""
-    api = PhaxioApi(settings.PHAXIO_KEY, settings.PHAXIO_SECRET, raise_errors=True)
+
+    api = PhaxioApi(api_key=settings.PHAXIO_KEY, api_secret=settings.PHAXIO_SECRET)
 
     try:
         comm = FOIACommunication.objects.get(pk=comm_id)
@@ -495,62 +495,42 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             exc=exc,
         )
 
-    # the fax number should always be set before calling this, if it is not
-    # it is likely a race condition and we should retry
     if comm.foia.fax is None:
         logger.info("send_fax: retry for missing fax")
         send_fax.retry(
-            countdown=300, args=[comm_id, subject, body, error_count], kwargs=kwargs
+            countdown=300,
+            args=[comm_id, subject, body, error_count],
+            kwargs=kwargs,
         )
 
-    files = [f.ffile for f in comm.files.all()]
+    # create temporary .txt file for body
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp_file:
+        tmp_file.write(body)
+        tmp_file_path = tmp_file.name
+
+    files = [f.ffile for f in comm.files.all()] + [tmp_file_path]
     callback_url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"))
 
     fax = FaxCommunication.objects.create(
         communication=comm, sent_datetime=timezone.now(), to_number=comm.foia.fax
     )
+
     try:
-        results = api.send(
+        results = api.Fax.send(
             to=comm.foia.fax.as_e164,
             header_text=subject[:45],
-            string_data=body,
-            string_data_type="text",
             files=files,
-            batch=True,
             batch_delay=settings.PHAXIO_BATCH_DELAY,
             batch_collision_avoidance=True,
             callback_url=callback_url,
-            **{"tag[fax_id]": fax.pk, "tag[error_count]": error_count},
+            tags_dict={"fax_id": fax.pk, "error_count": error_count},
+            test_fail=kwargs.get("test_fail"),
         )
-        fax.fax_id = results["faxId"]
+        fax.fax_id = results.data.id
         fax.save()
-    except PhaxioError as exc:
-        FaxError.objects.create(
-            fax=fax,
-            datetime=timezone.now(),
-            recipient=comm.foia.fax,
-            error_type="apiError",
-            error_code=exc.args[0],
-        )
-        fatal_errors = {
-            "Phone number is not formatted correctly or invalid. "
-            "Please check the number and try again.",
-            "Phone number is not permitted.",
-        }
-        if exc.args[0] in fatal_errors:
-            comm.foia.fax.status = "error"
-            comm.foia.fax.save()
-            ReviewAgencyTask.objects.ensure_one_created(
-                agency=comm.foia.agency, resolved=False, source="fax"
-            )
-        else:
-            logger.error("Send fax error, will retry: %s", exc, exc_info=sys.exc_info())
-            send_fax.retry(
-                countdown=300,
-                args=[comm_id, subject, body, error_count],
-                kwargs=kwargs,
-                exc=exc,
-            )
+    finally:
+        if os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
 
 
 @shared_task

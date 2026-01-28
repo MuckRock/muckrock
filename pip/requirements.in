@@ -65,7 +65,7 @@ pyembed # Used for embedding in crowdsources
 pyjwkest # for oauth
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
-pyphaxio # For sending faxes through Phaxio
+phaxio # For sending faxes through Phaxio
 python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
 python-dateutil # Used for relative time deltas
 python-documentcloud # for uploading to documentcloud
