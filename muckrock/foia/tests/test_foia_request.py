@@ -34,6 +34,7 @@ from muckrock.foia.factories import (
     FOIATemplateFactory,
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
+from muckrock.foia.utils import sanitize_surrogates
 from muckrock.task.models import PaymentInfoTask, SnailMailTask
 
 
@@ -711,9 +712,6 @@ class TestSanitizeSurrogates(TestCase):
 
     def test_sanitize_surrogates_removes_surrogates(self):
         """Test that surrogate characters are replaced"""
-        # MuckRock
-        from muckrock.foia.utils import sanitize_surrogates
-
         # String with lone surrogate (U+D800)
         text_with_surrogate = "Hello \ud800 World"
         result = sanitize_surrogates(text_with_surrogate)
@@ -726,17 +724,11 @@ class TestSanitizeSurrogates(TestCase):
 
     def test_sanitize_surrogates_preserves_valid_text(self):
         """Test that valid text passes through unchanged"""
-        # MuckRock
-        from muckrock.foia.utils import sanitize_surrogates
-
         valid_text = "Hello World! Special chars: éàü 中文 🎉"
         result = sanitize_surrogates(valid_text)
         assert result == valid_text
 
     def test_sanitize_surrogates_handles_empty(self):
         """Test that empty/None values are handled"""
-        # MuckRock
-        from muckrock.foia.utils import sanitize_surrogates
-
         assert sanitize_surrogates("") == ""
         assert sanitize_surrogates(None) is None
