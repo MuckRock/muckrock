@@ -8,7 +8,7 @@ on:
       - master
 
 env:
-  SECRET_KEY: ${{secrets.SECRET_KEY}}
+  SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-test-key' }}
   DJANGO_SETTINGS_MODULE: muckrock.settings.test
   MUCKROCK_TOKEN: token
   STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
