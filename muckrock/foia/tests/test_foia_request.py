@@ -34,6 +34,7 @@ from muckrock.foia.factories import (
     FOIATemplateFactory,
 )
 from muckrock.foia.models import FOIACommunication, FOIARequest, RawEmail
+from muckrock.foia.utils import sanitize_surrogates
 from muckrock.task.models import PaymentInfoTask, SnailMailTask
 
 
@@ -704,3 +705,30 @@ class TestFOIANotification(TestCase):
         assert (
             self.owner.notifications.get_unread().count() == unread_count + 2
         ), "The user should have two unread notifications."
+
+
+class TestSanitizeSurrogates(TestCase):
+    """Test the sanitize_surrogates utility function"""
+
+    def test_sanitize_surrogates_removes_surrogates(self):
+        """Test that surrogate characters are replaced"""
+        # String with lone surrogate (U+D800)
+        text_with_surrogate = "Hello \ud800 World"
+        result = sanitize_surrogates(text_with_surrogate)
+        # Surrogate should be replaced with ?
+        assert "\ud800" not in result
+        assert "Hello" in result
+        assert "World" in result
+        # Should be encodable as UTF-8 without error
+        result.encode("utf-8")
+
+    def test_sanitize_surrogates_preserves_valid_text(self):
+        """Test that valid text passes through unchanged"""
+        valid_text = "Hello World! Special chars: éàü 中文 🎉"
+        result = sanitize_surrogates(valid_text)
+        assert result == valid_text
+
+    def test_sanitize_surrogates_handles_empty(self):
+        """Test that empty/None values are handled"""
+        assert sanitize_surrogates("") == ""
+        assert sanitize_surrogates(None) is None
