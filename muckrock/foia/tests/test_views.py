@@ -1269,24 +1269,17 @@ class TestCommunicationViews(TestCase):
 
     def test_direct_agency_email_link_redirect(self):
         """Test that form_valid redirects with idx parameter after sending email link"""
-        # Import form here to avoid circular import issues
         from muckrock.foia.forms.comms import AgencyEmailLinkForm
         from unittest.mock import Mock
 
-        # Create a mock form with send_link method
         form = Mock(spec=AgencyEmailLinkForm)
         form.send_link = Mock()
 
-        # Set up the view
         view = FOIACommunicationDirectAgencyView()
         view.object = self.comm
 
-        # Call form_valid
         response = view.form_valid(form)
 
-        # Verify send_link was called
         form.send_link.assert_called_once()
-
-        # Verify redirect includes idx parameter
         assert response.status_code == 302
         assert response.url == f"/respond/{self.comm.pk}/"
