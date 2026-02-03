@@ -133,16 +133,6 @@ for(h=0;h<l.length;h++)c(e,l[h]);var f="set set_once union unset remove delete".
 MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
   mixpanel.init("{{ mp_token }}");</script><!-- end Mixpanel -->
 
-    {% if settings.USE_GOOGLE_TAG_MANAGER %}
-      <!-- Google Tag Manager -->
-      <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-      })(window,document,'script','dataLayer','GTM-WFBL4F2');</script>
-      <!-- End Google Tag Manager -->
-    {% endif %}
-
     {% if settings.USE_PLAUSIBLE %}
       <script defer data-domain="muckrock.com" src="https://plausible.io/js/script.js"></script>
     {% endif %}
@@ -237,12 +227,6 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
     {# iframe for OpenID Connect session management #}
     {% if request.session.session_state %}
       <iframe src="{% url "acct-rp-iframe" %}" frameborder="0" width="0" height="0"></iframe>
-    {% endif %}
-    {% if settings.USE_GOOGLE_TAG_MANAGER %}
-      <!-- Google Tag Manager (noscript) -->
-      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WFBL4F2"
-      height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-      <!-- End Google Tag Manager (noscript) -->
     {% endif %}
   </body>
 </html>

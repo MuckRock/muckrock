@@ -50,6 +50,7 @@ from muckrock.core.utils import (
 )
 from muckrock.foia.models.templates import FOIATemplate
 from muckrock.foia.querysets import FOIARequestQuerySet
+from muckrock.foia.utils import sanitize_surrogates
 from muckrock.tags.models import Tag, TaggedItemBase, normalize
 
 logger = logging.getLogger(__name__)
@@ -898,6 +899,10 @@ class FOIARequest(models.Model):
             appeal=kwargs.get("appeal"),
         )
 
+        # Sanitize subject and body to remove surrogates that can't be encoded in UTF-8
+        subject = sanitize_surrogates(comm.subject)
+        body = sanitize_surrogates(body)
+
         email_comm = EmailCommunication.objects.create(
             communication=comm, sent_datetime=timezone.now(), from_email=from_email
         )
@@ -914,7 +919,7 @@ class FOIARequest(models.Model):
         headers = kwargs.get("headers", {})
         with get_connection(backend) as email_connection:
             msg = EmailMultiAlternatives(
-                subject=comm.subject,
+                subject=subject,
                 body=body,
                 from_email=str(from_email),
                 to=[str(self.email)],

@@ -115,7 +115,7 @@ class TestOrganization(TestCase):
                     if f.is_relation and f.auto_created
                 ]
             )
-            == 2
+            == 4
         )
         # Many to many relations defined on the Organization model
         assert (
@@ -126,7 +126,7 @@ class TestOrganization(TestCase):
                     if f.many_to_many and not f.auto_created
                 ]
             )
-            == 1
+            == 2
         )
 
 
@@ -314,3 +314,254 @@ class TestSquareletUpdateData(TestCase):
         organization.refresh_from_db()
         assert organization.requests_per_month == 50
         assert organization.monthly_requests == 50
+
+
+class TestOrganizationCollective(TestCase):
+    """Tests for Organization collective resource sharing"""
+
+    def test_make_requests_with_parent(self):
+        """Test making requests using parent's resources when own resources exhausted"""
+        parent = OrganizationFactory(
+            monthly_requests=20,
+            number_requests=10,
+            share_resources=True,
+        )
+        child = OrganizationFactory(
+            monthly_requests=5,
+            number_requests=3,
+            parent=parent,
+        )
+
+        # Use child's own resources first
+        request_count = child.make_requests(6)
+        child.refresh_from_db()
+        parent.refresh_from_db()
+        assert request_count == {"monthly": 5, "regular": 1}
+        assert child.monthly_requests == 0
+        assert child.number_requests == 2
+        assert parent.monthly_requests == 20  # Parent untouched
+        assert parent.number_requests == 10
+
+        # Use remaining child resources + parent resources
+        request_count = child.make_requests(15)
+        child.refresh_from_db()
+        parent.refresh_from_db()
+        assert request_count == {"monthly": 13, "regular": 2}
+        assert child.monthly_requests == 0
+        assert child.number_requests == 0
+        assert parent.monthly_requests == 7  # Parent used
+        assert parent.number_requests == 10
+
+    def test_make_requests_parent_no_sharing(self):
+        """Test that resources are not shared when parent.share_resources=False"""
+        parent = OrganizationFactory(
+            monthly_requests=20,
+            number_requests=10,
+            share_resources=False,
+        )
+        child = OrganizationFactory(
+            monthly_requests=5,
+            number_requests=0,
+            parent=parent,
+        )
+
+        # Can only use child's own resources
+        request_count = child.make_requests(5)
+        child.refresh_from_db()
+        parent.refresh_from_db()
+        assert request_count == {"monthly": 5, "regular": 0}
+        assert child.monthly_requests == 0
+        assert parent.monthly_requests == 20  # Parent untouched
+        assert parent.number_requests == 10
+
+        # Cannot use parent's resources
+        with pytest.raises(InsufficientRequestsError):
+            child.make_requests(1)
+
+    def test_make_requests_with_groups(self):
+        """Test making requests using group's resources"""
+        group = OrganizationFactory(
+            monthly_requests=30,
+            number_requests=20,
+            share_resources=True,
+        )
+        member = OrganizationFactory(
+            monthly_requests=2,
+            number_requests=1,
+        )
+        group.members.add(member)
+
+        # Use member's own resources + group resources
+        request_count = member.make_requests(10)
+        member.refresh_from_db()
+        group.refresh_from_db()
+        assert request_count == {"monthly": 9, "regular": 1}
+        assert member.monthly_requests == 0
+        assert member.number_requests == 0
+        assert group.monthly_requests == 23
+        assert group.number_requests == 20
+
+    def test_make_requests_with_multiple_groups(self):
+        """Test making requests from multiple groups"""
+        group1 = OrganizationFactory(
+            monthly_requests=10,
+            number_requests=5,
+            share_resources=True,
+        )
+        group2 = OrganizationFactory(
+            monthly_requests=15,
+            number_requests=10,
+            share_resources=True,
+        )
+        member = OrganizationFactory(
+            monthly_requests=0,
+            number_requests=0,
+        )
+        group1.members.add(member)
+        group2.members.add(member)
+
+        # Use resources from both groups (arbitrary order)
+        member.make_requests(20)
+        member.refresh_from_db()
+        group1.refresh_from_db()
+        group2.refresh_from_db()
+
+        # Total resources used should be 20
+        total_used = (
+            (10 - group1.monthly_requests)
+            + (5 - group1.number_requests)
+            + (15 - group2.monthly_requests)
+            + (10 - group2.number_requests)
+        )
+        assert total_used == 20
+
+    def test_make_requests_parent_and_groups(self):
+        """Test making requests with both parent and groups"""
+        parent = OrganizationFactory(
+            monthly_requests=15,
+            number_requests=10,
+            share_resources=True,
+        )
+        group = OrganizationFactory(
+            monthly_requests=20,
+            number_requests=15,
+            share_resources=True,
+        )
+        org = OrganizationFactory(
+            monthly_requests=5,
+            number_requests=3,
+            parent=parent,
+        )
+        group.members.add(org)
+
+        # Use own, then parent, then group resources
+        org.make_requests(40)
+        org.refresh_from_db()
+        parent.refresh_from_db()
+        group.refresh_from_db()
+
+        assert org.monthly_requests == 0
+        assert org.number_requests == 0
+        # Parent should be depleted
+        assert parent.monthly_requests == 0
+        assert parent.number_requests == 0
+        # Group should have been used
+        assert (group.monthly_requests + group.number_requests) < (20 + 15)
+
+    def test_get_total_number_requests_own_only(self):
+        """Test get_total_number_requests with no parent or groups"""
+        org = OrganizationFactory(number_requests=10)
+        assert org.get_total_number_requests() == 10
+
+    def test_get_total_number_requests_with_parent(self):
+        """Test get_total_number_requests including parent"""
+        parent = OrganizationFactory(
+            number_requests=20,
+            share_resources=True,
+        )
+        child = OrganizationFactory(
+            number_requests=5,
+            parent=parent,
+        )
+        assert child.get_total_number_requests() == 25
+
+    def test_get_total_number_requests_parent_no_sharing(self):
+        """Test get_total_number_requests when parent doesn't share"""
+        parent = OrganizationFactory(
+            number_requests=20,
+            share_resources=False,
+        )
+        child = OrganizationFactory(
+            number_requests=5,
+            parent=parent,
+        )
+        assert child.get_total_number_requests() == 5
+
+    def test_get_total_number_requests_with_groups(self):
+        """Test get_total_number_requests including groups"""
+        group1 = OrganizationFactory(
+            number_requests=15,
+            share_resources=True,
+        )
+        group2 = OrganizationFactory(
+            number_requests=10,
+            share_resources=True,
+        )
+        member = OrganizationFactory(number_requests=5)
+        group1.members.add(member)
+        group2.members.add(member)
+
+        assert member.get_total_number_requests() == 30  # 5 + 15 + 10
+
+    def test_get_total_monthly_requests_own_only(self):
+        """Test get_total_monthly_requests with no parent or groups"""
+        org = OrganizationFactory(monthly_requests=20)
+        assert org.get_total_monthly_requests() == 20
+
+    def test_get_total_monthly_requests_with_parent(self):
+        """Test get_total_monthly_requests including parent"""
+        parent = OrganizationFactory(
+            monthly_requests=50,
+            share_resources=True,
+        )
+        child = OrganizationFactory(
+            monthly_requests=10,
+            parent=parent,
+        )
+        assert child.get_total_monthly_requests() == 60
+
+    def test_get_total_monthly_requests_with_groups(self):
+        """Test get_total_monthly_requests including groups"""
+        group = OrganizationFactory(
+            monthly_requests=30,
+            share_resources=True,
+        )
+        member = OrganizationFactory(monthly_requests=5)
+        group.members.add(member)
+
+        assert member.get_total_monthly_requests() == 35
+
+    def test_insufficient_requests_with_parent(self):
+        """Test InsufficientRequestsError even with parent resources"""
+        parent = OrganizationFactory(
+            monthly_requests=5,
+            number_requests=3,
+            share_resources=True,
+        )
+        child = OrganizationFactory(
+            monthly_requests=2,
+            number_requests=1,
+            parent=parent,
+        )
+
+        # Total available is 11 (2+1 from child, 5+3 from parent)
+        with pytest.raises(InsufficientRequestsError):
+            child.make_requests(12)
+
+        # Verify nothing was deducted due to transaction rollback
+        child.refresh_from_db()
+        parent.refresh_from_db()
+        assert child.monthly_requests == 2
+        assert child.number_requests == 1
+        assert parent.monthly_requests == 5
+        assert parent.number_requests == 3

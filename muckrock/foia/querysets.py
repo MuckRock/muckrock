@@ -524,7 +524,7 @@ class RawEmailQuerySet(models.QuerySet):
                 "Fetching raw emails: message_id: %s - items not found, will retry",
                 message_id,
             )
-            raise ValueError
+            raise ValueError(f"No stored emails found for message_id: {message_id}")
         url = items[0]["storage"]["url"]
         response = requests.get(
             url,

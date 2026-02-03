@@ -74,7 +74,7 @@ class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
             )
         elif comm.category == "p":
             # Payments are still always mailed
-            prepare_snail_mail.delay(comm.pk, False, extra)
+            prepare_snail_mail.delay(comm.pk, False, extra, None)
         else:
             super().send_msg(comm, reason="Unknown category of send message", **kwargs)
 

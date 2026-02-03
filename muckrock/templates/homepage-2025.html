@@ -163,9 +163,6 @@
     <ul class="tabs">
       <li class="tab active" data-tab="muckrock-requests" title="MuckRock Requests">{% include 'lib/component/logo/muckrock-requests.svg' %}</li>
       <li class="tab" data-tab="documentcloud" title="DocumentCloud">{% include 'lib/component/logo/documentcloud.svg' %}</li>
-      <li class="tab" data-tab="sunlight-research-center" title="Sunlight Research Center">
-        <img height="50" width="auto" src="{% static 'img/homepage/sunlight-research-center.png' %}" alt="Logo for Sunlight Research Center">
-      </li>
       <li class="tab" data-tab="data-liberation-project" title="Data Liberation Project">{% include 'lib/component/logo/data-liberation-project.svg' %}</li>
     </ul>
     <div class="tab-viewer">
@@ -229,24 +226,6 @@
           </div>
         </div>
       </div>
-      <div class="tab-content product" data-tab="sunlight-research-center" id="sunlight-research-center" style="background: url('{% static 'img/homepage/research.jpg' %}'), linear-gradient(115deg, #fcefc7 25%, #fff 50%, #E5EBFE 100%);">
-        <div class="product-content">
-          <div class="product-heading">
-            <h3>Multiply your newsroom&rsquo;s investigative impact with a dedicated research desk, workshops and reporting resources</h3>
-          </div>
-          <div class="product-main">
-            <div class="product-actions">
-              <a href="https://www.sunlightresearch.net/launch" class="primary button" target="_blank">{% include 'lib/component/icon/plus.svg' %} Become a member</a>
-              <a href="https://www.sunlightresearch.net/research-training" class="primary ghost button">{% include 'lib/component/icon/calendar.svg' %} Schedule a workshop</a>
-              <a href="https://www.sunlightresearch.net/resources" class="primary ghost button" target="_blank">{% include 'lib/component/icon/book.svg' %} Explore our resources</a>
-            </div>
-            <div class="product-description">
-              <p>Our research experts help newsrooms dig deeper to produce stories with impact.</p>
-              <p>Whether you&rsquo;re backgrounding a source, tracking campaign money, or connecting the dots in public records — we&rsquo;re the support system behind the byline.</p>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="tab-content product" data-tab="data-liberation-project" id="data-liberation-project" style="background-image: url('{% static 'img/homepage/data-liberation-project.jpg' %}');">
         <div class="product-content">
           <div class="product-heading">
@@ -279,6 +258,26 @@
       </div>
     </div>
   </div>
+  {% with sunlight_url="https://www.sunlightresearch.net/launch" %}
+  <div class="homepage-section sunlight-membership">
+    <a href="{{sunlight_url}}" target="_blank" class="sunlight-membership-image">
+      <img src="{% static 'img/lamp-newspaper.png' %}" alt="" class="sunlight-membership-lamp" />
+      <img src="{% static 'img/homepage/sunlight-research-desk.png' %}" alt="Sunlight Research Desk" class="sunlight-membership-logo" />
+    </a>
+    <div class="sunlight-membership-content">
+      <div class="sunlight-membership-text">
+        <h3>Multiply your newsroom's investigative impact with a <a class="underline" target="_blank" href="{{sunlight_url}}">Sunlight Research Desk Membership</a></h3>
+        <p>Our research experts help newsrooms dig deeper to produce stories with impact. Sunlight Research Desk's exclusive membership options give your team the resources they need. Whether you're backgrounding a source, tracking campaign money, or connecting the dots in public records — <strong>we're the support system behind the byline</strong>.</p>
+        <a href="{{sunlight_url}}" class="sunlight-membership-link" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 11 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.21967 0.219668C5.51256 -0.0732225 5.98744 -0.0732225 6.28033 0.219668L10.5303 4.46967C10.8232 4.76256 10.8232 5.23744 10.5303 5.53033L6.28033 9.7803C5.98744 10.0732 5.51256 10.0732 5.21967 9.7803C4.92678 9.4874 4.92678 9.0126 5.21967 8.7197L8.1893 5.75H0.75C0.33579 5.75 0 5.41421 0 5C0 4.58579 0.33579 4.25 0.75 4.25H8.1893L5.21967 1.28033C4.92678 0.987438 4.92678 0.512558 5.21967 0.219668Z" fill="#4294F0"/>
+          </svg>
+          Explore our plans and become a member
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
   {% newsletter %}
   <div class="tab-container" id="investigations">
     <header>

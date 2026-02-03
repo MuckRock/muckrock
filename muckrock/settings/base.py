@@ -943,8 +943,6 @@ THUMBNAIL_PRESERVE_FORMAT = True
 # For easy thumbnails
 THUMBNAIL_PRESERVE_EXTENSIONS = ("png",)
 
-# Google Tag Manager
-USE_GOOGLE_TAG_MANAGER = boolcheck(os.environ.get("USE_GOOGLE_TAG_MANAGER", False))
 
 # Plaid allows programtic access to our bank account transactions
 PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")
@@ -981,3 +979,7 @@ SEND_STAFF_DIGEST = boolcheck(os.environ.get("SEND_STAFF_DIGEST", True))
 SECURE_CROSS_ORIGIN_OPENER_POLICY = os.environ.get(
     "SECURE_CROSS_ORIGIN_OPENER_POLICY", "same-origin"
 )
+
+# Settings to auto-disable the GovQA automation
+GOVQA_DISABLE_TIME_LIMIT = os.environ.get("GOVQA_DISABLE_TIME_LIMIT", 5)
+GOVQA_DISABLE_AMOUNT = os.environ.get("GOVQA_DISABLE_AMOUNT", 3)
