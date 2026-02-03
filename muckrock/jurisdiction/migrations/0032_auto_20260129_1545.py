@@ -2,6 +2,7 @@
 
 # Django
 from django.db import migrations
+from django.utils.text import slugify
 
 JURISDICTIONS = [
     "Adjuntas",
@@ -98,6 +99,7 @@ def add_jurisdictions(apps, schema_editor):
     jurisdictions = [
         Jurisdiction(
             name=jurisdiction,
+            slug=slugify(jurisdiction),
             level="l",
             parent=puerto_rico,
         )
