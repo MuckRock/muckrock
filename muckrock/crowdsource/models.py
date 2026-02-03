@@ -23,10 +23,7 @@ from random import choice
 
 # Third Party
 from bleach.sanitizer import Cleaner
-from importlib.resources import files
-from pyembed.core import PyEmbed
-from pyembed.core.consumer import PyEmbedConsumerError
-from pyembed.core.discovery import AutoDiscoverer, ChainingDiscoverer, FileDiscoverer
+from micawber.exceptions import ProviderNotFoundException
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -37,7 +34,7 @@ from muckrock.crowdsource.querysets import (
     CrowdsourceResponseQuerySet,
 )
 from muckrock.tags.models import TaggedItemBase
-
+from muckrock.crowdsource.oembed_providers import PROVIDERS
 
 class Crowdsource(models.Model):
     """A Crowdsource"""
@@ -288,30 +285,13 @@ class CrowdsourceData(models.Model):
 
     def embed(self):
         """Get the html to embed into the crowdsource"""
-        if self.url:
-            try:
-                # first try to get embed code from oEmbed
-                return mark_safe(
-                    PyEmbed(
-                        # we don't use the default discoverer because it contains a bug
-                        # that makes it always match spotify
-                        discoverer=ChainingDiscoverer(
-                            [
-                                FileDiscoverer(
-                                    files(__package__).joinpath("oembed_providers.json")
-                                ),
-                                AutoDiscoverer(),
-                            ]
-                        )
-                    ).embed(self.url, max_height=800)
-                )
-            except PyEmbedConsumerError:
-                # fall back to a simple iframe
-                return format_html(
-                    '<iframe src="{}" width="100%" height="800px"></iframe>', self.url
-                )
-        else:
+        if not self.url:
             return ""
+        try:
+            data = PROVIDERS.request(self.url, maxheight=800)
+        except ProviderNotFoundException:
+            raise
+        return mark_safe(data['html'])
 
     class Meta:
         verbose_name = "assignment data"
