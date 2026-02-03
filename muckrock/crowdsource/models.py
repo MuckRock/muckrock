@@ -13,11 +13,11 @@ from django.db.models.functions import Concat
 from django.db.models.functions.datetime import TruncDay
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 # Standard Library
 import json
+import logging
 from html import unescape
 from random import choice
 
@@ -28,13 +28,16 @@ from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.crowdsource import fields
+from muckrock.crowdsource.oembed_providers import PROVIDERS
 from muckrock.crowdsource.querysets import (
     CrowdsourceDataQuerySet,
     CrowdsourceQuerySet,
     CrowdsourceResponseQuerySet,
 )
 from muckrock.tags.models import TaggedItemBase
-from muckrock.crowdsource.oembed_providers import PROVIDERS
+
+logger = logging.getLogger(__name__)
+
 
 class Crowdsource(models.Model):
     """A Crowdsource"""
@@ -290,8 +293,9 @@ class CrowdsourceData(models.Model):
         try:
             data = PROVIDERS.request(self.url, maxheight=800)
         except ProviderNotFoundException:
-            raise
-        return mark_safe(data['html'])
+            logger.warning("Could not embed URL: %s", self.url)
+            return ""
+        return mark_safe(data["html"])
 
     class Meta:
         verbose_name = "assignment data"
