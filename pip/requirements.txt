@@ -46,7 +46,7 @@ baml==0.18.0
 beautifulsoup4==4.13.4
     # via
     #   -r pip/requirements.in
-    #   pyembed
+    #   micawber
 billiard==4.2.1
     # via celery
 bleach==4.1.0
@@ -333,6 +333,7 @@ lob==4.0.1
 lxml==5.3.0
     # via
     #   govqa
+    #   micawber
     #   pikepdf
     #   premailer
 markdown==3.2.2
@@ -342,6 +343,8 @@ markdown==3.2.2
 matplotlib-inline==0.1.7
     # via ipython
 memoize==1.0.0
+    # via -r pip/requirements.in
+micawber==0.6.2
     # via -r pip/requirements.in
 multidict==6.0.4
     # via
@@ -440,8 +443,6 @@ pydantic==2.4.0
     #   openai
 pydantic-core==2.10.0
     # via pydantic
-pyembed==1.3.3
-    # via -r pip/requirements.in
 pygments==2.13.0
     # via ipython
 pyjwkest==1.4.0
@@ -522,7 +523,6 @@ requests[security]==2.31.0
     #   phaxio
     #   plaid-python
     #   premailer
-    #   pyembed
     #   pyjwkest
     #   python-documentcloud
     #   requests-oauthlib
