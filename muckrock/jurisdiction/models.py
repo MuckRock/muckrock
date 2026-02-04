@@ -514,5 +514,3 @@ class Appeal(models.Model):
             datetime__gt=self.communication.datetime
         )
         return subsequent_comms.filter(status__in=END_STATUS).exists()
-
-

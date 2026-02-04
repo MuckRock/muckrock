@@ -8,11 +8,14 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import re_path
 
 # Standard Library
 import logging
+import zipfile
+from io import BytesIO
 
 # Third Party
 from dal import forward
@@ -23,6 +26,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
 from muckrock.foia.models import FOIARequest
+from muckrock.jurisdiction.markdown_export import jurisdiction_to_markdown
 from muckrock.jurisdiction.models import (
     ExampleAppeal,
     Exemption,
@@ -107,6 +111,7 @@ class JurisdictionAdmin(VersionAdmin):
     inlines = [LawInline]
     filter_horizontal = ("holidays",)
     form = JurisdictionAdminForm
+    actions = ["export_as_markdown"]
     fieldsets = (
         (
             None,
@@ -136,6 +141,55 @@ class JurisdictionAdmin(VersionAdmin):
         ),
     )
     formats = ["xls", "csv"]
+
+    @admin.action(description="Export selected jurisdictions as Markdown")
+    def export_as_markdown(self, request, queryset):
+        """Export selected jurisdictions as Markdown files in a ZIP archive"""
+        # Filter to only state and federal jurisdictions
+        queryset = queryset.filter(level__in=["s", "f"])
+
+        if not queryset.exists():
+            self.message_user(
+                request,
+                "No state or federal jurisdictions selected.",
+                level="warning",
+            )
+            return None
+
+        # Optimize query
+        queryset = queryset.select_related(
+            "parent", "law", "jurisdictionpage"
+        ).prefetch_related("law__years", "holidays")
+
+        # Create ZIP file in memory
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for jurisdiction in queryset:
+                # Generate Markdown
+                markdown = jurisdiction_to_markdown(
+                    jurisdiction,
+                    include_stats=True,
+                    include_requests=True,
+                    base_url="https://www.muckrock.com",
+                )
+
+                # Add to ZIP
+                filename = f"{jurisdiction.slug}.md"
+                zip_file.writestr(filename, markdown)
+
+        # Prepare response
+        response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = (
+            'attachment; filename="jurisdictions_markdown.zip"'
+        )
+
+        self.message_user(
+            request,
+            f"Successfully exported {queryset.count()} jurisdictions as Markdown.",
+            level="success",
+        )
+
+        return response
 
 
 class ExemptionAdminForm(forms.ModelForm):
