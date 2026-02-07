@@ -30,6 +30,9 @@
 
 		let processedContent = content;
 
+		// Deduplicate consecutive identical citation markers like [1][1] or [1] [1]
+		processedContent = processedContent.replace(/(\[(\d+)\])(\s*\[\2\])+/g, '$1');
+
 		// Replace citation markers [1], [2], etc. with clickable links
 		// Match patterns like [1], [2], [3], etc. but not markdown links
 		const citationPattern = /\[(\d+)\](?!\()/g;

@@ -462,11 +462,18 @@ NEVER:
                 file_id_to_num[file_id] = citation_num
                 citation_num += 1
 
-        # Insert citation markers working backwards
+        # Insert citation markers working backwards, skipping duplicates
         modified_answer = answer
+        seen = set()
         for citation in sorted_citations:
             idx = citation['index']
             file_id = citation.get('file_id')
+
+            # Skip duplicate citations at the same position for the same source
+            key = (idx, file_id)
+            if key in seen:
+                continue
+            seen.add(key)
 
             if file_id and file_id in file_id_to_num and 0 <= idx <= len(modified_answer):
                 num = file_id_to_num[file_id]
