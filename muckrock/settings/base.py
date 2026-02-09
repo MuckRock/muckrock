@@ -701,6 +701,10 @@ DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
 )
 
+# Match both production and staging DocumentCloud URLs
+DOCCLOUD_OEMBED_REGEX = r"https?://(www\.)?(staging\.)?documentcloud\.org/documents/.*"
+DOCCLOUD_OEMBED_ENDPOINT = f"{DOCCLOUD_API_URL}/api/oembed/"
+
 if ENV == "staging" and HEROKU_APP_NAME:
     MUCKROCK_URL = f"https://{HEROKU_APP_NAME}.herokuapp.com"
 

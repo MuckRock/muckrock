@@ -23,12 +23,12 @@ from random import choice
 
 # Third Party
 from bleach.sanitizer import Cleaner
+from micawber import Provider, bootstrap_basic
 from micawber.exceptions import ProviderNotFoundException
 from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.crowdsource import fields
-from muckrock.crowdsource.oembed_providers import PROVIDERS
 from muckrock.crowdsource.querysets import (
     CrowdsourceDataQuerySet,
     CrowdsourceQuerySet,
@@ -37,6 +37,15 @@ from muckrock.crowdsource.querysets import (
 from muckrock.tags.models import TaggedItemBase
 
 logger = logging.getLogger(__name__)
+
+# Create registry
+PROVIDERS = bootstrap_basic()
+
+# Register DocumentCloud provider from settings
+PROVIDERS.register(
+    settings.DOCCLOUD_OEMBED_REGEX,
+    Provider(settings.DOCCLOUD_OEMBED_ENDPOINT),
+)
 
 
 class Crowdsource(models.Model):
