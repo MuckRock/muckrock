@@ -75,7 +75,7 @@ MANAGERS = ADMINS
 TIME_ZONE = "America/New_York"
 USE_TZ = True
 
-ENV = os.environ.get("DJANGO_ENV", "staging")
+ENV = os.environ.get("DJANGO_ENV", "dev")
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -700,6 +700,16 @@ DOCCLOUD_API_URL = os.environ.get(
 DOCCLOUD_ASSET_URL = os.environ.get(
     "DOCCLOUD_ASSET_URL", "http://minio.documentcloud.org:9000/documents/"
 )
+
+# Fallback, used for development
+DEFAULT_DOCCLOUD_OEMBED_REGEX = r"https?://(www\.)?dev\.documentcloud\.org/documents/.*"
+
+DOCCLOUD_OEMBED_REGEX = os.environ.get(
+    "DOCCLOUD_OEMBED_REGEX",
+    DEFAULT_DOCCLOUD_OEMBED_REGEX,
+)
+
+DOCCLOUD_OEMBED_ENDPOINT = f"{DOCCLOUD_API_URL}/api/oembed/"
 
 if ENV == "staging" and HEROKU_APP_NAME:
     MUCKROCK_URL = f"https://{HEROKU_APP_NAME}.herokuapp.com"

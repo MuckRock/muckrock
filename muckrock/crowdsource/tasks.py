@@ -40,7 +40,7 @@ def datum_per_page(crowdsource_pk, doc_id, metadata):
     document = dc_client.documents.get(doc_id)
     for i in range(1, document.pages + 1):
         crowdsource.data.create(
-            url=f"{document.canonical_url}/pages/{i}", metadata=metadata
+            url=f"{document.canonical_url}pages/{i}", metadata=metadata
         )
 
 

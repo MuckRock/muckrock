@@ -13,20 +13,18 @@ from django.db.models.functions import Concat
 from django.db.models.functions.datetime import TruncDay
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 # Standard Library
 import json
+import logging
 from html import unescape
 from random import choice
 
 # Third Party
 from bleach.sanitizer import Cleaner
-from pkg_resources import resource_filename
-from pyembed.core import PyEmbed
-from pyembed.core.consumer import PyEmbedConsumerError
-from pyembed.core.discovery import AutoDiscoverer, ChainingDiscoverer, FileDiscoverer
+from micawber import Provider, bootstrap_basic
+from micawber.exceptions import ProviderNotFoundException
 from taggit.managers import TaggableManager
 
 # MuckRock
@@ -37,6 +35,17 @@ from muckrock.crowdsource.querysets import (
     CrowdsourceResponseQuerySet,
 )
 from muckrock.tags.models import TaggedItemBase
+
+logger = logging.getLogger(__name__)
+
+# Create registry
+PROVIDERS = bootstrap_basic()
+
+# Register DocumentCloud provider from settings
+PROVIDERS.register(
+    settings.DOCCLOUD_OEMBED_REGEX,
+    Provider(settings.DOCCLOUD_OEMBED_ENDPOINT),
+)
 
 
 class Crowdsource(models.Model):
@@ -288,30 +297,14 @@ class CrowdsourceData(models.Model):
 
     def embed(self):
         """Get the html to embed into the crowdsource"""
-        if self.url:
-            try:
-                # first try to get embed code from oEmbed
-                return mark_safe(
-                    PyEmbed(
-                        # we don't use the default discoverer because it contains a bug
-                        # that makes it always match spotify
-                        discoverer=ChainingDiscoverer(
-                            [
-                                FileDiscoverer(
-                                    resource_filename(__name__, "oembed_providers.json")
-                                ),
-                                AutoDiscoverer(),
-                            ]
-                        )
-                    ).embed(self.url, max_height=800)
-                )
-            except PyEmbedConsumerError:
-                # fall back to a simple iframe
-                return format_html(
-                    '<iframe src="{}" width="100%" height="800px"></iframe>', self.url
-                )
-        else:
+        if not self.url:
             return ""
+        try:
+            data = PROVIDERS.request(self.url, maxheight=800)
+        except ProviderNotFoundException:
+            logger.warning("Could not embed URL: %s", self.url)
+            return ""
+        return mark_safe(data["html"])
 
     class Meta:
         verbose_name = "assignment data"

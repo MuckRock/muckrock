@@ -46,7 +46,7 @@ baml==0.18.0
 beautifulsoup4==4.13.4
     # via
     #   -r pip/requirements.in
-    #   pyembed
+    #   micawber
 billiard==4.2.1
     # via celery
 bleach==4.1.0
@@ -151,6 +151,7 @@ django==4.2
     #   django-redis
     #   django-reversion
     #   django-sesame
+    #   django-simple-history
     #   django-sslify
     #   django-storages
     #   django-taggit
@@ -193,7 +194,7 @@ django-filter==21.1
     # via -r pip/requirements.in
 django-hijack==2.3.0
     # via -r pip/requirements.in
-django-hosts==5.2
+django-hosts==7.0.0
     # via -r pip/requirements.in
 django-ipware==2.1.0
     # via -r pip/requirements.in
@@ -211,11 +212,11 @@ django-redis==5.1.0
     # via python-redis-lock
 django-reversion==4.0.1
     # via -r pip/requirements.in
-django-robots==5.0
+django-robots==6.1
     # via -r pip/requirements.in
 django-sesame==3.2.3
     # via -r pip/requirements.in
-django-simple-history==3.2.0
+django-simple-history==3.10.1
     # via -r pip/requirements.in
 django-sslify==0.2.7
     # via -r pip/requirements.in
@@ -332,6 +333,7 @@ lob==4.0.1
 lxml==5.3.0
     # via
     #   govqa
+    #   micawber
     #   pikepdf
     #   premailer
 markdown==3.2.2
@@ -341,6 +343,8 @@ markdown==3.2.2
 matplotlib-inline==0.1.7
     # via ipython
 memoize==1.0.0
+    # via -r pip/requirements.in
+micawber==0.6.2
     # via -r pip/requirements.in
 multidict==6.0.4
     # via
@@ -439,8 +443,6 @@ pydantic==2.4.0
     #   openai
 pydantic-core==2.10.0
     # via pydantic
-pyembed==1.3.3
-    # via -r pip/requirements.in
 pygments==2.13.0
     # via ipython
 pyjwkest==1.4.0
@@ -521,7 +523,6 @@ requests[security]==2.31.0
     #   phaxio
     #   plaid-python
     #   premailer
-    #   pyembed
     #   pyjwkest
     #   python-documentcloud
     #   requests-oauthlib
