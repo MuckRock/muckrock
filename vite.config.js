@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  base: "/static/",
+  base: "/static/dist/",
   build: {
     manifest: "manifest.json",
     outDir: path.resolve(__dirname, "muckrock/assets/dist"),
@@ -26,7 +26,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "muckrock/assets/dist"),
+      "@": path.resolve(__dirname, "muckrock/assets"),
     },
     extensions: [".js", ".jsx", ".json"],
   },
