@@ -10,6 +10,7 @@ export default defineConfig({
   build: {
     manifest: "manifest.json",
     outDir: path.resolve(__dirname, "muckrock/assets/dist"),
+    assetsDir: "",
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "muckrock/assets/entry.js"),
