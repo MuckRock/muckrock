@@ -251,14 +251,13 @@ def pip_compile(c, upgrade=False, package=None):
         upgrade_flag = "--upgrade"
     else:
         upgrade_flag = ""
-    c.run(
-        DJANGO_RUN.format(
-            cmd="pip-compile {upgrade_flag} pip/requirements.in &&"
-            "pip-compile {upgrade_flag} pip/dev-requirements.in".format(
-                upgrade_flag=upgrade_flag
-            )
-        )
-    )
+
+    c.run(DJANGO_RUN.format(
+        cmd=f"pip-compile --resolver=backtracking {upgrade_flag} pip/requirements.in"
+    ))
+    c.run(DJANGO_RUN.format(
+        cmd=f"pip-compile --resolver=backtracking {upgrade_flag} pip/dev-requirements.in"
+    ))
 
 
 @task
