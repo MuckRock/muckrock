@@ -40,4 +40,6 @@ CLAUDE.md
 /data
 .env
 foia-coach-api/media
+foia-coach-api/foia_coach_seed_data.tar.gz
+foia-coach-api/fixtures/
 muckrock/assets
