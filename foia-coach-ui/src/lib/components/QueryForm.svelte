@@ -19,6 +19,11 @@
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 
+		if (!selectedState) {
+			error = 'Please select a state';
+			return;
+		}
+
 		if (!question.trim()) {
 			error = 'Please enter a question';
 			return;
@@ -89,14 +94,14 @@
 
 	<div class="form-row">
 		<div class="jurisdiction-selector">
-			<label for="state">State (optional):</label>
+			<label for="state">State:</label>
 			{#if jurisdictionsStore.loading}
 				<select id="state" disabled>
 					<option>Loading...</option>
 				</select>
 			{:else}
 				<select id="state" bind:value={selectedState} disabled={submitting}>
-					<option value="">All States</option>
+					<option value="" disabled selected>Select a state...</option>
 					{#each jurisdictionsStore.jurisdictions as jurisdiction}
 						<option value={jurisdiction.abbrev}>{jurisdiction.name}</option>
 					{/each}
@@ -117,7 +122,7 @@
 	<div class="form-row">
 		<button
 			type="submit"
-			disabled={submitting || jurisdictionsStore.loading || !question.trim()}
+			disabled={submitting || jurisdictionsStore.loading || !question.trim() || !selectedState}
 		>
 			{submitting ? 'Sending...' : 'Ask Question'}
 		</button>
