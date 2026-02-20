@@ -44,12 +44,17 @@
 			// Get conversation context
 			const context = contextStore.getContext();
 
+			// Start timing the API call
+			const startTime = performance.now();
+
 			// Call API with context
 			const response = await apiClient.query({
 				question: question.trim(),
 				state: selectedState || context.currentState || undefined,
 				context: context.messages.length > 0 ? context : undefined
 			});
+
+			const responseTimeMs = Math.round(performance.now() - startTime);
 
 			// Add assistant response
 			chatStore.addMessage({
@@ -58,7 +63,8 @@
 				citations: response.citations,
 				state: response.state,
 				provider: response.provider,
-				model: response.model
+				model: response.model,
+				responseTimeMs
 			});
 
 			// Update context with assistant message

@@ -9,6 +9,7 @@ export interface ChatMessage {
 	state?: string;
 	provider?: string;
 	model?: string;
+	responseTimeMs?: number;
 }
 
 class ChatStore {

@@ -16,6 +16,11 @@
 		});
 	}
 
+	function formatResponseTime(ms: number): string {
+		if (ms < 1000) return `${ms}ms`;
+		return `${(ms / 1000).toFixed(1)}s`;
+	}
+
 	// Parse markdown content into HTML
 	function renderMarkdown(content: string): string {
 		return marked.parse(content) as string;
@@ -178,6 +183,11 @@
 				{message.provider}
 			</span>
 		{/if}
+		{#if message.responseTimeMs}
+			<span class="response-time" title="{message.responseTimeMs}ms">
+				{formatResponseTime(message.responseTimeMs)}
+			</span>
+		{/if}
 	</div>
 
 	<div class="message-content">
@@ -269,6 +279,15 @@
 		border-radius: 4px;
 		font-size: 0.75rem;
 		font-weight: 500;
+		cursor: help;
+	}
+
+	.response-time {
+		padding: 0.125rem 0.5rem;
+		background: #e8f5e9;
+		border-radius: 4px;
+		font-size: 0.75rem;
+		color: #2e7d32;
 		cursor: help;
 	}
 
