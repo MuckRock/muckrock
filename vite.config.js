@@ -6,11 +6,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  base: "dist/",
+  base: "/static/",
   build: {
     manifest: "manifest.json",
     outDir: path.resolve(__dirname, "muckrock/assets/dist"),
-    assetsDir: "",
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "muckrock/assets/entry.js"),

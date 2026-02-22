@@ -91,7 +91,10 @@ STATIC_ROOT = os.path.join(SITE_ROOT, "static")
 MEDIA_ROOT = os.path.join(STATIC_ROOT, "media")
 ASSETS_ROOT = os.path.join(SITE_ROOT, "assets")
 
-STATICFILES_DIRS = (os.path.join(SITE_ROOT, "assets"),)
+STATICFILES_DIRS = (
+    os.path.join(SITE_ROOT, "assets"),
+    os.path.join(SITE_ROOT, "assets", "dist"),
+)
 
 # DJANGO_VITE configuration is defined in environment-specific settings
 # (local.py, production.py, etc.) to properly reference DEBUG
