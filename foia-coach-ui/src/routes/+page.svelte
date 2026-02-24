@@ -34,7 +34,7 @@
 
 <div class="page">
 	<div class="header">
-		<h1>FOIA Coach</h1>
+		<h1>Project Moss</h1>
 		<div class="header-actions">
 			<a href="/upload" class="link-button">Upload Resources</a>
 			<button onclick={addTestMessages}>Add Test Messages</button>
