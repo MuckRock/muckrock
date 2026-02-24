@@ -4,7 +4,7 @@ Cache classes that extend S3, for asset compression
 
 # Django
 from django.conf import settings
-from django.core.files.storage import storages
+from django.contrib.staticfiles.storage import StaticFilesStorage
 
 # Third Party
 from storages.backends.s3boto3 import S3Boto3Storage
@@ -21,7 +21,7 @@ class CachedS3Boto3Storage(S3Boto3Storage):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.local_storage = storages.create("compressor.storage.CompressorFileStorage")
+        self.local_storage = StaticFilesStorage()
 
     def save(self, name, content, max_length=None):
         # pylint: disable=protected-access
