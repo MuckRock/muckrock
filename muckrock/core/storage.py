@@ -21,9 +21,7 @@ class CachedS3Boto3Storage(S3Boto3Storage):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.local_storage = storages.create(
-            "compressor.storage.CompressorFileStorage"
-        )
+        self.local_storage = storages.create("compressor.storage.CompressorFileStorage")
 
     def save(self, name, content, max_length=None):
         # pylint: disable=protected-access
