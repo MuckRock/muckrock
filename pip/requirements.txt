@@ -137,7 +137,6 @@ django==5.2.11
     #   django-appconf
     #   django-celery-email
     #   django-choices
-    #   django-compressor
     #   django-cors-headers
     #   django-debug-toolbar
     #   django-extensions
@@ -222,6 +221,8 @@ django-taggit==6.1.0
 django-vite==3.0.4
     # via -r pip/requirements.in
 django-watson==1.5.5
+    # via -r pip/requirements.in
+django-webpack-loader==3.2.3
     # via -r pip/requirements.in
 djangorestframework==3.16.1
     # via
