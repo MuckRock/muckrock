@@ -154,6 +154,7 @@ django==5.2.11
     #   django-sslify
     #   django-storages
     #   django-taggit
+    #   django-vite
     #   djangorestframework
     #   djangorestframework-simplejwt
     #   dogslow
@@ -169,15 +170,12 @@ django-anymail[mailgun]==9.1
 django-appconf==1.0.4
     # via
     #   django-celery-email
-    #   django-compressor
     #   django-opensearch
 django-autocomplete-light==3.9.0rc5
     # via -r pip/requirements.in
 django-celery-email==3.0.0
     # via -r pip/requirements.in
 django-choices==1.6.1
-    # via -r pip/requirements.in
-django-compressor==4.6.0
     # via -r pip/requirements.in
 django-constance==4.3.4
     # via -r pip/requirements.in
@@ -221,9 +219,9 @@ django-storages==1.12.3
     # via -r pip/requirements.in
 django-taggit==6.1.0
     # via -r pip/requirements.in
-django-watson==1.5.5
+django-vite==3.0.4
     # via -r pip/requirements.in
-django-webpack-loader==1.8.1
+django-watson==1.5.5
     # via -r pip/requirements.in
 djangorestframework==3.16.1
     # via
@@ -528,8 +526,6 @@ rapidfuzz==3.14.3
     # via levenshtein
 ratelimit==2.2.1
     # via python-documentcloud
-rcssmin==1.2.2
-    # via django-compressor
 redis==3.5.3
     # via
     #   -r pip/requirements.in
@@ -567,8 +563,6 @@ requests[security]==2.31.0
     #   zenpy
 requests-oauthlib==1.0.0
     # via social-auth-core
-rjsmin==1.2.5
-    # via django-compressor
 rpds-py==0.18.0
     # via
     #   jsonschema
