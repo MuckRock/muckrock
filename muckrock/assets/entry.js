@@ -1,12 +1,12 @@
 // Vite module preload polyfill
 import "vite/modulepreload-polyfill";
 
-// Make jQuery available globally for legacy code FIRST.
-// This MUST be imported before muckrock.js because ES modules evaluate
-// in dependency order — jquery-global.js will run before muckrock.js.
-import './jquery-global.js';
+// Make jQuery available globally for inline <script type="module"> tags in
+// templates. Bundled JS files import jQuery directly and don't need this.
+import jQuery from "jquery";
+window.$ = window.jQuery = jQuery;
 
-// Import styles (doesn't depend on jQuery)
+// Import styles
 import './scss/style.scss'
 
 // Static import so the full module graph (including fine-uploader which sets

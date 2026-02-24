@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import inject from "@rollup/plugin-inject";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,6 +8,13 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   base: process.env.VITE_ASSET_BASE || "/static/",
+  plugins: [
+    inject({
+      include: ["**/*.js", "**/*.jsx"],
+      $: "jquery",
+      jQuery: "jquery",
+    }),
+  ],
   build: {
     manifest: "manifest.json",
     outDir: path.resolve(__dirname, "muckrock/assets/dist"),
