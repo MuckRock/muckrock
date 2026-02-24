@@ -6,8 +6,10 @@
 #
 asgiref==3.11.1
     # via django
-astroid==2.15.8
-    # via pylint
+astroid==4.0.4
+    # via
+    #   -r pip/dev-requirements.in
+    #   pylint
 asttokens==2.0.8
     # via stack-data
 attrs==25.3.0
@@ -86,7 +88,7 @@ ipdb==0.13.9
     # via -r pip/dev-requirements.in
 ipython==8.4.0
     # via ipdb
-isort==4.3.21
+isort==8.0.0
     # via
     #   -r pip/dev-requirements.in
     #   pylint
@@ -100,8 +102,6 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-lazy-object-proxy==1.4.3
-    # via astroid
 markupsafe==1.1.1
     # via jinja2
 matplotlib-inline==0.1.6
@@ -160,14 +160,17 @@ pygments==2.13.0
     # via
     #   django-silk
     #   ipython
-pylint==2.17.7
+pylint==4.0.5
     # via
+    #   -r pip/dev-requirements.in
     #   pylint-django
     #   pylint-plugin-utils
-pylint-django==2.5.3
+pylint-django==2.7.0
     # via -r pip/dev-requirements.in
-pylint-plugin-utils==0.7
-    # via pylint-django
+pylint-plugin-utils==0.9.0
+    # via
+    #   -r pip/dev-requirements.in
+    #   pylint-django
 pynacl==1.3.0
     # via paramiko
 pyproject-hooks==1.0.0
@@ -252,8 +255,6 @@ wheel==0.38.4
     # via pip-tools
 whoosh==2.7.4
     # via -r pip/dev-requirements.in
-wrapt==1.17.2
-    # via astroid
 xmltodict==0.14.2
     # via moto
 
