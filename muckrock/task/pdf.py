@@ -232,7 +232,6 @@ class MailPDF(PDF):
 
     def _extra_header(self, text):
         """Add an extra line to the header"""
-        # pylint: disable=invalid-name
         x = self.get_x()
         y = self.get_y()
         self.set_font("Arial", "b", 18)

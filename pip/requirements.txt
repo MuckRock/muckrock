@@ -92,6 +92,7 @@ click==8.1.7
     #   click-didyoumean
     #   click-plugins
     #   click-repl
+    #   typer
 click-didyoumean==0.3.1
     # via celery
 click-plugins==1.1.1
@@ -293,6 +294,8 @@ gunicorn==23.0.0
     # via -r pip/requirements.in
 h11==0.14.0
     # via httpcore
+hf-xet==1.3.0
+    # via huggingface-hub
 httpcore==1.0.2
     # via httpx
 httplib2==0.18.1
@@ -302,10 +305,13 @@ httplib2==0.18.1
 httpx==0.27.0
     # via
     #   anthropic
+    #   huggingface-hub
     #   ollama
     #   openai
-huggingface-hub==0.20.3
-    # via tokenizers
+huggingface-hub==0.36.2
+    # via
+    #   -r pip/requirements.in
+    #   tokenizers
 humanfriendly==10.0
     # via coloredlogs
 idna==3.10
@@ -474,7 +480,9 @@ pydantic==2.4.0
 pydantic-core==2.10.0
     # via pydantic
 pygments==2.13.0
-    # via ipython
+    # via
+    #   ipython
+    #   rich
 pyjwkest==1.4.0
     # via -r pip/requirements.in
 pyjwt==2.3.0
