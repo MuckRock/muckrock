@@ -1,6 +1,8 @@
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
 -e git+https://github.com/MuckRock/govqa-py@main#egg=govqa # for govqa integration
+aiohttp>3.9
+multidict>6.4
 baml # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
@@ -14,7 +16,7 @@ django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
 django-compressor # Compress all JS and CSS assets into a single file
-django-constance[database] # Use for dynamic settings
+django-constance # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-debug-toolbar # Toolbar for debugging
 django-email-bandit # Used to hijack emails in a staging setting
@@ -36,7 +38,7 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-watson # Used for search
 django-webpack-loader # Used for loading Webpack bundles
-django<5.0 # Django is kinda important...
+django<6 # Django is kinda important...
 djangorestframework # The API framework
 djangorestframework_simplejwt # JWT auth for DRF
 dogslow # Monitors slow requests
@@ -66,8 +68,7 @@ pyjwkest # for oauth
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
 phaxio # For sending faxes through Phaxio
-python-Levenshtein==0.12.2 # fuzzy string matching for FM agency import
-python-dateutil # Used for relative time deltas
+python-Levenshtein==0.25.1 # fuzzy string matching for FM agency import
 python-documentcloud # for uploading to documentcloud
 python-redis-lock[django] # use a redis cache with a locking mechanism
 redis # Redis integration - for use with celery
@@ -77,6 +78,7 @@ rules # Rule based permissions
 scout-apm # performance monitoring
 sentry-sdk[django, celery] # Sentry integration for exception monitoring
 simplejson # json decoder for requests
+six>=1.17.0 # Required for packages with Python 2 compatibility support
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
 social-auth-app-django # for oauth client

@@ -1,7 +1,7 @@
 coverage # Used to generate coverage reports in dev
 dj-inmemorystorage # in memory file storage for faster testing
-django-debug-toolbar-request-history # Use DDT for non-html requests
-django<5.0 # django
+django-debug-toolbar
+django<6 # django
 fabric<2.0 # Used for dev scripts
 factory-boy # Used for creating test data
 freezegun # Control time during testing
@@ -14,6 +14,7 @@ pylint-django # Pylint for Django integration
 pytest # Used for testing
 pytest-django # Used for testing
 pytest-sugar # Used for testing
+six>=1.17.0 # Required for packages with Python 2 compatibility support
 requests-mock # Mock for http requests
 whoosh # Used for search backend in development
 black # code formatter
