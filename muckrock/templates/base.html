@@ -1,6 +1,5 @@
 {% load static %}
-{% load compress %}
-{% load render_bundle from webpack_loader %}
+{% load django_vite %}
 {% load hijack_tags %}
 {% load opensearch_tags %}
 <!doctype html>
@@ -23,47 +22,46 @@
     <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
     <link rel="mask-icon"           href="{% static 'icons/favicon.svg' %}" color="#367AF0" />
     <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
-    {% compress css %}
-      <style type="text/css">
-/* Typefaces are loaded inside the base template so that they can be referenced
-   by the correct URL. In production, the typefaces should be served from a CDN. */
-@font-face {
-  font-family: 'Source Sans Pro';
-  src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
-  font-weight: 400;
-  font-style: normal;
-}
-            @font-face {
-              font-family: 'Source Sans Pro';
-              src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
-              font-weight: 400;
-              font-style: italic;
-            }
-            @font-face {
-              font-family: 'Source Sans Pro';
-              src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
-              font-weight: 500 600;
-              font-style: normal;
-            }
-            @font-face {
-              font-family: 'Source Sans Pro';
-              src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
-              font-weight: 500 600;
-              font-style: italic;
-            }
-            @font-face {
-              font-family: 'Source Code Pro';
-              src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
-              font-weight: normal;
-              font-style: normal;
-            }
-      </style>
-      <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
-      <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
-      <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
-      <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
-      {% render_bundle 'main' 'css' %}
-    {% endcompress %}
+    <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
+    <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+    <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
+    <link href="{% static 'autocomplete_light/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
+    <style type="text/css">
+      /* Typefaces are loaded inside the base template so that they can be referenced
+         by the correct URL. In production, the typefaces should be served from a CDN.
+       */
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
+        font-weight: 400;
+        font-style: italic;
+      }
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
+        font-weight: 500 600;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
+        font-weight: 500 600;
+        font-style: italic;
+      }
+      @font-face {
+        font-family: 'Source Code Pro';
+        src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+    {% vite_asset 'muckrock/assets/entry.js' %}
     {% block styles %}
     {% endblock %}
     <!-- Prefetch and Prerendering -->
@@ -215,12 +213,28 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mi
     <script src="https://js.stripe.com/v3/"></script>
     {% block prescripts %}
     {% endblock prescripts %}
-    {% compress js %}
-      {% render_bundle 'main' 'js' %}
-      <script type="text/javascript" src="{% static 'vendor/autocomplete_light/select2.full.js' %}"></script>
-      <script type="text/javascript" src="{% static 'autocomplete_light/autocomplete_light.js' %}"></script>
-      <script type="text/javascript" src="{% static 'vendor/autocomplete_light/select2.js' %}"></script>
-    {% endcompress %}
+    <!-- Load autocomplete scripts after jQuery is available from Vite bundle -->
+    <script>
+      (function loadAutocomplete() {
+        if (window.jQuery) {
+          // jQuery is ready, load autocomplete scripts
+          const scripts = [
+            '{% static "vendor/autocomplete_light/select2.full.js" %}',
+            '{% static "autocomplete_light/autocomplete_light.js" %}',
+            '{% static "vendor/autocomplete_light/select2.js" %}'
+          ];
+          scripts.forEach(function(src) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.type = 'text/javascript';
+            document.body.appendChild(script);
+          });
+        } else {
+          // jQuery not ready yet, check again in 50ms
+          setTimeout(loadAutocomplete, 50);
+        }
+      })();
+    </script>
     {% block scripts %}
     {% endblock scripts %}
     <!-- END SCRIPTS -->
