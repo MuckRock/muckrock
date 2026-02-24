@@ -5,6 +5,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .viewsets import (
+    ExampleResponseViewSet,
     JurisdictionViewSet,
     JurisdictionResourceViewSet,
     QueryViewSet,
@@ -12,6 +13,7 @@ from .viewsets import (
 
 # Create API router
 router = DefaultRouter()
+router.register(r'examples', ExampleResponseViewSet, basename='example')
 router.register(r'jurisdictions', JurisdictionViewSet, basename='jurisdiction')
 router.register(r'resources', JurisdictionResourceViewSet, basename='resource')
 router.register(r'query', QueryViewSet, basename='query')

@@ -1,6 +1,6 @@
 """Django admin configuration for jurisdiction app."""
 from django.contrib import admin
-from .models import JurisdictionResource, ResourceProviderUpload
+from .models import ExampleResponse, JurisdictionResource, ResourceProviderUpload
 
 
 class ResourceProviderUploadInline(admin.TabularInline):
@@ -92,3 +92,31 @@ class JurisdictionResourceAdmin(admin.ModelAdmin):
         return " | ".join(status_strs)
 
     upload_status_summary.short_description = "Provider Upload Status"
+
+
+@admin.register(ExampleResponse)
+class ExampleResponseAdmin(admin.ModelAdmin):
+    """Admin interface for ExampleResponse model."""
+
+    list_display = [
+        'title',
+        'jurisdiction_abbrev_display',
+        'is_active',
+        'order',
+        'updated_at',
+    ]
+    list_filter = ['is_active', 'jurisdiction_abbrev']
+    search_fields = ['title', 'user_question', 'assistant_response']
+    list_editable = ['is_active', 'order']
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'jurisdiction_abbrev', 'order', 'is_active')
+        }),
+        ('Example Q&A', {
+            'fields': ('user_question', 'assistant_response'),
+        }),
+    )
+
+    def jurisdiction_abbrev_display(self, obj):
+        return obj.jurisdiction_abbrev or "Global"
+    jurisdiction_abbrev_display.short_description = "Scope"

@@ -208,3 +208,47 @@ class JurisdictionResource(models.Model):
             upload.provider: upload.index_status
             for upload in self.provider_uploads.all()
         }
+
+
+class ExampleResponse(models.Model):
+    """
+    Curated few-shot Q&A example for prompt engineering.
+
+    Examples can be global (no jurisdiction) or jurisdiction-specific.
+    They are injected into the system prompt to demonstrate ideal
+    response format and quality to the RAG provider.
+    """
+
+    jurisdiction_abbrev = models.CharField(
+        max_length=5,
+        blank=True,
+        help_text='State abbreviation (e.g., CO, GA). Leave blank for global examples.'
+    )
+
+    title = models.CharField(
+        max_length=255,
+        help_text='Short descriptive title for admin reference'
+    )
+    user_question = models.TextField(
+        help_text='Example user question'
+    )
+    assistant_response = models.TextField(
+        help_text='Ideal assistant response demonstrating desired format and quality'
+    )
+
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'foia_coach_exampleresponse'
+        ordering = ['order', 'title']
+        indexes = [
+            models.Index(fields=['jurisdiction_abbrev', 'is_active']),
+        ]
+
+    def __str__(self):
+        scope = self.jurisdiction_abbrev or "Global"
+        return f"[{scope}] {self.title}"

@@ -167,6 +167,39 @@ def validate_provider_config(provider_name: Optional[str] = None) -> tuple[bool,
         return False, f"Unexpected error: {exc}"
 
 
+def get_examples_for_prompt(state=None):
+    """
+    Fetch active examples (global + jurisdiction-specific) and format for prompt injection.
+
+    Args:
+        state: Optional state abbreviation (e.g., 'CO'). If provided, includes
+               both global and state-specific examples. Otherwise only global.
+
+    Returns:
+        Formatted string to append to the system prompt, or empty string if no examples.
+    """
+    from django.db.models import Q
+    from apps.jurisdiction.models import ExampleResponse
+
+    query = Q(is_active=True)
+    if state:
+        query &= Q(jurisdiction_abbrev='') | Q(jurisdiction_abbrev=state)
+    else:
+        query &= Q(jurisdiction_abbrev='')
+
+    examples = ExampleResponse.objects.filter(query).order_by('order', 'title')
+
+    if not examples:
+        return ""
+
+    lines = ["\n\nEXAMPLE RESPONSES:"]
+    for ex in examples:
+        lines.append(f"\nUser: {ex.user_question}")
+        lines.append(f"Assistant: {ex.assistant_response}")
+
+    return "\n".join(lines)
+
+
 def query_with_fallback(
     question: str,
     state: Optional[str] = None,
@@ -220,6 +253,11 @@ def query_with_fallback(
 
     # Determine primary provider
     primary_provider = provider_name or getattr(settings, 'RAG_PROVIDER', 'openai')
+
+    # Append few-shot examples to the system prompt
+    examples_text = get_examples_for_prompt(state)
+    if examples_text:
+        system_prompt = (system_prompt or "") + examples_text
 
     logger.info(
         f"Query with fallback: question='{question[:50]}...', "

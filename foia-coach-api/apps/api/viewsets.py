@@ -8,7 +8,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
-from apps.jurisdiction.models import JurisdictionResource
+from apps.jurisdiction.models import ExampleResponse, JurisdictionResource
 from apps.jurisdiction.services.muckrock_client import MuckRockAPIClient
 from apps.jurisdiction.services.providers.helpers import (
     get_provider,
@@ -16,12 +16,28 @@ from apps.jurisdiction.services.providers.helpers import (
     query_with_fallback
 )
 from .serializers import (
+    ExampleResponseSerializer,
     JurisdictionSerializer,
     JurisdictionResourceSerializer,
     JurisdictionResourceUploadSerializer,
     QueryRequestSerializer,
     QueryResponseSerializer,
 )
+
+
+class ExampleResponseViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for ExampleResponse model.
+    Read-only access to curated few-shot Q&A examples.
+    """
+    serializer_class = ExampleResponseSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['jurisdiction_abbrev', 'is_active']
+    ordering_fields = ['order', 'created_at', 'title']
+    ordering = ['order', 'title']
+
+    def get_queryset(self):
+        return ExampleResponse.objects.filter(is_active=True)
 
 
 class JurisdictionViewSet(viewsets.ViewSet):
