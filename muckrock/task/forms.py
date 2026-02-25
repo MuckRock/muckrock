@@ -26,6 +26,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 
 
+# pylint:disable=possibly-used-before-assignment, too-many-positional-arguments
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
 

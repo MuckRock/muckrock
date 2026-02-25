@@ -1,6 +1,6 @@
 """Celery Tasks for the FOIA application"""
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, too-many-positional-arguments
 
 # Django
 from celery import shared_task

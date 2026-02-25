@@ -1,6 +1,6 @@
 """Rules based permissions for the FOIA app"""
 
-# pylint: disable=unused-argument, invalid-unary-operand-type
+# pylint: disable=unused-argument, invalid-unary-operand-type, possibly-used-before-assignment
 
 # Django
 from django.conf import settings

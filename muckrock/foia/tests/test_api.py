@@ -26,6 +26,8 @@ from muckrock.core.test_utils import mock_mailchimp, mock_squarelet
 from muckrock.foia.factories import FOIARequestFactory, FOIATemplateFactory
 from muckrock.foia.models import FOIAComposer
 
+# pylint:disable=too-many-positional-arguments
+
 
 class TestFOIAViewsetCreate(TestCase):
     """Unit Tests for FOIA API Viewset create method"""

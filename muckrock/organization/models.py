@@ -25,6 +25,8 @@ from muckrock.organization.querysets import OrganizationQuerySet
 logger = logging.getLogger(__name__)
 stripe.api_version = "2015-10-16"
 
+# pylint:disable=too-many-positional-arguments
+
 
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""

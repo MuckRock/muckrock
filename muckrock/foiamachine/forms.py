@@ -57,8 +57,10 @@ class FoiaMachineRequestForm(forms.ModelForm):
             )
         return cleaned_data
 
+
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
+
 
 class FoiaMachineCommunicationForm(forms.ModelForm):
     """
