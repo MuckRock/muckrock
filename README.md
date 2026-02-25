@@ -64,7 +64,7 @@ Note: If dev.muckrock.com/admin (without a trailing /) does not work and throws 
 
 ## Docker info
 
-The development environment is managed via [docker][docker] and [docker compose][docker compose].  Please read up on them if you are unfmiliar with them.  The docker compose file is `local.yml`.  If you would like to run `docker compose` commands directly, please run `export COMPOSE_FILE=local.yml` so you don't need to specify it in every command.
+The development environment is managed via [docker][docker] and [docker compose][docker compose].  Please read up on them if you are unfamiliar with them.  The docker compose file is `local.yml`.  If you would like to run `docker compose` commands directly, please run `export COMPOSE_FILE=local.yml` so you don't need to specify it in every command.
 
 The containers which are run include the following:
 
@@ -78,7 +78,7 @@ This is the [Django][django] application
 [Redis][redis] is an in-memory datastore, used as a message broker for Celery as well as a cache backend for Django.
 
 * Celery Worker
-[Celery][celery] is a distrubuted task queue for Python, used to run background tasks from Django.  The worker is responsible for running the tasks.
+[Celery][celery] is a distributed task queue for Python, used to run background tasks from Django.  The worker is responsible for running the tasks.
 
 * Celery Beat
 The celery beat image is responsible for queueing up periodic celery tasks.
@@ -117,7 +117,7 @@ Both linting and formatting are checked on CodeShip.  Please ensure your code is
 `inv up` will start all containers in the background.
 `inv runserver` will run the Django server in the foreground.  Be careful to not have multiple Django servers running at once.  Running the server in the foreground is mainly useful for situations where you would like to use an interactive debugger within your application code.
 `inv shell` will run an interactive python shell within the Django environment.
-`inv sh` will run a bash shell within the Django docker comtainer.
+`inv sh` will run a bash shell within the Django docker container.
 `inv dbshell` will run a postgresql shell.
 `inv manage` will allow you to easily run Django manage.py commands.
 - `inv manage migrate` to migrate database
@@ -128,13 +128,13 @@ Both linting and formatting are checked on CodeShip.  Please ensure your code is
 
 Python dependencies are managed via [pip-tools][pip-tools].  This allows us to keep all of the python dependencies (including underling dependencies) pinned, to allow for consistent execution across development and production environments.
 
-The corresponding files are kept in the `pip` folder.  There are `requirements` and `dev-requirements` files.  `requirements` will be installed in all environments, while `dev-requirements` will only be installed for local development environments.  It can be used for code only needed during develpoment, such as testing.  For each environment there is an `.in` file and a `.txt` file.  The `.in` file is the input file - you list your direct dependencies here.  You may specify version constraints here, but do not have to.
+The corresponding files are kept in the `pip` folder.  There are `requirements` and `dev-requirements` files.  `requirements` will be installed in all environments, while `dev-requirements` will only be installed for local development environments.  It can be used for code only needed during development, such as testing.  For each environment there is an `.in` file and a `.txt` file.  The `.in` file is the input file - you list your direct dependencies here.  You may specify version constraints here, but do not have to.
 
 Running `inv pip-compile` will compile the `.in` files to the corresponding `.txt` files.  This will pin all of the dependencies, and their dependencies, to the latest versions that meet any constraints that have been put on them.  You should run this command if you need to add any new dependencies to an `.in` files.  Please keep the `.in` files sorted.  After running `inv pip-compile`, you will need to run `inv build` to rebuild the docker images with the new dependencies included.
 
 ## FOIAMachine
 
-FOIAMachine is our free FOIA filing tool, that allows you to track your requests while requiring you to manually handle all of the message sending and receiving.  It is run off of the same code base as MuckRock.  To access it, set `dev.foiamachine.org` to point to localhost - `sudo echo "127.0.0.1   dev.foiamachine.org" >> /etc/hosts`.  Then pointing your browser to `dev.foiamachine.org` will take you to FOIAMachine - the correst page is shown depending on the domain host.
+FOIAMachine is our free FOIA filing tool, that allows you to track your requests while requiring you to manually handle all of the message sending and receiving.  It is run off of the same code base as MuckRock.  To access it, set `dev.foiamachine.org` to point to localhost - `sudo echo "127.0.0.1   dev.foiamachine.org" >> /etc/hosts`.  Then pointing your browser to `dev.foiamachine.org` will take you to FOIAMachine - the correct page is shown depending on the domain host.
 
 ## Update search index
 

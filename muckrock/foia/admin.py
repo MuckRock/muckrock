@@ -285,7 +285,7 @@ class FOIACommunicationInline(admin.StackedInline):
             return None
 
     def open(self, instance):
-        """Was this communicaion opened?"""
+        """Was this communication opened?"""
         return instance.opens_count > 0
 
     open.boolean = True
@@ -568,7 +568,7 @@ class FOIARequestAdmin(VersionAdmin):
     def autoimport(self, request):
         """Autoimport documents from S3"""
         autoimport.apply_async()
-        messages.info(request, "Auotimport started")
+        messages.info(request, "Autoimport started")
         return HttpResponseRedirect(reverse("admin:foia_foiarequest_changelist"))
 
 

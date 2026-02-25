@@ -459,7 +459,7 @@ class ReviewAgencyTask(Task):
                 (k, list(v))
                 for k, v in groupby(open_requests, lambda f: getattr(f, email_or_fax))
             ]
-            # do seperate queries for per email addr/fax number stats
+            # do separate queries for per email addr/fax number stats
             # do annotations separately for performance reasons (limit joins)
             addresses = address_model.objects.annotate(
                 error_count=Count("errors", distinct=True),

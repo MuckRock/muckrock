@@ -561,7 +561,7 @@ class PortalCommunication(models.Model):
 
 
 class EmailError(models.Model):
-    """An error has occured delivering this email"""
+    """An error has occurred delivering this email"""
 
     email = models.ForeignKey(
         "communication.EmailCommunication",
@@ -586,7 +586,7 @@ class EmailError(models.Model):
 
 
 class FaxError(models.Model):
-    """An error has occured delivering this fax"""
+    """An error has occurred delivering this fax"""
 
     fax = models.ForeignKey(
         "communication.FaxCommunication",
