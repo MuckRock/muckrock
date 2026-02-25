@@ -574,9 +574,8 @@
             });
         } else if (typeof module !== "undefined" && module.exports) {
             module.exports = qq;
-        } else {
-            global.qq = qq;
         }
+        global.qq = qq;
     })();
     (function() {
         "use strict";
@@ -9861,4 +9860,7 @@
         qq.extend(qq.s3.FineUploader.prototype, qq.uiPrivateApi);
     })();
 })(window);
+
+// ESM export so Vite can import qq explicitly (mirrors jQuery pattern in entry.js)
+export default window.qq;
 //# sourceMappingURL=s3.fine-uploader.js.map
