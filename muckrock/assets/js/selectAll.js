@@ -6,6 +6,8 @@
 ** - Handles enabling or disabling a related toolbar
 */
 
+import jQuery from 'jquery';
+
 (function( $ ){
     function disableToolbar(toolbar) {
         $(toolbar).attr('disabled', true).closest('.field').addClass('disabled');

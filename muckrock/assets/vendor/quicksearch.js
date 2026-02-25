@@ -10,6 +10,8 @@
  * Licensed MIT: http://deuxhuithuit.mit-license.org
  */
 
+import jQuery from 'jquery';
+
 (function($) {
 	'use strict';
 

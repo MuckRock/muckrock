@@ -11,6 +11,7 @@
  * Requires jQuery version 1.7 or above
  *
  */
+import jQuery from 'jquery';
 ;(function($) {
   $.fn.cardtable = function(options) {
     var $tables = this,

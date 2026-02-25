@@ -11,6 +11,8 @@
  **   standalone files and then imported back into here.
  */
 
+import $ from 'jquery';
+import './jquery-global';
 import 'jquery-ui/datepicker';
 import 'jquery-ui/widget';
 import 'jquery-ui/sortable';
@@ -20,7 +22,7 @@ import '../vendor/formset';
 import '../vendor/loupe';
 import '../vendor/quicksearch';
 import '../vendor/stacktable';
-import '../vendor/fine-uploader';  // UMD module, attaches to window.qq
+// Note: fine-uploader is imported and set as window.qq in entry.js
 // Note: autocomplete_light scripts are loaded via Django static files in templates
 
 import './account';

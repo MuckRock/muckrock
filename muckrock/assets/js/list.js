@@ -5,6 +5,8 @@
 ** It examines the query arguments to figure out where and how to place the arrow.
 */
 
+import $ from 'jquery';
+
 function tableHeadSortIndicator() {
   const sortBy = $('.sortable').data('sortBy');
   const orderBy = $('.sortable').data('orderBy');

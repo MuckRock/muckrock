@@ -2,6 +2,8 @@
 **
 */
 
+import $ from 'jquery';
+
 $('document').ready(function(){
   $('.api-token a').click(function(e) {
     e.preventDefault();

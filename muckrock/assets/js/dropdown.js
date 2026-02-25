@@ -3,6 +3,8 @@
 ** Provides the logic for displaying dropdown menus.
 */
 
+import $ from 'jquery';
+
 var dropdowns = $('.dropdown');
 
 $('.dropdown .dropdown-trigger').click(function(){

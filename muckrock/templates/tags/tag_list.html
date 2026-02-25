@@ -64,7 +64,7 @@
 {% endblock content %}
 
 {% block scripts %}
-    <script>
+    <script type="module">
         $(document).ready(function() {
             $("#id_tag_select").change(function() {
                 window.location.href = '/tags/' + $(this).val() + '/';

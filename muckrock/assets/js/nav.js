@@ -3,6 +3,8 @@
 ** Provides logic for the global site navigation.
 */
 
+import $ from 'jquery';
+
 function toggleNav(nav, button) {
   $(nav).toggleClass('visible');
   $(button).toggleClass('active');

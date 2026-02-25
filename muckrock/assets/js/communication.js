@@ -4,6 +4,8 @@
 ** It toggles the display of forms on the commmunication when targeted by the URL.
 */
 
+import $ from 'jquery';
+
 function showCommForm(id) {
     if (!id) {
         return;

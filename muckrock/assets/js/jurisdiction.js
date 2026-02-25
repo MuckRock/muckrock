@@ -5,6 +5,8 @@
  **
  */
 
+import $ from 'jquery';
+
 $(document).ready(function(){
 
   $("#map-stat").change(function() {

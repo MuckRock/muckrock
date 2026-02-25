@@ -5,6 +5,8 @@
 ** - Manages the different states of the widget
 */
 
+import jQuery from 'jquery';
+
 (function( $ ){
 
     var $crowdfund, $overlays, email;

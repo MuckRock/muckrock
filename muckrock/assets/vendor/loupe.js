@@ -8,6 +8,8 @@
 ** Primarily for use in the news application.
 */
 
+import jQuery from 'jquery';
+
 (function ($) {
 	$.fn.loupe = function (arg) {
 		var options = $.extend({
