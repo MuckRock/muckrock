@@ -3,6 +3,7 @@
 ** Connects the exemption state and actions to the search component.
 */
 
+import $ from 'jquery';
 import { connect } from 'react-redux';
 
 import ExemptionSearch from '../components/ExemptionSearch';

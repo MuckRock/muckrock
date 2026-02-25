@@ -8,6 +8,7 @@
 ** be accessible by hash as well.
 */
 
+import $ from 'jquery';
 import { displayFile } from './foiaRequest';
 
 var tabs = $('.tab').attr('tabindex', '0');         // collect all the tabs and set tabindex to 0

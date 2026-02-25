@@ -3,6 +3,8 @@
 ** Pops a modal dialog up on screen.
 */
 
+import $ from 'jquery';
+
 export default function modal(nextSelector) {
     var overlay = '#modal-overlay';
     $(overlay).addClass('visible');

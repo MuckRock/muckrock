@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 var toolbar = $('.toolbar :button, .toolbar :input');
 
 function disableToolbar() {

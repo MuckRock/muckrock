@@ -7,6 +7,7 @@
 ** then applied to the specific selectors.
 */
 
+import $ from 'jquery';
 import modal from './modal';
 
 $('.hidden-reply').hide();

@@ -3,6 +3,8 @@
  * This handles stripe elements
  */
 
+import $ from 'jquery';
+
 function stripeTokenHandler(token, form) {
   // Insert the token ID into the form so it gets submitted to the server
   var hiddenInput = $("#id_stripe_token");

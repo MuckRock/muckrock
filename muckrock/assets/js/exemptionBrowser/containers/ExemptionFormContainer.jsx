@@ -3,6 +3,7 @@
 ** Connects form component to store and actions.
 */
 
+import $ from 'jquery';
 import axios from 'axios';
 import { connect } from 'react-redux';
 

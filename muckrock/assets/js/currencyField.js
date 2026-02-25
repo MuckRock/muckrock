@@ -6,6 +6,7 @@
 ** Assumes the value contained in the number input is a 1-cent delimited value, e.g. $1.00 -> 100
 */
 
+import jQuery from 'jquery';
 import 'autonumeric';
 
 (function( $ ){

@@ -2,6 +2,7 @@
 **
 */
 
+import $ from 'jquery';
 import modal from './modal';
 import showdown from 'showdown';
 

@@ -5,6 +5,7 @@
  **
  */
 
+import $ from 'jquery';
 import modal from './modal';
 import showOrigContactInfo from './foiaRequest';
 

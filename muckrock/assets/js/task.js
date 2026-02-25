@@ -4,6 +4,7 @@
 ** Mostly involves submitting task forms via AJAX and handling successful responses.
 */
 
+import $ from 'jquery';
 import Cookie from 'js-cookie';
 
 function authenticateAjax() {

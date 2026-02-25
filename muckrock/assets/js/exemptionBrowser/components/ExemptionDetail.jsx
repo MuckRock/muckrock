@@ -3,6 +3,7 @@
 ** Renders details about a single exemption.
 */
 
+import $ from 'jquery';
 import React, { PropTypes } from 'react';
 
 import { rootDomain } from '../api';
