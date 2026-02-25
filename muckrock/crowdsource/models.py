@@ -244,7 +244,7 @@ class Crowdsource(models.Model):
         total = len(users)
 
         def join_names(users):
-            """Create a comma seperated list of user names"""
+            """Create a comma separated list of user names"""
             return ", ".join(u.profile.full_name or u.username for u in users)
 
         if total > 4:

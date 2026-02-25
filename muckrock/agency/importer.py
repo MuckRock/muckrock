@@ -75,7 +75,7 @@ class Importer:
         """Match the jurisdiction name"""
         jurisdiction_name = datum["jurisdiction"]
         # if there is a comma in the name, it is a locality state pair
-        # seperate and try to find an exact match
+        # separate and try to find an exact match
         if "," in jurisdiction_name:
             locality, state = [j.strip() for j in jurisdiction_name.split(",", 1)]
             jurisdiction = Jurisdiction.objects.filter(

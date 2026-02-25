@@ -125,7 +125,7 @@ class FOIATemplate(models.Model):
             ),
             make_tag(
                 "{ days }",
-                "Number of says statue requires or default of 10 days if no "
+                "Number of days statute requires or default of 10 days if no "
                 "requirement",
             ),
             make_tag(
@@ -133,7 +133,7 @@ class FOIATemplate(models.Model):
             ),
             make_tag(
                 "{ waiver }",
-                "This will be replaced by jurisdiction approriate fee waiver language "
+                "This will be replaced by jurisdiction appropriate fee waiver language "
                 "if available, or generic fee waiver language otherwise",
             ),
             ("{ requested docs }", requested_docs),
