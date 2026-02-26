@@ -37,7 +37,6 @@ django-storages # Store files on S3
 django-taggit # Used for tagging
 django-vite # Used for loading Vite bundles
 django-watson # Used for search
-django-webpack-loader # Used for loading Webpack bundles
 django<6 # Django is kinda important...
 djangorestframework # The API framework
 djangorestframework_simplejwt # JWT auth for DRF

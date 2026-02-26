@@ -92,7 +92,6 @@ click==8.1.7
     #   click-didyoumean
     #   click-plugins
     #   click-repl
-    #   typer
 click-didyoumean==0.3.1
     # via celery
 click-plugins==1.1.1
@@ -223,8 +222,6 @@ django-vite==3.0.4
     # via -r pip/requirements.in
 django-watson==1.5.5
     # via -r pip/requirements.in
-django-webpack-loader==3.2.3
-    # via -r pip/requirements.in
 djangorestframework==3.16.1
     # via
     #   -r pip/requirements.in
@@ -305,13 +302,10 @@ httplib2==0.18.1
 httpx==0.27.0
     # via
     #   anthropic
-    #   huggingface-hub
     #   ollama
     #   openai
 huggingface-hub==0.36.2
-    # via
-    #   -r pip/requirements.in
-    #   tokenizers
+    # via tokenizers
 humanfriendly==10.0
     # via coloredlogs
 idna==3.10
@@ -480,9 +474,7 @@ pydantic==2.4.0
 pydantic-core==2.10.0
     # via pydantic
 pygments==2.13.0
-    # via
-    #   ipython
-    #   rich
+    # via ipython
 pyjwkest==1.4.0
     # via -r pip/requirements.in
 pyjwt==2.3.0
