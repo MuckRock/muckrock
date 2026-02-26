@@ -469,6 +469,10 @@ class FOIATemplateQuerySet(models.QuerySet):
             )
             template = self.filter(jurisdiction=jurisdiction).order_by("pk").first()
             if template is None:
+                template = (
+                    self.filter(jurisdiction=jurisdiction.parent).order_by("pk").first()
+                )
+            if template is None:
                 template = self.filter(jurisdiction=None).order_by("pk").first()
         if template:
             return template.render(agency, user, requested_docs, **kwargs)
