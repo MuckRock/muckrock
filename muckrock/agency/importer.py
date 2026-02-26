@@ -23,7 +23,7 @@ from muckrock.communication.models import Address, EmailAddress, PhoneNumber
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.portal.models import PORTAL_TYPES, Portal
 
-STATES = [s[0] for s in STATE_CHOICES]  # pylint: disable=not-an-iterable
+STATES = [s[0] for s in STATE_CHOICES]
 PORTALS = [p[0] for p in PORTAL_TYPES]
 
 
@@ -45,8 +45,7 @@ class CSVReader:
 
     def read(self):
         """Create a dictionary from each CSV row by keying by the headers"""
-        for row in self.csv_reader:
-            yield dict(zip(self.headers, row))
+        yield from (dict(zip(self.headers, row)) for row in self.csv_reader)
 
 
 class PyReader:
@@ -59,8 +58,7 @@ class PyReader:
 
     def read(self):
         """Just iterate through the list"""
-        for datum in self.data:
-            yield datum
+        yield from self.data
 
 
 class Importer:

@@ -33,6 +33,8 @@ logger = logging.getLogger(__name__)
 
 DELIVERED = (("fax", "Fax"), ("email", "Email"), ("mail", "Mail"), ("web", "Web"))
 
+# pylint:disable=too-many-positional-arguments
+
 
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""

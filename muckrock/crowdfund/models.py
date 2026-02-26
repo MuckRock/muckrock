@@ -27,6 +27,7 @@ stripe.api_version = "2015-10-16"
 logger = logging.getLogger(__name__)
 
 
+# pylint:disable=too-many-positional-arguments
 class CrowdfundQuerySet(models.QuerySet):
     """Query set for crowdfunds"""
 

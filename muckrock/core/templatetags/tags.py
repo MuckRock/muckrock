@@ -32,6 +32,7 @@ from muckrock.project.forms import ProjectManagerForm
 register = Library()
 
 
+# pylint:disable=too-many-positional-arguments
 @register.simple_tag
 def autologin(url, user):
     """Generate an autologin url for the user."""

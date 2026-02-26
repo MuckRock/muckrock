@@ -58,6 +58,10 @@ class FoiaMachineRequestForm(forms.ModelForm):
         return cleaned_data
 
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
 class FoiaMachineCommunicationForm(forms.ModelForm):
     """
     The FOIA Machine Communication form allows for creating and updating communications.
@@ -75,7 +79,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
     files = forms.FileField(
         required=False,
         help_text="The maximum upload size is 10MB.",
-        widget=forms.ClearableFileInput(attrs={"multiple": True}),
+        widget=MultipleFileInput(attrs={"multiple": True}),
     )
     status = forms.ChoiceField(
         choices=STATUS, required=False, label="Update request status"

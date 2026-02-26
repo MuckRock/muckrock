@@ -33,6 +33,8 @@ from muckrock.foia.models import (
 )
 from muckrock.foia.utils import file_name_trim
 
+# pylint:disable=possibly-used-before-assignment
+
 
 def _complete_chunked_upload(key, upload_id, chunks):
     """
