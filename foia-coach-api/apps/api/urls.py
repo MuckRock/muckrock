@@ -8,6 +8,7 @@ from .viewsets import (
     ExampleResponseViewSet,
     JurisdictionViewSet,
     JurisdictionResourceViewSet,
+    NFOICPartnerViewSet,
     QueryViewSet,
 )
 
@@ -16,6 +17,7 @@ router = DefaultRouter()
 router.register(r'examples', ExampleResponseViewSet, basename='example')
 router.register(r'jurisdictions', JurisdictionViewSet, basename='jurisdiction')
 router.register(r'resources', JurisdictionResourceViewSet, basename='resource')
+router.register(r'nfoic-partners', NFOICPartnerViewSet, basename='nfoic-partner')
 router.register(r'query', QueryViewSet, basename='query')
 
 app_name = 'api'

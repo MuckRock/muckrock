@@ -252,3 +252,56 @@ class ExampleResponse(models.Model):
     def __str__(self):
         scope = self.jurisdiction_abbrev or "Global"
         return f"[{scope}] {self.title}"
+
+
+class NFOICPartner(models.Model):
+    """
+    NFOIC (National Freedom of Information Coalition) state-level partner
+    organization.
+
+    Partner data is injected into the system prompt so the coach can
+    refer users to local FOI advocacy resources when relevant.
+    """
+
+    jurisdiction_abbrev = models.CharField(
+        max_length=5,
+        help_text='State abbreviation (e.g., CO, GA). Partners are always state-specific.'
+    )
+    name = models.CharField(
+        max_length=255,
+        help_text='Organization name'
+    )
+    website = models.URLField(
+        max_length=500,
+        blank=True,
+        help_text='Organization website URL'
+    )
+    email = models.EmailField(
+        blank=True,
+        help_text='Contact email address'
+    )
+    phone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text='Contact phone number'
+    )
+    description = models.TextField(
+        blank=True,
+        help_text='What they do, services offered'
+    )
+
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'foia_coach_nfoicpartner'
+        ordering = ['jurisdiction_abbrev', 'order', 'name']
+        indexes = [
+            models.Index(fields=['jurisdiction_abbrev', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"[{self.jurisdiction_abbrev}] {self.name}"

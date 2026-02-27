@@ -10,7 +10,11 @@ from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 
 # Local
-from apps.jurisdiction.models import JurisdictionResource, ResourceProviderUpload
+from apps.jurisdiction.models import (
+    JurisdictionResource,
+    NFOICPartner,
+    ResourceProviderUpload,
+)
 
 
 class JurisdictionResourceFactory(DjangoModelFactory):
@@ -65,3 +69,28 @@ class ResourceProviderUploadFactory(DjangoModelFactory):
 
     index_status = 'pending'
     error_message = ''
+
+
+class NFOICPartnerFactory(DjangoModelFactory):
+    """Factory for creating NFOICPartner test instances"""
+
+    class Meta:
+        model = NFOICPartner
+
+    jurisdiction_abbrev = factory.Iterator(['CO', 'GA', 'TN', 'CA', 'NY'])
+    name = factory.LazyAttribute(
+        lambda obj: f"{obj.jurisdiction_abbrev} Freedom of Information Coalition"
+    )
+    website = factory.LazyAttribute(
+        lambda obj: f"https://www.{obj.jurisdiction_abbrev.lower()}foic.org"
+    )
+    email = factory.LazyAttribute(
+        lambda obj: f"info@{obj.jurisdiction_abbrev.lower()}foic.org"
+    )
+    phone = factory.Faker('phone_number')
+    description = factory.LazyAttribute(
+        lambda obj: f"State FOI advocacy organization for {obj.jurisdiction_abbrev}"
+    )
+
+    is_active = True
+    order = factory.Sequence(lambda n: n)

@@ -1,6 +1,11 @@
 """Django admin configuration for jurisdiction app."""
 from django.contrib import admin
-from .models import ExampleResponse, JurisdictionResource, ResourceProviderUpload
+from .models import (
+    ExampleResponse,
+    JurisdictionResource,
+    NFOICPartner,
+    ResourceProviderUpload,
+)
 
 
 class ResourceProviderUploadInline(admin.TabularInline):
@@ -120,3 +125,31 @@ class ExampleResponseAdmin(admin.ModelAdmin):
     def jurisdiction_abbrev_display(self, obj):
         return obj.jurisdiction_abbrev or "Global"
     jurisdiction_abbrev_display.short_description = "Scope"
+
+
+@admin.register(NFOICPartner)
+class NFOICPartnerAdmin(admin.ModelAdmin):
+    """Admin interface for NFOICPartner model."""
+
+    list_display = [
+        'name',
+        'jurisdiction_abbrev',
+        'website',
+        'is_active',
+        'order',
+        'updated_at',
+    ]
+    list_editable = ['is_active', 'order']
+    list_filter = ['is_active', 'jurisdiction_abbrev']
+    search_fields = ['name', 'jurisdiction_abbrev', 'email', 'description']
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'jurisdiction_abbrev', 'order', 'is_active')
+        }),
+        ('Contact Information', {
+            'fields': ('website', 'email', 'phone'),
+        }),
+        ('Details', {
+            'fields': ('description',),
+        }),
+    )

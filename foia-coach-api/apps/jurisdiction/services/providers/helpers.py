@@ -200,6 +200,51 @@ def get_examples_for_prompt(state=None):
     return "\n".join(lines)
 
 
+def get_nfoic_partner_for_prompt(state=None):
+    """
+    Fetch active NFOIC partners for a state and format for prompt injection.
+
+    Args:
+        state: Optional state abbreviation (e.g., 'CO'). Partners are always
+               state-specific, so returns empty string if no state provided.
+
+    Returns:
+        Formatted string to append to the system prompt, or empty string.
+    """
+    if not state:
+        return ""
+
+    from apps.jurisdiction.models import NFOICPartner
+
+    partners = NFOICPartner.objects.filter(
+        jurisdiction_abbrev=state,
+        is_active=True,
+    ).order_by('order', 'name')
+
+    if not partners:
+        return ""
+
+    lines = [
+        "\n\nSTATE FOI ADVOCACY RESOURCES:",
+        "The following organizations provide FOI advocacy and assistance in this "
+        "state. Mention them when the user could benefit from local support, "
+        "legal help, or advocacy resources.",
+    ]
+
+    for partner in partners:
+        lines.append(f"\nOrganization: {partner.name}")
+        if partner.website:
+            lines.append(f"  Website: {partner.website}")
+        if partner.email:
+            lines.append(f"  Email: {partner.email}")
+        if partner.phone:
+            lines.append(f"  Phone: {partner.phone}")
+        if partner.description:
+            lines.append(f"  Description: {partner.description}")
+
+    return "\n".join(lines)
+
+
 def query_with_fallback(
     question: str,
     state: Optional[str] = None,
@@ -258,6 +303,11 @@ def query_with_fallback(
     examples_text = get_examples_for_prompt(state)
     if examples_text:
         system_prompt = (system_prompt or "") + examples_text
+
+    # Append NFOIC partner info to the system prompt
+    partner_text = get_nfoic_partner_for_prompt(state)
+    if partner_text:
+        system_prompt = (system_prompt or "") + partner_text
 
     logger.info(
         f"Query with fallback: question='{question[:50]}...', "

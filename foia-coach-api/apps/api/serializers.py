@@ -4,7 +4,7 @@ Serializers for FOIA Coach API
 import os
 from django.db import models
 from rest_framework import serializers
-from apps.jurisdiction.models import ExampleResponse, JurisdictionResource
+from apps.jurisdiction.models import ExampleResponse, JurisdictionResource, NFOICPartner
 
 
 class JurisdictionSerializer(serializers.Serializer):
@@ -190,6 +190,27 @@ class ExampleResponseSerializer(serializers.ModelSerializer):
 
     def get_scope(self, obj):
         return obj.jurisdiction_abbrev or "global"
+
+
+class NFOICPartnerSerializer(serializers.ModelSerializer):
+    """Serializer for NFOICPartner model."""
+
+    class Meta:
+        model = NFOICPartner
+        fields = [
+            'id',
+            'jurisdiction_abbrev',
+            'name',
+            'website',
+            'email',
+            'phone',
+            'description',
+            'is_active',
+            'order',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class QueryRequestSerializer(serializers.Serializer):

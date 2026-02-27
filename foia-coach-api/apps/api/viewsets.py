@@ -8,7 +8,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
-from apps.jurisdiction.models import ExampleResponse, JurisdictionResource
+from apps.jurisdiction.models import ExampleResponse, JurisdictionResource, NFOICPartner
 from apps.jurisdiction.services.muckrock_client import MuckRockAPIClient
 from apps.jurisdiction.services.providers.helpers import (
     get_provider,
@@ -20,6 +20,7 @@ from .serializers import (
     JurisdictionSerializer,
     JurisdictionResourceSerializer,
     JurisdictionResourceUploadSerializer,
+    NFOICPartnerSerializer,
     QueryRequestSerializer,
     QueryResponseSerializer,
 )
@@ -38,6 +39,21 @@ class ExampleResponseViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return ExampleResponse.objects.filter(is_active=True)
+
+
+class NFOICPartnerViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for NFOICPartner model.
+    Read-only access to NFOIC state-level partner organizations.
+    """
+    serializer_class = NFOICPartnerSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['jurisdiction_abbrev', 'is_active']
+    ordering_fields = ['order', 'name', 'jurisdiction_abbrev']
+    ordering = ['jurisdiction_abbrev', 'order', 'name']
+
+    def get_queryset(self):
+        return NFOICPartner.objects.filter(is_active=True)
 
 
 class JurisdictionViewSet(viewsets.ViewSet):
