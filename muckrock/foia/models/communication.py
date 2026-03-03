@@ -527,7 +527,7 @@ class RawEmail(models.Model):
     @raw_email.setter
     def raw_email(self, value):
         """Set the raw email value"""
-        self.raw_email_file = ContentFile(value.encode("utf8"), name=f"{self.pk}.eml")
+        self.raw_email_file = ContentFile(value, name=f"{self.pk}.eml")
 
     def get_text_html(self):
         """Decode the text and html from this raw email"""
