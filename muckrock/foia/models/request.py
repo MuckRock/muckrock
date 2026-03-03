@@ -951,7 +951,7 @@ class FOIARequest(models.Model):
                     agency=self.agency, resolved=False, source="email"
                 )
 
-        email_comm.set_raw_email(str(msg.message()))
+        email_comm.set_raw_email(msg.message().as_bytes(linesep="\r\n"))
 
     def _send_fax(self, comm, **kwargs):
         """Send the message as a fax"""
