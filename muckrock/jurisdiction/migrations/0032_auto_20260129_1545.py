@@ -105,7 +105,7 @@ def add_jurisdictions(apps, schema_editor):
         )
         for jurisdiction in JURISDICTIONS
     ]
-    Jurisdiction.objects.bulk_create(jurisdictions)
+    Jurisdiction.objects.bulk_create(jurisdictions, ignore_conflicts=True)
 
 
 def remove_jurisdictions(apps, schema_editor):
