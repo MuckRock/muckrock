@@ -47,6 +47,8 @@ from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import FlaggedTask, ReviewAgencyTask
 
+# pylint:disable=possibly-used-before-assignment
+
 
 class AgencyList(MRSearchFilterListView):
     """Filterable list of agencies"""

@@ -40,7 +40,7 @@ jobs:
             submodules: recursive
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip" # caching pip dependencies
 
       - name: Install
@@ -52,7 +52,7 @@ jobs:
         run: pylint muckrock
 
       - name: Isort
-        run: isort --check-only --recursive muckrock --skip ./muckrock/gloo
+        run: isort --check-only muckrock --skip ./muckrock/gloo
 
       - name: Formatting
         run: black --check muckrock --exclude migrations\|vendor\|gloo

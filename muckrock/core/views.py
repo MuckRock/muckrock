@@ -57,6 +57,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 logger = logging.getLogger(__name__)
 
 
+# pylint:disable = possibly-used-before-assignment
 class AuthenticatedAPIMixin:
     """
     Mixin for APIv2 viewsets to centralize authentication and permissions.

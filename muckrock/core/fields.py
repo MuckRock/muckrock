@@ -110,8 +110,7 @@ class EmptyLastModelChoiceIterator(ModelChoiceIterator):
         # pylint: disable=stop-iteration-return
         iter_self = super().__iter__()
         empty = next(iter_self)
-        for obj in iter_self:
-            yield obj
+        yield from iter_self
         yield empty
 
 

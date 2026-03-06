@@ -34,6 +34,7 @@ from muckrock.mailgun.views import bounces, delivered, opened, route_mailgun
 from muckrock.task.models import OrphanTask
 
 
+# pylint:disable=too-many-positional-arguments
 class TestMailgunViews(TestCase):
     """Shared methods for testing mailgun views"""
 

@@ -53,6 +53,7 @@ from muckrock.task.models import (
 logger = logging.getLogger(__name__)
 
 
+# pylint:disable = too-many-positional-arguments, possibly-used-before-assignment
 def _make_orphan_comm(
     from_email, to_emails, cc_emails, subject, message_id, post, files, foia
 ):

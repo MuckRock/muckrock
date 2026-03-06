@@ -66,7 +66,7 @@ from muckrock.task.querysets import (
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, possibly-used-before-assignment
 
 MR_NUMBER_FIELD = 1500004565182
 
