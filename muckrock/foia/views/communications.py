@@ -59,6 +59,9 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
         """Check if the communication requires a passcode"""
         self.object = self.get_object()
 
+        if not self.object or not self.object.foia:
+            return redirect("index")
+
         if self.object.foia.has_perm(request.user, "view"):
             url = furl(self.object.get_absolute_url())
             url.args["agency"] = 1
