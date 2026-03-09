@@ -616,8 +616,9 @@ def autoimport():
         if key_or_pre.endswith("/"):
             for obj in bucket.objects.filter(Prefix=key_or_pre):
                 if obj.key == key_or_pre:
-                    bucket.Object(dest_name).copy_from(
-                        CopySource={"Bucket": bucket.name, "Key": obj.key}
+                    bucket.copy(
+                        CopySource={"Bucket": bucket.name, "Key": obj.key},
+                        Key=dest_name,
                     )
                     continue
                 s3_copy(
@@ -626,8 +627,9 @@ def autoimport():
                     "%s/%s" % (dest_name, os.path.basename(os.path.normpath(obj.key))),
                 )
         else:
-            bucket.Object(dest_name).copy_from(
-                CopySource={"Bucket": bucket.name, "Key": key_or_pre}
+            bucket.copy(
+                CopySource={"Bucket": bucket.name, "Key": key_or_pre},
+                Key=dest_name,
             )
 
     def s3_delete(bucket, key_or_pre):
@@ -674,9 +676,10 @@ def autoimport():
         full_file_name = FOIAFile.ffile.field.generate_filename(None, file_name)
         full_file_name = default_storage.get_available_name(full_file_name)
 
-        new_obj = storage_bucket.Object(full_file_name)
-        new_obj.copy_from(
-            CopySource={"Bucket": bucket.name, "Key": key}, ACL=settings.AWS_DEFAULT_ACL
+        storage_bucket.copy(
+            CopySource={"Bucket": bucket.name, "Key": key},
+            Key=full_file_name,
+            ExtraArgs={"ACL": settings.AWS_DEFAULT_ACL},
         )
 
         foia_file = comm.attach_file(path=full_file_name, name=file_name, now=False)
