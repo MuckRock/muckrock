@@ -1,8 +1,7 @@
 -e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
 -e git+https://github.com/MuckRock/govqa-py@main#egg=govqa # for govqa integration
-aiohttp>3.9
-multidict>6.4
+aiohttp
 baml # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
@@ -57,6 +56,7 @@ lob # sending mail via lob.com
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
 micawber # Used for embeds in assignments
+multidict>6.4
 pdfrw # Used for reading/writing PDFs for form filling in
 phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
@@ -81,7 +81,7 @@ six>=1.17.0 # Required for packages with Python 2 compatibility support
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
 social-auth-app-django # for oauth client
-social-auth-core[openidconnect] # for oauth client
+social-auth-core # for oauth client
 sorl-thumbnail # used for squarlet avatars
 stripe # Stripe payment processor integration
 tiktoken # Used by gloo

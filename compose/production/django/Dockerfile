@@ -2,6 +2,10 @@ FROM python:3.12
 
 ENV PYTHONUNBUFFERED 1
 
+# Upgrade pip to a minimum version (26.0 or newer) for security
+# Will need to update this as time goes on. 
+RUN python -m pip install --upgrade "pip>=26.0,<27.0"
+
 RUN apk update \
   # psycopg2 dependencies
   && apk add --virtual build-deps gcc python3-dev musl-dev \
