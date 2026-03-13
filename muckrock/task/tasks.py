@@ -18,7 +18,7 @@ from random import randint
 # Third Party
 import boto3
 from fpdf import FPDF
-from pypdf import PdfWriter, PdfReader
+from pypdf import PdfReader, PdfWriter
 from requests.exceptions import RequestException
 from zenpy.lib.exception import APIException, ZenpyException
 

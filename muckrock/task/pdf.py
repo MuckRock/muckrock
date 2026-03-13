@@ -22,7 +22,7 @@ import emoji
 import img2pdf
 import pypdf
 from fpdf import FPDF
-from pypdf import PdfWriter, PdfReader
+from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
 
 # MuckRock
