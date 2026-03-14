@@ -606,8 +606,10 @@ def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
 
     if jurisdiction and idx:
         jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=idx)
-    if idx:
+    elif idx:
         jmodel = get_object_or_404(Jurisdiction, pk=idx)
+    else:
+        raise ValueError("Must provide either 'idx' or 'jurisdiction+idx'")
 
     if not view:
         return redirect(jmodel)

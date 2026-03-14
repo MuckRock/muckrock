@@ -537,13 +537,16 @@ class MassImportAgency(PermissionRequiredMixin, FormView):
         """Return the import results via HTML"""
         reader = CSVReader(codecs.iterdecode(self.request.FILES["csv"], "utf8"))
         importer = Importer(reader)
-        if form.cleaned_data["match_or_import"] == "match":
+        mode = form.cleaned.data["match_or_import"]
+        if mode == "match":
             context = {"data": importer.match(), "match": True}
-        elif form.cleaned_data["match_or_import"] == "import":
+        elif mode == "import":
             context = {
                 "data": importer.import_(dry=form.cleaned_data.get("dry_run")),
                 "import": True,
             }
+        else:
+            raise ValueError(f"Unknown match_or_import value: {mode}")
         return self.render_to_response(context)
 
     def handle_no_permission(self):

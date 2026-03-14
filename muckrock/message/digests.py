@@ -36,6 +36,8 @@ from muckrock.qanda.models import Question
 
 logger = logging.getLogger(__name__)
 
+# pylint:disable = too-many-positional-arguments
+
 
 def get_salutation():
     """Returns a time-appropriate salutation"""

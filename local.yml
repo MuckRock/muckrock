@@ -52,6 +52,7 @@ services:
   muckrock_celeryworker:
     <<: *django
     image: muckrock_local_celeryworker
+    ports: []
     depends_on:
       - muckrock_redis
       - muckrock_postgres
@@ -67,6 +68,7 @@ services:
   muckrock_celerybeat:
     <<: *django
     image: muckrock_local_celerybeat
+    ports: []
     depends_on:
       - muckrock_redis
       - muckrock_postgres

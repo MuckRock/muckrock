@@ -48,6 +48,11 @@ def user_authenticated(func):
         def inner(user):
             return user.is_authenticated and func(user)
 
+    else:
+        raise TypeError(
+            f"user_authenticated predicate '{func.__name__}' must accept "
+            "(user) or (user, obj), not {argc} positional arguments."
+        )
     return inner
 
 

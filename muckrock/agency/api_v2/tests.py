@@ -1,4 +1,4 @@
-""" Tests for the Agency API """
+"""Tests for the Agency API"""
 
 # Django
 from django.test import Client

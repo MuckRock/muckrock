@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # django-how-can-i-get-a-block-from-a-template
 
 
+# pylint:disable=too-many-positional-arguments
 class BlockNotFound(Exception):
     """Block not found exception"""
 

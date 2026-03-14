@@ -177,8 +177,10 @@ def _delete(request, model, idx):
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if request.user.is_authenticated:
-        user = request.user
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+
+    user = request.user
 
     if attm.user != user:
         return HttpResponseForbidden()
