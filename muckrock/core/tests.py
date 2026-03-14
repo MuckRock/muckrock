@@ -31,10 +31,10 @@ from muckrock.core.factories import (
 )
 from muckrock.core.fields import EmailsListField
 from muckrock.core.forms import NewsletterSignupForm
+from muckrock.core.helpers import get_allowed
 from muckrock.core.models import HomePage
 from muckrock.core.templatetags import tags
 from muckrock.core.test_utils import http_get_response, http_post_response
-from muckrock.core.tests.helpers import get_allowed, get_404, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.core.utils import new_action, notify, parse_header
 from muckrock.core.views import NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
@@ -50,6 +50,7 @@ from muckrock.task.factories import (
 logging.disable(logging.CRITICAL)
 
 kwargs = {"wsgi.url_scheme": "https"}
+
 
 class TestFunctional(TestCase):
     """Functional tests for top level"""
