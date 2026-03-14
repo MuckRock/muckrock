@@ -33,8 +33,6 @@ from muckrock.foia.models import (
 )
 from muckrock.foia.utils import file_name_trim
 
-# pylint:disable=possibly-used-before-assignment
-
 
 def _complete_chunked_upload(key, upload_id, chunks):
     """
@@ -179,8 +177,10 @@ def _delete(request, model, idx):
     except model.DoesNotExist:
         return HttpResponseBadRequest()
 
-    if request.user.is_authenticated:
-        user = request.user
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+
+    user = request.user
 
     if attm.user != user:
         return HttpResponseForbidden()

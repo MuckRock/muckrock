@@ -1,6 +1,6 @@
 """Rules based permissions for the FOIA app"""
 
-# pylint: disable=unused-argument, invalid-unary-operand-type, possibly-used-before-assignment
+# pylint: disable=unused-argument, invalid-unary-operand-type
 
 # Django
 from django.conf import settings
@@ -48,6 +48,11 @@ def user_authenticated(func):
         def inner(user):
             return user.is_authenticated and func(user)
 
+    else:
+        raise TypeError(
+            f"user_authenticated predicate '{func.__name__}' must accept "
+            "(user) or (user, obj), not {argc} positional arguments."
+        )
     return inner
 
 

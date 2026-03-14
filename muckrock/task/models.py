@@ -66,7 +66,7 @@ from muckrock.task.querysets import (
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=too-many-lines, possibly-used-before-assignment
+# pylint: disable=too-many-lines
 
 MR_NUMBER_FIELD = 1500004565182
 
@@ -414,6 +414,12 @@ class ReviewAgencyTask(Task):
                     "error_code",
                     "error_id",
                 ]
+
+            else:
+                raise ValueError(
+                    "get_review_data() called with invalid"
+                    f" email_or_fax value: {email_or_fax}"
+                )
 
             open_requests = (
                 self.agency.foiarequest_set.get_open()

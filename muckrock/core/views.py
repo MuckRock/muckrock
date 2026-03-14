@@ -57,7 +57,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 logger = logging.getLogger(__name__)
 
 
-# pylint:disable = possibly-used-before-assignment
 class AuthenticatedAPIMixin:
     """
     Mixin for APIv2 viewsets to centralize authentication and permissions.
@@ -607,8 +606,10 @@ def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
 
     if jurisdiction and idx:
         jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=idx)
-    if idx:
+    elif idx:
         jmodel = get_object_or_404(Jurisdiction, pk=idx)
+    else:
+        raise ValueError("Must provide either 'idx' or 'jurisdiction+idx'")
 
     if not view:
         return redirect(jmodel)
