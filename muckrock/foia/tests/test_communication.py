@@ -342,5 +342,5 @@ class TestAttachFilesToEmail(test.TestCase):
 
         msg.attach.assert_called_once()
         _, attached_content = msg.attach.call_args[0][:2]
-        if isinstance(attached_content, str):
-            assert attached_content == original
+        assert isinstance(attached_content, str)
+        assert attached_content == original

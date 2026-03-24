@@ -390,11 +390,14 @@ class FOIACommunication(models.Model):
             content = file_.ffile.read()
             mimetype, _ = mimetypes.guess_type(name)
             if mimetype and mimetype.startswith("text/"):
-                enc = chardet.detect(content)["encoding"]
-                if enc is not None:
-                    content = sanitize_surrogates(content.decode(enc))
+                if isinstance(content, str):
+                    content = sanitize_surrogates(content)
                 else:
-                    content = content.decode("utf-8", "replace")
+                    enc = chardet.detect(content)["encoding"]
+                    if enc is not None:
+                        content = sanitize_surrogates(content.decode(enc))
+                    else:
+                        content = content.decode("utf-8", "replace")
             msg.attach(name, content)
 
     def get_raw_email(self):
