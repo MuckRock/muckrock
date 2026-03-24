@@ -26,6 +26,7 @@ from muckrock.core.storage import PrivateMediaRootS3BotoStorage
 from muckrock.core.utils import UnclosableFile, new_action
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import STATUS, FOIARequest
+from muckrock.foia.utils import sanitize_surrogates
 from muckrock.foia.querysets import FOIACommunicationQuerySet, RawEmailQuerySet
 from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
 
@@ -390,7 +391,10 @@ class FOIACommunication(models.Model):
             mimetype, _ = mimetypes.guess_type(name)
             if mimetype and mimetype.startswith("text/"):
                 enc = chardet.detect(content)["encoding"]
-                content = content.decode(enc)
+                if enc is not None:
+                    content = sanitize_surrogates(content.decode(enc))
+                else:
+                    content = content.decode("utf-8", "replace")
             msg.attach(name, content)
 
     def get_raw_email(self):

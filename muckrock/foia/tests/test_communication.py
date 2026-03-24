@@ -8,6 +8,8 @@ from django import test
 # Standard Library
 import logging
 import os
+from io import BytesIO
+from unittest.mock import MagicMock
 
 # Third Party
 import pytest
@@ -278,3 +280,67 @@ class TestCommunicationClone(RunCommitHooksMixin, test.TestCase):
         assert not self.comm.files.all()[0].ffile
         other_foia = FOIARequestFactory()
         self.comm.clone([other_foia], self.user)
+
+
+class TestAttachFilesToEmail(test.TestCase):
+    """Test that attach_files_to_email handles encoding edge cases"""
+
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+        self.comm = FOIACommunicationFactory(foia=self.foia)
+
+    def _make_text_file(self, content, filename="test.txt"):
+        """Create a FOIAFile with the given bytes content"""
+        foia_file = FOIAFileFactory(comm=self.comm)
+        foia_file.ffile.save(filename, BytesIO(content))
+        return foia_file
+
+    def test_attach_text_file_with_surrogates(self):
+        """Text files decoded by chardet should have surrogates sanitized"""
+        # Construct bytes that, when decoded as UTF-16LE, produce surrogates.
+        # Mock chardet to force this decoding path.
+        text_with_surrogate = "Hello \ud800 World"
+        raw_bytes = text_with_surrogate.encode("utf-16-le", "surrogatepass")
+        self._make_text_file(raw_bytes)
+
+        with patch(
+            "muckrock.foia.models.communication.chardet.detect",
+            return_value={"encoding": "utf-16-le", "confidence": 1.0},
+        ):
+            msg = MagicMock()
+            self.comm.attach_files_to_email(msg)
+
+        msg.attach.assert_called_once()
+        _, attached_content = msg.attach.call_args[0][:2]
+        assert isinstance(attached_content, str)
+        # Should encode cleanly without UnicodeEncodeError
+        attached_content.encode("utf-8")
+        assert "\ud800" not in attached_content
+
+    def test_attach_text_file_with_undetectable_encoding(self):
+        """Files with undetectable encoding should fall back to utf-8 replace"""
+        self._make_text_file(b"some content")
+
+        with patch(
+            "muckrock.foia.models.communication.chardet.detect",
+            return_value={"encoding": None, "confidence": 0.0},
+        ):
+            msg = MagicMock()
+            self.comm.attach_files_to_email(msg)
+
+        msg.attach.assert_called_once()
+        _, attached_content = msg.attach.call_args[0][:2]
+        assert isinstance(attached_content, str)
+
+    def test_attach_text_file_preserves_valid_content(self):
+        """Valid UTF-8 text files should pass through unchanged"""
+        original = "Hello World! Special chars: éàü"
+        self._make_text_file(original.encode("utf-8"))
+
+        msg = MagicMock()
+        self.comm.attach_files_to_email(msg)
+
+        msg.attach.assert_called_once()
+        _, attached_content = msg.attach.call_args[0][:2]
+        if isinstance(attached_content, str):
+            assert attached_content == original
