@@ -1,4 +1,4 @@
-""" API ViewSets for accounts """
+"""API ViewSets for accounts"""
 
 # Django
 from django.contrib.auth.models import User

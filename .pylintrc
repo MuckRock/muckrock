@@ -3,7 +3,7 @@
 load-plugins=pylint_django
 ignore=migrations
 # https://stackoverflow.com/a/39207275/10952222
-init-hook="from pylint.config import find_pylintrc; import os, sys; sys.path.append(os.path.join(os.path.dirname(find_pylintrc()), 'muckrock'))"
+init-hook="import os, sys; sys.path.append(os.path.join(os.getcwd(), 'muckrock'))"
 
 [FORMAT]
 max-line-length=88

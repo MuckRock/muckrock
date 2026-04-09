@@ -26,6 +26,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 
 
+# pylint:disable=too-many-positional-arguments
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
 
@@ -117,11 +118,19 @@ class ResponseTaskForm(forms.Form):
     check_scans = True
 
     def __init__(self, *args, **kwargs):
-        if self.check_scans:
-            task = kwargs.pop("task")
+        # Safely pop 'task' only if check_scans is True, otherwise set to None
+        task = kwargs.pop("task") if getattr(self, "check_scans", False) else None
+
+        # Call the parent constructor, we have to do this after because
+        # the base constructor can't handle task
         super().__init__(*args, **kwargs)
-        if self.check_scans and task.scan:
-            del self.fields["status"]
+
+        # Adjust fields based on task and check_scans
+        if task is not None:
+            if task.scan:
+                del self.fields["status"]
+            else:
+                del self.fields["code"]
         else:
             del self.fields["code"]
 

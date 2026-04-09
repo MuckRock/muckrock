@@ -53,6 +53,7 @@ from muckrock.task.models import (
 logger = logging.getLogger(__name__)
 
 
+# pylint:disable = too-many-positional-arguments
 def _make_orphan_comm(
     from_email, to_emails, cc_emails, subject, message_id, post, files, foia
 ):
@@ -254,11 +255,12 @@ def _handle_request(request, mail_id):
             email_allowed = from_email.allowed(foia)
         else:
             email_allowed = False
-        if not email_allowed:
-            msg, reason = ("Bad Sender", "bs")
-        if foia.block_incoming:
-            msg, reason = ("Incoming Blocked", "ib")
+
         if not email_allowed or foia.block_incoming:
+            if not email_allowed:
+                msg, reason = ("Bad Sender", "bs")
+            else:
+                msg, reason = ("Incoming Blocked", "ib")
             logger.warning("%s: %s", msg, from_email)
             comm = _make_orphan_comm(
                 from_email,

@@ -1,4 +1,4 @@
-""" Serializer for Jurisdictions """
+"""Serializer for Jurisdictions"""
 
 # Third Party
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer

@@ -1,4 +1,4 @@
-""" Tests for the organization viewsets """
+"""Tests for the organization viewsets"""
 
 # Django
 from django.test import Client, TestCase

@@ -22,7 +22,7 @@ import emoji
 import img2pdf
 import pypdf
 from fpdf import FPDF
-from pypdf import PdfMerger, PdfReader
+from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
 
 # MuckRock
@@ -232,7 +232,6 @@ class MailPDF(PDF):
 
     def _extra_header(self, text):
         """Add an extra line to the header"""
-        # pylint: disable=invalid-name
         x = self.get_x()
         y = self.get_y()
         self.set_font("Arial", "b", 18)
@@ -244,28 +243,32 @@ class MailPDF(PDF):
         """Hook for subclasses to override"""
 
     def _resize_pages(self, pages):
-        """Resize the page if necessary and able"""
-        i = 0
+        """Resize the page if necessary using pypdf"""
         for page in pages:
-            i += 1
             rotated = False
-            width = page.pagedata.mediabox.width
-            height = page.pagedata.mediabox.height
-            # account for rotations
-            rotation = page.pagedata.rotation
-            if rotation is not None and rotation % 180 == 90:
+
+            # Get current dimensions
+            width = float(page.mediabox.width)
+            height = float(page.mediabox.height)
+
+            # account for rotation
+            rotation = page.get("/Rotate", 0)
+            if rotation % 180 == 90:
                 width, height = height, width
                 rotated = not rotated
+
+            # Force landscape to portrait
             if width > height:
-                page.pagedata.rotate(-90)
-                # page.transfer_rotation_to_content()
+                page.rotate(-90)  # rotate page counter-clockwise
                 width, height = height, width
                 rotated = not rotated
+
+            # Resize if necessary
             if (width, height) != (PDF_WIDTH, PDF_HEIGHT):
                 if rotated:
-                    page.pagedata.scale_to(PDF_HEIGHT, PDF_WIDTH)
+                    page.scale_to(PDF_HEIGHT, PDF_WIDTH)
                 else:
-                    page.pagedata.scale_to(PDF_WIDTH, PDF_HEIGHT)
+                    page.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
     def _handle_file(self, file_, files, merger):
         """Determine if we can attach the file"""
@@ -328,16 +331,16 @@ class MailPDF(PDF):
             return new_pdf.prepare(address_override, num_msgs=num_msgs)
 
         self.page = min(self.page, self.page_limit)
-        merger = PdfMerger(strict=False)
-        merger.append(BytesIO(self.output(dest="S").encode("latin-1")))
+        writer = PdfWriter(strict=False)
+        writer.append(BytesIO(self.output(dest="S").encode("latin-1")))
         files = []
         for file_ in self.comm.files.all():
-            total_pages = self._handle_file(file_, files, merger)
+            total_pages = self._handle_file(file_, files, writer)
 
         single_pdf = BytesIO()
         try:
-            self._resize_pages(merger.pages)
-            merger.write(single_pdf)
+            self._resize_pages(writer.pages)
+            writer.write(single_pdf)
         except (PdfReadError, TypeError):
             return (None, None, files, None)
 

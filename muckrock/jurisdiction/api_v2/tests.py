@@ -1,4 +1,4 @@
-""" Test jurisdiction views """
+"""Test jurisdiction views"""
 
 # Django
 from django.test import TestCase

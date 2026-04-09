@@ -1,7 +1,11 @@
 # # syntax = docker/dockerfile:experimental
-FROM python:3.11
+FROM python:3.12
 
 ENV PYTHONUNBUFFERED 1
+
+# Upgrade pip to a minimum version (26.0 or newer) for security
+# Will need to update this as time goes on. 
+RUN python -m pip install --upgrade "pip>=26.0,<27.0"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   # psycopg2 dependencies

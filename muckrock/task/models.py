@@ -415,6 +415,12 @@ class ReviewAgencyTask(Task):
                     "error_id",
                 ]
 
+            else:
+                raise ValueError(
+                    "get_review_data() called with invalid"
+                    f" email_or_fax value: {email_or_fax}"
+                )
+
             open_requests = (
                 self.agency.foiarequest_set.get_open()
                 .order_by("%s__status" % email_or_fax, email_or_fax)
