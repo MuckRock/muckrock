@@ -284,14 +284,14 @@
       <h3>Award-winning investigations and editorial collaborations</h3>
     </header>
     <ul class="tabs">
-      {% for featured_project in featured_project_slots.all %}
+      {% for featured_project in featured_project_slots %}
       {% with project=featured_project.project %}
       <li class="tab {% if forloop.first %}active{% endif %}" data-tab="{{project.slug}}">{{project.title}}</li>
       {% endwith %}
       {% endfor %}
     </ul>
     <div class="tab-viewer">
-      {% for featured_project in featured_project_slots.all %}
+      {% for featured_project in featured_project_slots %}
       {% with project=featured_project.project %}
       <div class="tab-content project {% if forloop.first %}active{% endif %}" data-tab="{{project.slug}}" id="{{project.slug}}">
         <div class="project-container">

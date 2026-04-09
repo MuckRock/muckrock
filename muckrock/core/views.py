@@ -405,9 +405,11 @@ def homepage(request):
 
     featured_project_slots = cache.get("homepage_featured_project_slots")
     if featured_project_slots is None:
-        featured_project_slots = homepage_obj.featured_project_slots.select_related(
-            "project"
-        ).prefetch_related("articles")
+        featured_project_slots = list(
+            homepage_obj.featured_project_slots.select_related(
+                "project"
+            ).prefetch_related("articles")
+        )
         cache.set("homepage_featured_project_slots", featured_project_slots, 60 * 30)
 
     context = {
