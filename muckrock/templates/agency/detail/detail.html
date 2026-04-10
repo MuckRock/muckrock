@@ -64,6 +64,12 @@
 <section class="briefing">
   {% if user.is_authenticated %}
     {% include 'agency/detail/contact.html' %}
+  {% else %}
+    <p>
+      <a href="https://accounts.muckrock.com/accounts/signup/?intent=muckrock&next={{ request.build_absolute_uri }}">Create a free account</a>
+      or <a href="https://accounts.muckrock.com/accounts/login/?intent=muckrock&next={{ request.build_absolute_uri }}">sign in</a>
+      to view agency contact details.
+    </p>
   {% endif %}
   {% include 'agency/detail/stats.html' %}
 </section>
