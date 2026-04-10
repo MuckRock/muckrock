@@ -9,9 +9,11 @@ from django.http.response import Http404
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
+# Standard Library
+from unittest.mock import patch
+
 # Third Party
 import pytest
-from mock import patch
 
 # MuckRock
 from muckrock.accounts import views

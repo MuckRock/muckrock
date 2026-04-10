@@ -9,12 +9,12 @@ from django.test import TestCase
 
 # Standard Library
 from datetime import date
+from unittest.mock import Mock, patch
 
 # Third Party
 import pytest
 from actstream.actions import follow
 from dateutil.relativedelta import relativedelta
-from mock import Mock, patch
 
 # MuckRock
 from muckrock.core.factories import (

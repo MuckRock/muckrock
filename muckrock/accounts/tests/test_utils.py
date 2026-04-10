@@ -9,10 +9,10 @@ from django.urls import reverse
 
 # Standard Library
 import re
+from unittest.mock import Mock
 
 # Third Party
 import requests_mock
-from mock.mock import Mock
 
 # MuckRock
 from muckrock.accounts.mixins import MiniregMixin

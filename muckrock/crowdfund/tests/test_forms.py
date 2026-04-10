@@ -9,9 +9,7 @@ from django.utils import timezone
 # Standard Library
 from datetime import date, timedelta
 from decimal import Decimal
-
-# Third Party
-from mock import Mock
+from unittest.mock import Mock
 
 # MuckRock
 from muckrock.crowdfund.forms import CrowdfundForm

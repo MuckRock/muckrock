@@ -7,8 +7,8 @@ object cannot be instantiated.
 # Django
 from django.test import TestCase
 
-# Third Party
-import mock
+# Standard Library
+from unittest import mock
 
 # MuckRock
 from muckrock.core.factories import NotificationFactory, ProjectFactory, UserFactory

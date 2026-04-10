@@ -12,9 +12,7 @@ import hashlib
 import hmac
 import time
 import uuid
-
-# Third Party
-from mock import patch
+from unittest.mock import patch
 
 # MuckRock
 from muckrock.squarelet.views import webhook

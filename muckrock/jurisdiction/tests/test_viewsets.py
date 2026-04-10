@@ -6,8 +6,10 @@ Test the API viewsets for the Jurisdiction application.
 from django.test import TestCase
 from django.urls import reverse
 
+# Standard Library
+from unittest import mock
+
 # Third Party
-import mock
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock

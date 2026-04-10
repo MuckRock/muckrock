@@ -100,7 +100,7 @@ jobs:
           node-version: '18.16.0'
 
       - name: Install frontend dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build frontend assets
         run: npm run build
@@ -111,7 +111,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip" # caching pip dependencies
 
       - name: Install requirements

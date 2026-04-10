@@ -8,10 +8,10 @@ from django import test
 # Standard Library
 import logging
 import os
+from unittest.mock import patch
 
 # Third Party
 import pytest
-from mock import patch
 
 # MuckRock
 from muckrock.communication.models import EmailAddress

@@ -7,9 +7,7 @@ from django.test import TestCase
 
 # Standard Library
 import json
-
-# Third Party
-from mock import patch
+from unittest.mock import patch
 
 # MuckRock
 from muckrock.message.notifications import SlackNotification
