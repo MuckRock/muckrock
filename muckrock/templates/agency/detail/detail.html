@@ -62,7 +62,9 @@
     </div>
 </section>
 <section class="briefing">
-  {% include 'agency/detail/contact.html' %}
+  {% if user.is_authenticated %}
+    {% include 'agency/detail/contact.html' %}
+  {% endif %}
   {% include 'agency/detail/stats.html' %}
 </section>
 {% endblock fullHeader %}
