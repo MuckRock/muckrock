@@ -133,7 +133,7 @@ class FOIACommunication(models.Model):
     opened = models.BooleanField(
         default=False,
         help_text="DEPRECATED: If emailed, did we receive an open notification?"
-        " If faxed, did we recieve a confirmation?",
+        " If faxed, did we receive a confirmation?",
     )
 
     objects = FOIACommunicationQuerySet.as_manager()
@@ -495,7 +495,7 @@ class FOIACommunication(models.Model):
 
 
 class RawEmail(models.Model):
-    """The raw email text for a communication - stored seperately for performance"""
+    """The raw email text for a communication - stored separately for performance"""
 
     # nullable during transition
     # communication is depreacted and should be removed
@@ -580,7 +580,7 @@ class FOIANote(models.Model):
 
 
 class CommunicationError(models.Model):
-    """An error has occured delivering this communication"""
+    """An error has occurred delivering this communication"""
 
     # Depreacted
     communication = models.ForeignKey(

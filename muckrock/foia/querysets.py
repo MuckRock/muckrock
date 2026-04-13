@@ -37,7 +37,7 @@ class PreloadFileQuerysetMixin:
         self._preload_files_done = False
 
     def _clone(self):
-        """Add _preload_files_amt to vlaues to copy over in a clone"""
+        """Add _preload_files_amt to values to copy over in a clone"""
         # pylint: disable=protected-access
         clone = super()._clone()
         clone._preload_files_amt = self._preload_files_amt

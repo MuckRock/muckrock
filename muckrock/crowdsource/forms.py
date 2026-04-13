@@ -175,7 +175,7 @@ class CrowdsourceForm(forms.ModelForm, CrowdsourceDataCsvForm):
     )
     form_json = forms.CharField(widget=forms.HiddenInput(), initial="[]")
     submission_emails = forms.CharField(
-        help_text="Comma seperated list of emails to send to on submission",
+        help_text="Comma separated list of emails to send to on submission",
         required=False,
     )
 
