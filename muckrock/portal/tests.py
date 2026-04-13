@@ -8,11 +8,11 @@ from django.test import TestCase
 
 # Standard Library
 from datetime import date
+from unittest.mock import patch
 
 # Third Party
 import pytest
 import requests_mock
-from mock import patch
 
 # MuckRock
 from muckrock.foia.factories import FOIACommunicationFactory

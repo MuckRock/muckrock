@@ -6,7 +6,6 @@ factory-boy # Used for creating test data
 freezegun # Control time during testing
 ipdb # interactive debugger
 isort # sort imports
-mock # Used for mocking objects during test
 moto[s3] # Used for mocking S3
 pip-audit # Used for auditing packages
 pip-tools # Keeps the requirements up to date

@@ -12,12 +12,12 @@ from django.urls import reverse
 # Standard Library
 import hashlib
 import logging
+from unittest import mock
+from unittest.mock import ANY, Mock, patch
 
 # Third Party
-import mock
 import pytest
 from actstream.models import Action
-from mock import ANY, Mock, patch
 
 # MuckRock
 from muckrock.accounts.models import Notification

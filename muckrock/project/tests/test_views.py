@@ -14,9 +14,9 @@ from django.urls import reverse
 # Standard Library
 from datetime import date, timedelta
 from decimal import Decimal
+from unittest import mock
 
 # Third Party
-import mock
 import pytest
 
 # MuckRock

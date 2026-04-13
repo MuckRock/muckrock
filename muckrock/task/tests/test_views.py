@@ -10,9 +10,7 @@ from django.urls import reverse
 
 # Standard Library
 import logging
-
-# Third Party
-import mock
+from unittest import mock
 
 # MuckRock
 from muckrock.agency.forms import AgencyForm

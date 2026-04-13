@@ -10,9 +10,9 @@ from django.utils import timezone
 
 # Standard Library
 import logging
+from unittest import mock
 
 # Third Party
-import mock
 import pytest
 import requests_mock
 

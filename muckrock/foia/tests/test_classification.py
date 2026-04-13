@@ -5,9 +5,11 @@ Tests for the classifing of new communications
 # Django
 from django.test import TestCase
 
+# Standard Library
+from unittest.mock import Mock, patch
+
 # Third Party
 from constance.test import override_config
-from mock import Mock, patch
 
 # MuckRock
 from muckrock.core.factories import UserFactory

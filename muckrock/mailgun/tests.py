@@ -16,13 +16,13 @@ import os
 import time
 from datetime import date, datetime
 from io import StringIO
+from unittest.mock import Mock, patch
 
 # Third Party
 import boto3
 import pytz
 import requests_mock
 from freezegun import freeze_time
-from mock import Mock, patch
 from moto import mock_aws
 
 # MuckRock

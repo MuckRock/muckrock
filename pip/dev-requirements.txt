@@ -117,8 +117,6 @@ mccabe==0.6.1
     # via pylint
 mdurl==0.1.2
     # via markdown-it-py
-mock==2.0.0
-    # via -r pip/dev-requirements.in
 moto[s3]==5.1.22
     # via -r pip/dev-requirements.in
 msgpack==1.1.2
@@ -139,8 +137,6 @@ parso==0.8.4
     # via jedi
 pathspec==1.0.4
     # via black
-pbr==1.10.0
-    # via mock
 pexpect==4.6.0
     # via ipython
 pickleshare==0.7.5
@@ -241,7 +237,6 @@ six==1.17.0
     #   fake-factory
     #   freezegun
     #   html5lib
-    #   mock
     #   python-dateutil
     #   requests-mock
 sortedcontainers==2.4.0

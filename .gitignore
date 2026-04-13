@@ -40,3 +40,4 @@ CLAUDE.md
 /data
 .env
 .claude
+rootCA.pem

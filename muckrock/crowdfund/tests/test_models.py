@@ -9,9 +9,7 @@ from django.test import TestCase
 # Standard Library
 from datetime import date, timedelta
 from decimal import Decimal
-
-# Third Party
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory

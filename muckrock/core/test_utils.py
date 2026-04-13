@@ -12,10 +12,8 @@ from django.utils.text import slugify
 # Standard Library
 import re
 import uuid
+from unittest.mock import MagicMock, patch
 from urllib.parse import parse_qs
-
-# Third Party
-from mock import MagicMock, patch
 
 
 def mock_middleware(request):

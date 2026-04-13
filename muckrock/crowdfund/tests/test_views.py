@@ -11,10 +11,10 @@ from django.urls import reverse
 import json
 from datetime import date, timedelta
 from decimal import Decimal
+from unittest.mock import Mock, patch
 
 # Third Party
 import requests_mock
-from mock import Mock, patch
 
 # MuckRock
 from muckrock.core.factories import CrowdfundFactory, ProjectFactory, UserFactory
