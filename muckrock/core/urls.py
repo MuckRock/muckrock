@@ -166,7 +166,6 @@ urlpatterns = [
     re_path(r"^squarelet/", include("muckrock.squarelet.urls")),
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^search/$", views.SearchView.as_view(), name="search"),
-    re_path(r"^api_v1/", include(router.urls)),
     re_path(r"^api_v2/", include(router_v2.urls)),
     re_path(r"^robots\.txt$", include("robots.urls")),
     re_path(
@@ -222,3 +221,7 @@ if settings.DEBUG:
         re_path(r"^404/$", TemplateView.as_view(template_name="404.html")),
         # re_path(r"^silk/", include("silk.urls", namespace="silk")),
     ]
+
+# If ENABLE_API_V1 is False, then this won't work.
+if settings.ENABLE_API_V1:
+    urlpatterns.append(re_path(r"^api_v1/", include(router.urls)))
