@@ -1,28 +1,10 @@
 <script>
+  import { showMessage } from "../js/messages";
+
   let { flagCategory = "", csrfToken = "" } = $props();
   let text = $state("");
   let submitted = $state(false);
   let errorMessage = $state("");
-
-  function showPageMessage(messageText, type) {
-    let container = document.querySelector("ul.messages");
-    if (!container) {
-      container = document.createElement("ul");
-      container.className = "messages nostyle";
-      const header = document.querySelector(".header");
-      if (header) {
-        header.after(container);
-      } else {
-        document.querySelector(".content")?.prepend(container);
-      }
-    }
-    const li = document.createElement("li");
-    const div = document.createElement("div");
-    div.className = `message ${type}`;
-    div.innerHTML = `<span class="text"><p>${messageText}</p></span>`;
-    li.appendChild(div);
-    container.appendChild(li);
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -45,7 +27,7 @@
 
       if (response.ok) {
         text = "";
-        showPageMessage(data.message, "success");
+        showMessage(data.message, "success");
         form.dispatchEvent(
           new CustomEvent("gethelpclose", { bubbles: true })
         );
