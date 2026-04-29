@@ -3,15 +3,19 @@
 import json
 
 import pytest
+from django.core.cache import cache
 from django.test import TestCase
 
 from muckrock.gethelp.models import Problem
-from muckrock.gethelp.utils import get_problems_by_category
+from muckrock.gethelp.utils import CACHE_KEY, get_problems_by_category
 
 
 @pytest.mark.django_db
 class TestGetProblemsByCategory(TestCase):
     """Tests for the get_problems_by_category serializer"""
+
+    def setUp(self):
+        cache.delete(CACHE_KEY)
 
     def test_empty_database(self):
         """Returns all categories with empty problem lists when no problems exist"""
@@ -139,3 +143,15 @@ class TestGetProblemsByCategory(TestCase):
         result = get_problems_by_category()
         problem = result["managing"]["problems"][0]
         assert problem["id"] == p.pk
+
+    def test_resolution_html_sanitized(self):
+        """Unsafe HTML in resolution is stripped"""
+        Problem.objects.create(
+            category="managing",
+            title="XSS test",
+            resolution='<script>alert("xss")</script>**safe**',
+        )
+        result = get_problems_by_category()
+        problem = result["managing"]["problems"][0]
+        assert "<script>" not in problem["resolution_html"]
+        assert "<strong>safe</strong>" in problem["resolution_html"]
