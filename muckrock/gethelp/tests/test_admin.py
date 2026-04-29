@@ -1,10 +1,14 @@
 """Tests for the gethelp admin"""
 
-import pytest
+# Django
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 
+# Third Party
+import pytest
+
+# MuckRock
 from muckrock.gethelp.admin import ProblemAdmin
 from muckrock.gethelp.models import Problem
 

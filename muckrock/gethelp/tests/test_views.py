@@ -1,10 +1,15 @@
 """Tests for gethelp view integration with FOIA detail"""
 
-import json
-
-import pytest
+# Django
 from django.test import TestCase
 
+# Standard Library
+import json
+
+# Third Party
+import pytest
+
+# MuckRock
 from muckrock.core.factories import AgencyFactory, AppealAgencyFactory, UserFactory
 from muckrock.core.test_utils import http_get_response
 from muckrock.foia.factories import FOIARequestFactory

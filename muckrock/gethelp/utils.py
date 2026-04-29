@@ -1,11 +1,16 @@
 """Utility functions for the gethelp app"""
 
-from collections import defaultdict
-
-import bleach
-import markdown
+# Django
 from django.core.cache import cache
 
+# Standard Library
+from collections import defaultdict
+
+# Third Party
+import bleach
+import markdown
+
+# MuckRock
 from muckrock.gethelp.models import Problem
 
 CACHE_KEY = "gethelp:problems_by_category"
