@@ -156,7 +156,7 @@ def flag(request, foia):
             new_action(request.user, "flagged", target=foia)
         if is_ajax:
             return JsonResponse({"message": "Problem successfully reported"})
-        messages.success(request, "Problem succesfully reported")
+        messages.success(request, "Problem successfully reported")
     else:
         if is_ajax:
             return JsonResponse(
