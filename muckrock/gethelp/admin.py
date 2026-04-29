@@ -1,7 +1,9 @@
 """Admin configuration for the gethelp app"""
 
+# Django
 from django.contrib import admin
 
+# MuckRock
 from muckrock.gethelp.models import Problem
 
 

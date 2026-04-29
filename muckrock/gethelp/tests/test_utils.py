@@ -1,11 +1,16 @@
 """Tests for the gethelp utils"""
 
-import json
-
-import pytest
+# Django
 from django.core.cache import cache
 from django.test import TestCase
 
+# Standard Library
+import json
+
+# Third Party
+import pytest
+
+# MuckRock
 from muckrock.gethelp.models import Problem
 from muckrock.gethelp.utils import CACHE_KEY, get_problems_by_category
 
