@@ -27,6 +27,7 @@
 
       if (response.ok) {
         text = "";
+        submitted = false;
         showMessage(data.message, "success");
         form.dispatchEvent(
           new CustomEvent("gethelpclose", { bubbles: true })

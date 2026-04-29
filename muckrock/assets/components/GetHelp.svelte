@@ -10,9 +10,7 @@
   let selectedCategory = $state(null);
 
   // Get CSRF token from the page
-  let csrfToken = $derived(
-    document.querySelector("[name=csrfmiddlewaretoken]")?.value ?? ""
-  );
+  const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]")?.value ?? "";
 
   // Build category list from problems data
   let categories = $derived(

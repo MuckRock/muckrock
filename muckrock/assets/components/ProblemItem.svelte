@@ -1,5 +1,6 @@
 <script>
   import ContactForm from "./ContactForm.svelte";
+  import Self from './ProblemItem.svelte';
 
   let { problem, csrfToken = "" } = $props();
   let showContact = $state(false);
@@ -17,9 +18,9 @@
     {#if problem.children && problem.children.length > 0}
       <div class="get-help__children">
         {#each problem.children as child (child.id)}
-          <svelte:self problem={child} {csrfToken} />
+          <Self problem={child} {csrfToken} />
         {/each}
-        <svelte:self problem={{title: "Other"}} {csrfToken} />
+        <Self problem={{id: "other", title: "Other"}} {csrfToken} />
       </div>
     {:else}
       {#if problem.resolution_html && !showContact}
