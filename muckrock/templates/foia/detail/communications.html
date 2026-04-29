@@ -84,9 +84,8 @@
             {% endif %}
           </div>
           {% if not is_agency_user %}
-            <span data-modal="#flag-modal" class="modal-link button">
-              Get Help
-            </span>
+            <div id="get-help-widget" data-foia-id="{{ foia.pk }}"></div>
+            {{ help_problems_json|json_script:"help-problems-data" }}
           {% endif %}
         </div>
 
