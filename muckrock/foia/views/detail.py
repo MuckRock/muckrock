@@ -55,6 +55,7 @@ from muckrock.foia.models import (
 )
 from muckrock.foia.tasks import composer_delayed_submit, zip_request
 from muckrock.foia.views import detail_actions
+from muckrock.gethelp.utils import get_problems_by_category
 from muckrock.portal.forms import PortalForm
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task
@@ -249,6 +250,7 @@ class Detail(DetailView):
         context["portal_form"] = PortalForm(foia=self.foia)
         context["resend_forms"] = self.resend_forms
         context["tracking_id_form"] = TrackingNumberForm()
+        context["help_problems_json"] = get_problems_by_category()
 
         # this data used in a form
         context["status_choices"] = [

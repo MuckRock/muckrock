@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,20 +19,21 @@ export default defineConfig({
         main: path.resolve(__dirname, "muckrock/assets/entry.js"),
         foiamachine: path.resolve(__dirname, "muckrock/foiamachine/assets/entry.js"),
         docViewer: path.resolve(__dirname, "muckrock/assets/js/docViewer.js"),
+        getHelp: path.resolve(__dirname, "muckrock/assets/js/getHelp.ts"),
       },
     },
   },
   esbuild: {
-    loader: "jsx",
     include: /\.(jsx?|tsx?)$/,
     jsxFactory: "React.createElement",
     jsxFragment: "React.Fragment",
   },
+  plugins: [svelte()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "muckrock/assets"),
     },
-    extensions: [".js", ".jsx", ".json"],
+    extensions: [".js", ".jsx", ".json", ".svelte", ".ts"],
   },
   server: {
     port: 4200,
