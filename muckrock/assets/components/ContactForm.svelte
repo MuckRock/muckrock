@@ -33,7 +33,7 @@
     const formData = new FormData(form);
 
     try {
-      const response = await fetch(form.action || window.location.href, {
+      const response = await fetch(window.location.href, {
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",
