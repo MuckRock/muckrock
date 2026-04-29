@@ -19,8 +19,26 @@ def _render_resolution(text):
     html = markdown.markdown(text)
     return bleach.clean(
         html,
-        tags=["p", "a", "strong", "em", "ul", "ol", "li", "code", "pre", "br", "h1",
-              "h2", "h3", "h4", "h5", "h6", "blockquote", "img"],
+        tags=[
+            "p",
+            "a",
+            "strong",
+            "em",
+            "ul",
+            "ol",
+            "li",
+            "code",
+            "pre",
+            "br",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "blockquote",
+            "img",
+        ],
         attributes={"a": ["href", "title"]},
     )
 

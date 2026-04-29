@@ -159,9 +159,7 @@ def flag(request, foia):
         messages.success(request, "Problem successfully reported")
     else:
         if is_ajax:
-            return JsonResponse(
-                {"message": f"Error: {form.errors}"}, status=400
-            )
+            return JsonResponse({"message": f"Error: {form.errors}"}, status=400)
         messages.error(request, f"Error: {form.errors}")
 
     return _get_redirect(request, foia)
