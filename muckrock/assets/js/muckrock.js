@@ -44,12 +44,15 @@ import './selectAll';
 import './stripe';
 import './tabs';
 import './task';
+import { initMessages } from './messages';
 
 import 'jquery.tabulator';
 
 /* Bind plugins and event handlers to frontend elements. */
 
 $('document').ready(function(){
+
+  initMessages();
 
   if ('ontouchstart' in window) {
     $('body').addClass('touch');

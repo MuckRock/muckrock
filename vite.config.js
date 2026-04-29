@@ -24,7 +24,6 @@ export default defineConfig({
     },
   },
   esbuild: {
-    loader: "jsx",
     include: /\.(jsx?|tsx?)$/,
     jsxFactory: "React.createElement",
     jsxFragment: "React.Fragment",
