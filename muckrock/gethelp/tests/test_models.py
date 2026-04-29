@@ -1,9 +1,13 @@
 """Tests for the gethelp models"""
 
-import pytest
+# Django
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+# Third Party
+import pytest
+
+# MuckRock
 from muckrock.gethelp.models import Problem
 
 

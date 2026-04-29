@@ -1,5 +1,6 @@
 """App configuration for the gethelp app"""
 
+# Django
 from django.apps import AppConfig
 
 
