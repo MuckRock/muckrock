@@ -4,7 +4,6 @@
 */
 
 import $ from 'jquery';
-import axios from 'axios';
 import { connect } from 'react-redux';
 
 import ExemptionForm from '../components/ExemptionForm';

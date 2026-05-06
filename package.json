@@ -9,6 +9,8 @@
     "build": "vite build --logLevel warn",
     "preview": "vite preview",
     "lint": "eslint ./muckrock/assets/js -c config/.eslintrc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "heroku-postbuild": "npm run build"
   },
   "repository": {
@@ -25,13 +27,13 @@
     "node": "22"
   },
   "devDependencies": {
-    "eslint": "^2.7.0",
+    "eslint": "^8.57.1",
     "sass": "^1.77.0",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "autonumeric": "^1.9.43",
-    "axios": "^0.13.1",
     "formBuilder": "^2.9.8",
     "jquery": "^3.6.4",
     "jquery-ui": "1.10.x",
