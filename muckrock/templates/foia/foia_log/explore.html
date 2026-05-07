@@ -3,6 +3,12 @@
 {% load static %}
 {% load humanize %}
 
+{% block title %}FOIA Log Explorer &bull; {{ block.super }}{% endblock title %}
+
+{% block description %}
+  <meta name="description" content="Search for interesting requests across FOIA log entries from federal, state and local agencies" />
+{% endblock description %}
+
 {% block classes %}foia-log-explore{% endblock %}
 
 {% block explore_header_description %}
