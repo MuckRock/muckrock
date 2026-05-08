@@ -4,14 +4,24 @@
 import factory
 
 # MuckRock
-from muckrock.gethelp.models import Problem
+from muckrock.gethelp.models import Category, Problem
+
+
+class CategoryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Category
+        django_get_or_create = ("slug",)
+
+    slug = "managing"
+    label = "Managing this request"
+    order = 0
 
 
 class ProblemFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Problem
 
-    category = "managing"
+    category = factory.SubFactory(CategoryFactory)
     title = factory.Faker("sentence")
     resolution = ""
     order = factory.Sequence(lambda n: n)

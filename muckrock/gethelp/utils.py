@@ -11,7 +11,7 @@ import bleach
 import markdown
 
 # MuckRock
-from muckrock.gethelp.models import Problem
+from muckrock.gethelp.models import Category, Problem
 
 CACHE_KEY = "gethelp:problems_by_category"
 CACHE_TIMEOUT = 60 * 15  # 15 minutes
@@ -73,10 +73,12 @@ def get_problems_by_category():
         return cached
 
     result = {}
-    for key, label in Problem.CATEGORY_CHOICES:
-        result[key] = {"label": label, "problems": []}
+    for cat in Category.objects.order_by("order"):
+        result[cat.slug] = {"label": cat.label, "problems": []}
 
-    problems = list(Problem.objects.order_by("category", "order"))
+    problems = list(
+        Problem.objects.select_related("category").order_by("category__order", "order")
+    )
 
     # Index children by parent_id
     children_by_parent = defaultdict(list)
@@ -89,7 +91,7 @@ def get_problems_by_category():
 
     for problem in top_level:
         serialized = _serialize_problem(problem, children_by_parent)
-        result[problem.category]["problems"].append(serialized)
+        result[problem.category.slug]["problems"].append(serialized)
 
     cache.set(CACHE_KEY, result, CACHE_TIMEOUT)
     return result

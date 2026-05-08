@@ -14,7 +14,7 @@ from muckrock.core.factories import AgencyFactory, AppealAgencyFactory, UserFact
 from muckrock.core.test_utils import http_get_response
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.views import Detail
-from muckrock.gethelp.models import Problem
+from muckrock.gethelp.models import Category, Problem
 
 
 @pytest.mark.django_db
@@ -33,6 +33,8 @@ class TestGetHelpContext(TestCase):
             "idx": self.foia.id,
         }
         UserFactory(username="MuckrockStaff")
+        # Categories are automatically created by our migration
+        self.managing = Category.objects.get(slug="managing")
 
     def test_help_problems_in_context(self):
         """The help_problems_json key should be in the detail context"""
@@ -42,7 +44,7 @@ class TestGetHelpContext(TestCase):
     def test_help_problems_structure(self):
         """The context should contain the correct problem structure"""
         Problem.objects.create(
-            category="managing",
+            category=self.managing,
             title="Test problem",
             resolution="**bold**",
         )
@@ -55,7 +57,7 @@ class TestGetHelpContext(TestCase):
 
     def test_help_problems_json_serializable(self):
         """The problems data can be serialized to JSON for the template"""
-        Problem.objects.create(category="managing", title="Test")
+        Problem.objects.create(category=self.managing, title="Test")
         response = http_get_response(self.url, self.view, self.foia.user, **self.kwargs)
         problems = response.context_data["help_problems_json"]
         json_str = json.dumps(problems)
