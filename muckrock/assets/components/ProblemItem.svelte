@@ -78,4 +78,12 @@
     flex-direction: column;
     gap: 0.25em;
   }
+
+  /* Dim other siblings when open */
+  :global(.get-help__problem-list:has(details[open]) > details:not([open])) {
+    opacity: 0.5;
+  }
+  :global(.get-help__children:has(details[open]) > details:not([open])) {
+    opacity: 0.5;
+  }
 </style>

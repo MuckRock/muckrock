@@ -78,6 +78,7 @@
     {/if}
     <button class="close-modal" onclick={closeModal}>Close</button>
   </header>
+  <main>
   {#if view === "categories"}
     <CategoryList {categories} onSelect={selectCategory} onOther={showContact} />
   {:else if view === "problems" && selectedCategory && problems[selectedCategory]}
@@ -92,13 +93,30 @@
       <ContactForm flagCategory="" {csrfToken} />
     </div>
   {/if}
+  </main>
 </div>
 
 <style>
+  .modal {
+    padding: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    margin-top: -5%;
+  }
   .modal header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 1em;
+    margin: 0;
+    background: #F7F8FA;
+    border-bottom: 1px solid #D5DAE0;
+  }
+  .modal main {
+    padding: 1em;
   }
 
   .modal header h2 {
