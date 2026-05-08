@@ -20,6 +20,7 @@ import stripe
 # MuckRock
 from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
+from muckrock.organization.exceptions import PaymentActionRequired
 from muckrock.organization.querysets import OrganizationQuerySet
 
 logger = logging.getLogger(__name__)
@@ -348,7 +349,10 @@ class Organization(models.Model):
         return monthly_requests
 
     def pay(self, amount, description, token, save_card, metadata, fee_amount=0):
-        """Pay via Squarelet API"""
+        """Pay via Squarelet API.
+
+        Raises PaymentActionRequired if 3DS authentication is needed.
+        """
         resp = squarelet_post(
             "/api/charges/",
             data={
@@ -362,6 +366,27 @@ class Organization(models.Model):
             },
         )
         logger.info("Squarelet response: %s %s", resp.status_code, resp.content)
+        if resp.status_code == 402:
+            data = resp.json()
+            raise PaymentActionRequired(
+                data["client_secret"],
+                data["payment_intent_id"],
+            )
+        resp.raise_for_status()
+        resp_json = resp.json()
+        if "card" in resp_json:
+            self.card = resp_json["card"]
+            self.save()
+
+    def confirm_payment_intent(self, payment_intent_id):
+        """Confirm a charge after 3DS authentication via Squarelet API."""
+        resp = squarelet_post(
+            "/api/charges/confirm/",
+            data={
+                "organization": self.uuid,
+                "payment_intent_id": payment_intent_id,
+            },
+        )
         resp.raise_for_status()
         resp_json = resp.json()
         if "card" in resp_json:
