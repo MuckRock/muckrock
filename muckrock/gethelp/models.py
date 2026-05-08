@@ -4,20 +4,29 @@
 from django.db import models
 
 
+class Category(models.Model):
+    """An admin-editable help category"""
+
+    slug = models.SlugField(max_length=20, unique=True)
+    label = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name_plural = "categories"
+
+    def __str__(self):
+        return self.label
+
+
 class Problem(models.Model):
     """An admin-editable help problem with optional self-referential nesting"""
 
-    CATEGORY_CHOICES = [
-        ("managing", "Managing this request"),
-        ("communications", "Communications and messages"),
-        ("payments", "Checks and request payments"),
-        ("documents", "Documents and files"),
-        ("portals", "Agency portals and web forms"),
-        ("appeals", "Appeals and public records advice"),
-        ("proxy", "In-state proxy and proof of citizenship"),
-    ]
-
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        related_name="problems",
+    )
     title = models.CharField(max_length=255)
     resolution = models.TextField(blank=True)
     parent = models.ForeignKey(
@@ -35,7 +44,7 @@ class Problem(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["category", "order"]
+        ordering = ["category__order", "order"]
 
     def __str__(self):
         return self.title

@@ -11,7 +11,7 @@ import json
 import pytest
 
 # MuckRock
-from muckrock.gethelp.models import Problem
+from muckrock.gethelp.models import Category, Problem
 from muckrock.gethelp.utils import CACHE_KEY, get_problems_by_category
 
 
@@ -21,20 +21,23 @@ class TestGetProblemsByCategory(TestCase):
 
     def setUp(self):
         cache.delete(CACHE_KEY)
+        # These categories are created by our database migration
+        self.managing = Category.objects.get(slug="managing")
+        self.payments = Category.objects.get(slug="payments")
 
     def test_empty_database(self):
         """Returns all categories with empty problem lists when no problems exist"""
         result = get_problems_by_category()
         assert isinstance(result, dict)
-        for key, _label in Problem.CATEGORY_CHOICES:
-            assert key in result
-            assert result[key]["problems"] == []
-            assert "label" in result[key]
+        for cat in Category.objects.all():
+            assert cat.slug in result
+            assert result[cat.slug]["problems"] == []
+            assert "label" in result[cat.slug]
 
     def test_is_json_serializable(self):
         """The result can be serialized to JSON"""
         Problem.objects.create(
-            category="managing",
+            category=self.managing,
             title="Test problem",
             resolution="Some **bold** text",
         )
@@ -44,8 +47,8 @@ class TestGetProblemsByCategory(TestCase):
 
     def test_grouped_by_category(self):
         """Problems are grouped under their category key"""
-        Problem.objects.create(category="managing", title="Managing problem", order=0)
-        Problem.objects.create(category="payments", title="Payment problem", order=0)
+        Problem.objects.create(category=self.managing, title="Managing problem", order=0)
+        Problem.objects.create(category=self.payments, title="Payment problem", order=0)
         result = get_problems_by_category()
         assert len(result["managing"]["problems"]) == 1
         assert len(result["payments"]["problems"]) == 1
@@ -66,7 +69,7 @@ class TestGetProblemsByCategory(TestCase):
     def test_markdown_rendered_to_html(self):
         """Markdown in resolution is rendered to HTML"""
         Problem.objects.create(
-            category="managing",
+            category=self.managing,
             title="Test",
             resolution="**bold** and *italic*",
         )
@@ -78,7 +81,7 @@ class TestGetProblemsByCategory(TestCase):
     def test_empty_resolution(self):
         """Empty resolution produces empty HTML"""
         Problem.objects.create(
-            category="managing",
+            category=self.managing,
             title="No resolution",
             resolution="",
         )
@@ -88,9 +91,9 @@ class TestGetProblemsByCategory(TestCase):
 
     def test_children_nested(self):
         """Child problems are nested under their parent"""
-        parent = Problem.objects.create(category="managing", title="Parent", order=0)
+        parent = Problem.objects.create(category=self.managing, title="Parent", order=0)
         Problem.objects.create(
-            category="managing", title="Child", parent=parent, order=0
+            category=self.managing, title="Child", parent=parent, order=0
         )
         result = get_problems_by_category()
         problems = result["managing"]["problems"]
@@ -103,13 +106,13 @@ class TestGetProblemsByCategory(TestCase):
     def test_deeply_nested_children(self):
         """Children can nest multiple levels"""
         grandparent = Problem.objects.create(
-            category="managing", title="Grandparent", order=0
+            category=self.managing, title="Grandparent", order=0
         )
         parent = Problem.objects.create(
-            category="managing", title="Parent", parent=grandparent, order=0
+            category=self.managing, title="Parent", parent=grandparent, order=0
         )
         Problem.objects.create(
-            category="managing", title="Child", parent=parent, order=0
+            category=self.managing, title="Child", parent=parent, order=0
         )
         result = get_problems_by_category()
         problems = result["managing"]["problems"]
@@ -124,8 +127,8 @@ class TestGetProblemsByCategory(TestCase):
 
     def test_ordering_respected(self):
         """Problems are ordered by their order field"""
-        Problem.objects.create(category="managing", title="Second", order=1)
-        Problem.objects.create(category="managing", title="First", order=0)
+        Problem.objects.create(category=self.managing, title="Second", order=1)
+        Problem.objects.create(category=self.managing, title="First", order=0)
         result = get_problems_by_category()
         problems = result["managing"]["problems"]
         assert problems[0]["title"] == "First"
@@ -134,7 +137,7 @@ class TestGetProblemsByCategory(TestCase):
     def test_flag_category_included(self):
         """flag_category is included in the serialized output"""
         Problem.objects.create(
-            category="managing",
+            category=self.managing,
             title="Test",
             flag_category="no response",
         )
@@ -144,7 +147,7 @@ class TestGetProblemsByCategory(TestCase):
 
     def test_problem_id_included(self):
         """Problem id is included in the serialized output"""
-        p = Problem.objects.create(category="managing", title="Test")
+        p = Problem.objects.create(category=self.managing, title="Test")
         result = get_problems_by_category()
         problem = result["managing"]["problems"][0]
         assert problem["id"] == p.pk
@@ -152,7 +155,7 @@ class TestGetProblemsByCategory(TestCase):
     def test_resolution_html_sanitized(self):
         """Unsafe HTML in resolution is stripped"""
         Problem.objects.create(
-            category="managing",
+            category=self.managing,
             title="XSS test",
             resolution='<script>alert("xss")</script>**safe**',
         )
