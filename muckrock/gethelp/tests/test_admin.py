@@ -3,7 +3,6 @@
 # Django
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
-from django.test import TestCase
 
 # Third Party
 import pytest
@@ -14,7 +13,7 @@ from muckrock.gethelp.models import Problem
 
 
 @pytest.mark.django_db
-class TestProblemAdmin(TestCase):
+class TestProblemAdmin:
     """Tests for the Problem admin configuration"""
 
     def test_problem_registered(self):
