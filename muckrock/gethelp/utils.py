@@ -14,7 +14,12 @@ import markdown
 from muckrock.gethelp.models import Category, Problem
 
 CACHE_KEY = "gethelp:problems_by_category"
-CACHE_TIMEOUT = 60 * 15  # 15 minutes
+CACHE_TIMEOUT = 60 * 60  # 1 hour
+
+
+def bust_cache():
+    """Invalidate the problems-by-category cache"""
+    cache.delete(CACHE_KEY)
 
 
 def _render_resolution(text):

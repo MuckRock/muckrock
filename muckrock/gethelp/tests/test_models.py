@@ -2,6 +2,7 @@
 
 # Django
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 
 # Third Party
 import pytest
@@ -43,7 +44,6 @@ class TestProblem(TestCase):
     def test_category_required(self):
         """Problem requires a category FK"""
         problem = Problem(category=None, title="No category")
-        from django.core.exceptions import ValidationError
 
         with self.assertRaises((ValidationError, Exception)):
             problem.full_clean()
@@ -107,15 +107,9 @@ class TestProblem(TestCase):
         """Problems are ordered by category order then problem order"""
         # managing has order=0, communications has order=1 (from migration data)
         communications = Category.objects.get(slug="communications")
-        p3 = Problem.objects.create(
-            category=communications, title="Comms 1", order=0
-        )
-        p1 = Problem.objects.create(
-            category=self.managing, title="Managing 2", order=1
-        )
-        p2 = Problem.objects.create(
-            category=self.managing, title="Managing 1", order=0
-        )
+        p3 = Problem.objects.create(category=communications, title="Comms 1", order=0)
+        p1 = Problem.objects.create(category=self.managing, title="Managing 2", order=1)
+        p2 = Problem.objects.create(category=self.managing, title="Managing 1", order=0)
         problems = list(Problem.objects.all())
         # managing (order=0) before communications (order=1), then by problem order
         assert problems == [p2, p1, p3]
