@@ -49,7 +49,7 @@ def _render_resolution(text):
             "blockquote",
             "img",
         ],
-        attributes={"a": ["href", "title"]},
+        attributes={"a": ["href", "title"], "img": ["src", "alt", "title"]},
     )
 
 
