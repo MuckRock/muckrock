@@ -47,7 +47,9 @@ class TestGetProblemsByCategory(TestCase):
 
     def test_grouped_by_category(self):
         """Problems are grouped under their category key"""
-        Problem.objects.create(category=self.managing, title="Managing problem", order=0)
+        Problem.objects.create(
+            category=self.managing, title="Managing problem", order=0
+        )
         Problem.objects.create(category=self.payments, title="Payment problem", order=0)
         result = get_problems_by_category()
         assert len(result["managing"]["problems"]) == 1

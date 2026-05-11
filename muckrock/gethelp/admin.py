@@ -4,7 +4,12 @@
 from django.contrib import admin
 
 # MuckRock
-from muckrock.gethelp.models import Problem
+from muckrock.gethelp.models import Category, Problem
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ["label", "slug", "order"]
+    list_editable = ["order"]
 
 
 class ChildProblemInline(admin.TabularInline):
@@ -24,3 +29,4 @@ class ProblemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Problem, ProblemAdmin)
+admin.site.register(Category, CategoryAdmin)
