@@ -283,3 +283,16 @@ class TestEmbargo(TestCase):
         assert not self.foia.status in END_STATUS
         assert self.foia.embargo_status == "embargo"
         assert not self.foia.date_embargo, "The embargo date should be removed."
+
+    def test_expire_clears_embargo_message(self):
+        """When an embargo expires, the embargo_message should be cleared."""
+        self.foia.embargo_status = "embargo"
+        self.foia.embargo_message = "Test embargo message"
+        self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
+        self.foia.status = "rejected"
+        self.foia.save()
+        embargo_expire()
+        self.foia.refresh_from_db()
+        assert self.foia.embargo_status == "public"
+        assert self.foia.embargo_message == ""
+
