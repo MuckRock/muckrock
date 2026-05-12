@@ -1,8 +1,8 @@
 """Tests for the gethelp models"""
 
 # Django
-from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.test import TestCase
 
 # Third Party
 import pytest
