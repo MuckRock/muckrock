@@ -7,13 +7,14 @@ from django.test import RequestFactory, TestCase
 
 # Standard Library
 import datetime
+from unittest.mock import patch
 
 # MuckRock
-from muckrock.core.factories import ProfessionalUserFactory, UserFactory
+from muckrock.core.factories import AgencyFactory, ProfessionalUserFactory, UserFactory
 from muckrock.core.test_utils import mock_middleware
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.forms import FOIAEmbargoForm
-from muckrock.foia.models import END_STATUS
+from muckrock.foia.models import END_STATUS, FOIARequest
 from muckrock.foia.tasks import embargo_expire
 from muckrock.foia.views import embargo
 
@@ -296,3 +297,79 @@ class TestEmbargo(TestCase):
         assert self.foia.embargo_status == "public"
         assert self.foia.embargo_message == ""
 
+
+@patch("muckrock.foia.models.request.FOIARequest.set_address")
+@patch("muckrock.foia.models.request.FOIARequest.process_attachments")
+@patch("muckrock.foia.models.request.FOIARequest.create_initial_communication")
+@patch("muckrock.foia.message.notify_proxy_user")
+class TestProxyEmbargo(TestCase):
+    """Proxy requests should be automatically embargoed."""
+
+    def _create_new(self, agency, no_proxy=False, embargo_status="public"):
+        """Helper to create and return a FOIA request."""
+        composer = FOIAComposerFactory(
+            embargo_status=embargo_status,
+            agencies=[agency],
+        )
+        FOIARequest.objects.create_new(composer, agency, no_proxy, None)
+        return FOIARequest.objects.order_by("-pk").first()
+
+    def test_proxy_request_auto_embargoed(self, *_mocks):
+        """A request to a proxy-requiring agency should be auto-embargoed."""
+        agency = AgencyFactory(requires_proxy=True)
+        UserFactory(
+            profile__proxy=True,
+            profile__state=agency.jurisdiction.legal.abbrev,
+        )
+        foia = self._create_new(agency)
+        assert foia.embargo_status == "embargo"
+        assert foia.embargo_message != ""
+
+    def test_proxy_request_creates_note(self, *_mocks):
+        """A proxy-embargoed request should have a note explaining why."""
+        agency = AgencyFactory(requires_proxy=True)
+        UserFactory(
+            profile__proxy=True,
+            profile__state=agency.jurisdiction.legal.abbrev,
+        )
+        foia = self._create_new(agency)
+        assert foia.notes.exists()
+        assert "privacy of our proxies" in foia.notes.first().note
+
+    def test_no_proxy_no_auto_embargo(self, *_mocks):
+        """A request to a non-proxy agency should not be auto-embargoed."""
+        agency = AgencyFactory(requires_proxy=False)
+        foia = self._create_new(agency)
+        assert foia.embargo_status == "public"
+        assert foia.embargo_message == ""
+
+    def test_no_proxy_flag_skips_auto_embargo(self, *_mocks):
+        """When no_proxy is True, auto-embargo should not apply."""
+        agency = AgencyFactory(requires_proxy=True)
+        UserFactory(
+            profile__proxy=True,
+            profile__state=agency.jurisdiction.legal.abbrev,
+        )
+        foia = self._create_new(agency, no_proxy=True)
+        assert foia.embargo_status == "public"
+        assert foia.embargo_message == ""
+
+    def test_user_embargo_not_overridden(self, *_mocks):
+        """If the user already chose to embargo, don't override with proxy message."""
+        agency = AgencyFactory(requires_proxy=True)
+        UserFactory(
+            profile__proxy=True,
+            profile__state=agency.jurisdiction.legal.abbrev,
+        )
+        foia = self._create_new(agency, embargo_status="permanent")
+        assert foia.embargo_status == "permanent"
+        assert foia.embargo_message == ""
+
+    def test_missing_proxy_not_embargoed(self, *_mocks):
+        """A request to a proxy-requiring agency with no available proxy
+        should not be auto-embargoed — no proxy identity to protect."""
+        agency = AgencyFactory(requires_proxy=True)
+        # No proxy user created for this jurisdiction
+        foia = self._create_new(agency)
+        assert foia.embargo_status == "public"
+        assert foia.embargo_message == ""
