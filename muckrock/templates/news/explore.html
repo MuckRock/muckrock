@@ -1,6 +1,12 @@
 {% extends 'base_explore.html' %}
 {% load thumbnail %}
 
+{% block title %}News &bull; {{ block.super }}{% endblock title %}
+
+{% block description %}
+    <meta name="description" content="Original reporting, commentary, and analysis of public records by MuckRock’s staff and affiliates, with new articles every weekday." />
+{% endblock description %}
+
 {% block classes %}news{% endblock %}
 
 {% block explore_header_description %}
