@@ -137,6 +137,11 @@ class FOIARequest(models.Model):
     )
 
     date_embargo = models.DateField(blank=True, null=True)
+    embargo_message = models.TextField(
+        blank=True,
+        default="",
+        help_text="Custom message displayed in the embargo status section",
+    )
 
     price = models.DecimalField(
         max_digits=14,

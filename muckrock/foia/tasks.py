@@ -587,6 +587,7 @@ def embargo_expire():
         embargo_status="embargo", date_embargo__lt=date.today()
     ):
         foia.embargo_status = "public"
+        foia.embargo_message = "" # clear embargo message, if set
         foia.save(comment="embargo expired")
         EmailMessage(
             subject='[MuckRock] Embargo expired for FOI Request "{}"'.format(
