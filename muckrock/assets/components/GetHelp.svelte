@@ -85,12 +85,13 @@
     <ProblemList
       category={problems[selectedCategory]}
       {csrfToken}
+      foiaPk={foiaId}
       onBack={goBack}
     />
   {:else if view === "contact"}
     <div class="get-help__contact-view">
       <h3>Contact Support</h3>
-      <ContactForm flagCategory="" {csrfToken} />
+      <ContactForm {csrfToken} foiaPk={foiaId} />
     </div>
   {/if}
   </main>

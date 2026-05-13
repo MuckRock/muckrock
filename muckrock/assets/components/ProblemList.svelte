@@ -1,7 +1,7 @@
 <script>
   import ProblemItem from "./ProblemItem.svelte";
 
-  let { category, csrfToken = "" } = $props();
+  let { category, csrfToken = "", foiaPk = "" } = $props();
 
   let otherProblem = {
     title: "I need help with something else.",
@@ -12,10 +12,10 @@
   <h3>{category.label}</h3>
 
   {#each category.problems as problem (problem.id)}
-    <ProblemItem {problem} {csrfToken} />
+    <ProblemItem {problem} {csrfToken} {foiaPk} categoryLabel={category.label} />
   {/each}
 
-  <ProblemItem problem={otherProblem} {csrfToken} />
+  <ProblemItem problem={otherProblem} {csrfToken} {foiaPk} categoryLabel={category.label} />
 </div>
 
 <style>
