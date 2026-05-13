@@ -5,12 +5,16 @@ import django_filters
 from rest_framework import mixins, viewsets
 
 # MuckRock
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.project.api_v2.serializers import ProjectSerializer
 from muckrock.project.models import Project
 
 
 class ProjectViewSet(
-    mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+    AuthenticatedAPIMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
 ):
     """
     API viewset for Projects
