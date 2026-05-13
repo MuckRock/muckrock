@@ -298,13 +298,13 @@ def create_zendesk_ticket(
             org = client.organizations.create_or_update(ZenOrg(**org_data))
         except APIException:
             # De-duplicate name
-            deduped = dict(org_data) # Create new dict from org_data
+            deduped = dict(org_data)  # Create new dict from org_data
             deduped["name"] += "_" + deduped["external_id"][:6]
             org = client.organizations.create_or_update(ZenOrg(**deduped))
         org_id = org.id
     if org_id:
         requester_data = dict(requester_data, organization_id=org_id)
-    
+
     try:
         user = client.users.create_or_update(ZenUser(**requester_data))
     except APIException:

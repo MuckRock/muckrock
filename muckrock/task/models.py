@@ -27,7 +27,7 @@ from taggit.managers import TaggableManager
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
 from muckrock.core.forms import TagManagerForm
 from muckrock.core.models import ExtractDay
-from muckrock.core.utils import zoho_get, zoho_post, create_zendesk_ticket
+from muckrock.core.utils import create_zendesk_ticket, zoho_get, zoho_post
 from muckrock.foia.models import STATUS, FOIATemplate
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
