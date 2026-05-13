@@ -1,7 +1,12 @@
 <script>
   import { showMessage } from "../js/messages";
 
-  let { flagCategory = "", csrfToken = "" } = $props();
+  let {
+    csrfToken = "",
+    foiaPk = "",
+    categoryLabel = "",
+    problemTitle = "",
+  } = $props();
   let text = $state("");
   let submitted = $state(false);
   let errorMessage = $state("");
@@ -15,7 +20,7 @@
     const formData = new FormData(form);
 
     try {
-      const response = await fetch(window.location.href, {
+      const response = await fetch("/gethelp/contact/", {
         method: "POST",
         headers: {
           "X-Requested-With": "XMLHttpRequest",
@@ -45,11 +50,12 @@
 
 <form method="post" class="get-help__contact-form" onsubmit={handleSubmit}>
   <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
-  <input type="hidden" name="action" value="flag" />
-  <input type="hidden" name="flag-category" value={flagCategory} />
+  <input type="hidden" name="foia_pk" value={foiaPk} />
+  <input type="hidden" name="category_label" value={categoryLabel} />
+  <input type="hidden" name="problem_title" value={problemTitle} />
   <textarea
-    id="flag-text"
-    name="flag-text"
+    id="text"
+    name="text"
     bind:value={text}
     required
     rows="4"
