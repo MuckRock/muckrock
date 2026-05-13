@@ -10,7 +10,9 @@
         {% endif %}
     </header>
     <div class="embargo state">
-      {% if foia.embargo_status == "permanent" %}
+      {% if foia.embargo_message %}
+        <p>{{ foia.embargo_message }}</p>
+      {% elif foia.embargo_status == "permanent" %}
         <p>This request is permanently embargoed.</p>
       {% elif foia.embargo_status == "embargo" %}
         <p>

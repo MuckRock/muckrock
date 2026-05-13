@@ -215,14 +215,17 @@ class FOIARequestQuerySet(models.QuerySet):
 
     def create_new(self, composer, agency, no_proxy, contact_info):
         """Create a new request and submit it"""
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel,too-many-locals
         # MuckRock
         from muckrock.foia.message import notify_proxy_user
+        from muckrock.foia.models import FOIANote
 
         if composer.agencies.count() > 1:
             title = "%s (%s)" % (composer.title, agency.name)
         else:
             title = composer.title
+
+        # Assign a due date if the jurisdiction sets a response time
         if agency.jurisdiction.days:
             calendar = agency.jurisdiction.get_calendar()
             date_due = calendar.business_days_from(
@@ -230,6 +233,8 @@ class FOIARequestQuerySet(models.QuerySet):
             )
         else:
             date_due = None
+
+        # Assign a proxy if the jurisdiction requires it
         if no_proxy:
             proxy_user = None
             missing_proxy = False
@@ -237,19 +242,45 @@ class FOIARequestQuerySet(models.QuerySet):
             proxy_info = agency.get_proxy_info()
             proxy_user = proxy_info.get("from_user")
             missing_proxy = proxy_info["missing_proxy"]
+
+        # Auto-embargo proxy requests to protect proxy identity
+        if proxy_user and composer.embargo_status == "public":
+            embargo_status = "embargo"
+            embargo_message = (
+                "To maintain the privacy of our proxies, this request has "
+                "been temporarily embargoed. This embargo will last for 30 "
+                "days after the request is completed."
+            )
+        else:
+            embargo_status = composer.embargo_status
+            embargo_message = ""
+
+        # Create the database record from our assembled information
         foia = self.create(
             status="submitted",
             title=title,
             slug=slugify(title),
             agency=agency,
-            embargo_status=composer.embargo_status,
+            embargo_status=embargo_status,
+            embargo_message=embargo_message,
             composer=composer,
             date_due=date_due,
             proxy=proxy_user,
             missing_proxy=missing_proxy,
         )
+        # Now we have a `foia` object to act upon
+
+        # Record the embargo message to a note for posterity
+        if embargo_message:
+            FOIANote.objects.create(
+                foia=foia,
+                note=embargo_message,
+            )
+        # Set tags on the request
         foia.tags.set(composer.tags.all())
+        # Compose the first message in the request chain, from the user to the agency
         foia.create_initial_communication(composer.user, proxy=proxy_user)
+        # If the request requires a proxy, send a Slack notification to #proxy
         if proxy_user:
             notify_proxy_user(foia)
         foia.process_attachments(composer.user, composer=True)
