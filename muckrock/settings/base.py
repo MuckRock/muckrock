@@ -306,6 +306,7 @@ INSTALLED_APPS = (
     "muckrock.communication",
     "muckrock.portal",
     "muckrock.crowdsource",
+    "muckrock.gethelp",
     "daily_active_users",
     "actstream",
     "simple_history",

@@ -1214,7 +1214,6 @@ class FOIARequest(models.Model):
         # MuckRock
         from muckrock.foia.forms import (
             FOIAContactUserForm,
-            FOIAFlagForm,
             FOIASoftDeleteForm,
             FOIAWithdrawForm,
         )
@@ -1254,16 +1253,6 @@ class FOIARequest(models.Model):
                 "title": "Download as Zip",
                 "desc": "Download all communications and " "files as a zip archive",
                 "class_name": "primary",
-            },
-            {
-                "test": self.has_perm(user, "flag") or is_agency_user,
-                "title": "Get Help",
-                "action": "flag",
-                "desc": "Something broken, buggy, or off?  "
-                "Let us know and we'll fix it",
-                "class_name": "failure",
-                "modal": True,
-                "form": FOIAFlagForm(is_agency_user=is_agency_user),
             },
             {
                 "test": user.has_perm("foia.delete_foiarequest")

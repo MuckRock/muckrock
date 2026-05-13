@@ -16,5 +16,8 @@
     <span class="text">
         <p>{{ message|safe }}</p>
     </span>
+    <button class="dismiss" aria-label="Dismiss message">
+        {% include 'lib/component/icon/x.svg' %}
+    </button>
 </div>
 {% endif %}
