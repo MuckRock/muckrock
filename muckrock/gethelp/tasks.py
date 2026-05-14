@@ -18,6 +18,7 @@ from zenpy.lib.exception import APIException, ZenpyException
 # MuckRock
 from muckrock.core.utils import create_zendesk_ticket
 from muckrock.foia.models import FOIARequest
+from muckrock.organization.models import Membership
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +70,17 @@ def create_ticket_data(user, foia):
         if foia:
             primary_org = foia.composer.organization
         else:
-            primary_org = user.profile.organization
-        org_data = {"name": primary_org.name, "external_id": str(primary_org.uuid)}
+            try:
+                primary_org = user.profile.organization
+            except Membership.DoesNotExist:
+                primary_org = None
+        if primary_org:
+            org_data = {
+                "name": primary_org.name,
+                "external_id": str(primary_org.uuid),
+            }
+        else:
+            org_data = None
     else:
         requester_data = {"name": "Anonymous User"}
         org_data = None
@@ -83,7 +93,7 @@ def create_gethelp_ticket(
 ):
     """Create a Zendesk support ticket from a GetHelp form submission."""
     user = (
-        User.objects.filter(pk=user_pk).select_related("profile__organization").first()
+        User.objects.filter(pk=user_pk).select_related("profile").first()
         if user_pk
         else None
     )
