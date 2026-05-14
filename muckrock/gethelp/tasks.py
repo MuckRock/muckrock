@@ -36,20 +36,46 @@ def create_ticket_subject(user, category_label, problem_title):
     return subject
 
 
-def create_ticket_description(text, user, foia):
-    description = text
+def get_primary_org(user, foia):
+    """Return the org this ticket is associated with, or None."""
     if foia:
-        description += f"\n\nRequest: {settings.MUCKROCK_URL}{foia.get_absolute_url()}"
-    if user:
-        description += (
-            f"\nUser profile: {settings.MUCKROCK_URL}{user.profile.get_absolute_url()}"
+        return foia.composer.organization
+    try:
+        return user.profile.organization
+    except Membership.DoesNotExist:
+        return None
+
+
+def create_ticket_description(text, user, foia):
+    links = ["=== Quick Links ==="]
+    if foia:
+        links.append(
+            f"- Request on MuckRock Requests: "
+            f"{settings.MUCKROCK_URL}{foia.get_absolute_url()}"
         )
-        for org in user.organizations.filter(individual=False):
+    if user:
+        links.append(
+            f"- User profile on MuckRock Requests: "
+            f"{settings.MUCKROCK_URL}{user.profile.get_absolute_url()}"
+        )
+        links.append(
+            f"- User profile on MuckRock Accounts: "
+            f"{settings.SQUARELET_URL}/users/{user.username}/"
+        )
+        org = get_primary_org(user, foia)
+        if org and not org.individual:
             plan = "Premium" if org.entitlement.base_requests > 0 else "Free"
-            description += (
-                f"\nOrg: {settings.MUCKROCK_URL}{org.get_absolute_url()} ({plan})"
+            links.append(
+                f"- {plan} Organization on MuckRock Requests: "
+                f"{settings.MUCKROCK_URL}{org.get_absolute_url()}"
             )
-    return description
+            links.append(
+                f"- {plan} Organization on MuckRock Accounts: "
+                f"{settings.SQUARELET_URL}/organizations/{org.slug}/ "
+            )
+    if links:
+        return text + "\n\n" + "\n".join(links)
+    return text
 
 
 def create_ticket_tags(category_label):
@@ -67,13 +93,7 @@ def create_ticket_data(user, foia):
         }
         if user.email:
             requester_data["email"] = user.email
-        if foia:
-            primary_org = foia.composer.organization
-        else:
-            try:
-                primary_org = user.profile.organization
-            except Membership.DoesNotExist:
-                primary_org = None
+        primary_org = get_primary_org(user, foia)
         if primary_org:
             org_data = {
                 "name": primary_org.name,
