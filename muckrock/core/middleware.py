@@ -70,7 +70,6 @@ class LogHTTPMiddleware:
         """Format an organization for logging"""
         return {
             "id": org.pk,
-            "uuid": str(org.uuid),
             "name": org.name,
             "individual": org.individual,
             "verified_journalist": org.verified_journalist,
@@ -84,5 +83,5 @@ class LogHTTPMiddleware:
         return {
             "status_code": response.status_code,
             "headers": dict(response.headers),
-            "body": response.content.decode("utf-8"),
+            "body": response.content.decode("utf-8")[:2000],
         }
