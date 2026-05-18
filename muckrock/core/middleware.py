@@ -1,10 +1,10 @@
-# Standard Library
-import logging
-
 # Django
 from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
 from django.utils.deprecation import MiddlewareMixin
+
+# Standard Library
+import logging
 
 logger = logging.getLogger("http_requests")
 
