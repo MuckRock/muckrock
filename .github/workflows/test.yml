@@ -16,8 +16,8 @@ env:
   STRIPE_WEBHOOK_SECRET: ${{secrets.STRIPE_WEBHOOK_SECRET}}
   MAILGUN_ACCESS_KEY: ${{secrets.MAILGUN_ACCESS_KEY}}
   USE_DOCKER: false
-  JWT_VERIFYING_KEY: 'tk'
-  OPENAI_API_KEY: 'tk'
+  JWT_VERIFYING_KEY: "tk"
+  OPENAI_API_KEY: "tk"
   SQUARELET_SECRET: ${{secrets.SQUARELET_SECRET}}
 
 jobs:
@@ -30,14 +30,12 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout
+          5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
         with:
-            submodules: recursive
+          submodules: recursive
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -66,10 +64,8 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout
+          5s --health-retries 5
 
       postgres:
         image: postgres
@@ -79,9 +75,7 @@ jobs:
           POSTGRES_DB: muckrock
         # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
         ports:
           # Maps tcp port 5432 on service container to the host
@@ -92,12 +86,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-            submodules: recursive
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.16.0'
+          node-version-file: ".node-version"
 
       - name: Install frontend dependencies
         run: npm ci
@@ -107,6 +101,9 @@ jobs:
 
       - name: Lint frontend code
         run: npm run lint
+
+      - name: Run tests
+        run: npm test
 
       - name: Install Python
         uses: actions/setup-python@v5
