@@ -221,6 +221,7 @@ MIDDLEWARE = (
     "simple_history.middleware.HistoryRequestMiddleware",
     "daily_active_users.middleware.DailyActiveUserMiddleware",
     "muckrock.core.middleware.FlatpageRedirectMiddleware",
+    "muckrock.core.middleware.LogHTTPMiddleware",
 )
 
 FLATPAGES_REDIRECTS = {
@@ -502,6 +503,14 @@ LOGGING = {
             "level": "WARNING",
             "class": "sentry_sdk.integrations.logging.EventHandler",
         },
+        "logzio": {
+            "class": "logzio.handler.LogzioHandler",
+            "level": "INFO",
+            "token": os.environ.get("LOGZIO_TOKEN", ""),
+            "logzio_type": "muckrock",
+            "logs_drain_timeout": 5,
+            "url": "https://listener.logz.io:8071",
+        },
     },
     "loggers": {
         "django": {"handlers": ["null"], "propagate": True, "level": "INFO"},
@@ -521,6 +530,11 @@ LOGGING = {
             "propagate": False,
         },
         "dogslow": {"level": "WARNING", "handlers": ["dogslow"]},
+        "http_requests": {
+            "handlers": ["logzio"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 
