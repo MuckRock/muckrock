@@ -2,7 +2,7 @@
   import ContactForm from "./ContactForm.svelte";
   import Self from './ProblemItem.svelte';
 
-  let { problem, csrfToken = "" } = $props();
+  let { problem, csrfToken = "", foiaPk = "", categoryLabel = "" } = $props();
   let showContact = $state(false);
 </script>
 
@@ -18,9 +18,9 @@
     {#if problem.children && problem.children.length > 0}
       <div class="get-help__children">
         {#each problem.children as child (child.id)}
-          <Self problem={child} {csrfToken} />
+          <Self problem={child} {csrfToken} {foiaPk} {categoryLabel} />
         {/each}
-        <Self problem={{id: "other", title: "Other"}} {csrfToken} />
+        <Self problem={{id: "other", title: "Other"}} {csrfToken} {foiaPk} {categoryLabel} />
       </div>
     {:else}
       {#if problem.resolution_html && !showContact}
@@ -32,7 +32,7 @@
           I still need help
       </button>
       {:else}
-      <ContactForm flagCategory={problem.flag_category} {csrfToken} />
+      <ContactForm {csrfToken} {foiaPk} {categoryLabel} problemTitle={problem.title} />
       {/if}
     {/if}
   </div>

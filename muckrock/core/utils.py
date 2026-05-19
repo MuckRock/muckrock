@@ -25,6 +25,14 @@ import actstream
 import boto3
 import requests
 import stripe
+from zenpy import Zenpy
+from zenpy.lib.api_objects import (
+    Comment,
+    Organization as ZenOrg,
+    Ticket,
+    User as ZenUser,
+)
+from zenpy.lib.exception import APIException
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +270,65 @@ def zoho_get(path, params=None):
     if params is None:
         params = {}
     return _zoho(requests.get, path, params=params)
+
+
+def get_zendesk_client():
+    """Return a configured Zenpy client."""
+    return Zenpy(
+        email=settings.ZENDESK_EMAIL,
+        subdomain=settings.ZENDESK_SUBDOMAIN,
+        token=settings.ZENDESK_TOKEN,
+    )
+
+
+def create_zendesk_ticket(
+    subject, description, tags, requester_data, org_data=None, custom_fields=None
+):
+    """Create a Zendesk ticket and return its integer ticket ID.
+
+    requester_data: dict with at least `name`; optionally `email`, `external_id`
+    org_data:       dict with `name` + `external_id`, or None
+    custom_fields:  list of {id, value} dicts, or None
+    """
+    client = get_zendesk_client()
+
+    org_id = None
+    if org_data:
+        try:
+            org = client.organizations.create_or_update(ZenOrg(**org_data))
+        except APIException:
+            # De-duplicate name
+            deduped = dict(org_data)  # Create new dict from org_data
+            deduped["name"] += "_" + deduped["external_id"][:6]
+            org = client.organizations.create_or_update(ZenOrg(**deduped))
+        org_id = org.id
+    if org_id:
+        requester_data = dict(requester_data, organization_id=org_id)
+
+    try:
+        user = client.users.create_or_update(ZenUser(**requester_data))
+    except APIException:
+        # merge conflicting users
+        user1 = list(client.users.search(external_id=requester_data["external_id"]))[0]
+        user2 = list(client.users.search(query=requester_data["email"]))[0]
+        user = client.users.merge(user1, user2)
+
+    ticket_kwargs = {
+        "subject": subject,
+        "comment": Comment(body=description),
+        "type": "task",
+        "priority": "normal",
+        "status": "new",
+        "tags": list(tags or []),
+        "requester_id": user.id,
+    }
+    if org_id:
+        ticket_kwargs["organization_id"] = org_id
+    if custom_fields:
+        ticket_kwargs["custom_fields"] = custom_fields
+
+    audit = client.tickets.create(Ticket(**ticket_kwargs))
+    return audit.ticket.id
 
 
 def get_s3_storage_bucket():
