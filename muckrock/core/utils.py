@@ -25,6 +25,7 @@ import actstream
 import boto3
 import requests
 import stripe
+from documentcloud import DocumentCloud
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +204,11 @@ def get_squarelet_access_token():
                     settings.SOCIAL_AUTH_SQUARELET_SECRET,
                 )
                 data = {"grant_type": "client_credentials"}
-                headers = {"X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET}
+                existing_ua = requests.utils.default_headers()["User-Agent"]
+                headers = {
+                    "X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET,
+                    "User-Agent": f"{existing_ua} {settings.SERVICE_USER_AGENT}",
+                }
                 logger.info(token_url)
                 resp = requests.post(
                     token_url,
@@ -226,9 +231,11 @@ def _squarelet(method, path, **kwargs):
     """Helper function for squarelet requests"""
     api_url = "{}{}".format(settings.SQUARELET_URL, path)
     access_token = get_squarelet_access_token()
+    existing_ua = requests.utils.default_headers()["User-Agent"]
     headers = {
         "Authorization": "Bearer {}".format(access_token),
         "X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET,
+        "User-Agent": f"{existing_ua} {settings.SERVICE_USER_AGENT}",
     }
     return method(api_url, headers=headers, **kwargs)
 
@@ -379,3 +386,18 @@ def mailchimp_journey(email, journey):
     except (requests.ConnectionError, ValueError):
         logger.error("[JOURNEY] Error starting journey", exc_info=sys.exc_info())
     return response
+
+
+def get_dc_client():
+    """Get a DocumentCloud client for the MuckRock User Account"""
+    client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    existing_ua = client.session.headers.get("User-Agent", "")
+    client.session.headers["User-Agent"] = (
+        f"{existing_ua} {settings.SERVICE_USER_AGENT}".strip()
+    )
+    return client
