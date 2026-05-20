@@ -221,7 +221,7 @@ MIDDLEWARE = (
     "simple_history.middleware.HistoryRequestMiddleware",
     "daily_active_users.middleware.DailyActiveUserMiddleware",
     "muckrock.core.middleware.FlatpageRedirectMiddleware",
-    # "muckrock.core.middleware.LogHTTPMiddleware",
+    "muckrock.core.middleware.LogHTTPMiddleware",
 )
 
 FLATPAGES_REDIRECTS = {

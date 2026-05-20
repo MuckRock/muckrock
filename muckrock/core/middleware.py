@@ -49,7 +49,6 @@ class LogHTTPMiddleware:
             "method": request.method,
             "headers": dict(request.headers),
             "get": dict(request.GET),
-            "post": dict(request.POST),
             "body": request.body.decode("utf-8"),
         }
 
