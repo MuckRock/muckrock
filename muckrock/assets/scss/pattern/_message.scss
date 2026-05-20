@@ -11,6 +11,9 @@
 
 .messages {
     margin-bottom: 0;
+    position: fixed;
+    width: 100%;
+    z-index: 500;
 }
 
 .message {
@@ -32,6 +35,24 @@
     .text {
         flex: 1 1 auto;
         padding: $vr/2;
+    }
+    .dismiss {
+        flex: 0 0 auto;
+        align-self: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: $vr/2;
+        opacity: 0.6;
+        &:hover {
+            opacity: 1;
+        }
+        svg {
+            display: block;
+            width: 1em;
+            height: 1em;
+            fill: currentColor;
+        }
     }
     @include media($medium-bp) {
         @include flex-direction(row);
@@ -61,4 +82,38 @@
 
 .message.error {
     @include message-color($color-red-light, $color-red, $color-red-dark);
+}
+
+@keyframes message-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes message-dismiss {
+    from {
+        opacity: 1;
+        max-height: 10rem;
+        margin-bottom: 0;
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+        margin-bottom: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+}
+
+.message--fade-in {
+    animation: message-fade-in 0.3s ease-out;
+}
+
+.message--dismiss {
+    animation: message-dismiss 0.4s ease-in-out forwards;
 }

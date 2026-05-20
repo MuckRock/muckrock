@@ -143,6 +143,8 @@ def add_note(request, foia):
 def flag(request, foia):
     """Allow a user to notify us of a problem with the request"""
     form = FOIAFlagForm(request.POST, all_choices=True)
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
     if form.is_valid():
         FlaggedTask.objects.create(
             user=request.user if request.user.is_authenticated else None,
@@ -150,10 +152,14 @@ def flag(request, foia):
             text=form.cleaned_data["text"],
             category=form.cleaned_data["category"],
         )
-        messages.success(request, "Problem succesfully reported")
         if request.user.is_authenticated:
             new_action(request.user, "flagged", target=foia)
+        if is_ajax:
+            return JsonResponse({"message": "Problem successfully reported"})
+        messages.success(request, "Problem successfully reported")
     else:
+        if is_ajax:
+            return JsonResponse({"message": f"Error: {form.errors}"}, status=400)
         messages.error(request, f"Error: {form.errors}")
 
     return _get_redirect(request, foia)

@@ -163,6 +163,7 @@ urlpatterns = [
     re_path(r"^project/", include("muckrock.project.urls")),
     re_path(r"^fine-uploader/", include("muckrock.fine_uploader.urls")),
     re_path(r"^communication/", include("muckrock.communication.urls")),
+    re_path(r"^gethelp/", include("muckrock.gethelp.urls")),
     re_path(r"^squarelet/", include("muckrock.squarelet.urls")),
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^search/$", views.SearchView.as_view(), name="search"),
