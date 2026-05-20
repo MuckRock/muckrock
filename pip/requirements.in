@@ -53,6 +53,7 @@ img2pdf # convert images to PDFs
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson
 lob # sending mail via lob.com
+logzio-python-handler # For logging API requests
 markdown # Used for rendering Markdown, obviously!
 memoize # cachable properties
 micawber # Used for embeds in assignments
