@@ -993,3 +993,6 @@ GOVQA_DISABLE_AMOUNT = os.environ.get("GOVQA_DISABLE_AMOUNT", 3)
 
 # APIv1 Killswitch
 ENABLE_API_V1 = boolcheck(os.environ.get("ENABLE_API_V1", True))
+
+# User agent to identify our service
+SERVICE_USER_AGENT = os.environ.get("SERVICE_USER_AGENT", "muckrock requests")

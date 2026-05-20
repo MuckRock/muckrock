@@ -18,11 +18,11 @@ from time import time
 # Third Party
 import boto3
 from botocore.exceptions import ClientError
-from documentcloud import DocumentCloud
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
 from muckrock.core.models import HomePage
+from muckrock.core.utils import get_dc_client
 from muckrock.message.email import TemplateEmail
 
 logger = logging.getLogger(__name__)
@@ -120,13 +120,8 @@ def fetch_and_load_documentcloud_stats():
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
     logger.info("Fetching DocumentCloud stats for %s", yesterday)
 
-    # Instantiate client with creds
-    client = DocumentCloud(
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-    )
+    # Instantiate client
+    client = get_dc_client()
 
     # Call statistics endpoint
     resp = client.get(f"statistics?date={yesterday}")

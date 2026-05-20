@@ -25,6 +25,7 @@ import actstream
 import boto3
 import requests
 import stripe
+from documentcloud import DocumentCloud
 
 logger = logging.getLogger(__name__)
 
@@ -379,3 +380,18 @@ def mailchimp_journey(email, journey):
     except (requests.ConnectionError, ValueError):
         logger.error("[JOURNEY] Error starting journey", exc_info=sys.exc_info())
     return response
+
+
+def get_dc_client():
+    """Get a DocumentCloud client for the MuckRock User Account"""
+    client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    existing_ua = client.session.headers.get("User-Agent", "")
+    client.session.headers["User-Agent"] = (
+        f"{existing_ua} {settings.SERVICE_USER_AGENT}".strip()
+    )
+    return client

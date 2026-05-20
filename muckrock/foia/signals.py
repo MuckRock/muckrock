@@ -6,11 +6,14 @@ from django.db import transaction
 from django.db.models.signals import post_delete, pre_save
 
 # Third Party
-from documentcloud import DocumentCloud
 from documentcloud.exceptions import DoesNotExistError
 
 # MuckRock
-from muckrock.core.utils import clear_cloudfront_cache, get_s3_storage_bucket
+from muckrock.core.utils import (
+    clear_cloudfront_cache,
+    get_dc_client,
+    get_s3_storage_bucket,
+)
 from muckrock.foia.models import FOIAFile, FOIARequest, OutboundRequestAttachment
 from muckrock.foia.tasks import upload_document_cloud
 
@@ -47,12 +50,7 @@ def foia_file_delete_dc(sender, **kwargs):
 
     foia_file = kwargs["instance"]
     if foia_file.doc_id:
-        dc_client = DocumentCloud(
-            username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-            password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-            base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-            auth_uri=f"{settings.SQUARELET_URL}/api/",
-        )
+        dc_client = get_dc_client()
         try:
             dc_client.documents.delete(foia_file.doc_id)
         except DoesNotExistError:
