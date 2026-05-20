@@ -1232,12 +1232,22 @@ def import_doccloud_file(file_pk):
         ffile.ffile.name = name
         ffile.save()
 
-    with ffile.ffile.open("wb") as out_file, dc_client.get(
-        document.pdf_url, full_url=True, stream=True
-    ) as response:
-        response.raise_for_status()
-        for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
-            out_file.write(chunk)
+    if document.access == "public":
+        ua = requests.utils.default_headers()["User-Agent"]
+        headers = {"User-Agent": f"{ua} {settings.SERVICE_USER_AGENT}"}
+        with ffile.ffile.open("wb") as out_file, requests.get(
+            document.pdf_url, headers=headers, stream=True, timeout=10
+        ) as response:
+            response.raise_for_status()
+            for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
+                out_file.write(chunk)
+    else:
+        with ffile.ffile.open("wb") as out_file, dc_client.get(
+            document.pdf_url, full_url=True, stream=True
+        ) as response:
+            response.raise_for_status()
+            for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
+                out_file.write(chunk)
 
 
 @shared_task(
