@@ -55,7 +55,10 @@ class LogHTTPMiddleware:
     def format_request(self, request):
         """Format a request for logging"""
         if request.log_body:
-            body = request.log_body.decode("utf8")[:1024]
+            try:
+                body = request.log_body.decode("utf8")[:1024]
+            except UnicodeDecodeError:
+                body = "<binary>"
         else:
             body = ""
         return {
@@ -92,8 +95,12 @@ class LogHTTPMiddleware:
 
     def format_response(self, response):
         """Format a response for logging"""
+        try:
+            body = response.content.decode("utf-8")[:1024]
+        except UnicodeDecodeError:
+            body = "<binary>"
         return {
             "status_code": response.status_code,
             "headers": dict(response.headers),
-            "body": response.content.decode("utf-8")[:1024],
+            "body": body,
         }
