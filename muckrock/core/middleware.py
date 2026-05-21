@@ -5,8 +5,7 @@ from django.utils.deprecation import MiddlewareMixin
 
 # Standard Library
 import logging
-
-logger = logging.getLogger("http_requests")
+import time
 
 
 class FlatpageRedirectMiddleware(MiddlewareMixin):
@@ -25,17 +24,29 @@ class FlatpageRedirectMiddleware(MiddlewareMixin):
 class LogHTTPMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        self.logger = logging.getLogger("http_requests")
 
     def __call__(self, request):
+
+        start = time.time()
+
+        try:
+            request.log_body = request.body
+        except:  # pylint:disable=bare-except
+            request.log_body = None
+
         response = self.get_response(request)
 
-        logger.info(
+        end = time.time()
+
+        self.logger.info(
             "%s %s",
             request.method,
             request.path,
             extra={
                 "request": self.format_request(request),
                 "response": self.format_response(response),
+                "elapsed": (end - start) * 1000,
             },
         )
 
@@ -43,14 +54,17 @@ class LogHTTPMiddleware:
 
     def format_request(self, request):
         """Format a request for logging"""
+        if request.log_body:
+            body = request.log_body.decode("utf8")[:1024]
+        else:
+            body = ""
         return {
             "user": self.format_user(request.user),
             "path": request.path,
             "method": request.method,
             "headers": dict(request.headers),
             "get": dict(request.GET),
-            "post": dict(request.POST),
-            "body": request.body.decode("utf-8"),
+            "body": body,
         }
 
     def format_user(self, user):
@@ -73,9 +87,7 @@ class LogHTTPMiddleware:
             "name": org.name,
             "individual": org.individual,
             "verified_journalist": org.verified_journalist,
-            "entitlement": org.entitlement.slug if org.entitlement_id else None,
-            "monthly_requests": org.monthly_requests,
-            "number_requests": org.number_requests,
+            "plan": org.entitlement.name if org.entitlement_id else None,
         }
 
     def format_response(self, response):
@@ -83,5 +95,5 @@ class LogHTTPMiddleware:
         return {
             "status_code": response.status_code,
             "headers": dict(response.headers),
-            "body": response.content.decode("utf-8")[:2000],
+            "body": response.content.decode("utf-8")[:1024],
         }
