@@ -36,6 +36,7 @@ from muckrock.task.models import (
     MultiRequestTask,
     NewAgencyTask,
     OrphanTask,
+    PaymentInfoTask,
     ResponseTask,
     SnailMailTask,
     StatusChangeTask,
@@ -335,6 +336,22 @@ class SnailMailTaskTests(TestCase):
         pdf = SnailMailPDF(comm, "n", switch=False)
         pdf.generate()
         pdf.output(dest="S").encode("latin-1")
+
+
+class PaymentInfoTaskTests(TestCase):
+    """Test the PaymentInfoTask class"""
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.foia = FOIARequestFactory()
+        self.task = PaymentInfoTask.objects.create(
+            user=self.user, foia=self.foia, amount=100.00
+        )
+
+    def test_get_absolute_url(self):
+        assert self.task.get_absolute_url() == reverse(
+            "payment-info-task", kwargs={"pk": self.task.pk}
+        )
 
 
 class NewAgencyTaskTests(TestCase):
