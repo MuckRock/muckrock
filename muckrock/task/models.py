@@ -250,6 +250,9 @@ class PaymentInfoTask(Task):
     def __str__(self):
         return "Payment Info Task"
 
+    def get_absolute_url(self):
+        return reverse("payment-info-task", kwargs={"pk": self.pk})
+
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
         return self.foia.has_perm(user, "tasks")
