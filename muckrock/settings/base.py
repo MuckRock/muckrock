@@ -475,6 +475,8 @@ MONTHLY_REQUESTS = {
     "robot": 0,
 }
 
+LOGZIO_TOKEN = os.environ.get("LOGZIO_TOKEN", "")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
@@ -503,14 +505,6 @@ LOGGING = {
             "level": "WARNING",
             "class": "sentry_sdk.integrations.logging.EventHandler",
         },
-        "logzio": {
-            "class": "logzio.handler.LogzioHandler",
-            "level": "INFO",
-            "token": os.environ.get("LOGZIO_TOKEN", ""),
-            "logzio_type": "muckrock",
-            "logs_drain_timeout": 5,
-            "url": "https://listener.logz.io:8071",
-        },
     },
     "loggers": {
         "django": {"handlers": ["null"], "propagate": True, "level": "INFO"},
@@ -531,12 +525,25 @@ LOGGING = {
         },
         "dogslow": {"level": "WARNING", "handlers": ["dogslow"]},
         "http_requests": {
-            "handlers": ["logzio"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
     },
 }
+
+# Only register the logzio handler when a token is configured; otherwise
+# LogzioHandler raises at startup and blocks the whole logging config.
+if LOGZIO_TOKEN:
+    LOGGING["handlers"]["logzio"] = {
+        "class": "logzio.handler.LogzioHandler",
+        "level": "INFO",
+        "token": LOGZIO_TOKEN,
+        "logzio_type": "muckrock",
+        "logs_drain_timeout": 5,
+        "url": "https://listener.logz.io:8071",
+    }
+    LOGGING["loggers"]["http_requests"]["handlers"] = ["logzio"]
 
 # these will be set in local settings if not in env var
 
