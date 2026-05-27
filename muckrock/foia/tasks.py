@@ -53,7 +53,7 @@ from muckrock.communication.models import (
 )
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
-from muckrock.core.utils import read_in_chunks, squarelet_get
+from muckrock.core.utils import get_dc_client, read_in_chunks, squarelet_get
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
@@ -99,12 +99,7 @@ def upload_document_cloud(ffile_pk):
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
 
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
 
     _upload_documentcloud(
         dc_client,
@@ -149,13 +144,19 @@ def upload_user_document_cloud(ffile_pk, user_pk):
             "Error getting token for Add-On: %s", exc, exc_info=sys.exc_info()
         )
         raise
-
+    # Note this method doesn't use get_dc_client() from core/utils.py
+    # because it isn't using the MuckRock service Account
+    # rather uploading to the user's account instead
     dc_client = DocumentCloud(
         base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
         auth_uri=f"{settings.SQUARELET_URL}/api/",
     )
+    existing_ua = dc_client.session.headers.get("User-Agent", "")
     dc_client.session.headers.update(
-        {"Authorization": "Bearer {}".format(resp.json()["access_token"])}
+        {
+            "Authorization": f"Bearer {resp.json()['access_token']}",
+            "User-Agent": f"{existing_ua} {settings.SERVICE_USER_AGENT}".strip(),
+        }
     )
     project, _created = dc_client.projects.get_or_create_by_title("MuckRock Imports")
     params = {"project": project.id}
@@ -238,12 +239,7 @@ def set_document_cloud_pages(ffile_pk):
         # already has pages set or not a doc cloud, just return
         return
 
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
     document = dc_client.documents.get(ffile.doc_id)
 
     if document.status == "success":
@@ -283,12 +279,7 @@ def noindex_documentcloud(foia_pk):
     doc_ids = foia.get_files().exclude(doc_id="").values_list("doc_id", flat=True)
     # get just the numeric ID
     doc_ids = [d.split("-")[0] for d in doc_ids]
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
     for group in grouper(doc_ids, BULK_LIMIT):
         resp = dc_client.patch(
             "documents/",
@@ -360,12 +351,7 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
 def get_text_ocr(doc_id):
     """Get the text OCR from document cloud"""
 
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
 
     try:
         document = dc_client.documents.get(doc_id)
@@ -1236,12 +1222,7 @@ def import_doccloud_file(file_pk):
     except FOIAFile.DoesNotExist:
         return
 
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
     document = dc_client.documents.get(ffile.doc_id)
 
     ext = ffile.get_extension()
@@ -1252,8 +1233,10 @@ def import_doccloud_file(file_pk):
         ffile.save()
 
     if document.access == "public":
+        ua = requests.utils.default_headers()["User-Agent"]
+        headers = {"User-Agent": f"{ua} {settings.SERVICE_USER_AGENT}"}
         with ffile.ffile.open("wb") as out_file, requests.get(
-            document.pdf_url, stream=True, timeout=10
+            document.pdf_url, headers=headers, stream=True, timeout=10
         ) as response:
             response.raise_for_status()
             for chunk in response.iter_content(chunk_size=10 * 1024 * 1024):
