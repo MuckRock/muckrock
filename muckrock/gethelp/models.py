@@ -2,6 +2,13 @@
 
 # Django
 from django.db import models
+from django.utils.safestring import mark_safe
+
+MARKDOWN_HELP_TEXT = mark_safe(
+    "Supports Markdown — see the "
+    '<a href="https://daringfireball.net/projects/markdown/syntax" '
+    'target="_blank" rel="noopener">syntax guide</a>.'
+)
 
 
 class Category(models.Model):
@@ -11,7 +18,10 @@ class Category(models.Model):
     label = models.CharField(max_length=100)
     description = models.TextField(
         blank=True,
-        help_text=("Optional intro shown above the list of problems in this category."),
+        help_text=mark_safe(
+            "Optional intro shown above the list of problems in this category. "
+            + MARKDOWN_HELP_TEXT
+        ),
     )
     placeholder = models.CharField(
         max_length=255,
@@ -40,7 +50,12 @@ class Problem(models.Model):
         related_name="problems",
     )
     title = models.CharField(max_length=255)
-    resolution = models.TextField(blank=True)
+    resolution = models.TextField(
+        blank=True,
+        help_text=mark_safe(
+            "How the user can resolve this problem on their own. " + MARKDOWN_HELP_TEXT
+        ),
+    )
     parent = models.ForeignKey(
         "self",
         null=True,
