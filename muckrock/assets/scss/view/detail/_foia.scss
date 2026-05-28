@@ -181,6 +181,18 @@ $request-breakpoint: 768px;
             }
         }
     }
+    
+    .composer-actions {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+    }
+
+    .composer-actions #get-help-widget {
+        display: inline-block;
+        margin-bottom: 0;
+    }
+
     .composer-input {
         @include border;
         @include box-shadow;

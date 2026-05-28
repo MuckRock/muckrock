@@ -6,6 +6,7 @@
 {% load tags %}
 {% load rules %}
 {% load cache %}
+{% load django_vite %}
 
 {% block title %}{{ foia.title }} &bull; MuckRock{% endblock %}
 {% block type %}request{% endblock %}
@@ -111,5 +112,6 @@
 
   {% include "lib/component/fine-uploader.html" %}
   <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+  {% vite_asset 'muckrock/assets/js/getHelp.ts' %}
 
 {% endblock scripts %}
