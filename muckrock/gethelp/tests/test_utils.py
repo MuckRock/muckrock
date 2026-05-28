@@ -168,6 +168,27 @@ class TestGetProblemsByCategory(TestCase):
         result = get_problems_by_category()
         assert result["managing"]["placeholder"] == ""
 
+    def test_category_description_html(self):
+        """Category description markdown is rendered to sanitized HTML"""
+        self.managing.description = "**Heads up** — read this first."
+        self.managing.save()
+        result = get_problems_by_category()
+        assert "<strong>Heads up</strong>" in result["managing"]["description_html"]
+
+    def test_category_description_blank_by_default(self):
+        """Category description_html is empty when description is blank"""
+        result = get_problems_by_category()
+        assert result["managing"]["description_html"] == ""
+
+    def test_category_description_sanitized(self):
+        """Unsafe HTML in category description is stripped"""
+        self.managing.description = '<script>alert("xss")</script>**safe**'
+        self.managing.save()
+        result = get_problems_by_category()
+        html = result["managing"]["description_html"]
+        assert "<script>" not in html
+        assert "<strong>safe</strong>" in html
+
     def test_problem_placeholder_included(self):
         """Problem placeholder is included in the serialized output"""
         Problem.objects.create(

@@ -9,6 +9,10 @@ class Category(models.Model):
 
     slug = models.SlugField(max_length=20, unique=True)
     label = models.CharField(max_length=100)
+    description = models.TextField(
+        blank=True,
+        help_text=("Optional intro shown above the list of problems in this category."),
+    )
     placeholder = models.CharField(
         max_length=255,
         blank=True,
