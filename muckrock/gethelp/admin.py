@@ -8,7 +8,7 @@ from muckrock.gethelp.models import Category, Problem
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ["label", "slug", "order"]
+    list_display = ["label", "order"]
     list_editable = ["order"]
 
 

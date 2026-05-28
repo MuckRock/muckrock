@@ -80,7 +80,7 @@ def get_problems_by_category():
 
     result = {}
     for cat in Category.objects.order_by("order"):
-        result[cat.slug] = {
+        result[str(cat.pk)] = {
             "label": cat.label,
             "description_html": _render_markdown(cat.description),
             "placeholder": cat.placeholder,
@@ -102,7 +102,7 @@ def get_problems_by_category():
 
     for problem in top_level:
         serialized = _serialize_problem(problem, children_by_parent)
-        result[problem.category.slug]["problems"].append(serialized)
+        result[str(problem.category.pk)]["problems"].append(serialized)
 
     cache.set(CACHE_KEY, result, CACHE_TIMEOUT)
     return result

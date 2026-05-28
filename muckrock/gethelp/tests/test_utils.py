@@ -22,17 +22,20 @@ class TestGetProblemsByCategory(TestCase):
     def setUp(self):
         cache.delete(CACHE_KEY)
         # These categories are created by our database migration
-        self.managing = Category.objects.get(slug="managing")
-        self.payments = Category.objects.get(slug="payments")
+        self.managing = Category.objects.get(label="Managing this request")
+        self.payments = Category.objects.get(label="Checks and request payments")
+        self.managing_key = str(self.managing.pk)
+        self.payments_key = str(self.payments.pk)
 
     def test_empty_database(self):
         """Returns all categories with empty problem lists when no problems exist"""
         result = get_problems_by_category()
         assert isinstance(result, dict)
         for cat in Category.objects.all():
-            assert cat.slug in result
-            assert result[cat.slug]["problems"] == []
-            assert "label" in result[cat.slug]
+            key = str(cat.pk)
+            assert key in result
+            assert result[key]["problems"] == []
+            assert "label" in result[key]
 
     def test_is_json_serializable(self):
         """The result can be serialized to JSON"""
@@ -52,21 +55,17 @@ class TestGetProblemsByCategory(TestCase):
         )
         Problem.objects.create(category=self.payments, title="Payment problem", order=0)
         result = get_problems_by_category()
-        assert len(result["managing"]["problems"]) == 1
-        assert len(result["payments"]["problems"]) == 1
-        assert result["managing"]["problems"][0]["title"] == "Managing problem"
-        assert result["payments"]["problems"][0]["title"] == "Payment problem"
+        assert len(result[self.managing_key]["problems"]) == 1
+        assert len(result[self.payments_key]["problems"]) == 1
+        assert result[self.managing_key]["problems"][0]["title"] == "Managing problem"
+        assert result[self.payments_key]["problems"][0]["title"] == "Payment problem"
 
     def test_category_labels(self):
         """Each category has the correct human-readable label"""
         result = get_problems_by_category()
-        assert result["managing"]["label"] == "Managing this request"
-        assert result["communications"]["label"] == "Communications and messages"
-        assert result["payments"]["label"] == "Checks and request payments"
-        assert result["documents"]["label"] == "Documents and files"
-        assert result["portals"]["label"] == "Agency portals and web forms"
-        assert result["appeals"]["label"] == "Appeals and public records advice"
-        assert result["proxy"]["label"] == "In-state proxy and proof of citizenship"
+        expected_labels = {cat.pk: cat.label for cat in Category.objects.all()}
+        for pk, label in expected_labels.items():
+            assert result[str(pk)]["label"] == label
 
     def test_markdown_rendered_to_html(self):
         """Markdown in resolution is rendered to HTML"""
@@ -76,7 +75,7 @@ class TestGetProblemsByCategory(TestCase):
             resolution="**bold** and *italic*",
         )
         result = get_problems_by_category()
-        problem = result["managing"]["problems"][0]
+        problem = result[self.managing_key]["problems"][0]
         assert "<strong>bold</strong>" in problem["resolution_html"]
         assert "<em>italic</em>" in problem["resolution_html"]
 
@@ -88,7 +87,7 @@ class TestGetProblemsByCategory(TestCase):
             resolution="",
         )
         result = get_problems_by_category()
-        problem = result["managing"]["problems"][0]
+        problem = result[self.managing_key]["problems"][0]
         assert problem["resolution_html"] == ""
 
     def test_children_nested(self):
@@ -98,7 +97,7 @@ class TestGetProblemsByCategory(TestCase):
             category=self.managing, title="Child", parent=parent, order=0
         )
         result = get_problems_by_category()
-        problems = result["managing"]["problems"]
+        problems = result[self.managing_key]["problems"]
         # Only parent at top level
         assert len(problems) == 1
         assert problems[0]["title"] == "Parent"
@@ -117,7 +116,7 @@ class TestGetProblemsByCategory(TestCase):
             category=self.managing, title="Child", parent=parent, order=0
         )
         result = get_problems_by_category()
-        problems = result["managing"]["problems"]
+        problems = result[self.managing_key]["problems"]
         assert len(problems) == 1
         assert problems[0]["title"] == "Grandparent"
         child_of_gp = problems[0]["children"]
@@ -132,7 +131,7 @@ class TestGetProblemsByCategory(TestCase):
         Problem.objects.create(category=self.managing, title="Second", order=1)
         Problem.objects.create(category=self.managing, title="First", order=0)
         result = get_problems_by_category()
-        problems = result["managing"]["problems"]
+        problems = result[self.managing_key]["problems"]
         assert problems[0]["title"] == "First"
         assert problems[1]["title"] == "Second"
 
@@ -144,14 +143,14 @@ class TestGetProblemsByCategory(TestCase):
             flag_category="no response",
         )
         result = get_problems_by_category()
-        problem = result["managing"]["problems"][0]
+        problem = result[self.managing_key]["problems"][0]
         assert problem["flag_category"] == "no response"
 
     def test_problem_id_included(self):
         """Problem id is included in the serialized output"""
         p = Problem.objects.create(category=self.managing, title="Test")
         result = get_problems_by_category()
-        problem = result["managing"]["problems"][0]
+        problem = result[self.managing_key]["problems"][0]
         assert problem["id"] == p.pk
 
     def test_category_placeholder_included(self):
@@ -160,32 +159,35 @@ class TestGetProblemsByCategory(TestCase):
         self.managing.save()
         result = get_problems_by_category()
         assert (
-            result["managing"]["placeholder"] == "Tell us about your management issue."
+            result[self.managing_key]["placeholder"]
+            == "Tell us about your management issue."
         )
 
     def test_category_placeholder_blank_by_default(self):
         """Category placeholder defaults to empty string"""
         result = get_problems_by_category()
-        assert result["managing"]["placeholder"] == ""
+        assert result[self.managing_key]["placeholder"] == ""
 
     def test_category_description_html(self):
         """Category description markdown is rendered to sanitized HTML"""
         self.managing.description = "**Heads up** — read this first."
         self.managing.save()
         result = get_problems_by_category()
-        assert "<strong>Heads up</strong>" in result["managing"]["description_html"]
+        assert (
+            "<strong>Heads up</strong>" in result[self.managing_key]["description_html"]
+        )
 
     def test_category_description_blank_by_default(self):
         """Category description_html is empty when description is blank"""
         result = get_problems_by_category()
-        assert result["managing"]["description_html"] == ""
+        assert result[self.managing_key]["description_html"] == ""
 
     def test_category_description_sanitized(self):
         """Unsafe HTML in category description is stripped"""
         self.managing.description = '<script>alert("xss")</script>**safe**'
         self.managing.save()
         result = get_problems_by_category()
-        html = result["managing"]["description_html"]
+        html = result[self.managing_key]["description_html"]
         assert "<script>" not in html
         assert "<strong>safe</strong>" in html
 
@@ -197,7 +199,7 @@ class TestGetProblemsByCategory(TestCase):
             placeholder="Specific placeholder.",
         )
         result = get_problems_by_category()
-        problem = result["managing"]["problems"][0]
+        problem = result[self.managing_key]["problems"][0]
         assert problem["placeholder"] == "Specific placeholder."
 
     def test_resolution_html_sanitized(self):
@@ -208,6 +210,6 @@ class TestGetProblemsByCategory(TestCase):
             resolution='<script>alert("xss")</script>**safe**',
         )
         result = get_problems_by_category()
-        problem = result["managing"]["problems"][0]
+        problem = result[self.managing_key]["problems"][0]
         assert "<script>" not in problem["resolution_html"]
         assert "<strong>safe</strong>" in problem["resolution_html"]

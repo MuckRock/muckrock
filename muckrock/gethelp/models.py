@@ -14,8 +14,7 @@ MARKDOWN_HELP_TEXT = mark_safe(
 class Category(models.Model):
     """An admin-editable help category"""
 
-    slug = models.SlugField(max_length=20, unique=True)
-    label = models.CharField(max_length=100)
+    label = models.CharField(max_length=100, unique=True)
     description = models.TextField(
         blank=True,
         help_text=mark_safe(
