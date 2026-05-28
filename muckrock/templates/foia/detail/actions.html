@@ -151,6 +151,10 @@
         </form>
       {% endif %}
     {% endfor %}
+
+    {% if not is_agency_user %}
+      {% include "gethelp/_trigger_button.html" %}
+    {% endif %}
   </section>
 
 {% else %} {# unauthenticated #}

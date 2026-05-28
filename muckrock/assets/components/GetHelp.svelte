@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   import CategoryList from "./CategoryList.svelte";
   import ProblemList from "./ProblemList.svelte";
   import ContactForm from "./ContactForm.svelte";
@@ -33,6 +34,11 @@
     }
   }
 
+  onMount(() => {
+    document.addEventListener("gethelp:open", openModal);
+    return () => document.removeEventListener("gethelp:open", openModal);
+  });
+
   function closeModal() {
     view = "closed";
     selectedCategory = null;
@@ -60,12 +66,6 @@
     }
   }
 </script>
-
-{#if view === "closed"}
-  <button type="button" class="button get-help__trigger" onclick={openModal}>
-    Get Help
-  </button>
-{/if}
 
 <div class="modal" class:visible={view !== "closed"} ongethelpclose={closeModal}>
   <header>

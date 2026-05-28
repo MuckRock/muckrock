@@ -15,4 +15,11 @@ window.addEventListener("DOMContentLoaded", () => {
       },
     });
   }
+
+  document.querySelectorAll<HTMLElement>("[data-gethelp-trigger]").forEach((trigger) => {
+    trigger.addEventListener("click", (event) => {
+      event.preventDefault();
+      document.dispatchEvent(new CustomEvent("gethelp:open"));
+    });
+  });
 });

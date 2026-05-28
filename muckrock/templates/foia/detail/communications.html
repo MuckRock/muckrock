@@ -84,6 +84,7 @@
             {% endif %}
           </div>
           {% if not is_agency_user %}
+            {% include "gethelp/_trigger_button.html" %}
             <div id="get-help-widget" data-foia-id="{{ foia.pk }}"></div>
             {{ help_problems_json|json_script:"help-problems-data" }}
           {% endif %}
