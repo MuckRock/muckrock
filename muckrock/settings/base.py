@@ -13,6 +13,8 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+# pylint: disable=too-many-lines
+
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
