@@ -154,6 +154,31 @@ class TestGetProblemsByCategory(TestCase):
         problem = result["managing"]["problems"][0]
         assert problem["id"] == p.pk
 
+    def test_category_placeholder_included(self):
+        """Category placeholder is included in the serialized output"""
+        self.managing.placeholder = "Tell us about your management issue."
+        self.managing.save()
+        result = get_problems_by_category()
+        assert (
+            result["managing"]["placeholder"] == "Tell us about your management issue."
+        )
+
+    def test_category_placeholder_blank_by_default(self):
+        """Category placeholder defaults to empty string"""
+        result = get_problems_by_category()
+        assert result["managing"]["placeholder"] == ""
+
+    def test_problem_placeholder_included(self):
+        """Problem placeholder is included in the serialized output"""
+        Problem.objects.create(
+            category=self.managing,
+            title="Test",
+            placeholder="Specific placeholder.",
+        )
+        result = get_problems_by_category()
+        problem = result["managing"]["problems"][0]
+        assert problem["placeholder"] == "Specific placeholder."
+
     def test_resolution_html_sanitized(self):
         """Unsafe HTML in resolution is stripped"""
         Problem.objects.create(

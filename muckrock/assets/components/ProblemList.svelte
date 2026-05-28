@@ -12,10 +12,22 @@
   <h3>{category.label}</h3>
 
   {#each category.problems as problem (problem.id)}
-    <ProblemItem {problem} {csrfToken} {foiaPk} categoryLabel={category.label} />
+    <ProblemItem
+      {problem}
+      {csrfToken}
+      {foiaPk}
+      categoryLabel={category.label}
+      categoryPlaceholder={category.placeholder}
+    />
   {/each}
 
-  <ProblemItem problem={otherProblem} {csrfToken} {foiaPk} categoryLabel={category.label} />
+  <ProblemItem
+    problem={otherProblem}
+    {csrfToken}
+    {foiaPk}
+    categoryLabel={category.label}
+    categoryPlaceholder={category.placeholder}
+  />
 </div>
 
 <style>

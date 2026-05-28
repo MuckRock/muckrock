@@ -9,6 +9,14 @@ class Category(models.Model):
 
     slug = models.SlugField(max_length=20, unique=True)
     label = models.CharField(max_length=100)
+    placeholder = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=(
+            "Placeholder text for the free-form contact textarea when this "
+            "category is selected. Leave blank to use the site default."
+        ),
+    )
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -40,6 +48,15 @@ class Problem(models.Model):
         max_length=40,
         blank=True,
         help_text="Maps to an existing flag category for staff triage",
+    )
+    placeholder = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=(
+            "Placeholder text for the free-form contact textarea when this "
+            "problem is selected. Overrides the category placeholder. Leave "
+            "blank to fall back to the category or site default."
+        ),
     )
     order = models.PositiveIntegerField(default=0)
 

@@ -61,6 +61,7 @@ def _serialize_problem(problem, children_by_parent):
         "title": problem.title,
         "resolution_html": _render_resolution(problem.resolution),
         "flag_category": problem.flag_category,
+        "placeholder": problem.placeholder,
         "children": [
             _serialize_problem(child, children_by_parent) for child in children
         ],
@@ -79,7 +80,11 @@ def get_problems_by_category():
 
     result = {}
     for cat in Category.objects.order_by("order"):
-        result[cat.slug] = {"label": cat.label, "problems": []}
+        result[cat.slug] = {
+            "label": cat.label,
+            "placeholder": cat.placeholder,
+            "problems": [],
+        }
 
     problems = list(
         Problem.objects.select_related("category").order_by("category__order", "order")
