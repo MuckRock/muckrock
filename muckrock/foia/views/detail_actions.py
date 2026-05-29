@@ -19,8 +19,6 @@ import requests
 
 # MuckRock
 from muckrock.accounts.utils import mixpanel_event
-from muckrock.organization.exceptions import PaymentActionRequired
-from muckrock.organization.models import Organization
 from muckrock.agency.forms import AgencyForm
 from muckrock.communication.models import WebCommunication
 from muckrock.core.utils import new_action
@@ -47,6 +45,8 @@ from muckrock.foia.tasks import import_doccloud_file, upload_user_document_cloud
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
+from muckrock.organization.exceptions import PaymentActionRequired
+from muckrock.organization.models import Organization
 from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask
