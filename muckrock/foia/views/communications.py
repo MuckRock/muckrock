@@ -81,7 +81,7 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
             self.request,
             "Check your email for a link to log in and reply to this request.",
         )
-        return redirect("communication-direct-agency", self.object.pk)
+        return redirect("communication-direct-agency", idx=self.object.pk)
 
     def get_form_kwargs(self):
         """Pass the request to the form"""
