@@ -22,7 +22,7 @@ def bust_cache():
     cache.delete(CACHE_KEY)
 
 
-def _render_resolution(text):
+def _render_markdown(text):
     """Render markdown to sanitized HTML"""
     if not text:
         return ""
@@ -59,8 +59,9 @@ def _serialize_problem(problem, children_by_parent):
     return {
         "id": problem.pk,
         "title": problem.title,
-        "resolution_html": _render_resolution(problem.resolution),
+        "resolution_html": _render_markdown(problem.resolution),
         "flag_category": problem.flag_category,
+        "placeholder": problem.placeholder,
         "children": [
             _serialize_problem(child, children_by_parent) for child in children
         ],
@@ -79,7 +80,12 @@ def get_problems_by_category():
 
     result = {}
     for cat in Category.objects.order_by("order"):
-        result[cat.slug] = {"label": cat.label, "problems": []}
+        result[str(cat.pk)] = {
+            "label": cat.label,
+            "description_html": _render_markdown(cat.description),
+            "placeholder": cat.placeholder,
+            "problems": [],
+        }
 
     problems = list(
         Problem.objects.select_related("category").order_by("category__order", "order")
@@ -96,7 +102,7 @@ def get_problems_by_category():
 
     for problem in top_level:
         serialized = _serialize_problem(problem, children_by_parent)
-        result[problem.category.slug]["problems"].append(serialized)
+        result[str(problem.category.pk)]["problems"].append(serialized)
 
     cache.set(CACHE_KEY, result, CACHE_TIMEOUT)
     return result

@@ -16,7 +16,7 @@ class TestProblem(TestCase):
     """Tests for the Problem model"""
 
     def setUp(self):
-        self.managing = Category.objects.get(slug="managing")
+        self.managing = Category.objects.get(label="Managing this request")
 
     def test_create_problem(self):
         """A problem can be created with all fields"""
@@ -50,7 +50,7 @@ class TestProblem(TestCase):
 
     def test_valid_category(self):
         """A problem can reference any Category object"""
-        other = Category.objects.get(slug="payments")
+        other = Category.objects.get(label="Checks and request payments")
         problem = Problem(category=other, title="Payment issue")
         problem.full_clean()  # should not raise
 
@@ -106,7 +106,7 @@ class TestProblem(TestCase):
     def test_ordering(self):
         """Problems are ordered by category order then problem order"""
         # managing has order=0, communications has order=1 (from migration data)
-        communications = Category.objects.get(slug="communications")
+        communications = Category.objects.get(label="Communications and messages")
         p3 = Problem.objects.create(category=communications, title="Comms 1", order=0)
         p1 = Problem.objects.create(category=self.managing, title="Managing 2", order=1)
         p2 = Problem.objects.create(category=self.managing, title="Managing 1", order=0)

@@ -10,9 +10,8 @@ from muckrock.gethelp.models import Category, Problem
 class CategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Category
-        django_get_or_create = ("slug",)
+        django_get_or_create = ("label",)
 
-    slug = "managing"
     label = "Managing this request"
     order = 0
 

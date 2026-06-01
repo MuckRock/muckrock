@@ -2,8 +2,18 @@
   import ContactForm from "./ContactForm.svelte";
   import Self from './ProblemItem.svelte';
 
-  let { problem, csrfToken = "", foiaPk = "", categoryLabel = "" } = $props();
+  let {
+    problem,
+    csrfToken = "",
+    foiaPk = "",
+    categoryLabel = "",
+    categoryPlaceholder = "",
+  } = $props();
   let showContact = $state(false);
+
+  let resolvedPlaceholder = $derived(
+    problem.placeholder || categoryPlaceholder || undefined
+  );
 </script>
 
 <details class="get-help__problem-item">
@@ -18,9 +28,9 @@
     {#if problem.children && problem.children.length > 0}
       <div class="get-help__children">
         {#each problem.children as child (child.id)}
-          <Self problem={child} {csrfToken} {foiaPk} {categoryLabel} />
+          <Self problem={child} {csrfToken} {foiaPk} {categoryLabel} {categoryPlaceholder} />
         {/each}
-        <Self problem={{id: "other", title: "Other"}} {csrfToken} {foiaPk} {categoryLabel} />
+        <Self problem={{id: "other", title: "Other"}} {csrfToken} {foiaPk} {categoryLabel} {categoryPlaceholder} />
       </div>
     {:else}
       {#if problem.resolution_html && !showContact}
@@ -32,7 +42,13 @@
           I still need help
       </button>
       {:else}
-      <ContactForm {csrfToken} {foiaPk} {categoryLabel} problemTitle={problem.title} />
+      <ContactForm
+        {csrfToken}
+        {foiaPk}
+        {categoryLabel}
+        problemTitle={problem.title}
+        placeholder={resolvedPlaceholder}
+      />
       {/if}
     {/if}
   </div>

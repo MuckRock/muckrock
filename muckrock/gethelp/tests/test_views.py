@@ -34,7 +34,8 @@ class TestGetHelpContext(TestCase):
         }
         UserFactory(username="MuckrockStaff")
         # Categories are automatically created by our migration
-        self.managing = Category.objects.get(slug="managing")
+        self.managing = Category.objects.get(label="Managing this request")
+        self.managing_key = str(self.managing.pk)
 
     def test_help_problems_in_context(self):
         """The help_problems_json key should be in the detail context"""
@@ -51,9 +52,9 @@ class TestGetHelpContext(TestCase):
         response = http_get_response(self.url, self.view, self.foia.user, **self.kwargs)
         problems = response.context_data["help_problems_json"]
         assert isinstance(problems, dict)
-        assert "managing" in problems
-        assert len(problems["managing"]["problems"]) == 1
-        assert problems["managing"]["problems"][0]["title"] == "Test problem"
+        assert self.managing_key in problems
+        assert len(problems[self.managing_key]["problems"]) == 1
+        assert problems[self.managing_key]["problems"][0]["title"] == "Test problem"
 
     def test_help_problems_json_serializable(self):
         """The problems data can be serialized to JSON for the template"""

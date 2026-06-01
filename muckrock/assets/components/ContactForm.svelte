@@ -1,11 +1,15 @@
 <script>
   import { showMessage } from "../js/messages";
 
+  const DEFAULT_PLACEHOLDER =
+    "Describe your issue, providing as much detail as you can.";
+
   let {
     csrfToken = "",
     foiaPk = "",
     categoryLabel = "",
     problemTitle = "",
+    placeholder = DEFAULT_PLACEHOLDER,
   } = $props();
   let text = $state("");
   let submitted = $state(false);
@@ -59,7 +63,7 @@
     bind:value={text}
     required
     rows="4"
-    placeholder="Describe your issue, providing as much detail as you can."
+    {placeholder}
   ></textarea>
   {#if errorMessage}
     <p class="get-help__contact-form-error">{errorMessage}</p>
