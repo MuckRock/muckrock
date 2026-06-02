@@ -17,12 +17,7 @@ import pytest
 
 # MuckRock
 from muckrock.accounts import views
-from muckrock.core.factories import (
-    AgencyFactory,
-    NotificationFactory,
-    QuestionFactory,
-    UserFactory,
-)
+from muckrock.core.factories import AgencyFactory, NotificationFactory, UserFactory
 from muckrock.core.test_utils import (
     http_get_response,
     http_post_response,
@@ -31,7 +26,6 @@ from muckrock.core.test_utils import (
 from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.views import Detail as FOIARequestDetail
-from muckrock.qanda.views import Detail as QuestionDetail
 
 
 def http_get_post(url, view, data):
@@ -237,27 +231,6 @@ class TestNotificationRead(TestCase):
             jurisdiction=foia.jurisdiction.slug,
         )
         assert response.status_code == 200, "The view should response 200 OK."
-        # Check that the notification has been read.
-        notification.refresh_from_db()
-        assert notification.read, "The notification should be marked as read."
-
-    def test_get_question(self):
-        """Try getting the detail page for a Question with an unread notification."""
-        question = QuestionFactory()
-        view = QuestionDetail.as_view()
-        # Create a notification for the question
-        action = new_action(UserFactory(), "answered", target=question)
-        notification = notify(self.user, action)[0]
-        assert not notification.read, "The notification should be unread."
-        # Try getting the view as the user
-        response = http_get_response(
-            question.get_absolute_url(),
-            view,
-            self.user,
-            pk=question.pk,
-            slug=question.slug,
-        )
-        assert response.status_code == 200, "The view should respond 200 OK."
         # Check that the notification has been read.
         notification.refresh_from_db()
         assert notification.read, "The notification should be marked as read."

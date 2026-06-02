@@ -37,25 +37,6 @@
         {% endif %}
         {% endwith %}
     {% endif %}
-    {% if activity.questions.count > 0 %}
-        <h1>Questions</h1>
-        {% if activity.questions.mine|length > 0 %}
-        <h2>Yours</h2>
-        <ul>
-            {% for notification in activity.questions.mine %}
-            <li>{% display_passive_action notification.action %}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% if activity.questions.following|length > 0 %}
-        <h2>Following</h2>
-        <ul>
-            {% for notification in activity.questions.following %}
-            <li>{% display_passive_action notification.action %}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-    {% endif %}
 {% endblock body %}
 
 {% block settings %}

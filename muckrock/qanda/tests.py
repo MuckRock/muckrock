@@ -13,6 +13,7 @@ from muckrock.core.test_utils import mock_middleware
 from muckrock.qanda.views import QuestionList, block_user, report_spam
 
 
+@pytest.mark.skip("deprecated")
 class TestQandA(TestCase):
     """Test for Q&A"""
 

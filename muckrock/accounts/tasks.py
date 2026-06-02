@@ -591,7 +591,6 @@ def db_cleanup():
             "crowdfund",
             "accounts",
             "organization",
-            "qanda",
         ]
         for cleanup in revision_cleanup:
             call_command("deleterevisions", cleanup, days=180, verbosity=2)

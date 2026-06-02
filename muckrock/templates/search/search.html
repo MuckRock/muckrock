@@ -17,10 +17,6 @@
         <input type="checkbox" id="id_models_1_show" {% if foia_checked %}checked="checked"{% endif %}/>
         <label for="id_models_1_show">Requests</label>
     </li>
-    <li>
-        <input type="checkbox" id="id_models_2_show" {% if qanda_checked %}checked="checked"{% endif %}/>
-        <label for="id_models_2_show">Questions</label>
-    </li>
 </ul>
 {% endblock list-navigation %}
 
@@ -34,7 +30,6 @@
             <div style="display: none">
                 <input type="checkbox" name="models" value="news.article" id="id_models_0" {% if news_checked %}checked="checked"{% endif %} />
                 <input type="checkbox" name="models" value="foia.foiarequest" id="id_models_1" {% if foia_checked %}checked="checked"{% endif %} />
-                <input type="checkbox" name="models" value="qanda.question" id="id_models_2" {% if qanda_checked %}checked="checked"{% endif %}/>
             </div>
         </form>
     </section>
@@ -55,8 +50,6 @@
                     Request
                     {% elif item.model_name == "article" %}
                     Article
-                    {% elif item.model_name == "question" %}
-                    Question
                     {% endif %}
                 </td>
                 <td><a href="{{ item.object.get_absolute_url }}">{{ item.object }}</a></td>
