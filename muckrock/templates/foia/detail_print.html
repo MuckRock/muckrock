@@ -1,0 +1,155 @@
+{% load static %}
+{% load tags %}
+{% load django_vite %}
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ foia.title }} &bull; MuckRock</title>
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type="text/css">
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-Regular.ttf' %}");
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-Italic.ttf' %}");
+        font-weight: 400;
+        font-style: italic;
+      }
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-Semibold.ttf' %}");
+        font-weight: 500 600;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Source Sans Pro';
+        src: url("{% static 'fonts/SourceSansPro-SemiboldItalic.ttf' %}");
+        font-weight: 500 600;
+        font-style: italic;
+      }
+      @font-face {
+        font-family: 'Source Code Pro';
+        src: url("{% static 'fonts/SourceCodePro-Regular.ttf' %}");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+    {% vite_asset 'muckrock/assets/print.js' %}
+  </head>
+  <body class="print">
+    <article class="request-print">
+      <header class="request-print__header">
+        <p class="request-print__brand">
+          MuckRock Request
+        </p>
+        <h1 class="request-print__title">{{ foia.title }}</h1>
+        <p class="request-print__subtitle">
+          {{ foia.composer.user.profile.full_name }}
+          filed this request with the
+          {{ foia.agency.name }}
+          of
+          {% if foia.jurisdiction.level == "f" %}the {% endif %}
+          {{ foia.jurisdiction.name }}{% if foia.jurisdiction.parent and foia.jurisdiction.level == "l" %}, {{ foia.jurisdiction.parent.name }}{% endif %}.
+        </p>
+        <dl class="request-print__meta">
+          <dt>MuckRock #</dt>
+          <dd>{{ foia.id }}</dd>
+          {% if foia.tracking_ids.all %}
+            <dt>Tracking #</dt>
+            <dd>
+              {% for tracking_id in foia.tracking_ids.all %}
+                {{ tracking_id }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </dd>
+          {% endif %}
+          <dt>Status</dt>
+          <dd>{{ foia.get_status_display }}</dd>
+          <dt>Submitted</dt>
+          <dd>{{ foia.composer.datetime_submitted|date:"F j, Y" }}</dd>
+          {% if foia.date_due %}
+            <dt>Due</dt>
+            <dd>{{ foia.date_due|date:"F j, Y" }}</dd>
+          {% endif %}
+          {% if foia.date_estimate %}
+            <dt>Est. Completion</dt>
+            <dd>{{ foia.date_estimate|date:"F j, Y" }}</dd>
+          {% endif %}
+          <dt>Permalink</dt>
+          <dd>{{ request.scheme }}://{{ request.get_host }}{{ foia.get_absolute_url }}</dd>
+        </dl>
+      </header>
+
+      <section class="request-print__communications">
+        {% for communication in foia.communications.all %}
+          {% if not communication.hidden %}
+            <article class="request-print__communication {% if communication.response %}is-response{% else %}is-outgoing{% endif %}">
+              <header class="request-print__communication-header">
+                <p class="request-print__communication-from">
+                  <span class="request-print__label">From:</span>
+                  {{ communication.from_line }}
+                </p>
+                {% with to=communication.sent_to %}
+                  {% if to %}
+                    <p class="request-print__communication-to">
+                      <span class="request-print__label">To:</span>
+                      {{ to|stringformat:"s"|cut:" (error)" }}
+                    </p>
+                  {% endif %}
+                {% endwith %}
+                {% with delivered=communication.get_delivered %}
+                  {% if delivered %}
+                    <p class="request-print__communication-delivery">
+                      <span class="request-print__label">Via:</span>
+                      {{ delivered|capfirst }}
+                    </p>
+                  {% endif %}
+                {% endwith %}
+                <p class="request-print__communication-subject">
+                  <span class="request-print__label">Subject:</span>
+                  {{ communication.subject|default:"None" }}
+                </p>
+                <p class="request-print__communication-date">
+                  <span class="request-print__label">Date:</span>
+                  <time datetime="{{ communication.datetime|date:'c' }}">
+                    {{ communication.datetime|date:"F j, Y, g:i a" }}
+                  </time>
+                </p>
+              </header>
+              <div class="request-print__communication-body">
+                {% if communication.full_html %}
+                  {{ communication.communication|redact_emails|safe }}
+                {% else %}
+                  {{ communication.communication|redact_emails|linebreaks }}
+                {% endif %}
+              </div>
+            </article>
+          {% endif %}
+        {% endfor %}
+      </section>
+
+      <footer class="request-print__footer">
+        <p>
+          Printed from MuckRock on {% now "F j, Y" %}.
+          Visit
+          {{ request.scheme }}://{{ request.get_host }}{{ foia.get_absolute_url }}
+          for the latest version of this request.
+        </p>
+      </footer>
+    </article>
+    <script>
+      // Trigger the print dialog as soon as styles and layout are ready.
+      // The `noprint` query param lets people open the page without it.
+      if (!new URLSearchParams(window.location.search).has("noprint")) {
+        window.addEventListener("load", function () {
+          window.print();
+        });
+      }
+    </script>
+  </body>
+</html>

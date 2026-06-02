@@ -20,6 +20,7 @@ export default defineConfig({
         foiamachine: path.resolve(__dirname, "muckrock/foiamachine/assets/entry.js"),
         docViewer: path.resolve(__dirname, "muckrock/assets/js/docViewer.js"),
         getHelp: path.resolve(__dirname, "muckrock/assets/js/getHelp.ts"),
+        print: path.resolve(__dirname, "muckrock/assets/print.js"),
       },
     },
   },

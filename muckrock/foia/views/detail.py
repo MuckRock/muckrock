@@ -405,6 +405,41 @@ class Detail(DetailView):
         return redirect(self.foia.get_absolute_url() + "#")
 
 
+class DetailPrint(DetailView):
+    """A print-friendly view of a FOIA request and its communications"""
+
+    model = FOIARequest
+    context_object_name = "foia"
+    template_name = "foia/detail_print.html"
+
+    def get_object(self, queryset=None):
+        foia = get_object_or_404(
+            FOIARequest.objects.select_related(
+                "agency__jurisdiction__parent",
+                "composer__user__profile",
+            ).prefetch_related(
+                "tracking_ids",
+                Prefetch(
+                    "communications",
+                    FOIACommunication.objects.select_related(
+                        "from_user__profile__agency"
+                    ).preload_list(),
+                ),
+            ),
+            agency__jurisdiction__slug=self.kwargs["jurisdiction"],
+            agency__jurisdiction__pk=self.kwargs["jidx"],
+            slug=self.kwargs["slug"],
+            pk=self.kwargs["idx"],
+        )
+        valid_access_key = (
+            compare_digest(self.request.GET.get("key", ""), foia.access_key)
+            and foia.access_key != ""
+        )
+        if not foia.has_perm(self.request.user, "view") and not valid_access_key:
+            raise Http404()
+        return foia
+
+
 class MultiDetail(DetailView):
     """Detail view for multi requests"""
 

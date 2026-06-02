@@ -142,6 +142,25 @@ class TestFOIAViews(TestCase):
             ),
         )
 
+    def test_foia_detail_print(self):
+        """The print view should render with metadata and communications"""
+
+        foia = FOIARequestFactory()
+        FOIACommunicationFactory(foia=foia)
+        response = get_allowed(
+            self.client,
+            reverse(
+                "foia-detail-print",
+                kwargs={
+                    "idx": foia.pk,
+                    "slug": foia.slug,
+                    "jurisdiction": foia.jurisdiction.slug,
+                    "jidx": foia.jurisdiction.pk,
+                },
+            ),
+        )
+        assert b"request-print" in response.content
+
     def test_feeds(self):
         """Test the RSS feed views"""
 
