@@ -15,10 +15,10 @@ from datetime import timedelta
 import dateutil
 import requests
 from furl import furl
-from govqa.base import GovQA
 from smart_open.smart_open_lib import smart_open
 
 # MuckRock
+from govqa.base import GovQA
 from muckrock.core.utils import parse_header
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.file import get_path
