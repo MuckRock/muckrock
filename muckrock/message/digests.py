@@ -32,7 +32,6 @@ from muckrock.core.models import ExtractDay
 from muckrock.crowdfund.models import Crowdfund
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.message.email import TemplateEmail
-from muckrock.qanda.models import Question
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +127,6 @@ class ActivityDigest(Digest):
     activity = {
         "count": 0,
         "requests": {"count": 0, "mine": None, "following": None},
-        "questions": {"count": 0, "mine": None, "following": None},
     }
 
     # Most of the work re: composing the email takes place
@@ -184,12 +182,7 @@ class ActivityDigest(Digest):
             .filter(datetime__gte=duration)
         )
         self.activity["requests"] = self.foia_notifications(notifications)
-        self.activity["questions"] = self.notifications_for_model(
-            notifications, Question
-        )
-        self.activity["count"] = (
-            self.activity["requests"]["count"] + self.activity["questions"]["count"]
-        )
+        self.activity["count"] = self.activity["requests"]["count"]
         return self.activity
 
     def foia_notifications(self, notifications):

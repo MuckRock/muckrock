@@ -31,7 +31,6 @@ import muckrock.news.viewsets
 import muckrock.organization.api_v2.viewsets
 import muckrock.project.api_v2.viewsets
 import muckrock.project.viewsets
-import muckrock.qanda.views
 import muckrock.task.viewsets
 from muckrock.agency.sitemap import AgencySitemap
 from muckrock.core import views
@@ -42,7 +41,6 @@ from muckrock.foia.views.communications import FOIACommunicationDirectAgencyView
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 from muckrock.project.sitemap import ProjectSitemap
-from muckrock.qanda.sitemap import QuestionSitemap
 
 admin.site.index_template = "admin/custom_index.html"
 
@@ -51,7 +49,6 @@ sitemaps = {
     "News": ArticleSitemap,
     "Agency": AgencySitemap,
     "Jurisdiction": JurisdictionSitemap,
-    "Question": QuestionSitemap,
     "Project": ProjectSitemap,
     "Flatpages": FlatPageSitemap,
 }
@@ -154,7 +151,6 @@ urlpatterns = [
     re_path(r"^agency/", include("muckrock.agency.urls")),
     re_path(r"^place/", include(muckrock.jurisdiction.urls.urlpatterns)),
     re_path(r"^jurisdiction/", include(muckrock.jurisdiction.urls.old_urlpatterns)),
-    re_path(r"^questions/", include("muckrock.qanda.urls")),
     re_path(r"^crowdfund/", include("muckrock.crowdfund.urls")),
     re_path(r"^assignment/", include("muckrock.crowdsource.urls")),
     re_path(r"^task/", include("muckrock.task.urls")),

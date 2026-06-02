@@ -30,29 +30,6 @@ Following
 {% include 'message/component/foia_digest.txt' with notifications=follow_foia.received label='New Response' %}
 {% endif %}{% endwith %}
 {% endif %}
-{% if activity.questions.count > 0 %}
----------------------------
-Questions
-- - - - - - - - - - - - - -
-{% if activity.questions.mine|length > 0 %}
-Yours
-- - - - - - - - - - - - - -
-{% for notification in activity.questions.mine %}
-{% with notification.action as action %}
-* {% include 'lib/pattern/actions/passive.txt' %}
-{% endwith %}
-{% endfor %}
-{% endif %}
-{% if activity.questions.following|length > 0 %}
-Following
-- - - - - - - - - - - - - -
-{% for notification in activity.questions.following %}
-{% with notification.action as action %}
-* {% include 'lib/pattern/actions/passive.txt' %}
-{% endwith %}
-{% endfor %}
-{% endif %}
-{% endif %}
 {% endblock %}
 
 {% block settings %}
