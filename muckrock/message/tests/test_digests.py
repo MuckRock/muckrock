@@ -13,16 +13,10 @@ from unittest.mock import Mock, patch
 
 # Third Party
 import pytest
-from actstream.actions import follow
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
-from muckrock.core.factories import (
-    AgencyFactory,
-    AnswerFactory,
-    StatisticsFactory,
-    UserFactory,
-)
+from muckrock.core.factories import AgencyFactory, StatisticsFactory, UserFactory
 from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.message import digests
