@@ -28,6 +28,4 @@ class RangeWidget(django_filters.widgets.RangeWidget):
                     %(inputs)s
                 </div>
             </div>
-        """ % {
-            "inputs": "\n".join(rendered_widgets)
-        }
+        """ % {"inputs": "\n".join(rendered_widgets)}
