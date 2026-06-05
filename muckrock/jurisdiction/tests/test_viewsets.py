@@ -139,6 +139,7 @@ class TestTemplateEndpoint(TestCase):
         self.factory = APIRequestFactory()
         self.view = JurisdictionViewSet.as_view({"get": "template"})
         FOIATemplateFactory.create()
+        self.user = UserFactory.create()
 
     def test_template(self):
         """Get the default language for a given jurisdiction"""
@@ -146,5 +147,6 @@ class TestTemplateEndpoint(TestCase):
         request = self.factory.get(
             reverse("api-jurisdiction-template", kwargs={"pk": jurisdiction.pk})
         )
+        force_authenticate(request, user=self.user)
         response = self.view(request, pk=jurisdiction.pk)
         assert response.status_code == 200
