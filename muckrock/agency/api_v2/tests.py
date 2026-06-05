@@ -54,11 +54,13 @@ class AgencyViewSetTests(APITestCase):
 
     def test_retrieve_agencies(self):
         """Test retrieving the list of agencies."""
+        self.client.force_login(self.user2)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_fuzzy_search_agency_name(self):
         """Test fuzzy searching by agency name."""
+        self.client.force_login(self.user2)
         response = self.client.get(self.url, {"search": "second"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -71,6 +73,7 @@ class AgencyViewSetTests(APITestCase):
 
     def test_fuzzy_search_jurisdiction_name(self):
         """Test fuzzy searching by jurisdiction name."""
+        self.client.force_login(self.user2)
         response = self.client.get(self.url, {"search": "1st"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -118,3 +121,14 @@ class AgencyViewSetTests(APITestCase):
             agency_names,
             ["First Approved Agency", "Second Approved Agency", "Unapproved Agency"],
         )
+
+    def test_unauthenticated_user_cannot_list_agencies(self):
+        """Test that unauthenticated users cannot access the agency list."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_user_cannot_retrieve_agency(self):
+        """Test that unauthenticated users cannot retrieve a single agency."""
+        url = reverse("api2-agencies-detail", args=[self.agencies[0].pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

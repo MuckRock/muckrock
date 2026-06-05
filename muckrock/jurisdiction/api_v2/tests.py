@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 # MuckRock
+from muckrock.core.factories import UserFactory
 from muckrock.jurisdiction.factories import (
     FederalJurisdictionFactory,
     LocalJurisdictionFactory,
@@ -23,6 +24,7 @@ class JurisdictionViewSetTests(TestCase):
         """Set up test cases, creating jurisdictions."""
         self.client = APIClient()
         self.url = reverse("api2-jurisdictions-list")
+        self.user = UserFactory.create()
 
         # Create jurisdictions and store in a dictionary for easy access
         self.jurisdictions = {
@@ -40,6 +42,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_list(self):
         """Test retrieving the list of jurisdictions."""
+        self.client.force_login(self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -61,6 +64,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_filter_by_name(self):
         """Test filtering jurisdictions by name."""
+        self.client.force_login(self.user)
         response = self.client.get(self.url, {"name": "spring"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -77,6 +81,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_filter_by_abbrev(self):
         """Test filtering jurisdictions by abbreviation."""
+        self.client.force_login(self.user)
         response = self.client.get(self.url, {"abbrev": "MO"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -95,6 +100,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_filter_by_level(self):
         """Test filtering jurisdictions by level."""
+        self.client.force_login(self.user)
         response = self.client.get(self.url, {"level": "s"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -110,3 +116,14 @@ class JurisdictionViewSetTests(TestCase):
             "f", jurisdiction_levels
         )  # Ensure that unexpected levels are not present
         self.assertNotIn("l", jurisdiction_levels)
+
+    def test_unauthenticated_cannot_list(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_cannot_retrieve(self):
+        url = reverse(
+            "api2-jurisdictions-detail", args=[self.jurisdictions["springfield"].pk]
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
