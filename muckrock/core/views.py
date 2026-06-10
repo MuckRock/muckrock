@@ -64,7 +64,10 @@ class AuthenticatedAPIMixin:
     """
 
     authentication_classes = [JWTAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+
+
+if settings.API_V2_AUTH:
+    AuthenticatedAPIMixin.permission_classes = [IsAuthenticated]
 
 
 class OrderedSortMixin:
