@@ -13,10 +13,17 @@ from unittest.mock import Mock, patch
 
 # Third Party
 import pytest
+from actstream.actions import follow
 from dateutil.relativedelta import relativedelta
 
 # MuckRock
-from muckrock.core.factories import AgencyFactory, StatisticsFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyFactory,
+    AnswerFactory,
+    QuestionFactory,
+    StatisticsFactory,
+    UserFactory,
+)
 from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.message import digests
@@ -69,6 +76,33 @@ class TestDailyDigest(TestCase):
         email = self.digest(user=self.user, interval=self.interval)
         assert email.activity["count"] == 1, "There should be activity."
         assert email.send() == 1, "The email should send."
+
+    def test_digest_user_questions(self):
+        """Digests should not include information on questions I asked."""
+        # generate an action on a question the user asked
+        question = QuestionFactory(user=self.user)
+        other_user = UserFactory()
+        AnswerFactory(user=other_user, question=question)
+        # creating an answer _should_ not have created a notification
+        # so let's generate the email and see what happened
+        email = self.digest(user=self.user, interval=self.interval)
+        assert email.activity["count"] == 0
+        assert "questions" not in email.activity
+        # email does not send if there is no activity
+        assert email.send() == 0, "The email should not send."
+
+    def test_digest_follow_questions(self):
+        """Digests should not include information on questions I follow."""
+        # generate an action on a question that I follow
+        question = QuestionFactory()
+        follow(self.user, question, actor_only=False)
+        other_user = UserFactory()
+        answer = AnswerFactory(user=other_user, question=question)
+        email = self.digest(user=self.user, interval=self.interval)
+        assert email.activity["count"] == 0
+        assert "questions" not in email.activity
+        # email does not send if there is no activity
+        assert email.send() == 0, "The email should not send."
 
 
 class TestStaffDigest(TestCase):
