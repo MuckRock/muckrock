@@ -32,7 +32,6 @@ from muckrock.core.test_utils import (
 from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.views import Detail as FOIARequestDetail
-from muckrock.qanda.views import Detail as QuestionDetail
 
 
 def http_get_post(url, view, data):
