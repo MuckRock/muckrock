@@ -56,7 +56,7 @@ class TestFoiaMachineRequestForm(TestCase):
     def test_agency_mismatch(self):
         """The form should not validate if the agency is from a different
         jurisdiction."""
-        jurisdiction = StateJurisdictionFactory()
+        jurisdiction = StateJurisdictionFactory(name="California")
         form = forms.FoiaMachineRequestForm(
             {
                 "title": self.title,
