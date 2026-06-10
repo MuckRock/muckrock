@@ -97,7 +97,7 @@ class TestDailyDigest(TestCase):
         question = QuestionFactory()
         follow(self.user, question, actor_only=False)
         other_user = UserFactory()
-        answer = AnswerFactory(user=other_user, question=question)
+        AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
         assert email.activity["count"] == 0
         assert "questions" not in email.activity
