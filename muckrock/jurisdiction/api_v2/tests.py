@@ -42,7 +42,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_list(self):
         """Test retrieving the list of jurisdictions."""
-        self.client.force_login(self.user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -64,7 +64,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_filter_by_name(self):
         """Test filtering jurisdictions by name."""
-        self.client.force_login(self.user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url, {"name": "spring"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -81,7 +81,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_filter_by_abbrev(self):
         """Test filtering jurisdictions by abbreviation."""
-        self.client.force_login(self.user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url, {"abbrev": "MO"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -100,7 +100,7 @@ class JurisdictionViewSetTests(TestCase):
 
     def test_filter_by_level(self):
         """Test filtering jurisdictions by level."""
-        self.client.force_login(self.user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url, {"level": "s"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

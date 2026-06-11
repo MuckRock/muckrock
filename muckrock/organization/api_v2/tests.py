@@ -1,11 +1,12 @@
 """Tests for the organization viewsets"""
 
 # Django
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 # Third Party
 from rest_framework import status
+from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import UserFactory
@@ -18,7 +19,7 @@ class OrganizationViewSetTests(TestCase):
 
     def setUp(self):
         """Set up test cases, creating users and organizations."""
-        self.client = Client()
+        self.client = APIClient()
 
         # Create users using UserFactory (password is handled automatically)
         self.user1 = UserFactory(username="jdoe", email="jdoe@example.com")
@@ -47,7 +48,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_list_organizations_staff(self):
         """Test staff users can list all organizations."""
-        self.client.force_login(self.staff_user)
+        self.client.force_authenticate(user=self.staff_user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -59,7 +60,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_list_organizations_non_staff(self):
         """Test non-staff users can only list organizations they belong to."""
-        self.client.force_login(self.user2)
+        self.client.force_authenticate(user=self.user2)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -71,7 +72,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_filter_organizations_by_name(self):
         """Test filtering organizations by name."""
-        self.client.force_login(self.staff_user)
+        self.client.force_authenticate(user=self.staff_user)
         response = self.client.get(self.list_url, {"name": "Example Organization 1"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -83,7 +84,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_filter_organizations_by_slug(self):
         """Test filtering organizations by slug."""
-        self.client.force_login(self.staff_user)
+        self.client.force_authenticate(user=self.staff_user)
         response = self.client.get(self.list_url, {"slug": "example-org-1"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -95,7 +96,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_filter_organizations_by_uuid(self):
         """Test filtering organizations by UUID."""
-        self.client.force_login(self.staff_user)
+        self.client.force_authenticate(user=self.staff_user)
         response = self.client.get(
             self.list_url, {"uuid": str(self.organization1.uuid)}
         )
@@ -109,7 +110,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_access_organization_detail_non_staff(self):
         """Test that non-staff users can access their own organization details."""
-        self.client.force_login(self.user1)
+        self.client.force_authenticate(user=self.user1)
         response = self.client.get(
             reverse("api2-organizations-detail", args=[self.organization1.id])
         )
@@ -122,7 +123,7 @@ class OrganizationViewSetTests(TestCase):
 
     def test_access_organization_detail_non_member(self):
         """Test that non-staff users cannot access organizations they don't belong to."""
-        self.client.force_login(self.user2)
+        self.client.force_authenticate(user=self.user2)
         response = self.client.get(
             reverse("api2-organizations-detail", args=[self.organization1.id])
         )

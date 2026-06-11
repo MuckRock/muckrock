@@ -1,6 +1,9 @@
 # Django
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
+
+# Third Party
+from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory, UserFactory
@@ -8,9 +11,9 @@ from muckrock.core.factories import ProjectFactory, UserFactory
 
 class TestProjectViewSet(TestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = APIClient()
         self.user = UserFactory()
-        self.client.force_login(self.user)
+        self.client.force_authenticate(user=self.user)
         self.project1 = ProjectFactory(title="Project 1", private=False, approved=True)
         self.project2 = ProjectFactory(title="Project 2", private=False, approved=True)
         self.project3 = ProjectFactory(title="Project 3", private=False, approved=True)
