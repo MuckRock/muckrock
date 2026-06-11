@@ -1,12 +1,11 @@
 """Tests for the Agency API"""
 
 # Django
-from django.test import Client
 from django.urls import reverse
 
 # Third Party
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient, APITestCase
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
@@ -50,15 +49,17 @@ class AgencyViewSetTests(APITestCase):
         self.user1 = UserFactory(username="adam", is_staff=True)
         self.user2 = UserFactory(username="bob", is_staff=False)
 
-        self.client = Client()
+        self.client = APIClient()
 
     def test_retrieve_agencies(self):
         """Test retrieving the list of agencies."""
+        self.client.force_authenticate(user=self.user2)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_fuzzy_search_agency_name(self):
         """Test fuzzy searching by agency name."""
+        self.client.force_authenticate(user=self.user2)
         response = self.client.get(self.url, {"search": "second"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -71,6 +72,7 @@ class AgencyViewSetTests(APITestCase):
 
     def test_fuzzy_search_jurisdiction_name(self):
         """Test fuzzy searching by jurisdiction name."""
+        self.client.force_authenticate(user=self.user2)
         response = self.client.get(self.url, {"search": "1st"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -81,7 +83,9 @@ class AgencyViewSetTests(APITestCase):
 
     def test_rejected_agencies_hidden(self):
         """Test that non-approved agencies are hidden for non-staff users."""
-        self.client.force_login(self.user2)  # Ensure we are logged in as non-staff user
+        self.client.force_authenticate(
+            user=self.user2
+        )  # Ensure we are logged in as non-staff user
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -93,7 +97,7 @@ class AgencyViewSetTests(APITestCase):
 
     def test_staff_user_can_see_all_agencies(self):
         """Test that staff users can see all agencies."""
-        self.client.force_login(self.user1)
+        self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -106,7 +110,7 @@ class AgencyViewSetTests(APITestCase):
 
     def test_ordering(self):
         """Test that agencies are returned in the correct order."""
-        self.client.force_login(self.user1)
+        self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.url, {"ordering": "name"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -118,3 +122,14 @@ class AgencyViewSetTests(APITestCase):
             agency_names,
             ["First Approved Agency", "Second Approved Agency", "Unapproved Agency"],
         )
+
+    def test_unauthenticated_user_cannot_list_agencies(self):
+        """Test that unauthenticated users cannot access the agency list."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthenticated_user_cannot_retrieve_agency(self):
+        """Test that unauthenticated users cannot retrieve a single agency."""
+        url = reverse("api2-agencies-detail", args=[self.agencies[0].pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

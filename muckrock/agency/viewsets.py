@@ -10,6 +10,7 @@ from django.db.models.query import Prefetch
 # Third Party
 import django_filters
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -29,6 +30,7 @@ def CountWhen(output_field=None, **kwargs):
 class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
 
+    permission_classes = (IsAuthenticated,)
     queryset = (
         Agency.objects.order_by("id")
         .select_related("jurisdiction", "parent", "appeal_agency")

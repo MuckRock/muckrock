@@ -34,6 +34,7 @@ import stripe
 from dal import autocomplete
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.pagination import CursorPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from watson import search as watson
@@ -63,6 +64,10 @@ class AuthenticatedAPIMixin:
     """
 
     authentication_classes = [JWTAuthentication, SessionAuthentication]
+
+
+if settings.API_V2_AUTH:
+    AuthenticatedAPIMixin.permission_classes = [IsAuthenticated]
 
 
 class OrderedSortMixin:
