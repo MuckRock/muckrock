@@ -23,6 +23,7 @@ class FederalJurisdictionFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Jurisdiction
+        django_get_or_create = ("name", "level")
 
     name = "United States of America"
     abbrev = "USA"
@@ -38,6 +39,7 @@ class StateJurisdictionFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Jurisdiction
+        django_get_or_create = ("name", "level")
 
     name = "Massachusetts"
     abbrev = "MA"
@@ -68,6 +70,7 @@ class LawFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Law
+        django_get_or_create = ("jurisdiction",)
 
     jurisdiction = factory.SubFactory(StateJurisdictionFactory, law=None)
     name = "Massachusetts Public Records Law"
