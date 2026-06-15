@@ -64,6 +64,7 @@ class FOIARequestViewSet(
             slug=slugify(request.data["title"]) or "untitled",
             requested_docs=request.data["requested_docs"],
             embargo_status=request.data.get("embargo_status", False),
+            edited_boilerplate=request.data.get("edited_boilerplate", False),
         )
         composer.agencies.set(Agency.objects.filter(pk__in=request.data["agencies"]))
 

@@ -72,6 +72,17 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         help_text="Description of the documents being requested",
     )
 
+    edited_boilerplate = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text=(
+            "If true, your `requested_docs` text is used directly as the full "
+            "request letter, bypassing the MuckRock template. "
+            "Template tags such as { name } and { closing } are still available "
+            "if you wish to use them."
+        ),
+    )
+
     class Meta:
         """Filters for foia request search"""
 
@@ -99,6 +110,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             # "tags",
             # "notes",
             # "communications",
+            "edited_boilerplate",
         )
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for this FOIA request"},
