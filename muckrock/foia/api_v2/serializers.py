@@ -83,6 +83,12 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         ),
     )
 
+    tags = serializers.StringRelatedField(
+        many=True,
+        read_only=True,
+        help_text="Tags associated with this request",
+    )
+
     class Meta:
         """Filters for foia request search"""
 
@@ -107,7 +113,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "tracking_id",
             "price",
             # connected models
-            # "tags",
+            "tags",
             # "notes",
             # "communications",
             "edited_boilerplate",
@@ -145,7 +151,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
                 "help_text": "The cost of processing this request, if applicable"
             },
         }
-
 
 @extend_schema_serializer(
     examples=[
@@ -196,6 +201,12 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         help_text="Description of the documents being requested"
     )
 
+    tags = serializers.ListField(
+        child=serializers.SlugField(max_length=100),
+        required=False,
+        help_text="List of tags to apply to this request",
+    )
+
     class Meta:
         """Filters for foia request create"""
 
@@ -209,7 +220,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             # "attachments",
             # "edit_collaborators",
             # "read_collaborators",
-            # "tags",
+            "tags",
         )
         extra_kwargs = {
             "embargo_status": {
