@@ -203,7 +203,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
     )
 
     tags = serializers.ListField(
-        child=serializers.SlugField(max_length=100),
+        child=serializers.CharField(max_length=100),
         required=False,
         help_text="List of tags to apply to this request",
     )
