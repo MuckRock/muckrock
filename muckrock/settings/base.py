@@ -1009,3 +1009,6 @@ SERVICE_USER_AGENT = os.environ.get("SERVICE_USER_AGENT", "muckrock requests")
 
 # API_v2 auth switch
 API_V2_AUTH = boolcheck(os.environ.get("API_V2_AUTH", True))
+
+# Allow verified orgs to bypass multi-request review
+VERIFIED_REQUEST_CHECKS_BYPASS = boolcheck(os.environ.get("VERIFIED_REQUEST_CHECKS_BYPASS", True))
