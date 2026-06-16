@@ -83,7 +83,7 @@ class FOIARequestViewSet(
             tags = request.data.get("tags", [])
             if tags:
                 for foia in foias:
-                    foia.tags.set(*tags)
+                    foia.tags.set(tags)
             return Response(
                 {
                     "status": "FOI Request submitted",
