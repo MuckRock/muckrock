@@ -152,6 +152,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             },
         }
 
+
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
