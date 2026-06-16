@@ -140,7 +140,7 @@ class FOIAComposer(models.Model):
         approve = (
             num_requests < settings.MULTI_REVIEW_AMOUNT
             or (
-                settings.VERIFIED_JOURNALIST_MULTI_REVIEW_BYPASS
+                settings.VERIFIED_REQUEST_CHECKS_BYPASS
                 and self.user.profile.verified_journalist
             )
         ) and not self.needs_moderation()
