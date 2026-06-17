@@ -50,7 +50,7 @@ class FOIARequestViewSet(
             FOIARequest.objects.get_viewable(self.request.user)
             .select_related("composer")
             .prefetch_related(
-                "edit_collaborators", "read_collaborators", "tracking_ids"
+                "edit_collaborators", "read_collaborators", "tracking_ids", "tags"
             )
         )
 
@@ -78,14 +78,20 @@ class FOIARequestViewSet(
                 },
                 status=http_status.HTTP_402_PAYMENT_REQUIRED,
             )
-        return Response(
-            {
-                "status": "FOI Request submitted",
-                "location": composer.get_absolute_url(),
-                "requests": [f.pk for f in composer.foias.all()],
-            },
-            status=http_status.HTTP_201_CREATED,
-        )
+        else:
+            foias = list(composer.foias.all())
+            tags = request.data.get("tags", [])
+            if tags:
+                for foia in foias:
+                    foia.tags.set(tags)
+            return Response(
+                {
+                    "status": "FOI Request submitted",
+                    "location": composer.get_absolute_url(),
+                    "requests": [f.pk for f in foias],
+                },
+                status=http_status.HTTP_201_CREATED,
+            )
 
     class Filter(django_filters.FilterSet):
         """Filters for requests"""
