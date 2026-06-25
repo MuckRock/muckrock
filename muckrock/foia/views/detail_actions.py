@@ -45,6 +45,8 @@ from muckrock.foia.tasks import import_doccloud_file, upload_user_document_cloud
 from muckrock.jurisdiction.forms import AppealForm
 from muckrock.jurisdiction.models import Appeal
 from muckrock.message.email import TemplateEmail
+from muckrock.organization.exceptions import PaymentActionRequired
+from muckrock.organization.models import Organization
 from muckrock.portal.forms import PortalForm
 from muckrock.project.forms import ProjectManagerForm
 from muckrock.task.models import FlaggedTask, ResponseTask, StatusChangeTask
@@ -143,6 +145,8 @@ def add_note(request, foia):
 def flag(request, foia):
     """Allow a user to notify us of a problem with the request"""
     form = FOIAFlagForm(request.POST, all_choices=True)
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
     if form.is_valid():
         FlaggedTask.objects.create(
             user=request.user if request.user.is_authenticated else None,
@@ -150,10 +154,14 @@ def flag(request, foia):
             text=form.cleaned_data["text"],
             category=form.cleaned_data["category"],
         )
-        messages.success(request, "Problem succesfully reported")
         if request.user.is_authenticated:
             new_action(request.user, "flagged", target=foia)
+        if is_ajax:
+            return JsonResponse({"message": "Problem successfully reported"})
+        messages.success(request, "Problem successfully reported")
     else:
+        if is_ajax:
+            return JsonResponse({"message": f"Error: {form.errors}"}, status=400)
         messages.error(request, f"Error: {form.errors}")
 
     return _get_redirect(request, foia)
@@ -617,11 +625,13 @@ def pay_fee(request, foia):
                     return _get_redirect(request, foia)
                 locked_foia.status = "submitted"
                 locked_foia.save()
-                form.cleaned_data["organization"].pay(
-                    amount=int(form.cleaned_data["amount"] * 1.05),
+                organization = form.cleaned_data["organization"]
+                amount = form.cleaned_data["amount"]
+                organization.pay(
+                    amount=int(amount * 1.05),
                     fee_amount=5,
                     description="Pay ${:.2f} to {}, {} for request fees".format(
-                        form.cleaned_data["amount"] / 100.0,
+                        amount / 100.0,
                         foia.agency,
                         foia.jurisdiction,
                     ),
@@ -629,6 +639,26 @@ def pay_fee(request, foia):
                     save_card=form.cleaned_data["save_card"],
                     metadata={"action": "Request Fee", "foia": foia.pk},
                 )
+            except PaymentActionRequired as exc:
+                # 3DS authentication required - return client_secret to browser
+                # The FOIA status stays as "submitted"; confirm_fee_payment
+                # will complete the flow after the user authenticates
+                if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                    return JsonResponse(
+                        {
+                            "client_secret": exc.client_secret,
+                            "payment_intent_id": exc.payment_intent_id,
+                            "foia_pk": foia.pk,
+                        },
+                        status=402,
+                    )
+                messages.error(
+                    request,
+                    "Your card requires additional authentication. Please try again.",
+                )
+                locked_foia.status = "payment"
+                locked_foia.save()
+                return _get_redirect(request, foia)
             except requests.exceptions.RequestException as exc:
                 locked_foia.status = "payment"
                 locked_foia.save()
@@ -664,6 +694,53 @@ def pay_fee(request, foia):
                 return _get_redirect(request, foia)
     else:
         raise FoiaFormError("fee_form", form)
+
+
+def confirm_fee_payment(request, foia):
+    """Complete a fee payment after 3DS authentication"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Must be logged in"}, status=403)
+
+    payment_intent_id = request.POST.get("payment_intent_id")
+    org_pk = request.POST.get("organization")
+    if not payment_intent_id or not org_pk:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    try:
+        organization = Organization.objects.get(pk=org_pk)
+    except Organization.DoesNotExist:
+        return JsonResponse({"error": "Organization not found"}, status=400)
+
+    with transaction.atomic():
+        try:
+            locked_foia = FOIARequest.objects.select_for_update().get(pk=foia.pk)
+            if locked_foia.status != "submitted":
+                return JsonResponse(
+                    {"error": "Request is not in expected state"}, status=400
+                )
+            organization.confirm_payment_intent(payment_intent_id)
+        except requests.exceptions.RequestException as exc:
+            locked_foia.status = "payment"
+            locked_foia.save()
+            logger.warning(
+                "Payment confirmation error: %s", exc, exc_info=sys.exc_info()
+            )
+            return JsonResponse({"error": "Payment confirmation failed"}, status=400)
+
+    messages.success(
+        request,
+        "Your payment was successful. We will get this to the agency right away!",
+    )
+    foia.status = locked_foia.status
+    amount = float(request.POST.get("amount", 0)) / 100.0
+    foia.pay(request.user, amount)
+    mixpanel_event(
+        request,
+        "Request Fee Paid",
+        foia.mixpanel_data({"Price": amount}),
+        charge=amount,
+    )
+    return JsonResponse({"redirect": _get_redirect(request, foia).url})
 
 
 def resend_comm(request, foia):

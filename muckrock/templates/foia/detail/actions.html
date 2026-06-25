@@ -151,6 +151,15 @@
         </form>
       {% endif %}
     {% endfor %}
+    {% if not is_agency_user %}
+      {% include "gethelp/_trigger_button.html" %}
+    {% endif %}
+    <a
+      class="button print-action"
+      href="{% url "foia-detail-print" jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}"
+      target="_blank"
+      rel="noopener"
+    >Print</a>
   </section>
 
 {% else %} {# unauthenticated #}

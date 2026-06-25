@@ -3,6 +3,7 @@
 # Third Party
 import django_filters
 from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
 from muckrock.project.models import Project
@@ -15,6 +16,8 @@ class ProjectViewSet(
     """
     API viewset for Projects
     """
+
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = ProjectSerializer
 

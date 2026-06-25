@@ -13,6 +13,8 @@ import urllib.parse
 from collections import OrderedDict
 from datetime import date
 
+# pylint: disable=too-many-lines
+
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -221,6 +223,7 @@ MIDDLEWARE = (
     "simple_history.middleware.HistoryRequestMiddleware",
     "daily_active_users.middleware.DailyActiveUserMiddleware",
     "muckrock.core.middleware.FlatpageRedirectMiddleware",
+    "muckrock.core.middleware.LogHTTPMiddleware",
 )
 
 FLATPAGES_REDIRECTS = {
@@ -306,6 +309,7 @@ INSTALLED_APPS = (
     "muckrock.communication",
     "muckrock.portal",
     "muckrock.crowdsource",
+    "muckrock.gethelp",
     "daily_active_users",
     "actstream",
     "simple_history",
@@ -474,6 +478,8 @@ MONTHLY_REQUESTS = {
     "robot": 0,
 }
 
+LOGZIO_TOKEN = os.environ.get("LOGZIO_TOKEN", "")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
@@ -521,8 +527,26 @@ LOGGING = {
             "propagate": False,
         },
         "dogslow": {"level": "WARNING", "handlers": ["dogslow"]},
+        "http_requests": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
+
+# Only register the logzio handler when a token is configured; otherwise
+# LogzioHandler raises at startup and blocks the whole logging config.
+if LOGZIO_TOKEN:
+    LOGGING["handlers"]["logzio"] = {
+        "class": "logzio.handler.LogzioHandler",
+        "level": "INFO",
+        "token": LOGZIO_TOKEN,
+        "logzio_type": "muckrock",
+        "logs_drain_timeout": 5,
+        "url": "https://listener.logz.io:8071",
+    }
+    LOGGING["loggers"]["http_requests"]["handlers"] = ["logzio"]
 
 # these will be set in local settings if not in env var
 
@@ -979,3 +1003,14 @@ GOVQA_DISABLE_AMOUNT = os.environ.get("GOVQA_DISABLE_AMOUNT", 3)
 
 # APIv1 Killswitch
 ENABLE_API_V1 = boolcheck(os.environ.get("ENABLE_API_V1", True))
+
+# User agent to identify our service
+SERVICE_USER_AGENT = os.environ.get("SERVICE_USER_AGENT", "muckrock requests")
+
+# API_v2 auth switch
+API_V2_AUTH = boolcheck(os.environ.get("API_V2_AUTH", True))
+
+# Allow verified orgs to bypass multi-request review
+VERIFIED_REQUEST_CHECKS_BYPASS = boolcheck(
+    os.environ.get("VERIFIED_REQUEST_CHECKS_BYPASS", True)
+)

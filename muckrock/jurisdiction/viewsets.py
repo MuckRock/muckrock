@@ -13,9 +13,12 @@ import logging
 import django_filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+from rest_framework.permissions import (
+    DjangoModelPermissionsOrAnonReadOnly,
+    IsAuthenticated,
+)
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 # MuckRock
 from muckrock.foia.models import FOIATemplate
@@ -31,9 +34,10 @@ from muckrock.task.serializers import FlaggedTaskSerializer
 logger = logging.getLogger(__name__)
 
 
-class JurisdictionViewSet(ModelViewSet):
+class JurisdictionViewSet(ReadOnlyModelViewSet):
     """API views for Jurisdiction"""
 
+    permission_classes = (IsAuthenticated,)
     queryset = Jurisdiction.objects.order_by("id").select_related("parent__parent")
     serializer_class = JurisdictionSerializer
     # don't allow ordering by computed fields

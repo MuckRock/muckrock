@@ -78,41 +78,31 @@ class TestDailyDigest(TestCase):
         assert email.send() == 1, "The email should send."
 
     def test_digest_user_questions(self):
-        """Digests should include information on questions I asked."""
+        """Digests should not include information on questions I asked."""
         # generate an action on a question the user asked
         question = QuestionFactory(user=self.user)
         other_user = UserFactory()
         AnswerFactory(user=other_user, question=question)
-        # creating an answer _should_ have created a notification
+        # creating an answer _should_ not have created a notification
         # so let's generate the email and see what happened
         email = self.digest(user=self.user, interval=self.interval)
-        assert (
-            email.activity["count"] == 1
-        ), "There should be activity that is not user initiated."
-        assert email.activity["questions"]["mine"].first().action.actor == other_user
-        assert email.activity["questions"]["mine"].first().action.verb == "answered"
-        assert email.send() == 1, "The email should send."
+        assert email.activity["count"] == 0
+        assert "questions" not in email.activity
+        # email does not send if there is no activity
+        assert email.send() == 0, "The email should not send."
 
     def test_digest_follow_questions(self):
-        """Digests should include information on questions I follow."""
+        """Digests should not include information on questions I follow."""
         # generate an action on a question that I follow
         question = QuestionFactory()
         follow(self.user, question, actor_only=False)
         other_user = UserFactory()
-        answer = AnswerFactory(user=other_user, question=question)
+        AnswerFactory(user=other_user, question=question)
         email = self.digest(user=self.user, interval=self.interval)
-        assert email.activity["count"] == 1, "There should be activity."
-        assert (
-            email.activity["questions"]["following"].first().action.actor == other_user
-        )
-        assert (
-            email.activity["questions"]["following"].first().action.action_object
-            == answer
-        )
-        assert (
-            email.activity["questions"]["following"].first().action.target == question
-        )
-        assert email.send() == 1, "The email should send."
+        assert email.activity["count"] == 0
+        assert "questions" not in email.activity
+        # email does not send if there is no activity
+        assert email.send() == 0, "The email should not send."
 
 
 class TestStaffDigest(TestCase):

@@ -1,10 +1,11 @@
 # Django
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 # Third Party
 from rest_framework import status
+from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import UserFactory
@@ -15,7 +16,7 @@ class UserViewSetTests(TestCase):
 
     def setUp(self):
         """Set up test cases, creating users using UserFactory."""
-        self.client = Client()
+        self.client = APIClient()
 
         # Create users using UserFactory
         self.user1 = UserFactory(username="jdoe", email="jdoe@example.com")
@@ -33,7 +34,7 @@ class UserViewSetTests(TestCase):
     def test_list_users(self):
         """Test retrieving the list of users."""
         # Staff user should see all users
-        self.client.force_login(self.staff_user)
+        self.client.force_authenticate(user=self.staff_user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -45,7 +46,9 @@ class UserViewSetTests(TestCase):
 
     def test_filter_by_username(self):
         """Test filtering users by username."""
-        self.client.force_login(self.staff_user)  # Simulate staff authentication
+        self.client.force_authenticate(
+            user=self.staff_user
+        )  # Simulate staff authentication
         response = self.client.get(self.list_url, {"username": "jdoe"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -57,7 +60,7 @@ class UserViewSetTests(TestCase):
 
     def test_access_current_user_by_me(self):
         """Test accessing the current user by using 'me'."""
-        self.client.force_login(self.user1)
+        self.client.force_authenticate(user=self.user1)
         response = self.client.get(reverse("api2-users-detail", args=["me"]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -70,7 +73,7 @@ class UserViewSetTests(TestCase):
         """Test the difference in behavior between staff and regular users."""
 
         # Regular user should only see their own user data
-        self.client.force_login(self.user1)
+        self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -81,7 +84,7 @@ class UserViewSetTests(TestCase):
         self.assertNotIn("asmith", usernames)  # Ensure they can't see other users
 
         # Staff user should see all users
-        self.client.force_login(self.staff_user)
+        self.client.force_authenticate(user=self.staff_user)
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

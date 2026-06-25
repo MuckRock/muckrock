@@ -25,6 +25,15 @@ import actstream
 import boto3
 import requests
 import stripe
+from documentcloud import DocumentCloud
+from zenpy import Zenpy
+from zenpy.lib.api_objects import (
+    Comment,
+    Organization as ZenOrg,
+    Ticket,
+    User as ZenUser,
+)
+from zenpy.lib.exception import APIException
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +212,11 @@ def get_squarelet_access_token():
                     settings.SOCIAL_AUTH_SQUARELET_SECRET,
                 )
                 data = {"grant_type": "client_credentials"}
-                headers = {"X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET}
+                existing_ua = requests.utils.default_headers()["User-Agent"]
+                headers = {
+                    "X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET,
+                    "User-Agent": f"{existing_ua} {settings.SERVICE_USER_AGENT}",
+                }
                 logger.info(token_url)
                 resp = requests.post(
                     token_url,
@@ -226,9 +239,11 @@ def _squarelet(method, path, **kwargs):
     """Helper function for squarelet requests"""
     api_url = "{}{}".format(settings.SQUARELET_URL, path)
     access_token = get_squarelet_access_token()
+    existing_ua = requests.utils.default_headers()["User-Agent"]
     headers = {
         "Authorization": "Bearer {}".format(access_token),
         "X-Bypass-Rate-Limit": settings.BYPASS_RATE_LIMIT_SECRET,
+        "User-Agent": f"{existing_ua} {settings.SERVICE_USER_AGENT}",
     }
     return method(api_url, headers=headers, **kwargs)
 
@@ -262,6 +277,65 @@ def zoho_get(path, params=None):
     if params is None:
         params = {}
     return _zoho(requests.get, path, params=params)
+
+
+def get_zendesk_client():
+    """Return a configured Zenpy client."""
+    return Zenpy(
+        email=settings.ZENDESK_EMAIL,
+        subdomain=settings.ZENDESK_SUBDOMAIN,
+        token=settings.ZENDESK_TOKEN,
+    )
+
+
+def create_zendesk_ticket(
+    subject, description, tags, requester_data, org_data=None, custom_fields=None
+):
+    """Create a Zendesk ticket and return its integer ticket ID.
+
+    requester_data: dict with at least `name`; optionally `email`, `external_id`
+    org_data:       dict with `name` + `external_id`, or None
+    custom_fields:  list of {id, value} dicts, or None
+    """
+    client = get_zendesk_client()
+
+    org_id = None
+    if org_data:
+        try:
+            org = client.organizations.create_or_update(ZenOrg(**org_data))
+        except APIException:
+            # De-duplicate name
+            deduped = dict(org_data)  # Create new dict from org_data
+            deduped["name"] += "_" + deduped["external_id"][:6]
+            org = client.organizations.create_or_update(ZenOrg(**deduped))
+        org_id = org.id
+    if org_id:
+        requester_data = dict(requester_data, organization_id=org_id)
+
+    try:
+        user = client.users.create_or_update(ZenUser(**requester_data))
+    except APIException:
+        # merge conflicting users
+        user1 = list(client.users.search(external_id=requester_data["external_id"]))[0]
+        user2 = list(client.users.search(query=requester_data["email"]))[0]
+        user = client.users.merge(user1, user2)
+
+    ticket_kwargs = {
+        "subject": subject,
+        "comment": Comment(body=description),
+        "type": "task",
+        "priority": "normal",
+        "status": "new",
+        "tags": list(tags or []),
+        "requester_id": user.id,
+    }
+    if org_id:
+        ticket_kwargs["organization_id"] = org_id
+    if custom_fields:
+        ticket_kwargs["custom_fields"] = custom_fields
+
+    audit = client.tickets.create(Ticket(**ticket_kwargs))
+    return audit.ticket.id
 
 
 def get_s3_storage_bucket():
@@ -379,3 +453,18 @@ def mailchimp_journey(email, journey):
     except (requests.ConnectionError, ValueError):
         logger.error("[JOURNEY] Error starting journey", exc_info=sys.exc_info())
     return response
+
+
+def get_dc_client():
+    """Get a DocumentCloud client for the MuckRock User Account"""
+    client = DocumentCloud(
+        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
+        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
+        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
+        auth_uri=f"{settings.SQUARELET_URL}/api/",
+    )
+    existing_ua = client.session.headers.get("User-Agent", "")
+    client.session.headers["User-Agent"] = (
+        f"{existing_ua} {settings.SERVICE_USER_AGENT}".strip()
+    )
+    return client

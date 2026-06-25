@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 # Third Party
 from rest_framework import viewsets
-from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 # MuckRock
 from muckrock.accounts.models import Statistics
@@ -26,10 +26,10 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_fields = ("username", "profile__full_name", "email", "is_staff")
 
 
-class StatisticsViewSet(viewsets.ModelViewSet):
+class StatisticsViewSet(viewsets.ReadOnlyModelViewSet):
     """API views for Statistics"""
 
     queryset = Statistics.objects.all()
     serializer_class = StatisticsSerializer
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
+    permission_classes = (IsAuthenticated,)
     filterset_fields = ("date",)

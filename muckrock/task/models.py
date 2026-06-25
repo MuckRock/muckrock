@@ -22,20 +22,12 @@ from itertools import groupby
 # Third Party
 import bleach
 from taggit.managers import TaggableManager
-from zenpy import Zenpy
-from zenpy.lib.api_objects import (
-    Comment,
-    Organization as ZenOrganization,
-    Ticket,
-    User as ZenUser,
-)
-from zenpy.lib.exception import APIException
 
 # MuckRock
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
 from muckrock.core.forms import TagManagerForm
 from muckrock.core.models import ExtractDay
-from muckrock.core.utils import zoho_get, zoho_post
+from muckrock.core.utils import create_zendesk_ticket, zoho_get, zoho_post
 from muckrock.foia.models import STATUS, FOIATemplate
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
@@ -127,37 +119,19 @@ class Task(models.Model):
         return user.is_staff
 
     def create_zendesk_ticket(self, note, email):
-        client = Zenpy(
-            email=settings.ZENDESK_EMAIL,
-            subdomain=settings.ZENDESK_SUBDOMAIN,
-            token=settings.ZENDESK_TOKEN,
-        )
-
         description = (
             f"Ticket link: {settings.MUCKROCK_URL}{self.get_absolute_url()}\n\n"
             f"Ticket created by: {email}\n\n"
             f"Note: {note}\n\n"
             f"{self.get_ticket_info()}"
         )
-
-        ticket_data = {
-            "subject": self.__class__.__name__,
-            "comment": Comment(body=description),
-            "type": "task",
-            "priority": "normal",
-            "status": "new",
-            "tags": ["tasks"],
-        }
-
-        user_data = {"name": "MuckRock Task"}
-        user = client.users.create_or_update(ZenUser(**user_data))
-
-        ticket_data["requester_id"] = user.id
-        ticket_audit = client.tickets.create(Ticket(**ticket_data))
-
-        self.zendesk_ticket_id = ticket_audit.ticket.id
+        self.zendesk_ticket_id = create_zendesk_ticket(
+            subject=self.__class__.__name__,
+            description=description,
+            tags=["tasks"],
+            requester_data={"name": "MuckRock Task"},
+        )
         self.save()
-
         return self.zendesk_ticket_id
 
     def get_ticket_info(self):
@@ -249,6 +223,9 @@ class PaymentInfoTask(Task):
 
     def __str__(self):
         return "Payment Info Task"
+
+    def get_absolute_url(self):
+        return reverse("payment-info-task", kwargs={"pk": self.pk})
 
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""
@@ -794,31 +771,19 @@ class FlaggedTask(Task):
             return None
 
     def create_zendesk_flag_ticket(self):
-        # pylint: disable=too-many-branches, too-many-locals
-        client = Zenpy(
-            email=settings.ZENDESK_EMAIL,
-            subdomain=settings.ZENDESK_SUBDOMAIN,
-            token=settings.ZENDESK_TOKEN,
-        )
-
         description = self.text
         tag = self.category.replace(" ", "_")
         # automatically extend no response tags with the acknowledgment
         # status of the foia request
         if tag == "no_response" and self.foia:
-            if self.foia.has_ack():
-                tag += "_ack"
-            else:
-                tag += "_no_ack"
+            tag += "_ack" if self.foia.has_ack() else "_no_ack"
         tags = ["flag", tag]
 
         for obj_name in ["foia", "agency", "jurisdiction"]:
             obj = getattr(self, obj_name)
             if obj:
-                description += "\n{}{}".format(
-                    settings.MUCKROCK_URL, obj.get_absolute_url()
-                )
-                tags.append("{}_flag".format(obj_name))
+                description += f"\n{settings.MUCKROCK_URL}{obj.get_absolute_url()}"
+                tags.append(f"{obj_name}_flag")
 
         if self.foia:
             description += (
@@ -835,62 +800,42 @@ class FlaggedTask(Task):
             if "free" in entitlements and len(entitlements) > 1:
                 entitlements.remove("free")
             tags.extend(entitlements)
-
-        ticket_data = {
-            "subject": self.get_category_display() or "Generic Flag",
-            "comment": Comment(body=description),
-            "type": "task",
-            "priority": "normal",
-            "status": "new",
-            "tags": tags,
-        }
-        if self.foia:
-            ticket_data["custom_fields"] = [
-                {"id": MR_NUMBER_FIELD, "value": self.foia.pk}
-            ]
-        if self.user:
-            user_data = {
+            requester_data = {
                 "name": self.user.profile.full_name or self.user.username,
                 "external_id": str(self.user.profile.uuid),
             }
             if self.user.email:
-                user_data["email"] = self.user.email
+                requester_data["email"] = self.user.email
             org_data = {
                 "name": self.user.profile.organization.name,
                 "external_id": str(self.user.profile.organization.uuid),
             }
         else:
-            user_data = {"name": "Anonymous User"}
-            org_data = {}
+            requester_data = {"name": "Anonymous User"}
+            org_data = None
 
-        if org_data:
-            try:
-                org = client.organizations.create_or_update(ZenOrganization(**org_data))
-            except APIException:
-                # De-duplicate name
-                org_data["name"] += "_" + org_data["external_id"][:6]
-                org = client.organizations.create_or_update(ZenOrganization(**org_data))
-            user_data["organization_id"] = org.id
-            ticket_data["organization_id"] = org.id
-        try:
-            user = client.users.create_or_update(ZenUser(**user_data))
-        except APIException:
-            # merge conflicting users
-            user1 = list(client.users.search(external_id=user_data["external_id"]))[0]
-            user2 = list(client.users.search(query=user_data["email"]))[0]
-            user = client.users.merge(user1, user2)
-        ticket_data["requester_id"] = user.id
-        ticket_audit = client.tickets.create(Ticket(**ticket_data))
+        custom_fields = (
+            [{"id": MR_NUMBER_FIELD, "value": self.foia.pk}] if self.foia else None
+        )
+
+        ticket_id = create_zendesk_ticket(
+            subject=self.get_category_display() or "Generic Flag",
+            description=description,
+            tags=tags,
+            requester_data=requester_data,
+            org_data=org_data,
+            custom_fields=custom_fields,
+        )
 
         if self.foia and self.user and self.foia.has_perm(self.user, "change"):
             self.foia.notes.create(
                 author=self.user,
                 datetime=timezone.now(),
                 note=f"Submitted help request:\n\n{self.text}\n\n"
-                f"https://muckrock.zendesk.com/agent/tickets/{ticket_audit.ticket.id}",
+                f"https://muckrock.zendesk.com/agent/tickets/{ticket_id}",
             )
 
-        return ticket_audit.ticket.id
+        return ticket_id
 
     def check_permission(self, user):
         """Check if a user has permission to manage this task"""

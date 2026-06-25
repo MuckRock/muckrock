@@ -132,13 +132,18 @@ class FOIAComposer(models.Model):
             # otherwise do it delayed so the page doesn't risk timing out
             composer_create_foias.delay(self.pk, contact_info, no_proxy)
 
-        # if num_requests is less than the multi-review amount, we will approve
-        # the request right away, other wise we create a multirequest task
+        # if num_requests is less than the multi-review amount, or the user is a
+        # verified journalist and the bypass is enabled, we will approve the
+        # request right away, otherwise we create a multirequest task.
         # if the request contains a moderated keyword, it will also not be
         # approved
         approve = (
-            num_requests < settings.MULTI_REVIEW_AMOUNT and not self.needs_moderation()
-        )
+            num_requests < settings.MULTI_REVIEW_AMOUNT
+            or (
+                settings.VERIFIED_REQUEST_CHECKS_BYPASS
+                and self.user.profile.verified_journalist
+            )
+        ) and not self.needs_moderation()
         logger.info("Composer submit: %s %s", self.pk, approve)
         result = composer_delayed_submit.apply_async(
             args=(self.pk, approve, contact_info), countdown=COMPOSER_SUBMIT_DELAY

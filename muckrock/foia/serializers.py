@@ -24,7 +24,7 @@ class DateTimeField(serializers.DateTimeField):
         return value.astimezone(get_default_timezone()).replace(tzinfo=None).isoformat()
 
 
-class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
+class FOIAPermissions(permissions.DjangoModelPermissions):
     """
     Object-level permission to allow owners of an object partially update it
     Also allows authenticated users to submit requests

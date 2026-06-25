@@ -8,6 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.urls.exceptions import NoReverseMatch
 
 # Standard Library
 from unittest.mock import patch
@@ -31,7 +32,6 @@ from muckrock.core.test_utils import (
 from muckrock.core.utils import new_action, notify
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.views import Detail as FOIARequestDetail
-from muckrock.qanda.views import Detail as QuestionDetail
 
 
 def http_get_post(url, view, data):
@@ -242,22 +242,7 @@ class TestNotificationRead(TestCase):
         assert notification.read, "The notification should be marked as read."
 
     def test_get_question(self):
-        """Try getting the detail page for a Question with an unread notification."""
+        """Questions have been removed - ensure they do not have an accessible URL"""
         question = QuestionFactory()
-        view = QuestionDetail.as_view()
-        # Create a notification for the question
-        action = new_action(UserFactory(), "answered", target=question)
-        notification = notify(self.user, action)[0]
-        assert not notification.read, "The notification should be unread."
-        # Try getting the view as the user
-        response = http_get_response(
-            question.get_absolute_url(),
-            view,
-            self.user,
-            pk=question.pk,
-            slug=question.slug,
-        )
-        assert response.status_code == 200, "The view should respond 200 OK."
-        # Check that the notification has been read.
-        notification.refresh_from_db()
-        assert notification.read, "The notification should be marked as read."
+        with pytest.raises(NoReverseMatch):
+            question.get_absolute_url()

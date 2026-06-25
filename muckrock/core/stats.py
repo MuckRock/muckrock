@@ -63,7 +63,7 @@ def grade_relative_response_time(agency):
         ) * 100
         return assign_grade(
             "fail",
-            """They complete requests respond {}% slower than
+            """They typically complete requests {}% slower than
             other agencies in their jurisdiction""",
             percentile,
         )

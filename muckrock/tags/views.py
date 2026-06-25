@@ -11,7 +11,6 @@ from muckrock.core.views import MRAutocompleteView
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
-from muckrock.qanda.models import Question
 from muckrock.tags.forms import TagForm
 from muckrock.tags.models import Tag
 
@@ -78,11 +77,6 @@ class TagDetailView(DetailView):
             Article.objects.get_published()
             .filter(tags=this_tag)
             .prefetch_related("authors", "authors__profile", "projects"),
-        )
-        self._get_and_count(
-            context,
-            "tagged_questions",
-            Question.objects.filter(tags__name__in=[this_tag]),
         )
         return context
 

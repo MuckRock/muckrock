@@ -74,6 +74,11 @@ urlpatterns = [
         name="foia-composer-detail",
     ),
     re_path(
+        r"^%s/print/$" % foia_url,
+        views.DetailPrint.as_view(),
+        name="foia-detail-print",
+    ),
+    re_path(
         r"^%s/crowdfund/$" % foia_url, views.crowdfund_request, name="foia-crowdfund"
     ),
     re_path(

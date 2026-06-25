@@ -1,6 +1,7 @@
 """Views for handling communications"""
 
 # Django
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.views.generic.detail import SingleObjectMixin
@@ -76,7 +77,11 @@ class FOIACommunicationDirectAgencyView(SingleObjectMixin, FormView):
     def form_valid(self, form):
         """Send the email the login link"""
         form.send_link()
-        return redirect("communication-direct-agency")
+        messages.success(
+            self.request,
+            "Check your email for a link to log in and reply to this request.",
+        )
+        return redirect("communication-direct-agency", idx=self.object.pk)
 
     def get_form_kwargs(self):
         """Pass the request to the form"""

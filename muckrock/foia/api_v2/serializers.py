@@ -72,6 +72,23 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         help_text="Description of the documents being requested",
     )
 
+    edited_boilerplate = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text=(
+            "If true, your `requested_docs` text is used directly as the full "
+            "request letter, bypassing the MuckRock template. "
+            "Template tags such as { name } and { closing } are still available "
+            "if you wish to use them."
+        ),
+    )
+
+    tags = serializers.StringRelatedField(
+        many=True,
+        read_only=True,
+        help_text="Tags associated with this request",
+    )
+
     class Meta:
         """Filters for foia request search"""
 
@@ -96,9 +113,10 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "tracking_id",
             "price",
             # connected models
-            # "tags",
+            "tags",
             # "notes",
             # "communications",
+            "edited_boilerplate",
         )
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for this FOIA request"},
@@ -184,6 +202,12 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         help_text="Description of the documents being requested"
     )
 
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        required=False,
+        help_text="List of tags to apply to this request",
+    )
+
     class Meta:
         """Filters for foia request create"""
 
@@ -197,7 +221,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             # "attachments",
             # "edit_collaborators",
             # "read_collaborators",
-            # "tags",
+            "tags",
         )
         extra_kwargs = {
             "embargo_status": {

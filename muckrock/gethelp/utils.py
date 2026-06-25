@@ -1,0 +1,108 @@
+"""Utility functions for the gethelp app"""
+
+# Django
+from django.core.cache import cache
+
+# Standard Library
+from collections import defaultdict
+
+# Third Party
+import bleach
+import markdown
+
+# MuckRock
+from muckrock.gethelp.models import Category, Problem
+
+CACHE_KEY = "gethelp:problems_by_category"
+CACHE_TIMEOUT = 60 * 60  # 1 hour
+
+
+def bust_cache():
+    """Invalidate the problems-by-category cache"""
+    cache.delete(CACHE_KEY)
+
+
+def _render_markdown(text):
+    """Render markdown to sanitized HTML"""
+    if not text:
+        return ""
+    html = markdown.markdown(text)
+    return bleach.clean(
+        html,
+        tags=[
+            "p",
+            "a",
+            "strong",
+            "em",
+            "ul",
+            "ol",
+            "li",
+            "code",
+            "pre",
+            "br",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "blockquote",
+            "img",
+        ],
+        attributes={"a": ["href", "title"], "img": ["src", "alt", "title"]},
+    )
+
+
+def _serialize_problem(problem, children_by_parent):
+    """Serialize a single problem and its children recursively"""
+    children = children_by_parent.get(problem.pk, [])
+    return {
+        "id": problem.pk,
+        "title": problem.title,
+        "resolution_html": _render_markdown(problem.resolution),
+        "flag_category": problem.flag_category,
+        "placeholder": problem.placeholder,
+        "children": [
+            _serialize_problem(child, children_by_parent) for child in children
+        ],
+    }
+
+
+def get_problems_by_category():
+    """Serialize all problems as a nested structure grouped by category.
+
+    Returns a dict keyed by category slug with label and nested problems.
+    Cached for 15 minutes.
+    """
+    cached = cache.get(CACHE_KEY)
+    if cached is not None:
+        return cached
+
+    result = {}
+    for cat in Category.objects.order_by("order"):
+        result[str(cat.pk)] = {
+            "label": cat.label,
+            "description_html": _render_markdown(cat.description),
+            "placeholder": cat.placeholder,
+            "problems": [],
+        }
+
+    problems = list(
+        Problem.objects.select_related("category").order_by("category__order", "order")
+    )
+
+    # Index children by parent_id
+    children_by_parent = defaultdict(list)
+    top_level = []
+    for problem in problems:
+        if problem.parent_id is not None:
+            children_by_parent[problem.parent_id].append(problem)
+        else:
+            top_level.append(problem)
+
+    for problem in top_level:
+        serialized = _serialize_problem(problem, children_by_parent)
+        result[str(problem.category.pk)]["problems"].append(serialized)
+
+    cache.set(CACHE_KEY, result, CACHE_TIMEOUT)
+    return result

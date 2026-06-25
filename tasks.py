@@ -4,8 +4,9 @@ import os
 # Third Party
 from invoke import task
 
-
-DOCKER_COMPOSE_RUN_OPT = f"docker compose -f local.yml run {{opt}} --rm {{service}} {{cmd}}"
+DOCKER_COMPOSE_RUN_OPT = (
+    f"docker compose -f local.yml run {{opt}} --rm {{service}} {{cmd}}"
+)
 
 DOCKER_COMPOSE_RUN_OPT_USER = DOCKER_COMPOSE_RUN_OPT.format(
     opt="-u $(id -u):$(id -g) {opt}", service="{service}", cmd="{cmd}"
@@ -115,8 +116,10 @@ def format(c):
     """Format your code"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black muckrock --exclude migrations\\|vendor\\|gloo && "
-            "isort muckrock --skip ./muckrock/gloo"
+            cmd='sh -c "'
+            "black muckrock --exclude migrations\\|vendor\\|gloo && "
+            "isort -rc muckrock --skip ./muckrock/gloo"
+            '"'
         )
     )
 
@@ -126,8 +129,10 @@ def format_check(c):
     """Check your code format"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd="black --check muckrock --exclude migrations\\|vendor\\|gloo && "
-            "isort --check-only muckrock --skip ./muckrock/gloo"
+            cmd='sh -c"'
+            "black --check muckrock --exclude migrations\\|vendor\\|gloo && "
+            "isort --check-only -rc muckrock --skip ./muckrock/gloo"
+            '"'
         )
     )
 
@@ -252,12 +257,16 @@ def pip_compile(c, upgrade=False, package=None):
     else:
         upgrade_flag = ""
 
-    c.run(DJANGO_RUN.format(
-        cmd=f"pip-compile --resolver=backtracking {upgrade_flag} pip/requirements.in"
-    ))
-    c.run(DJANGO_RUN.format(
-        cmd=f"pip-compile --resolver=backtracking {upgrade_flag} pip/dev-requirements.in"
-    ))
+    c.run(
+        DJANGO_RUN.format(
+            cmd=f"pip-compile --resolver=backtracking {upgrade_flag} pip/requirements.in"
+        )
+    )
+    c.run(
+        DJANGO_RUN.format(
+            cmd=f"pip-compile --resolver=backtracking {upgrade_flag} pip/dev-requirements.in"
+        )
+    )
 
 
 @task

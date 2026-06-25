@@ -4,18 +4,17 @@ Celery tasks for the crowdsource application
 
 # Django
 from celery import shared_task
-from django.conf import settings
 
 # Standard Library
 import csv
 import logging
 
 # Third Party
-from documentcloud import DocumentCloud
 from documentcloud.exceptions import DocumentCloudError
 
 # MuckRock
 from muckrock.core.tasks import AsyncFileDownloadTask
+from muckrock.core.utils import get_dc_client
 from muckrock.crowdsource.models import Crowdsource
 
 logger = logging.getLogger(__name__)
@@ -31,12 +30,7 @@ def datum_per_page(crowdsource_pk, doc_id, metadata):
     """Create a crowdsource data item for each page of the document"""
 
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
     document = dc_client.documents.get(doc_id)
     for i in range(1, document.pages + 1):
         crowdsource.data.create(
@@ -54,12 +48,7 @@ def import_doccloud_proj(crowdsource_pk, proj_id, metadata, doccloud_each_page):
     """Import documents from a document cloud project"""
     crowdsource = Crowdsource.objects.get(pk=crowdsource_pk)
 
-    dc_client = DocumentCloud(
-        username=settings.DOCUMENTCLOUD_BETA_USERNAME,
-        password=settings.DOCUMENTCLOUD_BETA_PASSWORD,
-        base_uri=f"{settings.DOCCLOUD_API_URL}/api/",
-        auth_uri=f"{settings.SQUARELET_URL}/api/",
-    )
+    dc_client = get_dc_client()
     project = dc_client.projects.get(proj_id)
 
     for document in project.documents:

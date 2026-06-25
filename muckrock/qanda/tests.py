@@ -7,12 +7,16 @@ from django.core import mail
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
+# Third Party
+import pytest
+
 # MuckRock
 from muckrock.core.factories import AnswerFactory, QuestionFactory, UserFactory
 from muckrock.core.test_utils import mock_middleware
 from muckrock.qanda.views import QuestionList, block_user, report_spam
 
 
+@pytest.mark.skip("deprecated")
 class TestQandA(TestCase):
     """Test for Q&A"""
 

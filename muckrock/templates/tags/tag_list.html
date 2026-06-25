@@ -38,15 +38,6 @@
             {% include 'lib/foia.html' %}
         {% endfor %}
         {% endif %}
-        {% if tagged_questions %}
-        <h2>{{ tagged_questions_count }} Question{{ tagged_questions_count|pluralize }}</h2>
-        <p><a href="{% url "question-index" %}?tags={{ tag.pk }}">View all...</a></p>
-        <table>
-            {% for question in tagged_questions %}
-            <tr><td><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></td></tr>
-            {% endfor %}
-        </table>
-        {% endif %}
     </section>
     {% else %}
     <section class="no-tag detail">
