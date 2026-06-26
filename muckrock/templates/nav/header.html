@@ -62,6 +62,16 @@
               <li><a class="nav-item red" href="/donate/">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
             </ul>
           </li>
+          <li class="dropdown" id="social">
+            <span class="nav-item" tabindex="0">Follow Us</span>
+            <ul>
+              <li><a class="nav-item" href="https://www.linkedin.com/company/muckrock-foundation" target="_blank" rel="noopener">{% include 'lib/component/icon/linkedin.svg' %}LinkedIn</a></li>
+              <li><a class="nav-item" href="https://bsky.app/profile/muckrock.com" target="_blank" rel="noopener">{% include 'lib/component/icon/bluesky.svg' %}Bluesky</a></li>
+              <li><a class="nav-item" href="https://www.instagram.com/muckrocknews/" target="_blank" rel="noopener">{% include 'lib/component/icon/instagram.svg' %}Instagram</a></li>
+              <li><a class="nav-item" href="https://www.threads.net/@muckrocknews" target="_blank" rel="noopener">{% include 'lib/component/icon/threads.svg' %}Threads</a></li>
+              <li><a class="nav-item" href="https://youtube.com/@muckrocknews" target="_blank" rel="noopener">{% include 'lib/component/icon/youtube.svg' %}YouTube</a></li>
+            </ul>
+          </li>
         {% elif not user.profile.is_agency_user and not is_agency_user %}
         <li class="dropdown">
             <a class="nav-item" href="{% url 'foia-root' %}">Requests</a>
