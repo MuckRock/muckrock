@@ -33,11 +33,12 @@
         {% if not user.is_authenticated and not is_agency_user %}
           <li><a class="nav-item red" href="/donate/">{% include 'lib/component/icon/donate.svg' %}Donate</a></li>
           <li class="dropdown" id="services">
-            <span class="nav-item" tabindex="0">Tools</span>
+            <span class="nav-item" tabindex="0">Products</span>
             <ul>
-              <li><a class="nav-item justify-center" href="{% url 'foia-root' %}" title="MuckRock Requests">{% include 'lib/component/logo/muckrock-requests.svg' %}</a></li>
-              <li><a class="nav-item justify-center" href="https://www.documentcloud.org" title="DocumentCloud">{% include 'lib/component/logo/documentcloud.svg' %}</a></li>
-              <li><a class="nav-item justify-center" href="https://www.data-liberation-project.org" title="Data Liberation Project">{% include 'lib/component/logo/data-liberation-project.svg' %}</a></li>
+              <li><a class="nav-item justify-center" href="{% url 'foia-root' %}" title="MuckRock Requests">MuckRock Requests</a></li>
+              <li><a class="nav-item justify-center" href="https://www.documentcloud.org" title="DocumentCloud">DocumentCloud</a></li>
+              <li><a class="nav-item justify-center" href="https://www.data-liberation-project.org" title="Data Liberation Project">Data Liberation Project</a></li>
+              <li><a class="nav-item justify-center" href="https://www.sunlightresearch.net" title="Sunlight Research Desk">Sunlight Research Desk</a></li>
             </ul>
           </li>
           <li><a class="nav-item" href="/newsletters/">Newsletter</a></li>
