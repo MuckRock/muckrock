@@ -214,6 +214,10 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   }
 }
 
+#services .nav-item {
+  justify-content: flex-start;
+}
+
 // Some nav-items are for informational purposes only
 .nav-item.nolink {
   cursor: auto;

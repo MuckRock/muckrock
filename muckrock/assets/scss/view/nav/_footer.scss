@@ -97,6 +97,31 @@ footer.website-footer .global-footer {
         gap: 1.75rem;
     }
 
+    .social {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .social-link {
+        display: flex;
+        color: $color-grey-7;
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: currentColor;
+
+            path {
+                fill: currentColor;
+            }
+        }
+
+        &:hover {
+            color: $color-blue;
+        }
+    }
+
     .membership {
         display: block;
         width: 6rem;
