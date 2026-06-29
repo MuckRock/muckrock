@@ -1,13 +1,20 @@
 // Fetch-based client for /api_v1/. Returns { data, status } on success and
 // throws with err.response.{data, status} on non-2xx — the shape actions.js
 // callers depend on.
-
 import Cookie from "js-cookie";
 
 const baseURL = "/api_v1/";
 
+function buildURL(path) {
+  const base =
+    typeof window !== "undefined"
+      ? window.location.origin + baseURL
+      : "http://localhost" + baseURL;
+  return new URL(path, base);
+}
+
 async function request(method, path, { params, body } = {}) {
-  const url = new URL(path, baseURL);
+  const url = buildURL(path);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.set(key, value);
