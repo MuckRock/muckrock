@@ -5,7 +5,7 @@ vi.mock("js-cookie", () => ({
 }));
 
 import Cookie from "js-cookie";
-import api, { rootDomain } from "./api";
+import api from "./api";
 
 const jsonResponse = (data, { ok = true, status = 200 } = {}) => ({
   ok,
@@ -23,20 +23,13 @@ describe("api transport", () => {
     vi.unstubAllGlobals();
   });
 
-  describe("rootDomain", () => {
-    it("defaults to dev.muckrock.com when not in staging or production", () => {
-      // process.env.NODE_ENV is unset (or "test") in vitest, so we get the default branch.
-      expect(rootDomain).toBe("https://dev.muckrock.com");
-    });
-  });
-
   describe("get()", () => {
     it("requests baseURL + path with no query string when no params given", async () => {
       fetch.mockResolvedValue(jsonResponse({ results: [] }));
       await api.get("exemption/");
       expect(fetch).toHaveBeenCalledTimes(1);
       const [url] = fetch.mock.calls[0];
-      expect(String(url)).toBe("https://dev.muckrock.com/api_v1/exemption/");
+      expect(String(url)).toBe("http://localhost/api_v1/exemption/");
     });
 
     it("appends params as a URL-encoded query string", async () => {
@@ -46,7 +39,7 @@ describe("api transport", () => {
       });
       const [url] = fetch.mock.calls[0];
       expect(String(url)).toBe(
-        "https://dev.muckrock.com/api_v1/exemption/?q=foo+bar&jurisdiction=1",
+        "http://localhost/api_v1/exemption/?q=foo+bar&jurisdiction=1",
       );
     });
 
@@ -82,7 +75,7 @@ describe("api transport", () => {
       await api.post("exemption/submit/", { foia: 7, language: "en" });
       const [url, init] = fetch.mock.calls[0];
       expect(String(url)).toBe(
-        "https://dev.muckrock.com/api_v1/exemption/submit/",
+        "http://localhost/api_v1/exemption/submit/",
       );
       expect(init.method).toBe("POST");
       expect(init.body).toBe(JSON.stringify({ foia: 7, language: "en" }));
