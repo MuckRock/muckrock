@@ -6,7 +6,6 @@
 import $ from 'jquery';
 import React, { PropTypes } from 'react';
 
-import { rootDomain } from '../api';
 
 const AppealLanguage = ({appeal}) => {
     const handleClick = (e) => {
