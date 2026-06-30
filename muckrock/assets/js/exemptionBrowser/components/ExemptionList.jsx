@@ -82,7 +82,7 @@ const ExemptionList = ({query, loading, exemptions, showExemptionDetail, showExe
         <div className="exemption__empty small">
           <div className="exemption__empty__submit">
           <p className="bold nomargin">Need help? Search MuckRock's datbase of exemptions and language you can use to appeal them</p>
-          <p className="nomargin">If it's not in our databse, we'll help you write an appeal letter from scratch</p>
+          <p className="nomargin">If it's not in our database, we'll help you write an appeal letter from scratch</p>
           <button onClick={showExemptionForm} className="button">Get Appeal Help</button>
           </div>
           </div>

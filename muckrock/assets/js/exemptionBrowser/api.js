@@ -1,23 +1,48 @@
-/* api.js
-**
-** Configures and exports an Axios instance for accessing the API.
-*/
+// Fetch-based client for /api_v1/. Returns { data, status } on success and
+// throws with err.response.{data, status} on non-2xx — the shape actions.js
+// callers depend on.
+import Cookie from "js-cookie";
 
-import axios from 'axios';
+const baseURL = "/api_v1/";
 
-/* eslint-disable no-undef */
-let rootDomain = 'https://dev.muckrock.com';
-if (process.env.NODE_ENV == 'staging') {
-    rootDomain = 'https://muckrock-staging.herokuapp.com';
-} else if (process.env.NODE_ENV == 'production') {
-    rootDomain = 'https://www.muckrock.com';
+function buildURL(path) {
+  const base =
+    typeof window !== "undefined"
+      ? window.location.origin + baseURL
+      : "http://localhost" + baseURL;
+  return new URL(path, base);
 }
-/* eslint-enable no-undef */
 
-const api = axios.create({
-    baseURL: rootDomain + '/api_v1/',
-    xsrfCookieName: 'csrftoken',
-    xsrfHeaderName: 'X-CSRFToken'
-});
+async function request(method, path, { params, body } = {}) {
+  const url = buildURL(path);
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      url.searchParams.set(key, value);
+    }
+  }
+  const headers = { Accept: "application/json" };
+  if (method !== "GET") {
+    headers["Content-Type"] = "application/json";
+    const csrftoken = Cookie.get("csrftoken");
+    if (csrftoken) headers["X-CSRFToken"] = csrftoken;
+  }
+  const init = { method, headers, credentials: "same-origin" };
+  if (body !== undefined) {
+    init.body = JSON.stringify(body);
+  }
+  const response = await fetch(url, init);
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const err = new Error(`Request failed with status ${response.status}`);
+    err.response = { data, status: response.status };
+    throw err;
+  }
+  return { data, status: response.status };
+}
 
-export { api as default, rootDomain };
+const api = {
+  get: (path, config) => request("GET", path, config),
+  post: (path, body) => request("POST", path, { body }),
+};
+
+export default api;
