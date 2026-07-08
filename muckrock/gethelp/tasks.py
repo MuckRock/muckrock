@@ -64,7 +64,7 @@ def create_ticket_description(text, user, foia):
         )
         org = get_primary_org(user, foia)
         if org and not org.individual:
-            plan = "Premium" if org.entitlement.base_requests > 0 else "Free"
+            plan = "Premium" if org.requests_per_month > 0 else "Free"
             links.append(
                 f"- {plan} Organization on MuckRock Requests: "
                 f"{settings.MUCKROCK_URL}{org.get_absolute_url()}"

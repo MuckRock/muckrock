@@ -21,6 +21,7 @@ from muckrock.organization.factories import (
     MembershipFactory,
     OrganizationEntitlementFactory,
     OrganizationFactory,
+    ProfessionalEntitlementFactory,
 )
 from muckrock.organization.models import Organization
 
@@ -314,6 +315,142 @@ class TestSquareletUpdateData(TestCase):
         organization.refresh_from_db()
         assert organization.requests_per_month == 50
         assert organization.monthly_requests == 50
+
+
+class TestSquareletUpdateDataMultiEntitlement(TestCase):
+    """Test cases for update_data with multiple entitlements"""
+
+    def _org_data(self, organization, entitlements, max_users=5):
+        return {
+            "name": organization.name,
+            "slug": organization.slug,
+            "individual": False,
+            "private": False,
+            "entitlements": entitlements,
+            "max_users": max_users,
+            "card": "",
+        }
+
+    def test_two_paid_entitlements_sums_requests(self):
+        """Two paid entitlements: requests_per_month = sum of both"""
+        ent1 = ProfessionalEntitlementFactory()
+        ent2 = OrganizationEntitlementFactory()
+        organization = OrganizationFactory()
+        date_update = date(2024, 3, 1)
+
+        organization.update_data(
+            self._org_data(
+                organization,
+                [
+                    ent_json(ent1, date_update),
+                    ent_json(ent2, date_update),
+                ],
+                max_users=5,
+            )
+        )
+        organization.refresh_from_db()
+        # Professional: 20 + max(0, 5-1)*0 = 20
+        # Organization: 50 + max(0, 5-5)*5 = 50
+        assert organization.requests_per_month == 70
+        assert organization.monthly_requests == 70
+
+    def test_paid_and_grant_entitlement_sums_requests(self):
+        """Paid entitlement + grant entitlement: both contribute to total"""
+        paid = OrganizationEntitlementFactory()
+        grant = EntitlementFactory(
+            name="Grant",
+            resources={"minimum_users": 1, "base_requests": 10, "feature_level": 0},
+        )
+        organization = OrganizationFactory()
+        date_update = date(2024, 3, 1)
+
+        organization.update_data(
+            self._org_data(
+                organization,
+                [ent_json(paid, date_update), ent_json(grant, date_update)],
+                max_users=5,
+            )
+        )
+        organization.refresh_from_db()
+        # Organization: 50, Grant: 10
+        assert organization.requests_per_month == 60
+        assert organization.monthly_requests == 60
+
+    def test_primary_entitlement_is_highest_feature_level(self):
+        """org.entitlement FK points to entitlement with highest feature_level"""
+        low = ProfessionalEntitlementFactory()  # feature_level=1
+        high = OrganizationEntitlementFactory()  # feature_level=2
+        organization = OrganizationFactory()
+        date_update = date(2024, 3, 1)
+
+        organization.update_data(
+            self._org_data(
+                organization,
+                [ent_json(low, date_update), ent_json(high, date_update)],
+            )
+        )
+        organization.refresh_from_db()
+        assert organization.entitlement.slug == high.slug
+
+    def test_equal_feature_level_tie_breaks_to_first(self):
+        """Equal feature_level: first entitlement in list wins the FK"""
+        ent1 = EntitlementFactory(
+            name="GrantA",
+            resources={"base_requests": 10, "feature_level": 1},
+        )
+        ent2 = EntitlementFactory(
+            name="GrantB",
+            resources={"base_requests": 20, "feature_level": 1},
+        )
+        organization = OrganizationFactory()
+        date_update = date(2024, 3, 1)
+
+        organization.update_data(
+            self._org_data(
+                organization,
+                [ent_json(ent1, date_update), ent_json(ent2, date_update)],
+            )
+        )
+        organization.refresh_from_db()
+        assert organization.entitlement.slug == ent1.slug
+        assert organization.requests_per_month == 30
+
+    def test_users_below_minimum_does_not_reduce_base(self):
+        """users < minimum_users: base requests are not reduced"""
+        ent = OrganizationEntitlementFactory()  # min=5, base=50, per_user=5
+        organization = OrganizationFactory()
+
+        organization.update_data(
+            self._org_data(organization, [ent_json(ent, date(2024, 3, 1))], max_users=2)
+        )
+        organization.refresh_from_db()
+        # max(0, 2-5) = 0, so just base=50
+        assert organization.requests_per_month == 50
+
+    def test_multi_entitlement_monthly_restore(self):
+        """Monthly restore resets monthly_requests to sum of all entitlements"""
+        ent1 = ProfessionalEntitlementFactory()
+        ent2 = OrganizationEntitlementFactory()
+        organization = OrganizationFactory(
+            entitlement=ent2,
+            date_update=date(2024, 2, 1),
+            requests_per_month=70,
+            monthly_requests=20,
+        )
+
+        organization.update_data(
+            self._org_data(
+                organization,
+                [
+                    ent_json(ent1, date(2024, 3, 1)),
+                    ent_json(ent2, date(2024, 3, 1)),
+                ],
+                max_users=5,
+            )
+        )
+        organization.refresh_from_db()
+        assert organization.requests_per_month == 70
+        assert organization.monthly_requests == 70
 
 
 class TestOrganizationCollective(TestCase):

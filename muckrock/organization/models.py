@@ -29,6 +29,14 @@ stripe.api_version = "2015-10-16"
 # pylint:disable=too-many-positional-arguments
 
 
+def _calc_ent_requests(ent_data, users):
+    r = ent_data["resources"]
+    base = r.get("base_requests", 0)
+    per_user = r.get("requests_per_user", 0)
+    minimum = r.get("minimum_users", 1)
+    return base + max(0, users - minimum) * per_user
+
+
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
 
@@ -144,34 +152,32 @@ class Organization(models.Model):
         if data.get("merged") and not self.merged:
             self.merge(data["merged"])
 
-        if len(data["entitlements"]) > 1:
-            logger.warning(
-                "Organization %s has multiple entitlements: %s",
-                self.pk,
-                ", ".join(e["slug"] for e in data["entitlements"]),
-            )
         if data["entitlements"]:
-            entitlement_data = max(
+            # Pick primary entitlement (highest feature_level) for FK / display
+            primary = max(
                 data["entitlements"],
-                key=lambda e: e["resources"].get("base_requests", 0),
+                key=lambda e: e["resources"].get("feature_level", 0),
             )
             self.entitlement, _created = Entitlement.objects.update_or_create(
-                slug=entitlement_data["slug"],
+                slug=primary["slug"],
                 defaults={
-                    "name": entitlement_data["name"],
-                    "description": entitlement_data["description"],
-                    "resources": entitlement_data["resources"],
+                    "name": primary["name"],
+                    "description": primary["description"],
+                    "resources": primary["resources"],
                 },
             )
-            date_update = entitlement_data["date_update"]
+            date_update = primary["date_update"]
         else:
             self.entitlement, _created = Entitlement.objects.get_or_create(
                 slug="free", defaults={"name": "Free"}
             )
             date_update = None
 
-        # calc reqs/month in case it has changed
-        self.requests_per_month = self.entitlement.requests_per_month(data["max_users"])
+        # sum requests across all entitlements (returns 0 for empty list / free org)
+        users = data["max_users"]
+        self.requests_per_month = sum(
+            _calc_ent_requests(ent_data, users) for ent_data in data["entitlements"]
+        )
 
         # if date update has changed, then this is a monthly restore of the
         # subscription, and we should restore monthly requests.  If not, requests
@@ -426,13 +432,6 @@ class Plan(models.Model):
     def __str__(self):
         return self.name
 
-    def requests_per_month(self, users):
-        """Calculate how many requests an organization gets per month on this plan
-        for a given number of users"""
-        return (
-            self.base_requests + (users - self.minimum_users) * self.requests_per_user
-        )
-
 
 class Entitlement(models.Model):
     """Entitlements represent features and resources an organization has paid for"""
@@ -451,13 +450,6 @@ class Entitlement(models.Model):
 
     def __str__(self):
         return self.name
-
-    def requests_per_month(self, users):
-        """Calculate how many requests an organization gets per month on this
-        entitlement for a given number of users"""
-        return (
-            self.base_requests + (users - self.minimum_users) * self.requests_per_user
-        )
 
 
 # dynamically create properties for all defined resource fields
