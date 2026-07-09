@@ -131,7 +131,7 @@ class TestOrganization(TestCase):
         )
 
 
-def ent_json(entitlement, date_update):
+def ent_json(entitlement, date_update, quantity=1):
     """Helper function for serializing entitlement data"""
     return {
         "name": entitlement.name,
@@ -139,6 +139,7 @@ def ent_json(entitlement, date_update):
         "description": entitlement.description,
         "resources": entitlement.resources,
         "date_update": date_update,
+        "quantity": quantity,
     }
 
 
@@ -320,14 +321,13 @@ class TestSquareletUpdateData(TestCase):
 class TestSquareletUpdateDataMultiEntitlement(TestCase):
     """Test cases for update_data with multiple entitlements"""
 
-    def _org_data(self, organization, entitlements, max_users=5):
+    def _org_data(self, organization, entitlements):
         return {
             "name": organization.name,
             "slug": organization.slug,
             "individual": False,
             "private": False,
             "entitlements": entitlements,
-            "max_users": max_users,
             "card": "",
         }
 
@@ -342,14 +342,13 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
             self._org_data(
                 organization,
                 [
-                    ent_json(ent1, date_update),
-                    ent_json(ent2, date_update),
+                    ent_json(ent1, date_update, quantity=1),
+                    ent_json(ent2, date_update, quantity=5),
                 ],
-                max_users=5,
             )
         )
         organization.refresh_from_db()
-        # Professional: 20 + max(0, 5-1)*0 = 20
+        # Professional: 20 + max(0, 1-1)*0 = 20
         # Organization: 50 + max(0, 5-5)*5 = 50
         assert organization.requests_per_month == 70
         assert organization.monthly_requests == 70
@@ -367,12 +366,14 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
         organization.update_data(
             self._org_data(
                 organization,
-                [ent_json(paid, date_update), ent_json(grant, date_update)],
-                max_users=5,
+                [
+                    ent_json(paid, date_update, quantity=5),
+                    ent_json(grant, date_update, quantity=1),
+                ],
             )
         )
         organization.refresh_from_db()
-        # Organization: 50, Grant: 10
+        # Organization: 50 + max(0, 5-5)*5 = 50, Grant: 10 + max(0, 1-1)*0 = 10
         assert organization.requests_per_month == 60
         assert organization.monthly_requests == 60
 
@@ -386,7 +387,10 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
         organization.update_data(
             self._org_data(
                 organization,
-                [ent_json(low, date_update), ent_json(high, date_update)],
+                [
+                    ent_json(low, date_update, quantity=1),
+                    ent_json(high, date_update, quantity=5),
+                ],
             )
         )
         organization.refresh_from_db()
@@ -408,24 +412,39 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
         organization.update_data(
             self._org_data(
                 organization,
-                [ent_json(ent1, date_update), ent_json(ent2, date_update)],
+                [
+                    ent_json(ent1, date_update, quantity=1),
+                    ent_json(ent2, date_update, quantity=1),
+                ],
             )
         )
         organization.refresh_from_db()
         assert organization.entitlement.slug == ent1.slug
         assert organization.requests_per_month == 30
 
-    def test_users_below_minimum_does_not_reduce_base(self):
-        """users < minimum_users: base requests are not reduced"""
+    def test_quantity_below_minimum_does_not_reduce_base(self):
+        """quantity < minimum_users: base requests are not reduced"""
         ent = OrganizationEntitlementFactory()  # min=5, base=50, per_user=5
         organization = OrganizationFactory()
 
         organization.update_data(
-            self._org_data(organization, [ent_json(ent, date(2024, 3, 1))], max_users=2)
+            self._org_data(organization, [ent_json(ent, date(2024, 3, 1), quantity=2)])
         )
         organization.refresh_from_db()
         # max(0, 2-5) = 0, so just base=50
         assert organization.requests_per_month == 50
+
+    def test_quantity_above_minimum_adds_per_user_requests(self):
+        """quantity > minimum_users: extra quantity adds per-user requests"""
+        ent = OrganizationEntitlementFactory()  # min=5, base=50, per_user=5
+        organization = OrganizationFactory()
+
+        organization.update_data(
+            self._org_data(organization, [ent_json(ent, date(2024, 3, 1), quantity=8)])
+        )
+        organization.refresh_from_db()
+        # 50 + max(0, 8-5)*5 = 50 + 15 = 65
+        assert organization.requests_per_month == 65
 
     def test_multi_entitlement_monthly_restore(self):
         """Monthly restore resets monthly_requests to sum of all entitlements"""
@@ -442,10 +461,9 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
             self._org_data(
                 organization,
                 [
-                    ent_json(ent1, date(2024, 3, 1)),
-                    ent_json(ent2, date(2024, 3, 1)),
+                    ent_json(ent1, date(2024, 3, 1), quantity=1),
+                    ent_json(ent2, date(2024, 3, 1), quantity=5),
                 ],
-                max_users=5,
             )
         )
         organization.refresh_from_db()

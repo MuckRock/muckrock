@@ -29,12 +29,18 @@ stripe.api_version = "2015-10-16"
 # pylint:disable=too-many-positional-arguments
 
 
-def _calc_ent_requests(ent_data, users):
+def _calc_ent_requests(ent_data):
+    """Compute the request quota for one entitlement entry.
+
+    Uses ent_data["quantity"] (the per-subscription billing quantity sent by
+    Squarelet) rather than the stale org-level max_users field.
+    """
     r = ent_data["resources"]
     base = r.get("base_requests", 0)
     per_user = r.get("requests_per_user", 0)
     minimum = r.get("minimum_users", 1)
-    return base + max(0, users - minimum) * per_user
+    quantity = ent_data.get("quantity", 1)
+    return base + max(0, quantity - minimum) * per_user
 
 
 class Organization(models.Model):
@@ -174,9 +180,8 @@ class Organization(models.Model):
             date_update = None
 
         # sum requests across all entitlements (returns 0 for empty list / free org)
-        users = data["max_users"]
         self.requests_per_month = sum(
-            _calc_ent_requests(ent_data, users) for ent_data in data["entitlements"]
+            _calc_ent_requests(ent_data) for ent_data in data["entitlements"]
         )
 
         # if date update has changed, then this is a monthly restore of the
