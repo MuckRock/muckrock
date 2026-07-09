@@ -2,7 +2,7 @@
 -e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
 -e git+https://github.com/MuckRock/govqa-py@main#egg=govqa # for govqa integration
 aiohttp
-baml # For using gloo to use ChatGPT
+baml-py # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
 bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
@@ -64,6 +64,7 @@ pillow # Used by Django for image handling
 plaid-python # for access to bank account information
 psycopg2-binary # Interface to postgres DB
 pycryptodome # Reading encypted PDFs
+pydantic # for gloo
 pyjwkest # for oauth
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
