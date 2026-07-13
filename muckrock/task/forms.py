@@ -393,6 +393,17 @@ class MultiRequestRejectionForm(forms.Form):
         required=False,
     )
 
+    def send_message(self, composer):
+        """Notify the composer's owner that their multirequest was rejected"""
+        email = TemplateEmail(
+            user=composer.user,
+            extra_context={"text": self.cleaned_data.get("text", "")},
+            subject="Multirequest Rejected",
+            text_template="message/notification/multirequest_rejected.txt",
+            html_template="message/notification/multirequest_rejected.html",
+        )
+        email.send(fail_silently=False)
+
 
 class PaymentInfoTaskForm(AddressForm):
     """Form for either an address to mail a check to, or a portal payment URL"""
