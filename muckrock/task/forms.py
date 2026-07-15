@@ -397,7 +397,10 @@ class MultiRequestRejectionForm(forms.Form):
         """Notify the composer's owner that their multirequest was rejected"""
         email = TemplateEmail(
             user=composer.user,
-            extra_context={"text": self.cleaned_data.get("text", "")},
+            extra_context={
+                "text": self.cleaned_data.get("text", ""),
+                "composer_url": composer.get_absolute_url(),
+            },
             subject="Multirequest Rejected",
             text_template="message/notification/multirequest_rejected.txt",
             html_template="message/notification/multirequest_rejected.html",

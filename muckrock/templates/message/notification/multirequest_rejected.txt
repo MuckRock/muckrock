@@ -2,7 +2,8 @@
 {% block body %}
 {% if text %}{{ text }}{% else %}We were unable to process your recent request submission.
 
-We've returned the request(s) and associated credit(s) back to your account. You can find the previous submission in your drafts.
+We've returned the request(s) and associated credit(s) back to your account. You can find the previous submission in your drafts:
+{{ base_url }}{{ composer_url }}
 
 If you have any questions or concerns, please reach out to info@muckrock.com with details about your request.{% endif %}
 Sincerely,
