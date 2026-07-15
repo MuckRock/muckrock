@@ -564,15 +564,19 @@ class MultiRequestTaskList(TaskList):
             messages.success(request, "Multirequest submitted")
         elif request.POST.get("reject"):
             form = MultiRequestRejectionForm(request.POST)
+            if not form.is_valid():
+                messages.error(request, "Rejection form invalid - no action taken")
+                return None
+            form.send_message(task.composer)
+            if form.cleaned_data.get("text"):
+                messages.success(request, "Multirequest rejected - custom message sent")
+            else:
+                messages.success(
+                    request, "Multirequest rejected - standard message sent"
+                )
             task.reject()
             task.resolve(request.user, {"action": "reject"})
-            if form.is_valid() and form.cleaned_data["text"]:
-                form.send_message(task.composer)
-                messages.error(
-                    request, "Multirequest rejected - rejection message sent"
-                )
-            else:
-                messages.error(request, "Multirequest rejected")
+
         elif request.POST.get("resolve"):
             form_data = {"action": "resolve"}
         return super().task_post_helper(request, task, form_data)
