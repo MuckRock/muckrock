@@ -157,7 +157,6 @@ class TestSquareletUpdateData(TestCase):
                 "individual": False,
                 "private": False,
                 "entitlements": [ent_json(ent, date(2019, 2, 21))],
-                "max_users": 5,
                 "card": "",
             }
         )
@@ -181,7 +180,6 @@ class TestSquareletUpdateData(TestCase):
                 "individual": False,
                 "private": False,
                 "entitlements": [ent_json(ent, None)],
-                "max_users": 5,
                 "card": "",
             }
         )
@@ -208,7 +206,6 @@ class TestSquareletUpdateData(TestCase):
                 "individual": False,
                 "private": False,
                 "entitlements": [ent_json(ent, date(2019, 2, 21))],
-                "max_users": 5,
                 "card": "",
             }
         )
@@ -237,7 +234,6 @@ class TestSquareletUpdateData(TestCase):
                 "individual": False,
                 "private": False,
                 "entitlements": [ent_json(ent, date(2019, 3, 21))],
-                "max_users": 5,
                 "card": "",
             }
         )
@@ -260,8 +256,9 @@ class TestSquareletUpdateData(TestCase):
                 "slug": organization.slug,
                 "individual": False,
                 "private": False,
-                "entitlements": [ent_json(ent, date(2019, 2, 21))],
-                "max_users": 9,
+                "entitlements": [
+                    ent_json(ent, date(2019, 2, 21), quantity=9)
+                ],
                 "card": "",
             }
         )
@@ -284,8 +281,9 @@ class TestSquareletUpdateData(TestCase):
                 "slug": organization.slug,
                 "individual": False,
                 "private": False,
-                "entitlements": [ent_json(ent, date(2019, 2, 21))],
-                "max_users": 7,
+                "entitlements": [
+                    ent_json(ent, date(2019, 2, 21), quantity=7)
+                ],
                 "card": "",
             }
         )
@@ -309,7 +307,6 @@ class TestSquareletUpdateData(TestCase):
                 "individual": False,
                 "private": False,
                 "entitlements": [ent_json(ent, date(2019, 3, 21))],
-                "max_users": 5,
                 "card": "",
             }
         )
