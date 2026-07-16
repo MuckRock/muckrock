@@ -1,6 +1,5 @@
 # Django
-from django.contrib.auth.models import Permission
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -15,10 +14,7 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
 )
 from muckrock.foia.models import FOIARequest
-from muckrock.organization.factories import (
-    MembershipFactory,
-    OrganizationFactory,
-)
+from muckrock.organization.factories import MembershipFactory, OrganizationFactory
 
 
 def _grant(user, codename):
@@ -141,11 +137,12 @@ class TestFOIARequestViewset(TestCase):
         )
         assert response.status_code == 402, response.json()
 
-    def test_create_foreign_organization_rejected(self):
-        """Filing under an org the user isn't in fails serializer validation (400)"""
+    def test_create_defaults_to_personal_org(self):
+        """Omitting organization files under the user's individual org"""
         agency = AgencyFactory.create()
         user = UserFactory.create()
-        other_org = OrganizationFactory.create()  # user is NOT a member
+        personal_org = user.profile.organization
+        _fund(personal_org)
         self.client.force_authenticate(user=user)
         response = self.client.post(
             reverse("api2-requests-list"),
@@ -153,14 +150,15 @@ class TestFOIARequestViewset(TestCase):
                 "agencies": [agency.pk],
                 "title": "Test",
                 "requested_docs": "Meeting minutes",
-                "organization": other_org.pk,
             },
+            format="json",
         )
-        assert response.status_code == 400, response.json()
-        assert "organization" in response.json()
+        assert response.status_code == 201, response.json()
+        foia = FOIARequest.objects.get(pk=response.json()["requests"][0])
+        assert foia.composer.organization == personal_org
 
-    def test_create_member_organization_allowed(self):
-        """Can file under an org the user IS a member of"""
+    def test_create_bills_the_named_organization(self):
+        """The composer is billed to the org the user selected, not their default"""
         agency = AgencyFactory.create()
         user = UserFactory.create()
         org = OrganizationFactory.create()
@@ -175,8 +173,53 @@ class TestFOIARequestViewset(TestCase):
                 "requested_docs": "Meeting minutes",
                 "organization": org.pk,
             },
+            format="json",
         )
         assert response.status_code == 201, response.json()
+        foia = FOIARequest.objects.get(pk=response.json()["requests"][0])
+        assert foia.composer.organization == org
+        # the named org was debited, not the user's personal org
+        org.refresh_from_db()
+        assert org.number_requests == 4
+
+    def test_create_nonexistent_organization_rejected(self):
+        """A nonexistent org PK fails validation (400)"""
+        agency = AgencyFactory.create()
+        user = UserFactory.create()
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "Meeting minutes",
+                "organization": 99999999,
+            },
+            format="json",
+        )
+        assert response.status_code == 400, response.json()
+        assert "organization" in response.json()
+
+    def test_create_personal_org_explicitly(self):
+        """A user can explicitly name their own individual org"""
+        agency = AgencyFactory.create()
+        user = UserFactory.create()
+        personal_org = user.profile.organization
+        _fund(personal_org)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "Meeting minutes",
+                "organization": personal_org.pk,
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.json()
+        foia = FOIARequest.objects.get(pk=response.json()["requests"][0])
+        assert foia.composer.organization == personal_org
 
     def test_create_edited_boilerplate(self):
         """edited_boilerplate is settable on create and persists to the composer"""
