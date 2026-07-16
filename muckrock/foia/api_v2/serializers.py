@@ -411,3 +411,15 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
                 "help_text": "The list of files associated with this communication"
             },
         }
+
+
+class FOIARequestCreateResponseSerializer(serializers.Serializer):
+    """Documents the create endpoint's response body"""
+
+    status = serializers.CharField(help_text="Human-readable result message")
+    location = serializers.CharField(help_text="URL of the created composer")
+    requests = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        help_text="IDs of the created FOIA requests",
+    )

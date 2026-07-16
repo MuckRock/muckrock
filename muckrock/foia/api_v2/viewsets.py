@@ -8,6 +8,7 @@ from django.db import transaction
 # Third Party
 import django_filters
 from django_filters.rest_framework.backends import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import filters, mixins, status as http_status, viewsets
 from rest_framework.response import Response
 
@@ -16,6 +17,7 @@ from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
     FOIAFileSerializer,
+    FOIARequestCreateResponseSerializer,
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
 )
@@ -53,6 +55,36 @@ class FOIARequestViewSet(
             )
         )
 
+    @extend_schema(
+        request=FOIARequestCreateSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=FOIARequestCreateResponseSerializer,
+                description=(
+                    "Request submitted. Returns the composer location and the "
+                    "list of created FOIA request IDs."
+                ),
+            ),
+            400: OpenApiResponse(
+                description=(
+                    "Validation failed. Possible causes: no valid agencies "
+                    "provided, missing title or requested_docs, an organization "
+                    "you are not a member of, or an embargo status you lack "
+                    "permission to set."
+                ),
+            ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided or are invalid.",
+            ),
+            402: OpenApiResponse(
+                response=FOIARequestCreateResponseSerializer,
+                description=(
+                    "The selected organization has no requests remaining. The "
+                    "request has been saved as a draft; its location is returned."
+                ),
+            ),
+        },
+    )
     def create(self, request, *args, **kwargs):
         """Submit a new request"""
         serializer = self.get_serializer(data=request.data)
