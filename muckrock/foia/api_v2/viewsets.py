@@ -3,7 +3,7 @@ Viewsets for V2 of the FOIA API
 """
 
 # Django
-from django.template.defaultfilters import slugify
+from django.db import transaction
 
 # Third Party
 import django_filters
@@ -12,7 +12,6 @@ from rest_framework import filters, mixins, status as http_status, viewsets
 from rest_framework.response import Response
 
 # MuckRock
-from muckrock.agency.models.agency import Agency
 from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
@@ -55,18 +54,23 @@ class FOIARequestViewSet(
         )
 
     def create(self, request, *args, **kwargs):
-        composer = FOIAComposer.objects.create(
-            user=request.user,
-            organization_id=request.data.get(
-                "organization", request.user.profile.organization.pk
-            ),
-            title=request.data["title"],
-            slug=slugify(request.data["title"]) or "untitled",
-            requested_docs=request.data["requested_docs"],
-            embargo_status=request.data.get("embargo_status", False),
-            edited_boilerplate=request.data.get("edited_boilerplate", False),
-        )
-        composer.agencies.set(Agency.objects.filter(pk__in=request.data["agencies"]))
+        """Submit a new request"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        organization = data.get("organization") or request.user.profile.organization
+
+        with transaction.atomic():
+            composer = FOIAComposer.objects.create(
+                user=request.user,
+                organization=organization,
+                title=data["title"],
+                requested_docs=data["requested_docs"],
+                edited_boilerplate=data.get("edited_boilerplate", False),
+                embargo_status=data.get("embargo_status", "public"),
+            )
+            composer.agencies.set(data["agencies"])
 
         try:
             composer.submit()
@@ -80,7 +84,7 @@ class FOIARequestViewSet(
             )
         else:
             foias = list(composer.foias.all())
-            tags = request.data.get("tags", [])
+            tags = data.get("tags", [])
             if tags:
                 for foia in foias:
                     foia.tags.set(tags)
