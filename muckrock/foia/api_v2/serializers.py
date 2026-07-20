@@ -73,14 +73,9 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     )
 
     edited_boilerplate = serializers.BooleanField(
-        required=False,
-        default=False,
-        help_text=(
-            "If true, your `requested_docs` text is used directly as the full "
-            "request letter, bypassing the MuckRock template. "
-            "Template tags such as { name } and { closing } are still available "
-            "if you wish to use them."
-        ),
+        read_only=True,
+        source="composer.edited_boilerplate",
+        help_text="Whether the request bypassed the MuckRock template",
     )
 
     tags = serializers.StringRelatedField(
@@ -191,6 +186,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         queryset=Agency.objects.filter(status="approved"),
         many=True,
         required=True,
+        allow_empty=False,
         help_text="List of agency IDs of agencies you would like to send this request to.",
     )
     organization = serializers.PrimaryKeyRelatedField(
@@ -208,6 +204,15 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         help_text="List of tags to apply to this request",
     )
 
+    edited_boilerplate = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text=(
+            "If true, your requested_docs text is used directly as the full "
+            "request letter, bypassing the MuckRock template."
+        ),
+    )
+
     class Meta:
         """Filters for foia request create"""
 
@@ -218,6 +223,7 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
             "embargo_status",
             "title",
             "requested_docs",
+            "edited_boilerplate",
             # "attachments",
             # "edit_collaborators",
             # "read_collaborators",
@@ -238,29 +244,34 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         request = self.context.get("request", None)
-        view = self.context.get("view", None)
         user = request and request.user
         authed = user and user.is_authenticated
-        # are we currently generating the documentation
-        docs = getattr(view, "swagger_fake_view", False)
         if authed:
             # set the valid organizations to those the current user is a member of
             self.fields["organization"].queryset = Organization.objects.filter(
                 users=user
             )
-        # remove embargo fields if the user does not have permission to set them
-        if not docs and (not authed or not user.has_perm("foia.embargo_foiarequest")):
-            self.fields.pop("embargo_status")
 
     def validate_embargo_status(self, value):
-        """If the user doesn't have the permission to set to a permanent embargo, tell them"""
+        """Enforce embargo permissions, informing the user when they lack them"""
         request = self.context.get("request", None)
-        if value == "permanent" and not request.user.has_perm(
+        user = request and request.user
+
+        if value == "public":
+            return value
+
+        if not user or not user.has_perm("foia.embargo_foiarequest"):
+            raise serializers.ValidationError(
+                "You do not have permission to embargo requests."
+            )
+
+        if value == "permanent" and not user.has_perm(
             "foia.embargo_perm_foiarequest", self.instance
         ):
             raise serializers.ValidationError(
                 "You do not have permission to set embargo to permanent"
             )
+
         return value
 
 
@@ -400,3 +411,15 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
                 "help_text": "The list of files associated with this communication"
             },
         }
+
+
+class FOIARequestCreateResponseSerializer(serializers.Serializer):
+    """Documents the create endpoint's response body"""
+
+    status = serializers.CharField(help_text="Human-readable result message")
+    location = serializers.CharField(help_text="URL of the created composer")
+    requests = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        help_text="IDs of the created FOIA requests",
+    )

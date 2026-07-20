@@ -3,20 +3,21 @@ Viewsets for V2 of the FOIA API
 """
 
 # Django
-from django.template.defaultfilters import slugify
+from django.db import transaction
 
 # Third Party
 import django_filters
 from django_filters.rest_framework.backends import DjangoFilterBackend
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import filters, mixins, status as http_status, viewsets
 from rest_framework.response import Response
 
 # MuckRock
-from muckrock.agency.models.agency import Agency
 from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
     FOIAFileSerializer,
+    FOIARequestCreateResponseSerializer,
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
 )
@@ -54,19 +55,54 @@ class FOIARequestViewSet(
             )
         )
 
-    def create(self, request, *args, **kwargs):
-        composer = FOIAComposer.objects.create(
-            user=request.user,
-            organization_id=request.data.get(
-                "organization", request.user.profile.organization.pk
+    @extend_schema(
+        request=FOIARequestCreateSerializer,
+        responses={
+            201: OpenApiResponse(
+                response=FOIARequestCreateResponseSerializer,
+                description=(
+                    "Request submitted. Returns the composer location and the "
+                    "list of created FOIA request IDs."
+                ),
             ),
-            title=request.data["title"],
-            slug=slugify(request.data["title"]) or "untitled",
-            requested_docs=request.data["requested_docs"],
-            embargo_status=request.data.get("embargo_status", False),
-            edited_boilerplate=request.data.get("edited_boilerplate", False),
-        )
-        composer.agencies.set(Agency.objects.filter(pk__in=request.data["agencies"]))
+            400: OpenApiResponse(
+                description=(
+                    "Validation failed. Possible causes: no valid agencies "
+                    "provided, missing title or requested_docs, an organization "
+                    "you are not a member of, or an embargo status you lack "
+                    "permission to set."
+                ),
+            ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided or are invalid.",
+            ),
+            402: OpenApiResponse(
+                response=FOIARequestCreateResponseSerializer,
+                description=(
+                    "The selected organization has no requests remaining. The "
+                    "request has been saved as a draft; its location is returned."
+                ),
+            ),
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        """Submit a new request"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        organization = data.get("organization") or request.user.profile.organization
+
+        with transaction.atomic():
+            composer = FOIAComposer.objects.create(
+                user=request.user,
+                organization=organization,
+                title=data["title"],
+                requested_docs=data["requested_docs"],
+                edited_boilerplate=data.get("edited_boilerplate", False),
+                embargo_status=data.get("embargo_status", "public"),
+            )
+            composer.agencies.set(data["agencies"])
 
         try:
             composer.submit()
@@ -80,7 +116,7 @@ class FOIARequestViewSet(
             )
         else:
             foias = list(composer.foias.all())
-            tags = request.data.get("tags", [])
+            tags = data.get("tags", [])
             if tags:
                 for foia in foias:
                     foia.tags.set(tags)
