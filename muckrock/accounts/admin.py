@@ -23,11 +23,11 @@ from reversion.admin import VersionAdmin
 
 # MuckRock
 from muckrock.accounts.models import (
+    InternalNote,
     Profile,
     RecurringDonation,
     Statistics,
     StockResponse,
-    InternalNote,
 )
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
