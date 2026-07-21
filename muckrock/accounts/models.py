@@ -599,3 +599,38 @@ class StockResponse(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class InternalNote(models.Model):
+    """
+    A private note about this user, written by staff.
+    This should never be exposed to non-staff users.
+    It exists to keep a record of interactions, especially
+    any problems this user has caused or moderation actions taken.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="internal_notes",
+        help_text="The user this note is about",
+    )
+
+    by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="internal_notes_by",
+        help_text="Staff member who wrote this note",
+    )
+
+    text = models.TextField()
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created",)
+        get_latest_by = "created"
+
+    def __str__(self):
+        return f"<Note by {self.by.username}> {self.text[:20]} ..."
