@@ -40,6 +40,7 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
     FOIATemplateFactory,
 )
+from muckrock.foia.forms import FOIAOwnerForm
 from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.foia.views import (
     ComposerDetail,
@@ -1069,6 +1070,34 @@ class TestRequestSharingViews(TestCase):
             idx=self.foia.id,
         )
         assert response.context_data["user_can_change_owner"] is True
+
+    def test_form_change_owner_rejects_non_owner(self):
+        """FOIAOwnerForm.change_owner must not transfer when called by an editor,
+        independent of any view-level guard."""
+        self.foia.add_editor(self.editor)
+        new_user = UserFactory()
+        form = FOIAOwnerForm({"user": new_user.pk})
+        assert form.is_valid()
+        form.change_owner(self.editor, [self.foia])
+        composer = FOIAComposer.objects.get(pk=self.foia.composer.pk)
+        assert (
+            composer.user == self.creator
+        ), "Editor calling the form method directly must not transfer ownership."
+
+    def test_change_owner_removes_new_owner_as_collaborator(self):
+        """Transferring to an existing editor must not leave them double-listed,
+        and must clear collaborator rows across all sibling requests."""
+        sibling = FOIARequestFactory(composer=self.foia.composer)
+        self.foia.add_editor(self.editor)
+        sibling.add_editor(self.editor)
+        _, composer = self._post_change_owner(self.creator, self.editor)
+        assert composer.user == self.editor
+        self.foia.refresh_from_db()
+        sibling.refresh_from_db()
+        assert not self.foia.has_editor(self.editor)
+        assert not sibling.has_editor(
+            self.editor
+        ), "New owner should be cleared as collaborator on sibling requests too."
 
 
 class TestFOIAComposerViews(TestCase):
