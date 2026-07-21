@@ -977,6 +977,99 @@ class TestRequestSharingViews(TestCase):
         assert response.status_code == 302
         assert not self.foia.has_viewer(a_viewer)
 
+    def _post_change_owner(self, actor, target):
+        """Helper: POST a change_owner action as `actor`, transferring to `target`."""
+        data = {"action": "change_owner", "user": target.pk}
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = mock_middleware(request)
+        request.user = actor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id,
+        )
+        # re-read the composer from the DB; the FK isn't reflected by a plain
+        # refresh_from_db on the cached foia.composer
+        composer = FOIAComposer.objects.get(pk=self.foia.composer.pk)
+        return response, composer
+
+    def test_change_owner_editor_denied(self):
+        """Editors must not be able to change the owner of a request.
+
+        This is the core regression guard: `change_owner` authorizes on the
+        composer's `change` perm (is_owner_composer | is_staff), NOT the
+        request's `change` perm (which includes editors)."""
+        response, composer = self._post_change_owner(self.editor, self.editor)
+        assert response.status_code == 302
+        assert (
+            composer.user == self.creator
+        ), "An editor must not be able to seize ownership of the request."
+
+    def test_change_owner_viewer_denied(self):
+        """Viewers must not be able to change the owner."""
+        _, composer = self._post_change_owner(self.viewer, self.viewer)
+        assert composer.user == self.creator
+
+    def test_change_owner_normie_denied(self):
+        """Unrelated users must not be able to change the owner."""
+        _, composer = self._post_change_owner(self.normie, self.normie)
+        assert composer.user == self.creator
+
+    def test_change_owner_owner_allowed(self):
+        """The owner may transfer ownership (confirms we did not over-restrict)."""
+        new_owner = UserFactory()
+        response, composer = self._post_change_owner(self.creator, new_owner)
+        assert response.status_code == 302
+        assert composer.user == new_owner
+
+    def test_change_owner_staff_allowed(self):
+        """Staff may transfer ownership."""
+        new_owner = UserFactory()
+        _, composer = self._post_change_owner(self.staff, new_owner)
+        assert composer.user == new_owner
+
+    def test_change_owner_editor_denied_multirequest(self):
+        """An editor on one request of a multi-request composer must not be able
+        to seize the whole composer — the sibling requests must be untouched."""
+        sibling = FOIARequestFactory(composer=self.foia.composer)
+        assert self.foia.composer.foias.count() > 1
+        _, composer = self._post_change_owner(self.editor, self.editor)
+        assert composer.user == self.creator
+        sibling.refresh_from_db()
+        assert (
+            sibling.composer.user == self.creator
+        ), "Sibling requests sharing the composer must not change owner."
+
+    def test_change_owner_hidden_from_editor(self):
+        """The Change Owner control must not be offered to editors in context."""
+        request = self.factory.get(self.foia.get_absolute_url())
+        request = mock_middleware(request)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id,
+        )
+        assert response.context_data["user_can_change_owner"] is False
+
+    def test_change_owner_shown_to_owner(self):
+        """The owner should be offered the Change Owner control."""
+        request = self.factory.get(self.foia.get_absolute_url())
+        request = mock_middleware(request)
+        request.user = self.creator
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id,
+        )
+        assert response.context_data["user_can_change_owner"] is True
+
 
 class TestFOIAComposerViews(TestCase):
     """Tests for FOIA Composer views"""
