@@ -49,6 +49,7 @@ from muckrock.foia.views import (
     FollowingRequestList,
     MyRequestList,
     RequestList,
+    SharedRequestList,
     UpdateComposer,
     autosave,
     crowdfund_request,
@@ -364,6 +365,64 @@ class TestFollowingRequestList(TestCase):
         assert len(response.context_data["object_list"]) == 3
         for foia in (foias[0], foias[4], foias[6]):
             assert foia in response.context_data["object_list"]
+
+
+class TestSharedRequestList(TestCase):
+    """The shared-with-you list shows requests where the user is a collaborator."""
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = UserFactory()
+        UserFactory(username="MuckrockStaff")
+
+    def _get_list(self, user):
+        request = self.factory.get(reverse("foia-list-shared"))
+        request.user = user
+        request = mock_middleware(request)
+        return SharedRequestList.as_view()(request)
+
+    def test_shows_edit_collaborations(self):
+        """Requests where the user is an editor should appear."""
+        foia = FOIARequestFactory()
+        foia.add_editor(self.user)
+        response = self._get_list(self.user)
+        assert foia in response.context_data["object_list"]
+
+    def test_shows_view_collaborations(self):
+        """Requests where the user is a viewer should appear."""
+        foia = FOIARequestFactory()
+        foia.add_viewer(self.user)
+        response = self._get_list(self.user)
+        assert foia in response.context_data["object_list"]
+
+    def test_excludes_owned_requests(self):
+        """Requests the user owns (but isn't a collaborator on) should NOT appear —
+        those belong under 'Yours', not 'Shared With You'."""
+        owned = FOIARequestFactory(composer__user=self.user)
+        response = self._get_list(self.user)
+        assert owned not in response.context_data["object_list"]
+
+    def test_excludes_unrelated_requests(self):
+        """Requests the user has no relationship to should not appear."""
+        other = FOIARequestFactory()
+        response = self._get_list(self.user)
+        assert other not in response.context_data["object_list"]
+
+    def test_excludes_others_collaborations(self):
+        """A request shared with someone else should not appear for this user."""
+        someone_else = UserFactory()
+        foia = FOIARequestFactory()
+        foia.add_editor(someone_else)
+        response = self._get_list(self.user)
+        assert foia not in response.context_data["object_list"]
+
+    def test_no_duplicate_rows(self):
+        """A request should appear once even if the join could fan out."""
+        foia = FOIARequestFactory()
+        foia.add_editor(self.user)
+        response = self._get_list(self.user)
+        object_list = list(response.context_data["object_list"])
+        assert object_list.count(foia) == 1
 
 
 class TestBulkActions(TestCase):
