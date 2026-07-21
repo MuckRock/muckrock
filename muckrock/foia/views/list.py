@@ -578,7 +578,7 @@ class FollowingRequestList(RequestList):
 class SharedRequestList(RequestList):
     """List of FOIA requests explicitly shared with the current user"""
 
-    title = "Shared With You"
+    title = "Shared with You"
 
     def get_queryset(self):
         """Limit to requests where the user is an edit or view collaborator"""
