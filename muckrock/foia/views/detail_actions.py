@@ -511,7 +511,7 @@ def promote(request, foia):
 def change_owner(request, foia):
     """Change the owner of the request"""
     form = FOIAOwnerForm(request.POST)
-    has_perm = foia.has_perm(request.user, "change")
+    has_perm = foia.composer.has_perm(request.user, "change")
     if not has_perm or not form.is_valid():
         return _get_redirect(request, foia)
 
