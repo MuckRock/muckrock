@@ -22,7 +22,7 @@
         <li class="{% active request '^/foi/proxy-list/$' %}"><a href="{% url 'foia-proxy-list' %}">Proxy</a></li>
       {% endif %}
       <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
-      <li class="{% active request '^/foi/list/shared/$' %}"><a href="{% url 'foia-list-shared' %}">Shared With You</a></li>
+      <li class="{% active request '^/foi/list/shared/$' %}"><a href="{% url 'foia-list-shared' %}">Shared with You</a></li>
       {% if user.is_staff %}
         <li class="{% active request '^/foi/list/processing/$' %}"><a href="{% url 'foia-list-processing' %}">Processing</a></li>
         <li class="{% active request '^/foi/list/processing-portal/$' %}"><a href="{% url 'foia-list-processing-portal' %}">Portal</a></li>
