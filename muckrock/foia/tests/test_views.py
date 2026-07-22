@@ -40,6 +40,7 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
     FOIATemplateFactory,
 )
+from muckrock.foia.forms import FOIAOwnerForm
 from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.foia.views import (
     ComposerDetail,
@@ -48,6 +49,7 @@ from muckrock.foia.views import (
     FollowingRequestList,
     MyRequestList,
     RequestList,
+    SharedRequestList,
     UpdateComposer,
     autosave,
     crowdfund_request,
@@ -363,6 +365,64 @@ class TestFollowingRequestList(TestCase):
         assert len(response.context_data["object_list"]) == 3
         for foia in (foias[0], foias[4], foias[6]):
             assert foia in response.context_data["object_list"]
+
+
+class TestSharedRequestList(TestCase):
+    """The shared-with-you list shows requests where the user is a collaborator."""
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = UserFactory()
+        UserFactory(username="MuckrockStaff")
+
+    def _get_list(self, user):
+        request = self.factory.get(reverse("foia-list-shared"))
+        request.user = user
+        request = mock_middleware(request)
+        return SharedRequestList.as_view()(request)
+
+    def test_shows_edit_collaborations(self):
+        """Requests where the user is an editor should appear."""
+        foia = FOIARequestFactory()
+        foia.add_editor(self.user)
+        response = self._get_list(self.user)
+        assert foia in response.context_data["object_list"]
+
+    def test_shows_view_collaborations(self):
+        """Requests where the user is a viewer should appear."""
+        foia = FOIARequestFactory()
+        foia.add_viewer(self.user)
+        response = self._get_list(self.user)
+        assert foia in response.context_data["object_list"]
+
+    def test_excludes_owned_requests(self):
+        """Requests the user owns (but isn't a collaborator on) should NOT appear —
+        those belong under 'Yours', not 'Shared With You'."""
+        owned = FOIARequestFactory(composer__user=self.user)
+        response = self._get_list(self.user)
+        assert owned not in response.context_data["object_list"]
+
+    def test_excludes_unrelated_requests(self):
+        """Requests the user has no relationship to should not appear."""
+        other = FOIARequestFactory()
+        response = self._get_list(self.user)
+        assert other not in response.context_data["object_list"]
+
+    def test_excludes_others_collaborations(self):
+        """A request shared with someone else should not appear for this user."""
+        someone_else = UserFactory()
+        foia = FOIARequestFactory()
+        foia.add_editor(someone_else)
+        response = self._get_list(self.user)
+        assert foia not in response.context_data["object_list"]
+
+    def test_no_duplicate_rows(self):
+        """A request should appear once even if the join could fan out."""
+        foia = FOIARequestFactory()
+        foia.add_editor(self.user)
+        response = self._get_list(self.user)
+        object_list = list(response.context_data["object_list"])
+        assert object_list.count(foia) == 1
 
 
 class TestBulkActions(TestCase):
@@ -976,6 +1036,127 @@ class TestRequestSharingViews(TestCase):
         )
         assert response.status_code == 302
         assert not self.foia.has_viewer(a_viewer)
+
+    def _post_change_owner(self, actor, target):
+        """Helper: POST a change_owner action as `actor`, transferring to `target`."""
+        data = {"action": "change_owner", "user": target.pk}
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = mock_middleware(request)
+        request.user = actor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id,
+        )
+        # re-read the composer from the DB; the FK isn't reflected by a plain
+        # refresh_from_db on the cached foia.composer
+        composer = FOIAComposer.objects.get(pk=self.foia.composer.pk)
+        return response, composer
+
+    def test_change_owner_editor_denied(self):
+        """Editors must not be able to change the owner of a request.
+
+        This is the core regression guard: `change_owner` authorizes on the
+        composer's `change` perm (is_owner_composer | is_staff), NOT the
+        request's `change` perm (which includes editors)."""
+        response, composer = self._post_change_owner(self.editor, self.editor)
+        assert response.status_code == 302
+        assert (
+            composer.user == self.creator
+        ), "An editor must not be able to seize ownership of the request."
+
+    def test_change_owner_viewer_denied(self):
+        """Viewers must not be able to change the owner."""
+        _, composer = self._post_change_owner(self.viewer, self.viewer)
+        assert composer.user == self.creator
+
+    def test_change_owner_normie_denied(self):
+        """Unrelated users must not be able to change the owner."""
+        _, composer = self._post_change_owner(self.normie, self.normie)
+        assert composer.user == self.creator
+
+    def test_change_owner_owner_allowed(self):
+        """The owner may transfer ownership (confirms we did not over-restrict)."""
+        new_owner = UserFactory()
+        response, composer = self._post_change_owner(self.creator, new_owner)
+        assert response.status_code == 302
+        assert composer.user == new_owner
+
+    def test_change_owner_staff_allowed(self):
+        """Staff may transfer ownership."""
+        new_owner = UserFactory()
+        _, composer = self._post_change_owner(self.staff, new_owner)
+        assert composer.user == new_owner
+
+    def test_change_owner_editor_denied_multirequest(self):
+        """An editor on one request of a multi-request composer must not be able
+        to seize the whole composer — the sibling requests must be untouched."""
+        sibling = FOIARequestFactory(composer=self.foia.composer)
+        assert self.foia.composer.foias.count() > 1
+        _, composer = self._post_change_owner(self.editor, self.editor)
+        assert composer.user == self.creator
+        sibling.refresh_from_db()
+        assert (
+            sibling.composer.user == self.creator
+        ), "Sibling requests sharing the composer must not change owner."
+
+    def test_change_owner_hidden_from_editor(self):
+        """The Change Owner control must not be offered to editors in context."""
+        request = self.factory.get(self.foia.get_absolute_url())
+        request = mock_middleware(request)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id,
+        )
+        assert response.context_data["user_can_change_owner"] is False
+
+    def test_change_owner_shown_to_owner(self):
+        """The owner should be offered the Change Owner control."""
+        request = self.factory.get(self.foia.get_absolute_url())
+        request = mock_middleware(request)
+        request.user = self.creator
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id,
+        )
+        assert response.context_data["user_can_change_owner"] is True
+
+    def test_form_change_owner_rejects_non_owner(self):
+        """FOIAOwnerForm.change_owner must not transfer when called by an editor,
+        independent of any view-level guard."""
+        self.foia.add_editor(self.editor)
+        new_user = UserFactory()
+        form = FOIAOwnerForm({"user": new_user.pk})
+        assert form.is_valid()
+        form.change_owner(self.editor, [self.foia])
+        composer = FOIAComposer.objects.get(pk=self.foia.composer.pk)
+        assert (
+            composer.user == self.creator
+        ), "Editor calling the form method directly must not transfer ownership."
+
+    def test_change_owner_removes_new_owner_as_collaborator(self):
+        """Transferring to an existing editor must not leave them double-listed,
+        and must clear collaborator rows across all sibling requests."""
+        sibling = FOIARequestFactory(composer=self.foia.composer)
+        self.foia.add_editor(self.editor)
+        sibling.add_editor(self.editor)
+        _, composer = self._post_change_owner(self.creator, self.editor)
+        assert composer.user == self.editor
+        self.foia.refresh_from_db()
+        sibling.refresh_from_db()
+        assert not self.foia.has_editor(self.editor)
+        assert not sibling.has_editor(
+            self.editor
+        ), "New owner should be cleared as collaborator on sibling requests too."
 
 
 class TestFOIAComposerViews(TestCase):

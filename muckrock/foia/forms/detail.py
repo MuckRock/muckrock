@@ -5,6 +5,7 @@ FOIA forms used on the detail page
 # Django
 from django import forms
 from django.contrib.auth.models import User
+from django.db import transaction
 
 # Standard Library
 from datetime import date, timedelta
@@ -118,14 +119,20 @@ class FOIAOwnerForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["user"].required = required
 
+    @transaction.atomic
     def change_owner(self, user, foias):
         """Perform the owner change"""
-        foias = [f for f in foias if f.has_perm(user, "change")]
+        foias = [f for f in foias if f.composer.has_perm(user, "change")]
         new_user = self.cleaned_data["user"]
         for foia in foias:
             old_user = foia.composer.user
             foia.composer.user = new_user
             foia.composer.save()
+            # the new owner is now the creator; drop any redundant collaborator
+            # rows across every request on the composer so they aren't listed twice
+            for sibling in foia.composer.foias.all():
+                sibling.edit_collaborators.remove(new_user)
+                sibling.read_collaborators.remove(new_user)
             foia.notes.create(
                 author=user,
                 note=f"{user.username} ({user.pk}) changed ownership of this request "

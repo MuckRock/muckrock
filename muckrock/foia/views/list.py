@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db import transaction
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -572,6 +572,21 @@ class FollowingRequestList(RequestList):
             f.pk for f in following(self.request.user, FOIARequest) if f is not None
         ]
         return queryset.filter(pk__in=followed)
+
+
+@class_view_decorator(login_required)
+class SharedRequestList(RequestList):
+    """List of FOIA requests explicitly shared with the current user"""
+
+    title = "Shared with You"
+
+    def get_queryset(self):
+        """Limit to requests where the user is an edit or view collaborator"""
+        queryset = super().get_queryset()
+        return queryset.filter(
+            Q(edit_collaborators=self.request.user)
+            | Q(read_collaborators=self.request.user)
+        ).distinct()
 
 
 class BaseProcessingRequestList(RequestList):
