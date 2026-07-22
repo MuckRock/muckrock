@@ -5,6 +5,7 @@ FOIA forms used on the detail page
 # Django
 from django import forms
 from django.contrib.auth.models import User
+from django.db import transaction
 
 # Standard Library
 from datetime import date, timedelta
@@ -118,6 +119,7 @@ class FOIAOwnerForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["user"].required = required
 
+    @transaction.atomic
     def change_owner(self, user, foias):
         """Perform the owner change"""
         foias = [f for f in foias if f.composer.has_perm(user, "change")]
