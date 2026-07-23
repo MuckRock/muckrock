@@ -23,6 +23,8 @@ from reversion.admin import VersionAdmin
 
 # MuckRock
 from muckrock.accounts.models import (
+    InternalNote,
+    NoteCategory,
     Profile,
     RecurringDonation,
     Statistics,
@@ -188,6 +190,12 @@ class ProfileInline(admin.StackedInline):
     org_link.short_description = "Individual Organization"
 
 
+class InternalNoteInline(admin.StackedInline):
+    model = InternalNote
+    extra = 0
+    fk_name = "user"
+
+
 class MRUserAdmin(UserAdmin):
     """User admin options"""
 
@@ -201,7 +209,7 @@ class MRUserAdmin(UserAdmin):
     )
     list_filter = UserAdmin.list_filter + (PermissionFilter,)
     list_select_related = ("profile",)
-    inlines = [ProfileInline]
+    inlines = [ProfileInline, InternalNoteInline]
     superuser_fieldsets = (
         (None, {"fields": ("username", "password")}),
         ("Personal info", {"fields": ("email",)}),
@@ -365,6 +373,7 @@ class StockResponseAdmin(VersionAdmin):
     list_filter = ("type",)
 
 
+admin.site.register(NoteCategory)
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
 admin.site.register(User, MRUserAdmin)
