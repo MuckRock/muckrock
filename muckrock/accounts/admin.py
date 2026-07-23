@@ -24,6 +24,7 @@ from reversion.admin import VersionAdmin
 # MuckRock
 from muckrock.accounts.models import (
     InternalNote,
+    NoteCategory,
     Profile,
     RecurringDonation,
     Statistics,
@@ -372,6 +373,7 @@ class StockResponseAdmin(VersionAdmin):
     list_filter = ("type",)
 
 
+admin.site.register(NoteCategory)
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
 admin.site.register(User, MRUserAdmin)

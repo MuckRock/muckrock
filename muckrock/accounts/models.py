@@ -601,6 +601,34 @@ class StockResponse(models.Model):
         return self.title
 
 
+class NoteCategory(models.Model):
+    """
+    A categry for notes
+    """
+
+    name = models.CharField(unique=True)
+    description = models.TextField(blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name_plural = "Note categories"
+
+    def __str__(self):
+        return self.name
+
+
+class WarningLevels(models.TextChoices):
+    FIRST = "first", "First warning"
+    SECOND = "second", "Second warning"
+    FINAL = "final", "Final warning"
+    BANNED = "banned", "Banned"
+
+    __empty__ = "None"
+
+
 class InternalNote(models.Model):
     """
     A private note about this user, written by staff.
@@ -625,6 +653,18 @@ class InternalNote(models.Model):
 
     text = models.TextField()
 
+    warning_level = models.CharField(
+        blank=True,
+        choices=WarningLevels,
+    )
+
+    category = models.ForeignKey(
+        NoteCategory,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -633,4 +673,4 @@ class InternalNote(models.Model):
         get_latest_by = "created"
 
     def __str__(self):
-        return f"<Note by {self.by.username}> {self.text[:20]} ..."
+        return f"Note by {self.by.username} on {self.created}"
