@@ -190,10 +190,42 @@ class ProfileInline(admin.StackedInline):
     org_link.short_description = "Individual Organization"
 
 
+class InternalNoteFormSet(forms.BaseInlineFormSet):
+    """Attribute new notes to the staff member writing them"""
+
+    current_user = None
+
+    def _construct_form(self, i, **kwargs):
+        form = super()._construct_form(i, **kwargs)
+        if form.instance.by_id is None:
+            form.instance.by = self.current_user
+        return form
+
+    @property
+    def empty_form(self):
+        """The template the "Add another" JavaScript clones"""
+        form = super().empty_form
+        form.instance.by = self.current_user
+        return form
+
+
 class InternalNoteInline(admin.StackedInline):
+    """Internal staff notes about a user"""
+
     model = InternalNote
-    extra = 0
+    extra = 1
     fk_name = "user"
+    formset = InternalNoteFormSet
+    fields = ("by", "text", "category", "warning_level", "created")
+    # `by` is never editable - new notes get the logged in user
+    readonly_fields = ("by", "created")
+
+    def get_formset(self, request, obj=None, **kwargs):
+        """Tell the formset who is writing the notes"""
+        formset = super().get_formset(request, obj, **kwargs)
+        # a fresh formset class is built per request, so this is not shared
+        formset.current_user = request.user
+        return formset
 
 
 class MRUserAdmin(UserAdmin):
@@ -253,6 +285,21 @@ class MRUserAdmin(UserAdmin):
     def full_name(self, obj):
         """Show full name from profile"""
         return obj.profile.full_name
+
+    def save_formset(self, request, form, formset, change):
+        """Credit internal notes to the staff member writing them"""
+        if formset.model is not InternalNote:
+            return super().save_formset(request, form, formset, change)
+
+        notes = formset.save(commit=False)
+        for note in formset.deleted_objects:
+            note.delete()
+        for note in notes:
+            if note.by_id is None:
+                note.by = request.user
+            note.save()
+        formset.save_m2m()
+        return None
 
     def get_urls(self):
         """Add custom URLs here"""
