@@ -3,7 +3,11 @@ Viewsets for V2 of the FOIA API
 """
 
 # Django
-from django.db import transaction
+from django.db import connection, transaction
+
+# Standard Library
+import logging
+import traceback
 
 # Third Party
 import django_filters
@@ -24,6 +28,8 @@ from muckrock.foia.api_v2.serializers import (
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
+
+logger = logging.getLogger(__name__)
 
 
 # pylint:disable=too-many-ancestors
@@ -87,6 +93,12 @@ class FOIARequestViewSet(
     )
     def create(self, request, *args, **kwargs):
         """Submit a new request"""
+        logger.info(
+            "ATOMIC_AT_ENTRY in_atomic=%s autocommit=%s\n%s",
+            connection.in_atomic_block,
+            connection.get_autocommit(),
+            "".join(traceback.format_stack()),
+        )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
