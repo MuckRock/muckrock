@@ -295,7 +295,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
     """Create all the foias for a composer"""
     exists = FOIAComposer.objects.filter(pk=composer_pk).exists()
     logger.info(
-        "FANOUT_READ pk=%s exists=%s ts=%.6f backend_pid=%s in_atomic=%s autocommit=%s",
+        "FANOUT_READ pk=%s exists=%s ts=%s backend_pid=%s in_atomic=%s autocommit=%s",
         composer_pk,
         exists,
         timezone.now(),

@@ -118,7 +118,7 @@ class FOIAComposer(models.Model):
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
         logger.info(
-            "SUBMIT_ENTER pk=%s in_atomic=%s autocommit=%s ts=%.6f",
+            "SUBMIT_ENTER pk=%s in_atomic=%s autocommit=%s ts=%s",
             self.pk,
             connection.in_atomic_block,
             connection.get_autocommit(),
@@ -139,7 +139,7 @@ class FOIAComposer(models.Model):
         else:
             # otherwise do it delayed so the page doesn't risk timing out
             logger.info(
-                "SUBMIT_DISPATCH pk=%s in_atomic=%s ts=%.6f",
+                "SUBMIT_DISPATCH pk=%s in_atomic=%s ts=%s",
                 self.pk,
                 connection.in_atomic_block,
                 timezone.now(),

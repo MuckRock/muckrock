@@ -284,7 +284,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             embargo_status=data["embargo_status"],
         )
         logger.info(
-            "V1_AFTER_CREATE pk=%s in_atomic=%s autocommit=%s ts=%.6f",
+            "V1_AFTER_CREATE pk=%s in_atomic=%s autocommit=%s ts=%s",
             composer.pk,
             connection.in_atomic_block,
             connection.get_autocommit(),
@@ -300,13 +300,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
         try:
             logger.info(
-                "V1_BEFORE_SUBMIT pk=%s in_atomic=%s ts=%.6f",
+                "V1_BEFORE_SUBMIT pk=%s in_atomic=%s ts=%s",
                 composer.pk,
                 connection.in_atomic_block,
                 timezone.now(),
             )
             composer.submit()
-            logger.info("V1_AFTER_SUBMIT pk=%s ts=%.6f", composer.pk, timezone.now())
+            logger.info("V1_AFTER_SUBMIT pk=%s ts=%s", composer.pk, timezone.now())
         except InsufficientRequestsError:
             return Response(
                 {
