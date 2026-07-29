@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.core.files.storage import default_storage
 from django.core.mail.message import EmailMessage
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import DurationField, F
 from django.db.models.functions import Cast, Now
 from django.db.models.query import Prefetch
@@ -27,6 +27,7 @@ import os.path
 import re
 import sys
 import tempfile
+import time
 from datetime import date, datetime, time
 from random import randint
 
@@ -293,6 +294,17 @@ def noindex_documentcloud(foia_pk):
 )
 def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
     """Create all the foias for a composer"""
+    exists = FOIAComposer.objects.filter(pk=composer_pk).exists()
+    logger.info(
+        "FANOUT_READ pk=%s exists=%s ts=%.6f backend_pid=%s in_atomic=%s autocommit=%s",
+        composer_pk,
+        exists,
+        time.time(),
+        connection.connection.get_backend_pid() if connection.connection else None,
+        connection.in_atomic_block,
+        connection.get_autocommit(),
+    )
+
     composer = FOIAComposer.objects.get(pk=composer_pk)
     logger.info(
         "Starting composer_create_foias: (%s, %s, %s)",
