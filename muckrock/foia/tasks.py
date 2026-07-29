@@ -27,7 +27,6 @@ import os.path
 import re
 import sys
 import tempfile
-import time
 from datetime import date, datetime, time
 from random import randint
 
@@ -299,7 +298,7 @@ def composer_create_foias(composer_pk, contact_info, no_proxy, **kwargs):
         "FANOUT_READ pk=%s exists=%s ts=%.6f backend_pid=%s in_atomic=%s autocommit=%s",
         composer_pk,
         exists,
-        time.time(),
+        timezone.now(),
         connection.connection.get_backend_pid() if connection.connection else None,
         connection.in_atomic_block,
         connection.get_autocommit(),

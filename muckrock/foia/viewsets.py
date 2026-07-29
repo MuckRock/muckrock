@@ -13,7 +13,6 @@ from django.utils import timezone
 
 # Standard Library
 import logging
-import time
 
 # Third Party
 import actstream
@@ -289,7 +288,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             composer.pk,
             connection.in_atomic_block,
             connection.get_autocommit(),
-            time.time(),
+            timezone.now(),
         )
         composer.agencies.set(data["agencies"])
 
@@ -304,10 +303,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                 "V1_BEFORE_SUBMIT pk=%s in_atomic=%s ts=%.6f",
                 composer.pk,
                 connection.in_atomic_block,
-                time.time(),
+                timezone.now(),
             )
             composer.submit()
-            logger.info("V1_AFTER_SUBMIT pk=%s ts=%.6f", composer.pk, time.time())
+            logger.info("V1_AFTER_SUBMIT pk=%s ts=%.6f", composer.pk, timezone.now())
         except InsufficientRequestsError:
             return Response(
                 {

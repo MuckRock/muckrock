@@ -23,7 +23,6 @@ from django.utils.text import slugify
 # Standard Library
 import logging
 import re
-import time
 from datetime import timedelta
 from itertools import zip_longest
 
@@ -123,7 +122,7 @@ class FOIAComposer(models.Model):
             self.pk,
             connection.in_atomic_block,
             connection.get_autocommit(),
-            time.time(),
+            timezone.now(),
         )
 
         num_requests = self.agencies.count()
@@ -143,7 +142,7 @@ class FOIAComposer(models.Model):
                 "SUBMIT_DISPATCH pk=%s in_atomic=%s ts=%.6f",
                 self.pk,
                 connection.in_atomic_block,
-                time.time(),
+                timezone.now(),
             )
             composer_create_foias.delay(self.pk, contact_info, no_proxy)
 
