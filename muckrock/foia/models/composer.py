@@ -12,7 +12,7 @@ upgrades, such as recurring requests.
 from celery import current_app
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db import models, transaction
+from django.db import connection, models, transaction
 from django.db.models import F
 from django.db.models.functions import Least
 from django.db.models.signals import post_delete
@@ -23,6 +23,7 @@ from django.utils.text import slugify
 # Standard Library
 import logging
 import re
+import time
 from datetime import timedelta
 from itertools import zip_longest
 
@@ -117,6 +118,14 @@ class FOIAComposer(models.Model):
         # MuckRock
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
+        logger.info(
+            "SUBMIT_ENTER pk=%s in_atomic=%s autocommit=%s ts=%.6f",
+            self.pk,
+            connection.in_atomic_block,
+            connection.get_autocommit(),
+            time.time(),
+        )
+
         num_requests = self.agencies.count()
         request_count = self.organization.make_requests(num_requests)
         self.num_reg_requests = request_count["regular"]
@@ -130,6 +139,12 @@ class FOIAComposer(models.Model):
             composer_create_foias(self.pk, contact_info, no_proxy)
         else:
             # otherwise do it delayed so the page doesn't risk timing out
+            logger.info(
+                "SUBMIT_DISPATCH pk=%s in_atomic=%s ts=%.6f",
+                self.pk,
+                connection.in_atomic_block,
+                time.time(),
+            )
             composer_create_foias.delay(self.pk, contact_info, no_proxy)
 
         # if num_requests is less than the multi-review amount, or the user is a

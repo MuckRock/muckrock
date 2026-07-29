@@ -6,12 +6,14 @@ Viewsets for the FOIA API
 from django import forms
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db import connection
 from django.db.models import Prefetch
 from django.template.defaultfilters import slugify
 from django.utils import timezone
 
 # Standard Library
 import logging
+import time
 
 # Third Party
 import actstream
@@ -282,6 +284,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             edited_boilerplate=data["edited_boilerplate"],
             embargo_status=data["embargo_status"],
         )
+        logger.info(
+            "V1_AFTER_CREATE pk=%s in_atomic=%s autocommit=%s ts=%.6f",
+            composer.pk,
+            connection.in_atomic_block,
+            connection.get_autocommit(),
+            time.time(),
+        )
         composer.agencies.set(data["agencies"])
 
         for title, content in data["attachments"]:
@@ -291,7 +300,14 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             attm.ffile.save(title, ContentFile(content))
 
         try:
+            logger.info(
+                "V1_BEFORE_SUBMIT pk=%s in_atomic=%s ts=%.6f",
+                composer.pk,
+                connection.in_atomic_block,
+                time.time(),
+            )
             composer.submit()
+            logger.info("V1_AFTER_SUBMIT pk=%s ts=%.6f", composer.pk, time.time())
         except InsufficientRequestsError:
             return Response(
                 {
