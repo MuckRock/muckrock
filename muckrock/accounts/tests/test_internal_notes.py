@@ -13,6 +13,7 @@ from muckrock.accounts.models import InternalNote
 from muckrock.accounts.utils import note_form_prefix
 from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
+from muckrock.task.factories import FlaggedTaskFactory
 from muckrock.task.models import MultiRequestTask
 
 NOTE_TEXT = "This user keeps filing the same request over and over"
@@ -145,6 +146,22 @@ class TestMultiRequestTaskNotes(InternalNoteTestCase):
         self.client.force_login(self.user)
         response = self.client.get(self.url)
         assert response.status_code == 302
+
+    def test_task_notes_are_named_apart_from_internal_notes(self):
+        """Notes about the request are labeled separately from notes about
+        the user, since both forms are on this page"""
+        self.client.force_login(self.staff)
+        response = self.client.get(self.url)
+        self.assertContains(response, "Task Notes")
+        self.assertContains(response, "Internal Notes")
+
+    def test_other_tasks_still_say_note(self):
+        """Only the multirequest page renames the shared note form"""
+        self.client.force_login(self.staff)
+        flagged = FlaggedTaskFactory()
+        response = self.client.get(reverse("flagged-task", kwargs={"pk": flagged.pk}))
+        self.assertContains(response, ">Note</p>")
+        self.assertNotContains(response, "Task Notes")
 
 
 class TestCreateNote(InternalNoteTestCase):
