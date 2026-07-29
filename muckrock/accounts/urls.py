@@ -52,6 +52,21 @@ urlpatterns = [
         r"^contact_user/(?P<idx>\d+)/$", views.contact_user, name="acct-contact-user"
     ),
     re_path(
+        r"^notes/user/(?P<idx>\d+)/$",
+        views.create_internal_note,
+        name="acct-note-create",
+    ),
+    re_path(
+        r"^notes/(?P<idx>\d+)/edit/$",
+        views.update_internal_note,
+        name="acct-note-update",
+    ),
+    re_path(
+        r"^notes/(?P<idx>\d+)/delete/$",
+        views.delete_internal_note,
+        name="acct-note-delete",
+    ),
+    re_path(
         r"^notifications/$", views.NotificationList.as_view(), name="acct-notifications"
     ),
     re_path(

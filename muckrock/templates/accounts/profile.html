@@ -1,4 +1,5 @@
 {% extends 'base_profile.html' %}
+{% load account_tags %}
 {% load tags %}
 {% load static %}
 
@@ -133,6 +134,8 @@
       {% endif %}
     </div>
   </section>
+
+  {% internal_notes user_obj %}
 
   {% if request.user == user_obj %}
     <section class="buy">

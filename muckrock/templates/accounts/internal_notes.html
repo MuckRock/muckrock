@@ -1,0 +1,69 @@
+{% comment %}
+Private staff notes about a user.  Rendered by the {% internal_notes user %}
+tag, which shows nothing to non-staff users.  Never include this template
+directly - go through the tag so the permission check cannot be skipped.
+{% endcomment %}
+{% if show_notes %}
+  <section class="internal-notes">
+    <h3>
+      Internal Notes
+      <small>Staff only &mdash; not visible to {{ notes_user.username }}</small>
+    </h3>
+
+    {% if notes %}
+      <ul class="internal-notes__list nostyle">
+        {% for item in notes %}
+          <li class="internal-note {% if item.note.warning_level %}internal-note--warning{% endif %}" id="note-{{ item.note.pk }}">
+            <p class="internal-note__meta">
+              <span class="internal-note__by">{{ item.note.by.profile.full_name|default:item.note.by.username }}</span>
+              <time datetime="{{ item.note.created|date:'c' }}">{{ item.note.created|date:'m/d/Y g:i a' }}</time>
+              {% if item.note.category %}
+                <span class="internal-note__category">{{ item.note.category }}</span>
+              {% endif %}
+              {% if item.note.warning_level %}
+                <span class="internal-note__warning">{{ item.note.get_warning_level_display }}</span>
+              {% endif %}
+            </p>
+            <div class="internal-note__text">{{ item.note.text|linebreaks }}</div>
+            <details class="internal-note__edit">
+              <summary class="button">Edit</summary>
+              <form method="post" action="{% url 'acct-note-update' idx=item.note.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                {% include 'lib/pattern/form.html' with form=item.form %}
+                <button type="submit" name="update_note" value="true" class="primary button">
+                  Save Note
+                </button>
+              </form>
+              <form method="post" action="{% url 'acct-note-delete' idx=item.note.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <button type="submit" name="delete_note" value="true" class="red button"
+                        onclick="return confirm('Delete this note? This cannot be undone.')">
+                  Delete Note
+                </button>
+              </form>
+            </details>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="internal-notes__empty">No notes about {{ notes_user.username }} yet.</p>
+    {% endif %}
+
+    <details class="internal-notes__add">
+      <summary class="button">
+        <span class="internal-notes__label-closed">Add a note</span>
+        <span class="internal-notes__label-open">Cancel</span>
+      </summary>
+      <form method="post" action="{% url 'acct-note-create' idx=notes_user.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include 'lib/pattern/form.html' with form=note_form %}
+        <button type="submit" name="add_note" value="true" class="primary button">
+          Add Note
+        </button>
+      </form>
+    </details>
+  </section>
+{% endif %}
