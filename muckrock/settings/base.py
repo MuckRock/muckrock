@@ -218,7 +218,7 @@ MIDDLEWARE = (
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "reversion.middleware.RevisionMiddleware",
+    #"reversion.middleware.RevisionMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "daily_active_users.middleware.DailyActiveUserMiddleware",
