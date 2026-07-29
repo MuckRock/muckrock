@@ -1,3 +1,4 @@
+{% load tags %}
 {% comment %}
 Private staff notes about a user.  Rendered by the {% internal_notes user %}
 tag, which shows nothing to non-staff users.  Never include this template
@@ -24,7 +25,7 @@ directly - go through the tag so the permission check cannot be skipped.
                 <span class="internal-note__warning">{{ item.note.get_warning_level_display }}</span>
               {% endif %}
             </p>
-            <div class="internal-note__text">{{ item.note.text|linebreaks }}</div>
+            <div class="internal-note__text">{{ item.note.text|markdown }}</div>
             <details class="internal-note__edit">
               <summary class="button">Edit</summary>
               <form method="post" action="{% url 'acct-note-update' idx=item.note.pk %}">

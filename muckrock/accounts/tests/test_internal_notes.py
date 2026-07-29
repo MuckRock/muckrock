@@ -62,6 +62,23 @@ class TestProfileNotes(InternalNoteTestCase):
             response, reverse("acct-note-create", kwargs={"idx": self.user.pk})
         )
 
+    def test_note_text_is_markdown(self):
+        """Notes are written in markdown"""
+        self.note.text = "Filed **too many** requests, see [the log](/foia/)"
+        self.note.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(self.url)
+        self.assertContains(response, "<strong>too many</strong>")
+        self.assertContains(response, '<a href="/foia/">the log</a>')
+
+    def test_note_markdown_is_sanitized(self):
+        """Markdown does not let a note smuggle in a script tag"""
+        self.note.text = "Suspicious <script>alert('xss')</script>"
+        self.note.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "<script>alert")
+
     def test_owner_does_not_see_notes(self):
         """The user a note is about may never see it"""
         self.client.force_login(self.user)

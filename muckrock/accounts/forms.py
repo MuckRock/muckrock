@@ -61,3 +61,4 @@ class InternalNoteForm(forms.ModelForm):
         model = InternalNote
         fields = ["text", "category", "warning_level"]
         widgets = {"text": forms.Textarea(attrs={"rows": 4})}
+        help_texts = {"text": "Markdown is supported"}
