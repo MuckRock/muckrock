@@ -30,6 +30,26 @@ from muckrock.core.utils import retry_on_error, stripe_retry_on_error
 logger = logging.getLogger(__name__)
 
 
+def can_see_internal_notes(user):
+    """Internal notes are private staff records about a user
+
+    They must never be exposed to non-staff users.  This is the single place
+    where that is decided, so additional requirements can be added later.
+    """
+    return user.is_authenticated and user.is_staff
+
+
+def note_form_prefix(note=None, user=None):
+    """Namespace an internal note form
+
+    Several of these forms are rendered on the same page, so each one needs its
+    own prefix to keep field ids from colliding.
+    """
+    if note is not None:
+        return "note-{}".format(note.pk)
+    return "add-note-{}".format(user.pk)
+
+
 def unique_username(name):
     """Create a globally unique username from a name and return it."""
     # username can be at most 150 characters

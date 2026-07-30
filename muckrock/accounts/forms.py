@@ -9,7 +9,7 @@ from django import forms
 import logging
 
 # MuckRock
-from muckrock.accounts.models import Profile
+from muckrock.accounts.models import InternalNote, Profile
 from muckrock.organization.forms import StripeForm
 
 logger = logging.getLogger(__name__)
@@ -52,3 +52,13 @@ class ContactForm(forms.Form):
 
     subject = forms.CharField(max_length=255)
     message = forms.CharField(widget=forms.Textarea)
+
+
+class InternalNoteForm(forms.ModelForm):
+    """A form for staff to write private notes about a user"""
+
+    class Meta:
+        model = InternalNote
+        fields = ["text", "category", "warning_level"]
+        widgets = {"text": forms.Textarea(attrs={"rows": 4})}
+        help_texts = {"text": "Markdown is supported"}

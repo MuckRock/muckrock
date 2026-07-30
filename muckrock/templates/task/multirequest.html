@@ -1,5 +1,9 @@
 {% extends 'task/default.html' %}
+{% load account_tags %}
 {% load tags %}
+
+{# these notes are about the request - internal notes are about the user #}
+{% block task-note-title %}Task Notes{% endblock %}
 
 {% block task-content %}
   <summary class="task__data multirequest">
@@ -16,6 +20,7 @@
       {% endfor %}
     </ul>
   </summary>
+  {% internal_notes task.composer.user %}
 {% endblock %}
 
 {% block task-actions %}
