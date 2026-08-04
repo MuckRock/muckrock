@@ -130,7 +130,9 @@ class FOIAComposer(models.Model):
             composer_create_foias(self.pk, contact_info, no_proxy)
         else:
             # otherwise do it delayed so the page doesn't risk timing out
-            composer_create_foias.delay(self.pk, contact_info, no_proxy)
+            transaction.on_commit(
+                lambda: composer_create_foias.delay(self.pk, contact_info, no_proxy)
+            )
 
         # if num_requests is less than the multi-review amount, or the user is a
         # verified journalist and the bypass is enabled, we will approve the

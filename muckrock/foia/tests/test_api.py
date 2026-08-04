@@ -119,8 +119,18 @@ class TestFOIAViewsetCreate(TestCase):
     def test_multi_agency(self):
         """Test with multiple agencies"""
         agencies = AgencyFactory.create_batch(3)
-        response = self.api_call({"agency": [a.pk for a in agencies]})
-        assert len(response.json()["Requests"]) == 3
+        # Documentation for captureOnCommitCallbacks:
+        # https://adamj.eu/tech/2020/05/20/the-fast-way-to-test-django-transaction-on-commit-callbacks/
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.api_call({"agency": [a.pk for a in agencies]})
+
+        # on_commit has now run, now fetch the number of requests by the composer
+        # returned by location in the response
+        # and ensure the foia count on that composer is 3.
+        location = response.json()["Location"]
+        pk = int(location.rstrip("/").split("-")[-1])
+        composer = FOIAComposer.objects.get(pk=pk)
+        assert composer.foias.count() == 3
 
     def test_bad_agency_id_format(self):
         """Test with a bad agency ID format"""
