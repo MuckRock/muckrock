@@ -10,6 +10,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.foia.models.composer import FOIAComposer
 from muckrock.foia.models.request import FOIARequest
 from muckrock.foia.viewsets import FOIARequestViewSet
 from muckrock.organization.factories import MembershipFactory, OrganizationFactory
@@ -65,6 +66,22 @@ class TestFoiaCreation(TestCase):
         request_ids = response.data["Requests"]
         foia = FOIARequest.objects.get(pk=request_ids[0])
         assert foia.composer.organization == self.organization
+
+    def test_create_blocked_from_filing(self):
+        """A user blocked from filing may not create a request"""
+
+        self.user.profile.blocked_from_filing = True
+        self.user.profile.save()
+        data = {
+            "agency": [self.agency.pk],
+            "title": "Test request",
+            "document_request": "Best cake recipe",
+        }
+        request = self.factory.post(self.endpoint, data, format="json")
+        force_authenticate(request, user=self.user)
+        response = self.view(request)
+        assert response.status_code == 403
+        assert not FOIAComposer.objects.filter(user=self.user).exists()
 
     def test_create_org_bad(self):
         """Create a FOIA Request with a specified org"""

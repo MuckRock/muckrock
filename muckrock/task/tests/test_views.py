@@ -23,7 +23,7 @@ from muckrock.core.test_utils import (
 )
 from muckrock.core.views import MRFilterListView
 from muckrock.foia.codes import CODES
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.task.factories import (
     FlaggedTaskFactory,
     NewAgencyTaskFactory,
@@ -38,12 +38,14 @@ from muckrock.task.factories import (
 from muckrock.task.forms import FlaggedTaskForm, ProjectReviewTaskForm
 from muckrock.task.models import (
     BlacklistDomain,
+    MultiRequestTask,
     NewAgencyTask,
     OrphanTask,
     SnailMailTask,
 )
 from muckrock.task.views import (
     FlaggedTaskList,
+    MultiRequestTaskList,
     NewPortalTaskList,
     PortalTaskList,
     ProjectReviewTaskList,
@@ -175,6 +177,50 @@ class TaskListViewBatchedPOSTTests(TestCase):
             assert _task.resolved, (
                 "Task %d should be resolved when doing a batched resolve" % _task.pk
             )
+
+
+@mock.patch("muckrock.message.notifications.SlackNotification.send", mock_send)
+class MultiRequestTaskViewTests(TestCase):
+    """Tests MultiRequestTask-specific POST handlers"""
+
+    def setUp(self):
+        self.url = reverse("multirequest-task-list")
+        self.view = MultiRequestTaskList.as_view()
+        self.staff = UserFactory(is_staff=True)
+        self.agencies = AgencyFactory.create_batch(2)
+
+    def _task(self, **user_kwargs):
+        """A multirequest task awaiting review"""
+        composer = FOIAComposerFactory(
+            status="submitted",
+            agencies=self.agencies,
+            user=UserFactory(**user_kwargs),
+        )
+        return MultiRequestTask.objects.create(composer=composer)
+
+    def test_submit(self):
+        """Staff may approve a multirequest for a user in good standing"""
+        task = self._task()
+        data = {
+            "task_submit": "truthy",
+            "task": task.pk,
+            "agencies": [a.pk for a in self.agencies],
+        }
+        http_post_response(self.url, self.view, data, self.staff)
+        task.refresh_from_db()
+        assert task.resolved
+
+    def test_submit_blocked_from_filing(self):
+        """Staff may not approve a multirequest for a blocked user"""
+        task = self._task(profile__blocked_from_filing=True)
+        data = {
+            "task_submit": "truthy",
+            "task": task.pk,
+            "agencies": [a.pk for a in self.agencies],
+        }
+        http_post_response(self.url, self.view, data, self.staff)
+        task.refresh_from_db()
+        assert not task.resolved
 
 
 @mock.patch("muckrock.message.notifications.SlackNotification.send", mock_send)

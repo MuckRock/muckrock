@@ -13,7 +13,7 @@ from muckrock.foia.factories import (
     FOIAFileFactory,
     FOIARequestFactory,
 )
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIAComposer, FOIARequest
 from muckrock.organization.factories import MembershipFactory, OrganizationFactory
 
 
@@ -63,6 +63,23 @@ class TestFOIARequestViewset(TestCase):
             },
         )
         assert response.status_code == 201, response.json()
+
+    def test_create_blocked_from_filing(self):
+        """A user blocked from filing gets a 403 and no draft is left behind"""
+        agency = AgencyFactory.create()
+        user = UserFactory.create(profile__blocked_from_filing=True)
+        _fund(user.profile.organization)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "Meeting minutes",
+            },
+        )
+        assert response.status_code == 403, response.json()
+        assert not FOIAComposer.objects.filter(user=user).exists()
 
     def test_create_missing_agencies(self):
         """Omitting agencies returns 400 (previously a 500 KeyError)"""
