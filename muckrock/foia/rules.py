@@ -188,6 +188,12 @@ def is_agency_user(user):
 
 @predicate
 @user_authenticated
+def is_blocked_from_filing(user):
+    return user.profile.blocked_from_filing
+
+
+@predicate
+@user_authenticated
 def has_perm_embargo(user):
     # we want to directly check the model backend for a permissions to avoid
     # infinite recursion
@@ -228,7 +234,7 @@ can_view_composer = can_view_composer_child | is_owner_composer | is_staff
 
 can_edit_composer = is_owner_composer | is_staff
 
-add_perm("foia.add_foiarequest", is_authenticated)
+add_perm("foia.add_foiarequest", is_authenticated & ~is_blocked_from_filing)
 add_perm("foia.change_foiarequest", can_edit)
 add_perm("foia.view_foiarequest", can_view)
 add_perm("foia.embargo_foiarequest", (can_edit | no_foia) & can_embargo)

@@ -140,6 +140,16 @@ class Profile(models.Model):
         default=False, help_text="This user is a proxy filer for their home state"
     )
 
+    # moderation
+    blocked_from_filing = models.BooleanField(
+        default=False,
+        verbose_name="Block from filing",
+        help_text=(
+            "Prevent this user from filing new requests.  They will still be "
+            "able to view and track the requests they have already filed."
+        ),
+    )
+
     # for agency users
     agency = models.OneToOneField(
         "agency.Agency", blank=True, null=True, on_delete=models.SET_NULL
