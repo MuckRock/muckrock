@@ -17,6 +17,7 @@ from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
+from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.forms.comms import ContactInfoForm
 from muckrock.foia.models import FOIAComposer
 
@@ -224,6 +225,13 @@ class BaseComposerForm(forms.ModelForm):
                     raise forms.ValidationError(
                         "Please enter a correct username and password"
                     )
+        # check this last, as an anonymous user may have just logged in above
+        if (
+            cleaned_data.get("action") == "submit"
+            and self._user.is_authenticated
+            and self._user.profile.blocked_from_filing
+        ):
+            raise forms.ValidationError(BLOCKED_FROM_FILING_MESSAGE)
         return cleaned_data
 
 

@@ -27,7 +27,8 @@ import requests
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
-from muckrock.foia.exceptions import InsufficientRequestsError
+from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
+from muckrock.foia.exceptions import BlockedFromFilingError, InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIARequest, FOIATemplate
 
@@ -174,6 +175,8 @@ class GenericComposer(BuyRequestsMixin):
             composer.submit(contact_info, form.cleaned_data.get("no_proxy"))
         except InsufficientRequestsError:
             messages.warning(self.request, "You need to purchase more requests")
+        except BlockedFromFilingError:
+            messages.error(self.request, BLOCKED_FROM_FILING_MESSAGE)
         else:
             self.request.session["ga"] = "request_submitted"
             mixpanel_event(
