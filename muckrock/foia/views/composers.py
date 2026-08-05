@@ -99,6 +99,10 @@ class GenericComposer(BuyRequestsMixin):
     def get_context_data(self, **kwargs):
         """Extra context"""
         context = super().get_context_data(**kwargs)
+        context["blocked_from_filing"] = (
+            self.request.user.is_authenticated
+            and self.request.user.profile.blocked_from_filing
+        )
         if self.request.user.is_authenticated:
             foias_filed = self.request.user.composers.exclude(status="started").count()
             organization, payer = self._get_organizations(self.request.user)
