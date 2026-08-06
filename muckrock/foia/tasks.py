@@ -137,13 +137,24 @@ def upload_document_cloud(ffile_pk):
 
     dc_client = get_dc_client()
 
-    _upload_documentcloud(
-        dc_client,
-        ffile,
-        change,
-        save_doc_attrs=True,
-        extra_params={"revision_control": True},
-    )
+    try:
+        _upload_documentcloud(
+            dc_client,
+            ffile,
+            change,
+            save_doc_attrs=True,
+            extra_params={"revision_control": True},
+        )
+    except (DocumentCloudError, requests.ReadTimeout) as exc:
+        if upload_document_cloud.request.retries >= 10:
+            logger.warning(
+                "DocumentCloud upload failed for FOIAFile %s (source: %s): %s",
+                ffile.pk,
+                ffile.source,
+                exc,
+                exc_info=sys.exc_info(),
+            )
+        raise
 
 
 @shared_task(
