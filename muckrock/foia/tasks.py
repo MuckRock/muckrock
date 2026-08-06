@@ -54,6 +54,7 @@ from muckrock.communication.models import (
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import get_dc_client, read_in_chunks, squarelet_get
+from muckrock.foia.constants import FILE_MAGIC_BYTES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
@@ -71,6 +72,35 @@ foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<i
 logger = logging.getLogger(__name__)
 
 lob.api_key = settings.LOB_SECRET_KEY
+
+
+class InvalidFileTypeError(Exception):
+    """A FOIAFile's contents don't match its claimed extension"""
+
+
+def is_valid_file_type(ffile):
+    """Return whether a FOIAFile's contents match its claimed extension.
+    This only runs on approved filetypes before uploading to DocumentCloud
+    and acts a filter to stop junk from being uploaded"""
+    ext = ffile.get_extension()
+    expected = FILE_MAGIC_BYTES.get(ext)
+    if expected is None:
+        return True
+
+    read_len = max(len(sig) for sig in expected)
+    with ffile.ffile.open("rb") as f:
+        head = f.read(read_len)
+
+    valid = any(head.startswith(sig) for sig in expected)
+    if not valid:
+        logger.warning(
+            "FOIAFile %s claims .%s but content starts with %r (source: %s)",
+            ffile.pk,
+            ext,
+            head,
+            ffile.source,
+        )
+    return valid
 
 
 @shared_task(
@@ -95,6 +125,12 @@ def upload_document_cloud(ffile_pk):
     if not ffile.is_doccloud():
         # not a file doc cloud supports, do not attempt to upload
         return
+
+    if not is_valid_file_type(ffile):
+        raise InvalidFileTypeError(
+            f"FOIAFile {ffile.pk} claims .{ffile.get_extension()} "
+            "but content does not match"
+        )
 
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
