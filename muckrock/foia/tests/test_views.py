@@ -1456,3 +1456,65 @@ class TestFOIAComposerViews(TestCase):
         )
         assert response.status_code == 200
         assert response.template_name == ["foia/foiacomposer_detail.html"]
+
+
+class TestBlockedFromFilingComposerViews(TestCase):
+    """A user blocked from filing may not use the composer to file"""
+
+    def setUp(self):
+        self.request_factory = RequestFactory()
+        self.mocker = requests_mock.Mocker()
+        mock_squarelet(self.mocker)
+        self.mocker.start()
+        self.addCleanup(self.mocker.stop)
+        FOIATemplateFactory.create()
+        self.user = UserFactory(profile__blocked_from_filing=True)
+
+    def submit_data(self):
+        """Post data for an otherwise valid submission"""
+        return {
+            "title": "Title",
+            "requested_docs": "ABC",
+            "agencies": AgencyFactory().pk,
+            "action": "submit",
+            "stripe_pk": "STRIPE_PK",
+        }
+
+    def test_get_create_composer(self):
+        """A blocked user gets a notice instead of the request form"""
+        request = self.request_factory.get(reverse("foia-create"))
+        request.user = self.user
+        request = mock_middleware(request)
+        response = CreateComposer.as_view()(request)
+        assert response.status_code == 200
+        assert response.context_data["blocked_from_filing"]
+        response.render()
+        assert b"not able to file new requests" in response.content
+        assert reverse("foia-mylist").encode() in response.content
+        # the request form itself is gone
+        assert b'id="submit_button"' not in response.content
+        assert b'name="requested_docs"' not in response.content
+
+    def test_post_create_composer(self):
+        """A blocked user cannot submit a new composer"""
+        request = self.request_factory.post(reverse("foia-create"), self.submit_data())
+        request.user = self.user
+        request = mock_middleware(request)
+        response = CreateComposer.as_view()(request)
+        assert response.status_code == 200
+        assert not FOIAComposer.objects.filter(
+            user=self.user, status="submitted"
+        ).exists()
+
+    def test_post_update_composer(self):
+        """A blocked user cannot submit a draft they already had"""
+        composer = FOIAComposerFactory(status="started", user=self.user)
+        request = self.request_factory.post(
+            reverse("foia-draft", kwargs={"idx": composer.pk}), self.submit_data()
+        )
+        request.user = self.user
+        request = mock_middleware(request)
+        response = UpdateComposer.as_view()(request, idx=composer.pk)
+        assert response.status_code == 200
+        composer.refresh_from_db()
+        assert composer.status == "started"

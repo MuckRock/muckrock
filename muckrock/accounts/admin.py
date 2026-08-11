@@ -175,6 +175,7 @@ class ProfileInline(admin.StackedInline):
         "state",
         "proxy",
         "agency",
+        "blocked_from_filing",
     )
     readonly_fields = ("org_link", "uuid", "full_name", "email_confirmed", "avatar_url")
 
@@ -238,8 +239,12 @@ class MRUserAdmin(UserAdmin):
         "full_name",
         "is_staff",
         "is_superuser",
+        "blocked_from_filing",
     )
-    list_filter = UserAdmin.list_filter + (PermissionFilter,)
+    list_filter = UserAdmin.list_filter + (
+        PermissionFilter,
+        "profile__blocked_from_filing",
+    )
     list_select_related = ("profile",)
     inlines = [ProfileInline, InternalNoteInline]
     superuser_fieldsets = (
@@ -285,6 +290,11 @@ class MRUserAdmin(UserAdmin):
     def full_name(self, obj):
         """Show full name from profile"""
         return obj.profile.full_name
+
+    @admin.display(boolean=True, description="Blocked from filing")
+    def blocked_from_filing(self, obj):
+        """Is this user blocked from filing new requests?"""
+        return obj.profile.blocked_from_filing
 
     def save_formset(self, request, form, formset, change):
         """Credit internal notes to the staff member writing them"""

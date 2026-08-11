@@ -8,6 +8,13 @@ COMPOSER_SUBMIT_DELAY = 35 * 60
 # allow a composer to be edited 30 minutes after it has been submitted
 COMPOSER_EDIT_DELAY = 30 * 60
 
+# shown to users whose account has been blocked from filing new requests
+BLOCKED_FROM_FILING_MESSAGE = (
+    "Your account is not able to file new requests.  You can still view and "
+    "track the requests you have already filed.  If you believe this is a "
+    "mistake, please contact us at info@muckrock.com."
+)
+
 # elements allowed in html email, from:
 # https://www.pinpointe.com/blog/email-campaign-html-and-css-support
 EMAIL_TAGS = [

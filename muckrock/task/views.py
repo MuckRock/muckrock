@@ -556,6 +556,13 @@ class MultiRequestTaskList(TaskList):
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to MultiRequestTasks"""
         if request.POST.get("task_submit"):
+            if task.composer.user.profile.blocked_from_filing:
+                messages.error(
+                    request,
+                    f"{task.composer.user.username} has been blocked from filing "
+                    "- no action taken.  Reject this multirequest instead.",
+                )
+                return None
             agency_list = request.POST.getlist("agencies")
             task.submit(agency_list)
             task.resolve(

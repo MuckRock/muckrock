@@ -301,6 +301,45 @@ $color-advanced-container: lighten($color-agency, 40%);
     text-align: center;
 }
 
+// Shown in place of the request form when a user is blocked from filing
+.filing-blocked {
+    @include border;
+    max-width: 32rem;
+    margin: 2*$vr auto;
+    padding: 2*$vr;
+    border-color: $color-grey-7;
+    border-radius: 4*$border-radius;
+    background-color: $color-white-pure;
+    text-align: center;
+    .symbol {
+        display: block;
+        svg {
+            $svg-size: 3.5rem;
+            width: $svg-size;
+            height: $svg-size;
+            @include svg-color($color-red);
+        }
+    }
+    h2 {
+        margin-top: $vr/2;
+    }
+    p {
+        @include vr;
+        color: $color-grey-2;
+    }
+    .button {
+        margin: $vr/2 0 $vr 0;
+    }
+}
+
+.new-request:has(.filing-blocked) {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .buy-section {
   &.hide-form .number-row {
     display: none;

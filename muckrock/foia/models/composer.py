@@ -33,6 +33,7 @@ from taggit.managers import TaggableManager
 # MuckRock
 from muckrock.core.utils import TempDisconnectSignal, mailchimp_journey
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
+from muckrock.foia.exceptions import BlockedFromFilingError
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import EMBARGO_CHOICES
 from muckrock.foia.querysets import FOIAComposerQuerySet
@@ -116,6 +117,12 @@ class FOIAComposer(models.Model):
         # pylint: disable=import-outside-toplevel
         # MuckRock
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
+
+        if self.user.profile.blocked_from_filing:
+            # this is the last line of defense - it catches the web form, both
+            # versions of the API, and any other caller
+            logger.info("Composer submit blocked: %s %s", self.pk, self.user.pk)
+            raise BlockedFromFilingError
 
         num_requests = self.agencies.count()
         request_count = self.organization.make_requests(num_requests)

@@ -19,3 +19,7 @@ class SizeError(Exception):
 
 class InsufficientRequestsError(Exception):
     """User needs to purchase more requests"""
+
+
+class BlockedFromFilingError(Exception):
+    """User has been blocked from filing new requests"""
