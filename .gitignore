@@ -41,3 +41,4 @@ CLAUDE.md
 .env
 .claude
 rootCA.pem
+.playwright-mcp
