@@ -99,7 +99,7 @@ def is_valid_file_type(ffile):
     ignore_result=True,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
-    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
+    autoretry_for=(DocumentCloudError, requests.exceptions.RequestException),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
