@@ -54,6 +54,7 @@ from muckrock.communication.models import (
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import get_dc_client, read_in_chunks, squarelet_get
+from muckrock.foia.constants import FILE_MAGIC_BYTES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
     FOIACommunication,
@@ -73,11 +74,32 @@ logger = logging.getLogger(__name__)
 lob.api_key = settings.LOB_SECRET_KEY
 
 
+class InvalidFileTypeError(Exception):
+    """A FOIAFile's contents don't match its claimed extension"""
+
+
+def is_valid_file_type(ffile):
+    """Return whether a FOIAFile's contents match its claimed extension.
+    This only runs on approved filetypes before uploading to DocumentCloud
+    and acts a filter to stop junk from being uploaded"""
+    ext = ffile.get_extension()
+    expected = FILE_MAGIC_BYTES.get(ext)
+    if expected is None:
+        return True
+
+    read_len = max(len(sig) for sig in expected)
+    with ffile.ffile.open("rb") as f:
+        head = f.read(read_len)
+
+    valid = any(head.startswith(sig) for sig in expected)
+    return valid
+
+
 @shared_task(
     ignore_result=True,
     time_limit=600,
     name="muckrock.foia.tasks.upload_document_cloud",
-    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
+    autoretry_for=(DocumentCloudError, requests.exceptions.RequestException),
     retry_backoff=60,
     retry_kwargs={"max_retries": 10},
 )
@@ -96,18 +118,35 @@ def upload_document_cloud(ffile_pk):
         # not a file doc cloud supports, do not attempt to upload
         return
 
+    if not is_valid_file_type(ffile):
+        raise InvalidFileTypeError(
+            f"FOIAFile {ffile.pk} claims .{ffile.get_extension()} "
+            "but content does not match"
+        )
+
     # if it has a doc_id already, we are changing it, not creating it
     change = bool(ffile.doc_id)
 
     dc_client = get_dc_client()
 
-    _upload_documentcloud(
-        dc_client,
-        ffile,
-        change,
-        save_doc_attrs=True,
-        extra_params={"revision_control": True},
-    )
+    try:
+        _upload_documentcloud(
+            dc_client,
+            ffile,
+            change,
+            save_doc_attrs=True,
+            extra_params={"revision_control": True},
+        )
+    except (DocumentCloudError, requests.ReadTimeout) as exc:
+        if upload_document_cloud.request.retries >= 10:
+            logger.warning(
+                "DocumentCloud upload failed for FOIAFile %s (source: %s): %s",
+                ffile.pk,
+                ffile.source,
+                exc,
+                exc_info=sys.exc_info(),
+            )
+        raise
 
 
 @shared_task(
@@ -348,18 +387,11 @@ def composer_delayed_submit(composer_pk, approve, contact_info, **kwargs):
         composer.multirequesttask_set.create()
 
 
-def get_text_ocr(doc_id):
-    """Get the text OCR from document cloud"""
-
+def get_document(doc_id):
+    """Helper to fetch a document from DocumentCloud"""
     dc_client = get_dc_client()
-
-    try:
-        document = dc_client.documents.get(doc_id)
-    except DocumentCloudError as exc:
-        logger.warning("Doc Cloud error for %s: %s", doc_id, exc.error)
-        return ""
-
-    return document.full_text
+    document = dc_client.documents.get(doc_id)
+    return document
 
 
 def resolve_gloo_if_possible(resp_task, extracted_data):
@@ -414,7 +446,11 @@ def resolve_gloo_if_possible(resp_task, extracted_data):
 
 
 @shared_task(
-    ignore_result=True, max_retries=3, name="muckrock.foia.tasks.classify_status"
+    ignore_result=True,
+    max_retries=10,
+    name="muckrock.foia.tasks.classify_status",
+    autoretry_for=(DocumentCloudError, requests.exceptions.RequestException),
+    retry_backoff=60,
 )
 def classify_status(task_pk, **kwargs):
     """Use a machine learning classifier to predict the communications status"""
@@ -427,11 +463,29 @@ def classify_status(task_pk, **kwargs):
     file_text = []
     total_pages = 0
     for file_ in resp_task.communication.files.all():
+        # For each DC file with a doc ID, fetch the document and branch on status.
+        # If success -> use its text. If still processing -> retry later.
+        # Terminal (error/nofile) -> no text coming, classify without it.
+        # Any DocumentCloudError from the fetches propagates to autoretry_for.
         total_pages += file_.pages
+
         if file_.is_doccloud() and file_.doc_id:
-            file_text.append(get_text_ocr(file_.doc_id))
+            document = get_document(file_.doc_id)
+            if document.status in ("success", "readable"):
+                file_text.append(document.full_text)
+            elif document.status == "pending":
+                # still processing — wait longer for DocumentCloud
+                classify_status.retry(countdown=60 * 30, args=[task_pk], kwargs=kwargs)
+            elif document.status in ("error", "nofile"):
+                # terminal — processing failed or no file uploaded; no text is
+                # coming, so classify without this file, don't retry again
+                logger.warning(
+                    "Doc Cloud doc %s in terminal state %s, classifying without it",
+                    file_.doc_id,
+                    document.status,
+                )
         elif file_.is_doccloud() and not file_.doc_id:
-            # wait longer for document cloud
+            # not uploaded yet — wait longer for document cloud
             classify_status.retry(countdown=60 * 30, args=[task_pk], kwargs=kwargs)
 
     # new classify
