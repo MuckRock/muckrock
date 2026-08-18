@@ -8,6 +8,7 @@ bleach # Used to sanitize any HTML we're rendering
 boto3 # Used to access AWS
 celery # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
+cryptography==50.0.0 # Used by token handling libraries
 daily-active-users # Log daily active users
 django-activity-stream # Used for notifications
 django-anymail[mailgun] # Use for sending email on production
@@ -49,6 +50,7 @@ furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
 google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
+httplib2==0.32.0 # Used by oauth2client
 img2pdf # convert images to PDFs
 ipython # better python shell
 jsonfield # Used for storing JSON data, required by django-geojson

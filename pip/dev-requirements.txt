@@ -147,7 +147,7 @@ pip-audit==2.7.3
     # via -r pip/dev-requirements.in
 pip-requirements-parser==32.0.1
     # via pip-audit
-pip-tools==7.5.3
+pip-tools==7.6.1
     # via -r pip/dev-requirements.in
 platformdirs==2.5.2
     # via

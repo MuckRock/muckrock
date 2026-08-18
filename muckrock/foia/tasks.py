@@ -92,14 +92,6 @@ def is_valid_file_type(ffile):
         head = f.read(read_len)
 
     valid = any(head.startswith(sig) for sig in expected)
-    if not valid:
-        logger.warning(
-            "FOIAFile %s claims .%s but content starts with %r (source: %s)",
-            ffile.pk,
-            ext,
-            head,
-            ffile.source,
-        )
     return valid
 
 
@@ -455,9 +447,9 @@ def resolve_gloo_if_possible(resp_task, extracted_data):
 
 @shared_task(
     ignore_result=True,
-    max_retries=3,
+    max_retries=10,
     name="muckrock.foia.tasks.classify_status",
-    autoretry_for=(DocumentCloudError, requests.ReadTimeout),
+    autoretry_for=(DocumentCloudError, requests.exceptions.RequestException),
     retry_backoff=60,
 )
 def classify_status(task_pk, **kwargs):

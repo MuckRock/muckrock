@@ -571,7 +571,6 @@ uritemplate==3.0.0
     #   google-api-python-client
 urllib3==2.7.0
     # via
-    #   -r pip/requirements.in
     #   botocore
     #   phaxio
     #   python-documentcloud
