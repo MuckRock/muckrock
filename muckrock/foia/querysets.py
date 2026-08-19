@@ -483,12 +483,6 @@ class FOIATemplateQuerySet(models.QuerySet):
             template = self._render_single(None, user, requested_docs, **kwargs)
         else:
             template = self._render_generic(user, requested_docs, **kwargs)
-
-        if template is None:
-            raise ValueError(
-                "No FOIA template found. A generic template (jurisdiction=None)"
-                " must exist. If this is a fresh environment, set one."
-            )
         if kwargs.get("split") and template:
             parts = template.split(requested_docs, 1)
             if len(parts) != 2:
@@ -496,7 +490,7 @@ class FOIATemplateQuerySet(models.QuerySet):
                     "FOIA template is missing the requested_docs"
                     " marker required for split rendering"
                 )
-            return parts[0], parts[1]
+            return [parts[0], parts[1]]
 
         return template
 
