@@ -370,6 +370,7 @@ class AgencyComposerAutocomplete(AgencyAutocomplete):
         "jurisdiction__parent__abbrev",
     )
     create_field = "name"
+    validate_create = True
 
     def get_queryset(self):
         """Filter by jurisdiction"""

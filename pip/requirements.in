@@ -12,7 +12,7 @@ cryptography==50.0.0 # Used by token handling libraries
 daily-active-users # Log daily active users
 django-activity-stream # Used for notifications
 django-anymail[mailgun] # Use for sending email on production
-django-autocomplete-light==3.9.0rc5 # Autocomplete drop down inputs
+django-autocomplete-light==3.12.1 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-choices # Define choices for a field
 django-constance # Use for dynamic settings
