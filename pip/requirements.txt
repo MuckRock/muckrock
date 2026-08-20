@@ -110,6 +110,7 @@ django==5.2.15
     #   django-activity-stream
     #   django-anymail
     #   django-appconf
+    #   django-autocomplete-light
     #   django-celery-email
     #   django-choices
     #   django-cors-headers
@@ -146,7 +147,7 @@ django-appconf==1.0.4
     # via
     #   django-celery-email
     #   django-opensearch
-django-autocomplete-light==3.9.0rc5
+django-autocomplete-light==3.12.1
     # via -r pip/requirements.in
 django-celery-email==3.0.0
     # via -r pip/requirements.in
@@ -509,7 +510,6 @@ six==1.17.0
     #   -r pip/requirements.in
     #   bleach
     #   click-repl
-    #   django-autocomplete-light
     #   furl
     #   google-api-python-client
     #   oauth2client
