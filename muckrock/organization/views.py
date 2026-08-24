@@ -98,7 +98,7 @@ class OrganizationSquareletView(RedirectView):
         organization = get_object_or_404(Organization, slug=slug)
         if organization.individual:
             user = User.objects.get(profile__uuid=organization.uuid)
-            return "{}/users/{}/".format(settings.SQUARELET_URL, user.username)
+            return user.profile.squarelet_url
         else:
             return "{}/organizations/{}/".format(settings.SQUARELET_URL, slug)
 

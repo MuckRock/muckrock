@@ -162,6 +162,11 @@ class Profile(models.Model):
         """The url for this object"""
         return reverse("acct-profile", kwargs={"username": self.user.username})
 
+    @property
+    def squarelet_url(self):
+        """The url for this user's profile on Squarelet"""
+        return "{}/users/{}/".format(settings.SQUARELET_URL, self.user.username)
+
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""
         # pylint: disable=comparison-with-callable

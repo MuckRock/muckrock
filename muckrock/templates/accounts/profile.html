@@ -116,6 +116,9 @@
             <span class="close-modal button">Close</span>
           </form>
         </div>
+        <div class="button-group">
+          <a target="_blank" rel="noopener noreferrer" class="blue button" href="{{ user_obj.profile.squarelet_url }}">View account</a>
+        </div>
       {% endif %}
       {% if request.user.is_staff and not user_obj.is_superuser %}
         <form method="post" action="/hijack/{{user_obj.pk}}/">
