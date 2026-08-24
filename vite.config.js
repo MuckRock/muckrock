@@ -42,6 +42,16 @@ export default defineConfig({
     cors: true,
     watch: {
       usePolling: true, // Important for Docker
+      interval: 300,
+      ignored: [
+        "**/.git/**",
+        "**/node_modules/**",
+        "**/muckrock/static/**",
+        "**/muckrock/assets/dist/**",
+        "**/.venv/**",
+        "**/__pycache__/**",
+        "**/*.pyc",
+      ],
     },
   },
   css: {
