@@ -3,7 +3,8 @@ Tests accounts models
 """
 
 # Django
-from django.test import TestCase
+from django.conf import settings
+from django.test import TestCase, override_settings
 
 # MuckRock
 from muckrock.accounts.models import Notification, Profile
@@ -28,6 +29,17 @@ class TestProfileUnit(TestCase):
         """Test profile model's str method"""
         expected = "%s's Profile" % str(self.profile.user).capitalize()
         assert str(self.profile) == expected
+
+    def test_squarelet_url(self):
+        """Test the url for the user's profile on Squarelet"""
+        profile = ProfileFactory(user__username="chris")
+        assert profile.squarelet_url == "{}/users/chris/".format(settings.SQUARELET_URL)
+
+    @override_settings(SQUARELET_URL="https://squarelet.example.com")
+    def test_squarelet_url_respects_setting(self):
+        """The Squarelet host comes from settings, not a hardcoded domain"""
+        profile = ProfileFactory(user__username="chris")
+        assert profile.squarelet_url == "https://squarelet.example.com/users/chris/"
 
     def test_feature_level(self):
         """Test getting a users max feature level from their entitlements"""
