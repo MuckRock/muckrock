@@ -754,6 +754,9 @@ def _usable_email(email):
     if email.domain in muckrock_domains:
         return False
 
+    if email.no_reply:
+        return False
+
     if any(n in email.local for n in config.NOREPLY_EMAILS.split()):
         return False
 
