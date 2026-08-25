@@ -193,6 +193,43 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
 
         assert foia.email == original_email
 
+    # patching asyncio.run to not run the classification on actual LLM
+    @patch("asyncio.run", Mock())
+    @requests_mock.Mocker()
+    def test_no_reply_flag(self, mock_requests):
+        """Test that an address flagged no_reply is not routed to,
+        even when its local part doesn't look like a no-reply address"""
+        url = "https://www.example.com/raw_email/"
+        mock_requests.get(
+            settings.MAILGUN_API_URL + "/events",
+            json={"items": [{"storage": {"url": url}}]},
+        )
+        mock_requests.get(url, json={"body-mime": "Raw email"})
+
+        foia = FOIARequestFactory(status="ack")
+        original_email = foia.email
+
+        # a normal-looking address that would pass the string heuristic
+        from_name = "Yes reply"
+        from_email = "yesreply@agency.gov"  # actually a noreply address
+        from_ = '"%s" <%s>' % (from_name, from_email)
+
+        # flag it as no_reply before routing
+        email_address = EmailAddress.objects.fetch(from_email)
+        email_address.no_reply = True
+        email_address.save()
+
+        to_ = '%s, "Doe, John" <other@agency.gov>' % foia.get_request_email()
+        subject = "Test subject"
+        text = "Test normal."
+        signature = "-Charlie Jones"
+
+        self.mailgun_route(from_, to_, subject, text, signature)
+        foia.refresh_from_db()
+        # Confirm that the contact email for this request is left untouched
+        # If the email from the agency is marked as a no reply manually
+        assert foia.email == original_email
+
     def test_bad_sender(self):
         """Test receiving a message from an unauthorized sender"""
 

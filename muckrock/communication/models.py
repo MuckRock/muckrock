@@ -95,7 +95,13 @@ class EmailAddress(models.Model):
     status = models.CharField(
         max_length=5, choices=(("good", "Good"), ("error", "Error")), default="good"
     )
-
+    no_reply = models.BooleanField(
+        default=False,
+        help_text=(
+            "Set this email as a no-reply manually so "
+            "that we won't try to follow up to communications sent from this email"
+        ),
+    )
     objects = EmailAddressQuerySet.as_manager()
 
     def __str__(self):
