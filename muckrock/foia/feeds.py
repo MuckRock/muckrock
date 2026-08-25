@@ -83,7 +83,7 @@ class FOIAFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        return obj.communications.all()[:25]
+        return obj.communications.filter(hidden=False)[:25]
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -183,7 +183,7 @@ class UserUpdateFeed(Feed):
         """The communications are the items for this feed"""
         communications = (
             FOIACommunication.objects.filter(
-                foia__composer__user=obj, foia__embargo_status="public"
+                foia__composer__user=obj, foia__embargo_status="public", hidden=False
             )
             .select_related("foia__agency__jurisdiction")
             .order_by("-datetime")
