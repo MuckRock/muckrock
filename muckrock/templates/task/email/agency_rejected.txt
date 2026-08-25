@@ -1,19 +1,17 @@
 {% extends 'message/base.txt' %}
-
 {% block body %}
-
 Hi,
+{% if text %}{{ text }}
+{% else %}
+We weren't able to send your request to {{ agency }}. When you file to an agency that isn't already in our system, our team reviews it to confirm we have valid contact information. In this case we couldn't verify a working contact, so your request couldn't be sent.
 
-{{ text }}
-
+We've returned the request credit to your account. Your request has been saved below so you don't lose your work. If you think this was a mistake, or you'd like help finding the right agency,  contact us at info@muckrock.com.
+{% endif %}
 {% if foias %}
 {% for foia in foias %}
     * {{ foia.composer.title }} - {{ url }}{% if foia.count == 1%}{% url "foia-draft" idx=foia.composer.pk %}{% else %}{% url "foia-composer-detail" slug=foia.composer.slug idx=foia.composer.pk %}{% endif %}
 {% endfor %}
 {% endif %}
-
 Sincerely,
 The MuckRock Team
-
 {% endblock body %}
-

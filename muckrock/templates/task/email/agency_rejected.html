@@ -1,11 +1,12 @@
 {% extends 'message/base.html' %}
-
 {% block body %}
-
   <p>Hi,</p>
-
-  <p>{{ text|linebreaks }}</p>
-
+  {% if text %}
+    <p>{{ text|linebreaks }}</p>
+  {% else %}
+    <p>We weren't able to send your request to {{ agency }}. When you file to an agency that isn't already in our system, our team reviews it to confirm we have valid contact information. In this case we couldn't verify a working contact, so your request couldn't be sent.</p>
+    <p>We've returned the request credit to your account, and your request has been saved so you don't lose your work. If you think this was a mistake, or you'd like help finding the right agency, contact us at <a href="mailto:info@muckrock.com">info@muckrock.com</a>.</p>
+  {% endif %}
   {% if foias %}
     {% if replaced %}
       <p>
@@ -18,7 +19,6 @@
         agency’s name:
       </p>
     {% endif %}
-
     <ul>
       {% for foia in foias %}
         <li>
@@ -29,9 +29,6 @@
       {% endfor %}
     </ul>
   {% endif %}
-
   <p>Sincerely,<br>
   The MuckRock Team</p>
-
 {% endblock body %}
-

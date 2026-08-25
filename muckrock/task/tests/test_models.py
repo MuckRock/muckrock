@@ -3,6 +3,7 @@ Tests for Tasks models
 """
 
 # Django
+from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -399,6 +400,22 @@ class NewAgencyTaskTests(TestCase):
         assert self.agency.status == "rejected"
         assert not self.user.is_active
         assert not FOIARequest.objects.filter(pk=existing_foia.pk).exists()
+
+    def test_reject_no_replacement_no_text_notifies_user(self):
+        """The no-text path renders the default template and sends one email."""
+        with requests_mock.Mocker() as mocker:
+            mock_squarelet(mocker)
+            FOIARequestFactory(agency=self.agency)
+            self.task.reject()
+        assert len(mail.outbox) == 1
+
+    def test_reject_no_replacement_with_text_notifies_user(self):
+        """The custom-text path also renders and sends one email."""
+        with requests_mock.Mocker() as mocker:
+            mock_squarelet(mocker)
+            FOIARequestFactory(agency=self.agency)
+            self.task.reject(msg_text="Please clarify the agency name.")
+        assert len(mail.outbox) == 1
 
 
 class ResponseTaskTests(TestCase):
