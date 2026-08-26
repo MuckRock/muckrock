@@ -910,7 +910,8 @@ class NewAgencyTask(Task):
             else:
                 subject = 'Update on your request, "{}"'.format(foias[0].title)
             if len(foias) > 1:
-                subject += ", and others"
+                count = len(foias) - 1
+                subject += ", and {} other{}".format(count, "" if count == 1 else "s")
         else:
             subject = f"Agency Rejected: {self.agency}"
         self._send_rejection_email(

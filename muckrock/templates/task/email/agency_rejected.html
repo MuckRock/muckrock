@@ -4,21 +4,10 @@
   {% if text %}
     <p>{{ text|linebreaks }}</p>
   {% else %}
-    <p>We weren't able to send your request to {{ agency }}. When you file to an agency that isn't already in our system, our team reviews it to confirm we have valid contact information. In this case we couldn't verify a working contact, so your request couldn't be sent.</p>
-    <p>We've returned the request credit to your account, and your request has been saved so you don't lose your work. If you think this was a mistake, or you'd like help finding the right agency, contact us at <a href="mailto:info@muckrock.com">info@muckrock.com</a>.</p>
+    <p>We weren't able to send your {{ foias|length|pluralize:"request,requests" }} to {{ agency }}. When you file to an agency that isn't already in our system, our team reviews it to confirm we have valid contact information. In this case we couldn't verify a working contact, so {{ foias|length|pluralize:"it couldn't,they couldn't" }} be sent.</p>
   {% endif %}
   {% if foias %}
-    {% if replaced %}
-      <p>
-        Your request has been directed to {{ agency.name }}. If you believe
-        your request should go elsewhere, please let us know.
-      </p>
-    {% else %}
-      <p>
-        There’s a copy of your request draft here if you want to clarify the
-        agency’s name:
-      </p>
-    {% endif %}
+    <p>We've returned the request {{ foias|length|pluralize:"credit,credits" }} to your account, and your {{ foias|length|pluralize:"request has,requests have" }} been saved so you don't lose your work. If you think this was a mistake, or you'd like help finding the right agency, contact us at <a href="mailto:info@muckrock.com">info@muckrock.com</a>.</p>
     <ul>
       {% for foia in foias %}
         <li>
