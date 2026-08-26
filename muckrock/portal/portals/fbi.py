@@ -7,20 +7,27 @@ Logic for interacting with FBI portals automatically
 from django.utils import timezone
 
 # Standard Library
+import logging
 import os
 import re
+import time
 
 # Third Party
 import requests
+import sentry_sdk
 
 # MuckRock
 from muckrock.communication.models import PortalCommunication
-from muckrock.foia.models import FOIACommunication
+from muckrock.core.utils import requests_retry_session
+from muckrock.foia.models import FOIACommunication, RawEmail
 from muckrock.portal.portals.automated import PortalAutoReceiveMixin
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
 
 FBI_PORTAL_EMAIL = os.environ.get("FBI_PORTAL_EMAIL", "")
+FBI_DOWNLOAD_DELAY = int(os.environ.get("FBI_DOWNLOAD_DELAY", "5"))
+
+logger = logging.getLogger(__name__)
 
 
 class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
@@ -57,19 +64,113 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         else:
             ManualPortal.receive_msg(self, comm, reason="Unexpected email format")
 
+    def _raw_email_body(self, comm):
+        """Return the text/plain body from the raw email.
+
+        comm.communication is stripped to just the intro line, dropping the
+        download links and tokens, so we grab the raw email.
+        """
+        email_comm = comm.emails.first()
+        if email_comm is None:
+            return None
+        try:
+            text, _html = email_comm.rawemail.get_text_html()
+        except RawEmail.DoesNotExist:
+            return None
+        return text or None
+
     def document_reply_task(self, comm_pk):
-        """Download the documents asynchornously"""
+        """Download the documents asynchronously"""
         comm = FOIACommunication.objects.get(pk=comm_pk)
-        p_document_link = re.compile(r"\* \[(?P<name>[^\]]+)\]\((?P<url>.*)\)")
-        for name, url in p_document_link.findall(comm.communication):
-            reply = requests.get(url, timeout=10)
-            if reply.status_code != 200:
-                ManualPortal.receive_msg(
-                    self, comm, reason="Error downloading file: {}".format(name)
-                )
+        body = self._raw_email_body(comm)
+        if body is None:
+            self._report_broken(comm, "Could not read text/plain from raw email")
+            return
+
+        # Each file link is followed by a per-file token, and the download URL
+        # is a token-gated page. POST the token to the URL to get the bytes.
+        p_document = re.compile(
+            r"\* \[(?P<name>[^\]]+)\]\((?P<url>[^)]+)\)"
+            r"\s*\* Use this token to access:\s*(?P<token>\S+)"
+        )
+        # Every link should pair with a token; if not, the format changed again.
+        p_link_only = re.compile(r"\* \[[^\]]+\]\([^)]+\)")
+        matches = list(p_document.finditer(body))
+        if len(matches) != len(p_link_only.findall(body)):
+            self._report_broken(comm, "Could not pair every file link with a token")
+            return
+
+        # skip files already attached so a rerun doesn't duplicate them.
+        # attach_file stores the extension-stripped basename as `title`, so
+        # compare against the same transform to match already-attached files.
+        existing = set(comm.files.values_list("title", flat=True))
+
+        # retries 429/5xx with exponential backoff at the adapter layer.
+        # The tokens are valid for 48 hours, so retrying the POST is safe.
+        # POST must be added to allowed_methods because urllib3's default
+        # frozenset excludes it (POSTs are not retried by default).
+        session = requests_retry_session(
+            retries=5, backoff_factor=2, allowed_methods=frozenset({"POST"})
+        )
+
+        for i, match in enumerate(matches):
+            name = match.group("name")
+            title = os.path.splitext(name)[0][:255]
+            if title in existing:
+                continue
+            if i > 0:
+                # space out requests proactively to avoid FBI rate limiting
+                time.sleep(FBI_DOWNLOAD_DELAY)
+            if not self._download_file(comm, session, match):
                 return
-            comm.attach_file(content=reply.content, name=name, source=self.portal.name)
         self._accept_comm(comm, "There are eFOIA files available for you to download.")
+
+    def _download_file(self, comm, session, match):
+        """POST the token and attach the file. Returns True on success, or
+        reports the failure to manual review and returns False."""
+        name = match.group("name")
+        url = match.group("url")
+        token = match.group("token")
+        try:
+            reply = session.post(
+                url,
+                data={"token": token, "download": "Download File"},
+                timeout=10,
+            )
+        except requests.RequestException as exc:
+            # exhausted retries or a non-retryable network error
+            self._report_broken(
+                comm, "Download failed after retries: {} ({})".format(name, exc)
+            )
+            return False
+
+        if reply.status_code != 200:
+            self._report_broken(
+                comm,
+                "Error downloading file: {} (status {})".format(
+                    name, reply.status_code
+                ),
+            )
+            return False
+        # A wrong/expired token re-renders the HTML gate with a 200
+        # This is a guard against saving the page instead of the file.
+        content_type = reply.headers.get("Content-Type", "").lower()
+        if "text/html" in content_type:
+            self._report_broken(
+                comm, "Token gate returned instead of a file: {}".format(name)
+            )
+            return False
+        comm.attach_file(content=reply.content, name=name, source=self.portal.name)
+        return True
+
+    def _report_broken(self, comm, reason):
+        """Route to manual review and alert that the automation is broken"""
+        logger.error("FBI portal automation failed: %s (comm %d)", reason, comm.pk)
+        sentry_sdk.capture_message(
+            "FBI portal automation failed: {} (comm {})".format(reason, comm.pk),
+            level="error",
+        )
+        ManualPortal.receive_msg(self, comm, reason=reason)
 
     def send_msg(self, comm, **kwargs):
         """Send a message via email if it is not a new submission"""
