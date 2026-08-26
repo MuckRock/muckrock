@@ -19,7 +19,7 @@ import sentry_sdk
 # MuckRock
 from muckrock.communication.models import PortalCommunication
 from muckrock.core.utils import requests_retry_session
-from muckrock.foia.models import FOIACommunication
+from muckrock.foia.models import FOIACommunication, RawEmail
 from muckrock.portal.portals.automated import PortalAutoReceiveMixin
 from muckrock.portal.portals.manual import ManualPortal
 from muckrock.portal.tasks import portal_task
@@ -71,9 +71,12 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         download links and tokens, so we grab the raw email.
         """
         email_comm = comm.emails.first()
-        if email_comm is None or not hasattr(email_comm, "rawemail"):
+        if email_comm is None:
             return None
-        text, _html = email_comm.rawemail.get_text_html()
+        try:
+            text, _html = email_comm.rawemail.get_text_html()
+        except RawEmail.DoesNotExist:
+            return None
         return text or None
 
     def document_reply_task(self, comm_pk):
