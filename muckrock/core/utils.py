@@ -26,6 +26,8 @@ import boto3
 import requests
 import stripe
 from documentcloud import DocumentCloud
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from zenpy import Zenpy
 from zenpy.lib.api_objects import (
     Comment,
@@ -468,3 +470,36 @@ def get_dc_client():
         f"{existing_ua} {settings.SERVICE_USER_AGENT}".strip()
     )
     return client
+
+
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(429, 500, 502, 503, 504),
+    allowed_methods=Retry.DEFAULT_ALLOWED_METHODS,
+    session=None,
+):
+    """Automatic retries for HTTP requests.
+    I've modified it to allow the method caller to specify
+    allowed_methods so that in the case where a POST is effectively just
+    a mask for GET request, it can be retried.
+    This is used in the FBI portal task.
+    This is because urllib3's Retry utility by default
+    does not allow for POST retries:
+    print(Retry.DEFAULT_ALLOWED_METHODS)
+    frozenset({'TRACE', 'HEAD', 'OPTIONS', 'GET', 'DELETE', 'PUT'})
+    See: https://www.peterbe.com/plog/best-practice-with-retries-with-requests
+    """
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+        allowed_methods=allowed_methods,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
