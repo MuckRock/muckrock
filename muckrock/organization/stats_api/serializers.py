@@ -12,7 +12,6 @@ class OrganizationStatsSerializer(serializers.ModelSerializer):
     """Staff-facing organization activity stats."""
 
     uuid = serializers.UUIDField(source="organization.uuid", read_only=True)
-    name = serializers.CharField(source="organization.name", read_only=True)
     total_requests = serializers.SerializerMethodField(
         help_text="Total non-draft requests filed by the organization."
     )
@@ -31,7 +30,6 @@ class OrganizationStatsSerializer(serializers.ModelSerializer):
         model = OrganizationStats
         fields = [
             "uuid",
-            "name",
             "last_request_at",
             "total_requests",
             "recent_request_count",
