@@ -18,6 +18,7 @@ import sys
 import time
 import uuid
 from email.message import Message
+from email.utils import collapse_rfc2231_value
 from hashlib import md5
 
 # Third Party
@@ -397,11 +398,21 @@ def custom_preprocessing_hook(endpoints):
 
 
 def parse_header(header):
-    """Replacement for deprecated cgi parse_header"""
+    """Replacement for the deprecated cgi.parse_header.
+
+    Parses a header value like a Content-Type or Content-Disposition into
+    its main value plus a dict of parameters like the following:
+    'attachment; filename="a.zip"' -> ('attachment', {'filename': 'a.zip'})
+
+    RFC 2231 extended parameters (e.g. filename*=UTF-8''a.zip, used by
+    Dropbox and some FOIA portals) are decoded to plain strings rather than
+    the (charset, language, value) tuples that Message.get_params returns.
+    """
     msg = Message()
     msg["content-type"] = header
-    params = msg.get_params()
-    return (params[0][0], dict(params[1:]))
+    main_value, *param_pairs = msg.get_params()
+    params = {key: collapse_rfc2231_value(value) for key, value in param_pairs}
+    return (main_value[0], params)
 
 
 def mailchimp_journey(email, journey):
