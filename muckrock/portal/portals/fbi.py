@@ -78,7 +78,7 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
         actually contains the tokens. Only then fall back to the raw email
         (an S3 read that can be transiently empty right after delivery).
         """
-        if "Use this token to access" in (comm.communication or ""):
+        if comm.communication and "Use this token to access" in comm.communication:
             return comm.communication
         email_comm = comm.emails.first()
         if email_comm is None:
