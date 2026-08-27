@@ -26,6 +26,9 @@ from muckrock.portal.tasks import portal_task
 
 FBI_PORTAL_EMAIL = os.environ.get("FBI_PORTAL_EMAIL", "")
 FBI_DOWNLOAD_DELAY = int(os.environ.get("FBI_DOWNLOAD_DELAY", "5"))
+# transient-failure retry budget for reading the raw-email body from S3
+FBI_BODY_MAX_RETRIES = int(os.environ.get("FBI_BODY_MAX_RETRIES", "5"))
+FBI_BODY_RETRY_DELAY = int(os.environ.get("FBI_BODY_RETRY_DELAY", "30"))
 
 logger = logging.getLogger(__name__)
 
@@ -65,11 +68,18 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
             ManualPortal.receive_msg(self, comm, reason="Unexpected email format")
 
     def _raw_email_body(self, comm):
-        """Return the text/plain body from the raw email.
+        """Return the body containing the download links and per-file tokens.
 
-        comm.communication is stripped to just the intro line, dropping the
-        download links and tokens, so we grab the raw email.
+        The full body is present in the raw email's text/plain part.
+        Inbound ingest (muckrock/mailgun/views.py) stores Mailgun's
+        stripped-text into comm.communication, which unreliably strips the
+        FBI's link/token bullets. Communication is sometimes the full
+        body and sometimes just the intro line. Prefer communication when it
+        actually contains the tokens. Only then fall back to the raw email
+        (an S3 read that can be transiently empty right after delivery).
         """
+        if "Use this token to access" in (comm.communication or ""):
+            return comm.communication
         email_comm = comm.emails.first()
         if email_comm is None:
             return None
@@ -79,11 +89,25 @@ class FBIPortal(PortalAutoReceiveMixin, ManualPortal):
             return None
         return text or None
 
-    def document_reply_task(self, comm_pk):
+    def document_reply_task(self, comm_pk, attempt=0):
         """Download the documents asynchronously"""
         comm = FOIACommunication.objects.get(pk=comm_pk)
         body = self._raw_email_body(comm)
         if body is None:
+            # The body may only live in the raw email's text/plain part, which
+            # is stored in S3. Right after delivery that object may not be
+            # readable yet, and RawEmail.raw_email is an mproperty, so
+            # an empty read gets memoized for the life of the worker instance.
+            if attempt < FBI_BODY_MAX_RETRIES:
+                portal_task.apply_async(
+                    args=[
+                        self.portal.pk,
+                        "document_reply_task",
+                        [comm_pk, attempt + 1],
+                    ],
+                    countdown=FBI_BODY_RETRY_DELAY,
+                )
+                return
             self._report_broken(comm, "Could not read text/plain from raw email")
             return
 

@@ -105,8 +105,8 @@ def _get_mail_body(post, foia=None):
     ]
     if stripped_text in bad_text:
         return post.get("body-plain")
-    elif foia and foia.portal and foia.portal.type == "nextrequest":
-        # mailgun seems to improperly strip nextrequest messages
+    elif foia and foia.portal and foia.portal.type in ("nextrequest", "fbi"):
+        # mailgun seems to improperly strip nextrequest and FBI messages
         return post.get("body-plain")
     else:
         return "%s\n%s" % (
