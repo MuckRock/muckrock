@@ -858,7 +858,7 @@ class NewAgencyTask(Task):
         return "New Agency Task"
 
     def display(self):
-        """Display something useful and identifing"""
+        """Display something useful and identifying"""
         return self.agency.name
 
     def get_absolute_url(self):
@@ -872,57 +872,69 @@ class NewAgencyTask(Task):
         """Reject agency, resend to replacement if one is specified"""
         if replacement_agency is not None:
             self._resolve_agency(replacement_agency)
-            subject = f"Agency Updated: {self.agency}"
             if msg_text:
-                TemplateEmail(
-                    subject=subject,
-                    user=self.user,
-                    text_template="task/email/agency_rejected.txt",
-                    html_template="task/email/agency_rejected.html",
-                    extra_context={
-                        "agency": self.agency,
-                        "text": msg_text,
-                        "url": settings.MUCKROCK_URL,
-                    },
-                ).send(fail_silently=False)
+                self._send_rejection_email(
+                    subject=f"Agency Updated: {self.agency}",
+                    extra_context={"agency": self.agency, "text": msg_text},
+                )
         else:
             self.agency.status = "rejected"
             self.agency.save()
-            foias = self.agency.foiarequest_set.select_related("composer").annotate(
-                count=Count("composer__foias")
+            foias = list(
+                self.agency.foiarequest_set.select_related("composer").annotate(
+                    count=Count("composer__foias")
+                )
             )
+            self._notify_rejection(foias, msg_text)
+            self._return_and_cleanup(foias)
+
+    def _send_rejection_email(self, subject, extra_context):
+        """Send the agency-rejection email. Callers own the subject and context.
+        This adds the shared url and dispatches through the standard templates."""
+        TemplateEmail(
+            subject=subject,
+            user=self.user,
+            text_template="task/email/agency_rejected.txt",
+            html_template="task/email/agency_rejected.html",
+            extra_context={"url": settings.MUCKROCK_URL, **extra_context},
+        ).send(fail_silently=False)
+
+    def _notify_rejection(self, foias, msg_text):
+        """Email the user that their agency was rejected with no viable replacement.
+        Always sends an email, using default copy when staff provided no custom text."""
+        if foias:
             if msg_text:
-                # only send an email if message text was provided
-                if foias:
-                    subject = 'We need your help with your request, "{}"'.format(
-                        foias[0].title
-                    )
-                    if len(foias) > 1:
-                        subject += ", and others"
-                else:
-                    subject = f"Agency Rejected: {self.agency}"
-                TemplateEmail(
-                    subject=subject,
-                    user=self.user,
-                    text_template="task/email/agency_rejected.txt",
-                    html_template="task/email/agency_rejected.html",
-                    extra_context={
-                        "agency": self.agency,
-                        "foias": foias,
-                        "text": msg_text,
-                        "url": settings.MUCKROCK_URL,
-                    },
-                ).send(fail_silently=False)
-            for foia in foias:
-                foia.composer.return_requests(1)
-                foia.delete()
-            for composer in self.agency.composers.all():
-                composer.agencies.remove(self.agency)
-                if composer.foias.count() == 0:
-                    if composer.revokable():
-                        composer.revoke()
-                    composer.status = "started"
-                    composer.save()
+                subject = 'We need your help with your request, "{}"'.format(
+                    foias[0].title
+                )
+            else:
+                subject = 'Update on your request, "{}"'.format(foias[0].title)
+            if len(foias) > 1:
+                count = len(foias) - 1
+                subject += ", and {} other{}".format(count, "" if count == 1 else "s")
+        else:
+            subject = f"Agency Rejected: {self.agency}"
+        self._send_rejection_email(
+            subject=subject,
+            extra_context={
+                "agency": self.agency,
+                "foias": foias,
+                "text": msg_text,
+            },
+        )
+
+    def _return_and_cleanup(self, foias):
+        """Return one credit per deleted request and reset emptied composers."""
+        for foia in foias:
+            foia.composer.return_requests(1)
+            foia.delete()
+        for composer in self.agency.composers.all():
+            composer.agencies.remove(self.agency)
+            if composer.foias.count() == 0:
+                if composer.revokable():
+                    composer.revoke()
+                composer.status = "started"
+                composer.save()
 
     def _resolve_agency(self, replacement_agency=None):
         """Approves or rejects an agency and re-submits the pending requests"""
