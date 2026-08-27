@@ -18,3 +18,7 @@ class OrganizationConfig(AppConfig):
         from actstream import registry
 
         registry.register(self.get_model("Organization"))
+
+        # org creation signal
+        # MuckRock
+        import muckrock.organization.signals  # pylint:disable = unused-import

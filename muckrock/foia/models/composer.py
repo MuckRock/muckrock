@@ -31,7 +31,11 @@ from constance import config
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock.core.utils import TempDisconnectSignal, mailchimp_journey
+from muckrock.core.utils import (
+    TempDisconnectSignal,
+    mailchimp_journey,
+    record_request_filed,
+)
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
 from muckrock.foia.exceptions import BlockedFromFilingError
 from muckrock.foia.models.file import FOIAFile
@@ -131,6 +135,13 @@ class FOIAComposer(models.Model):
         self.status = "submitted"
         self.datetime_submitted = timezone.now()
         self.save()
+
+        # Record the request-filing watermark explicitly here
+        # As all paths (API and web) lead here
+        record_request_filed(
+            user_id=self.user_id,
+            organization_id=self.organization_id,
+        )
 
         if num_requests == 1:
             # if only one request, create it immediately so we can redirect there
