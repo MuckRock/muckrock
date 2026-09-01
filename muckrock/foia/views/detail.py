@@ -322,7 +322,7 @@ class Detail(DetailView):
 
     def _get_config_context_data(self, context):
         """Get context data for configuration or administrative data"""
-
+        context["hide_files_from_scrapers"] = settings.HIDE_FILES_FROM_SCRAPERS
         context["sidebar_admin_url"] = reverse(
             "admin:foia_foiarequest_change", args=(self.foia.pk,)
         )

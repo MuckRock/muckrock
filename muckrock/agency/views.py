@@ -134,6 +134,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
         "foia_logs_limit": FOIA_LOG_LIMIT,
         "form": form,
         "sidebar_admin_url": reverse("admin:agency_agency_change", args=(agency.pk,)),
+        "hide_files_from_scrapers": settings.HIDE_FILES_FROM_SCRAPERS,
     }
 
     collect_stats(agency, context)

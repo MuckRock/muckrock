@@ -1,6 +1,8 @@
 """FOIA views for handling files"""
 
 # Django
+from django.conf import settings
+from django.contrib.auth.views import redirect_to_login
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -32,6 +34,8 @@ class FOIAFileListView(ModelFilterMixin, MRListView):
 
     def dispatch(self, request, *args, **kwargs):
         """Prevent unauthorized users from viewing the files."""
+        if settings.HIDE_FILES_FROM_SCRAPERS and not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
         foia = self.get_foia()
         if not foia.has_perm(request.user, "view"):
             raise Http404()

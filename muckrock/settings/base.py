@@ -1014,3 +1014,7 @@ API_V2_AUTH = boolcheck(os.environ.get("API_V2_AUTH", True))
 VERIFIED_REQUEST_CHECKS_BYPASS = boolcheck(
     os.environ.get("VERIFIED_REQUEST_CHECKS_BYPASS", True)
 )
+
+
+# Killswitch for unauthenticated access to files
+HIDE_FILES_FROM_SCRAPERS = boolcheck(os.environ.get("HIDE_FILES_FROM_SCRAPERS", False))
