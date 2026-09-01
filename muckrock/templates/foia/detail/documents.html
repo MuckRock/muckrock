@@ -20,16 +20,20 @@
         ></iframe>
     </div>
   {% endif %}
-  {% if files %}
-    <ul class="files-list nostyle" id="all-files">
-      {% with foia_url=foia.get_absolute_url %}
-        {% for file in files %}
-          <li>{% include "lib/file.html" with show_date=True %}</li>
-        {% endfor %}
-      {% endwith %}
-    </ul>
+  {% if hide_files_from_scrapers and not request.user.is_authenticated %}
+    <p class="empty">Please <a href="{% url 'acct-login' %}?next={{ request.path|urlencode }}">log in</a> to view files for this request.</p>
   {% else %}
-    <p class="empty">There are no files associated with this request.</p>
+    {% if files %}
+      <ul class="files-list nostyle" id="all-files">
+        {% with foia_url=foia.get_absolute_url %}
+          {% for file in files %}
+            <li>{% include "lib/file.html" with show_date=True %}</li>
+          {% endfor %}
+        {% endwith %}
+      </ul>
+    {% else %}
+      <p class="empty">There are no files associated with this request.</p>
+    {% endif %}
   {% endif %}
   {% if foia.get_files.count > 50 %}
     <div class="notification warning">

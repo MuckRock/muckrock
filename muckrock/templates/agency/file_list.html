@@ -1,18 +1,21 @@
 {% extends 'base_list.html' %}
-
 {% block title %}
   Files from {{ agency }}
 {% endblock %}
-
 {% block list-header %}
   <p><a href="{{ agency_url }}">{{ agency }}</a></p>
   <h1 class="list-title">Files</h1>
 {% endblock list-header %}
-
 {% block list-objects %}
-  <ul class="nostyle">
-    {% for file in object_list %}
-      <li>{% include "lib/file.html" with show_date=True %}</li>
-    {% endfor %}
-  </ul>
+  {% if hide_files_from_scrapers and not request.user.is_authenticated %}
+    <div class="login-prompt">
+      <p>Please <a href="{% url 'acct-login' %}?next={{ request.path|urlencode }}">log in</a> to view these files.</p>
+    </div>
+  {% else %}
+    <ul class="nostyle">
+      {% for file in object_list %}
+        <li>{% include "lib/file.html" with show_date=True %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endblock list-objects %}

@@ -126,22 +126,26 @@
       </section>
     {% endif %}
     {% if communication.display_files %}
-      <ul class="files">
-        {% with foia_url=communication.foia.get_absolute_url %}
-          {% with files=communication.display_files|slice:":10" %}
-            {% for file in files %}
-              <li>{% include 'lib/file.html' with hide_id=True %}</li>
-            {% endfor %}
+      {% if hide_files_from_scrapers and not request.user.is_authenticated %}
+        <p class="empty">Please <a href="{% url 'acct-login' %}?next={{ request.path|urlencode }}">log in</a> to view files for this request.</p>
+      {% else %}
+        <ul class="files">
+          {% with foia_url=communication.foia.get_absolute_url %}
+            {% with files=communication.display_files|slice:":10" %}
+              {% for file in files %}
+                <li>{% include 'lib/file.html' with hide_id=True %}</li>
+              {% endfor %}
+            {% endwith %}
           {% endwith %}
-        {% endwith %}
-      </ul>
-      {% if communication.display_files|length > 10 %}
-        <span class="notification warning">
-          <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
-          <span class="text">
-            <p>There are too many files to display on this communication. <a class="action" href="{% url 'foia-files' jurisdiction=communication.foia.jurisdiction.slug jidx=communication.foia.jurisdiction.pk idx=communication.foia.id slug=communication.foia.slug %}">See all files</a></p>
+        </ul>
+        {% if communication.display_files|length > 10 %}
+          <span class="notification warning">
+            <span class="symbol">{% include 'lib/component/icon/warning.svg' %}</span>
+            <span class="text">
+              <p>There are too many files to display on this communication. <a class="action" href="{% url 'foia-files' jurisdiction=communication.foia.jurisdiction.slug jidx=communication.foia.jurisdiction.pk idx=communication.foia.id slug=communication.foia.slug %}">See all files</a></p>
+            </span>
           </span>
-        </span>
+        {% endif %}
       {% endif %}
     {% endif %}
     {% if request.user.is_staff and not hide_options %}
