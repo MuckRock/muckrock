@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 # Standard Library
 import hashlib
 import hmac
+import html
 import json
 import logging
 import re
@@ -26,6 +27,7 @@ from email.utils import getaddresses
 from functools import wraps
 
 # Third Party
+from bs4 import BeautifulSoup
 from constance import config
 
 # MuckRock
@@ -104,15 +106,70 @@ def _get_mail_body(post, foia=None):
         "--- Please respond above this line ---\n",
     ]
     if stripped_text in bad_text:
-        return post.get("body-plain")
+        body = post.get("body-plain") or ""
     elif foia and foia.portal and foia.portal.type in ("nextrequest", "fbi"):
         # mailgun seems to improperly strip nextrequest and FBI messages
-        return post.get("body-plain")
+        body = post.get("body-plain") or ""
     else:
-        return "%s\n%s" % (
+        body = "%s\n%s" % (
             post.get("stripped-text", ""),
             post.get("stripped-signature", ""),
         )
+
+    # GovQA sends HTML with mimetype text/plain
+    # so the body we get is markup rather than text. We need
+    # to detect this reliably, strip it to readable text
+    # so it doesn't render as tag soup with linebreaks
+    if _looks_like_html(body):
+        body = _html_to_text(body)
+
+    return body
+
+
+def _looks_like_html(text):
+    """Body advertised as plain text but actually containing HTML markup.
+
+    Granicus/GovQA sends multipart/alternative mail whose text/plain part
+    is HTML. We need to be able to detect this with a heuristic and fix it.
+    """
+    if not text:
+        return False
+    head = text.lstrip()[:64].lower()
+    return head.startswith(
+        (
+            "<br",
+            "<div",
+            "<html",
+            "<table",
+            "<p ",
+            "<p>",
+            "<strong",
+            "<span",
+            "<img",
+            "<center",
+            "<!doctype",
+        )
+    )
+
+
+def _html_to_text(body):
+    """Convert an HTML email body to readable plain text, preserving links."""
+    soup = BeautifulSoup(body, "lxml")
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        # GovQA emits malformed attrs (missing closing quote), so the parsed
+        # href can trail into ` target=`, `>`, or a stray quote. A valid URL
+        # contains none of these unescaped so we cut at the first one.
+        href = re.split(r'[\s>"\']', href, 1)[0] if href else href
+        txt = a.get_text().strip()
+        if href and href not in txt:
+            a.replace_with(f"{txt} ({href})" if txt else href)
+    text = soup.get_text("\n")
+    text = html.unescape(text)
+    text = text.replace("\xa0", " ")
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
+    return text.strip()
 
 
 def mailgun_verify(function):
