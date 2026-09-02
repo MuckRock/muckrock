@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.utils.timezone import is_naive, make_aware
 
 # Standard Library
 from datetime import timedelta
@@ -129,6 +130,8 @@ class UserStatsViewSet(viewsets.ReadOnlyModelViewSet):
         since_dt = parse_datetime(since)
         if since_dt is None:
             return Response({"error": "since must be an ISO 8601 datetime"}, status=400)
+        if is_naive(since_dt):
+            since_dt = make_aware(since_dt)
         win = timedelta(days=settings.REQUEST_WINDOW_DAYS)
         now = timezone.now()
         qs = (

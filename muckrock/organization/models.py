@@ -22,6 +22,7 @@ from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.exceptions import PaymentActionRequired
 from muckrock.organization.querysets import OrganizationQuerySet
+from muckrock.organization.stats_api.models import OrganizationStats
 
 logger = logging.getLogger(__name__)
 stripe.api_version = "2015-10-16"
@@ -256,7 +257,7 @@ class Organization(models.Model):
         self.members.all().delete()
 
         # OrganizationStats is a per-org watermark, obsolete once merged away
-        self.stats.delete()
+        OrganizationStats.objects.filter(organization=self).delete()
 
         self.merged = other
 
