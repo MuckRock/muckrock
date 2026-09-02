@@ -229,11 +229,52 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
         method="filter_complicated", label="Complicated Tasks", choices=BOOLEAN_CHOICES
     )
 
-    source = django_filters.ChoiceFilter(choices=ReviewAgencyTask.sources)
+    # The four labelled sources plus a sentinel for the tasks that predate
+    # source labelling.  Those were unreachable before -- the filter offered
+    # only the labelled values -- and they are overwhelmingly email problems.
+    UNLABELED = "unlabeled"
+
+    source = django_filters.ChoiceFilter(
+        choices=list(ReviewAgencyTask.sources) + [(UNLABELED, "Unlabeled")],
+        method="filter_source",
+    )
+
+    min_blocked = django_filters.NumberFilter(
+        field_name="blocked_count",
+        lookup_expr="gte",
+        label="Min blocked requests",
+    )
+    max_blocked = django_filters.NumberFilter(
+        field_name="blocked_count",
+        lookup_expr="lte",
+        label="Max blocked requests",
+    )
+    zero_active = django_filters.BooleanFilter(
+        method="filter_zero_active",
+        label="Include agencies with no active requests",
+        widget=forms.CheckboxInput,
+    )
 
     class Meta:
         model = ReviewAgencyTask
         fields = ["jurisdiction", "agency", "resolved", "resolved_by"]
+
+    def filter_source(self, queryset, name, value):
+        """Filter by source, treating unlabeled as a value of its own"""
+        # pylint: disable=unused-argument
+        if value == self.UNLABELED:
+            return queryset.filter(source__isnull=True)
+        return queryset.filter(source=value)
+
+    def filter_zero_active(self, queryset, name, value):
+        """Declared so the field renders and the querystring validates
+
+        The exclusion itself lives in ReviewAgencyTaskList.get_queryset(),
+        which has to apply it before sorting and skip it for a single task
+        addressed by pk.
+        """
+        # pylint: disable=unused-argument
+        return queryset
 
     def filter_federal(self, queryset, name, value):
         """Check if the task is for a federal agency"""

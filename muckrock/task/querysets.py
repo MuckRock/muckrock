@@ -5,6 +5,7 @@ Custom QuerySets for the Task application
 # Django
 from django.db import models
 from django.db.models import (
+    Case,
     Count,
     Exists,
     F,
@@ -15,6 +16,7 @@ from django.db.models import (
     Subquery,
     Sum,
     Value,
+    When,
 )
 from django.db.models.functions import Cast, Coalesce, Now
 
@@ -351,14 +353,47 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             )
         )
 
+    def annotate_blocked(self):
+        """Annotate each task with the number of live requests it is blocking
+
+        This is the queue's ordering key.  A channel scoped task counts the
+        open requests routed at its channel; an agency level task (staff or
+        stale, with no channel) counts all of the agency's open requests,
+        because that task really is about the agency.
+        """
+        open_requests = FOIARequest.objects.get_open()
+
+        channel_blocked = Subquery(
+            open_requests.filter(agency=OuterRef("agency"), email=OuterRef("email"))
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
+        agency_blocked = Subquery(
+            open_requests.filter(agency=OuterRef("agency"))
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
+        return self.annotate(
+            blocked_count=Coalesce(
+                Case(
+                    When(email__isnull=True, then=agency_blocked),
+                    default=channel_blocked,
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+                output_field=IntegerField(),
             ),
-            Prefetch(
-                "agency__agencyphone_set",
-                queryset=AgencyPhone.objects.select_related("phone"),
+            # The agency's whole load, so its channels can be kept together in
+            # the queue while agencies still compete on impact.
+            agency_blocked_count=Coalesce(
+                agency_blocked, Value(0), output_field=IntegerField()
             ),
-            Prefetch(
-                "agency__agencyaddress_set",
-                queryset=AgencyAddress.objects.select_related("address"),
+        )
+
     def annotate_channel(self):
         """Annotate the summary the queue row needs to be legible
 
