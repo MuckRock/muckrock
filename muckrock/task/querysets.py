@@ -4,15 +4,27 @@ Custom QuerySets for the Task application
 
 # Django
 from django.db import models
-from django.db.models import F, Prefetch, Q, Sum
-from django.db.models.functions import Cast, Now
+from django.db.models import (
+    Count,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+    Sum,
+    Value,
+)
+from django.db.models.functions import Cast, Coalesce, Now
 
 # Standard Library
 from datetime import date
 
 # MuckRock
 from muckrock import task
-from muckrock.communication.models import EmailCommunication
+from muckrock.agency.models import AgencyEmail
+from muckrock.communication.models import EmailCommunication, EmailError
 from muckrock.core.models import ExtractDay
 from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
 from muckrock.foia.querysets import FOIACommunicationQuerySet, PreloadFileQuerysetMixin
@@ -314,12 +326,31 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
         # MuckRock
         from muckrock.agency.models import AgencyAddress, AgencyEmail, AgencyPhone
 
-        return self.select_related(
-            "agency__jurisdiction", "agency__portal", "resolved_by__profile"
-        ).prefetch_related(
-            Prefetch(
-                "agency__agencyemail_set",
-                queryset=AgencyEmail.objects.select_related("email"),
+        return (
+            self.annotate_channel()
+            .select_related(
+                "agency__jurisdiction",
+                "agency__portal",
+                "resolved_by__profile",
+                "email",
+            )
+            .prefetch_related(
+                "tags",
+                Prefetch(
+                    "agency__agencyemail_set",
+                    queryset=AgencyEmail.objects.select_related("email"),
+                ),
+                Prefetch(
+                    "agency__agencyphone_set",
+                    queryset=AgencyPhone.objects.select_related("phone"),
+                ),
+                Prefetch(
+                    "agency__agencyaddress_set",
+                    queryset=AgencyAddress.objects.select_related("address"),
+                ),
+            )
+        )
+
             ),
             Prefetch(
                 "agency__agencyphone_set",
@@ -328,6 +359,46 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             Prefetch(
                 "agency__agencyaddress_set",
                 queryset=AgencyAddress.objects.select_related("address"),
+    def annotate_channel(self):
+        """Annotate the summary the queue row needs to be legible
+
+        Which channel is broken, whether it is the agency's primary contact,
+        how it last failed and how long ago, and when it last delivered.  All
+        as subqueries so the queue's cost does not grow with its length.
+        """
+        newest_error = EmailError.objects.filter(recipient=OuterRef("email")).order_by(
+            "-datetime"
+        )
+
+        return self.annotate(
+            channel_last_error=Subquery(newest_error.values("datetime")[:1]),
+            channel_last_error_code=Subquery(newest_error.values("code")[:1]),
+            channel_last_error_reason=Subquery(newest_error.values("reason")[:1]),
+            channel_error_count=Coalesce(
+                Subquery(
+                    EmailError.objects.filter(recipient=OuterRef("email"))
+                    .values("recipient")
+                    .annotate(count=Count("pk"))
+                    .values("count"),
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+                output_field=IntegerField(),
+            ),
+            channel_last_confirm=Subquery(
+                EmailCommunication.objects.filter(
+                    to_emails=OuterRef("email"), confirmed_datetime__isnull=False
+                )
+                .order_by("-confirmed_datetime")
+                .values("confirmed_datetime")[:1]
+            ),
+            channel_is_primary=Exists(
+                AgencyEmail.objects.filter(
+                    agency=OuterRef("agency"),
+                    email=OuterRef("email"),
+                    request_type="primary",
+                    email_type="to",
+                )
             ),
         )
 

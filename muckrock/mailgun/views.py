@@ -463,7 +463,10 @@ def bounces(request, email_comm, timestamp):
     recipient.status = "error"
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
-        agency=email_comm.communication.foia.agency, resolved=False, source="email"
+        agency=email_comm.communication.foia.agency,
+        resolved=False,
+        source="email",
+        email=recipient,
     )
 
     # ensure we don't create an infinite loop of emails

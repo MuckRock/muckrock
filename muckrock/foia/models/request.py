@@ -894,9 +894,7 @@ class FOIARequest(models.Model):
     def send_delayed_email(self, comm, **kwargs):
         """Send the message as an email"""
 
-        from_email, _ = EmailAddress.objects.get_or_create(
-            email=self.get_request_email()
-        )
+        from_email = EmailAddress.objects.fetch(self.get_request_email())
 
         body = self.render_msg_body(
             comm=comm,
@@ -953,7 +951,10 @@ class FOIARequest(models.Model):
                 self.email.status = "error"
                 self.email.save()
                 task.models.ReviewAgencyTask.objects.ensure_one_created(
-                    agency=self.agency, resolved=False, source="email"
+                    agency=self.agency,
+                    resolved=False,
+                    source="email",
+                    email=self.email,
                 )
 
         email_comm.set_raw_email(msg.message().as_bytes(linesep="\r\n"))

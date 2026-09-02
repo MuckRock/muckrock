@@ -362,6 +362,32 @@ class ReviewAgencyTask(Task):
     def get_absolute_url(self):
         return reverse("review-agency-task", kwargs={"pk": self.pk})
 
+    @cached_property
+    def channel(self):
+        """The broken channel this task is about, as a Channel
+
+        Built from the annotations that annotate_channel() and
+        annotate_blocked() put on the queryset, so a queue row costs no
+        queries of its own.  Returns None for the staff and stale sources,
+        which have no channel.
+        """
+        if self.email is None:
+            return None
+
+        last_error_reason = getattr(self, "channel_last_error_reason", "") or ""
+        return Channel(
+            address=self.email,
+            blocked_count=getattr(self, "blocked_count", 0) or 0,
+            is_primary=bool(getattr(self, "channel_is_primary", False)),
+            classification=classify_address(self.email, last_error_reason),
+            has_error=self.email.status == "error",
+            last_error=getattr(self, "channel_last_error", None),
+            last_error_code=getattr(self, "channel_last_error_code", "") or "",
+            last_error_reason=last_error_reason,
+            last_confirm=getattr(self, "channel_last_confirm", None),
+            error_count=getattr(self, "channel_error_count", 0) or 0,
+        )
+
     def get_review_data(self):
         """Get all the data on all open requests for the agency"""
         review_data = []
