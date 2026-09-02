@@ -119,8 +119,15 @@ def _get_mail_body(post, foia=None):
     # GovQA sends HTML with mimetype text/plain
     # so the body we get is markup rather than text. We need
     # to detect this reliably, strip it to readable text
-    # so it doesn't render as tag soup with linebreaks
+    # so it doesn't render as tag soup with linebreaks.
     if _looks_like_html(body):
+        # I've added logging here to log when this happens
+        # In case it comes from different sender in the future too.
+        logger.info(
+            "[MAILGUN] Converting HTML body sent as text/plain from %s (foia %s)",
+            post.get("From", "unknown"),
+            foia.pk if foia else None,
+        )
         body = _html_to_text(body)
 
     return body
@@ -141,8 +148,7 @@ def _looks_like_html(text):
             "<div",
             "<html",
             "<table",
-            "<p ",
-            "<p>",
+            "<p",
             "<strong",
             "<span",
             "<img",
@@ -154,22 +160,29 @@ def _looks_like_html(text):
 
 def _html_to_text(body):
     """Convert an HTML email body to readable plain text, preserving links."""
-    soup = BeautifulSoup(body, "lxml")
-    for a in soup.find_all("a", href=True):
-        href = a["href"].strip()
-        # GovQA emits malformed attrs (missing closing quote), so the parsed
-        # href can trail into ` target=`, `>`, or a stray quote. A valid URL
-        # contains none of these unescaped so we cut at the first one.
-        href = re.split(r'[\s>"\']', href, 1)[0] if href else href
-        txt = a.get_text().strip()
-        if href and href not in txt:
-            a.replace_with(f"{txt} ({href})" if txt else href)
-    text = soup.get_text("\n")
-    text = html.unescape(text)
-    text = text.replace("\xa0", " ")
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
-    return text.strip()
+    try:
+        soup = BeautifulSoup(body, "lxml")
+        for a in soup.find_all("a", href=True):
+            # GovQA emits malformed attrs (missing closing quote), so the parsed
+            # href can trail into ` target=`, `>`, or a stray quote. A valid URL
+            # contains none of these unescaped so we cut at the first one.
+            href = re.split(r'[\s>"\']', a["href"].strip(), 1)[0]
+            txt = a.get_text().strip()
+            # no usable URL "" returned, leave anchor text as-is
+            if not href:
+                continue
+            # Only show the URL if it's not already in the text
+            if href not in txt:
+                a.replace_with(f"{txt} ({href})" if txt else href)
+        text = soup.get_text("\n")
+        text = html.unescape(text)
+        text = text.replace("\xa0", " ")
+        text = re.sub(r"[ \t]+", " ", text)
+        text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
+        return text.strip()
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Failed to convert HTML email body", exc_info=sys.exc_info())
+        return body
 
 
 def mailgun_verify(function):
