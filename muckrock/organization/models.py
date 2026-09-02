@@ -22,6 +22,7 @@ from muckrock.core.utils import squarelet_post
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.organization.exceptions import PaymentActionRequired
 from muckrock.organization.querysets import OrganizationQuerySet
+from muckrock.organization.stats_api.models import OrganizationStats
 
 logger = logging.getLogger(__name__)
 stripe.api_version = "2015-10-16"
@@ -255,6 +256,9 @@ class Organization(models.Model):
         other.members.add(*members)
         self.members.all().delete()
 
+        # OrganizationStats is a per-org watermark, obsolete once merged away
+        OrganizationStats.objects.filter(organization=self).delete()
+
         self.merged = other
 
     @transaction.atomic
@@ -344,20 +348,41 @@ class Organization(models.Model):
         self.save()
 
     def get_total_number_requests(self):
+        """Pooled purchased (non-expiring) requests across this org and the orgs
+        it shares resources with."""
+        # .all() + Python-side filter (not .filter()) so a prefetched groups
+        # cache satisfies this without a per-row query — same reason as the DC
+        # get_total_ai_credits refactor.
         number_requests = self.number_requests
         if self.parent and self.parent.share_resources:
             number_requests += self.parent.number_requests
-        for group in self.groups.filter(share_resources=True):
-            number_requests += group.number_requests
+        for group in self.groups.all():
+            if group.share_resources:
+                number_requests += group.number_requests
         return number_requests
 
     def get_total_monthly_requests(self):
+        """Pooled monthly requests remaining this month across this org and the
+        orgs it shares resources with (the balance, not the allowance)."""
         monthly_requests = self.monthly_requests
         if self.parent and self.parent.share_resources:
             monthly_requests += self.parent.monthly_requests
-        for group in self.groups.filter(share_resources=True):
-            monthly_requests += group.monthly_requests
+        for group in self.groups.all():
+            if group.share_resources:
+                monthly_requests += group.monthly_requests
         return monthly_requests
+
+    def get_total_requests_per_month(self):
+        """Pooled monthly request allowance across this org and the orgs it
+        shares resources with.
+        """
+        requests_per_month = self.requests_per_month
+        if self.parent and self.parent.share_resources:
+            requests_per_month += self.parent.requests_per_month
+        for group in self.groups.all():
+            if group.share_resources:
+                requests_per_month += group.requests_per_month
+        return requests_per_month
 
     def pay(self, amount, description, token, save_card, metadata, fee_amount=0):
         """Pay via Squarelet API.
