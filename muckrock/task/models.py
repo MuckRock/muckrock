@@ -891,6 +891,12 @@ class NewAgencyTask(Task):
     def _send_rejection_email(self, subject, extra_context):
         """Send the agency-rejection email. Callers own the subject and context.
         This adds the shared url and dispatches through the standard templates."""
+        if not (self.user and self.user.email):
+            logger.warning(
+                "Skipping agency rejection email for task %s: no recipient email",
+                self.pk,
+            )
+            return
         TemplateEmail(
             subject=subject,
             user=self.user,
