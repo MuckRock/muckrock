@@ -12,6 +12,7 @@ from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import linebreaks, urlize
 
 # Standard Library
@@ -34,6 +35,7 @@ from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.tags.models import TaggedItemBase
+from muckrock.task.channels import Channel, classify_address
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -342,6 +344,15 @@ class ReviewAgencyTask(Task):
     )
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
     source = models.CharField(max_length=5, choices=sources, blank=True, null=True)
+    # The specific broken channel this task is about.  Null for the staff and
+    # stale sources, which are genuinely about the agency.
+    email = models.ForeignKey(
+        "communication.EmailAddress",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="review_tasks",
+    )
 
     objects = ReviewAgencyTaskQuerySet.as_manager()
 

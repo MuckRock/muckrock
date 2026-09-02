@@ -102,6 +102,11 @@ class EmailAddress(models.Model):
 
     objects = EmailAddressQuerySet.as_manager()
 
+    def save(self, *args, **kwargs):
+        # Lowercase the address so no caller can reintroduce a case variant
+        self.email = self.email.lower()
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         if self.name:
             val = '"%s" <%s>' % (self.name, self.email)
