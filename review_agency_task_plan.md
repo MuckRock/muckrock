@@ -6,28 +6,30 @@ Engineering plan for [#2224](https://github.com/MuckRock/muckrock/issues/2224), 
 
 **Explicit non-goal:** layout and visual design. Each phase's job is to get correct, complete data into a Django template context or a Svelte component's props. Markup is a scaffold — unstyled, semantic, sufficient to assert against. Design work happens by hand afterward.
 
-**Phase sequencing rationale:** the model change (1) must land before anything can be keyed on a channel; the channel-summary layer (2) is the shared data vocabulary the queue (3), detail view (4), and repair (5) all consume; resolved-task readout (6) depends on repair having recorded an outcome. Phases 1–2 are backend-only and shippable behind existing UI. Phases 3–6 each ship user-visible surfaces.
+**Phase sequencing rationale:** the address merge (1) comes first — every later phase keys on `EmailAddress` as a stand-in for a real mailbox, and that's only true once the case variants are gone; the model change (2) must land before anything can be keyed on a channel; the channel-summary layer (3) is the shared data vocabulary the queue (4), detail view (5), and repair (6) all consume; resolved-task readout (7) depends on repair having recorded an outcome. Phases 1–3 are backend-only and shippable behind existing UI. Phases 4–7 each ship user-visible surfaces.
 
 ---
 
 ## Phase 0 — Test data across the whole distribution (parallel, non-blocking)
 
-Runs alongside Phase 1 rather than gating it. Two tracks, split by whether the shape is worth pulling from production or cheaper to build to spec.
+Runs alongside the implementation phases rather than gating them, with one exception: 0b's FBI dump is the rehearsal input for Phase 1's merge, so pull it early.
+
+Two tracks, split by whether the shape is worth pulling from production or cheaper to build to spec.
 
 ### 0a — Synthesized shapes (factories)
 
-Everything at or near N=1 is simple enough to construct exactly, and an arbitrary long-tail agency is a *worse* fixture than a built one: it carries incidental data, can't be asserted against precisely, and doesn't isolate the variation under test. Build these as reusable factory traits in `muckrock/task/factories.py`, not as a dumped JSON fixture — Phases 1–6 then assert against them directly, and the test suite stays independent of the gitignored dump.
+Everything at or near N=1 is simple enough to construct exactly, and an arbitrary long-tail agency is a *worse* fixture than a built one: it carries incidental data, can't be asserted against precisely, and doesn't isolate the variation under test. Build these as reusable factory traits in `muckrock/task/factories.py`, not as a dumped JSON fixture — Phases 1–7 then assert against them directly, and the test suite stays independent of the gitignored dump.
 
 `agency_with_channels(...)` builder emitting these shapes:
 
 | Shape | Why it's needed |
 |---|---|
-| N=0 broken, task with null channel | `staff`/`stale` sources — must survive Phase 1 unchanged |
+| N=0 broken, task with null channel | `staff`/`stale` sources — must survive Phase 2 unchanged |
 | N=1 dead mailbox, SMTP 550 | The 81.7% majority case; the design's default assumption |
 | N=1, zero active requests | Design §8 — triage hint, must not auto-resolve |
-| N=1, stale error flag (no bounce in 24mo) | 61% of error flags; recency display in Phase 3 |
-| N=2 (p90), N=5 (p99) | The realistic multi-channel middle, and multi-repair in Phase 5 |
-| N=2 where both rows are one mailbox by case | Collapse logic at a scale small enough to assert exactly |
+| N=1, stale error flag (no bounce in 24mo) | 61% of error flags; recency display in Phase 4 |
+| N=2 (p90), N=5 (p99) | The realistic multi-channel middle, and multi-repair in Phase 6 |
+| N=2 where both rows are one mailbox by case | Input to the Phase 1 merge, at a scale small enough to assert exactly; after Phase 1 this shape must not survive |
 | N=1 no-reply address | Failure class 3 classification |
 | N=1 reputation error (`blacklisted`/`espblock`) | The ~3% no address swap fixes |
 | One broken address linked to 2 agencies | `ICE-FOIA@` shape; must not cross-group (design §3) |
@@ -46,7 +48,53 @@ Only the head is genuinely hard to synthesize — its complexity is the point.
 
 ---
 
-## Phase 1 — Per-channel task model
+## Phase 1 — Normalize and merge email addresses
+
+**Goal:** one real mailbox is one `EmailAddress` row, permanently. Design §3/§4. Every later phase treats the `EmailAddress` FK as a channel identity; that's only sound once this lands.
+
+**Sizing query first.** Before writing the command, run the §9 collision query against production and record the result in the design doc: how many groups collide, how many rows die, and how many rows move in each referencing relation. The command is written against a known magnitude, not a guess.
+
+### Red
+
+New `muckrock/communication/tests/test_normalization.py`:
+
+- `_normalize_email("FOIPAQuestions@FBI.gov")` returns `foipaquestions@fbi.gov` — local part *and* domain.
+- `EmailAddress.objects.fetch("FOIPAQUESTIONS@fbi.gov")` and `.fetch("foipaquestions@fbi.gov")` return the **same** row.
+- `fetch_many` with mixed-case duplicates in one header returns one address, not two.
+- `EmailAddress(email="Mixed@Case.gov").save()` stores lowercase.
+- Existing `muckrock/communication/tests/` and `muckrock/mailgun/tests.py` pass unchanged — mailgun's inbound handling compares fetched addresses and is the most likely place a behavior change shows up.
+
+New `muckrock/communication/tests/test_commands.py::TestMergeEmailAddresses`:
+
+- Three rows differing only by case, each carrying `FOIARequest`s, `AgencyEmail` links, `EmailCommunication` to/from/cc entries, `EmailError`s, `EmailOpen`s, and `Source`s → one surviving row (lowest pk, lowercased) holding **all** of them; the other two deleted.
+- Blocked-request counts sum: 2 + 3 + 1 → 6 on the survivor.
+- `status` is `error` if any member was `error`, even when the canonical row was `good`.
+- `name` takes the first non-blank, canonical row preferred.
+- Duplicate `(agency, email)` `AgencyEmail` links collapse to one, keeping the most specific `request_type`/`email_type` (`primary` beats `none`).
+- M2M repoints dedupe: a communication that had two variants in `to_emails` ends with one entry.
+- `--dry-run` reports the same groups and writes nothing (assert row counts unchanged).
+- Re-running after a successful merge is a no-op.
+- A group with no collision is untouched.
+
+Fixtures for these tests must write mixed case *around* the model's normalization — build the rows with `bulk_create` or a post-create `queryset.update()`, since `save()` now lowercases. Note that explicitly in the factory trait so it doesn't read as an accident.
+
+### Green
+
+- `muckrock/communication/models.py:81` — `_normalize_email` lowercases the whole address. Update the docstring, which currently asserts the opposite.
+- `muckrock/communication/models.py` — `EmailAddress.save()` lowercases `self.email` defensively, so admin edits and any future caller can't reintroduce a variant.
+- `muckrock/foia/models/request.py:897` — `EmailAddress.objects.get_or_create(email=self.get_request_email())` → `EmailAddress.objects.fetch(...)`. Left as `get_or_create`, a mixed-case argument would miss the existing row, then hit the lowercasing `save()` and raise `IntegrityError` on the unique index.
+- New `muckrock/communication/management/commands/merge_email_addresses.py`: group by `Lower("email")`, keep the lowest pk, repoint the relations in design §4's table, then delete the losers — one `transaction.atomic()` per group, delete strictly last. `--dry-run` prints the plan. `PROTECT` on four of those FKs is the safety net: a missed repoint refuses to delete rather than silently orphaning.
+- No schema migration. `email` is already `unique=True`; once every row is lowercase, that constraint is the one we want.
+
+### Green criterion
+
+New tests pass; the full `muckrock/communication/`, `muckrock/mailgun/`, `muckrock/agency/`, and `muckrock/foia/` suites pass unchanged. Rehearse the command against the Phase 0b FBI dump: 23 rows → ~18, with the 869-request mailbox intact as one row.
+
+**Production run is staged and separate from the deploy:** ship the normalization code, verify no new variants appear, then run `--dry-run` against production, review the report, then run for real. The per-channel task work (Phase 2) does not start against production data until this has been run.
+
+---
+
+## Phase 2 — Per-channel task model
 
 **Goal:** `ReviewAgencyTask` identity becomes `(agency, source, email)`.
 
@@ -59,7 +107,7 @@ New `muckrock/task/tests/test_querysets.py::TestReviewAgencyTaskQuerySet`:
 - `email=None` (staff/stale) still dedups to one task per `(agency, source)`.
 - Pre-existing duplicates on the same key still collapse via the `MultipleObjectsReturned` path.
 
-In `test_models.py`: a mailgun bounce on `FOIPAQUESTIONS@fbi.gov` creates a task carrying that `EmailAddress`; a second bounce on a *different* address at the same agency creates a second task, not a reuse of the first.
+In `test_models.py`: a mailgun bounce addressed to `FOIPAQUESTIONS@fbi.gov` creates a task carrying the `foipaquestions@fbi.gov` row — one task, whatever the casing on the wire, because Phase 1 normalizes on the way in. A second bounce on a *genuinely different* address at the same agency creates a second task, not a reuse of the first.
 
 ### Green
 
@@ -78,15 +126,15 @@ New queryset tests pass; the full existing `muckrock/task/tests/` suite passes u
 
 ---
 
-## Phase 2 — Channel identity, classification, and impact
+## Phase 3 — Channel identity, classification, and impact
 
-**Goal:** one place that answers, for an agency: what are its real mailboxes, which are broken, how, and how much traffic each is blocking. This is the data layer for Phases 3–5.
+**Goal:** one place that answers, for an agency: what are its real mailboxes, which are broken, how, and how much traffic each is blocking. This is the data layer for Phases 4–6.
 
 ### Red
 
 New `muckrock/task/tests/test_channels.py`:
 
-- **Case collapsing:** `FOIPAQUESTIONS@fbi.gov` (2 blocked), `foipaquestions@fbi.gov` (3), `FOIPAQuestions@fbi.gov` (1) collapse to one channel with 6 blocked and 3 member rows. Assert the canonical address chosen is deterministic (lowest-pk row).
+- **A channel is an address, with no collapse logic:** post-Phase-1 there is one row per mailbox, so `agency_channels` maps `EmailAddress` rows to channels one-for-one. Assert exactly that on the FBI shape — 18 merged rows, 18 channels, the 869-request mailbox reporting its full blocked count from a single row. The channel layer deliberately does **not** group case-insensitively: a surviving variant is a data bug for Phase 1's command to fix, not something this layer hides.
 - **Active-channel definition:** an error-status `AgencyEmail` link with no open requests routed to it is *not* an active channel; an address with open requests routed to it *is*, even if the `AgencyEmail` link is clean.
 - **Failure classification:** `seattle@mycusthelp.net` → `portal`; `noreply@securerelease.us` → `portal`; `donotreply@hq.dhs.gov`, `no-reply@x.gov`, `postmaster@usdoj.gov` → `noreply`; `foia@example.gov` with SMTP 550 → `dead`.
 - **Reputation errors distinguishable:** an error with `reason` in (`blacklisted`, `espblock`) surfaces as sender-side, not as a dead mailbox.
@@ -97,9 +145,9 @@ New `muckrock/task/tests/test_channels.py`:
 
 New module `muckrock/task/channels.py`:
 
-- `normalize_channel_key(email) -> str` — lowercase local part and domain. This is the collapse key; it deliberately differs from `EmailAddressQuerySet._normalize_email` (`muckrock/communication/models.py:81`), which lowercases only the domain. Do not change `_normalize_email` — existing rows depend on its behavior.
+- No key-normalization helper. Channel identity is the `EmailAddress` pk; Phase 1 already made that equal mailbox identity.
 - `classify_channel(email_address, errors) -> str` in `{"dead", "portal", "noreply", "reputation"}`. Portal detection matches the address domain against portal domains derived from `PORTAL_TYPES` plus a small explicit map (`mycusthelp.net`, `securerelease.us`, `foiaonline.gov`, `nextrequest.com`, `mail.foia.state.gov`). No-reply detection matches local-part prefixes. Classification is display-only — it never triggers a repair action.
-- `Channel` dataclass: `key`, `canonical_address`, `member_addresses`, `blocked_count`, `is_primary`, `classification`, `last_error`, `last_error_code`, `last_error_reason`, `last_confirm`, `error_count`, `foias`.
+- `Channel` dataclass: `address` (the `EmailAddress`), `blocked_count`, `is_primary`, `classification`, `last_error`, `last_error_code`, `last_error_reason`, `last_confirm`, `error_count`, `foias`.
 - `agency_channels(agency) -> list[Channel]` — builds the roster for one agency, sorted by `blocked_count` descending. Includes healthy channels (design §6) with a `has_error` flag so callers can filter.
 - `Agency`-level rollup: `total_blocked`, `channels_known`, `channels_broken`, `channels_active`, `last_success`.
 
@@ -111,7 +159,7 @@ Query budget: reuse the shape already proven in `ReviewAgencyTask.get_review_dat
 
 ---
 
-## Phase 3 — Impact-ordered queue
+## Phase 4 — Impact-ordered queue
 
 **Goal:** the list view orders and reads by blocked-request impact, and exposes the filters staff need.
 
@@ -142,7 +190,7 @@ New view tests pass; `_test_n_plus_one_query` still holds.
 
 ---
 
-## Phase 4 — Agency detail view
+## Phase 5 — Agency detail view
 
 **Goal:** a real URL rendering one agency's full channel roster, replacing the inline AJAX panel.
 
@@ -152,7 +200,7 @@ New `muckrock/task/tests/test_views.py::ReviewAgencyDetailViewTests`:
 
 - `GET /task/review-agency/agency/<agency_pk>/` returns 200 for staff, 302/403 for non-staff.
 - Context contains agency identity, `total_blocked`, roster shape counts, `last_success`, and a `channels` list.
-- Case-variant rows appear as **one** channel entry.
+- The FBI fixture's `foipaquestions@fbi.gov` appears **once**, with the merged blocked count — a post-Phase-1 regression check that the roster shows mailboxes, not rows.
 - Healthy channels are present and marked.
 - A portal-classified channel is present with its classification, and the context flags that email repair is the wrong tool.
 - Mail and phone are in context (demoted, not omitted).
@@ -161,7 +209,7 @@ New `muckrock/task/tests/test_views.py::ReviewAgencyDetailViewTests`:
 
 ### Green
 
-- `muckrock/task/views.py` — new `ReviewAgencyDetailView(DetailView)` on `Agency`, staff-gated, consuming `agency_channels()` from Phase 2.
+- `muckrock/task/views.py` — new `ReviewAgencyDetailView(DetailView)` on `Agency`, staff-gated, consuming `agency_channels()` from Phase 3.
 - `muckrock/task/urls.py` — route `review-agency/agency/<int:pk>/`, name `review-agency-detail`.
 - `muckrock/templates/task/review_agency_detail.html` — minimal shell: agency header, rollup numbers, and a `{{ channels_json|json_script:"review-agency-data" }}` block plus a mount `<div id="review-agency-app">`. Mail/phone behind a `<details>`.
 - Keep `review_agency_ajax` and `muckrock/templates/lib/review_agency.html` working as the rollout fallback.
@@ -172,7 +220,7 @@ Detail view tests pass; existing AJAX-panel tests unchanged.
 
 ---
 
-## Phase 5 — Repair, single and multi-channel
+## Phase 6 — Repair, single and multi-channel
 
 **Goal:** staff can repair one channel or several in one submit, and the Svelte component owns selection state.
 
@@ -189,19 +237,19 @@ New `muckrock/task/tests/test_forms.py::TestChannelRepairForm` and view tests:
 
 ### Green
 
-- `muckrock/task/forms.py:47` — `ChannelRepairForm`: `new_email`, `channel_keys` (multi), `foia_pks`, `update_agency_info`, `snail_mail`, `resolve`, `reply`. Validation rejects portal-classified targets. Keep `ReviewAgencyTaskForm` in place for the fallback panel.
+- `muckrock/task/forms.py:47` — `ChannelRepairForm`: `new_email` (cleaned through `EmailAddress.objects.fetch()`, so a staffer typing `FOIA@Agency.gov` lands on the same row as `foia@agency.gov` rather than creating a fresh variant), `channel_pks` (multi, `EmailAddress` pks), `foia_pks`, `update_agency_info`, `snail_mail`, `resolve`, `reply`. Validation rejects portal-classified targets. Keep `ReviewAgencyTaskForm` in place for the fallback panel.
 - `muckrock/task/models.py` — extend `update_contact()` (currently at `:560`) or add `repair_channels(...)` wrapping it for the multi-task case, resolving every affected task inside one `transaction.atomic()`.
-- Outcome recording: reuse the existing `Task.note` field (added in migration `0059_task_note`) with a structured payload, plus `resolved_by`/`date_done`. No new model — the readout in Phase 6 needs a few fields, not a table.
+- Outcome recording: reuse the existing `Task.note` field (added in migration `0059_task_note`) with a structured payload, plus `resolved_by`/`date_done`. No new model — the readout in Phase 7 needs a few fields, not a table.
 - `muckrock/assets/components/ReviewAgencyRepair.svelte` + `muckrock/assets/js/reviewAgency.ts` mount script, following the `getHelp.ts` pattern: read the JSON payload, hold selection state across channel cards, POST a normal form. `{% vite_asset %}` it from the detail template.
 - Component receives everything as props — no fetches. Unstyled; markup is a placeholder for manual design work.
 
 ### Green criterion
 
-Form and view tests pass. Manually exercise the detail view against the Phase 0 FBI fixture: three case-variant rows must appear as one channel and repair once.
+Form and view tests pass. Manually exercise the detail view against the merged Phase 0 FBI fixture: the 869-request mailbox is one channel, one row, one repair.
 
 ---
 
-## Phase 6 — Resolved-task readout and reopen linkage
+## Phase 7 — Resolved-task readout and reopen linkage
 
 ### Red
 
@@ -217,15 +265,15 @@ Form and view tests pass. Manually exercise the detail view against the Phase 0 
 
 ---
 
-## Migration (after Phase 5, before Phase 6)
+## Task split migration (after Phase 6, before Phase 7)
 
-Retroactive split, strategy 3 from design §4: channels carrying blocked active traffic → ~2,265 tasks, down from 3,677.
+Retroactive split, strategy 3 from design §4: channels carrying blocked active traffic → ~2,265 tasks, down from 3,677. That figure is pre-merge and will come down by the size of Phase 1's collision set; re-derive it from the dry run rather than quoting it.
 
 - Write as a **management command**, not a data migration. It needs dry-run output, re-runnability, and a staged production run — none of which a migration gives us.
-- Reuse `agency_channels()` from Phase 2 so the split and the UI agree by construction.
-- Case-collapse before emitting: one task per real mailbox, blocked counts summed. This is the one delicate step.
+- **Runs only after Phase 1's merge has been applied in production.** One address is one mailbox by then, so the split emits one task per channel with no case logic of its own. Have the command assert this up front — refuse to run if any `EmailAddress.email` differs from its lowercase form.
+- Reuse `agency_channels()` from Phase 3 so the split and the UI agree by construction.
 - For each open task: emit per-channel tasks preserving `date_created` and `source` (null source stays null), then resolve the original with a note pointing at its successors. Never delete.
-- Tests: FBI-shaped input (23 rows → ~18 tasks, the 869-request mailbox intact as one); single-channel agency → exactly one task; zero-active agency → no task; `--dry-run` writes nothing.
+- Tests: FBI-shaped merged input (~18 addresses → ~18 tasks, the 869-request mailbox as one); single-channel agency → exactly one task; zero-active agency → no task; unmerged mixed-case input → refuses to run; `--dry-run` writes nothing.
 
 ## Out of scope, per design §2
 

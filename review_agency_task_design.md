@@ -25,7 +25,7 @@ The current `ReviewAgencyTask` model flattens all of that into one row per `(age
 
 **The heaviest agencies need to be workable one at a time.** Per-agency load comes in two shapes, and they need different repairs:
 
-1. **Concentrated.** The FBI has 1,075 blocked requests, and **869 of them (81%) sit on a single real mailbox** — `foipaquestions@fbi.gov`, which exists as three separate rows differing only in capitalization. One correct repair moves 10% of the entire in-scope backlog.
+1. **Concentrated.** The FBI has 1,075 blocked requests, and **869 of them (81%) sit on a single real mailbox** — `foipaquestions@fbi.gov`, which exists as three separate rows differing only in capitalization (§4 merges them). One correct repair moves 10% of the entire in-scope backlog.
 2. **Spread.** Department of Energy HQ has 22 channels for 49 blocked requests, the largest holding 16%. Nothing here is one repair.
 
 Across the 309 agencies with more than one blocked channel, the biggest channel holds a median 61% of that agency's blocked requests — so **1,979 requests (23% of the pool) sit on channels that aren't their agency's biggest.** Repairing only the top channel per agency would leave nearly a quarter of the backlog on the floor.
@@ -44,7 +44,7 @@ Either shape needs the same thing: a **detail view for one agency**, where the w
 | Per-channel task model + migration | Zendesk integration |
 | Impact-ordered queue | `stale` Celery job trigger conditions |
 | Resolved-task readout | Portal switching (see below) |
-| Case-variant channel collapsing (§4) | Repair of portal-hosted agencies |
+| Email address normalization + row merge (§4) | Repair of portal-hosted agencies |
 
 **Fax and snail mail aren't going away** — they stay visible, and existing behavior keeps working. We're just not designing their repair workflows now.
 
@@ -56,14 +56,14 @@ Sometimes the right repair isn't a new email address — it's recognizing that t
 |---|---|---:|---|
 | `seattle@mycusthelp.net` | Seattle PD | **159** (89% of its total) | GovQA portal |
 | `noreply@securerelease.us` | ICE + DHS | 63 | SecureRelease portal |
-| `no-reply@` / `foia@` / `admin@foiaonline.gov` | FBI, DHS | ~37 | FOIAonline — already a `PORTAL_TYPES` entry |
+| `no-reply@` / `foia@` / `admin@foiaonline.gov` | FBI, DHS | ~37 | FOIAonline — actually a discontinued `PORTAL_TYPES` entry that needs to be redirected to another portal type |
 | `noreply@mail.foia.state.gov` | State | 1 | State's portal |
 
 A subset of head agencies — Seattle PD prominently among them — cannot be repaired in this pass. Seattle PD's single largest channel is a GovQA notification address. **No replacement email repairs it** — picking one would be actively wrong.
 
 This tells us an important detail on how we expect this work to fit into the bigger picture: this is a step in the right direction, but not a complete solution. We can't expect just a UI cleanup to address some of the deeper, harder repair work that's needed here. **We don't yet have an open issue describing how switching to portal should work or improve.**
 
-That needs deeper consideration than this pass allows: `Agency.portal` is a FK to a `Portal` with a type (`govqa`, `nextrequest`, `foiaxpress`, `fbi`, `webform`, …), several of those types have live automation classes, and `FOIARequest.get_contact_info()` puts portal *ahead* of email in the preference order — so setting a portal silently reroutes every request on that agency. **Portal switching stays out of this pass**, named as follow-on work, with an obvious seam left where it will land.
+That needs deeper consideration than this pass allows: `Agency.portal` is a FK to a `Portal` with a type (`govqa`, `nextrequest`, `foiaxpress`, `fbi`, `webform`, …), several of those types have live automation classes, and `FOIARequest.get_contact_info()` puts portal *ahead* of email in the preference order — so setting a portal silently reroutes every _new_ request on that agency. **Portal switching stays out of this pass**, named as follow-on work, with an obvious seam left where it will land.
 
 **What this pass should still do, cheaply: not mislead staff into a wrong repair.** If a channel is recognizably a portal address, say so rather than inviting an email replacement. That's a display concern, not machinery.
 
@@ -71,7 +71,13 @@ That needs deeper consideration than this pass allows: `Agency.portal` is a FK t
 
 - **The unit of work is the broken communication channel, not the agency.** For small agencies these collapse: one address, one task, and that's **81.7% of agencies**. For large ones they don't. The ~1:1 agency-to-task ratio in the research is an artifact of `ensure_one_created`'s `(agency, source)` dedup key, which unhelpfully collapses all subtasks into one gnarly, rat-king task.
 
-- **A channel is a mailbox, not a database row.** `EmailAddress.email` is `unique=True` and `_normalize_email` evidently lowercases only the domain, so the same real mailbox exists as several rows. The FBI has `FOIPAQUESTIONS@fbi.gov` (481 blocked), `foipaquestions@fbi.gov` (387), and `FOIPAQuestions@fbi.gov` (1) — **one mailbox, 869 requests, three rows.** Also `OIP-NoReply@` / `oip-noreply@usdoj.gov` (42 combined), `FOIPARequest@` / `foiparequest@ic.fbi.gov`, `FBI.FOIPA.NEGOTIATION@` / `fbi.foipa.negotiation@fbi.gov`. Channels must be identified case-insensitively on the local part. Two reasons: the **lever** — 869 requests is the single highest-leverage repair in the system, and it's invisible while the rows stay split — and the **trap** — list them as three channels and staff will fix one while the other two keep failing. FBI's 23 channels are really ~18. This belongs in the model, not the template.
+- **A channel is a mailbox, not a database row — and we make the data say so.** `EmailAddress.email` is `unique=True`, but [`_normalize_email`](muckrock/communication/models.py#L81) lowercases only the domain, so the same real mailbox has accumulated several rows. The FBI has `FOIPAQUESTIONS@fbi.gov` (481 blocked), `foipaquestions@fbi.gov` (387), and `FOIPAQuestions@fbi.gov` (1) — **one mailbox, 869 requests, three rows.** Also `OIP-NoReply@` / `oip-noreply@usdoj.gov` (42 combined), `FOIPARequest@` / `foiparequest@ic.fbi.gov`, `FBI.FOIPA.NEGOTIATION@` / `fbi.foipa.negotiation@fbi.gov`. FBI's 23 channels are really ~18.
+
+  **The fix is upstream, in the data: lowercase the stored addresses and merge the collided rows** ([#2273 review](https://github.com/MuckRock/muckrock/pull/2273#discussion_r3915149376)) — see §4. The alternative we first considered, teaching the channel layer to group case-insensitively, leaves the duplicate rows in place for every *other* consumer — `FOIARequest.email`, `AgencyEmail`, `EmailCommunication`, `EmailError`, admin autocompletes, the API — and copies the same collapse logic into each one. One migration fixes it once, everywhere, and afterwards a channel is simply an `EmailAddress` FK with no special identity rules.
+
+  Two reasons this is load-bearing: the **lever** — 869 requests is the single highest-leverage repair in the system, and it's invisible while the rows stay split — and the **trap** — list them as three channels and staff will fix one while the other two keep failing.
+
+  RFC 5321 makes the local part case-sensitive in principle. No provider we deliver to treats it that way, and our own data shows the variants are the same mailbox receiving the same bounces. We take that trade deliberately rather than carry the ambiguity forever.
 
 - **Channels fail in three distinct ways, and they need different repairs.** Conflating them is what makes the current UI unhelpful, but we have an opportunity to guide staff by better classifying the repair work to be done:
   1. **The mailbox is dead** — someone left, a role address was retired. 71% SMTP 550. Repair: a new address. This is the assumed case today and it *is* the majority.
@@ -116,9 +122,37 @@ That needs deeper consideration than this pass allows: `Agency.portal` is a FK t
 | [muckrock/mailgun/views.py:465](muckrock/mailgun/views.py#L465) | `recipient` (just set to `status="error"`) | `agency`, `source="email"` |
 | [muckrock/foia/models/request.py:955](muckrock/foia/models/request.py#L955) | `self.email` (just set to `status="error"`) | `agency`, `source="email"` |
 
-Both already mark the specific address as errored on the line above. Threading it into `ensure_one_created` is a mechanical change. New tasks become correctly channel-scoped essentially for free; the retroactive split of the existing 3,677 is the harder part, and case-collapsing (§4) is the only genuinely delicate piece of it.
+Both already mark the specific address as errored on the line above. Threading it into `ensure_one_created` is a mechanical change. New tasks become correctly channel-scoped essentially for free; the retroactive split of the existing 3,677 is the harder part — and it gets materially simpler once the address rows are normalized first.
 
 The `staff` and `stale` call sites ([muckrock/agency/views.py:117](muckrock/agency/views.py#L117), [muckrock/foia/views/list.py:326](muckrock/foia/views/list.py#L326), [muckrock/agency/tasks.py:23](muckrock/agency/tasks.py#L23)) genuinely have no channel to point at — they stay agency-level with a null channel. That's correct, not a gap: those tasks *are* about the agency.
+
+### Prerequisite — normalize the address rows, then merge them
+
+**This lands before the per-channel task model, and it is a data change, not a display rule** (§3). Three parts:
+
+1. **Stop producing variants.** `_normalize_email` lowercases the whole address, not just the domain. The one `EmailAddress.objects.get_or_create()` caller ([muckrock/foia/models/request.py:897](muckrock/foia/models/request.py#L897)) routes through `fetch()` instead, and `EmailAddress.save()` lowercases defensively so the admin and any future caller can't reintroduce mixed case.
+2. **Merge what exists.** For each group of rows differing only by case, keep the lowest-pk row as canonical, repoint every referencing row at it, then delete the losers. The relations to repoint are bounded and known:
+
+   | Relation | Kind | Merge note |
+   |---|---|---|
+   | `agency.AgencyEmail.email` | FK (PROTECT) | Collapse resulting duplicate `(agency, email)` links; keep the most specific `request_type` / `email_type` (`primary` beats `none`) |
+   | `foia.FOIARequest.email` | FK | Straight repoint |
+   | `foia.FOIARequest.cc_emails` | M2M | Repoint, then dedupe |
+   | `communication.EmailCommunication.from_email` | FK (PROTECT) | Straight repoint |
+   | `communication.EmailCommunication.to_emails` / `cc_emails` | M2M | Repoint, then dedupe |
+   | `communication.EmailError.recipient` | FK (PROTECT) | Straight repoint — the error history is what makes the merged channel's severity legible |
+   | `communication.EmailOpen.recipient` | FK (PROTECT) | Straight repoint |
+   | `communication.Source.email_address` | FK (CASCADE) | Repoint; sources are provenance, keep them all |
+   | `crowdsource.Crowdsource.submission_emails` | M2M | Repoint, then dedupe |
+   | `task.ReviewAgencyTask.email` | FK | Doesn't exist yet — merge first, and it never sees a variant |
+
+   Field conflicts on the surviving row: `status` is `error` if **any** member is `error` (a mailbox that bounces under one spelling bounces under all of them); `name` takes the first non-blank, preferring the canonical row's.
+
+3. **Run it as a management command with `--dry-run`**, not a data migration — it needs a rehearsal pass, a report of what it will merge, and a staged production run. The schema-level piece (nothing to change; `email` is already `unique=True`) needs no migration at all once every row is lowercase.
+
+`PROTECT` on four of these FKs means the delete must come strictly after every repoint, in one `transaction.atomic()` per group — a partial merge that orphans references will simply refuse to delete, which is the failure mode we want.
+
+**Unmeasured, and it gates the rehearsal:** we know the FBI case exactly and have spot examples elsewhere, but not the system-wide magnitude — how many mailboxes are split, and how many referencing rows move. That query is now the first item in §9 and should run before the command is written, not after.
 
 ### The retroactive split — measured and decided
 
@@ -135,7 +169,7 @@ Existing tasks don't record which channel triggered them; the evidence lives in 
 
 The distribution makes the migration safe: **81.7% of agencies get exactly one task, p90 is 2, p99 is 5, and the max is 23** (FBI). No cap or manual-review path for the head is needed.
 
-**The migration must case-collapse.** Per §3, group candidate channels case-insensitively on the local part and emit one task per real mailbox, summing blocked counts across the merged rows. Without this the FBI gets 23 tasks for ~18 mailboxes and its largest repair is split three ways. This is the one piece of migration logic that needs real care — the rest is mechanical.
+**The split runs after the address merge, and is mechanical because of it.** With every mailbox reduced to one `EmailAddress` row, one task per candidate channel is already one task per real mailbox — the FBI gets ~18, not 23, and its 869-request repair is a single row rather than three. The counts above (2,265) are pre-merge and will come down by the size of the collision set; sizing that is the §9 query. Nothing in the split needs case logic of its own, and if it appears to, the merge didn't finish.
 
 ## 5. Queue view — what it must surface
 
@@ -159,7 +193,7 @@ The distribution makes the migration safe: **81.7% of agencies get exactly one t
 - Filter to or away from unlabeled tasks — currently impossible, since the filter only offers the four labelled sources.
 - See agency-level grouping when one agency has several channel tasks, so twelve State Department rows don't read as twelve unrelated items.
 
-**Known constraint:** annotating blocked counts across the full list may be expensive. Needs benchmarking before we commit to computing it live (§9).
+**Known constraint:** annotating blocked counts across the full list may be expensive. Needs benchmarking before we commit to computing it live (§9). Alternate strategies include pre-computation or optimizing our queries for performance.
 
 ## 6. Agency detail view — what it must support
 
@@ -216,7 +250,7 @@ Treat "zero active" as a **triage hint** — small blast radius, safe to defer �
 
 | Query | Why it matters |
 |---|---|
-| **Case-variant collision count across all 2,265 channels** | §3/§4 commit to case-collapsing on the strength of the FBI example. Need the real magnitude: how many mailboxes are split across rows, and how many blocked requests are hiding behind the split. Directly sizes the migration's hardest step. |
+| **Case-variant collision count across all of `EmailAddress`** | §3/§4 commit to lowercasing and merging on the strength of the FBI example. Need the real magnitude before writing the command: how many mailboxes are split across rows, how many blocked requests hide behind the split, and how many rows in each referencing relation (§4's table) have to move. Note this is now a question about the *whole* table, not just the 2,265 broken channels — the merge touches every address, healthy ones included. |
 | **Portal-notification addresses among the 2,265** | Quantifies the §2 accepted limitation. Match against `PORTAL_TYPES` domains (`mycusthelp.net`, `securerelease.us`, `foiaonline.gov`, `nextrequest.com`, …) and count agencies and requests unreachable this pass. Also gives the portal follow-on its business case. |
 | **Do-not-reply addresses among the 2,265** | Sizes failure class 3 (§3) — `no-reply@`, `donotreply@`, `postmaster@`, `notification@` patterns. If large, the upstream reply-to selection bug is worth its own ticket. |
 | Blocked-count annotation cost on the full list | Decides whether we compute live, cache on the task, or materialize (§5). Still unbenchmarked. |
@@ -242,8 +276,11 @@ Approach:
 
 | File | Change |
 |---|---|
+| [muckrock/communication/models.py:81](muckrock/communication/models.py#L81) | `_normalize_email` lowercases the local part too; `EmailAddress.save()` lowercases defensively (§4) |
+| [muckrock/foia/models/request.py:897](muckrock/foia/models/request.py#L897) | `get_or_create` → `EmailAddress.objects.fetch()`, so normalization isn't bypassed |
+| muckrock/communication/management/commands/ — new | Lowercase-and-merge `EmailAddress` rows, with `--dry-run` (§4) |
 | [muckrock/task/models.py:332](muckrock/task/models.py#L332) | Channel FK on `ReviewAgencyTask`; uniqueness `(agency, source, channel)` |
-| Data migration (new) | Retroactive per-channel split (§4) |
+| Management command (new) | Retroactive per-channel split (§4) |
 | [muckrock/task/querysets.py:334](muckrock/task/querysets.py#L334) | `ensure_one_created` dedup keyed on channel; `preload_list` updated for grouping |
 | [muckrock/mailgun/views.py:465](muckrock/mailgun/views.py#L465), [muckrock/foia/models/request.py:955](muckrock/foia/models/request.py#L955) | Pass the already-in-hand address into `ensure_one_created` |
 | [muckrock/task/views.py:326](muckrock/task/views.py#L326) | Impact ordering, blocked-count annotation, agency grouping |
@@ -256,7 +293,7 @@ Approach:
 | [muckrock/templates/lib/review_agency.html](muckrock/templates/lib/review_agency.html) | Superseded by the detail view; keep as fallback during rollout |
 | muckrock/assets/components/ — new | Repair UI (see below) |
 
-**Frontend:** Svelte 5 and Vite are **already in the stack**, with components in [muckrock/assets/components/](muckrock/assets/components/). The repair surface is a good fit for a component: shared selection state across channel cards, and one repair form that mounts both inside a channel and in a multi-channel context.
+**Frontend:** Svelte 5 and Vite are **already in the stack**, with components in [muckrock/assets/components/](muckrock/assets/components/). The repair surface is a good fit for a component: shared selection state across channel cards, and one repair form that mounts both inside a channel and in a multi-channel context. This could provide the foundation for migrating other tasks from HTML/JS with AJAX to Svelte—any components we write should be designed with an eye towards repeatable patterns.
 
 Explicitly not changing: source choices, resolve semantics, the `stale` job's trigger conditions, Zendesk.
 
