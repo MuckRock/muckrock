@@ -79,12 +79,16 @@ class EmailAddressQuerySet(models.QuerySet):
 
     @staticmethod
     def _normalize_email(email):
-        """Username is case sensitive, domain is not"""
-        # strip invisible spaces
-        email = email.replace("\u200b", "")
+        """Lowercase the whole address
+
+        RFC 5321 is case-sensitive in principle, but in practice
+        most email providers treat addresses as case-insensitive.
+        Storing a single casing keeps one mailbox to one row.
+        """
+        
+        email = email.replace("\u200b", "") # strip invisible spaces
         validate_email(email)
-        username, domain = email.rsplit("@", 1)
-        return "%s@%s" % (username, domain.lower())
+        return email.lower()
 
 
 class EmailAddress(models.Model):
