@@ -653,6 +653,78 @@ class ReviewAgencyTask(Task):
                 foia.address = self.agency.get_addresses().first()
                 foia.save()
 
+    @classmethod
+    def repair_channels(
+        cls,
+        agency,
+        user,
+        *,
+        new_email=None,
+        channels=(),
+        foias=(),
+        update_info=False,
+        snail=False,
+        resolve=False,
+        reply="",
+    ):
+        """Repair one or several of an agency's channels in one pass
+
+        The whole submission is one transaction: a repair that updated the
+        agency's contact info but failed to resolve half the tasks would leave
+        a staffer unable to tell what actually happened.
+        """
+        # pylint: disable=too-many-arguments,too-many-locals
+
+        channel_pks = [channel.pk for channel in channels]
+        foias = list(foias)
+        foia_pks = [foia.pk for foia in foias]
+
+        tasks = cls.objects.filter(agency=agency, resolved=False)
+        if channel_pks:
+            tasks = tasks.filter(email__in=channel_pks)
+        else:
+            # No explicit channel selection: act on the tasks for the channels
+            # the submitted requests are actually sitting on.
+            tasks = tasks.filter(email__in={foia.email_id for foia in foias})
+        tasks = list(tasks.select_related("email"))
+
+        with transaction.atomic():
+            if new_email is not None or snail:
+                # One agency level contact update for the whole submission,
+                # however many channels it covers.
+                representative = tasks[0] if tasks else cls(agency=agency)
+                representative.agency = agency
+                representative.update_contact(new_email, foias, update_info, snail)
+
+            outcome_base = {
+                "new_email": new_email.email if new_email is not None else None,
+                "snail_mail": bool(snail),
+                "requests_updated": len(foia_pks) if (new_email or snail) else 0,
+                "followup_sent": bool(reply),
+                "agency_info_updated": bool(update_info),
+                "by": user.username if user is not None else None,
+                "at": timezone.now().isoformat(),
+            }
+            for task_ in tasks:
+                outcome = dict(outcome_base)
+                outcome["old_email"] = (
+                    task_.email.email if task_.email is not None else None
+                )
+                form_data = dict(task_.form_data or {})
+                form_data["repair"] = outcome
+                if resolve:
+                    task_.resolve(user, form_data)
+                else:
+                    task_.form_data = form_data
+                    task_.save()
+
+            if reply and foia_pks:
+                transaction.on_commit(
+                    lambda: submit_review_update.delay(foia_pks, reply)
+                )
+
+        return tasks
+
     def latest_response(self):
         """Returns the latest response from the agency"""
         # pylint: disable=import-outside-toplevel

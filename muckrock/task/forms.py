@@ -16,7 +16,7 @@ from dal_select2.widgets import ListSelect2
 from muckrock.accounts.models import Notification, StockResponse
 from muckrock.agency.models import Agency
 from muckrock.communication.forms import AddressForm
-from muckrock.communication.models import Address
+from muckrock.communication.models import Address, EmailAddress
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.core import autocomplete
 from muckrock.core.utils import generate_status_action
@@ -24,6 +24,7 @@ from muckrock.foia.codes import CODE_CHOICES, CODES
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
+from muckrock.task.channels import classify_address
 
 
 # pylint:disable=too-many-positional-arguments
@@ -81,6 +82,104 @@ class ReviewAgencyTaskForm(forms.Form):
 
         if not email_or_fax and not snail_mail:
             self.add_error("email_or_fax", "Required if snail mail is not checked")
+
+
+class ChannelRepairForm(forms.Form):
+    """Repair one or several of an agency's broken channels
+
+    One submitted replacement address can be applied across requests drawn
+    from several channels: the median multi channel agency has only 61% of its
+    blocked requests on its biggest channel, so single channel only repair
+    structurally cannot clear the backlog.
+    """
+
+    new_email = forms.CharField(
+        label="Replacement email address",
+        required=False,
+        widget=ListSelect2(
+            url="email-autocomplete",
+            attrs={"data-placeholder": "Search for an email address"},
+        ),
+    )
+    channel_pks = forms.CharField(required=False, widget=forms.HiddenInput)
+    foia_pks = forms.CharField(required=False, widget=forms.HiddenInput)
+    update_agency_info = forms.BooleanField(
+        label="Update agency's main contact info?", required=False
+    )
+    snail_mail = forms.BooleanField(
+        label="Make snail mail the preferred communication method", required=False
+    )
+    resolve = forms.BooleanField(label="Resolve after updating", required=False)
+    reply = forms.CharField(
+        label="Reply:", required=False, widget=forms.Textarea(attrs={"rows": 5})
+    )
+
+    def clean_new_email(self):
+        """Resolve the address through fetch() so no case variant is created
+
+        A staffer typing FOIA@Agency.gov must land on the same row as
+        foia@agency.gov rather than minting a fresh variant of one mailbox.
+        """
+        value = self.cleaned_data["new_email"]
+        if not value:
+            return None
+        address = EmailAddress.objects.fetch(value)
+        if address is None:
+            raise forms.ValidationError("Enter a valid email address")
+        return address
+
+    def clean_channel_pks(self):
+        """The channels being repaired, as EmailAddress rows"""
+        return self._clean_pks("channel_pks")
+
+    def clean_foia_pks(self):
+        """The requests to repoint"""
+        return self._clean_pks("foia_pks")
+
+    def _clean_pks(self, field):
+        """A comma separated pk list as integers"""
+        raw = self.cleaned_data.get(field) or ""
+        pks = []
+        for part in raw.replace(",", " ").split():
+            try:
+                pks.append(int(part))
+            except ValueError as exc:
+                raise forms.ValidationError("Invalid selection") from exc
+        return pks
+
+    def clean(self):
+        """A replacement address is required unless snail mail is chosen
+
+        Portal classified channels are rejected outright: no replacement email
+        repairs a portal notification address, so offering the swap would walk
+        a staffer into a repair that is actively wrong.
+        """
+        cleaned_data = super().clean()
+        new_email = cleaned_data.get("new_email")
+        snail_mail = cleaned_data.get("snail_mail")
+        resolve = cleaned_data.get("resolve")
+
+        if not new_email and not snail_mail and not resolve:
+            self.add_error(
+                "new_email",
+                "Required unless snail mail is checked or you are only resolving",
+            )
+
+        channel_pks = cleaned_data.get("channel_pks") or []
+        if new_email and channel_pks:
+            portal_channels = [
+                address
+                for address in EmailAddress.objects.filter(pk__in=channel_pks)
+                if classify_address(address) == "portal"
+            ]
+            if portal_channels:
+                self.add_error(
+                    "new_email",
+                    "%s is a portal notification address. Switching this agency "
+                    "to a portal is out of scope -- an email replacement is the "
+                    "wrong repair." % ", ".join(a.email for a in portal_channels),
+                )
+        return cleaned_data
 
 
 class ResponseTaskForm(forms.Form):

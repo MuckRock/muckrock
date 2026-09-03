@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load django_vite %}
+
+{% comment %}
+  Unstyled scaffold.  Its job is to get the complete, correct roster into the
+  page and into the component's props.  Visual design happens by hand after.
+{% endcomment %}
+
+{% block title %}Review channels &mdash; {{ agency.name }}{% endblock %}
+
+{% block content %}
+<article class="review-agency-detail">
+
+  <header>
+    <h1>{{ agency.name }}</h1>
+    <p>{{ agency.jurisdiction }}</p>
+    <p>
+      <a href="{{ agency.get_absolute_url }}">Agency page</a>
+      &middot;
+      <a href="{% url 'admin:agency_agency_change' agency.pk %}">Admin</a>
+      &middot;
+      <a href="{% url 'review-agency-task-list' %}?agency={{ agency.pk }}">Back to queue</a>
+    </p>
+  </header>
+
+  {# The scorecard: how much work is left to be done #}
+  <section class="review-agency-scorecard">
+    <h2>Scorecard</h2>
+    <dl>
+      <dt>Blocked requests</dt>
+      <dd><strong>{{ total_blocked }}</strong></dd>
+
+      {# Channel count is not an impact signal -- a long roster is not urgent
+         on its own, so these sit beside the blocked count, never instead of it #}
+      <dt>Known channels</dt>
+      <dd>{{ channels_known }}</dd>
+
+      <dt>Broken</dt>
+      <dd>{{ channels_broken }}</dd>
+
+      <dt>Carrying live traffic</dt>
+      <dd>{{ channels_active }}</dd>
+
+      <dt>Last successful response</dt>
+      <dd>
+        {% if last_success %}
+          <time datetime="{{ last_success|date:'Y-m-d H:i' }}">
+            {{ last_success|date:'m/d/Y' }} ({{ last_success|timesince }} ago)
+          </time>
+        {% else %}
+          None on record
+        {% endif %}
+      </dd>
+    </dl>
+
+    {% if has_portal_channel %}
+      <p class="review-agency-warning">
+        <mark>This agency has at least one portal notification address.</mark>
+        No replacement email repairs a portal channel &mdash; switching the
+        agency to a portal is separate, follow-on work.
+      </p>
+    {% endif %}
+  </section>
+
+  <section class="review-agency-roster">
+    <h2>Channels</h2>
+    {% for channel in channels %}
+      <article class="review-agency-channel" data-channel="{{ channel.address.pk }}">
+        <h3>
+          <code>{{ channel.address.email }}</code>
+          {% if channel.is_primary %}<span class="badge">Primary</span>{% endif %}
+          {% if not channel.has_error %}<span class="badge">Healthy</span>{% endif %}
+          {% if channel.is_portal %}<span class="badge">Portal</span>{% endif %}
+          {% if channel.classification == 'noreply' %}<span class="badge">Do-not-reply</span>{% endif %}
+          {% if channel.classification == 'reputation' %}<span class="badge">Sender reputation</span>{% endif %}
+        </h3>
+
+        <p><strong>{{ channel.blocked_count }}</strong> request{{ channel.blocked_count|pluralize }} blocked</p>
+
+        {% if channel.last_error %}
+          <p>
+            {{ channel.last_error_message }} &mdash;
+            <time datetime="{{ channel.last_error|date:'Y-m-d H:i' }}">
+              {{ channel.last_error|date:'m/d/Y' }}
+              ({{ channel.last_error_age }} day{{ channel.last_error_age|pluralize }} ago)
+            </time>
+            {% if channel.is_stale_error %}
+              <mark>Stale flag</mark> &mdash; nothing has bounced here in over two years.
+            {% endif %}
+          </p>
+        {% endif %}
+
+        {% if channel.recent_errors %}
+          {# The latest few carry the whole signal; the rest is a scroll #}
+          <details>
+            <summary>{{ channel.error_count }} error event{{ channel.error_count|pluralize }}</summary>
+            <ul>
+              {% for error in channel.recent_errors %}
+                <li>
+                  <time datetime="{{ error.datetime|date:'Y-m-d H:i' }}">{{ error.datetime|date:'m/d/Y' }}</time>
+                  &mdash; {{ error.code }} {{ error.reason }} {{ error.error }}
+                </li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
+
+        {% if channel.foias %}
+          <details>
+            <summary>{{ channel.foias|length }} request{{ channel.foias|length|pluralize }} routed here</summary>
+            <ul>
+              {% for foia in channel.foias %}
+                <li><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a> ({{ foia.get_status_display }})</li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
+      </article>
+    {% empty %}
+      <p>No channels on record for this agency.</p>
+    {% endfor %}
+  </section>
+
+  {# Demoted per #2224, but reachable -- these crowd out what is broken #}
+  <section class="review-agency-other-contacts">
+    <details>
+      <summary>Mail and phone</summary>
+      <h3>Mailing addresses</h3>
+      <ul>
+        {% for agency_address in addresses %}
+          <li>{{ agency_address.address }} ({{ agency_address.request_type }})</li>
+        {% empty %}
+          <li>None on record</li>
+        {% endfor %}
+      </ul>
+      <h3>Faxes</h3>
+      <ul>
+        {% for agency_fax in faxes %}
+          <li>{{ agency_fax.phone }} ({{ agency_fax.request_type }})</li>
+        {% empty %}
+          <li>None on record</li>
+        {% endfor %}
+      </ul>
+      <h3>Phones</h3>
+      <ul>
+        {% for agency_phone in phones %}
+          <li>{{ agency_phone.phone }}</li>
+        {% empty %}
+          <li>None on record</li>
+        {% endfor %}
+      </ul>
+    </details>
+  </section>
+
+</article>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  {% vite_asset 'muckrock/assets/js/reviewAgency.ts' %}
+{% endblock scripts %}
