@@ -74,7 +74,8 @@ class EmailAddressQuerySet(models.QuerySet):
             email_address, _ = self.update_or_create(
                 email=email, defaults={"name": name}
             )
-            addresses.append(email_address)
+            if email_address not in addresses:
+                addresses.append(email_address)
         return addresses
 
     @staticmethod
