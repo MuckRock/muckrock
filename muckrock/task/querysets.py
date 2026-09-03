@@ -330,6 +330,7 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
 
         return (
             self.annotate_channel()
+            .with_outcome()
             .select_related(
                 "agency__jurisdiction",
                 "agency__portal",
@@ -392,6 +393,23 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             agency_blocked_count=Coalesce(
                 agency_blocked, Value(0), output_field=IntegerField()
             ),
+        )
+
+    def with_outcome(self):
+        """Annotate whether a resolved repair actually held
+
+        Held means the agency has responded to us since the resolve.  Anything
+        older is not evidence about this repair, and our own outgoing mail is
+        not evidence at all.
+        """
+        return self.annotate(
+            held=Exists(
+                FOIACommunication.objects.filter(
+                    foia__agency=OuterRef("agency"),
+                    response=True,
+                    datetime__gt=OuterRef("date_done"),
+                )
+            )
         )
 
     def annotate_channel(self):

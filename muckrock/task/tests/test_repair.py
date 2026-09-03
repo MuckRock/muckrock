@@ -286,3 +286,40 @@ class TestMultiChannelRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
             foia.refresh_from_db()
             assert foia.email == portal
 
+
+@mock.patch("muckrock.task.tasks.submit_review_update.delay")
+class TestRepairOutcome(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
+    """What was done has to be recoverable afterward"""
+
+    def test_outcome_is_recorded_on_the_task(self, _mock_delay):
+        """Which channel, old to new, how many requests, follow up, by whom"""
+        address, foias, task = self.make_channel("old@agency.gov", blocked=2)
+        self.post(
+            new_email="new@agency.gov",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+            resolve="on",
+            reply="Following up.",
+        )
+        task.refresh_from_db()
+        outcome = task.repair_outcome
+        assert outcome["old_email"] == "old@agency.gov"
+        assert outcome["new_email"] == "new@agency.gov"
+        assert outcome["requests_updated"] == 2
+        assert outcome["followup_sent"] is True
+        assert outcome["by"] == self.user.username
+        assert outcome["at"]
+
+    def test_outcome_records_a_resolve_with_no_change(self, _mock_delay):
+        """Resolving without a contact edit says so"""
+        address, _foias, task = self.make_channel("fine@agency.gov", blocked=1)
+        self.post(resolve="on", channel_pks=str(address.pk))
+        task.refresh_from_db()
+        outcome = task.repair_outcome
+        assert outcome["new_email"] is None
+        assert outcome["requests_updated"] == 0
+
+    def test_no_outcome_on_an_untouched_task(self, _mock_delay):
+        """A task nobody acted on has nothing to report"""
+        _address, _foias, task = self.make_channel("old@agency.gov", blocked=1)
+        assert task.repair_outcome is None

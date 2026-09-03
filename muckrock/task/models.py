@@ -57,6 +57,7 @@ from muckrock.task.querysets import (
     StatusChangeTaskQuerySet,
     TaskQuerySet,
 )
+from muckrock.task.tasks import submit_review_update
 
 logger = logging.getLogger(__name__)
 
@@ -652,6 +653,37 @@ class ReviewAgencyTask(Task):
                 foia.fax = None
                 foia.address = self.agency.get_addresses().first()
                 foia.save()
+
+    @property
+    def repair_outcome(self):
+        """What was done to this task, or None if nobody has acted on it
+
+        Recorded in form_data, which is a JSONField already meant for what the
+        resolving form submitted.  Deliberately not the note field: staff edit
+        that as free text and a structured payload would clobber their notes.
+        """
+        if not self.form_data:
+            return None
+        return self.form_data.get("repair")
+
+    @cached_property
+    def successor(self):
+        """The open task that reopened this channel after it was resolved
+
+        A property rather than a FK: the link is derivable, and a FK would
+        need backfilling for every existing task and could go stale.  Only
+        matched on a channel -- an agency level task has none, and matching on
+        the agency alone would link unrelated work.
+        """
+        if not self.resolved or self.email_id is None:
+            return None
+        return (
+            ReviewAgencyTask.objects.filter(
+                agency_id=self.agency_id, email_id=self.email_id, resolved=False
+            )
+            .order_by("-date_created", "-pk")
+            .first()
+        )
 
     @classmethod
     def repair_channels(

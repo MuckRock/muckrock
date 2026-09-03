@@ -152,6 +152,24 @@
     </details>
   </section>
 
+  <section class="review-agency-repair">
+    <h2>Repair</h2>
+    {# The component owns selection state across channel cards and posts a
+       normal form back here.  Everything it needs arrives as props. #}
+    {{ channels_json|json_script:"review-agency-data" }}
+    <div id="review-agency-app" data-action="{{ request.get_full_path }}"></div>
+    {# The component needs a CSRF token to post with #}
+    <form style="display:none">{% csrf_token %}</form>
+
+    <noscript>
+      <form method="POST" action="">
+        {% csrf_token %}
+        {{ repair_form.as_p }}
+        <button type="submit" name="repair" value="true">Repair selected channels</button>
+      </form>
+    </noscript>
+  </section>
+
 </article>
 {% endblock %}
 
