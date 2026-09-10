@@ -19,6 +19,7 @@ from rest_framework.response import Response
 # MuckRock
 from muckrock.accounts.stats_api.models import UserStats
 from muckrock.accounts.stats_api.serializers import UserStatsSerializer
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.core.pagination import CursorPagination
 from muckrock.organization.models import Organization
 
@@ -65,7 +66,7 @@ class UserStatsFilter(django_filters.FilterSet):
         )
 
 
-class UserStatsViewSet(viewsets.ReadOnlyModelViewSet):
+class UserStatsViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """Staff-facing user activity stats."""
 
     serializer_class = UserStatsSerializer
