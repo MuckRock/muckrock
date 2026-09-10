@@ -18,6 +18,7 @@ from rest_framework.response import Response
 
 # MuckRock
 from muckrock.core.pagination import CursorPagination
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.organization.stats_api.models import OrganizationStats
 from muckrock.organization.stats_api.serializers import OrganizationStatsSerializer
 
@@ -51,7 +52,7 @@ class OrganizationStatsFilter(django_filters.FilterSet):
     filter_active_within_days = filter_filed_within_days
 
 
-class OrganizationStatsViewSet(viewsets.ReadOnlyModelViewSet):
+class OrganizationStatsViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """Staff-facing organization activity stats."""
 
     serializer_class = OrganizationStatsSerializer
