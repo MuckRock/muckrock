@@ -16,7 +16,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-
 # MuckRock
 from muckrock.core.pagination import CursorPagination
 from muckrock.core.views import AuthenticatedAPIMixin

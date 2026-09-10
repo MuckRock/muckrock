@@ -19,8 +19,8 @@ from rest_framework.response import Response
 # MuckRock
 from muckrock.accounts.stats_api.models import UserStats
 from muckrock.accounts.stats_api.serializers import UserStatsSerializer
-from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.core.pagination import CursorPagination
+from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.organization.models import Organization
 
 
