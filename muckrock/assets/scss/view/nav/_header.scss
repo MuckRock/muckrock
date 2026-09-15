@@ -381,6 +381,27 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       }
     }
   }
+  /* Bound the org-switcher list so many-org users can scroll it instead of
+     the dropdown running off-screen. Scoped under #profile-dropdown so it
+     outranks the ID-based panel rules. Horizontal scroll + width:auto let
+     long names extend the row and be reached by scrolling, rather than
+     clipping at the panel edge. */
+  #profile-dropdown .org-switcher-list {
+    max-height: 40vh;
+    overflow-y: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: $color-black;
+    width: 100%;
+    box-sizing: border-box;
+    .nav-item {
+      width: 100%;
+      color: $color-white;
+      &:hover {
+        background: $color-black-pure;
+      }
+    }
+  }
 }
 
 /*
