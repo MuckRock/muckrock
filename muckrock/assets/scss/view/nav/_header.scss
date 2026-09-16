@@ -381,21 +381,38 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       }
     }
   }
-  /* Bound the org-switcher list so many-org users can scroll it instead of
-     the dropdown running off-screen. Scoped under #profile-dropdown so it
-     outranks the ID-based panel rules. Horizontal scroll + width:auto let
-     long names extend the row and be reached by scrolling, rather than
-     clipping at the panel edge. */
+  /*
+  The org switcher is a nested <ul>, so it picks up the dropdown panel styles
+  above (absolute positioning, border, shadow). Undo those so it behaves as an
+  ordinary block inside the profile panel, then bound it: it grows with the
+  longest org name up to a cap, scrolls vertically when there are many orgs,
+  and scrolls horizontally for names longer than the cap.
+  Scoped under #profile-dropdown so it outranks the ID-based panel rules.
+  */
   #profile-dropdown .org-switcher-list {
-    max-height: 40vh;
-    overflow-y: auto;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    display: block;
+    position: static;
+    border: 0;
+    box-shadow: none;
     background: $color-black;
-    width: 100%;
-    box-sizing: border-box;
+    /* Size to the longest org name (max-content), but never narrower than the
+       panel and never wider than the cap -- past that the list scrolls. */
+    width: max-content;
+    min-width: 100%;
+    /* vw rather than % so the cap still applies while the panel is being
+       sized to its contents, and so narrow screens stay narrow. */
+    max-width: min(24rem, 90vw);
+    max-height: 40vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
     .nav-item {
-      width: 100%;
+      /* Fill the panel, but keep extending with the name so the row's
+         background covers the full horizontal scroll width. */
+      width: auto;
+      min-width: 100%;
+      /* .dropdown button's right margin would overflow the scroll box. */
+      margin-right: 0;
+      white-space: nowrap;
       color: $color-white;
       &:hover {
         background: $color-black-pure;
