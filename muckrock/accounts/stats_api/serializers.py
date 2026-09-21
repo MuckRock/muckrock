@@ -12,6 +12,8 @@ class UserStatsSerializer(serializers.ModelSerializer):
     """Staff-facing user activity stats."""
 
     uuid = serializers.UUIDField(source="user.profile.uuid", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
     last_login_at = serializers.DateTimeField(source="user.last_login", read_only=True)
     total_requests = serializers.SerializerMethodField(
         help_text="Total non-draft requests the user has filed."
@@ -29,6 +31,8 @@ class UserStatsSerializer(serializers.ModelSerializer):
         model = UserStats
         fields = [
             "uuid",
+            "username",
+            "user_id",
             "last_request_at",
             "last_login_at",
             "total_requests",

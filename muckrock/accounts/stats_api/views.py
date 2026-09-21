@@ -45,6 +45,16 @@ class UserStatsFilter(django_filters.FilterSet):
         help_text="Return users whose most recent login was within the last N days.",
     )
 
+    user_id = django_filters.NumberFilter(
+        field_name="user__id",
+        label="User ID (exact)",
+    )
+    username = django_filters.CharFilter(
+        field_name="user__username",
+        lookup_expr="iexact",
+        label="Username (exact, case-insensitive)",
+    )
+
     class Meta:
         model = UserStats
         fields = []
