@@ -44,8 +44,8 @@ class OrganizationViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     pagination_class = APIV2CursorPagination
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Organization.objects.all()  # Staff can see all organizations
-        # Non-staff users see only organizations they are members of
-        return Organization.objects.filter(users=user)
+        """Staff see all organizations, others see only their own"""
+        queryset = super().get_queryset()
+        if self.request.user.is_staff:
+            return queryset
+        return queryset.filter(users=self.request.user)
