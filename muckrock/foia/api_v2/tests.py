@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import assert_max_queries, assert_queries_do_not_scale
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,
@@ -374,6 +375,29 @@ class TestFOIARequestViewset(TestCase):
         )
         assert response.status_code == 401
 
+    def test_list_queries_do_not_scale(self):
+        """Listing requests must not add queries as the number of requests grows"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        assert_queries_do_not_scale(
+            self.client,
+            reverse("api2-requests-list"),
+            FOIARequestFactory.create,
+        )
+
+    def test_list_query_count_staff(self):
+        """Listing requests stays within a query limit for staff"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        url = reverse("api2-requests-list")
+        assert_queries_do_not_scale(self.client, url, FOIARequestFactory.create)
+        assert_max_queries(self.client, url, max_queries=5)
+
+    def test_list_query_count_nonstaff(self):
+        """Listing requests stays within a query limit for non-staff"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=False))
+        url = reverse("api2-requests-list")
+        assert_queries_do_not_scale(self.client, url, FOIARequestFactory.create)
+        assert_max_queries(self.client, url, max_queries=5)
+
 
 class TestFOIACommunicationViewset(TestCase):
     def setUp(self):
@@ -405,6 +429,15 @@ class TestFOIACommunicationViewset(TestCase):
         )
         assert response.status_code == 401
 
+    def test_list_queries_do_not_scale(self):
+        """Listing communications must not add queries as communications grow"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        assert_queries_do_not_scale(
+            self.client,
+            reverse("api2-communications-list"),
+            FOIACommunicationFactory.create,
+        )
+
 
 class TestFOIAFileViewset(TestCase):
     def setUp(self):
@@ -431,3 +464,12 @@ class TestFOIAFileViewset(TestCase):
         file = FOIAFileFactory.create()
         response = self.client.get(reverse("api2-files-detail", kwargs={"pk": file.pk}))
         assert response.status_code == 401
+
+    def test_list_queries_do_not_scale(self):
+        """Listing files must not add queries as the number of files grows"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        assert_queries_do_not_scale(
+            self.client,
+            reverse("api2-files-list"),
+            FOIAFileFactory.create,
+        )

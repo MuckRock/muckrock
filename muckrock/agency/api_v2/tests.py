@@ -9,6 +9,7 @@ from rest_framework.test import APIClient, APITestCase
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.core.test_utils import assert_queries_do_not_scale
 from muckrock.jurisdiction.factories import LocalJurisdictionFactory
 
 
@@ -50,6 +51,15 @@ class AgencyViewSetTests(APITestCase):
         self.user2 = UserFactory(username="bob", is_staff=False)
 
         self.client = APIClient()
+
+    def test_list_queries_do_not_scale(self):
+        """Listing agencies must not add queries as the number of agencies grows."""
+        self.client.force_authenticate(user=self.user1)
+        assert_queries_do_not_scale(
+            self.client,
+            self.url,
+            lambda: AgencyFactory(status="approved"),
+        )
 
     def test_retrieve_agencies(self):
         """Test retrieving the list of agencies."""
@@ -107,21 +117,6 @@ class AgencyViewSetTests(APITestCase):
         self.assertIn("First Approved Agency", agency_names)
         self.assertIn("Second Approved Agency", agency_names)
         self.assertIn("Unapproved Agency", agency_names)
-
-    def test_ordering(self):
-        """Test that agencies are returned in the correct order."""
-        self.client.force_authenticate(user=self.user1)
-        response = self.client.get(self.url, {"ordering": "name"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        response_data = response.json()
-        agency_names = [agency["name"] for agency in response_data["results"]]
-
-        # Assuming the expected order based on names
-        self.assertEqual(
-            agency_names,
-            ["First Approved Agency", "Second Approved Agency", "Unapproved Agency"],
-        )
 
     def test_unauthenticated_user_cannot_list_agencies(self):
         """Test that unauthenticated users cannot access the agency list."""

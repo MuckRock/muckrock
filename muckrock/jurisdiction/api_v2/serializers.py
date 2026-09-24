@@ -19,6 +19,8 @@ from muckrock.jurisdiction.models import Jurisdiction
                 "abbrev": "CA",
                 "level": "s",
                 "parent": 3,
+                "parent_name": "United States of America",
+                "parent_abbrev": "USA",
             },
             description="Example of a state jurisdiction under the USA.",
         ),
@@ -31,6 +33,8 @@ from muckrock.jurisdiction.models import Jurisdiction
                 "abbrev": "",
                 "level": "l",
                 "parent": 1,
+                "parent_name": "California",
+                "parent_abbrev": "CA",
             },
             description="Example of a local jurisdiction under California.",
         ),
@@ -43,6 +47,8 @@ from muckrock.jurisdiction.models import Jurisdiction
                 "abbrev": "USA",
                 "level": "f",
                 "parent": None,
+                "parent_name": None,
+                "parent_abbrev": None,
             },
             description="Example of a federal jurisdiction.",
         ),
@@ -53,12 +59,26 @@ class JurisdictionSerializer(serializers.ModelSerializer):
     """Serializer for Jurisdiction model"""
 
     parent = serializers.PrimaryKeyRelatedField(
-        queryset=Jurisdiction.objects.order_by(),
-        style={"base_template": "input.html"},
+        read_only=True,
         help_text=(
-            "Parent jurisdiction. This defines the hierarchy between jurisdictions, "
-            "where a jurisdiction can have a federal or state parent. "
+            "ID of the parent jurisdiction. This defines the hierarchy between "
+            "jurisdictions, where a jurisdiction can have a federal or state parent. "
             "Local jurisdictions cannot be parents."
+        ),
+    )
+    parent_name = serializers.CharField(
+        source="parent.name",
+        read_only=True,
+        allow_null=True,
+        help_text="Name of the parent jurisdiction, or null for federal jurisdictions",
+    )
+    parent_abbrev = serializers.CharField(
+        source="parent.abbrev",
+        read_only=True,
+        allow_null=True,
+        help_text=(
+            "Abbreviation of the parent jurisdiction, or null for federal "
+            "jurisdictions. For local jurisdictions this is the state abbreviation."
         ),
     )
 
@@ -73,6 +93,8 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             "abbrev",
             "level",
             "parent",
+            "parent_name",
+            "parent_abbrev",
         )
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for this jurisdiction."},
@@ -80,15 +102,9 @@ class JurisdictionSerializer(serializers.ModelSerializer):
             "slug": {"help_text": "The slug (URL identifier) for the jurisdiction."},
             "abbrev": {
                 "help_text": (
-                    "The abbreviation for the jurisdiction. Local jurisdictions don't have one"
+                    "The abbreviation for the jurisdiction. "
+                    "Local jurisdictions don't have one"
                 )
             },
-            "level": {"help_text": ("The level of the jurisdiction.")},
-            "parent": {
-                "help_text": (
-                    "ID of the parent jurisdiction. This defines the hierarchy between jurisdictions, "
-                    "where a jurisdiction can have a federal or state parent. "
-                    "Local jurisdictions cannot be parents."
-                )
-            },
+            "level": {"help_text": "The level of the jurisdiction."},
         }

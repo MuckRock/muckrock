@@ -2,9 +2,11 @@
 
 # Third Party
 import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets
 
 # MuckRock
+from muckrock.core.pagination import APIV2CursorPagination
 from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.project.api_v2.serializers import ProjectSerializer
 from muckrock.project.models import Project
@@ -21,6 +23,8 @@ class ProjectViewSet(
     """
 
     serializer_class = ProjectSerializer
+    pagination_class = APIV2CursorPagination
+    filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
         return Project.objects.get_viewable(self.request.user).prefetch_related(

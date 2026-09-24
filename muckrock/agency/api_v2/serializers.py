@@ -23,6 +23,7 @@ from muckrock.jurisdiction.models import Jurisdiction
                 "exempt": False,
                 "requires_proxy": False,
                 "jurisdiction": 10,
+                "state": None,
                 "types": ["Executive"],
                 "parent": None,
                 "appeal_agency": None,
@@ -36,7 +37,6 @@ class AgencySerializer(serializers.ModelSerializer):
 
     types = serializers.StringRelatedField(
         many=True,
-        required=False,
         help_text="The types of the agency (e.g., Executive, Legislative, Police, etc).",
     )
     appeal_agency = serializers.PrimaryKeyRelatedField(
@@ -55,6 +55,21 @@ class AgencySerializer(serializers.ModelSerializer):
         style={"base_template": "input.html"},
         help_text="The ID of the jurisdiction this agency operates under",
     )
+    state = serializers.SerializerMethodField(
+        help_text=(
+            "Jurisdiction ID of the state this"
+            " agency belongs to, or null for federal agencies"
+        )
+    )
+
+    def get_state(self, obj) -> int | None:
+        """The state jurisdiction for state and local agencies"""
+        jurisdiction = obj.jurisdiction
+        if jurisdiction.level == "s":
+            return jurisdiction.pk
+        if jurisdiction.level == "l":
+            return jurisdiction.parent_id
+        return None
 
     class Meta:
         """Options for the Agency serializer"""
@@ -70,6 +85,7 @@ class AgencySerializer(serializers.ModelSerializer):
             "types",
             "requires_proxy",
             "jurisdiction",
+            "state",
             # connects to other agencies
             "parent",
             "appeal_agency",
@@ -89,12 +105,5 @@ class AgencySerializer(serializers.ModelSerializer):
                     "Indicates whether the agency requires a proxy "
                     "because of in-state residency laws."
                 )
-            },
-            "jurisdiction": {
-                "help_text": "The ID of the jurisdiction this agency operates under."
-            },
-            "parent": {"help_text": "The ID of the parent agency, if applicable."},
-            "appeal_agency": {
-                "help_text": "The ID of the agency to which appeals are directed, if applicable."
             },
         }
