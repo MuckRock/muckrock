@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import UserFactory
+from muckrock.core.test_utils import assert_queries_do_not_scale
 from muckrock.organization.factories import OrganizationFactory
 
 
@@ -128,3 +129,12 @@ class OrganizationViewSetTests(TestCase):
             reverse("api2-organizations-detail", args=[self.organization1.id])
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_queries_do_not_scale(self):
+        """Listing organizations must not add queries as organizations grow"""
+        self.client.force_authenticate(user=self.staff_user)
+
+        def create_one():
+            OrganizationFactory().users.add(self.user1)
+
+        assert_queries_do_not_scale(self.client, self.list_url, create_one)

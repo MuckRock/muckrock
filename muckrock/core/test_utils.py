@@ -5,8 +5,9 @@ Utilities for testing MuckRock applications
 # Django
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
-from django.db import transaction
+from django.db import connection, transaction
 from django.test import RequestFactory
+from django.test.utils import CaptureQueriesContext
 from django.utils.text import slugify
 
 # Standard Library
@@ -14,6 +15,26 @@ import re
 import uuid
 from unittest.mock import MagicMock, patch
 from urllib.parse import parse_qs
+
+
+def assert_queries_do_not_scale(client, url, create_one, rows=10):
+    """
+    Helper methods that can be used in tests to assert that as
+    rows grow in page size, the number of rows on a page 
+    grows but not the query count. This is a shared guard against N+1
+    """
+    baseline = len(client.get(url).json()["results"])
+
+    counts = []
+    for added in range(1, rows + 1):
+        create_one()
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.get(url)
+        assert response.status_code == 200
+        assert len(response.json()["results"]) == baseline + added
+        counts.append(len(ctx.captured_queries))
+
+    assert len(set(counts)) == 1, f"Query count grew with rows: {counts}"
 
 
 def mock_middleware(request):
