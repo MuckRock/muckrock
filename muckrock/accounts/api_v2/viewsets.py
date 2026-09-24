@@ -49,7 +49,7 @@ class UserFilter(django_filters.FilterSet):
 class UserViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for users"""
 
-    queryset = User.objects.select_related("profile")
+    queryset = User.objects.select_related("profile").prefetch_related("organizations")
     serializer_class = UserSerializer
     # The mixin will set this permission class to IsAuthenticated when
     # settings.API_V2_AUTH is set, but this sets it to IsAuthenticated

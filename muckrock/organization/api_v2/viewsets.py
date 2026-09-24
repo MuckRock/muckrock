@@ -37,7 +37,7 @@ class OrganizationFilter(django_filters.FilterSet):
 class OrganizationViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for organizations"""
 
-    queryset = Organization.objects.all()
+    queryset = Organization.objects.prefetch_related("users")
     serializer_class = OrganizationSerializer
     permission_classes = (IsAuthenticated,)
     filterset_class = OrganizationFilter
