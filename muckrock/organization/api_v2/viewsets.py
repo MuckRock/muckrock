@@ -8,6 +8,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 # MuckRock
+from muckrock.core.pagination import APIV2CursorPagination
 from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.organization.api_v2.serializers import OrganizationSerializer
 from muckrock.organization.models import Organization
@@ -40,6 +41,7 @@ class OrganizationViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = OrganizationSerializer
     permission_classes = (IsAuthenticated,)
     filterset_class = OrganizationFilter
+    pagination_class = APIV2CursorPagination
 
     def get_queryset(self):
         user = self.request.user

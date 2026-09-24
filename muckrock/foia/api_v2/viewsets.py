@@ -4,6 +4,7 @@ Viewsets for V2 of the FOIA API
 
 # Django
 from django.db import transaction
+from django.db.models import Prefetch
 
 # Third Party
 import django_filters
@@ -13,12 +14,14 @@ from rest_framework import filters, mixins, status as http_status, viewsets
 from rest_framework.response import Response
 
 # MuckRock
+from muckrock.core.pagination import APIV2CursorPagination
 from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.foia.api_v2.serializers import (
     FOIACommunicationSerializer,
     FOIAFileSerializer,
     FOIARequestCreateResponseSerializer,
     FOIARequestCreateSerializer,
+    FOIARequestDetailSerializer,
     FOIARequestSerializer,
 )
 from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
@@ -38,23 +41,35 @@ class FOIARequestViewSet(
     """API for FOIA Requests"""
 
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    pagination_class = APIV2CursorPagination
 
     search_fields = ["title"]
 
     def get_serializer_class(self):
         if self.action == "create":
             return FOIARequestCreateSerializer
-
+        if self.action == "retrieve":
+            return FOIARequestDetailSerializer
         return FOIARequestSerializer
 
     def get_queryset(self):
-        return (
+        queryset = (
             FOIARequest.objects.get_viewable(self.request.user)
             .select_related("composer")
             .prefetch_related(
                 "edit_collaborators", "read_collaborators", "tracking_ids", "tags"
             )
         )
+        if self.action == "retrieve":
+            # Load only the IDs of communications this user can see.
+            # Communication bodies are large.
+            viewable_communications = FOIACommunication.objects.get_viewable(
+                self.request.user
+            ).only("id", "foia_id")
+            queryset = queryset.prefetch_related(
+                Prefetch("communications", queryset=viewable_communications)
+            )
+        return queryset
 
     @extend_schema(
         request=FOIARequestCreateSerializer,
@@ -170,30 +185,16 @@ class FOIARequestViewSet(
             label="Requests submitted on or before this date",
         )
 
-        order_by_field = "ordering"
-        ordering = django_filters.OrderingFilter(
-            fields=(
-                ("composer__datetime_submitted", "datetime_submitted"),
-                ("composer__user__id", "user"),
-                ("agency__id", "agency"),
-                ("datetime_done", "datetime_done"),
-                ("datetime_updated", "datetime_updated"),
-                ("title", "title"),
-                ("status", "status"),
-            )
-        )
-
         # pylint:disable=too-few-public-methods
         class Meta:
             """Filters"""
 
             model = FOIARequest
             fields = {
-                "title": ["icontains"],
                 "status": ["exact"],
                 "embargo_status": ["exact"],
-                "agency": ["exact"],
                 "datetime_done": ["gte", "lte"],
+                "datetime_updated": ["gte", "lte"],
             }
 
     filterset_class = Filter
@@ -209,22 +210,32 @@ class FOIACommunicationViewSet(
 
     serializer_class = FOIACommunicationSerializer
     filter_backends = (DjangoFilterBackend,)
+    pagination_class = APIV2CursorPagination
 
     def get_queryset(self):
-        return FOIACommunication.objects.get_viewable(self.request.user)
+        # We show file IDs on this so for efficiency we need to prefetch
+        # To avoid a query per communication.
+        return FOIACommunication.objects.get_viewable(
+            self.request.user
+        ).prefetch_related("files")
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
 
+        # The datetime field is the date the communication was sent,
+        # per the model. Not to be confused with python's datetime
         min_date = django_filters.DateFilter(
             field_name="datetime",
-            lookup_expr="gte",
-            label="Filter communications after this date",
+            lookup_expr="date__gte",
+            label="Filter communications on or after this date",
         )
         max_date = django_filters.DateFilter(
             field_name="datetime",
-            lookup_expr="lte",
-            label="Filter communications before this date",
+            lookup_expr="date__lte",
+            # Compare only its date part. A plain date is
+            # otherwise treated as midnight, so max_date would drop everything
+            # after 00:00 on that day.
+            label="Filter communications on or before this date",
         )
         foia = django_filters.NumberFilter(
             field_name="foia__id", label="The ID of the associated request"
@@ -251,7 +262,7 @@ class FOIAFileViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
         return FOIAFile.objects.get_viewable(self.request.user)
 
     serializer_class = FOIAFileSerializer
-
+    pagination_class = APIV2CursorPagination
     filter_backends = (DjangoFilterBackend,)
 
     class Filter(django_filters.FilterSet):
@@ -266,7 +277,7 @@ class FOIAFileViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
         )
         doc_id = django_filters.CharFilter(
             field_name="doc_id",
-            lookup_expr="icontains",
+            lookup_expr="exact",
             label="Filter by the unique slug for the file",
         )
 

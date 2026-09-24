@@ -7,11 +7,13 @@ from django.contrib.auth.models import User
 import django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 # MuckRock
 from muckrock.accounts.api_v2.serializers import StatisticsSerializer, UserSerializer
 from muckrock.accounts.models import Statistics
+from muckrock.core.pagination import APIV2CursorPagination
 from muckrock.core.views import AuthenticatedAPIMixin
 
 
@@ -27,9 +29,8 @@ class UserFilter(django_filters.FilterSet):
     username = django_filters.CharFilter(
         lookup_expr="icontains", label="The unique username of the user."
     )
-    uuid = django_filters.CharFilter(
+    uuid = django_filters.UUIDFilter(
         field_name="profile__uuid",
-        lookup_expr="icontains",
         label="The unique identifier (UUID) of the user's profile.",
     )
     email = django_filters.CharFilter(
@@ -48,19 +49,25 @@ class UserFilter(django_filters.FilterSet):
 class UserViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for users"""
 
-    queryset = User.objects.order_by("id").prefetch_related("profile")
+    queryset = User.objects.select_related("profile")
     serializer_class = UserSerializer
+    # The mixin will set this permission class to IsAuthenticated when
+    # settings.API_V2_AUTH is set, but this sets it to IsAuthenticated
+    # even if this isn't set, which is the old behavior.
     permission_classes = (IsAuthenticated,)
     filterset_class = UserFilter
+    filter_backends = [DjangoFilterBackend]
+    pagination_class = APIV2CursorPagination
 
     def get_queryset(self):
+        """Staff can see all users.
+        Non-staff can only see users they share an org membership with.
+        """
         user = self.request.user
+        queryset = super().get_queryset()
         if user.is_staff:
-            return User.objects.all()  # Staff can see all users
-        # Non-staff users see members of their organization
-        return User.objects.filter(
-            organizations__in=user.organizations.all()
-        ).distinct()
+            return queryset
+        return queryset.filter(organizations__in=user.organizations.all()).distinct()
 
     def get_object(self):
         """Allow one to lookup themselves by specifying `me` as the pk."""
@@ -78,5 +85,8 @@ class StatisticsViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Statistics.objects.all()
     serializer_class = StatisticsSerializer
     permission_classes = [IsAdminUser]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ["date"]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = {"date": ["exact", "gte", "lte"]}
+    ordering_fields = ["date"]
+    ordering = ["-date"]
+    pagination_class = APIV2CursorPagination
