@@ -20,7 +20,7 @@ from urllib.parse import parse_qs
 def assert_queries_do_not_scale(client, url, create_one, rows=10):
     """
     Helper methods that can be used in tests to assert that as
-    rows grow in page size, the number of rows on a page 
+    rows grow in page size, the number of rows on a page
     grows but not the query count. This is a shared guard against N+1
     """
     baseline = len(client.get(url).json()["results"])
