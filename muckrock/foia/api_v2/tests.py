@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
-from muckrock.core.test_utils import assert_queries_do_not_scale
+from muckrock.core.test_utils import assert_max_queries, assert_queries_do_not_scale
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,
@@ -383,6 +383,20 @@ class TestFOIARequestViewset(TestCase):
             reverse("api2-requests-list"),
             FOIARequestFactory.create,
         )
+
+    def test_list_query_count_staff(self):
+        """Listing requests stays within a query limit for staff"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        url = reverse("api2-requests-list")
+        assert_queries_do_not_scale(self.client, url, FOIARequestFactory.create)
+        assert_max_queries(self.client, url, max_queries=5)
+
+    def test_list_query_count_nonstaff(self):
+        """Listing requests stays within a query limit for non-staff"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=False))
+        url = reverse("api2-requests-list")
+        assert_queries_do_not_scale(self.client, url, FOIARequestFactory.create)
+        assert_max_queries(self.client, url, max_queries=5)
 
 
 class TestFOIACommunicationViewset(TestCase):

@@ -37,6 +37,20 @@ def assert_queries_do_not_scale(client, url, create_one, rows=10):
     assert len(set(counts)) == 1, f"Query count grew with rows: {counts}"
 
 
+def assert_max_queries(client, url, max_queries):
+    """Assert that a single request to url runs at most max_queries queries."""
+    # Cached queries shouldn't count, so run the test on the second get
+    client.get(url)
+
+    with CaptureQueriesContext(connection) as ctx:
+        response = client.get(url)
+
+    assert response.status_code == 200
+    assert (
+        len(ctx.captured_queries) <= max_queries
+    ), f"{len(ctx.captured_queries)} queries, limit is {max_queries}"
+
+
 def mock_middleware(request):
     """Mocks the request with messages and session middleware"""
     setattr(request, "session", MagicMock())
