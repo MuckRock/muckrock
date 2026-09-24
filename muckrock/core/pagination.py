@@ -70,7 +70,7 @@ class APIV2CursorPagination(CursorPagination):
     def get_paginated_response(self, data):
         response = super().get_paginated_response(data)
         if self.include_count:
-            response.data["count"] = self.count
+            response.data = {"count": self.count, **response.data}
         return response
 
     def get_next_link(self):
