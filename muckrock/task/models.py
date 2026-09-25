@@ -57,7 +57,6 @@ from muckrock.task.querysets import (
     StatusChangeTaskQuerySet,
     TaskQuerySet,
 )
-from muckrock.task.tasks import submit_review_update
 
 logger = logging.getLogger(__name__)
 
@@ -705,7 +704,9 @@ class ReviewAgencyTask(Task):
         agency's contact info but failed to resolve half the tasks would leave
         a staffer unable to tell what actually happened.
         """
-        # pylint: disable=too-many-arguments,too-many-locals
+        # pylint: disable=too-many-arguments,too-many-locals,import-outside-toplevel
+        # MuckRock
+        from muckrock.task.tasks import submit_review_update
 
         channel_pks = [channel.pk for channel in channels]
         foias = list(foias)

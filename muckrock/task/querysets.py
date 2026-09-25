@@ -25,7 +25,6 @@ from datetime import date
 
 # MuckRock
 from muckrock import task
-from muckrock.agency.models import AgencyEmail
 from muckrock.communication.models import EmailCommunication, EmailError
 from muckrock.core.models import ExtractDay
 from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
@@ -419,6 +418,10 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
         how it last failed and how long ago, and when it last delivered.  All
         as subqueries so the queue's cost does not grow with its length.
         """
+        # pylint: disable=import-outside-toplevel
+        # MuckRock
+        from muckrock.agency.models import AgencyEmail
+
         newest_error = EmailError.objects.filter(recipient=OuterRef("email")).order_by(
             "-datetime"
         )
