@@ -1,0 +1,368 @@
+/*
+** reviewAgency.css
+**
+** Styles for the review agency detail page and its repair component.
+** Imported by js/reviewAgency.ts, so the template's markup and the Svelte
+** component's markup share one stylesheet.  Values mirror scss/base/_variables.scss.
+*/
+
+.review-agency-detail {
+  --ra-vr: 1.1875rem;
+  --ra-grey-3: #616c7a;
+  --ra-grey-7: #d5dae0;
+  --ra-grey-8: #f7f8fa;
+  --ra-inset: var(--ra-grey-8);
+  --ra-white: #ffffff;
+  --ra-blue: #4582cc;
+  --ra-blue-light: #bbd6fa;
+  --ra-red-dark: #662c29;
+  --ra-yellow-light: #f8e8ca;
+  --ra-yellow-dark: #947026;
+
+  box-sizing: border-box;
+  max-width: 60em;
+  margin: 0 auto;
+  /* Matches the padding() mixin: half a vertical rhythm on small screens */
+  padding: calc(var(--ra-vr) / 2);
+}
+
+@media (min-width: 500px) {
+  .review-agency-detail {
+    padding: var(--ra-vr);
+  }
+}
+
+.review-agency-detail > section {
+  margin-bottom: calc(var(--ra-vr) * 2);
+}
+
+.review-agency-back {
+  margin-bottom: calc(var(--ra-vr) / 2);
+}
+
+/* The vendored normalize sets summary to display: block, which drops the
+   disclosure triangle; only a list-item summary gets its ::marker */
+.review-agency-detail summary {
+  display: list-item;
+  cursor: pointer;
+  margin: 0;
+}
+
+/* The site sets every dt, and every label inside a fieldset, in small caps.
+   Here that is kept for text input labels alone (.repair-field__label);
+   everywhere else these read as ordinary text.  Declared before the more
+   specific dt rules below so their sizes still apply. */
+.review-agency-detail dt,
+.review-agency-detail fieldset label {
+  font-size: inherit;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.review-agency-detail .repair-field__label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ra-grey-3);
+}
+
+/* Agency card: identity, contact info behind a disclosure, then the
+   scorecard, each set off by a rule */
+
+.review-agency-agency {
+  display: flex;
+  flex-wrap: wrap;
+  padding: var(--ra-vr);
+  border-radius: 4px;
+}
+
+.review-agency-agency header {
+  flex: 1 1 auto;
+}
+
+.review-agency-contact {
+  flex: 1 1 16em;
+}
+
+.review-agency-scorecard {
+  flex: 1 1 100%;
+}
+
+.review-agency-agency h1 {
+  margin: 0;
+}
+
+.review-agency-agency header p {
+  margin: 0 0 calc(var(--ra-vr) / 4);
+}
+
+.review-agency-scorecard {
+  margin-top: calc(var(--ra-vr) / 2);
+  padding-top: calc(var(--ra-vr) / 2);
+  border-top: 1px solid var(--ra-grey-7);
+}
+
+/* Labels in a narrow column, each row's values stacked beside them */
+.review-agency-contact dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: calc(var(--ra-vr) / 4) var(--ra-vr);
+  margin: calc(var(--ra-vr) / 2) 0 0;
+}
+
+.review-agency-contact dt {
+  grid-column: 1;
+  margin: 0;
+}
+
+.review-agency-contact dd {
+  grid-column: 2;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Scorecard: the card already frames it, so the stats sit flush with the
+   text above rather than in a box of their own */
+
+.review-agency-scorecard h2 {
+  margin: 0 0 calc(var(--ra-vr) / 2);
+  font-size: 1.1875rem;
+}
+
+.review-agency-scorecard dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--ra-vr) / 2) var(--ra-vr);
+  margin: 0;
+}
+
+/* The dt stays first in the markup for screen readers; it displays below */
+.review-agency-stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  flex: 1 1 8em;
+  margin-bottom: 0;
+}
+
+.review-agency-stat dt {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.review-agency-stat dd {
+  margin: 0;
+  font-size: 1.4375rem;
+  font-weight: 500;
+  line-height: 1.4375em;
+}
+
+/* Blocked requests is the impact signal; the rest is context */
+.review-agency-stat--primary dd {
+  color: var(--ra-blue);
+}
+
+.review-agency-warning {
+  margin: var(--ra-vr) 0 0;
+  padding: calc(var(--ra-vr) / 2) var(--ra-vr);
+  border-radius: 4px;
+  background: var(--ra-yellow-light);
+  color: var(--ra-yellow-dark);
+}
+
+.review-agency-warning mark {
+  background: none;
+  color: inherit;
+  font-weight: 500;
+}
+
+/* Channels (repair component) */
+
+/* One card holds the roster and, below it, the repair subsection */
+.review-agency-channels {
+  padding: var(--ra-vr);
+  border: 1px solid var(--ra-grey-7);
+  border-radius: 4px;
+  background: var(--ra-white);
+}
+
+.review-agency-channels > h2 {
+  margin-top: 0;
+}
+
+.review-agency-repair-form fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.repair-channels__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: calc(var(--ra-vr) / 2);
+  margin-bottom: calc(var(--ra-vr) / 2);
+}
+
+.repair-channels__header h3 {
+  margin: 0;
+  font-size: 1.1875rem;
+}
+
+.repair-channels__actions {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ra-vr) / 2);
+}
+
+.repair-channels__actions button {
+  margin: 0;
+}
+
+.repair-channels__filter {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  margin: 0;
+  cursor: pointer;
+}
+
+.repair-channels__filter input {
+  margin: 0;
+}
+
+/* The roster is inset on a grey ground so the white channel cards read as
+   one list, apart from the repair form */
+.repair-channels__list {
+  padding: calc(var(--ra-vr) / 2);
+  border-radius: 4px;
+  background: var(--ra-inset);
+  border: 1px solid var(--ra-grey-7);
+}
+
+.repair-channels__list > p {
+  margin: 0;
+}
+
+.repair-channel {
+  margin-bottom: calc(var(--ra-vr) / 2);
+  padding: calc(var(--ra-vr) / 2) var(--ra-vr);
+  border: 1px solid var(--ra-grey-7);
+  border-radius: 4px;
+  background: var(--ra-white);
+}
+
+.repair-channel:last-child {
+  margin-bottom: 0;
+}
+
+.repair-channel--selected {
+  border-color: var(--ra-blue);
+}
+
+.repair-channel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--ra-vr) / 4) calc(var(--ra-vr) / 2);
+  cursor: pointer;
+}
+
+.repair-channel details {
+  margin: calc(var(--ra-vr) / 4) 0 0;
+}
+
+.repair-channel__error,
+.repair-form__error {
+  color: var(--ra-red-dark);
+}
+
+.repair-channel__note {
+  color: var(--ra-grey-3);
+}
+
+.repair-channel__warning {
+  color: var(--ra-yellow-dark);
+}
+
+.repair-action__summary {
+  margin: calc(var(--ra-vr) / 2) 0 var(--ra-vr);
+}
+
+.repair-action label {
+  display: block;
+  margin-bottom: calc(var(--ra-vr) / 2);
+}
+
+.repair-action input[type="email"],
+.repair-action textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+.repair-action input[type="checkbox"] {
+  margin-right: 0.25em;
+}
+
+/* Email autocomplete: a plain input with suggestions dropped over what
+   follows, so opening the list never shifts the form */
+
+.email-autocomplete {
+  position: relative;
+  margin-bottom: calc(var(--ra-vr) / 2);
+}
+
+.repair-action .email-autocomplete label {
+  margin-bottom: 0;
+}
+
+.email-autocomplete__list {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 16em;
+  overflow-y: auto;
+  margin: 2px 0 0;
+  padding: calc(var(--ra-vr) / 4) 0;
+  list-style: none;
+  border: 1px solid var(--ra-grey-7);
+  border-radius: 4px;
+  background: var(--ra-white);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.email-autocomplete__list[hidden] {
+  display: none;
+}
+
+.email-autocomplete__option,
+.email-autocomplete__note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 calc(var(--ra-vr) / 2);
+  margin: 0;
+  padding: calc(var(--ra-vr) / 4) calc(var(--ra-vr) / 2);
+}
+
+.email-autocomplete__option {
+  cursor: pointer;
+}
+
+.email-autocomplete__option small,
+.email-autocomplete__note {
+  color: var(--ra-grey-3);
+}
+
+.email-autocomplete__option:hover,
+.email-autocomplete__option--active {
+  background: var(--ra-blue-light);
+}

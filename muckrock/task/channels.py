@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 
 # MuckRock
 from muckrock.communication.models import EmailAddress, EmailError
+from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 # An error flag with no bounce event in two years tells you something different
 # from a live breakage: the flag is probably stale and the channel is a lower
@@ -360,6 +361,8 @@ def serialize_channels(agency, channels=None):
         "has_portal_channel": rollup["has_portal_channel"],
         "last_success": _isoformat(rollup["last_success"]),
         "channels": [_serialize_channel(channel) for channel in channels],
+        # The follow-up starts from the legacy task's text rather than blank
+        "default_reply": REVIEW_AGENCY_FOLLOWUP,
     }
 
 

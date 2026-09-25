@@ -23,10 +23,17 @@ from datetime import timedelta
 from muckrock.communication.factories import (
     EmailAddressFactory,
     EmailCommunicationFactory,
+    PhoneNumberFactory,
 )
 from muckrock.communication.models import EmailError
-from muckrock.core.factories import AgencyEmailFactory, AgencyFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyEmailFactory,
+    AgencyFactory,
+    AgencyPhoneFactory,
+    UserFactory,
+)
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 from muckrock.task.factories import ReviewAgencyTaskFactory
 from muckrock.task.models import ReviewAgencyTask
 
@@ -395,6 +402,26 @@ class ReviewAgencyDetailViewTests(TestCase):
         assert context["channels_active"] == 2
         assert "last_success" in context
 
+    def test_primary_email_in_contact_info(self):
+        """The primary to address is shown even when it is broken
+
+        A broken primary is the usual reason the agency is in review, so the
+        good-only Agency.email would hide exactly the address that matters.
+        """
+        self.make_channel("broken@fbi.gov", status="error")
+        AgencyEmailFactory(
+            agency=self.agency,
+            email=EmailAddressFactory(email="cc@fbi.gov"),
+            email_type="cc",
+        )
+        AgencyEmailFactory(
+            agency=self.agency,
+            email=EmailAddressFactory(email="appeal@fbi.gov"),
+            request_type="appeal",
+        )
+        context = self.context()
+        assert [e.email.email for e in context["primary_emails"]] == ["broken@fbi.gov"]
+
     def test_channels_present_and_impact_ordered(self):
         """The roster, most blocked first"""
         self.make_channel("small@fbi.gov", blocked=1)
@@ -441,12 +468,31 @@ class ReviewAgencyDetailViewTests(TestCase):
         assert channel.is_portal
         assert context["has_portal_channel"]
 
-    def test_mail_and_phone_are_demoted_not_omitted(self):
-        """Reachable behind a disclosure, but out of the default reading"""
-        context = self.context()
-        assert "addresses" in context
-        assert "faxes" in context
-        assert "phones" in context
+    def test_contact_info_at_hand(self):
+        """Website and phone are one click away for finding new contact info"""
+        self.agency.website = "https://www.fbi.gov"
+        self.agency.save()
+        AgencyPhoneFactory(
+            agency=self.agency, phone=PhoneNumberFactory(number="617-555-0100")
+        )
+        AgencyPhoneFactory(
+            agency=self.agency,
+            phone=PhoneNumberFactory(number="617-555-0199", type="fax"),
+            request_type="primary",
+        )
+        response = self.client.get(self.url)
+        content = response.content.decode()
+        # Collapsed so the checks do not depend on the template's indentation
+        start = content.index('class="review-agency-contact"')
+        end = content.index("</dl>", start)
+        contact = re.sub(r"\s+", " ", content[start:end])
+        assert '<a href="https://www.fbi.gov"' in contact
+        assert 'href="tel:+16175550100"' in contact
+        # The number's own type is not repeated under its label
+        assert "(617) 555-0199 (primary)" in contact
+        assert "(phone)" not in contact
+        # Email, addresses and the FOIA web page are empty, and say so
+        assert contact.count("None on record") == 3
 
     def test_json_payload_round_trips(self):
         """The Svelte handoff: props in, no fetches"""
@@ -469,6 +515,25 @@ class ReviewAgencyDetailViewTests(TestCase):
         assert channel["blocked_count"] == 3
         assert channel["classification"] == "dead"
         assert len(channel["foias"]) == 3
+
+    def test_follow_up_defaults_to_legacy_text(self):
+        """The follow-up starts from the same text the legacy task offers"""
+        response = self.client.get(self.url)
+        payload = json.loads(
+            re.search(
+                rb'<script id="review-agency-data" '
+                rb'type="application/json">(.*?)</script>',
+                response.content,
+                re.DOTALL,
+            )
+            .group(1)
+            .decode()
+        )
+        assert payload["default_reply"] == REVIEW_AGENCY_FOLLOWUP
+        # The no-JS fallback form starts from it too
+        assert response.context["repair_form"]["reply"].value() == (
+            REVIEW_AGENCY_FOLLOWUP
+        )
 
     def test_query_count_is_constant(self):
         """A 20 channel agency must not cost 20 times a 1 channel agency"""

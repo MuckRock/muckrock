@@ -25,6 +25,7 @@ from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
 from muckrock.task.channels import classify_address
+from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 
 # pylint:disable=too-many-positional-arguments
@@ -111,7 +112,10 @@ class ChannelRepairForm(forms.Form):
     )
     resolve = forms.BooleanField(label="Resolve after updating", required=False)
     reply = forms.CharField(
-        label="Reply:", required=False, widget=forms.Textarea(attrs={"rows": 5})
+        label="Reply:",
+        required=False,
+        initial=REVIEW_AGENCY_FOLLOWUP,
+        widget=forms.Textarea(attrs={"rows": 5}),
     )
 
     def clean_new_email(self):

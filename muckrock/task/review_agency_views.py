@@ -53,8 +53,14 @@ class ReviewAgencyDetailView(DetailView):
         context["channels"] = channels
         context.update(agency_rollup(agency, channels=channels))
 
-        # Demoted behind a disclosure but reachable -- mail and phone crowd out
-        # what is actually broken when they share the main reading.
+        # Behind a disclosure at the top of the page -- close at hand for
+        # finding or asking after new contact info, without crowding out what
+        # is actually broken.
+        # Not Agency.email, which skips broken addresses -- and a broken
+        # primary is usually why the agency is here.
+        context["primary_emails"] = agency.agencyemail_set.filter(
+            request_type="primary", email_type="to"
+        ).select_related("email")
         context["faxes"] = agency.agencyphone_set.filter(
             phone__type="fax"
         ).select_related("phone")

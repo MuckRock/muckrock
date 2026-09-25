@@ -1,5 +1,7 @@
+/// <reference types="vite/client" />
 import { mount } from "svelte";
 import ReviewAgencyRepair from "../components/ReviewAgencyRepair.svelte";
+import "../css/reviewAgency.css";
 
 window.addEventListener("DOMContentLoaded", () => {
   const el = document.getElementById("review-agency-app");
@@ -18,6 +20,7 @@ window.addEventListener("DOMContentLoaded", () => {
       data,
       csrfToken,
       action: el.dataset.action || "",
+      emailSearchUrl: el.dataset.emailSearchUrl || "",
     },
   });
 });
