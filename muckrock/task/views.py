@@ -336,7 +336,7 @@ class ReviewAgencyTaskList(TaskList):
     model = ReviewAgencyTask
     filter_class = ReviewAgencyTaskFilterSet
     title = "Review Agencies"
-    # Annotated here rather than in get_queryset() to 
+    # Annotated here rather than in get_queryset() to
     # guarantee before OrderedSortMixin sorts on it.
     queryset = ReviewAgencyTask.objects.all().preload_list().annotate_blocked()
     default_sort = "blocked_count"

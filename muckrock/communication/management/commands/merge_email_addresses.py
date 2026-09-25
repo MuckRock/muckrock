@@ -184,9 +184,7 @@ class Command(BaseCommand):
         )
         for relation, counts in group.breakdown.items():
             moving = sum(
-                count
-                for pk, count in counts.items()
-                if pk != group.canonical_pk
+                count for pk, count in counts.items() if pk != group.canonical_pk
             )
             if moving:
                 self.stdout.write(f"      {relation}: {moving} row(s) to repoint")

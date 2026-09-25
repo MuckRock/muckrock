@@ -86,8 +86,8 @@ class EmailAddressQuerySet(models.QuerySet):
         most email providers treat addresses as case-insensitive.
         Storing a single casing keeps one mailbox to one row.
         """
-        
-        email = email.replace("\u200b", "") # strip invisible spaces
+
+        email = email.replace("\u200b", "")  # strip invisible spaces
         validate_email(email)
         return email.lower()
 
