@@ -265,7 +265,7 @@ Our dev database doesn't contain the top-of-distribution agencies at all. We can
 Approach:
 
 1. **Anchor on sizing §3's top 30**, not research §11.5's top 50 — the latter's per-agency figures are unreliable (§1). Include FBI (the 23-channel, case-split case), DOE HQ (22 channels, low impact), and Seattle PD (portal-address case) specifically: those three are the shapes the design has to survive. Per agency: the agency row, all `AgencyEmail` links (primary and not), attached `EmailAddress` rows, open `ReviewAgencyTask`s, a bounded sample of attached `FOIARequest`s, and `EmailCommunication` + `EmailError` rows within 24 months.
-2. **Write a management command** rather than ad-hoc `dumpdata` — the relationship walk is non-trivial and it needs to be re-runnable.
+2. **Use a re-runnable exporter** rather than ad-hoc `dumpdata`, because the relationship walk is non-trivial. We ported the prod-subset exporter from `dev_env_data` into [`scripts/dev_data/`](scripts/dev_data/README.md). The walk is in `review_agency_head.json`, and it loads additively into an existing local database.
 3. **Redact only non-public data.** MuckRock's non-embargoed requests are already public at `/foi/*`; redacting what's already on the web costs design fidelity and buys nothing.
    - **Always redact:** `User.email`, `User.password` (set unusable).
    - **Embargoed requests only:** request title and body, associated communication bodies, requester first/last name. Check current embargo state per request; treat expired embargoes as non-embargoed.

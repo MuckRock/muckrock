@@ -36,7 +36,9 @@ Everything at or near N=1 is simple enough to construct exactly, and an arbitrar
 
 Use `create_batch()` for repeated channels per CLAUDE.md.
 
-### 0b — Real head agencies (dump command)
+### 0b — Real head agencies (prod-subset exporter)
+
+**Superseded:** rather than the management command below, this is done by the exporter ported from `dev_env_data`: [`scripts/dev_data/`](scripts/dev_data/README.md) with `review_agency_head.json`. It covers the top 30 head agencies, all their open requests, and 24 months of communications, with the §9.3 redaction plus a few extra private columns. The original spec is kept below for reference.
 
 Only the head is genuinely hard to synthesize — its complexity is the point.
 
