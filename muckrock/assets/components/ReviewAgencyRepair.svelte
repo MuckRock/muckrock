@@ -134,6 +134,34 @@
     setSelection(channelIds, foiaIds);
   }
 
+  // Nearly every stuck request shares a status, so status heads a group
+  // rather than repeating on each row.  Largest group first; within one, the
+  // oldest filing first, since it has been stuck longest.
+  function groupByStatus(foias) {
+    const groups = new Map();
+    foias.forEach((foia) => {
+      if (!groups.has(foia.status)) groups.set(foia.status, []);
+      groups.get(foia.status).push(foia);
+    });
+    return [...groups]
+      .map(([status, rows]) => ({
+        status,
+        foias: rows.toSorted((a, b) =>
+          (a.date_submitted ?? "").localeCompare(b.date_submitted ?? ""),
+        ),
+      }))
+      .sort((a, b) => b.foias.length - a.foias.length);
+  }
+
+  function toggleGroup(foias) {
+    const foiaIds = new Set(selectedFoias);
+    const allSelected = foias.every((foia) => foiaIds.has(foia.id));
+    foias.forEach((foia) =>
+      allSelected ? foiaIds.delete(foia.id) : foiaIds.add(foia.id),
+    );
+    selectedFoias = foiaIds;
+  }
+
   function formatDate(iso) {
     return iso ? new Date(iso).toLocaleDateString("en-US") : "";
   }
@@ -249,21 +277,69 @@
           {#if channel.foias.length}
             <details open={selectedChannels.has(channel.id)}>
               <summary>{channel.foias.length} request(s) routed here</summary>
-              <ul>
-                {#each channel.foias as foia (foia.id)}
-                  <li>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={selectedFoias.has(foia.id)}
-                        onchange={() => toggleFoia(foia.id)}
-                      />
-                      <a href={foia.url}>{foia.title}</a>
-                      <small>{foia.status}</small>
-                    </label>
-                  </li>
+              <table class="repair-requests">
+                <thead>
+                  <tr>
+                    <th scope="col" aria-label="Move"></th>
+                    <th scope="col">Request</th>
+                    <th scope="col">Filed</th>
+                    <th scope="col">Last response</th>
+                  </tr>
+                </thead>
+                {#each groupByStatus(channel.foias) as group (group.status)}
+                  {@const groupSelected = group.foias.filter((foia) =>
+                    selectedFoias.has(foia.id),
+                  ).length}
+                  <tbody>
+                    <tr class="repair-requests__group">
+                      <th scope="colgroup" colspan="4">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={groupSelected === group.foias.length}
+                            indeterminate={groupSelected > 0 &&
+                              groupSelected < group.foias.length}
+                            onchange={() => toggleGroup(group.foias)}
+                          />
+                          {group.status}
+                          <small>({group.foias.length})</small>
+                        </label>
+                      </th>
+                    </tr>
+                    {#each group.foias as foia (foia.id)}
+                      <tr>
+                        <td>
+                          <input
+                            type="checkbox"
+                            aria-label="Move {foia.title}"
+                            checked={selectedFoias.has(foia.id)}
+                            onchange={() => toggleFoia(foia.id)}
+                          />
+                        </td>
+                        <td><a href={foia.url}>{foia.title}</a></td>
+                        <td>
+                          {#if foia.date_submitted}
+                            <time datetime={foia.date_submitted}>
+                              {formatDate(foia.date_submitted)}
+                            </time>
+                          {:else}
+                            &mdash;
+                          {/if}
+                        </td>
+                        <td>
+                          {#if foia.last_response}
+                            <time datetime={foia.last_response}>
+                              {formatDate(foia.last_response)}
+                            </time>
+                          {:else}
+                            Never
+                          {/if}
+                        </td>
+                      </tr>
+                    {/each}
+                  </tbody>
                 {/each}
-              </ul>
+              </table>
             </details>
           {/if}
         </article>

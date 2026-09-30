@@ -276,6 +276,60 @@
   margin: calc(var(--ra-vr) / 4) 0 0;
 }
 
+/* Requests routed to a channel: status heads each group, so rows carry only
+   what differs between them */
+.repair-requests {
+  width: 100%;
+  margin: calc(var(--ra-vr) / 4) 0 0;
+  border-collapse: collapse;
+}
+
+.repair-requests th,
+.repair-requests td {
+  padding: calc(var(--ra-vr) / 4) calc(var(--ra-vr) / 2);
+  border-bottom: 1px solid var(--ra-grey-7);
+  text-align: left;
+  vertical-align: top;
+}
+
+.repair-requests thead th {
+  color: var(--ra-grey-3);
+  font-weight: normal;
+}
+
+.repair-requests th:first-child,
+.repair-requests td:first-child {
+  width: 1px;
+  padding-right: 0;
+}
+
+.repair-requests td:nth-child(n + 3) {
+  width: 1px;
+  white-space: nowrap;
+  color: var(--ra-grey-3);
+}
+
+.repair-requests input[type="checkbox"] {
+  margin: 0;
+}
+
+.repair-requests__group th {
+  background: var(--ra-inset);
+}
+
+.repair-requests__group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0;
+  cursor: pointer;
+}
+
+.repair-requests__group small {
+  color: var(--ra-grey-3);
+  font-weight: normal;
+}
+
 .repair-channel__error,
 .repair-form__error {
   color: var(--ra-red-dark);
