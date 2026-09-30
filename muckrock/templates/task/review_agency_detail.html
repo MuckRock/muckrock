@@ -64,7 +64,7 @@
         {% for agency_email in primary_emails %}
           <dd>
             <a href="mailto:{{ agency_email.email.email }}">{{ agency_email.email.email }}</a>
-            {% if agency_email.email.status == "error" %}<span class="badge">Error</span>{% endif %}
+            {% if agency_email.email.status == "error" %}<span class="red badge" title="{{ agency_email.error_summary }}">Error</span>{% endif %}
           </dd>
         {% empty %}
           <dd>None on record</dd>
@@ -74,7 +74,7 @@
         {% for agency_phone in phones %}
           <dd>
             <a href="tel:{{ agency_phone.phone.number.as_e164 }}">{{ agency_phone.phone.number.as_national }}</a>
-            {% if agency_phone.phone.status == "error" %}<span class="badge">Error</span>{% endif %}
+            {% if agency_phone.phone.status == "error" %}<span class="red badge" title="{{ agency_phone.error_summary }}">Error</span>{% endif %}
           </dd>
         {% empty %}
           <dd>None on record</dd>
@@ -85,7 +85,7 @@
           <dd>
             {{ agency_fax.phone.number.as_national }}
             {% if agency_fax.request_type != "none" %}({{ agency_fax.request_type }}){% endif %}
-            {% if agency_fax.phone.status == "error" %}<span class="badge">Error</span>{% endif %}
+            {% if agency_fax.phone.status == "error" %}<span class="red badge" title="{{ agency_fax.error_summary }}">Error</span>{% endif %}
           </dd>
         {% empty %}
           <dd>None on record</dd>

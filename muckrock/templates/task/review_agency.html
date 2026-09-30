@@ -156,30 +156,10 @@
       </a>
     </p>
   </div>
-
-  <div class="review-agency-placeholder collapsable" data-id="{{ task.pk }}">
-    <summary class="task__data">
-      <p>Loading...</p>
-    </summary>
-  </div>
 {% endblock %}
 
 {% block task-actions %}
-  <div class="form-field">
-    <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
-    {{ form.email_or_fax }}
-    <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
-    {{ form.update_agency_info }}
-    <br>
-    <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
-    {{ form.snail_mail }}
-    <br>
-    <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
-    {{ form.resolve }}
-    <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
-    {{ form.reply }}
-    <span>Leave blank to not send a follow up to the new address</span>
-  </div>
+  {# Repair happens on the agency page linked above; the task only triages #}
   <span class="task-defer">
     {% if not task.zendesk_ticket_id %}
       <button type="submit" name="zendesk" value="true" class="primary button">
@@ -189,9 +169,6 @@
     {% endif %}
   </span>
   <span class="task-buttons">
-    <button type="submit" name="update" value="true" class="primary button">
-      Update email
-    </button>
     <button class="button" type="submit" name="resolve" value="true">
       Resolve
     </button>

@@ -764,6 +764,50 @@ class ReviewAgencyTaskListViewTests(TestCase):
         response = http_get_response(self.url, self.view, self.user)
         assert response.status_code == 200
 
+    def task_html(self):
+        """One task as rendered in the queue"""
+        url = reverse("review-agency-task", kwargs={"pk": self.task.pk})
+        return self.client.get(url).content.decode()
+
+    def test_task_links_to_repair_and_keeps_inline_form(self):
+        """The agency repair page is linked; the inline form stays for now"""
+        content = self.task_html()
+        assert (
+            reverse("review-agency-detail", kwargs={"pk": self.task.agency_id})
+            in content
+        )
+        assert "review-agency-placeholder" in content
+        assert "email_or_fax" in content
+        assert 'name="update"' in content
+        assert 'name="zendesk"' in content
+        assert 'name="resolve"' in content
+
+    def test_ajax_panel_loads(self):
+        """The inline panel's endpoint still renders"""
+        response = self.client.get(
+            reverse("review-agency-ajax", kwargs={"pk": self.task.pk})
+        )
+        assert response.status_code == 200
+
+    @mock.patch("muckrock.task.models.ReviewAgencyTask.update_contact")
+    def test_update_post_repairs(self, mock_update_contact):
+        """The inline form still updates contact info"""
+        self.client.post(
+            self.url,
+            {
+                "update": "true",
+                "task": self.task.pk,
+                "%d-email_or_fax" % self.task.pk: "new@example.gov",
+            },
+        )
+        mock_update_contact.assert_called_once()
+
+    def test_resolve_still_works(self):
+        """Resolve is still available from the queue"""
+        self.client.post(self.url, {"resolve": "true", "task": self.task.pk})
+        self.task.refresh_from_db()
+        assert self.task.resolved
+
 
 class PortalTaskListViewTests(TestCase):
     """Tests PortalTask-specific view tests"""

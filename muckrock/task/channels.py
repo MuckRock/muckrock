@@ -15,7 +15,7 @@ command to fix rather than something this layer should hide.
 """
 
 # Django
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Q
 from django.utils import timezone
 
 # Standard Library
@@ -222,6 +222,12 @@ def agency_channels(agency):
         agency.foiarequest_set.get_open()
         .exclude(email=None)
         .select_related("agency__jurisdiction", "composer", "email")
+        .annotate(
+            last_response_datetime=Max(
+                "communications__datetime",
+                filter=Q(communications__response=True),
+            )
+        )
     )
 
     addresses = {link.email_id: link.email for link in links.values()}
@@ -403,6 +409,8 @@ def _serialize_channel(channel):
                 "id": foia.pk,
                 "title": foia.title,
                 "status": foia.get_status_display(),
+                "date_submitted": _isoformat(foia.composer.datetime_submitted),
+                "last_response": _isoformat(foia.last_response_datetime),
                 "url": foia.get_absolute_url(),
             }
             for foia in channel.foias

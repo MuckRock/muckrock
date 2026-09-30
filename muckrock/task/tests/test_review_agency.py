@@ -23,16 +23,17 @@ from datetime import timedelta
 from muckrock.communication.factories import (
     EmailAddressFactory,
     EmailCommunicationFactory,
+    FaxCommunicationFactory,
     PhoneNumberFactory,
 )
-from muckrock.communication.models import EmailError
+from muckrock.communication.models import EmailError, FaxError
 from muckrock.core.factories import (
     AgencyEmailFactory,
     AgencyFactory,
     AgencyPhoneFactory,
     UserFactory,
 )
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 from muckrock.task.factories import ReviewAgencyTaskFactory
 from muckrock.task.models import ReviewAgencyTask
@@ -327,15 +328,10 @@ class ReviewAgencyTaskQueueFilterTests(ReviewAgencyQueueMixin, TestCase):
         assert one_task == many_tasks
 
 
-class ReviewAgencyDetailViewTests(TestCase):
-    """The agency detail view -- one URL for one agency's whole channel roster
+class ReviewAgencyDetailMixin:
+    """Shared fixtures for the agency detail view"""
 
-    Whether an agency's load is concentrated on one mailbox or spread across
-    22, the work is the roster, and a roster deserves a real URL: shareable in
-    Slack and tickets, with a working back button, and heavy work that does not
-    push the queue off screen.
-    """
-
+    # pylint: disable=invalid-name
     def setUp(self):
         password = "abc"
         self.user = UserFactory(is_staff=True, password=password)
@@ -358,6 +354,16 @@ class ReviewAgencyDetailViewTests(TestCase):
         response = self.client.get(self.url)
         assert response.status_code == 200
         return response.context
+
+
+class ReviewAgencyDetailViewTests(ReviewAgencyDetailMixin, TestCase):
+    """The agency detail view -- one URL for one agency's whole channel roster
+
+    Whether an agency's load is concentrated on one mailbox or spread across
+    22, the work is the roster, and a roster deserves a real URL: shareable in
+    Slack and tickets, with a working back button, and heavy work that does not
+    push the queue off screen.
+    """
 
     def test_staff_can_view(self):
         """Staff get the page"""
@@ -468,32 +474,6 @@ class ReviewAgencyDetailViewTests(TestCase):
         assert channel.is_portal
         assert context["has_portal_channel"]
 
-    def test_contact_info_at_hand(self):
-        """Website and phone are one click away for finding new contact info"""
-        self.agency.website = "https://www.fbi.gov"
-        self.agency.save()
-        AgencyPhoneFactory(
-            agency=self.agency, phone=PhoneNumberFactory(number="617-555-0100")
-        )
-        AgencyPhoneFactory(
-            agency=self.agency,
-            phone=PhoneNumberFactory(number="617-555-0199", type="fax"),
-            request_type="primary",
-        )
-        response = self.client.get(self.url)
-        content = response.content.decode()
-        # Collapsed so the checks do not depend on the template's indentation
-        start = content.index('class="review-agency-contact"')
-        end = content.index("</dl>", start)
-        contact = re.sub(r"\s+", " ", content[start:end])
-        assert '<a href="https://www.fbi.gov"' in contact
-        assert 'href="tel:+16175550100"' in contact
-        # The number's own type is not repeated under its label
-        assert "(617) 555-0199 (primary)" in contact
-        assert "(phone)" not in contact
-        # Email, addresses and the FOIA web page are empty, and say so
-        assert contact.count("None on record") == 3
-
     def test_json_payload_round_trips(self):
         """The Svelte handoff: props in, no fetches"""
         self.make_channel("foia@fbi.gov", blocked=3)
@@ -515,6 +495,66 @@ class ReviewAgencyDetailViewTests(TestCase):
         assert channel["blocked_count"] == 3
         assert channel["classification"] == "dead"
         assert len(channel["foias"]) == 3
+        assert {foia["status"] for foia in channel["foias"]} == {
+            "Awaiting Acknowledgement"
+        }
+
+    def test_json_payload_carries_filing_date(self):
+        """Each request carries the date it was filed, for the request table"""
+        submitted = timezone.now() - timedelta(days=400)
+        FOIARequestFactory(
+            agency=self.agency,
+            email=self.make_channel("foia@fbi.gov"),
+            status="ack",
+            composer__datetime_submitted=submitted,
+        )
+        response = self.client.get(self.url)
+        payload = json.loads(
+            re.search(
+                rb'<script id="review-agency-data" '
+                rb'type="application/json">(.*?)</script>',
+                response.content,
+                re.DOTALL,
+            )
+            .group(1)
+            .decode()
+        )
+        (foia,) = payload["channels"][0]["foias"]
+        assert foia["date_submitted"] == submitted.isoformat()
+
+    def test_json_payload_carries_last_response(self):
+        """Each request carries its latest agency response, or none"""
+        address = self.make_channel("foia@fbi.gov")
+        answered, unanswered = FOIARequestFactory.create_batch(
+            2, agency=self.agency, email=address, status="ack"
+        )
+        latest = timezone.now() - timedelta(days=30)
+        FOIACommunicationFactory(
+            foia=answered, response=True, datetime=latest - timedelta(days=60)
+        )
+        FOIACommunicationFactory(foia=answered, response=True, datetime=latest)
+        # Our own follow-ups are not responses
+        FOIACommunicationFactory(foia=answered, response=False)
+        FOIACommunicationFactory(foia=unanswered, response=False)
+        response = self.client.get(self.url)
+        payload = json.loads(
+            re.search(
+                rb'<script id="review-agency-data" '
+                rb'type="application/json">(.*?)</script>',
+                response.content,
+                re.DOTALL,
+            )
+            .group(1)
+            .decode()
+        )
+        last_response = {
+            foia["id"]: foia["last_response"]
+            for foia in payload["channels"][0]["foias"]
+        }
+        assert last_response == {
+            answered.pk: latest.isoformat(),
+            unanswered.pk: None,
+        }
 
     def test_follow_up_defaults_to_legacy_text(self):
         """The follow-up starts from the same text the legacy task offers"""
@@ -554,3 +594,85 @@ class ReviewAgencyDetailViewTests(TestCase):
         for index in range(20):
             self.make_channel("many%d@fbi.gov" % index, blocked=1)
         assert count() == one_channel
+
+
+class ReviewAgencyContactPanelTests(ReviewAgencyDetailMixin, TestCase):
+    """The contact panel -- known contact info, and what is broken about it"""
+
+    def test_contact_info_at_hand(self):
+        """Website and phone are one click away for finding new contact info"""
+        self.agency.website = "https://www.fbi.gov"
+        self.agency.save()
+        AgencyPhoneFactory(
+            agency=self.agency, phone=PhoneNumberFactory(number="617-555-0100")
+        )
+        AgencyPhoneFactory(
+            agency=self.agency,
+            phone=PhoneNumberFactory(number="617-555-0199", type="fax"),
+            request_type="primary",
+        )
+        response = self.client.get(self.url)
+        content = response.content.decode()
+        # Collapsed so the checks do not depend on the template's indentation
+        start = content.index('class="review-agency-contact"')
+        end = content.index("</dl>", start)
+        contact = re.sub(r"\s+", " ", content[start:end])
+        assert '<a href="https://www.fbi.gov"' in contact
+        assert 'href="tel:+16175550100"' in contact
+        # The number's own type is not repeated under its label
+        assert "(617) 555-0199 (primary)" in contact
+        assert "(phone)" not in contact
+        # Email, addresses and the FOIA web page are empty, and say so
+        assert contact.count("None on record") == 3
+
+    def contact_panel(self):
+        """The contact panel, whitespace collapsed"""
+        content = self.client.get(self.url).content.decode()
+        start = content.index('class="review-agency-contact"')
+        end = content.index("</dl>", start)
+        return re.sub(r"\s+", " ", content[start:end])
+
+    def test_error_chip_summarizes_email_bounce(self):
+        """A broken email's chip is red and explains itself on hover"""
+        address = self.make_channel("foia@fbi.gov")
+        EmailError.objects.create(
+            email=EmailCommunicationFactory(),
+            datetime=timezone.make_aware(timezone.datetime(2025, 3, 3, 12)),
+            recipient=address,
+            code="550",
+            error="no such mailbox",
+            event="failed",
+            reason="bounce",
+        )
+        assert (
+            '<span class="red badge" title="Mailbox does not exist (SMTP 550)'
+            ' — last failed Mar 3, 2025">Error</span>'
+        ) in self.contact_panel()
+
+    def test_error_chip_without_events_still_explains(self):
+        """A flag with no error on record says so rather than nothing"""
+        AgencyEmailFactory(
+            agency=self.agency,
+            email=EmailAddressFactory(status="error"),
+            request_type="primary",
+        )
+        assert (
+            '<span class="red badge" title="Flagged as an error, no failure on'
+            ' record">Error</span>'
+        ) in self.contact_panel()
+
+    def test_error_chip_summarizes_fax_failure(self):
+        """Fax errors carry Phaxio's own description"""
+        number = PhoneNumberFactory(type="fax", status="error")
+        AgencyPhoneFactory(agency=self.agency, phone=number)
+        FaxError.objects.create(
+            fax=FaxCommunicationFactory(to_number=number),
+            datetime=timezone.make_aware(timezone.datetime(2025, 6, 1, 12)),
+            recipient=number,
+            error_type="fatalError",
+            error_code="Phone number not operational",
+        )
+        assert (
+            '<span class="red badge" title="Phone number not operational'
+            ' — last failed Jun 1, 2025">Error</span>'
+        ) in self.contact_panel()
