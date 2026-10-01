@@ -74,17 +74,22 @@ class EmailAddressQuerySet(models.QuerySet):
             email_address, _ = self.update_or_create(
                 email=email, defaults={"name": name}
             )
-            addresses.append(email_address)
+            if email_address not in addresses:
+                addresses.append(email_address)
         return addresses
 
     @staticmethod
     def _normalize_email(email):
-        """Username is case sensitive, domain is not"""
-        # strip invisible spaces
-        email = email.replace("\u200b", "")
+        """Lowercase the whole address
+
+        RFC 5321 is case-sensitive in principle, but in practice
+        most email providers treat addresses as case-insensitive.
+        Storing a single casing keeps one mailbox to one row.
+        """
+
+        email = email.replace("\u200b", "")  # strip invisible spaces
         validate_email(email)
-        username, domain = email.rsplit("@", 1)
-        return "%s@%s" % (username, domain.lower())
+        return email.lower()
 
 
 class EmailAddress(models.Model):
@@ -103,6 +108,11 @@ class EmailAddress(models.Model):
         ),
     )
     objects = EmailAddressQuerySet.as_manager()
+
+    def save(self, *args, **kwargs):
+        # Lowercase the address so no caller can reintroduce a case variant
+        self.email = self.email.lower()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         if self.name:

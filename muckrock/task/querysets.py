@@ -4,15 +4,28 @@ Custom QuerySets for the Task application
 
 # Django
 from django.db import models
-from django.db.models import F, Prefetch, Q, Sum
-from django.db.models.functions import Cast, Now
+from django.db.models import (
+    Case,
+    Count,
+    Exists,
+    F,
+    IntegerField,
+    OuterRef,
+    Prefetch,
+    Q,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Cast, Coalesce, Now
 
 # Standard Library
 from datetime import date
 
 # MuckRock
 from muckrock import task
-from muckrock.communication.models import EmailCommunication
+from muckrock.communication.models import EmailCommunication, EmailError
 from muckrock.core.models import ExtractDay
 from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIAFile, FOIARequest
 from muckrock.foia.querysets import FOIACommunicationQuerySet, PreloadFileQuerysetMixin
@@ -314,20 +327,143 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
         # MuckRock
         from muckrock.agency.models import AgencyAddress, AgencyEmail, AgencyPhone
 
-        return self.select_related(
-            "agency__jurisdiction", "agency__portal", "resolved_by__profile"
-        ).prefetch_related(
-            Prefetch(
-                "agency__agencyemail_set",
-                queryset=AgencyEmail.objects.select_related("email"),
+        return (
+            self.annotate_channel()
+            .with_outcome()
+            .select_related(
+                "agency__jurisdiction",
+                "agency__portal",
+                "resolved_by__profile",
+                "email",
+            )
+            .prefetch_related(
+                "tags",
+                Prefetch(
+                    "agency__agencyemail_set",
+                    queryset=AgencyEmail.objects.select_related("email"),
+                ),
+                Prefetch(
+                    "agency__agencyphone_set",
+                    queryset=AgencyPhone.objects.select_related("phone"),
+                ),
+                Prefetch(
+                    "agency__agencyaddress_set",
+                    queryset=AgencyAddress.objects.select_related("address"),
+                ),
+            )
+        )
+
+    def annotate_blocked(self):
+        """Annotate each task with the number of live requests it is blocking
+
+        This is the queue's ordering key.  A channel scoped task counts the
+        open requests routed at its channel; an agency level task (staff or
+        stale, with no channel) counts all of the agency's open requests,
+        because that task really is about the agency.
+        """
+        open_requests = FOIARequest.objects.get_open()
+
+        channel_blocked = Subquery(
+            open_requests.filter(agency=OuterRef("agency"), email=OuterRef("email"))
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
+        agency_blocked = Subquery(
+            open_requests.filter(agency=OuterRef("agency"))
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
+        # Requests on a healthy address are stale, waiting on the agency
+        # rather than on a repair, so they stay out of the agency's total
+        agency_broken_blocked = Subquery(
+            open_requests.filter(agency=OuterRef("agency"), email__status="error")
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
+        return self.annotate(
+            blocked_count=Coalesce(
+                Case(
+                    When(email__isnull=True, then=agency_blocked),
+                    default=channel_blocked,
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+                output_field=IntegerField(),
             ),
-            Prefetch(
-                "agency__agencyphone_set",
-                queryset=AgencyPhone.objects.select_related("phone"),
+            # The agency's whole broken load, so its channels can be kept
+            # together in the queue while agencies still compete on impact.
+            agency_blocked_count=Coalesce(
+                agency_broken_blocked, Value(0), output_field=IntegerField()
             ),
-            Prefetch(
-                "agency__agencyaddress_set",
-                queryset=AgencyAddress.objects.select_related("address"),
+        )
+
+    def with_outcome(self):
+        """Annotate whether a resolved repair actually held
+
+        Held means the agency has responded to us since the resolve.  Anything
+        older is not evidence about this repair, and our own outgoing mail is
+        not evidence at all.
+        """
+        return self.annotate(
+            held=Exists(
+                FOIACommunication.objects.filter(
+                    foia__agency=OuterRef("agency"),
+                    response=True,
+                    datetime__gt=OuterRef("date_done"),
+                )
+            )
+        )
+
+    def annotate_channel(self):
+        """Annotate the summary the queue row needs to be legible
+
+        Which channel is broken, whether it is the agency's primary contact,
+        how it last failed and how long ago, and when it last delivered.  All
+        as subqueries so the queue's cost does not grow with its length.
+        """
+        # pylint: disable=import-outside-toplevel
+        # MuckRock
+        from muckrock.agency.models import AgencyEmail
+
+        newest_error = EmailError.objects.filter(recipient=OuterRef("email")).order_by(
+            "-datetime"
+        )
+
+        return self.annotate(
+            channel_last_error=Subquery(newest_error.values("datetime")[:1]),
+            channel_last_error_code=Subquery(newest_error.values("code")[:1]),
+            channel_last_error_reason=Subquery(newest_error.values("reason")[:1]),
+            channel_error_count=Coalesce(
+                Subquery(
+                    EmailError.objects.filter(recipient=OuterRef("email"))
+                    .values("recipient")
+                    .annotate(count=Count("pk"))
+                    .values("count"),
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+                output_field=IntegerField(),
+            ),
+            channel_last_confirm=Subquery(
+                EmailCommunication.objects.filter(
+                    to_emails=OuterRef("email"), confirmed_datetime__isnull=False
+                )
+                .order_by("-confirmed_datetime")
+                .values("confirmed_datetime")[:1]
+            ),
+            channel_is_primary=Exists(
+                AgencyEmail.objects.filter(
+                    agency=OuterRef("agency"),
+                    email=OuterRef("email"),
+                    request_type="primary",
+                    email_type="to",
+                )
             ),
         )
 
