@@ -64,26 +64,39 @@
     </div>
   {% endif %}
 
-  <div class="review-agency-summary" data-id="{{ task.pk }}">
-    <h4>
-      <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
-      <small>{{ task.agency.jurisdiction.name }}</small>
-    </h4>
+  <div class="review-agency-summary">
+    <header class="review-agency-summary__header">
+      <h4>
+        <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
+        <small>{{ task.agency.jurisdiction.name }}</small>
+      </h4>
+      <span class="review-agency-badges">
+        <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
+        {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
+        {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
+      </span>
+      <a class="blue button" href="{% url 'review-agency-detail' pk=task.agency_id %}">
+        Repair this agency's channels &rarr;
+      </a>
+    </header>
 
-    <ul class="review-agency-impact">
-      <li><strong>{{ task.blocked_count }}</strong> request{{ task.blocked_count|pluralize }} blocked on this channel</li>
+    <p class="review-agency-impact">
+      <strong>{{ task.blocked_count }}</strong> request{{ task.blocked_count|pluralize }} blocked on this channel
       {% if task.agency_blocked_count != task.blocked_count %}
-        <li>{{ task.agency_blocked_count }} blocked across this agency</li>
+        &middot; {{ task.agency_blocked_count }} across this agency
       {% endif %}
       {% if task.agency_group_size > 1 %}
-        <li>{{ task.agency_group_size }} channel tasks for this agency</li>
+        &middot; {{ task.agency_group_size }} channel tasks for this agency
       {% endif %}
-    </ul>
+    </p>
 
     {% if task.channel %}
       <dl class="review-agency-channel">
         <dt>Channel</dt>
-        <dd><code>{{ task.channel.address.email }}</code></dd>
+        <dd>
+          <code>{{ task.channel.address.email }}</code>
+          {% if task.channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
+        </dd>
 
         <dt>Problem</dt>
         <dd>
@@ -101,31 +114,27 @@
           {% endif %}
         </dd>
 
-        {% if task.channel.is_primary %}
-          <dt>Contact</dt>
-          <dd>Agency's primary contact</dd>
-        {% endif %}
-
         <dt>Last error</dt>
         <dd>
           {% if task.channel.last_error %}
             {{ task.channel.last_error_message }}
+            &middot;
             <time datetime="{{ task.channel.last_error|date:'Y-m-d H:i' }}">
               {{ task.channel.last_error|date:'m/d/Y' }}
               ({{ task.channel.last_error_age }} day{{ task.channel.last_error_age|pluralize }} ago)
             </time>
-            {% if task.channel.is_stale_error %}
-              <mark>Stale flag</mark> &mdash; nothing has bounced here in over two years.
-            {% endif %}
             {% if task.channel.error_count > 1 %}
-              <small>{{ task.channel.error_count }} errors total</small>
+              &middot; {{ task.channel.error_count }} errors total
+            {% endif %}
+            {% if task.channel.is_stale_error %}
+              <br><mark>Stale flag</mark> &mdash; nothing has bounced here in over two years.
             {% endif %}
           {% else %}
             Flagged as broken, but no error event on record
           {% endif %}
         </dd>
 
-        <dt>Last successful response</dt>
+        <dt>Last success</dt>
         <dd>
           {% if task.channel.last_confirm %}
             <time datetime="{{ task.channel.last_confirm|date:'Y-m-d H:i' }}">
@@ -138,28 +147,36 @@
         </dd>
       </dl>
     {% else %}
-      <p class="review-agency-channel">
+      <p class="review-agency-channel review-agency-channel--none">
         {# staff and stale tasks are about the agency, not one of its mailboxes #}
         No specific channel &mdash; this task is about the agency as a whole.
       </p>
     {% endif %}
+  </div>
 
-    <p class="review-agency-badges">
-      <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
-      {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
-      {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
-    </p>
-
-    <p class="review-agency-links">
-      <a href="{% url 'review-agency-detail' pk=task.agency_id %}">
-        Repair this agency's channels
-      </a>
-    </p>
+  <div class="review-agency-placeholder collapsable" data-id="{{ task.pk }}">
+    <summary class="task__data">
+      <p>Loading...</p>
+    </summary>
   </div>
 {% endblock %}
 
 {% block task-actions %}
-  {# Repair happens on the agency page linked above; the task only triages #}
+  <div class="form-field">
+    <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
+    {{ form.email_or_fax }}
+    <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
+    {{ form.update_agency_info }}
+    <br>
+    <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
+    {{ form.snail_mail }}
+    <br>
+    <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
+    {{ form.resolve }}
+    <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
+    {{ form.reply }}
+    <span>Leave blank to not send a follow up to the new address</span>
+  </div>
   <span class="task-defer">
     {% if not task.zendesk_ticket_id %}
       <button type="submit" name="zendesk" value="true" class="primary button">
@@ -169,6 +186,9 @@
     {% endif %}
   </span>
   <span class="task-buttons">
+    <button type="submit" name="update" value="true" class="primary button">
+      Update email
+    </button>
     <button class="button" type="submit" name="resolve" value="true">
       Resolve
     </button>
