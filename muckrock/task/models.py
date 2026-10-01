@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.db.models import Case, Count, Max, When
+from django.db.models import Case, Count, Max, Q, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -712,14 +712,17 @@ class ReviewAgencyTask(Task):
         foias = list(foias)
         foia_pks = [foia.pk for foia in foias]
 
-        tasks = cls.objects.filter(agency=agency, resolved=False)
-        if channel_pks:
-            tasks = tasks.filter(email__in=channel_pks)
-        else:
+        if not channel_pks:
             # No explicit channel selection: act on the tasks for the channels
             # the submitted requests are actually sitting on.
-            tasks = tasks.filter(email__in={foia.email_id for foia in foias})
-        tasks = list(tasks.select_related("email"))
+            channel_pks = {foia.email_id for foia in foias}
+        # An agency level task has no channel because it covers them all, so
+        # any repair on the agency is a repair on it too
+        tasks = list(
+            cls.objects.filter(agency=agency, resolved=False)
+            .filter(Q(email__in=channel_pks) | Q(email=None))
+            .select_related("email")
+        )
 
         with transaction.atomic():
             if new_email is not None or snail:

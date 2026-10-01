@@ -87,7 +87,17 @@ class ReviewAgencyDetailView(DetailView):
         context["phones"] = [
             link for link in agency_phones if link.phone.type == "phone"
         ]
-        context["addresses"] = agency.agencyaddress_set.select_related("address")
+        # Only the addresses requests go to are worth listing; the rest are
+        # counted, with the full roster a click away in the admin
+        agency_addresses = list(agency.agencyaddress_set.select_related("address"))
+        context["addresses"] = [
+            link
+            for link in agency_addresses
+            if link.request_type in ("primary", "appeal")
+        ]
+        context["other_address_count"] = len(agency_addresses) - len(
+            context["addresses"]
+        )
 
         context["open_tasks"] = ReviewAgencyTask.objects.filter(
             agency=agency, resolved=False
@@ -106,8 +116,19 @@ class ReviewAgencyDetailView(DetailView):
             context = self.get_context_data(object=self.object, repair_form=form)
             return self.render_to_response(context)
 
-        channels = EmailAddress.objects.filter(pk__in=form.cleaned_data["channel_pks"])
-        foias = FOIARequest.objects.filter(pk__in=form.cleaned_data["foia_pks"])
+        channels = list(
+            EmailAddress.objects.filter(pk__in=form.cleaned_data["channel_pks"])
+        )
+        foias = list(FOIARequest.objects.filter(pk__in=form.cleaned_data["foia_pks"]))
+        # Counted before the repair repoints them, and from the selection
+        # rather than the tasks matched: a channel covered by the agency level
+        # task has no task of its own
+        channel_count = len(channels) or len({foia.email_id for foia in foias})
+        rerouted = (
+            len(foias)
+            if form.cleaned_data["new_email"] or form.cleaned_data["snail_mail"]
+            else 0
+        )
 
         tasks = ReviewAgencyTask.repair_channels(
             agency=self.object,
@@ -120,12 +141,27 @@ class ReviewAgencyDetailView(DetailView):
             resolve=form.cleaned_data["resolve"],
             reply=form.cleaned_data["reply"],
         )
-        messages.success(
-            request,
-            "Repaired %d channel%s for %s."
-            % (len(tasks), "" if len(tasks) == 1 else "s", self.object.name),
+        message = "Rerouted %d request%s on %d channel%s for %s." % (
+            rerouted,
+            "" if rerouted == 1 else "s",
+            channel_count,
+            "" if channel_count == 1 else "s",
+            self.object.name,
         )
-        return redirect(reverse("review-agency-detail", kwargs={"pk": self.object.pk}))
+        if form.cleaned_data["resolve"]:
+            message += " Resolved %d task%s." % (
+                len(tasks),
+                "" if len(tasks) == 1 else "s",
+            )
+        messages.success(request, message)
+        # Back to the queue, scoped to this agency, where its new blocked total
+        # shows whether anything is left before the task can be resolved.
+        # Once every task is resolved that view would be empty, so the whole
+        # queue it is.
+        queue_url = reverse("review-agency-task-list")
+        if ReviewAgencyTask.objects.filter(agency=self.object, resolved=False).exists():
+            queue_url += "?agency=%d" % self.object.pk
+        return redirect(queue_url)
 
 
 def _error_summary(message, when):

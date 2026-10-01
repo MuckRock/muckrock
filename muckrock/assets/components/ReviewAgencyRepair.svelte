@@ -19,15 +19,20 @@
     (a, b) => Number(b.is_primary) - Number(a.is_primary),
   );
   const primary = channels.find((c) => c.is_primary);
-  const primaryIsSound =
-    !!primary && !primary.has_error && !primary.blocked_count && !primary.is_portal;
+  // Stale requests on a healthy primary are waiting on the agency, not on a
+  // broken address, so they do not disqualify it as the replacement.
+  const primaryIsSound = !!primary && !primary.has_error && !primary.is_portal;
 
-  // A channel needs attention if it is flagged or still has traffic stuck on
-  // it: blocked behind an error, or stale on a healthy address.  Anything
-  // already selected also shows, so the filter never hides part of what is
-  // about to be submitted.
+  // Only a flagged email channel with requests stuck on it needs repair.  A
+  // healthy one may still have stale requests, but those are slow responses
+  // rather than delivery failures; a flagged one with nothing routed to it
+  // has nothing to move; and a portal is out of reach of an email repair.
+  // Anything already selected also shows, so the filter never hides part of
+  // what is about to be submitted.
   function needsAttention(channel) {
-    return channel.has_error || channel.blocked_count > 0;
+    return (
+      channel.has_error && channel.blocked_count > 0 && !channel.is_portal
+    );
   }
 
   // Which channels the staffer is repairing, and which requests move with them.
@@ -122,15 +127,14 @@
     selectedFoias = foiaIds;
   }
 
-  function selectAllRepairable() {
+  // Selects exactly what the staffer can see, so the filter decides the scope
+  function selectAllVisible() {
     const channelIds = new Set();
     const foiaIds = new Set();
-    channels
-      .filter((c) => c.repairable_by_email && c.blocked_count > 0)
-      .forEach((c) => {
-        channelIds.add(c.id);
-        c.foias.forEach((foia) => foiaIds.add(foia.id));
-      });
+    visibleChannels.forEach((c) => {
+      channelIds.add(c.id);
+      c.foias.forEach((foia) => foiaIds.add(foia.id));
+    });
     setSelection(channelIds, foiaIds);
   }
 
@@ -189,8 +193,8 @@
             ({hiddenCount} hidden)
           {/if}
         </label>
-        <button type="button" onclick={selectAllRepairable}>
-          Select all repairable channels
+        <button type="button" onclick={selectAllVisible}>
+          Select all
         </button>
         <button type="button" onclick={clearSelection}>Clear</button>
       </div>
@@ -212,7 +216,7 @@
             <strong>{channel.blocked_count}</strong>
             {channel.has_error ? "blocked" : "stale"}
             {#if channel.is_primary}<span class="blue badge">Primary</span>{/if}
-            {#if !channel.has_error}<span class="badge">Healthy</span>{/if}
+            {#if !channel.has_error}<span class="green badge">Healthy</span>{/if}
             {#if channel.is_portal}<span class="badge">Portal</span>{/if}
             {#if channel.classification === "noreply"}
               <span class="badge">Do-not-reply</span>
@@ -346,7 +350,7 @@
       {:else}
         <p>
           {channels.length
-            ? "Every channel is healthy with no stale requests."
+            ? "Every channel is healthy."
             : "No channels on record for this agency."}
         </p>
       {/each}

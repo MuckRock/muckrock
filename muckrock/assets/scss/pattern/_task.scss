@@ -245,7 +245,7 @@ $task-padding: $vr/4 $vr/2;
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey-7;
         font-size: 0.875em;
-        padding: 0;
+        padding: 0 0.5em;
         * {
             margin-bottom: 0;
         }
@@ -279,19 +279,16 @@ $task-padding: $vr/4 $vr/2;
     display: flex;
     flex-direction: column;
     gap: $vr/2;
+    margin-bottom: 0;
 }
 
 .review-agency-summary__header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: $vr/4 $vr/2;
+    h4 {
+        margin-bottom: 0.5rem;
+    }
     h4 small {
         color: $color-grey-3;
         font-weight: normal;
-    }
-    .button {
-        margin-left: auto;
     }
 }
 
@@ -366,6 +363,7 @@ $task-padding: $vr/4 $vr/2;
         cursor: pointer;
         padding: 1em;
         font-weight: bold;
+        margin-bottom: 0;
     }
     form {
         background: #f7f8fa;

@@ -66,27 +66,30 @@
 
   <div class="review-agency-summary">
     <header class="review-agency-summary__header">
-      <div>
-        <h4>
-          <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
-          <small>{{ task.agency.jurisdiction.name }}</small>
-        </h4>
-        <span class="review-agency-badges">
-          {% if task.agency.portal_id %}<span class="badge">Portal</span>{% endif %}
-          <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
-          {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
-          {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
-        </span>
-      </div>
-      <a class="blue button" href="{% url 'review-agency-detail' pk=task.agency_id %}">
-        Repair this agency's channels &rarr;
-      </a>
+      <h4>
+        <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
+        <small>{{ task.agency.jurisdiction.name }}</small>
+      </h4>
+      <span class="review-agency-badges">
+        {% if task.agency.portal_id %}<span class="badge">Portal</span>{% endif %}
+        <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
+        {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
+        {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
+      </span>
     </header>
 
     <p class="review-agency-impact">
-      <strong>{{ task.blocked_count }}</strong> request{{ task.blocked_count|pluralize }} blocked on this channel
-      {% if task.agency_blocked_count != task.blocked_count %}
-        &middot; {{ task.agency_blocked_count }} across this agency
+      {% if task.email_id %}
+        <strong>{{ task.blocked_count }}</strong> request{{ task.blocked_count|pluralize }} blocked on this channel
+        {% if task.agency_blocked_count != task.blocked_count %}
+          &middot; {{ task.agency_blocked_count }} across this agency
+        {% endif %}
+      {% else %}
+        {# Impact first; the agency's open load only as the share it blocks #}
+        <strong>{{ task.agency_blocked_count }}</strong> blocked request{{ task.agency_blocked_count|pluralize }}
+        {% if task.blocked_count %}
+          &middot; {% widthratio task.agency_blocked_count task.blocked_count 100 %}% of {{ task.blocked_count }} open
+        {% endif %}
       {% endif %}
       {% if task.agency_group_size > 1 %}
         &middot; {{ task.agency_group_size }} channel tasks for this agency
@@ -149,12 +152,12 @@
           {% endif %}
         </dd>
       </dl>
-    {% else %}
-      <p class="review-agency-channel review-agency-channel--none">
-        {# staff and stale tasks are about the agency, not one of its mailboxes #}
-        No specific channel &mdash; this task is about the agency as a whole.
-      </p>
     {% endif %}
+    <div>
+      <a class="blue button" href="{% url 'review-agency-detail' pk=task.agency_id %}">
+        Repair this agency's channels &rarr;
+      </a>
+    </div>
   </div>
 
   {# Legacy ajax data and repair form, kept collapsed until the revamped layout replaces them #}

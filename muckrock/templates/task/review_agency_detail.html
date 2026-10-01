@@ -97,6 +97,9 @@
         {% empty %}
           <dd>None on record</dd>
         {% endfor %}
+        {% if other_address_count %}
+          <dd>{{ other_address_count }} other address{{ other_address_count|pluralize:"es" }} (<a href="{% url 'admin:agency_agency_change' agency.pk %}">view in Admin</a>)</dd>
+        {% endif %}
       </dl>
     </div>
 
@@ -144,8 +147,7 @@
       {% if has_portal_channel %}
         <p class="review-agency-warning">
           <mark>This agency has at least one portal notification address.</mark>
-          No replacement email repairs a portal channel &mdash; support for
-          switching the agency to use a portal is coming soon.
+          Support for switching the agency to use a portal is coming soon.
         </p>
       {% endif %}
     </section>

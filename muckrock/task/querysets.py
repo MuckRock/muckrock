@@ -377,6 +377,15 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             .values("count"),
             output_field=IntegerField(),
         )
+        # Requests on a healthy address are stale, waiting on the agency
+        # rather than on a repair, so they stay out of the agency's total
+        agency_broken_blocked = Subquery(
+            open_requests.filter(agency=OuterRef("agency"), email__status="error")
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
         return self.annotate(
             blocked_count=Coalesce(
                 Case(
@@ -387,10 +396,10 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
                 Value(0),
                 output_field=IntegerField(),
             ),
-            # The agency's whole load, so its channels can be kept together in
-            # the queue while agencies still compete on impact.
+            # The agency's whole broken load, so its channels can be kept
+            # together in the queue while agencies still compete on impact.
             agency_blocked_count=Coalesce(
-                agency_blocked, Value(0), output_field=IntegerField()
+                agency_broken_blocked, Value(0), output_field=IntegerField()
             ),
         )
 

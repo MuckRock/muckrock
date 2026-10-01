@@ -225,6 +225,10 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
         method="filter_federal", label="Federal Agencies", choices=BOOLEAN_CHOICES
     )
 
+    portal = django_filters.ChoiceFilter(
+        method="filter_portal", label="Portal Agencies", choices=BOOLEAN_CHOICES
+    )
+
     complicated = django_filters.ChoiceFilter(
         method="filter_complicated", label="Complicated Tasks", choices=BOOLEAN_CHOICES
     )
@@ -283,6 +287,11 @@ class ReviewAgencyTaskFilterSet(JurisdictionFilterSet, TaskFilterSet):
             return queryset.filter(agency__jurisdiction__level="f")
         else:
             return queryset.exclude(agency__jurisdiction__level="f")
+
+    def filter_portal(self, queryset, name, value):
+        """Check if the task's agency has moved to a portal"""
+        # pylint: disable=unused-argument
+        return queryset.filter(agency__portal__isnull=value != "True")
 
     def filter_complicated(self, queryset, name, value):
         """Check if the task is for a federal agency"""

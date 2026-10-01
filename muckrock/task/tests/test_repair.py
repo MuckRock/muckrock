@@ -9,6 +9,7 @@ biggest.  Single channel only repair structurally cannot clear the backlog.
 """
 
 # Django
+from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
 
@@ -265,6 +266,28 @@ class TestMultiChannelRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         assert first_task.resolved
         assert not second_task.resolved
 
+    def test_agency_level_task_resolves_with_any_channel(self, _mock_delay):
+        """A task with no channel covers them all, so a repair includes it
+
+        Most legacy tasks are agency level; matching only on the selected
+        channels left them open with nothing blocked.
+        """
+        address = EmailAddressFactory(email="old@agency.gov", status="error")
+        AgencyEmailFactory(agency=self.agency, email=address)
+        foias = FOIARequestFactory.create_batch(
+            2, agency=self.agency, email=address, status="ack"
+        )
+        task = ReviewAgencyTaskFactory(agency=self.agency, email=None, resolved=False)
+        self.post(
+            new_email="new@agency.gov",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+            resolve="on",
+        )
+        task.refresh_from_db()
+        assert task.resolved
+        assert task.repair_outcome["requests_updated"] == 2
+
     def test_portal_channel_in_the_selection_blocks_the_whole_repair(self, _mock_delay):
         """A portal channel is not quietly skipped, it stops the submission
 
@@ -323,3 +346,75 @@ class TestRepairOutcome(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         """A task nobody acted on has nothing to report"""
         _address, _foias, task = self.make_channel("old@agency.gov", blocked=1)
         assert task.repair_outcome is None
+
+
+@mock.patch("muckrock.task.tasks.submit_review_update.delay")
+class TestRepairResponse(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
+    """Where a repair lands the staffer, and what it tells them"""
+
+    def test_redirects_to_the_queue_filtered_to_the_agency(self, _mock_delay):
+        """The queue shows the agency's new blocked total, so it can be resolved"""
+        address, foias, _task = self.make_channel("old@agency.gov", blocked=1)
+        response = self.post(
+            new_email="new@agency.gov",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+        )
+        self.assertRedirects(
+            response,
+            "%s?agency=%d" % (reverse("review-agency-task-list"), self.agency.pk),
+            fetch_redirect_response=False,
+        )
+
+    def test_redirects_to_the_whole_queue_once_nothing_is_left(self, _mock_delay):
+        """A filtered queue with every task resolved would be empty"""
+        address, foias, _task = self.make_channel("old@agency.gov", blocked=1)
+        response = self.post(
+            new_email="new@agency.gov",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+            resolve="on",
+        )
+        self.assertRedirects(
+            response,
+            reverse("review-agency-task-list"),
+            fetch_redirect_response=False,
+        )
+
+    def test_stays_filtered_while_the_agency_has_open_tasks(self, _mock_delay):
+        """Resolving one channel's task leaves the others to work through"""
+        first, first_foias, _first_task = self.make_channel("one@agency.gov")
+        self.make_channel("two@agency.gov", request_type="none")
+        response = self.post(
+            new_email="new@agency.gov",
+            channel_pks=str(first.pk),
+            foia_pks=str(first_foias[0].pk),
+            resolve="on",
+        )
+        self.assertRedirects(
+            response,
+            "%s?agency=%d" % (reverse("review-agency-task-list"), self.agency.pk),
+            fetch_redirect_response=False,
+        )
+
+    def test_message_counts_the_rerouted_requests(self, _mock_delay):
+        """Counted from the requests moved, not from the tasks matched
+
+        A channel can have blocked requests without a task of its own -- the
+        agency level task covers it -- and the message still has to say what
+        moved.
+        """
+        address = EmailAddressFactory(email="old@agency.gov", status="error")
+        AgencyEmailFactory(agency=self.agency, email=address)
+        foias = FOIARequestFactory.create_batch(
+            3, agency=self.agency, email=address, status="ack"
+        )
+        ReviewAgencyTaskFactory(agency=self.agency, email=None, resolved=False)
+        response = self.post(
+            new_email="new@agency.gov",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+        )
+        message = str(list(get_messages(response.wsgi_request))[0])
+        assert "Rerouted 3 requests" in message
+        assert "1 channel " in message

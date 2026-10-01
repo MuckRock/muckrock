@@ -20,7 +20,9 @@ import re
 from datetime import timedelta
 
 # MuckRock
+from muckrock.agency.models import AgencyAddress
 from muckrock.communication.factories import (
+    AddressFactory,
     EmailAddressFactory,
     EmailCommunicationFactory,
     FaxCommunicationFactory,
@@ -34,6 +36,7 @@ from muckrock.core.factories import (
     UserFactory,
 )
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
+from muckrock.portal.models import Portal
 from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 from muckrock.task.factories import ReviewAgencyTaskFactory
 from muckrock.task.models import ReviewAgencyTask
@@ -189,6 +192,22 @@ class ReviewAgencyTaskQueueFilterTests(ReviewAgencyQueueMixin, TestCase):
         email_task = self.make_task(blocked=3, source="email")
         assert self.get_tasks("?source=email") == [email_task]
 
+    def test_portal_filter(self):
+        """Isolate the agencies that have moved to a portal
+
+        An email or fax swap is the wrong repair for these, so staff work them
+        as a batch of their own.
+        """
+        portal = Portal.objects.create(
+            url="https://www.example.com", name="Test Portal", type="other"
+        )
+        portal_task = self.make_task(
+            blocked=2, agency=AgencyFactory(email=None, fax=None, portal=portal)
+        )
+        other_task = self.make_task(blocked=3)
+        assert self.get_tasks("?portal=True") == [portal_task]
+        assert self.get_tasks("?portal=False") == [other_task]
+
     def test_zero_active_excluded_by_default(self):
         """Zero active is a triage hint, not a resolve trigger
 
@@ -237,6 +256,53 @@ class ReviewAgencyTaskQueueFilterTests(ReviewAgencyQueueMixin, TestCase):
         self.make_task(blocked=5, agency=agency)
         self.make_task(blocked=3, agency=agency)
         assert self.get_tasks()[0].agency_blocked_count == 8
+
+    def test_agency_total_skips_healthy_addresses(self):
+        """Stale requests on a working address are not blocked
+
+        They are waiting on the agency, not on a repair, so they neither
+        inflate the agency's total nor lift it up the queue.
+        """
+        agency = AgencyFactory(email=None, fax=None)
+        self.make_task(blocked=5, agency=agency)
+        FOIARequestFactory.create_batch(
+            3,
+            agency=agency,
+            email=EmailAddressFactory(status="good"),
+            status="ack",
+        )
+        assert self.get_tasks()[0].agency_blocked_count == 5
+
+    def test_agency_level_row_leads_with_impact(self):
+        """An agency level task reads as blocked requests, then their share
+
+        Its own count is every open request, stale ones on healthy addresses
+        included, so it is shown only as what the blocked count is a share of.
+        """
+        agency = AgencyFactory(email=None, fax=None)
+        FOIARequestFactory.create_batch(
+            3,
+            agency=agency,
+            email=EmailAddressFactory(status="error"),
+            status="ack",
+        )
+        FOIARequestFactory(
+            agency=agency, email=EmailAddressFactory(status="good"), status="ack"
+        )
+        ReviewAgencyTaskFactory(
+            agency=agency, source="email", email=None, resolved=False
+        )
+        content = self.client.get(self.url).content.decode()
+        assert re.search(r"<strong>3</strong>\s+blocked requests", content)
+        assert re.search(r"75% of 4 open", content)
+        assert "blocked on this channel" not in content
+
+    def test_channel_row_counts_blocked_requests(self):
+        """A channel task reads as blocked on its channel"""
+        self.make_task(blocked=2)
+        content = self.client.get(self.url).content.decode()
+        assert "blocked on this channel" in content
+        assert "% of" not in content
 
     def test_row_carries_the_channel_summary(self):
         """The row is legible without expanding anything
@@ -407,6 +473,18 @@ class ReviewAgencyDetailViewTests(ReviewAgencyDetailMixin, TestCase):
         assert context["channels_broken"] == 2
         assert context["channels_active"] == 2
         assert "last_success" in context
+
+    def test_stale_requests_on_a_healthy_channel_are_not_blocked(self):
+        """Requests on a working address are waiting on the agency, not on us
+
+        Counting them as blocked inflates the impact number with requests no
+        repair would move.
+        """
+        self.make_channel("broken@fbi.gov", blocked=4)
+        self.make_channel("working@fbi.gov", blocked=3, status="good")
+        response = self.client.get(self.url)
+        assert response.context["total_blocked"] == 4
+        assert response.context["channels_json"]["total_blocked"] == 4
 
     def test_primary_email_in_contact_info(self):
         """The primary to address is shown even when it is broken
@@ -624,6 +702,39 @@ class ReviewAgencyContactPanelTests(ReviewAgencyDetailMixin, TestCase):
         assert "(phone)" not in contact
         # Email, addresses and the FOIA web page are empty, and say so
         assert contact.count("None on record") == 3
+
+    def test_addresses_primary_and_appeal_only(self):
+        """Only primary and appeal addresses are listed; the rest are counted"""
+        for request_type, address in [
+            ("primary", "1 Primary St"),
+            ("appeal", "2 Appeal Ave"),
+            ("check", "3 Check Rd"),
+            ("none", "4 Other Ln"),
+            ("none", "5 Other Ln"),
+        ]:
+            AgencyAddress.objects.create(
+                agency=self.agency,
+                address=AddressFactory(address=address),
+                request_type=request_type,
+            )
+        contact = self.contact_panel()
+        assert "1 Primary St (primary)" in contact
+        assert "2 Appeal Ave (appeal)" in contact
+        assert "Check Rd" not in contact
+        assert "Other Ln" not in contact
+        admin_url = reverse("admin:agency_agency_change", args=[self.agency.pk])
+        assert f'3 other addresses (<a href="{admin_url}">view in Admin</a>)' in (
+            contact
+        )
+
+    def test_addresses_only_others(self):
+        """With no primary or appeal address, the panel says so and counts the rest"""
+        AgencyAddress.objects.create(
+            agency=self.agency, address=AddressFactory(), request_type="check"
+        )
+        contact = self.contact_panel()
+        assert "None on record" in contact
+        assert "1 other address (" in contact
 
     def contact_panel(self):
         """The contact panel, whitespace collapsed"""

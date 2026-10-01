@@ -320,9 +320,10 @@ def _recent_errors(addresses):
 def agency_rollup(agency, channels=None):
     """The agency level scorecard
 
-    total_blocked is the impact number and drives priority.  The roster shape
-    counts sit beside it precisely so a long channel list cannot be mistaken
-    for urgency.
+    total_blocked is the impact number and drives priority.  It counts only
+    flagged channels: requests on a healthy address are stale, waiting on the
+    agency rather than on a repair.  The roster shape counts sit beside it
+    precisely so a long channel list cannot be mistaken for urgency.
     """
     if channels is None:
         channels = agency_channels(agency)
@@ -332,7 +333,7 @@ def agency_rollup(agency, channels=None):
         default=None,
     )
     return {
-        "total_blocked": sum(c.blocked_count for c in channels),
+        "total_blocked": sum(c.blocked_count for c in channels if c.has_error),
         "channels_known": len(channels),
         "channels_broken": sum(1 for c in channels if c.has_error),
         "channels_active": sum(1 for c in channels if c.is_active),

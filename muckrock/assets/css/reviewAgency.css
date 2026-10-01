@@ -80,7 +80,7 @@
 }
 
 .review-agency-agency header {
-  flex: 1 1 auto;
+  flex: 1 1 16em;
 }
 
 .review-agency-contact {
@@ -221,6 +221,7 @@
 
 .repair-channels__actions button {
   margin: 0;
+  white-space: nowrap;
 }
 
 .repair-channels__filter {
