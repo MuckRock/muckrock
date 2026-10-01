@@ -66,15 +66,18 @@
 
   <div class="review-agency-summary">
     <header class="review-agency-summary__header">
-      <h4>
-        <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
-        <small>{{ task.agency.jurisdiction.name }}</small>
-      </h4>
-      <span class="review-agency-badges">
-        <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
-        {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
-        {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
-      </span>
+      <div>
+        <h4>
+          <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
+          <small>{{ task.agency.jurisdiction.name }}</small>
+        </h4>
+        <span class="review-agency-badges">
+          {% if task.agency.portal_id %}<span class="badge">Portal</span>{% endif %}
+          <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
+          {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
+          {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
+        </span>
+      </div>
       <a class="blue button" href="{% url 'review-agency-detail' pk=task.agency_id %}">
         Repair this agency's channels &rarr;
       </a>
@@ -154,29 +157,41 @@
     {% endif %}
   </div>
 
-  <div class="review-agency-placeholder collapsable" data-id="{{ task.pk }}">
-    <summary class="task__data">
-      <p>Loading...</p>
-    </summary>
-  </div>
+  {# Legacy ajax data and repair form, kept collapsed until the revamped layout replaces them #}
+  <details class="review-agency-legacy">
+    <summary>Legacy repair tools</summary>
+    <div class="review-agency-placeholder collapsable" data-id="{{ task.pk }}">
+      <summary class="task__data">
+        <p>Loading...</p>
+      </summary>
+    </div>
+    {# The request checkboxes in lib/review_agency.html submit with this form #}
+    <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="review-agency-repair-form" id="{{ task.pk }}-repair-form">
+      {% csrf_token %}
+      <input type="hidden" name="task" value="{{ task.pk }}">
+      <div class="form-field">
+        <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
+        {{ form.email_or_fax }}
+        <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
+        {{ form.update_agency_info }}
+        <br>
+        <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
+        {{ form.snail_mail }}
+        <br>
+        <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
+        {{ form.resolve }}
+        <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
+        {{ form.reply }}
+        <span>Leave blank to not send a follow up to the new address</span>
+      </div>
+      <button type="submit" name="update" value="true" class="primary button">
+        Update email
+      </button>
+    </form>
+  </details>
 {% endblock %}
 
 {% block task-actions %}
-  <div class="form-field">
-    <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
-    {{ form.email_or_fax }}
-    <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
-    {{ form.update_agency_info }}
-    <br>
-    <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
-    {{ form.snail_mail }}
-    <br>
-    <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
-    {{ form.resolve }}
-    <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
-    {{ form.reply }}
-    <span>Leave blank to not send a follow up to the new address</span>
-  </div>
   <span class="task-defer">
     {% if not task.zendesk_ticket_id %}
       <button type="submit" name="zendesk" value="true" class="primary button">
@@ -186,9 +201,6 @@
     {% endif %}
   </span>
   <span class="task-buttons">
-    <button type="submit" name="update" value="true" class="primary button">
-      Update email
-    </button>
     <button class="button" type="submit" name="resolve" value="true">
       Resolve
     </button>

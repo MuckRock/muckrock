@@ -236,13 +236,16 @@ $task-padding: $vr/4 $vr/2;
     .task__note {
         margin-bottom: 0;
     }
-    .task__data {
+    .task__main > .task__data {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
+        justify-content: space-between;
         gap: $vr/4 $vr/2;
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey-7;
+        font-size: 0.875em;
+        padding: 0;
         * {
             margin-bottom: 0;
         }
@@ -251,9 +254,13 @@ $task-padding: $vr/4 $vr/2;
         }
         .tags-form {
             display: flex;
-            flex: 1;
+            flex: 0 1 auto;
             align-items: center;
             gap: $vr/4;
+            padding: $vr/2;
+            & .button {
+                margin-top: 0;
+            }
         }
     }
 }
@@ -349,6 +356,43 @@ $task-padding: $vr/4 $vr/2;
 
 .review-agency .form-field {
     text-align: left;
+}
+
+.review-agency-legacy {
+    text-align: left;
+    border: 1px solid #d5dae0;
+    > summary {
+        display: list-item; // normalize's display: block hides the marker
+        cursor: pointer;
+        padding: 1em;
+        font-weight: bold;
+    }
+    form {
+        background: #f7f8fa;
+    }
+}
+
+// Mirrors the .task__actions / .task-post-actions form styles the repair form
+// had while it lived in the footer.  It can't share those classes: task.js
+// collects form.task-post-actions for batch actions.
+.review-agency-repair-form {
+    padding: $vr/4 $vr/2;
+    input, select, label {
+        display: block;
+        width: 100%;
+        margin-bottom: $vr;
+    }
+    label {
+        margin-bottom: 0;
+    }
+    label.check-label {
+        display: inline;
+    }
+    input[type="checkbox"] {
+        display: inline-block;
+        width: auto;
+        margin: 0 $vr/2;
+    }
 }
 
 /* New Agency Task */
