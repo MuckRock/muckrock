@@ -193,6 +193,9 @@ class Detail(DetailView):
         """Get context data about permissions"""
 
         context["user_can_edit"] = self.foia.has_perm(self.request.user, "change")
+        context["user_can_change_owner"] = self.foia.composer.has_perm(
+            self.request.user, "change"
+        )
         user_can_embargo = self.foia.has_perm(self.request.user, "embargo")
 
         context["user_can_pay"] = (

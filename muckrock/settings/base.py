@@ -289,6 +289,7 @@ INSTALLED_APPS = (
     "django_extensions",
     "social_django",
     "muckrock.accounts",
+    "muckrock.accounts.stats_api",
     "muckrock.foia",
     "muckrock.news",
     "muckrock.core",
@@ -302,6 +303,7 @@ INSTALLED_APPS = (
     "muckrock.task",
     "muckrock.message",
     "muckrock.organization",
+    "muckrock.organization.stats_api",
     "muckrock.project",
     "muckrock.mailgun",
     "muckrock.foiamachine",
@@ -639,6 +641,10 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# Pagination defaults, default for standard pagination was 50
+# so this is what both standard and cursor fall back to
+DEFAULT_PAGE_SIZE = int(os.environ.get("DEFAULT_PAGE_SIZE", 50))
 MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
 
 SPECTACULAR_SETTINGS = {
@@ -1014,3 +1020,6 @@ API_V2_AUTH = boolcheck(os.environ.get("API_V2_AUTH", True))
 VERIFIED_REQUEST_CHECKS_BYPASS = boolcheck(
     os.environ.get("VERIFIED_REQUEST_CHECKS_BYPASS", True)
 )
+
+# Number of days for windows on our stats api
+REQUEST_WINDOW_DAYS = int(os.environ.get("REQUEST_WINDOW_DAYS", 90))

@@ -8,6 +8,13 @@ COMPOSER_SUBMIT_DELAY = 35 * 60
 # allow a composer to be edited 30 minutes after it has been submitted
 COMPOSER_EDIT_DELAY = 30 * 60
 
+# shown to users whose account has been blocked from filing new requests
+BLOCKED_FROM_FILING_MESSAGE = (
+    "Your account is not able to file new requests.  You can still view and "
+    "track the requests you have already filed.  If you believe this is a "
+    "mistake, please contact us at info@muckrock.com."
+)
+
 # elements allowed in html email, from:
 # https://www.pinpointe.com/blog/email-campaign-html-and-css-support
 EMAIL_TAGS = [
@@ -166,3 +173,11 @@ EMAIL_STYLES = [
     "text-transform",
     "vertical-align",
 ]
+
+# file type magic bytes, keyed by extension, for verifying that a file's
+# contents match its claimed extension (see validate_file_type)
+FILE_MAGIC_BYTES = {
+    "pdf": [b"%PDF-"],
+    "docx": [b"PK\x03\x04"],  # OOXML zip container
+    "doc": [b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"],  # legacy OLE2
+}

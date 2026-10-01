@@ -33,6 +33,11 @@ urlpatterns = [
         name="foia-list-following",
     ),
     re_path(
+        r"^list/shared/$",
+        views.SharedRequestList.as_view(),
+        name="foia-list-shared",
+    ),
+    re_path(
         r"^list/processing/$",
         views.ProcessingRequestList.as_view(),
         name="foia-list-processing",

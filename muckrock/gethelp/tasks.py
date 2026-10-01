@@ -59,8 +59,7 @@ def create_ticket_description(text, user, foia):
             f"{settings.MUCKROCK_URL}{user.profile.get_absolute_url()}"
         )
         links.append(
-            f"- User profile on MuckRock Accounts: "
-            f"{settings.SQUARELET_URL}/users/{user.username}/"
+            f"- User profile on MuckRock Accounts: {user.profile.squarelet_url}"
         )
         org = get_primary_org(user, foia)
         if org and not org.individual:

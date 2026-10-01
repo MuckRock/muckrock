@@ -24,7 +24,7 @@
     </header>
     <section class="collapsable {% if not task.note %}collapsed{% endif %} task__note">
       <header class="textbox__header">
-        <p class="{% if task.note %}has-note{% endif %}">Note</p>
+        <p class="{% if task.note %}has-note{% endif %}">{% block task-note-title %}Note{% endblock %}</p>
       </header>
       <main>
         <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="note-form">

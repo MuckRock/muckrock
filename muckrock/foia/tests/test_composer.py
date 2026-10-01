@@ -8,8 +8,13 @@ Tests for the FOIA Composer
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
+# Third Party
+import pytest
+
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
+from muckrock.foia.exceptions import BlockedFromFilingError
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.forms.composers import BaseComposerForm
 from muckrock.foia.models import FOIAComposer
@@ -48,6 +53,27 @@ class TestFOIAComposer(TestCase):
                 "regular": reg,
                 "monthly": monthly,
             }
+
+    def test_submit_blocked_from_filing(self):
+        """A user blocked from filing may not submit, even calling submit directly"""
+        composer = FOIAComposerFactory(
+            status="started",
+            user=UserFactory(profile__blocked_from_filing=True),
+            agencies=AgencyFactory.create_batch(1),
+        )
+        composer.organization.number_requests = 10
+        composer.organization.save()
+
+        with pytest.raises(BlockedFromFilingError):
+            composer.submit()
+
+        composer.refresh_from_db()
+        assert composer.status == "started"
+        assert composer.datetime_submitted is None
+        assert not composer.foias.exists()
+        # no requests were deducted
+        composer.organization.refresh_from_db()
+        assert composer.organization.number_requests == 10
 
 
 class TestFOIAComposerQueryset(TestCase):
@@ -184,4 +210,31 @@ class TestFOIAComposerForm(TestCase):
             user=foia.composer.user,
             request=None,
         )
+        assert form.is_valid()
+
+    def _blocked_user_form(self, action):
+        """A composer form filled out by a user blocked from filing"""
+        user = UserFactory(profile__blocked_from_filing=True)
+        agency = AgencyFactory()
+        return BaseComposerForm(
+            {
+                "action": action,
+                "title": "Title",
+                "requested_docs": "ABC",
+                "agencies": [agency.pk],
+                "tags": "",
+            },
+            user=user,
+            request=None,
+        )
+
+    def test_blocked_from_filing_submit(self):
+        """A blocked user may not submit"""
+        form = self._blocked_user_form("submit")
+        assert not form.is_valid()
+        assert BLOCKED_FROM_FILING_MESSAGE in form.non_field_errors()
+
+    def test_blocked_from_filing_save(self):
+        """A blocked user may still save a draft"""
+        form = self._blocked_user_form("save")
         assert form.is_valid()

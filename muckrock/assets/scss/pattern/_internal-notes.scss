@@ -1,0 +1,95 @@
+// Private staff notes about a user
+// Shown on profile, composer detail and multirequest task pages
+
+.internal-notes {
+    margin: $vr 0;
+    padding: $vr/2 $vr;
+    border-left: 4px solid $color-red;
+    background-color: $color-grey-8;
+
+    h3 small {
+        display: block;
+        color: $color-grey-3;
+        font-weight: normal;
+    }
+
+    .internal-notes__list {
+        margin: 0;
+        padding: 0;
+    }
+
+    .internal-notes__empty {
+        color: $color-grey-3;
+    }
+
+    // set the add form apart from the last note's Edit button
+    .internal-notes__add {
+        margin-top: $vr;
+        border-top: 1px solid $color-grey-7;
+        padding-top: $vr/2;
+
+        // the button closes the form again, so it says so while it is open
+        .internal-notes__label-open {
+            display: none;
+        }
+
+        &[open] {
+            .internal-notes__label-closed {
+                display: none;
+            }
+
+            .internal-notes__label-open {
+                display: inline;
+            }
+        }
+    }
+
+    .internal-note {
+        padding: $vr/2 0;
+        border-bottom: 1px solid $color-grey-7;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .internal-note__meta {
+        margin-bottom: $vr/4;
+        color: $color-grey-3;
+        font-size: .875em;
+
+        > * {
+            margin-right: $vr/2;
+        }
+    }
+
+    .internal-note__by {
+        font-weight: bold;
+        color: $color-black;
+    }
+
+    .internal-note__category,
+    .internal-note__warning {
+        padding: 0 $vr/4;
+        border-radius: 2px;
+        background-color: $color-grey-7;
+    }
+
+    .internal-note__warning {
+        background-color: $color-red-light;
+        color: $color-red-dark;
+    }
+
+    .internal-note--warning .internal-note__text {
+        font-weight: bold;
+    }
+
+    // the disclosure triangle would show up inside the button
+    summary.button {
+        list-style: none;
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+    }
+}

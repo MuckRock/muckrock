@@ -52,6 +52,11 @@
         </p>
       {% endif %}
 
+      {% if request.user.is_staff %}
+        <div class="button-group">
+          <a target="_blank" rel="noopener noreferrer" class="blue button" href="{{ foia.user.profile.squarelet_url }}">View account</a>
+        </div>
+      {% endif %}
     </section>
 
     <section class="specific-information">

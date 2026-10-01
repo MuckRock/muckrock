@@ -140,6 +140,16 @@ class Profile(models.Model):
         default=False, help_text="This user is a proxy filer for their home state"
     )
 
+    # moderation
+    blocked_from_filing = models.BooleanField(
+        default=False,
+        verbose_name="Block from filing",
+        help_text=(
+            "Prevent this user from filing new requests.  They will still be "
+            "able to view and track the requests they have already filed."
+        ),
+    )
+
     # for agency users
     agency = models.OneToOneField(
         "agency.Agency", blank=True, null=True, on_delete=models.SET_NULL
@@ -151,6 +161,11 @@ class Profile(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return reverse("acct-profile", kwargs={"username": self.user.username})
+
+    @property
+    def squarelet_url(self):
+        """The url for this user's profile on Squarelet"""
+        return "{}/users/{}/".format(settings.SQUARELET_URL, self.user.username)
 
     def is_advanced(self):
         """Advanced users can access features basic users cannot."""
@@ -599,3 +614,78 @@ class StockResponse(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class NoteCategory(models.Model):
+    """
+    A categry for notes
+    """
+
+    name = models.CharField(unique=True)
+    description = models.TextField(blank=True)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name_plural = "Note categories"
+
+    def __str__(self):
+        return self.name
+
+
+class WarningLevels(models.TextChoices):
+    FIRST = "first", "First warning"
+    SECOND = "second", "Second warning"
+    FINAL = "final", "Final warning"
+    BANNED = "banned", "Banned"
+
+    __empty__ = "None"
+
+
+class InternalNote(models.Model):
+    """
+    A private note about this user, written by staff.
+    This should never be exposed to non-staff users.
+    It exists to keep a record of interactions, especially
+    any problems this user has caused or moderation actions taken.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="internal_notes",
+        help_text="The user this note is about",
+    )
+
+    by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="internal_notes_by",
+        help_text="Staff member who wrote this note",
+    )
+
+    text = models.TextField()
+
+    warning_level = models.CharField(
+        blank=True,
+        choices=WarningLevels,
+    )
+
+    category = models.ForeignKey(
+        NoteCategory,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created",)
+        get_latest_by = "created"
+
+    def __str__(self):
+        return f"Note by {self.by.username} on {self.created}"

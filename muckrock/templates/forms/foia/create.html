@@ -18,7 +18,8 @@
   <div class="foia__create form">
     <div class="new-request">
       <header class="grid__row">
-        {% if clone %}
+        {% if blocked_from_filing %}
+        {% elif clone %}
           <h1 class="grid__column half">Clone a request</h1>
           <summary class="grid__column half">
             Make any changes to the request, then clone it.
@@ -41,6 +42,27 @@
           </summary>
         {% endif %}
       </header>
+      {% if blocked_from_filing %}
+        <div class="filing-blocked">
+          <span class="symbol">
+            {% include 'lib/component/icon/error.svg' %}
+          </span>
+          <h2>Your account is not able to file new requests</h2>
+          <p>You can still view and track the requests you have already filed.</p>
+          <a class="primary button" href="{% url "foia-mylist" %}">
+            View my requests
+          </a>
+          <p class="small">
+            If you believe this is a mistake, please contact us at
+            <a href="mailto:info@muckrock.com">info@muckrock.com</a>.
+          </p>
+        </div>
+      {% else %}
+      {% comment %}
+        The request form below is only rendered for users who are allowed to
+        file.  It is left un-indented to keep the diff readable. This points
+        to extracting the composer into a separate template, rendered by a tag.
+      {% endcomment %}
       {% if composer %}
         <div class="form-status-holder badge hidden">Autosave enabled</div>
       {% endif %}
@@ -284,16 +306,17 @@
         </div>
 
       </form>
+      {% endif %}{# blocked_from_filing #}
     </div>
-    {% if featured and not clone %}
+    {% if featured and not clone and not blocked_from_filing %}
       <div class="clone-candidates" id="clone">
         <h2>Looking for inspiration? Clone a request below, then tweak it how you want.</h2>
         {% for foia in featured %}
           {% include 'lib/foia.html' with foia=foia %}
         {% endfor %}
       </div>
+    {% endif %}
   </div>
-{% endif %}
 
 <div class="modal" id="similar-agency-modal">
   <h1>The agency you selected isn't in our database yet.</h1>
@@ -312,6 +335,8 @@
 {% endblock %}
 
 {% block scripts %}
-  {% include 'lib/component/fine-uploader.html' %}
-  <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+  {% if not blocked_from_filing %}
+    {% include 'lib/component/fine-uploader.html' %}
+    <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+  {% endif %}
 {% endblock scripts %}

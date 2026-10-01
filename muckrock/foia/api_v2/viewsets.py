@@ -21,6 +21,7 @@ from muckrock.foia.api_v2.serializers import (
     FOIARequestCreateSerializer,
     FOIARequestSerializer,
 )
+from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
@@ -83,10 +84,19 @@ class FOIARequestViewSet(
                     "request has been saved as a draft; its location is returned."
                 ),
             ),
+            403: OpenApiResponse(
+                description="This account has been blocked from filing new requests.",
+            ),
         },
     )
     def create(self, request, *args, **kwargs):
         """Submit a new request"""
+        if request.user.profile.blocked_from_filing:
+            return Response(
+                {"status": BLOCKED_FROM_FILING_MESSAGE},
+                status=http_status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data

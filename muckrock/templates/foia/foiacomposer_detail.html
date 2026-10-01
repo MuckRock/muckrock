@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load account_tags %}
 
 {% block title %}
   {{ composer.title }}
@@ -43,6 +44,8 @@
     <a href="{% url "foia-create" %}?clone={{ composer.pk }}" class="blue button">
       Clone
     </a>
+
+    {% internal_notes composer.user %}
 
     <section class="requests" id="requests">
       <h2>{{ foias|length }} Request{{ foias|length|pluralize }}</h2>

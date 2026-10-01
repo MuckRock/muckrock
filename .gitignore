@@ -42,3 +42,4 @@ CLAUDE.md
 .claude
 rootCA.pem
 /fixtures-prod
+.playwright-mcp

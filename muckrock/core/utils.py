@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group, User
 from django.core.cache import cache, caches
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
+from django.utils import timezone
 
 # Standard Library
 import datetime
@@ -18,6 +19,7 @@ import sys
 import time
 import uuid
 from email.message import Message
+from email.utils import collapse_rfc2231_value
 from hashlib import md5
 
 # Third Party
@@ -26,6 +28,8 @@ import boto3
 import requests
 import stripe
 from documentcloud import DocumentCloud
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from zenpy import Zenpy
 from zenpy.lib.api_objects import (
     Comment,
@@ -34,6 +38,10 @@ from zenpy.lib.api_objects import (
     User as ZenUser,
 )
 from zenpy.lib.exception import APIException
+
+# MuckRock
+from muckrock.accounts.stats_api.models import UserStats
+from muckrock.organization.stats_api.models import OrganizationStats
 
 logger = logging.getLogger(__name__)
 
@@ -395,11 +403,21 @@ def custom_preprocessing_hook(endpoints):
 
 
 def parse_header(header):
-    """Replacement for deprecated cgi parse_header"""
+    """Replacement for the deprecated cgi.parse_header.
+
+    Parses a header value like a Content-Type or Content-Disposition into
+    its main value plus a dict of parameters like the following:
+    'attachment; filename="a.zip"' -> ('attachment', {'filename': 'a.zip'})
+
+    RFC 2231 extended parameters (e.g. filename*=UTF-8''a.zip, used by
+    Dropbox and some FOIA portals) are decoded to plain strings rather than
+    the (charset, language, value) tuples that Message.get_params returns.
+    """
     msg = Message()
     msg["content-type"] = header
-    params = msg.get_params()
-    return (params[0][0], dict(params[1:]))
+    main_value, *param_pairs = msg.get_params()
+    params = {key: collapse_rfc2231_value(value) for key, value in param_pairs}
+    return (main_value[0], params)
 
 
 def mailchimp_journey(email, journey):
@@ -468,3 +486,53 @@ def get_dc_client():
         f"{existing_ua} {settings.SERVICE_USER_AGENT}".strip()
     )
     return client
+
+
+def requests_retry_session(
+    retries=3,
+    backoff_factor=0.3,
+    status_forcelist=(429, 500, 502, 503, 504),
+    allowed_methods=Retry.DEFAULT_ALLOWED_METHODS,
+    session=None,
+):
+    """Automatic retries for HTTP requests.
+    I've modified it to allow the method caller to specify
+    allowed_methods so that in the case where a POST is effectively just
+    a mask for GET request, it can be retried.
+    This is used in the FBI portal task.
+    This is because urllib3's Retry utility by default
+    does not allow for POST retries:
+    print(Retry.DEFAULT_ALLOWED_METHODS)
+    frozenset({'TRACE', 'HEAD', 'OPTIONS', 'GET', 'DELETE', 'PUT'})
+    See: https://www.peterbe.com/plog/best-practice-with-retries-with-requests
+    """
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+        allowed_methods=allowed_methods,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
+
+def record_request_filed(user_id=None, organization_id=None, when=None):
+    """
+    Bump the request-filing watermark on the user and org stats rows.
+
+    Called explicitly from FOIAComposer.submit()
+    Updates existing rows only.
+    The creation signals + backfill guarantee rows exist.
+    """
+    when = when or timezone.now()
+    if user_id:
+        UserStats.objects.filter(user_id=user_id).update(last_request_at=when)
+    if organization_id:
+        OrganizationStats.objects.filter(organization_id=organization_id).update(
+            last_request_at=when
+        )

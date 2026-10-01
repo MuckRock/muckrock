@@ -31,3 +31,7 @@ class AccountsConfig(AppConfig):
         from django.contrib.auth.decorators import login_required
 
         admin.site.login = login_required(admin.site.login)
+
+        # User creation signal
+        # MuckRock
+        import muckrock.accounts.signals  # pylint:disable=unused-import

@@ -40,7 +40,7 @@ ENV SODIUM_INSTALL=system
 
 # install NVM
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 18.16.0
+ENV NODE_VERSION 22.12.0
 
 RUN mkdir $NVM_DIR
 RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash \

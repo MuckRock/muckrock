@@ -199,8 +199,9 @@ class EmailAddressAdmin(VersionAdmin):
     """Email address admin"""
 
     search_fields = ["email", "name"]
-    list_filter = ["status"]
-    fields = ["email", "name", "status"]
+    list_display = ["email", "name", "status", "no_reply"]
+    list_filter = ["status", "no_reply"]
+    fields = ["email", "name", "status", "no_reply"]
     inlines = [SourceInline]
 
 

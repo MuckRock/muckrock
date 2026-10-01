@@ -72,6 +72,28 @@
             margin-right: $vr;
         }
     }
+    // These buttons are a mix of spans, links and submit buttons wrapped in
+    // forms, so they will not line up on their own: the form is a block and
+    // breaks the row, and the inline-flex button group takes its baseline from
+    // its own children's margins.
+    .actions > div {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(center);
+        gap: $vr/2;
+        // the buttons drop their margins, so leave room for the drop shadow
+        margin-bottom: $vr/4;
+        > form {
+            margin: 0;
+        }
+        // only the buttons in the row itself - the contact modal is a child of
+        // this element too, and its buttons keep their own spacing
+        > .button,
+        > form > .button,
+        > .button-group > .button {
+            margin: 0;
+        }
+    }
 }
 
 .api-token {

@@ -288,27 +288,30 @@
 
                 {% if organizations|length > 1 %}
                   <li class="separator nav-item nolink">Switch&nbsp;Organization</li>
-                  {% for org in organizations %}
-                    {% if org != user_organization %}
-                      <li>
-                        <form action="{% url "org-activate" %}" method="post">
-                          {% csrf_token %}
-                          <input type="hidden" name="next" value="{{ request.path }}">
-                          <input type="hidden" name="organization" value="{{ org.pk }}">
-                          <button class="black nav-item align-center avatar-container">
-                            {% sorl_thumbnail org.avatar_url "62x62" as avatar %}
-                              <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
-                            {% empty %}
-                              <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
-                            {% endthumbnail %}
-                            <span>{{ org.display_name|nbsp }}</span>
-                          </button>
-                        </form>
-                      </li>
-                    {% endif %}
-                  {% endfor %}
+                  <li class="org-switcher-scroll">
+                    <ul class="org-switcher-list">
+                      {% for org in organizations %}
+                        {% if org != user_organization %}
+                          <li>
+                            <form action="{% url "org-activate" %}" method="post">
+                              {% csrf_token %}
+                              <input type="hidden" name="next" value="{{ request.path }}">
+                              <input type="hidden" name="organization" value="{{ org.pk }}">
+                              <button class="black nav-item align-center avatar-container">
+                                {% sorl_thumbnail org.avatar_url "62x62" as avatar %}
+                                  <img class="round avatar mb0" src="{{ avatar.url }}" height="31" width="31">
+                                {% empty %}
+                                  <img class="round avatar mb0" src="{% static 'img/defaultavatar.png' %}" height="31" width="31">
+                                {% endthumbnail %}
+                                <span>{{ org.display_name|nbsp }}</span>
+                              </button>
+                            </form>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  </li>
                 {% endif %}
-
               </ul>
             </li>
 

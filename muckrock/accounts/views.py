@@ -19,8 +19,10 @@ from django.http.response import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.generic import FormView, ListView, RedirectView, TemplateView
 
 # Standard Library
@@ -40,11 +42,16 @@ from muckrock.accounts.forms import (
     BuyRequestForm,
     ContactForm,
     EmailSettingsForm,
+    InternalNoteForm,
     OrgPreferencesForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
-from muckrock.accounts.models import Notification, RecurringDonation
-from muckrock.accounts.utils import mixpanel_event
+from muckrock.accounts.models import InternalNote, Notification, RecurringDonation
+from muckrock.accounts.utils import (
+    can_see_internal_notes,
+    mixpanel_event,
+    note_form_prefix,
+)
 from muckrock.agency.models import Agency
 from muckrock.core.views import MRAutocompleteView, MRFilterListView
 from muckrock.crowdfund.models import RecurringCrowdfundPayment
@@ -280,6 +287,58 @@ def contact_user(request, idx):
         else:
             messages.error(request, "Message failed!")
     return redirect(user)
+
+
+def _note_redirect(request, user):
+    """Send the staffer back to the page they wrote the note from"""
+    url = request.POST.get("next")
+    if url and url_has_allowed_host_and_scheme(url, allowed_hosts=None):
+        return redirect(url)
+    return redirect(user)
+
+
+@require_POST
+@user_passes_test(can_see_internal_notes)
+def create_internal_note(request, idx):
+    """Let staff write a private note about a user"""
+    user = get_object_or_404(User, pk=idx)
+    form = InternalNoteForm(request.POST, prefix=note_form_prefix(user=user))
+    if form.is_valid():
+        note = form.save(commit=False)
+        note.user = user
+        note.by = request.user
+        note.save()
+        messages.success(request, "Note added")
+    else:
+        messages.error(request, "Note not added: %s" % form.errors.as_text())
+    return _note_redirect(request, user)
+
+
+@require_POST
+@user_passes_test(can_see_internal_notes)
+def update_internal_note(request, idx):
+    """Let staff edit a private note about a user"""
+    note = get_object_or_404(InternalNote, pk=idx)
+    form = InternalNoteForm(
+        request.POST, instance=note, prefix=note_form_prefix(note=note)
+    )
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Note updated")
+    else:
+        messages.error(request, "Note not updated: %s" % form.errors.as_text())
+    return _note_redirect(request, note.user)
+
+
+@require_POST
+@user_passes_test(can_see_internal_notes)
+def delete_internal_note(request, idx):
+    """Let staff delete a private note about a user"""
+    note = get_object_or_404(InternalNote, pk=idx)
+    user = note.user
+    note.delete()
+    messages.success(request, "Note deleted")
+    return _note_redirect(request, user)
 
 
 @csrf_exempt

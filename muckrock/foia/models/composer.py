@@ -31,8 +31,13 @@ from constance import config
 from taggit.managers import TaggableManager
 
 # MuckRock
-from muckrock.core.utils import TempDisconnectSignal, mailchimp_journey
+from muckrock.core.utils import (
+    TempDisconnectSignal,
+    mailchimp_journey,
+    record_request_filed,
+)
 from muckrock.foia.constants import COMPOSER_EDIT_DELAY, COMPOSER_SUBMIT_DELAY
+from muckrock.foia.exceptions import BlockedFromFilingError
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import EMBARGO_CHOICES
 from muckrock.foia.querysets import FOIAComposerQuerySet
@@ -117,6 +122,12 @@ class FOIAComposer(models.Model):
         # MuckRock
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
+        if self.user.profile.blocked_from_filing:
+            # this is the last line of defense - it catches the web form, both
+            # versions of the API, and any other caller
+            logger.info("Composer submit blocked: %s %s", self.pk, self.user.pk)
+            raise BlockedFromFilingError
+
         num_requests = self.agencies.count()
         request_count = self.organization.make_requests(num_requests)
         self.num_reg_requests = request_count["regular"]
@@ -125,12 +136,21 @@ class FOIAComposer(models.Model):
         self.datetime_submitted = timezone.now()
         self.save()
 
+        # Record the request-filing watermark explicitly here
+        # As all paths (API and web) lead here
+        record_request_filed(
+            user_id=self.user_id,
+            organization_id=self.organization_id,
+        )
+
         if num_requests == 1:
             # if only one request, create it immediately so we can redirect there
             composer_create_foias(self.pk, contact_info, no_proxy)
         else:
             # otherwise do it delayed so the page doesn't risk timing out
-            composer_create_foias.delay(self.pk, contact_info, no_proxy)
+            transaction.on_commit(
+                lambda: composer_create_foias.delay(self.pk, contact_info, no_proxy)
+            )
 
         # if num_requests is less than the multi-review amount, or the user is a
         # verified journalist and the bypass is enabled, we will approve the

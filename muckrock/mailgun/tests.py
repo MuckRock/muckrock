@@ -30,7 +30,14 @@ from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
 from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
-from muckrock.mailgun.views import bounces, delivered, opened, route_mailgun
+from muckrock.mailgun.views import (
+    _html_to_text,
+    _looks_like_html,
+    bounces,
+    delivered,
+    opened,
+    route_mailgun,
+)
 from muckrock.task.models import OrphanTask
 
 
@@ -191,6 +198,43 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         self.mailgun_route(from_, to_, subject, text, signature)
         foia.refresh_from_db()
 
+        assert foia.email == original_email
+
+    # patching asyncio.run to not run the classification on actual LLM
+    @patch("asyncio.run", Mock())
+    @requests_mock.Mocker()
+    def test_no_reply_flag(self, mock_requests):
+        """Test that an address flagged no_reply is not routed to,
+        even when its local part doesn't look like a no-reply address"""
+        url = "https://www.example.com/raw_email/"
+        mock_requests.get(
+            settings.MAILGUN_API_URL + "/events",
+            json={"items": [{"storage": {"url": url}}]},
+        )
+        mock_requests.get(url, json={"body-mime": "Raw email"})
+
+        foia = FOIARequestFactory(status="ack")
+        original_email = foia.email
+
+        # a normal-looking address that would pass the string heuristic
+        from_name = "Yes reply"
+        from_email = "yesreply@agency.gov"  # actually a noreply address
+        from_ = '"%s" <%s>' % (from_name, from_email)
+
+        # flag it as no_reply before routing
+        email_address = EmailAddress.objects.fetch(from_email)
+        email_address.no_reply = True
+        email_address.save()
+
+        to_ = '%s, "Doe, John" <other@agency.gov>' % foia.get_request_email()
+        subject = "Test subject"
+        text = "Test normal."
+        signature = "-Charlie Jones"
+
+        self.mailgun_route(from_, to_, subject, text, signature)
+        foia.refresh_from_db()
+        # Confirm that the contact email for this request is left untouched
+        # If the email from the agency is marked as a no reply manually
         assert foia.email == original_email
 
     def test_bad_sender(self):
@@ -473,3 +517,66 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         assert comm.emails.first().confirmed_datetime == datetime(
             2017, 1, 2, 17, tzinfo=pytz.utc
         )
+
+
+class TestMailgunHtmlBody(TestCase):
+    """Tests for detecting and converting HTML sent in a text/plain part
+    (as Granicus/GovQA does)"""
+
+    # This is a trimmed down and anonymized real govqa comm body.
+    # HTML in what should be plain text
+    # with a link and a tracking image
+    GOVQA_BODY = (
+        '<br><br><div style="text-align: center;">'
+        '<img alt="" src="https://track.example/logo.png" width="100%" /></div>\r\n'
+        "<div>\r\n"
+        "<div>Dear s,</div>\r\n"
+        "<div>&nbsp;</div>\r\n"
+        "<div>Thank you for registering with the Records Center.</div>\r\n"
+        "<div>&nbsp;</div>\r\n"
+        '<div>Reset here: <a title="Reset" '
+        'href="https://portal.example/reset?tok=abc" target="_blank">'
+        "Request Temporary Password</a></div>\r\n"
+        "</div>"
+    )
+
+    def test_looks_like_html_detects_leading_tag(self):
+        """Bodies that open with an HTML tag are detected"""
+        assert _looks_like_html(self.GOVQA_BODY)
+        assert _looks_like_html("<div>hello</div>")
+        # Case with a leading whitespace
+        assert _looks_like_html("  \r\n<br><br><div>x</div>")
+
+    def test_html_to_text_strips_tags_and_keeps_content(self):
+        """Conversion removes markup but preserves the readable text"""
+        result = _html_to_text(self.GOVQA_BODY)
+        assert "<div" not in result
+        assert "<img" not in result
+        assert "&nbsp;" not in result
+        assert "Dear s," in result
+        assert "Thank you for registering with the Records Center." in result
+
+    def test_html_to_text_preserves_links(self):
+        """Anchor hrefs are inlined as text so the URL isn't lost"""
+        result = _html_to_text(self.GOVQA_BODY)
+        assert "Request Temporary Password" in result
+        assert "https://portal.example/reset?tok=abc" in result
+
+    def test_html_to_text_trims_malformed_href(self):
+        """A missing closing quote must not drag ` target=` into the href"""
+        body = (
+            '<div><a href="https://portal.example/x=1 target="_blank">'
+            "click</a></div>"
+        )
+        result = _html_to_text(body)
+        assert "https://portal.example/x=1" in result
+        assert "target=" not in result
+
+    def test_html_to_text_returns_body_on_conversion_failure(self):
+        """If parsing/conversion raises, the original body is returned unchanged
+        rather than propagating the error into email ingest"""
+        body = "<div>some content</div>"
+        with patch(
+            "muckrock.mailgun.views.BeautifulSoup", side_effect=Exception("boom")
+        ):
+            assert _html_to_text(body) == body
