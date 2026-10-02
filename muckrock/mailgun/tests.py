@@ -6,7 +6,7 @@ Tests for mailgun
 from django.conf import settings
 from django.core import mail
 from django.template.loader import render_to_string
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 # Standard Library
@@ -319,6 +319,21 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         to_ = foia.get_request_email()
         response = self.mailgun_route(to_=to_, sign=False)
         assert response.status_code == 403
+
+    @override_settings(DATA_UPLOAD_MAX_NUMBER_FILES=1)
+    @patch("muckrock.mailgun.views.sentry_sdk.capture_exception")
+    def test_too_many_files(self, mock_capture):
+        """Too many attachments returns 406 and reports to Sentry"""
+        foia = FOIARequestFactory()
+        to_ = foia.get_request_email()
+        attachments = [StringIO("File one"), StringIO("File two")]
+        attachments[0].name = "one.pdf"
+        attachments[1].name = "two.pdf"
+        response = self.mailgun_route(to_=to_, attachments=attachments)
+
+        assert response.status_code == 406
+        mock_capture.assert_called_once()
+        assert foia.communications.count() == 0
 
     def test_deleted(self):
         """Test a message to a deleted request"""
