@@ -28,6 +28,7 @@ from email.utils import getaddresses
 from functools import wraps
 
 # Third Party
+import sentry_sdk
 from bs4 import BeautifulSoup
 from constance import config
 
@@ -198,12 +199,16 @@ def mailgun_verify(function):
             try:
                 data = request.POST
             except TooManyFilesSent:
+                content_length = request.META.get("CONTENT_LENGTH", "unknown")
                 logger.warning(
                     "[MAILGUN] Inbound email rejected: too many files. "
                     "Content-Length=%s see Mailgun logs to identify",
-                    request.META.get("CONTENT_LENGTH", "unknown"),
+                    content_length,
                 )
-                raise
+                # Log it in Sentry for visibility since we don't raise
+                sentry_sdk.capture_exception()
+                # 406 tells Mailgun not to retry delivery
+                return HttpResponse("Too many files", status=406)
         if _verify(data):
             return function(request)
         else:
