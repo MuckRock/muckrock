@@ -4,6 +4,7 @@ API ViewSets for organizations
 
 # Third Party
 import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 

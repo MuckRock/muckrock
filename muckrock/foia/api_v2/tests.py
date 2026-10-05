@@ -2,6 +2,10 @@
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
+
+# Standard Library
+from datetime import datetime
 
 # Third Party
 from rest_framework.test import APIClient
@@ -397,6 +401,20 @@ class TestFOIARequestViewset(TestCase):
         url = reverse("api2-requests-list")
         assert_queries_do_not_scale(self.client, url, FOIARequestFactory.create)
         assert_max_queries(self.client, url, max_queries=5)
+
+    def test_list_date_filters_queries_do_not_scale(self):
+        """Filtering communications by date must not add queries as rows grow"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        sent = timezone.make_aware(datetime(2026, 1, 5, 15, 0))
+        url = (
+            f"{reverse('api2-communications-list')}"
+            "?min_date=2026-01-05&max_date=2026-01-05"
+        )
+
+        def create_one():
+            FOIACommunicationFactory.create(datetime=sent)
+
+        assert_queries_do_not_scale(self.client, url, create_one)
 
 
 class TestFOIACommunicationViewset(TestCase):
