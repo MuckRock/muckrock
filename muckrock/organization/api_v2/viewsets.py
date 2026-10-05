@@ -40,6 +40,7 @@ class OrganizationViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Organization.objects.prefetch_related("users")
     serializer_class = OrganizationSerializer
     permission_classes = (IsAuthenticated,)
+    filter_backends = [DjangoFilterBackend]
     filterset_class = OrganizationFilter
     pagination_class = APIV2CursorPagination
 

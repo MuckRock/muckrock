@@ -5,6 +5,10 @@ Viewsets for V2 of the FOIA API
 # Django
 from django.db import transaction
 from django.db.models import Prefetch
+from django.utils import timezone
+
+# Standard Library
+from datetime import datetime, time, timedelta
 
 # Third Party
 import django_filters
@@ -28,6 +32,11 @@ from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
+
+
+def start_of_day(date):
+    """Midnight at the start of `date`, in the site's timezone"""
+    return timezone.make_aware(datetime.combine(date, time.min))
 
 
 # pylint:disable=too-many-ancestors
@@ -222,19 +231,13 @@ class FOIACommunicationViewSet(
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
 
-        # The datetime field is the date the communication was sent,
-        # per the model. Not to be confused with python's datetime
+        # Range filters on the raw datetime so the index on it can be used
         min_date = django_filters.DateFilter(
-            field_name="datetime",
-            lookup_expr="date__gte",
+            method="filter_min_date",
             label="Filter communications on or after this date",
         )
         max_date = django_filters.DateFilter(
-            field_name="datetime",
-            lookup_expr="date__lte",
-            # Compare only its date part. A plain date is
-            # otherwise treated as midnight, so max_date would drop everything
-            # after 00:00 on that day.
+            method="filter_max_date",
             label="Filter communications on or before this date",
         )
         foia = django_filters.NumberFilter(
@@ -244,6 +247,14 @@ class FOIACommunicationViewSet(
         response = django_filters.BooleanFilter(
             label="Indicates if the communication is a response"
         )
+
+        def filter_min_date(self, queryset, name, value):
+            """Communications sent on or after the start of this date"""
+            return queryset.filter(datetime__gte=start_of_day(value))
+
+        def filter_max_date(self, queryset, name, value):
+            """Communications sent before the start of the following date"""
+            return queryset.filter(datetime__lt=start_of_day(value + timedelta(days=1)))
 
         # pylint:disable=too-few-public-methods
         class Meta:

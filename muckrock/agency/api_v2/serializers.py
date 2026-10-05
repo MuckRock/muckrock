@@ -23,7 +23,6 @@ from muckrock.jurisdiction.models import Jurisdiction
                 "exempt": False,
                 "requires_proxy": False,
                 "jurisdiction": 10,
-                "state": None,
                 "types": ["Executive"],
                 "parent": None,
                 "appeal_agency": None,
@@ -55,21 +54,6 @@ class AgencySerializer(serializers.ModelSerializer):
         style={"base_template": "input.html"},
         help_text="The ID of the jurisdiction this agency operates under",
     )
-    state = serializers.SerializerMethodField(
-        help_text=(
-            "Jurisdiction ID of the state this"
-            " agency belongs to, or null for federal agencies"
-        )
-    )
-
-    def get_state(self, obj) -> int | None:
-        """The state jurisdiction for state and local agencies"""
-        jurisdiction = obj.jurisdiction
-        if jurisdiction.level == "s":
-            return jurisdiction.pk
-        if jurisdiction.level == "l":
-            return jurisdiction.parent_id
-        return None
 
     class Meta:
         """Options for the Agency serializer"""
@@ -85,7 +69,6 @@ class AgencySerializer(serializers.ModelSerializer):
             "types",
             "requires_proxy",
             "jurisdiction",
-            "state",
             # connects to other agencies
             "parent",
             "appeal_agency",
@@ -97,7 +80,7 @@ class AgencySerializer(serializers.ModelSerializer):
             "status": {"help_text": ("The current status of the agency")},
             "exempt": {
                 "help_text": (
-                    "Indicates whether the agency is exempt from records laws "
+                    "Indicates whether the agency is exempt from records laws."
                 )
             },
             "requires_proxy": {
