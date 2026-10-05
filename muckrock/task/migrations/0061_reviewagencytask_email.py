@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("communication", "0029_alter_source_type"),
-        ("task", "0059_task_note"),
+        ("task", "0060_alter_responsetask_predicted_status"),
     ]
 
     operations = [
