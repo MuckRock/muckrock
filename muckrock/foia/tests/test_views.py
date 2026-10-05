@@ -58,7 +58,8 @@ from muckrock.foia.views import (
 from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.jurisdiction.models import Appeal
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.task.factories import ResponseTaskFactory
+from muckrock.task.factories import PortalTaskFactory, ResponseTaskFactory
+from muckrock.task.models import PortalTask
 
 
 class TestFOIAViews(TestCase):
@@ -121,6 +122,29 @@ class TestFOIAViews(TestCase):
         user = UserFactory(username="adam", is_staff=True)
         self.client.force_login(user)
         get_allowed(self.client, reverse("foia-list-processing"))
+
+    def test_foia_processing_list_days(self):
+        """Processing days only show for submitted requests, task age always shows"""
+
+        user = UserFactory(is_staff=True)
+        self.client.force_login(user)
+        stale = FOIARequestFactory(
+            status="ack", date_processing=date.today() - timedelta(days=17)
+        )
+        task = PortalTaskFactory(communication__foia=stale)
+        PortalTask.objects.filter(pk=task.pk).update(
+            date_created=timezone.now() - timedelta(days=3)
+        )
+        submitted = FOIARequestFactory(
+            status="submitted", date_processing=date.today() - timedelta(days=11)
+        )
+        PortalTaskFactory(communication__foia=submitted)
+
+        response = get_allowed(self.client, reverse("foia-list-processing-portal"))
+        content = response.content.decode()
+        assert "17 days" not in content
+        assert "3 days" in content
+        assert "11 days" in content
 
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
