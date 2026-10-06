@@ -11,6 +11,9 @@ The original tool loads into a fresh install.  This port adds:
 - CLEAN_FIELD with an optional replacement value
 - REDACT_WHERE: overwrite a field only on rows matching a condition in prod
 - DEFINE: named SQL snippets, substituted into conditions as {{name}}
+- KEEP_LOCAL: leave a table's existing local rows alone in an upsert load
+- SKIP_KEPT: in an upsert load, don't load rows pointing at a kept local row
+  that shares a prod id
 - --upsert: load additively into an existing database, skipping rows that
   already exist and bumping sequences afterwards
 
@@ -164,6 +167,9 @@ class Exporter:
         self.pks = {}
         # tables whose existing local rows are kept rather than refreshed
         self.keep_local = set()
+        # (table, field, parent): rows of table pointing at a parent row that
+        # was kept local are not loaded
+        self.skip_kept = []
         self.defines = {}
         # tables exported more than once, in order to clean out duplicates
         self.clean_tables = []
@@ -362,6 +368,8 @@ class Exporter:
                 self.define(*args)
             elif command == "KEEP_LOCAL":
                 self.keep_local.add(*args)
+            elif command == "SKIP_KEPT":
+                self.skip_kept.append(tuple(args))
             elif command == "CLEAN_KEY":
                 self.clean_key(*args)
             elif command == "CLEAN_FIELD":
@@ -387,6 +395,8 @@ class Exporter:
                 self.set_pk(*args)
             elif command == "KEEP_LOCAL":
                 self.keep_local.add(*args)
+            elif command == "SKIP_KEPT":
+                self.skip_kept.append(tuple(args))
             elif command in ("SQL", "ALL", "BACK"):
                 self.ids.setdefault(args[0], [])
             elif command == "FORE":
@@ -408,6 +418,7 @@ class Exporter:
                 lines.append(f"DELETE FROM {table};")
         copy_opts = "WITH (FORMAT CSV, NULL '-NULL-', HEADER)"
         tables = [t for t in self.ids if os.path.exists(self.path(t))]
+        loaded = set()
         for table in tables:
             with open(self.path(table), newline="") as file:
                 header = next(csv.reader(file))
@@ -429,6 +440,41 @@ class Exporter:
             lines += [
                 f"CREATE TEMP TABLE {stage} ({stage_cols}) ON COMMIT DROP;",
                 f"\\copy {stage} ({cols}) FROM '{self.csv_ref(table)}' {copy_opts}",
+            ]
+            # A kept local row that shares a prod id is a different record, so
+            # prod rows hanging off it must not load -- a prod user's
+            # memberships would attach to the local user.  Record the
+            # collisions before the upsert inserts the new ids.
+            # A match column tells a different record from one an earlier
+            # import loaded, whose new children should still load.
+            parents = {parent: match for _, _, parent, *match in self.skip_kept}
+            if table in parents:
+                pk = self.pk(table)
+                same = "".join(
+                    f' AND t."{col}"::text IS DISTINCT FROM s."{col}"'
+                    for col in parents[table]
+                )
+                lines.append(
+                    f"CREATE TEMP TABLE kept_{table} ON COMMIT DROP AS "
+                    f'SELECT s."{pk}" AS id FROM {stage} s '
+                    f"WHERE EXISTS (SELECT 1 FROM {table} t "
+                    f'WHERE t."{pk}"::text = s."{pk}"{same});'
+                )
+            for child, field, parent, *_ in self.skip_kept:
+                if child != table:
+                    continue
+                if parent not in loaded:
+                    raise ValueError(
+                        f"SKIP_KEPT {table}.{field}: {parent} must load before {table}"
+                    )
+                lines.append(
+                    f"WITH skipped AS (DELETE FROM {stage} "
+                    f'WHERE "{field}" IN (SELECT id FROM kept_{parent}) RETURNING 1) '
+                    f"SELECT '{table}' AS kept_parent_table, "
+                    f"count(*) AS skipped FROM skipped;"
+                )
+            loaded.add(table)
+            lines += [
                 f"SELECT * FROM pg_temp.upsert_shared_columns"
                 f"('{table}', '{stage}', ARRAY[{csv_cols}], '{self.pk(table)}', "
                 f"{'false' if table in self.keep_local else 'true'});",

@@ -10,6 +10,8 @@
     ["KEEP_LOCAL", ["organization_organization"]],
     ["KEEP_LOCAL", ["organization_membership"]],
     ["KEEP_LOCAL", ["organization_entitlement"]],
+    ["SKIP_KEPT", ["accounts_profile", "user_id", "auth_user", "username"]],
+    ["SKIP_KEPT", ["organization_membership", "user_id", "auth_user", "username"]],
 
     ["ALL", ["jurisdiction_jurisdiction"]],
     ["ALL", ["agency_agencytype"]],
@@ -81,6 +83,7 @@
 
     ["CLEAN_KEY", ["agency_agency", "parent_id", "agency_agency"]],
     ["CLEAN_KEY", ["agency_agency", "appeal_agency_id", "agency_agency"]],
+    ["CLEAN_KEY", ["jurisdiction_jurisdiction", "appeal_agency_id", "agency_agency"]],
     ["CLEAN_KEY", ["foia_foiarequest", "crowdfund_id", "crowdfund_crowdfund"]],
     ["CLEAN_KEY", ["foia_foiacomposer", "parent_id", "foia_foiacomposer"]],
     ["CLEAN_KEY", ["foia_foiacommunication", "likely_foia_id", "foia_foiarequest"]],

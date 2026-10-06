@@ -195,6 +195,82 @@ def test_keep_local_tables_skip_existing_rows(exporter, tmp_path):
     ) in sql
 
 
+def test_skip_kept_drops_children_of_colliding_local_rows(exporter, tmp_path):
+    """A prod user sharing a local user's id must not bring its memberships
+
+    The local user is kept, so its prod memberships would attach to the wrong
+    person -- and a second individual organization breaks login.
+    """
+    write_csv(tmp_path / "auth_user.csv", [{"id": "1", "username": "prod"}])
+    write_csv(
+        tmp_path / "organization_membership.csv",
+        [{"id": "9", "user_id": "1", "organization_id": "5"}],
+    )
+    exporter.ids["auth_user"] = ["1"]
+    exporter.ids["organization_membership"] = ["9"]
+    exporter.run(
+        [
+            ["KEEP_LOCAL", ["auth_user"]],
+            ["SKIP_KEPT", ["organization_membership", "user_id", "auth_user"]],
+        ]
+    )
+    sql = exporter.generate_sql(upsert=True)
+
+    record = (
+        "CREATE TEMP TABLE kept_auth_user ON COMMIT DROP AS "
+        'SELECT s."id" AS id FROM stage_auth_user s '
+        'WHERE EXISTS (SELECT 1 FROM auth_user t WHERE t."id"::text = s."id");'
+    )
+    skip = (
+        "WITH skipped AS (DELETE FROM stage_organization_membership "
+        'WHERE "user_id" IN (SELECT id FROM kept_auth_user) RETURNING 1) '
+        "SELECT 'organization_membership' AS kept_parent_table, "
+        "count(*) AS skipped FROM skipped;"
+    )
+    # collisions are recorded before the parent load inserts new ids
+    assert sql.index(record) < sql.index("upsert_shared_columns('auth_user'")
+    # and children are dropped from staging before they load
+    assert sql.index(skip) < sql.index("upsert_shared_columns('organization_membership'")
+
+
+def test_skip_kept_match_column_spares_earlier_imports(exporter, tmp_path):
+    """A user from an earlier import is the same person, not a collision"""
+    write_csv(tmp_path / "auth_user.csv", [{"id": "1", "username": "prod"}])
+    write_csv(tmp_path / "organization_membership.csv", [{"id": "9", "user_id": "1"}])
+    exporter.ids["auth_user"] = ["1"]
+    exporter.ids["organization_membership"] = ["9"]
+    exporter.run(
+        [["SKIP_KEPT", ["organization_membership", "user_id", "auth_user", "username"]]]
+    )
+    sql = exporter.generate_sql(upsert=True)
+    assert (
+        'WHERE t."id"::text = s."id" '
+        'AND t."username"::text IS DISTINCT FROM s."username");'
+    ) in sql
+
+
+def test_skip_kept_requires_parent_loaded_first(exporter, tmp_path):
+    write_csv(tmp_path / "organization_membership.csv", [{"id": "9", "user_id": "1"}])
+    write_csv(tmp_path / "auth_user.csv", [{"id": "1"}])
+    exporter.ids["organization_membership"] = ["9"]
+    exporter.ids["auth_user"] = ["1"]
+    exporter.plan(
+        [
+            ["KEEP_LOCAL", ["auth_user"]],
+            ["SKIP_KEPT", ["organization_membership", "user_id", "auth_user"]],
+        ]
+    )
+    with pytest.raises(ValueError, match="auth_user"):
+        exporter.generate_sql(upsert=True)
+
+
+def test_skip_kept_ignored_without_upsert(exporter, tmp_path):
+    write_csv(tmp_path / "auth_user.csv", [{"id": "1"}])
+    exporter.ids["auth_user"] = ["1"]
+    exporter.run([["SKIP_KEPT", ["organization_membership", "user_id", "auth_user"]]])
+    assert "kept_auth_user" not in exporter.generate_sql(upsert=False)
+
+
 def test_upsert_helper_refreshes_then_inserts(exporter, tmp_path):
     """Existing ids are updated where they differ; only new ids are inserted
 
@@ -272,6 +348,7 @@ def test_review_agency_head_config_is_well_formed():
     known = {
         "BACK", "FORE", "ALL", "SQL", "PK", "DEFINE",
         "CLEAN_KEY", "CLEAN_FIELD", "REDACT_WHERE", "CLEAR", "KEEP_LOCAL",
+        "SKIP_KEPT",
     }
     exporter = Exporter(StubCursor())
     for command, args in commands:

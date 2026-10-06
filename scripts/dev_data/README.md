@@ -18,11 +18,12 @@ The original commands are `BACK`, `FORE`, `ALL`, `SQL`, `CLEAN_KEY`, `CLEAN_FIEL
 | `BACK` | table, fk, id_table, *[condition]* | The optional condition is ANDed onto the id filter. |
 | `CLEAN_FIELD` | table, field, *[value]* | Overwrites the field with `value` instead of blanking it. |
 | `KEEP_LOCAL` | table | In an upsert load, leaves this table's existing local rows alone instead of refreshing them. |
+| `SKIP_KEPT` | table, fk, parent, *[match]* | In an upsert load, skips rows whose `fk` points at a `parent` row that already existed locally. Use it with a `KEEP_LOCAL` parent: a production user sharing your local user's id is a different person, and its memberships would otherwise attach to you. With `match`, a local row only counts if that column differs from production. This means a user loaded by an earlier import still gets new memberships. `parent` must load before `table`. |
 | `REDACT_WHERE` | table, field, condition, value | Overwrites the field only on exported rows that match `condition` in prod. `value` may contain `{pk}` for fields that must stay unique. |
 
 ## Loading the review agency head
 
-This load is **additive**. It keeps your current local database and runs in two steps. First, a row whose id already exists locally is **updated to the production values** where they differ, so a row from an earlier import doesn't keep stale state (an address that has since started bouncing would still read `good`). Then rows with new ids are inserted, skipping any that collide on another unique key. Tables marked `KEEP_LOCAL` (users, profiles, organizations) are never updated, so your local staff accounts aren't overwritten with redacted copies. Sequences are moved past the imported ids afterwards.
+This load is **additive**. It keeps your current local database and runs in two steps. First, a row whose id already exists locally is **updated to the production values** where they differ, so a row from an earlier import doesn't keep stale state (an address that has since started bouncing would still read `good`). Then rows with new ids are inserted, skipping any that collide on another unique key. Tables marked `KEEP_LOCAL` (users, profiles, organizations) are never updated, so your local staff accounts aren't overwritten with redacted copies. A production user whose id matches a local user is a different person, so their profile and memberships are skipped too (`SKIP_KEPT`). Sequences are moved past the imported ids afterwards.
 
 1. **Snapshot** the local database, so the load and anything you rehearse on it can be rolled back:
 
