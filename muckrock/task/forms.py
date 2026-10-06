@@ -110,7 +110,11 @@ class ChannelRepairForm(forms.Form):
     snail_mail = forms.BooleanField(
         label="Make snail mail the preferred communication method", required=False
     )
-    resolve = forms.BooleanField(label="Resolve after updating", required=False)
+    # Moving a channel's requests almost always finishes its task; left off,
+    # the task sits open at zero blocked
+    resolve = forms.BooleanField(
+        label="Resolve after updating", required=False, initial=True
+    )
     reply = forms.CharField(
         label="Reply:",
         required=False,

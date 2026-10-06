@@ -9,12 +9,21 @@
   hand afterward.
 {% endcomment %}
 
+{% comment %}
+  The generic form_data table stringifies the repair payload; the readout
+  below replaces it
+{% endcomment %}
+{% block task-form-data %}{% endblock %}
+
 {% block task-content %}
-  {% if task.resolved %}
-    {# What was done, whether it held, and where it reopened -- #1869/#1870.
-       The generic form_data table stringifies the payload; this is the readout. #}
+  {% if task.resolved or task.repair_outcome %}
+    {% comment %}
+      What was done, whether it held, and where it reopened -- #1869/#1870.
+      An open task can carry a repair too, when it was not resolved on submit;
+      it says so, since nothing else marks it as worked.
+    {% endcomment %}
     <div class="review-agency-outcome">
-      <h4>What was done</h4>
+      <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
       {% with outcome=task.repair_outcome %}
         {% if outcome %}
           <p>
@@ -43,23 +52,25 @@
         {% endif %}
       {% endwith %}
 
-      <h4>Did it hold?</h4>
-      <p>
-        {% if task.held %}
-          <mark>Held</mark> &mdash; the agency has communicated with us since this resolve.
-        {% else %}
-          <mark>Not verified</mark> &mdash; no response from the agency since this resolve.
-        {% endif %}
-      </p>
-
-      {% if task.successor %}
+      {% if task.resolved %}
+        <h4>Did it hold?</h4>
         <p>
-          {# A resolve that did not hold is a signal, not noise #}
-          <mark>Reopened</mark> &mdash;
-          <a href="{{ task.successor.get_absolute_url }}">
-            a new task has been opened on this same channel
-          </a>.
+          {% if task.held %}
+            <mark>Held</mark> &mdash; the agency has communicated with us since this resolve.
+          {% else %}
+            <mark>Not verified</mark> &mdash; no response from the agency since this resolve.
+          {% endif %}
         </p>
+
+        {% if task.successor %}
+          <p>
+            {# A resolve that did not hold is a signal, not noise #}
+            <mark>Reopened</mark> &mdash;
+            <a href="{{ task.successor.get_absolute_url }}">
+              a new task has been opened on this same channel
+            </a>.
+          </p>
+        {% endif %}
       {% endif %}
     </div>
   {% endif %}
@@ -75,6 +86,7 @@
         <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
         {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
         {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
+        {% if not task.resolved and task.repair_outcome %}<span class="badge">Repaired, not resolved</span>{% endif %}
       </span>
     </header>
 

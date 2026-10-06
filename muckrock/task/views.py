@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -364,12 +364,29 @@ class ReviewAgencyTaskList(TaskList):
             )
         return queryset
 
+    # A repaired task can reach zero blocked while still open; it stays in
+    # view until someone resolves it rather than vanishing as zero impact
+    visible = Q(blocked_count__gt=0) | Q(form_data__has_key="repair")
+
+    def hides_zero_impact(self):
+        """Whether the zero impact tasks are left out of this view"""
+        return "pk" not in self.kwargs and not self.request.GET.get("zero_active")
+
     def get_queryset(self):
-        """Default hide any zer-impact tasks out of the impact ordered view"""
+        """Default hide any zero-impact tasks out of the impact ordered view"""
         queryset = super().get_queryset()
-        if "pk" not in self.kwargs and not self.request.GET.get("zero_active"):
-            queryset = queryset.filter(blocked_count__gt=0)
+        if self.hides_zero_impact():
+            queryset = queryset.filter(self.visible)
         return queryset
+
+    def hidden_count(self):
+        """How many tasks the current filters match but the default hides"""
+        if not self.hides_zero_impact():
+            return 0
+        filter_ = self.filter_class(
+            self.request.GET, queryset=super().get_queryset(), request=self.request
+        )
+        return filter_.qs.exclude(self.visible).count()
 
     def get_context_data(self, **kwargs):
         """Add the agency grouping counts"""
@@ -379,6 +396,13 @@ class ReviewAgencyTaskList(TaskList):
         for task_ in object_list:
             task_.agency_group_size = groups[task_.agency_id]
         context["agency_groups"] = dict(groups)
+        # Say when the default is hiding something, so a task that drops out
+        # of view is never silently lost
+        context["hidden_count"] = self.hidden_count()
+        query = self.request.GET.copy()
+        query["zero_active"] = "1"
+        query.pop("page", None)
+        context["show_hidden_url"] = "?" + query.urlencode()
         return context
 
     def task_post_helper(self, request, task, form_data=None):

@@ -43,7 +43,8 @@
   let updateAgencyInfo = $state(false);
   let onlyNeedingAttention = $state(true);
   let snailMail = $state(false);
-  let resolve = $state(false);
+  // A repair almost always finishes its task; staff opt out, not in
+  let resolve = $state(true);
   // Starts from the legacy task's follow-up text; clearing it sends none
   let reply = $state(data.default_reply ?? "");
 

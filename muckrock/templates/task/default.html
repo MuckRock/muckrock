@@ -70,18 +70,20 @@
               </form>
             </div>
           {% endif %}
-          {% if task.form_data %}
-            <div class="form-data-table">
-              <div class="row">
-                {% for key, value in task.form_data.items %}
-                  <div class="cell">
-                    <strong>{{key}}:</strong><br>{{value}}
-                  </div>
-                {% endfor %}
-                <br class="clear">
+          {% block task-form-data %}
+            {% if task.form_data %}
+              <div class="form-data-table">
+                <div class="row">
+                  {% for key, value in task.form_data.items %}
+                    <div class="cell">
+                      <strong>{{key}}:</strong><br>{{value}}
+                    </div>
+                  {% endfor %}
+                  <br class="clear">
+                </div>
               </div>
-            </div>
-          {% endif %}
+            {% endif %}
+          {% endblock %}
           {% block task-content %}
           {% endblock %}
       </main>

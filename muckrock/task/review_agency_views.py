@@ -111,23 +111,27 @@ class ReviewAgencyDetailView(DetailView):
         self.object = self.get_object()
         form = ChannelRepairForm(request.POST)
         if not form.is_valid():
-            for error in form.errors.values():
-                messages.error(request, error.as_text())
+            for field, errors in form.errors.items():
+                label = form.fields[field].label if field in form.fields else None
+                for error in errors:
+                    messages.error(request, f"{label}: {error}" if label else error)
             context = self.get_context_data(object=self.object, repair_form=form)
             return self.render_to_response(context)
 
         channels = list(
             EmailAddress.objects.filter(pk__in=form.cleaned_data["channel_pks"])
         )
-        foias = list(FOIARequest.objects.filter(pk__in=form.cleaned_data["foia_pks"]))
-        # Counted before the repair repoints them, and from the selection
-        # rather than the tasks matched: a channel covered by the agency level
-        # task has no task of its own
-        channel_count = len(channels) or len({foia.email_id for foia in foias})
-        rerouted = (
-            len(foias)
-            if form.cleaned_data["new_email"] or form.cleaned_data["snail_mail"]
-            else 0
+        foias = list(
+            FOIARequest.objects.filter(
+                pk__in=form.cleaned_data["foia_pks"]
+            ).select_related("email")
+        )
+        # Read before the repair repoints them, and from the selection rather
+        # than the tasks matched: a channel covered by the agency level task
+        # has no task of its own
+        old_emails = sorted(
+            {channel.email for channel in channels}
+            or {foia.email.email for foia in foias if foia.email}
         )
 
         tasks = ReviewAgencyTask.repair_channels(
@@ -141,19 +145,10 @@ class ReviewAgencyDetailView(DetailView):
             resolve=form.cleaned_data["resolve"],
             reply=form.cleaned_data["reply"],
         )
-        message = "Rerouted %d request%s on %d channel%s for %s." % (
-            rerouted,
-            "" if rerouted == 1 else "s",
-            channel_count,
-            "" if channel_count == 1 else "s",
-            self.object.name,
+        messages.success(
+            request,
+            _repair_message(self.object, form.cleaned_data, foias, old_emails, tasks),
         )
-        if form.cleaned_data["resolve"]:
-            message += " Resolved %d task%s." % (
-                len(tasks),
-                "" if len(tasks) == 1 else "s",
-            )
-        messages.success(request, message)
         # Back to the queue, scoped to this agency, where its new blocked total
         # shows whether anything is left before the task can be resolved.
         # Once every task is resolved that view would be empty, so the whole
@@ -162,6 +157,56 @@ class ReviewAgencyDetailView(DetailView):
         if ReviewAgencyTask.objects.filter(agency=self.object, resolved=False).exists():
             queue_url += "?agency=%d" % self.object.pk
         return redirect(queue_url)
+
+
+def _plural(count, word):
+    """'1 request', '2 requests'"""
+    return "%d %s%s" % (count, word, "" if count == 1 else "s")
+
+
+def _repair_message(agency, data, foias, old_emails, tasks):
+    """What a repair did, and what it left for the staffer to do
+
+    Each part of the submission gets a clause, including the ones that did
+    nothing -- a resolve with no replacement address is easy to submit by
+    accident now resolve starts checked.  A task the repair touched but left
+    open is named, since it no longer stands out in the queue on its own.
+    """
+    parts = []
+    if data["new_email"] or data["snail_mail"]:
+        channels = _plural(len(old_emails), "channel")
+        if 0 < len(old_emails) <= 3:
+            channels += " (%s)" % ", ".join(old_emails)
+        target = data["new_email"].email if data["new_email"] else "snail mail"
+        parts.append(
+            "Rerouted %s on %s to %s."
+            % (_plural(len(foias), "request"), channels, target)
+        )
+        if data["update_agency_info"]:
+            parts.append("Agency contact updated.")
+    else:
+        parts.append("No contact change.")
+
+    if data["reply"] and foias:
+        parts.append("Follow-up queued for %s." % _plural(len(foias), "request"))
+    else:
+        parts.append("No follow-up sent.")
+
+    resolved = [task for task in tasks if task.resolved]
+    if resolved:
+        parts.append("Resolved %s." % _plural(len(resolved), "task"))
+    still_open = [
+        "#%d (%s)" % (task.pk, task.email.email if task.email else "agency-level")
+        for task in tasks
+        if not task.resolved
+    ]
+    if len(still_open) == 1:
+        parts.append("Task %s is still open." % still_open[0])
+    elif still_open:
+        parts.append(
+            "%d tasks are still open: %s." % (len(still_open), ", ".join(still_open))
+        )
+    return "%s: %s" % (agency.name, " ".join(parts))
 
 
 def _error_summary(message, when):
