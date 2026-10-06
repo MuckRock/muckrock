@@ -34,14 +34,18 @@ def make_variants(*emails):
     )
 
 
-class TestMergeEmailAddresses(TestCase):
-    """Test the merge_email_addresses command"""
+class MergeEmailAddressesTestCase(TestCase):
+    """Base for merge_email_addresses command tests"""
 
     def call(self, *args):
         """Run the command, returning its stdout"""
         out = StringIO()
         call_command("merge_email_addresses", *args, stdout=out)
         return out.getvalue()
+
+
+class TestMergeSurvivorChoice(MergeEmailAddressesTestCase):
+    """Test which row merge_email_addresses keeps from each group"""
 
     def test_merges_case_variants(self):
         """Three rows differing only by case collapse to one
@@ -144,6 +148,10 @@ class TestMergeEmailAddresses(TestCase):
         assert EmailAddress.objects.filter(pk=second.pk).count() == 0
         assert EmailAddress.objects.filter(pk=first.pk).exists()
 
+
+class TestMergeRunBehavior(MergeEmailAddressesTestCase):
+    """Test merge_email_addresses reporting, dry runs and reruns"""
+
     def test_report_names_the_weight_behind_the_choice(self):
         """The dry-run report has to say why a row was kept
 
@@ -155,6 +163,44 @@ class TestMergeEmailAddresses(TestCase):
         FOIARequestFactory.create_batch(4, email=heavy)
         output = self.call("--dry-run")
         assert "4 reference" in output
+
+    def test_dry_run_writes_nothing(self):
+        """--dry-run reports the same groups and changes no rows"""
+        make_variants("Jj@fbi.gov", "jj@fbi.gov", "jJ@fbi.gov")
+        before = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
+        output = self.call("--dry-run")
+        after = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
+        assert before == after
+        assert "jj@fbi.gov" in output
+
+    def test_rerun_is_a_noop(self):
+        """Running again after a successful merge changes nothing"""
+        make_variants("K@fbi.gov", "k@fbi.gov")
+        self.call()
+        before = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
+        self.call()
+        after = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
+        assert before == after
+
+    def test_non_colliding_rows_are_lowercased_but_kept(self):
+        """A row with no collision survives, lowercased"""
+        (only,) = make_variants("Lonely@fbi.gov")
+        self.call()
+        only.refresh_from_db()
+        assert only.email == "lonely@fbi.gov"
+        assert EmailAddress.objects.filter(pk=only.pk).exists()
+
+    def test_already_lowercase_untouched(self):
+        """An already normalized row is left completely alone"""
+        address = EmailAddressFactory(email="fine@fbi.gov", name="Fine")
+        self.call()
+        address.refresh_from_db()
+        assert address.email == "fine@fbi.gov"
+        assert address.name == "Fine"
+
+
+class TestMergeFieldsAndRelations(MergeEmailAddressesTestCase):
+    """Test how merge_email_addresses combines fields and moves references"""
 
     def test_error_status_wins(self):
         """A mailbox that bounces under one spelling bounces under all"""
@@ -257,37 +303,3 @@ class TestMergeEmailAddresses(TestCase):
         crowdsource.submission_emails.set([upper, lower])
         self.call()
         assert list(crowdsource.submission_emails.all()) == [upper]
-
-    def test_dry_run_writes_nothing(self):
-        """--dry-run reports the same groups and changes no rows"""
-        make_variants("Jj@fbi.gov", "jj@fbi.gov", "jJ@fbi.gov")
-        before = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
-        output = self.call("--dry-run")
-        after = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
-        assert before == after
-        assert "jj@fbi.gov" in output
-
-    def test_rerun_is_a_noop(self):
-        """Running again after a successful merge changes nothing"""
-        make_variants("K@fbi.gov", "k@fbi.gov")
-        self.call()
-        before = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
-        self.call()
-        after = set(EmailAddress.objects.values_list("pk", "email", "status", "name"))
-        assert before == after
-
-    def test_non_colliding_rows_are_lowercased_but_kept(self):
-        """A row with no collision survives, lowercased"""
-        (only,) = make_variants("Lonely@fbi.gov")
-        self.call()
-        only.refresh_from_db()
-        assert only.email == "lonely@fbi.gov"
-        assert EmailAddress.objects.filter(pk=only.pk).exists()
-
-    def test_already_lowercase_untouched(self):
-        """An already normalized row is left completely alone"""
-        address = EmailAddressFactory(email="fine@fbi.gov", name="Fine")
-        self.call()
-        address.refresh_from_db()
-        assert address.email == "fine@fbi.gov"
-        assert address.name == "Fine"
