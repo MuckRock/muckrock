@@ -58,10 +58,12 @@ class Command(BaseCommand):
         created = 0
         emptied = 0
         for task in legacy:
+            # Blocked means routed at a broken address: live traffic on a
+            # good address is the agency working, not something to repair
             channels = [
                 channel
                 for channel in agency_channels(task.agency)
-                if channel.blocked_count > 0
+                if channel.has_error and channel.blocked_count > 0
             ]
             if not channels:
                 # Zero active is a triage hint, not evidence the agency is

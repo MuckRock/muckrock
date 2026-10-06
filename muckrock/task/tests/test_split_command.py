@@ -108,6 +108,21 @@ class TestSplitReviewAgencyTasks(TestCase):
         }
         assert emails == {"carrying@agency.gov"}
 
+    def test_healthy_channels_with_traffic_get_no_task(self):
+        """Blocked means routed at a broken address, not merely routed
+
+        Live traffic on a good address is the agency working, not a repair.
+        """
+        self.channel("broken@agency.gov", blocked=2)
+        self.channel("working@agency.gov", blocked=5, status="good")
+        self.legacy_task()
+        self.call()
+        emails = {
+            t.email.email
+            for t in ReviewAgencyTask.objects.filter(agency=self.agency, resolved=False)
+        }
+        assert emails == {"broken@agency.gov"}
+
     def test_zero_active_agency_gets_no_task(self):
         """Nothing to route, so nothing to split"""
         self.channel("quiet@agency.gov", blocked=0)
