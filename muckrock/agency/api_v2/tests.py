@@ -8,9 +8,14 @@ from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
 # MuckRock
+from muckrock.agency.models import AgencyType
 from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.core.test_utils import assert_queries_do_not_scale
-from muckrock.jurisdiction.factories import LocalJurisdictionFactory
+from muckrock.jurisdiction.factories import (
+    FederalJurisdictionFactory,
+    LocalJurisdictionFactory,
+    StateJurisdictionFactory,
+)
 
 
 class AgencyViewSetTests(APITestCase):
@@ -128,3 +133,89 @@ class AgencyViewSetTests(APITestCase):
         url = reverse("api2-agencies-detail", args=[self.agencies[0].pk])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def _names(self, response):
+        """Sorted agency names from a list response"""
+        return sorted(agency["name"] for agency in response.json()["results"])
+
+    def _create_typed_agencies(self):
+        """Agencies with known types"""
+        police, _ = AgencyType.objects.get_or_create(name="Police")
+        executive, _ = AgencyType.objects.get_or_create(name="Executive")
+        AgencyFactory.create(
+            name="Burlington Police Department", status="approved"
+        ).types.add(police)
+        AgencyFactory.create(
+            name="Concord Police Department", status="approved"
+        ).types.add(police)
+        AgencyFactory.create(
+            name="Office of the Governor", status="approved"
+        ).types.add(executive)
+
+    def test_filter_by_type(self):
+        """type matches the agency type name, case-insensitive"""
+        self.client.force_authenticate(user=self.user2)
+        self._create_typed_agencies()
+        response = self.client.get(self.url, {"type": "POLICE"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == [
+            "Burlington Police Department",
+            "Concord Police Department",
+        ]
+
+    def test_filter_by_type_is_exact(self):
+        """A partial type name matches nothing"""
+        self.client.force_authenticate(user=self.user2)
+        self._create_typed_agencies()
+        response = self.client.get(self.url, {"type": "pol"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == []
+
+    def _create_state_agencies(self):
+        """Agencies at the state, local, other-state and federal levels"""
+        vermont = StateJurisdictionFactory.create(name="Vermont", abbrev="VT")
+        burlington = LocalJurisdictionFactory.create(name="Burlington", parent=vermont)
+        new_hampshire = StateJurisdictionFactory.create(
+            name="New Hampshire", abbrev="NH"
+        )
+        federal = FederalJurisdictionFactory.create(
+            name="United States of America Test", abbrev="UST"
+        )
+        AgencyFactory.create(
+            name="Vermont State Police", jurisdiction=vermont, status="approved"
+        )
+        AgencyFactory.create(
+            name="Burlington Police Department",
+            jurisdiction=burlington,
+            status="approved",
+        )
+        AgencyFactory.create(
+            name="New Hampshire State Police",
+            jurisdiction=new_hampshire,
+            status="approved",
+        )
+        AgencyFactory.create(
+            name="Federal Bureau of Investigation",
+            jurisdiction=federal,
+            status="approved",
+        )
+        return vermont, burlington
+
+    def test_filter_by_state(self):
+        """state matches agencies in the state and its local jurisdictions"""
+        self.client.force_authenticate(user=self.user2)
+        vermont, _ = self._create_state_agencies()
+        response = self.client.get(self.url, {"state": vermont.pk})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == [
+            "Burlington Police Department",
+            "Vermont State Police",
+        ]
+
+    def test_filter_by_state_ignores_local_ids(self):
+        """Passing a local jurisdiction's ID as state matches nothing"""
+        self.client.force_authenticate(user=self.user2)
+        _, burlington = self._create_state_agencies()
+        response = self.client.get(self.url, {"state": burlington.pk})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == []
