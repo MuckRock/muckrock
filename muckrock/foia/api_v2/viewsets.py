@@ -70,13 +70,12 @@ class FOIARequestViewSet(
             )
         )
         if self.action == "retrieve":
-            # Load only the IDs of communications this user can see.
-            # Communication bodies are large.
-            viewable_communications = FOIACommunication.objects.get_viewable(
-                self.request.user
-            ).only("id", "foia_id")
+            # Request visibility already applies, so only load IDs of non-hidden comms
+            communications = FOIACommunication.objects.only("id", "foia_id")
+            if not self.request.user.is_staff:
+                communications = communications.visible()
             queryset = queryset.prefetch_related(
-                Prefetch("communications", queryset=viewable_communications)
+                Prefetch("communications", queryset=communications)
             )
         return queryset
 
