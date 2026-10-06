@@ -537,9 +537,32 @@ class TestFOIACommunicationViewset(TestCase):
             FOIACommunicationFactory.create,
         )
 
+    def test_list_queries_do_not_scale_nonstaff(self):
+        """Listing communications as non-staff must not add queries as rows grow"""
+        self.client.force_authenticate(user=self.user)
+        assert_queries_do_not_scale(
+            self.client,
+            reverse("api2-communications-list"),
+            FOIACommunicationFactory.create,
+        )
+
     def test_list_date_filters_queries_do_not_scale(self):
         """Filtering communications by date must not add queries as rows grow"""
         self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        sent = timezone.make_aware(datetime(2026, 1, 5, 15, 0))
+        url = (
+            f"{reverse('api2-communications-list')}"
+            "?min_date=2026-01-05&max_date=2026-01-05"
+        )
+
+        def create_one():
+            FOIACommunicationFactory.create(datetime=sent)
+
+        assert_queries_do_not_scale(self.client, url, create_one)
+
+    def test_list_date_filters_queries_do_not_scale_nonstaff(self):
+        """Filtering communications by date as non-staff must not add queries"""
+        self.client.force_authenticate(user=self.user)
         sent = timezone.make_aware(datetime(2026, 1, 5, 15, 0))
         url = (
             f"{reverse('api2-communications-list')}"
@@ -666,6 +689,15 @@ class TestFOIAFileViewset(TestCase):
     def test_list_queries_do_not_scale(self):
         """Listing files must not add queries as the number of files grows"""
         self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        assert_queries_do_not_scale(
+            self.client,
+            reverse("api2-files-list"),
+            FOIAFileFactory.create,
+        )
+
+    def test_list_queries_do_not_scale_nonstaff(self):
+        """Listing files as non-staff must not add queries as rows grow"""
+        self.client.force_authenticate(user=self.user)
         assert_queries_do_not_scale(
             self.client,
             reverse("api2-files-list"),
