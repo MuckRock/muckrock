@@ -94,6 +94,30 @@ class TestChannelRepairForm(TestCase):
         form = ChannelRepairForm(data={"resolve": "on"})
         assert form.is_valid(), form.errors
 
+    def test_portal_address_rejected_as_the_replacement(self):
+        """Moving requests onto a portal notification address strands them
+
+        Mail to a GovQA or NextRequest sender never reaches the records
+        office.  Found in local testing: Seattle PD's healthy channels were
+        "repaired" onto its own seattle@mycusthelp.net notification address.
+        """
+        healthy = EmailAddressFactory(email="spdpdr@seattle.gov", status="error")
+        form = ChannelRepairForm(
+            data={
+                "new_email": "seattle@mycusthelp.net",
+                "channel_pks": str(healthy.pk),
+                "resolve": "on",
+            }
+        )
+        assert not form.is_valid()
+        assert "portal" in str(form.errors["new_email"])
+
+    def test_portal_replacement_rejected_without_a_channel_selection(self):
+        """Requests picked individually are stranded just the same"""
+        form = ChannelRepairForm(data={"new_email": "agency@govqa.us"})
+        assert not form.is_valid()
+        assert "new_email" in form.errors
+
     def test_portal_channel_rejects_an_email_replacement(self):
         """No replacement email repairs a portal address
 
@@ -332,6 +356,48 @@ class TestRepairOutcome(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         assert outcome["followup_sent"] is True
         assert outcome["by"] == self.user.username
         assert outcome["at"]
+
+    def test_each_task_records_its_own_request_count(self, _mock_delay):
+        """One submit across channels: each outcome counts its own channel
+
+        Recording the submission total on every task made a channel that held
+        one request read as having had five moved off it.
+        """
+        first, first_foias, first_task = self.make_channel("one@agency.gov", 4)
+        second, second_foias, second_task = self.make_channel(
+            "two@agency.gov", 1, request_type="none"
+        )
+        self.post(
+            new_email="new@agency.gov",
+            channel_pks="%d,%d" % (first.pk, second.pk),
+            foia_pks=",".join(str(f.pk) for f in first_foias + second_foias),
+            resolve="on",
+        )
+        first_task.refresh_from_db()
+        second_task.refresh_from_db()
+        assert first_task.repair_outcome["requests_updated"] == 4
+        assert second_task.repair_outcome["requests_updated"] == 1
+
+    def test_agency_level_task_counts_requests_without_a_task(self, _mock_delay):
+        """The agency level task covers channels that have no task of their own"""
+        covered, covered_foias, covered_task = self.make_channel("one@agency.gov", 2)
+        loose = EmailAddressFactory(email="loose@agency.gov", status="error")
+        loose_foias = FOIARequestFactory.create_batch(
+            3, agency=self.agency, email=loose, status="ack"
+        )
+        agency_task = ReviewAgencyTaskFactory(
+            agency=self.agency, source="email", email=None, resolved=False
+        )
+        self.post(
+            new_email="new@agency.gov",
+            channel_pks="%d,%d" % (covered.pk, loose.pk),
+            foia_pks=",".join(str(f.pk) for f in covered_foias + loose_foias),
+            resolve="on",
+        )
+        covered_task.refresh_from_db()
+        agency_task.refresh_from_db()
+        assert covered_task.repair_outcome["requests_updated"] == 2
+        assert agency_task.repair_outcome["requests_updated"] == 3
 
     def test_outcome_records_a_resolve_with_no_change(self, _mock_delay):
         """Resolving without a contact edit says so"""

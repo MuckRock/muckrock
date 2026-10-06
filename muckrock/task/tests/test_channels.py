@@ -31,6 +31,7 @@ from muckrock.task.channels import (
     agency_channels,
     agency_rollup,
     classify_channel,
+    serialize_channels,
 )
 
 
@@ -440,3 +441,14 @@ class TestAgencyRollup(TestCase):
         """An ordinary agency does not flag portal"""
         self.make_channel("foia@fbi.gov", blocked=2)
         assert not agency_rollup(self.agency)["has_portal_channel"]
+
+
+class TestSerializeChannels(TestCase):
+    """The repair component's whole contract with the view"""
+
+    def test_payload_carries_the_portal_domains(self):
+        """The component checks the replacement address against them too"""
+        agency = AgencyFactory(email=None, fax=None)
+        payload = serialize_channels(agency, channels=[])
+        assert "mycusthelp.net" in payload["portal_domains"]
+        assert payload["portal_domains"] == sorted(payload["portal_domains"])

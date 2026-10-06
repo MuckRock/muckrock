@@ -55,7 +55,19 @@
     channels.filter((c) => selectedChannels.has(c.id) && c.is_portal),
   );
   let blockedByPortal = $derived(selectedPortals.length > 0 && !!newEmail);
-  let canRepair = $derived(selectedChannels.size > 0 && !blockedByPortal);
+  // The replacement itself must not be a portal notification address either:
+  // mail to one never reaches the records office.  Same domain rule as the
+  // server's classify_address().
+  const portalDomains = data.portal_domains ?? [];
+  let replacementIsPortal = $derived.by(() => {
+    const domain = (newEmail ?? "").split("@")[1]?.trim().toLowerCase() ?? "";
+    return portalDomains.some(
+      (portal) => domain === portal || domain.endsWith("." + portal),
+    );
+  });
+  let canRepair = $derived(
+    selectedChannels.size > 0 && !blockedByPortal && !replacementIsPortal,
+  );
 
   let visibleChannels = $derived(
     onlyNeedingAttention
@@ -382,6 +394,13 @@
         {selectedPortals.map((c) => c.email).join(", ")} is a portal
         notification address. An email replacement is the wrong repair &mdash;
         deselect it or clear the replacement address.
+      </p>
+    {/if}
+
+    {#if replacementIsPortal}
+      <p class="repair-form__error" role="alert">
+        {newEmail} is a portal notification address. Mail sent to it does not
+        reach the agency &mdash; choose the agency's own mailbox.
       </p>
     {/if}
 

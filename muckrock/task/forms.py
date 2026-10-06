@@ -187,6 +187,16 @@ class ChannelRepairForm(forms.Form):
                     "to a portal is out of scope -- an email replacement is the "
                     "wrong repair." % ", ".join(a.email for a in portal_channels),
                 )
+        # The other direction is as wrong: mail to a portal notification
+        # address never reaches the records office, so moving requests onto
+        # one strands them
+        if new_email and classify_address(new_email) == "portal":
+            self.add_error(
+                "new_email",
+                "%s is a portal notification address. Mail sent to it does not "
+                "reach the agency -- choose the agency's own mailbox."
+                % new_email.email,
+            )
         return cleaned_data
 
 

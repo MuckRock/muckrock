@@ -400,6 +400,9 @@ def serialize_channels(agency, channels=None):
         "channels": [_serialize_channel(channel) for channel in channels],
         # The follow-up starts from the legacy task's text rather than blank
         "default_reply": REVIEW_AGENCY_FOLLOWUP,
+        # So the component can refuse a portal address as the replacement
+        # before submitting, by the same rule the form applies
+        "portal_domains": sorted(PORTAL_DOMAINS),
     }
 
 

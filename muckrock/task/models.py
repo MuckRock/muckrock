@@ -17,6 +17,7 @@ from django.utils.html import linebreaks, urlize
 
 # Standard Library
 import logging
+from collections import Counter
 from datetime import date
 from itertools import groupby
 
@@ -723,6 +724,16 @@ class ReviewAgencyTask(Task):
             .filter(Q(email__in=channel_pks) | Q(email=None))
             .select_related("email")
         )
+        # Read before update_contact() repoints them.  Each task records the
+        # requests moved off its own channel; the agency level task records
+        # those on channels with no task of their own in this repair.
+        moved_by_channel = Counter(foia.email_id for foia in foias)
+        task_channels = {task_.email_id for task_ in tasks if task_.email_id}
+        moved_uncovered = sum(
+            count
+            for email_id, count in moved_by_channel.items()
+            if email_id not in task_channels
+        )
 
         with transaction.atomic():
             if new_email is not None or snail:
@@ -735,7 +746,6 @@ class ReviewAgencyTask(Task):
             outcome_base = {
                 "new_email": new_email.email if new_email is not None else None,
                 "snail_mail": bool(snail),
-                "requests_updated": len(foia_pks) if (new_email or snail) else 0,
                 "followup_sent": bool(reply),
                 "agency_info_updated": bool(update_info),
                 "by": user.username if user is not None else None,
@@ -746,6 +756,12 @@ class ReviewAgencyTask(Task):
                 outcome["old_email"] = (
                     task_.email.email if task_.email is not None else None
                 )
+                if new_email is None and not snail:
+                    outcome["requests_updated"] = 0
+                elif task_.email_id:
+                    outcome["requests_updated"] = moved_by_channel[task_.email_id]
+                else:
+                    outcome["requests_updated"] = moved_uncovered
                 form_data = dict(task_.form_data or {})
                 form_data["repair"] = outcome
                 if resolve:
