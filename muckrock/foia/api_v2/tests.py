@@ -402,19 +402,37 @@ class TestFOIARequestViewset(TestCase):
         assert_queries_do_not_scale(self.client, url, FOIARequestFactory.create)
         assert_max_queries(self.client, url, max_queries=5)
 
-    def test_list_date_filters_queries_do_not_scale(self):
-        """Filtering communications by date must not add queries as rows grow"""
-        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
-        sent = timezone.make_aware(datetime(2026, 1, 5, 15, 0))
-        url = (
-            f"{reverse('api2-communications-list')}"
-            "?min_date=2026-01-05&max_date=2026-01-05"
+    def _detail_comm_ids(self, user, foia):
+        """Communication IDs on a request's detail response"""
+        self.client.force_authenticate(user=user)
+        response = self.client.get(
+            reverse("api2-requests-detail", kwargs={"pk": foia.pk})
         )
+        assert response.status_code == 200
+        return response.json()["communications"]
 
-        def create_one():
-            FOIACommunicationFactory.create(datetime=sent)
+    def test_detail_communications_excludes_hidden(self):
+        """Non-staff don't see hidden communication IDs on the detail view"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        visible = FOIACommunicationFactory.create(foia=foia)
+        hidden = FOIACommunicationFactory.create(foia=foia, hidden=True)
+        ids = self._detail_comm_ids(self.user, foia)
+        assert visible.pk in ids
+        assert hidden.pk not in ids
 
-        assert_queries_do_not_scale(self.client, url, create_one)
+    def test_detail_communications_staff_sees_hidden(self):
+        """Staff see hidden communication IDs on the detail view"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        hidden = FOIACommunicationFactory.create(foia=foia, hidden=True)
+        staff = UserFactory.create(is_staff=True)
+        assert hidden.pk in self._detail_comm_ids(staff, foia)
+
+    def test_detail_communications_proxy(self):
+        """A proxy sees communication IDs on an embargoed request they proxy"""
+        proxy = UserFactory.create()
+        foia = FOIARequestFactory.create(proxy=proxy, embargo_status="embargo")
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk in self._detail_comm_ids(proxy, foia)
 
 
 class TestFOIACommunicationViewset(TestCase):
@@ -456,6 +474,63 @@ class TestFOIACommunicationViewset(TestCase):
             FOIACommunicationFactory.create,
         )
 
+    def test_list_date_filters_queries_do_not_scale(self):
+        """Filtering communications by date must not add queries as rows grow"""
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        sent = timezone.make_aware(datetime(2026, 1, 5, 15, 0))
+        url = (
+            f"{reverse('api2-communications-list')}"
+            "?min_date=2026-01-05&max_date=2026-01-05"
+        )
+
+        def create_one():
+            FOIACommunicationFactory.create(datetime=sent)
+
+        assert_queries_do_not_scale(self.client, url, create_one)
+
+    def _comm_ids(self, user, foia):
+        """IDs of communications the user can list for a request"""
+        self.client.force_authenticate(user=user)
+        response = self.client.get(
+            reverse("api2-communications-list"), {"foia": foia.pk}
+        )
+        assert response.status_code == 200
+        return {c["id"] for c in response.json()["results"]}
+
+    def test_proxy_sees_communications(self):
+        """A proxy on an embargoed request can list its communications"""
+        proxy = UserFactory.create()
+        foia = FOIARequestFactory.create(proxy=proxy, embargo_status="embargo")
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk in self._comm_ids(proxy, foia)
+
+    def test_embargoed_communications_hidden_from_others(self):
+        """Users with no access to an embargoed request can't list its communications"""
+        foia = FOIARequestFactory.create(embargo_status="embargo")
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk not in self._comm_ids(self.user, foia)
+
+    def test_hidden_communications_excluded_for_non_staff(self):
+        """Non-staff don't see hidden communications"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        visible = FOIACommunicationFactory.create(foia=foia)
+        hidden = FOIACommunicationFactory.create(foia=foia, hidden=True)
+        ids = self._comm_ids(self.user, foia)
+        assert visible.pk in ids
+        assert hidden.pk not in ids
+
+    def test_hidden_communications_shown_to_staff(self):
+        """Staff see hidden communications"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        hidden = FOIACommunicationFactory.create(foia=foia, hidden=True)
+        assert hidden.pk in self._comm_ids(UserFactory.create(is_staff=True), foia)
+
+    def test_deleted_request_communications_excluded(self):
+        """Communications on deleted requests aren't listed for non-staff"""
+        foia = FOIARequestFactory.create(embargo_status="public", deleted=True)
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk not in self._comm_ids(self.user, foia)
+
 
 class TestFOIAFileViewset(TestCase):
     def setUp(self):
@@ -491,3 +566,34 @@ class TestFOIAFileViewset(TestCase):
             reverse("api2-files-list"),
             FOIAFileFactory.create,
         )
+
+    def _file_ids(self, user, comm):
+        """IDs of files the user can list for a communication"""
+        self.client.force_authenticate(user=user)
+        response = self.client.get(
+            reverse("api2-files-list"), {"communication": comm.pk}
+        )
+        assert response.status_code == 200
+        return {f["id"] for f in response.json()["results"]}
+
+    def test_proxy_sees_files(self):
+        """A proxy on an embargoed request can list its files"""
+        proxy = UserFactory.create()
+        foia = FOIARequestFactory.create(proxy=proxy, embargo_status="embargo")
+        comm = FOIACommunicationFactory.create(foia=foia)
+        file = FOIAFileFactory.create(comm=comm)
+        assert file.pk in self._file_ids(proxy, comm)
+
+    def test_files_on_hidden_communications_excluded_for_non_staff(self):
+        """Non-staff don't see files on hidden communications"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        comm = FOIACommunicationFactory.create(foia=foia, hidden=True)
+        file = FOIAFileFactory.create(comm=comm)
+        assert file.pk not in self._file_ids(self.user, comm)
+
+    def test_files_on_hidden_communications_shown_to_staff(self):
+        """Staff see files on hidden communications"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        comm = FOIACommunicationFactory.create(foia=foia, hidden=True)
+        file = FOIAFileFactory.create(comm=comm)
+        assert file.pk in self._file_ids(UserFactory.create(is_staff=True), comm)
