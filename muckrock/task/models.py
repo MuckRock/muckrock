@@ -625,12 +625,14 @@ class ReviewAgencyTask(Task):
 
         if is_email:
             if update_info:
-                AgencyEmail.objects.create(
-                    email=email_or_fax,
-                    agency=self.agency,
-                    request_type="primary",
-                    email_type="to",
-                )
+                # Promote a link the agency already has rather than adding a
+                # second one for the same address
+                link = self.agency.agencyemail_set.filter(email=email_or_fax).first()
+                if link is None:
+                    link = AgencyEmail(email=email_or_fax, agency=self.agency)
+                link.request_type = "primary"
+                link.email_type = "to"
+                link.save()
             for foia in foia_list:
                 foia.email = email_or_fax
                 if foia.fax and foia.fax.status != "good":
@@ -639,9 +641,11 @@ class ReviewAgencyTask(Task):
 
         elif is_fax:
             if update_info:
-                AgencyPhone.objects.create(
-                    phone=email_or_fax, agency=self.agency, request_type="primary"
-                )
+                link = self.agency.agencyphone_set.filter(phone=email_or_fax).first()
+                if link is None:
+                    link = AgencyPhone(phone=email_or_fax, agency=self.agency)
+                link.request_type = "primary"
+                link.save()
             for foia in foia_list:
                 foia.email = None
                 foia.fax = email_or_fax

@@ -10,12 +10,14 @@ from django.utils import timezone
 
 # Standard Library
 from io import StringIO
+from unittest import mock
 
 # MuckRock
 from muckrock.communication.factories import (
     EmailAddressFactory,
     EmailCommunicationFactory,
 )
+from muckrock.communication.management.commands import merge_email_addresses
 from muckrock.communication.models import EmailAddress, EmailError, EmailOpen, Source
 from muckrock.core.factories import AgencyEmailFactory, AgencyFactory, UserFactory
 from muckrock.crowdsource.factories import CrowdsourceFactory
@@ -189,6 +191,35 @@ class TestMergeRunBehavior(MergeEmailAddressesTestCase):
         only.refresh_from_db()
         assert only.email == "lonely@fbi.gov"
         assert EmailAddress.objects.filter(pk=only.pk).exists()
+
+    def test_dry_run_counts_only_rows_outside_the_merge(self):
+        """The dry run predicts the real run's lowercase count
+
+        Rows in a collision group are merged away or lowercased by the merge
+        itself; counting them too made the dry run report 637 where the real
+        run lowercased 501.
+        """
+        make_variants("Pair@fbi.gov", "pair@fbi.gov", "Solo@fbi.gov")
+        assert "1 non-colliding row(s) lowercased" in self.call("--dry-run")
+        assert "1 non-colliding row(s) lowercased" in self.call()
+
+    def test_a_failed_group_is_left_alone(self):
+        """A group that failed to merge is not lowercased into a collision
+
+        Lowercasing both rows of an unmerged pair would break the unique
+        index and abort the whole run.
+        """
+        upper, lower = make_variants("Fail@fbi.gov", "fail@fbi.gov")
+        with mock.patch.object(
+            merge_email_addresses.Command,
+            "_merge_group",
+            side_effect=RuntimeError("boom"),
+        ):
+            output = self.call()
+        assert "1 failed" in output
+        upper.refresh_from_db()
+        lower.refresh_from_db()
+        assert upper.email == "Fail@fbi.gov"
 
     def test_already_lowercase_untouched(self):
         """An already normalized row is left completely alone"""

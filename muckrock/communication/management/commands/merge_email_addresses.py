@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         # Rows with no collision still need their stored casing fixed.  This is
         # separate from the merge: nothing has to move, only the value changes.
-        lowercased = self._lowercase_remaining(dry_run)
+        lowercased = self._lowercase_remaining(dry_run, groups)
 
         verb = "would merge" if dry_run else "merged"
         self.stdout.write(
@@ -307,9 +307,18 @@ class Command(BaseCommand):
             manager.remove(*loser_pks)
             manager.add(canonical)
 
-    def _lowercase_remaining(self, dry_run):
-        """Lowercase rows that need no merge, reporting how many"""
-        remaining = EmailAddress.objects.exclude(email=Lower("email"))
+    def _lowercase_remaining(self, dry_run, groups):
+        """Lowercase rows that need no merge, reporting how many
+
+        Rows in a collision group are left out.  A merged group is already
+        lowercase, so counting it only inflated the dry run's report; a group
+        that failed to merge must stay as it is, since lowercasing its rows
+        would break the unique index and abort the run.
+        """
+        grouped = [pk for group in groups for pk in group.pks]
+        remaining = EmailAddress.objects.exclude(email=Lower("email")).exclude(
+            pk__in=grouped
+        )
         count = remaining.count()
         if count and not dry_run:
             remaining.update(email=Lower("email"))

@@ -17,9 +17,14 @@ from django.urls import reverse
 from unittest import mock
 
 # MuckRock
-from muckrock.communication.factories import EmailAddressFactory
+from muckrock.communication.factories import EmailAddressFactory, PhoneNumberFactory
 from muckrock.communication.models import EmailAddress
-from muckrock.core.factories import AgencyEmailFactory, AgencyFactory, UserFactory
+from muckrock.core.factories import (
+    AgencyEmailFactory,
+    AgencyFactory,
+    AgencyPhoneFactory,
+    UserFactory,
+)
 from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.foia.models import FOIACommunication, FOIARequest
@@ -191,6 +196,36 @@ class TestSingleChannelRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase)
         assert [link.email for link in primary] == [new_address]
         old_link = self.agency.agencyemail_set.get(email=address)
         assert old_link.request_type == "none"
+
+    def test_update_agency_info_promotes_an_existing_link(self, _mock_delay):
+        """An address already on file is promoted, not linked a second time"""
+        address, foias, _task = self.make_channel("old@agency.gov", blocked=1)
+        existing = EmailAddressFactory(email="new@agency.gov")
+        AgencyEmailFactory(
+            agency=self.agency, email=existing, request_type="none", email_type="none"
+        )
+        self.post(
+            new_email="new@agency.gov",
+            foia_pks=str(foias[0].pk),
+            update_agency_info="on",
+        )
+        links = self.agency.agencyemail_set.filter(email=existing)
+        assert links.count() == 1
+        assert (links.get().request_type, links.get().email_type) == (
+            "primary",
+            "to",
+        )
+        assert self.agency.agencyemail_set.get(email=address).request_type == "none"
+
+    def test_update_agency_info_promotes_an_existing_fax(self, _mock_delay):
+        """Faxes follow the same rule as email"""
+        _address, foias, task = self.make_channel("old@agency.gov", blocked=1)
+        fax = PhoneNumberFactory(type="fax")
+        AgencyPhoneFactory(agency=self.agency, phone=fax, request_type="none")
+        task.update_contact(fax, foias, True, False)
+        links = self.agency.agencyphone_set.filter(phone=fax)
+        assert links.count() == 1
+        assert links.get().request_type == "primary"
 
     def test_resolve_closes_the_task(self, _mock_delay):
         """The task resolves when asked"""
