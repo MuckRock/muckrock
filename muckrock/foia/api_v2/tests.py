@@ -446,6 +446,57 @@ class TestFOIARequestViewset(TestCase):
         ids = self._detail_comm_ids(self.user, foia)
         assert ids.index(older.pk) < ids.index(newer.pk)
 
+    def test_detail_communications_empty(self):
+        """A request with no communications returns an empty list"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        foia.communications.all().delete()
+        assert self._detail_comm_ids(self.user, foia) == []
+
+    def test_detail_communications_only_this_request(self):
+        """Communications from other requests don't appear"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        other = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(embargo_status="public")
+        )
+        assert other.pk not in self._detail_comm_ids(self.user, foia)
+
+    def test_detail_embargoed_request_not_found(self):
+        """Users without access get a 404, so no communication IDs leak"""
+        foia = FOIARequestFactory.create(embargo_status="embargo")
+        FOIACommunicationFactory.create(foia=foia)
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            reverse("api2-requests-detail", kwargs={"pk": foia.pk})
+        )
+        assert response.status_code == 404
+
+    def test_detail_communications_agency_user(self):
+        """An agency user sees communication IDs on their agency's embargoed request"""
+        agency = AgencyFactory.create()
+        foia = FOIARequestFactory.create(agency=agency, embargo_status="embargo")
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk in self._detail_comm_ids(agency.profile.user, foia)
+
+    def test_retrieve_file_on_hidden_communication_not_found(self):
+        """Non-staff get a 404 when fetching a file on a hidden communication"""
+        comm = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(embargo_status="public"), hidden=True
+        )
+        file = FOIAFileFactory.create(comm=comm)
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(reverse("api2-files-detail", kwargs={"pk": file.pk}))
+        assert response.status_code == 404
+
+    def test_retrieve_file_on_hidden_communication_staff(self):
+        """Staff can fetch a file on a hidden communication"""
+        comm = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(embargo_status="public"), hidden=True
+        )
+        file = FOIAFileFactory.create(comm=comm)
+        self.client.force_authenticate(user=UserFactory.create(is_staff=True))
+        response = self.client.get(reverse("api2-files-detail", kwargs={"pk": file.pk}))
+        assert response.status_code == 200
+
 
 class TestFOIACommunicationViewset(TestCase):
     def setUp(self):
@@ -551,6 +602,40 @@ class TestFOIACommunicationViewset(TestCase):
         assert response.status_code == 200
         assert "communications" not in response.json()["results"][0]
 
+    def test_retrieve_hidden_communication_not_found(self):
+        """Non-staff get a 404 when fetching a hidden communication by ID"""
+        comm = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(embargo_status="public"), hidden=True
+        )
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            reverse("api2-communications-detail", kwargs={"pk": comm.pk})
+        )
+        assert response.status_code == 404
+
+    def test_read_collaborator_sees_communications(self):
+        """A read collaborator on an embargoed request can list its communications"""
+        foia = FOIARequestFactory.create(embargo_status="embargo")
+        foia.read_collaborators.add(self.user)
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk in self._comm_ids(self.user, foia)
+
+    def test_agency_user_sees_communications(self):
+        """Agency users can list communications on their agency's embargoed requests"""
+        agency = AgencyFactory.create()
+        foia = FOIARequestFactory.create(agency=agency, embargo_status="embargo")
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk in self._comm_ids(agency.profile.user, foia)
+
+    def test_other_agency_user_cannot_see_communications(self):
+        """An agency user can't list another agency's embargoed communications"""
+        agency_user = AgencyFactory.create().profile.user
+        foia = FOIARequestFactory.create(
+            agency=AgencyFactory.create(), embargo_status="embargo"
+        )
+        comm = FOIACommunicationFactory.create(foia=foia)
+        assert comm.pk not in self._comm_ids(agency_user, foia)
+
 
 class TestFOIAFileViewset(TestCase):
     def setUp(self):
@@ -617,3 +702,28 @@ class TestFOIAFileViewset(TestCase):
         comm = FOIACommunicationFactory.create(foia=foia, hidden=True)
         file = FOIAFileFactory.create(comm=comm)
         assert file.pk in self._file_ids(UserFactory.create(is_staff=True), comm)
+
+    def test_files_on_embargoed_request_excluded(self):
+        """Users without access can't list files on an embargoed request"""
+        comm = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(embargo_status="embargo")
+        )
+        file = FOIAFileFactory.create(comm=comm)
+        assert file.pk not in self._file_ids(self.user, comm)
+
+    def test_files_on_deleted_request_excluded(self):
+        """Files on deleted requests aren't listed for non-staff"""
+        comm = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(embargo_status="public", deleted=True)
+        )
+        file = FOIAFileFactory.create(comm=comm)
+        assert file.pk not in self._file_ids(self.user, comm)
+
+    def test_agency_user_sees_files(self):
+        """An agency user can list files on their agency's embargoed request"""
+        agency = AgencyFactory.create()
+        comm = FOIACommunicationFactory.create(
+            foia=FOIARequestFactory.create(agency=agency, embargo_status="embargo")
+        )
+        file = FOIAFileFactory.create(comm=comm)
+        assert file.pk in self._file_ids(agency.profile.user, comm)
