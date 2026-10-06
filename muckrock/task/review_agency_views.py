@@ -187,7 +187,7 @@ def _repair_message(agency, data, foias, old_emails, tasks):
     else:
         parts.append("No contact change.")
 
-    if data["reply"] and foias:
+    if data["reply"] and foias and (data["new_email"] or data["snail_mail"]):
         parts.append("Follow-up queued for %s." % _plural(len(foias), "request"))
     else:
         parts.append("No follow-up sent.")

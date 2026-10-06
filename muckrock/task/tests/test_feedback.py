@@ -180,11 +180,18 @@ class RepairMessageTests(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
 
     def test_resolve_only_says_nothing_changed(self, _mock_delay):
         """Resolve on by default makes this easy to do by accident -- say so"""
-        address, _foias, _task = self.make_channel("old@agency.gov")
-        response = self.post(channel_pks=str(address.pk), resolve="on")
+        address, foias, _task = self.make_channel("old@agency.gov")
+        response = self.post(
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+            reply="Please confirm receipt.",
+            resolve="on",
+        )
         message = self.message(response)
         assert "No contact change." in message
         assert "Rerouted" not in message
+        # the follow up would only bounce off the same broken address
+        assert "No follow-up sent." in message
 
 
 class RepairErrorMessageTests(ChannelRepairMixin, TestCase):

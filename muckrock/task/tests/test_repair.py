@@ -22,8 +22,10 @@ from muckrock.communication.models import EmailAddress
 from muckrock.core.factories import AgencyEmailFactory, AgencyFactory, UserFactory
 from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.factories import ReviewAgencyTaskFactory
 from muckrock.task.forms import ChannelRepairForm
+from muckrock.task.tasks import submit_review_update
 
 
 class ChannelRepairMixin:
@@ -232,6 +234,24 @@ class TestSingleChannelRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase)
         args = mock_delay.call_args[0]
         assert [str(foias[0].pk)] == [str(pk) for pk in args[0]]
         assert args[1] == "Please confirm receipt."
+
+    def test_no_follow_up_without_a_contact_change(self, mock_delay):
+        """Resolving without a new address must not mail the broken one again
+
+        The follow up would go to the same dead mailbox and bounce, reopening
+        the very task being resolved.
+        """
+        address, foias, task = self.make_channel("old@agency.gov", blocked=1)
+        self.post(
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+            reply="Please confirm receipt.",
+            resolve="on",
+        )
+        self.run_commit_hooks()
+        mock_delay.assert_not_called()
+        task.refresh_from_db()
+        assert task.repair_outcome["followup_sent"] is False
 
     def test_no_follow_up_when_reply_is_blank(self, mock_delay):
         """Leaving the reply blank sends nothing"""
@@ -484,3 +504,37 @@ class TestRepairResponse(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         message = str(list(get_messages(response.wsgi_request))[0])
         assert "Rerouted 3 requests" in message
         assert "1 channel " in message
+
+
+class TestSubmitReviewUpdate(TestCase):
+    """The follow up job after a repair"""
+
+    def setUp(self):
+        UserFactory(username="MuckrockStaff")
+        self.foias = FOIARequestFactory.create_batch(3, status="ack")
+        self.pks = [foia.pk for foia in self.foias]
+
+    def test_one_failing_request_does_not_stop_the_rest(self):
+        """Every request gets its follow up even if one of them fails
+
+        A missing law record once crashed the job on its first request, so
+        the follow ups for every other request were silently never sent.
+        """
+        failing = self.pks[0]
+
+        def submit(foia, **kwargs):
+            # pylint: disable=unused-argument
+            if foia.pk == failing:
+                raise ValueError("broken request")
+
+        with mock.patch.object(
+            FOIARequest, "submit", autospec=True, side_effect=submit
+        ) as mock_submit:
+            submit_review_update(self.pks, "Following up.")
+        assert mock_submit.call_count == 3
+        followups = FOIACommunication.objects.filter(
+            communication="Following up."
+        ).values_list("foia_id", flat=True)
+        # the failed request's follow up is rolled back rather than left
+        # looking sent
+        assert sorted(followups) == sorted(self.pks[1:])

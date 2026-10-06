@@ -14,6 +14,7 @@
     ["SKIP_KEPT", ["organization_membership", "user_id", "auth_user", "username"]],
 
     ["ALL", ["jurisdiction_jurisdiction"]],
+    ["ALL", ["jurisdiction_law"]],
     ["ALL", ["agency_agencytype"]],
 
     ["SQL", ["agency_agency", "id in (select f.agency_id from foia_foiarequest f join communication_emailaddress e on e.id = f.email_id where f.status in ('ack', 'processed', 'appealing') and e.status = 'error' and exists (select 1 from task_reviewagencytask r join task_task t on t.id = r.task_ptr_id where r.agency_id = f.agency_id and not t.resolved) group by f.agency_id order by count(*) desc limit 30)"]],

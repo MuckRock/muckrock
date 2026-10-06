@@ -65,6 +65,8 @@
       (portal) => domain === portal || domain.endsWith("." + portal),
     );
   });
+  // Mirrors the server: a follow-up only goes out with a contact change
+  let contactChanges = $derived(!!newEmail || snailMail);
   let canRepair = $derived(
     selectedChannels.size > 0 && !blockedByPortal && !replacementIsPortal,
   );
@@ -425,8 +427,20 @@
 
     <label>
       <span class="repair-field__label">Follow-up message</span>
-      <textarea name="reply" rows="5" bind:value={reply}></textarea>
-      <small>Leave blank to send no follow-up.</small>
+      <textarea
+        name="reply"
+        rows="5"
+        bind:value={reply}
+        disabled={!contactChanges}
+      ></textarea>
+      {#if contactChanges}
+        <small>Leave blank to send no follow-up.</small>
+      {:else}
+        <small>
+          No follow-up without a new address or snail mail &mdash; it would go
+          back to the broken address.
+        </small>
+      {/if}
     </label>
 
     <button type="submit" class="primary button" disabled={!canRepair}>

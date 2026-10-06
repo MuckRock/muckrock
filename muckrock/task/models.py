@@ -735,8 +735,13 @@ class ReviewAgencyTask(Task):
             if email_id not in task_channels
         )
 
+        # A follow up without a contact change goes back to the same broken
+        # address and bounces, reopening the task being resolved
+        changed = new_email is not None or bool(snail)
+        send_reply = bool(reply) and bool(foia_pks) and changed
+
         with transaction.atomic():
-            if new_email is not None or snail:
+            if changed:
                 # One agency level contact update for the whole submission,
                 # however many channels it covers.
                 representative = tasks[0] if tasks else cls(agency=agency)
@@ -746,7 +751,7 @@ class ReviewAgencyTask(Task):
             outcome_base = {
                 "new_email": new_email.email if new_email is not None else None,
                 "snail_mail": bool(snail),
-                "followup_sent": bool(reply),
+                "followup_sent": send_reply,
                 "agency_info_updated": bool(update_info),
                 "by": user.username if user is not None else None,
                 "at": timezone.now().isoformat(),
@@ -756,7 +761,7 @@ class ReviewAgencyTask(Task):
                 outcome["old_email"] = (
                     task_.email.email if task_.email is not None else None
                 )
-                if new_email is None and not snail:
+                if not changed:
                     outcome["requests_updated"] = 0
                 elif task_.email_id:
                     outcome["requests_updated"] = moved_by_channel[task_.email_id]
@@ -770,7 +775,7 @@ class ReviewAgencyTask(Task):
                     task_.form_data = form_data
                     task_.save()
 
-            if reply and foia_pks:
+            if send_reply:
                 transaction.on_commit(
                     lambda: submit_review_update.delay(foia_pks, reply)
                 )
