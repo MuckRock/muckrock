@@ -434,6 +434,18 @@ class TestFOIARequestViewset(TestCase):
         comm = FOIACommunicationFactory.create(foia=foia)
         assert comm.pk in self._detail_comm_ids(proxy, foia)
 
+    def test_detail_communications_oldest_first(self):
+        """The detail view lists communication IDs oldest first"""
+        foia = FOIARequestFactory.create(embargo_status="public")
+        newer = FOIACommunicationFactory.create(
+            foia=foia, datetime=timezone.make_aware(datetime(2026, 1, 2))
+        )
+        older = FOIACommunicationFactory.create(
+            foia=foia, datetime=timezone.make_aware(datetime(2026, 1, 1))
+        )
+        ids = self._detail_comm_ids(self.user, foia)
+        assert ids.index(older.pk) < ids.index(newer.pk)
+
 
 class TestFOIACommunicationViewset(TestCase):
     def setUp(self):
@@ -530,6 +542,14 @@ class TestFOIACommunicationViewset(TestCase):
         foia = FOIARequestFactory.create(embargo_status="public", deleted=True)
         comm = FOIACommunicationFactory.create(foia=foia)
         assert comm.pk not in self._comm_ids(self.user, foia)
+
+    def test_list_has_no_communications_field(self):
+        """Communication IDs are only included on the detail view"""
+        self.client.force_authenticate(user=self.user)
+        FOIARequestFactory.create(embargo_status="public")
+        response = self.client.get(reverse("api2-requests-list"))
+        assert response.status_code == 200
+        assert "communications" not in response.json()["results"][0]
 
 
 class TestFOIAFileViewset(TestCase):
