@@ -9,7 +9,9 @@ view and the repair form all read the same answer from here.
 """
 
 # Django
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 # Standard Library
@@ -20,7 +22,7 @@ from muckrock.communication.factories import (
     EmailAddressFactory,
     EmailCommunicationFactory,
 )
-from muckrock.communication.models import EmailAddress, EmailError
+from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
 from muckrock.core.factories import AgencyEmailFactory, AgencyFactory
 from muckrock.foia.factories import FOIARequestFactory
 from muckrock.task.channels import (
@@ -304,6 +306,66 @@ class TestAgencyChannels(TestCase):
             FOIARequestFactory(agency=big, email=address, status="ack")
         with self.assertNumQueries(agency_channels.__query_count__):
             agency_channels(big)
+
+
+class TestAddressStats(TestCase):
+    """Error and delivery stats per address, without multiplying rows
+
+    Errors, deliveries and opens are three independent one-to-many relations.
+    Joined together they multiply: after the address merge one FBI mailbox
+    carried ~3,300 deliveries and ~900 opens, and the joined stats query ran
+    the database out of disk building their cross product.
+    """
+
+    def setUp(self):
+        self.agency = AgencyFactory(email=None, fax=None)
+        self.address = EmailAddressFactory(email="foia@fbi.gov", status="error")
+        AgencyEmailFactory(agency=self.agency, email=self.address)
+        FOIARequestFactory(agency=self.agency, email=self.address, status="ack")
+
+    def deliver(self, days_ago, opens=0):
+        """A delivery to the address, confirmed and opened some number of times"""
+        comm = EmailCommunicationFactory(
+            confirmed_datetime=timezone.now() - timedelta(days=days_ago)
+        )
+        comm.to_emails.set([self.address])
+        for _ in range(opens):
+            EmailOpen.objects.create(
+                email=comm,
+                datetime=timezone.now() - timedelta(days=days_ago),
+                event="opened",
+                recipient=self.address,
+            )
+        return comm
+
+    def test_stats_are_exact_across_all_three_relations(self):
+        add_error(self.address, days_ago=10)
+        add_error(self.address, days_ago=3)
+        add_error(self.address, days_ago=7)
+        self.deliver(days_ago=20, opens=2)
+        self.deliver(days_ago=5, opens=3)
+        channel = agency_channels(self.agency)[0]
+        assert channel.error_count == 3
+        assert channel.last_error.date() == (timezone.now() - timedelta(days=3)).date()
+        assert (
+            channel.last_confirm.date() == (timezone.now() - timedelta(days=5)).date()
+        )
+        assert channel.last_open.date() == (timezone.now() - timedelta(days=5)).date()
+
+    def test_no_stats_reads_as_none_and_zero(self):
+        channel = agency_channels(self.agency)[0]
+        assert channel.error_count == 0
+        assert channel.last_error is None
+        assert channel.last_confirm is None
+        assert channel.last_open is None
+
+    def test_stats_query_does_not_join_the_relations_together(self):
+        """Each relation is read on its own, never as a cross product"""
+        with CaptureQueriesContext(connection) as queries:
+            agency_channels(self.agency)
+        stats_sql = [q["sql"] for q in queries if "last_open" in q["sql"]]
+        assert len(stats_sql) == 1
+        assert "LEFT OUTER JOIN" not in stats_sql[0]
 
 
 class TestAgencyRollup(TestCase):

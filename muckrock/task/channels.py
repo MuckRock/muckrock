@@ -15,14 +15,20 @@ command to fix rather than something this layer should hide.
 """
 
 # Django
-from django.db.models import Count, Max, Q
+from django.db.models import Count, Max, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 # Standard Library
 from dataclasses import dataclass, field
 
 # MuckRock
-from muckrock.communication.models import EmailAddress, EmailError
+from muckrock.communication.models import (
+    EmailAddress,
+    EmailCommunication,
+    EmailError,
+    EmailOpen,
+)
 from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 # An error flag with no bounce event in two years tells you something different
@@ -283,18 +289,42 @@ agency_channels.__query_count__ = 4
 def _address_stats(addresses):
     """Per address error and delivery stats, in one pass
 
-    Annotated separately from the request query to keep the joins bounded --
-    the same shape the old get_review_data() used, for the same reason.
+    Each stat is a correlated subquery rather than a join.  Errors, deliveries
+    and opens are independent one-to-many relations, and joining all three
+    multiplies them: a merged FBI mailbox with ~3,300 deliveries and ~900 opens
+    produced a cross product that ran the database out of disk.
     """
+    errors = EmailError.objects.filter(recipient=OuterRef("pk")).order_by()
     return (
         EmailAddress.objects.filter(pk__in=addresses)
         .annotate(
-            error_count=Count("errors", distinct=True),
-            last_error=Max("errors__datetime"),
-            last_confirm=Max("to_emails__confirmed_datetime"),
-            last_open=Max("opens__datetime"),
+            error_count=Coalesce(
+                Subquery(
+                    errors.values("recipient")
+                    .annotate(count=Count("pk"))
+                    .values("count")
+                ),
+                0,
+            ),
+            last_error=_newest(errors, "datetime"),
+            last_confirm=_newest(
+                EmailCommunication.objects.filter(to_emails=OuterRef("pk")),
+                "confirmed_datetime",
+            ),
+            last_open=_newest(
+                EmailOpen.objects.filter(recipient=OuterRef("pk")), "datetime"
+            ),
         )
         .in_bulk()
+    )
+
+
+def _newest(queryset, field_name):
+    """The latest non-null value of a field, as a subquery"""
+    return Subquery(
+        queryset.exclude(**{field_name: None})
+        .order_by("-" + field_name)
+        .values(field_name)[:1]
     )
 
 
