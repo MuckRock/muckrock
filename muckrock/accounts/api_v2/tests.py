@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import UserFactory
+from muckrock.core.test_utils import assert_queries_do_not_scale
 
 
 class UserViewSetTests(TestCase):
@@ -43,6 +44,13 @@ class UserViewSetTests(TestCase):
         usernames = [user["username"] for user in response_data["results"]]
         self.assertIn("jdoe", usernames)
         self.assertIn("asmith", usernames)
+
+    def test_list_queries_do_not_scale(self):
+        """Assert the list view does not encounter N+1 queries"""
+        self.client.force_authenticate(UserFactory(is_staff=True))
+        assert_queries_do_not_scale(
+            self.client, reverse("api2-users-list"), UserFactory
+        )
 
     def test_filter_by_username(self):
         """Test filtering users by username."""

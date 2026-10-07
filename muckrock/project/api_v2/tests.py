@@ -2,11 +2,15 @@
 from django.test import TestCase
 from django.urls import reverse
 
+# Standard Library
+from itertools import count
+
 # Third Party
 from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import ProjectFactory, UserFactory
+from muckrock.core.test_utils import assert_queries_do_not_scale
 
 
 class TestProjectViewSet(TestCase):
@@ -45,3 +49,14 @@ class TestProjectViewSet(TestCase):
     def test_retrieve_project_not_found(self):
         response = self.client.get(reverse("api2-projects-detail", kwargs={"pk": 9999}))
         assert response.status_code == 404
+
+    def test_list_queries_do_not_scale(self):
+        """Listing projects must not add queries as the number of projects grows"""
+        numbers = count(1)
+
+        def create_one():
+            ProjectFactory(
+                title=f"Scaling Project {next(numbers)}", private=False, approved=True
+            )
+
+        assert_queries_do_not_scale(self.client, self.list_url, create_one)
