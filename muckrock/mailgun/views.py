@@ -5,6 +5,7 @@ Views for mailgun
 # Django
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import TooManyFilesSent
 from django.core.mail import EmailMessage
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden
@@ -27,6 +28,7 @@ from email.utils import getaddresses
 from functools import wraps
 
 # Third Party
+import sentry_sdk
 from bs4 import BeautifulSoup
 from constance import config
 
@@ -194,7 +196,19 @@ def mailgun_verify(function):
         if request.content_type == "application/json":
             data = json.loads(request.body.decode("utf8"))
         else:
-            data = request.POST
+            try:
+                data = request.POST
+            except TooManyFilesSent:
+                content_length = request.META.get("CONTENT_LENGTH", "unknown")
+                logger.warning(
+                    "[MAILGUN] Inbound email rejected: too many files. "
+                    "Content-Length=%s see Mailgun logs to identify",
+                    content_length,
+                )
+                # Log it in Sentry for visibility since we don't raise
+                sentry_sdk.capture_exception()
+                # 406 tells Mailgun not to retry delivery
+                return HttpResponse("Too many files", status=406)
         if _verify(data):
             return function(request)
         else:
