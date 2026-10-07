@@ -710,6 +710,9 @@ class ReviewAgencyTask(Task):
         agency's contact info but failed to resolve half the tasks would leave
         a staffer unable to tell what actually happened.
 
+        Returns the tasks the repair covered, and the requests a portal move
+        skipped because they had nothing to resend.
+
         With a portal, the requests move to it instead of to an address, and
         no follow-up is sent: it would go through the portal too, doubling
         every request's portal work.
@@ -738,11 +741,6 @@ class ReviewAgencyTask(Task):
         # those on channels with no task of their own in this repair.
         moved_by_channel = Counter(foia.email_id for foia in foias)
         task_channels = {task_.email_id for task_ in tasks if task_.email_id}
-        moved_uncovered = sum(
-            count
-            for email_id, count in moved_by_channel.items()
-            if email_id not in task_channels
-        )
 
         # A follow up without a contact change goes back to the same broken
         # address and bounces, reopening the task being resolved.  After a
@@ -751,15 +749,23 @@ class ReviewAgencyTask(Task):
         changed = new_email is not None or bool(snail) or portal is not None
         send_reply = bool(reply) and bool(foia_pks) and changed and portal is None
 
+        skipped = []
         with transaction.atomic():
             if portal is not None:
-                cls._move_to_portal(agency, portal, foias)
+                skipped = cls._move_to_portal(agency, portal, foias)
+                # A skipped request stays on its channel, so it was not moved
+                moved_by_channel.subtract(foia.email_id for foia in skipped)
             elif changed:
                 # One agency level contact update for the whole submission,
                 # however many channels it covers.
                 representative = tasks[0] if tasks else cls(agency=agency)
                 representative.agency = agency
                 representative.update_contact(new_email, foias, update_info, snail)
+            moved_uncovered = sum(
+                count
+                for email_id, count in moved_by_channel.items()
+                if email_id not in task_channels
+            )
 
             outcome_base = {
                 "new_email": new_email.email if new_email is not None else None,
@@ -794,7 +800,7 @@ class ReviewAgencyTask(Task):
                     lambda: submit_review_update.delay(foia_pks, reply)
                 )
 
-        return tasks
+        return tasks, skipped
 
     @staticmethod
     def _move_to_portal(agency, portal, foias):
@@ -804,15 +810,26 @@ class ReviewAgencyTask(Task):
         submission goes through the manual portal path for every portal type,
         so each request gets its own Portal Task for a staffer to file.  The
         portal becomes the agency's, which routes its new requests there too.
+
+        The request resent is the first one we sent, not the first
+        communication: an agency reply can come first on imported requests.
+        A request with nothing sent is left where it is and returned, rather
+        than failing the whole repair.
         """
         if portal.pk is None:
             portal.save()
         if agency.portal_id != portal.pk:
             agency.portal = portal
             agency.save()
+        skipped = []
         for foia in foias:
+            comm = foia.communications.filter(response=False).first()
+            if comm is None:
+                skipped.append(foia)
+                continue
             foia.update_address("portal", email=None, fax=None)
-            foia.submit(comm=foia.communications.first())
+            foia.submit(comm=comm)
+        return skipped
 
     def latest_response(self):
         """Returns the latest response from the agency"""

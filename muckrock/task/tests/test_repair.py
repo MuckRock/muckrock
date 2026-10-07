@@ -12,8 +12,10 @@ biggest.  Single channel only repair structurally cannot clear the backlog.
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 # Standard Library
+from datetime import timedelta
 from unittest import mock
 
 # MuckRock
@@ -794,6 +796,56 @@ class TestPortalRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         )
         agency_task.refresh_from_db()
         assert agency_task.resolved
+
+    def test_resends_the_first_outgoing_communication(self, _mock_delay):
+        """An agency reply that happens to come first is not the request"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _task = self.make_channel("seattle@mycusthelp.net")
+        foia = foias[0]
+        FOIACommunicationFactory(
+            foia=foia, response=True, datetime=timezone.now() - timedelta(days=2)
+        )
+        request = FOIACommunicationFactory(
+            foia=foia,
+            response=False,
+            category="n",
+            datetime=timezone.now() - timedelta(days=1),
+        )
+        self.post(
+            repair_via="portal", channel_pks=str(address.pk), foia_pks=str(foia.pk)
+        )
+        assert [t.communication for t in PortalTask.objects.all()] == [request]
+
+    def test_a_request_with_nothing_to_resend_is_skipped(self, _mock_delay):
+        """One request with no outgoing communication does not sink the repair
+
+        It stays on its channel, still blocked, and the staffer is told.
+        """
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _comms, task = self.make_portal_channel(blocked=1)
+        empty = FOIARequestFactory(agency=self.agency, email=address, status="ack")
+        response = self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks="%d,%d" % (foias[0].pk, empty.pk),
+        )
+        foias[0].refresh_from_db()
+        empty.refresh_from_db()
+        assert foias[0].portal == self.agency.portal
+        assert empty.portal is None
+        assert empty.email == address
+        assert empty.status == "ack"
+        task.refresh_from_db()
+        assert task.repair_outcome["requests_updated"] == 1
+        message = str(list(get_messages(response.wsgi_request))[0])
+        assert "Rerouted 1 request" in message
+        assert "Skipped 1 request with no filed request to resend" in message
 
     def test_message_counts_the_portal_tasks(self, _mock_delay):
         """The staffer is told how much portal work was just queued"""
