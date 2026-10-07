@@ -27,19 +27,7 @@ def _gloo_result(status):
 class TestFOIAClassify(TestCase):
     """Test the classification of a new communication"""
 
-    @patch(
-        "asyncio.run",
-        Mock(
-            return_value=(
-                Mock(
-                    trackingNumber=None,
-                    price=None,
-                    dateEstimate=None,
-                ),
-                "processed",
-            )
-        ),
-    )
+    @patch("asyncio.run", Mock(return_value=_gloo_result("processed")))
     def test_classifier(self):
         """Classifier should populate the fields on the response task"""
         UserFactory(username="gloo")
