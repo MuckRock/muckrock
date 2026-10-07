@@ -24,7 +24,8 @@ from muckrock.foia.codes import CODE_CHOICES, CODES
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
-from muckrock.task.channels import classify_address
+from muckrock.portal.models import Portal
+from muckrock.task.channels import REPAIR_PORTAL_TYPES, classify_address
 from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 
@@ -94,6 +95,11 @@ class ChannelRepairForm(forms.Form):
     structurally cannot clear the backlog.
     """
 
+    repair_via = forms.ChoiceField(
+        choices=[("email", "Email"), ("portal", "Portal")],
+        initial="email",
+        required=False,
+    )
     new_email = forms.CharField(
         label="Replacement email address",
         required=False,
@@ -121,6 +127,24 @@ class ChannelRepairForm(forms.Form):
         initial=REVIEW_AGENCY_FOLLOWUP,
         widget=forms.Textarea(attrs={"rows": 5}),
     )
+    # Only needed in portal mode when the agency has no portal yet
+    portal_url = forms.URLField(
+        label="Portal URL", required=False, max_length=255, assume_scheme="https"
+    )
+    portal_name = forms.CharField(label="Portal name", required=False, max_length=255)
+    portal_type = forms.ChoiceField(
+        label="Portal type",
+        choices=[("", "---")] + REPAIR_PORTAL_TYPES,
+        required=False,
+    )
+
+    def __init__(self, *args, agency=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.agency = agency
+
+    def clean_repair_via(self):
+        """Email unless portal is asked for, so older submissions still work"""
+        return self.cleaned_data.get("repair_via") or "email"
 
     def clean_new_email(self):
         """Resolve the address through fetch() so no case variant is created
@@ -160,9 +184,13 @@ class ChannelRepairForm(forms.Form):
 
         Portal classified channels are rejected outright: no replacement email
         repairs a portal notification address, so offering the swap would walk
-        a staffer into a repair that is actively wrong.
+        a staffer into a repair that is actively wrong.  Moving to a portal is
+        its own mode, validated separately.
         """
         cleaned_data = super().clean()
+        if cleaned_data.get("repair_via") == "portal":
+            return self._clean_portal(cleaned_data)
+
         new_email = cleaned_data.get("new_email")
         snail_mail = cleaned_data.get("snail_mail")
         resolve = cleaned_data.get("resolve")
@@ -197,6 +225,47 @@ class ChannelRepairForm(forms.Form):
                 "reach the agency -- choose the agency's own mailbox."
                 % new_email.email,
             )
+        return cleaned_data
+
+    def _clean_portal(self, cleaned_data):
+        """The portal the selected requests move to
+
+        The agency's own portal when it has one; otherwise one described here,
+        reused when its URL is already known (URLs are unique) and built but
+        not saved when it is new, so creating it stays inside the repair's
+        transaction.  A portal marked Error is a bigger problem than routing,
+        so the repair stops rather than resubmitting into it.
+        """
+        if not cleaned_data.get("foia_pks"):
+            self.add_error("foia_pks", "Select at least one request to move")
+
+        portal = self.agency.portal if self.agency is not None else None
+        if portal is None:
+            url = cleaned_data.get("portal_url")
+            if not url:
+                self.add_error("portal_url", "Required to add a portal")
+                if not cleaned_data.get("portal_type"):
+                    self.add_error("portal_type", "Required to add a portal")
+                return cleaned_data
+            portal = Portal.objects.filter(url__iexact=url).first()
+            if portal is None:
+                for field in ("portal_name", "portal_type"):
+                    if not cleaned_data.get(field):
+                        self.add_error(field, "Required to add a portal")
+                portal = Portal(
+                    url=url,
+                    name=cleaned_data.get("portal_name"),
+                    type=cleaned_data.get("portal_type"),
+                )
+
+        if portal.status == "error":
+            self.add_error(
+                None,
+                "The portal %s is marked as an error. Find a working portal or "
+                "review the agency's contact methods before moving requests to "
+                "it." % portal.name,
+            )
+        cleaned_data["portal"] = portal
         return cleaned_data
 
 

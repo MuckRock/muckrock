@@ -26,10 +26,12 @@ from muckrock.core.factories import (
     UserFactory,
 )
 from muckrock.core.test_utils import RunCommitHooksMixin
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.portal.models import Portal
 from muckrock.task.factories import ReviewAgencyTaskFactory
 from muckrock.task.forms import ChannelRepairForm
+from muckrock.task.models import PortalTask
 from muckrock.task.tasks import submit_review_update
 
 
@@ -539,6 +541,293 @@ class TestRepairResponse(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         message = str(list(get_messages(response.wsgi_request))[0])
         assert "Rerouted 3 requests" in message
         assert "1 channel " in message
+
+
+class TestPortalRepairForm(TestCase):
+    """Validation rules for moving requests to a portal"""
+
+    def setUp(self):
+        self.agency = AgencyFactory(email=None, fax=None)
+        self.foia = FOIARequestFactory(agency=self.agency)
+
+    def form(self, **data):
+        """A portal mode form for the agency"""
+        data.setdefault("repair_via", "portal")
+        data.setdefault("foia_pks", str(self.foia.pk))
+        return ChannelRepairForm(data=data, agency=self.agency)
+
+    def test_uses_the_agency_portal(self):
+        """An agency with a working portal needs nothing else filled in"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        form = self.form()
+        assert form.is_valid(), form.errors
+        assert form.cleaned_data["portal"] == self.agency.portal
+
+    def test_portal_channels_are_welcome(self):
+        """The portal notification address is exactly what this repair is for"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        channel = EmailAddressFactory(email="seattle@mycusthelp.net", status="error")
+        form = self.form(channel_pks=str(channel.pk))
+        assert form.is_valid(), form.errors
+
+    def test_a_broken_portal_stops_the_repair(self):
+        """A portal marked Error points at a bigger problem than routing"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us",
+            name="Seattle GovQA",
+            type="govqa",
+            status="error",
+        )
+        self.agency.save()
+        form = self.form()
+        assert not form.is_valid()
+        assert "error" in str(form.errors).lower()
+
+    def test_a_new_portal_needs_its_details(self):
+        """With no portal on the agency, one has to be described"""
+        form = self.form()
+        assert not form.is_valid()
+        assert "portal_url" in form.errors
+        assert "portal_type" in form.errors
+
+    def test_a_new_portal_is_built_but_not_saved(self):
+        """Saving waits for the repair's transaction"""
+        form = self.form(
+            portal_url="https://seattle.govqa.us",
+            portal_name="Seattle GovQA",
+            portal_type="govqa",
+        )
+        assert form.is_valid(), form.errors
+        portal = form.cleaned_data["portal"]
+        assert portal.pk is None
+        assert portal.url == "https://seattle.govqa.us"
+        assert portal.type == "govqa"
+
+    def test_a_known_portal_url_is_reused(self):
+        """Portal URLs are unique, so a match is the same portal"""
+        existing = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        form = self.form(
+            portal_url="https://Seattle.GovQA.us",
+            portal_name="Anything",
+            portal_type="nextrequest",
+        )
+        assert form.is_valid(), form.errors
+        assert form.cleaned_data["portal"] == existing
+
+    def test_a_known_broken_portal_is_not_reused(self):
+        """Matching a broken portal by URL bails out like the agency's own"""
+        Portal.objects.create(
+            url="https://seattle.govqa.us",
+            name="Seattle GovQA",
+            type="govqa",
+            status="error",
+        )
+        form = self.form(
+            portal_url="https://seattle.govqa.us",
+            portal_name="Seattle GovQA",
+            portal_type="govqa",
+        )
+        assert not form.is_valid()
+
+    def test_foiaonline_is_not_offered(self):
+        """FOIAonline is discontinued"""
+        form = self.form(
+            portal_url="https://foiaonline.gov",
+            portal_name="FOIAonline",
+            portal_type="foiaonline",
+        )
+        assert not form.is_valid()
+        assert "portal_type" in form.errors
+
+    def test_needs_requests_to_move(self):
+        """A portal repair is per request; with none selected there is nothing"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        form = self.form(foia_pks="")
+        assert not form.is_valid()
+
+    def test_no_replacement_email_is_required(self):
+        """The email rule belongs to email repairs"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        form = self.form()
+        assert form.is_valid(), form.errors
+        assert "new_email" not in form.errors
+
+
+@mock.patch("muckrock.task.tasks.submit_review_update.delay")
+class TestPortalRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
+    """Moving requests off a broken email channel into a portal
+
+    Each request is resent through the portal by hand, so each gets its own
+    Portal Task -- the same thing resending one request at a time does.
+    """
+
+    def make_portal_channel(self, blocked=2):
+        """A broken portal notification channel whose requests were filed"""
+        address, foias, task = self.make_channel(
+            "seattle@mycusthelp.net", blocked=blocked
+        )
+        comms = [
+            FOIACommunicationFactory(foia=foia, category="n", response=False)
+            for foia in foias
+        ]
+        return address, foias, comms, task
+
+    def test_each_request_gets_its_own_portal_task(self, _mock_delay):
+        """One Portal Task per request, on its initial communication"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, comms, _task = self.make_portal_channel(blocked=3)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+        )
+        tasks = PortalTask.objects.filter(resolved=False)
+        assert sorted(t.communication_id for t in tasks) == sorted(c.pk for c in comms)
+        assert {t.category for t in tasks} == {"n"}
+        for foia in foias:
+            foia.refresh_from_db()
+            assert foia.portal == self.agency.portal
+            assert foia.status == "submitted"
+
+    def test_a_new_portal_is_attached_to_the_agency(self, _mock_delay):
+        """Creating the portal is part of the repair"""
+        address, foias, _comms, _task = self.make_portal_channel(blocked=1)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+            portal_url="https://seattle.govqa.us",
+            portal_name="Seattle GovQA",
+            portal_type="govqa",
+        )
+        portal = Portal.objects.get(url="https://seattle.govqa.us")
+        self.agency.refresh_from_db()
+        assert self.agency.portal == portal
+        assert PortalTask.objects.filter(communication__foia=foias[0]).count() == 1
+
+    def test_only_selected_requests_move(self, _mock_delay):
+        """A deselected request stays where it is"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _comms, _task = self.make_portal_channel(blocked=2)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+        )
+        foias[1].refresh_from_db()
+        assert foias[1].portal is None
+        assert not PortalTask.objects.filter(communication__foia=foias[1]).exists()
+
+    def test_no_follow_up_is_sent(self, mock_delay):
+        """A follow-up would go through the portal too -- a second task each"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _comms, _task = self.make_portal_channel(blocked=1)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+            reply="Please confirm receipt.",
+        )
+        self.run_commit_hooks()
+        mock_delay.assert_not_called()
+
+    def test_outcome_names_the_portal(self, _mock_delay):
+        """The readout says the channel moved to a portal"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _comms, task = self.make_portal_channel(blocked=2)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+            reply="Ignored.",
+            resolve="on",
+        )
+        task.refresh_from_db()
+        assert task.resolved
+        outcome = task.repair_outcome
+        assert outcome["portal"] == "Seattle GovQA"
+        assert outcome["new_email"] is None
+        assert outcome["requests_updated"] == 2
+        assert outcome["followup_sent"] is False
+
+    def test_agency_level_task_resolves_after_moving_everything(self, _mock_delay):
+        """Requests resubmitted through the portal are no longer blocked"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _comms, _task = self.make_portal_channel(blocked=2)
+        agency_task = ReviewAgencyTaskFactory(
+            agency=self.agency, email=None, resolved=False
+        )
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+            resolve="on",
+        )
+        agency_task.refresh_from_db()
+        assert agency_task.resolved
+
+    def test_message_counts_the_portal_tasks(self, _mock_delay):
+        """The staffer is told how much portal work was just queued"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+        address, foias, _comms, _task = self.make_portal_channel(blocked=2)
+        response = self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+        )
+        message = str(list(get_messages(response.wsgi_request))[0])
+        assert "2 Portal Tasks" in message
+
+    def test_a_broken_portal_changes_nothing(self, _mock_delay):
+        """Bailing out leaves the requests and task as they were"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us",
+            name="Seattle GovQA",
+            type="govqa",
+            status="error",
+        )
+        self.agency.save()
+        address, foias, _comms, task = self.make_portal_channel(blocked=1)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+        )
+        task.refresh_from_db()
+        assert not task.resolved
+        assert not PortalTask.objects.exists()
 
 
 class TestSubmitReviewUpdate(TestCase):

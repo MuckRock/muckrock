@@ -25,6 +25,7 @@ from muckrock.communication.factories import (
 from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
 from muckrock.core.factories import AgencyEmailFactory, AgencyFactory
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.portal.models import Portal
 from muckrock.task.channels import (
     STALE_ERROR_DAYS,
     Channel,
@@ -452,3 +453,34 @@ class TestSerializeChannels(TestCase):
         payload = serialize_channels(agency, channels=[])
         assert "mycusthelp.net" in payload["portal_domains"]
         assert payload["portal_domains"] == sorted(payload["portal_domains"])
+
+
+class TestSerializePortal(TestCase):
+    """What the repair component knows about the agency's portal"""
+
+    def setUp(self):
+        self.agency = AgencyFactory(email=None, fax=None)
+
+    def test_no_portal(self):
+        """A portal repair has to add one"""
+        assert serialize_channels(self.agency)["portal"] is None
+
+    def test_agency_portal(self):
+        """Named, linked, and flagged when broken"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us",
+            name="Seattle GovQA",
+            type="govqa",
+            status="error",
+        )
+        self.agency.save()
+        portal = serialize_channels(self.agency)["portal"]
+        assert portal["name"] == "Seattle GovQA"
+        assert portal["type"] == "GovQA"
+        assert portal["has_error"] is True
+
+    def test_foiaonline_is_not_offered(self):
+        """New portals cannot get a discontinued type"""
+        types = [t["value"] for t in serialize_channels(self.agency)["portal_types"]]
+        assert "govqa" in types
+        assert "foiaonline" not in types

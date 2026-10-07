@@ -23,7 +23,7 @@ from muckrock.core.views import class_view_decorator
 from muckrock.foia.models import FOIARequest
 from muckrock.task.channels import agency_channels, agency_rollup, serialize_channels
 from muckrock.task.forms import ChannelRepairForm
-from muckrock.task.models import ReviewAgencyTask
+from muckrock.task.models import PortalTask, ReviewAgencyTask
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
@@ -109,7 +109,7 @@ class ReviewAgencyDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         """Apply a repair to one or several of this agency's channels"""
         self.object = self.get_object()
-        form = ChannelRepairForm(request.POST)
+        form = ChannelRepairForm(request.POST, agency=self.object)
         if not form.is_valid():
             for field, errors in form.errors.items():
                 label = form.fields[field].label if field in form.fields else None
@@ -144,6 +144,7 @@ class ReviewAgencyDetailView(DetailView):
             snail=form.cleaned_data["snail_mail"],
             resolve=form.cleaned_data["resolve"],
             reply=form.cleaned_data["reply"],
+            portal=form.cleaned_data.get("portal"),
         )
         messages.success(
             request,
@@ -173,16 +174,18 @@ def _repair_message(agency, data, foias, old_emails, tasks):
     open is named, since it no longer stands out in the queue on its own.
     """
     parts = []
-    if data["new_email"] or data["snail_mail"]:
+    portal = data.get("portal")
+    if portal or data["new_email"] or data["snail_mail"]:
         channels = _plural(len(old_emails), "channel")
         if 0 < len(old_emails) <= 3:
             channels += " (%s)" % ", ".join(old_emails)
-        target = data["new_email"].email if data["new_email"] else "snail mail"
         parts.append(
             "Rerouted %s on %s to %s."
-            % (_plural(len(foias), "request"), channels, target)
+            % (_plural(len(foias), "request"), channels, _repair_target(data))
         )
-        if data["update_agency_info"]:
+        if portal:
+            parts.append(_portal_summary(foias))
+        elif data["update_agency_info"]:
             parts.append("Agency contact updated.")
     else:
         parts.append("No contact change.")
@@ -207,6 +210,23 @@ def _repair_message(agency, data, foias, old_emails, tasks):
             "%d tasks are still open: %s." % (len(still_open), ", ".join(still_open))
         )
     return "%s: %s" % (agency.name, " ".join(parts))
+
+
+def _repair_target(data):
+    """Where a repair sent the requests"""
+    if data.get("portal"):
+        return data["portal"].name
+    if data["new_email"]:
+        return data["new_email"].email
+    return "snail mail"
+
+
+def _portal_summary(foias):
+    """How much portal work a move just queued, counted from what was made"""
+    count = PortalTask.objects.filter(
+        communication__foia__in=foias, resolved=False
+    ).count()
+    return "%s to file." % _plural(count, "Portal Task")
 
 
 def _error_summary(message, when):

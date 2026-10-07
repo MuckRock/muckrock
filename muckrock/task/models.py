@@ -702,12 +702,17 @@ class ReviewAgencyTask(Task):
         snail=False,
         resolve=False,
         reply="",
+        portal=None,
     ):
         """Repair one or several of an agency's channels in one pass
 
         The whole submission is one transaction: a repair that updated the
         agency's contact info but failed to resolve half the tasks would leave
         a staffer unable to tell what actually happened.
+
+        With a portal, the requests move to it instead of to an address, and
+        no follow-up is sent: it would go through the portal too, doubling
+        every request's portal work.
         """
         # pylint: disable=too-many-arguments,too-many-locals,import-outside-toplevel
         # MuckRock
@@ -740,12 +745,16 @@ class ReviewAgencyTask(Task):
         )
 
         # A follow up without a contact change goes back to the same broken
-        # address and bounces, reopening the task being resolved
-        changed = new_email is not None or bool(snail)
-        send_reply = bool(reply) and bool(foia_pks) and changed
+        # address and bounces, reopening the task being resolved.  After a
+        # portal move it would go through the portal too, doubling every
+        # request's portal work.
+        changed = new_email is not None or bool(snail) or portal is not None
+        send_reply = bool(reply) and bool(foia_pks) and changed and portal is None
 
         with transaction.atomic():
-            if changed:
+            if portal is not None:
+                cls._move_to_portal(agency, portal, foias)
+            elif changed:
                 # One agency level contact update for the whole submission,
                 # however many channels it covers.
                 representative = tasks[0] if tasks else cls(agency=agency)
@@ -755,6 +764,7 @@ class ReviewAgencyTask(Task):
             outcome_base = {
                 "new_email": new_email.email if new_email is not None else None,
                 "snail_mail": bool(snail),
+                "portal": portal.name if portal is not None else None,
                 "followup_sent": send_reply,
                 "agency_info_updated": bool(update_info),
                 "by": user.username if user is not None else None,
@@ -785,6 +795,24 @@ class ReviewAgencyTask(Task):
                 )
 
         return tasks
+
+    @staticmethod
+    def _move_to_portal(agency, portal, foias):
+        """Resubmit each request's initial communication through the portal
+
+        The same thing as resending each request by hand: an initial
+        submission goes through the manual portal path for every portal type,
+        so each request gets its own Portal Task for a staffer to file.  The
+        portal becomes the agency's, which routes its new requests there too.
+        """
+        if portal.pk is None:
+            portal.save()
+        if agency.portal_id != portal.pk:
+            agency.portal = portal
+            agency.save()
+        for foia in foias:
+            foia.update_address("portal", email=None, fax=None)
+            foia.submit(comm=foia.communications.first())
 
     def latest_response(self):
         """Returns the latest response from the agency"""
