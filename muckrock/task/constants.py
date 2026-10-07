@@ -50,3 +50,13 @@ AGENCY_FLAG_CATEGORIES = [
 FLAG_CATEGORIES = (
     PUBLIC_FLAG_CATEGORIES + PRIVATE_FLAG_CATEGORIES + AGENCY_FLAG_CATEGORIES
 )
+
+# Default follow-up offered when a review agency task moves requests to a new
+# address, on both the legacy task and the agency repair page
+REVIEW_AGENCY_FOLLOWUP = (
+    "To Whom It May Concern:\n"
+    "I wanted to follow up on the following request, copied below. "
+    "Please let me know when I can expect to receive a response.\n"
+    "Thanks for your help, and let me know if further "
+    "clarification is needed."
+)

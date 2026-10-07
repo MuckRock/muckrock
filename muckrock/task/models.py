@@ -7,15 +7,17 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.db.models import Case, Count, Max, When
+from django.db.models import Case, Count, Max, Q, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import linebreaks, urlize
 
 # Standard Library
 import logging
+from collections import Counter
 from datetime import date
 from itertools import groupby
 
@@ -34,6 +36,7 @@ from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.tags.models import TaggedItemBase
+from muckrock.task.channels import Channel, classify_address
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -342,6 +345,15 @@ class ReviewAgencyTask(Task):
     )
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
     source = models.CharField(max_length=5, choices=sources, blank=True, null=True)
+    # The specific broken channel this task is about.  Null for the staff and
+    # stale sources, which are genuinely about the agency.
+    email = models.ForeignKey(
+        "communication.EmailAddress",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="review_tasks",
+    )
 
     objects = ReviewAgencyTaskQuerySet.as_manager()
 
@@ -350,6 +362,32 @@ class ReviewAgencyTask(Task):
 
     def get_absolute_url(self):
         return reverse("review-agency-task", kwargs={"pk": self.pk})
+
+    @cached_property
+    def channel(self):
+        """The broken channel this task is about, as a Channel
+
+        Built from the annotations that annotate_channel() and
+        annotate_blocked() put on the queryset, so a queue row costs no
+        queries of its own.  Returns None for the staff and stale sources,
+        which have no channel.
+        """
+        if self.email is None:
+            return None
+
+        last_error_reason = getattr(self, "channel_last_error_reason", "") or ""
+        return Channel(
+            address=self.email,
+            blocked_count=getattr(self, "blocked_count", 0) or 0,
+            is_primary=bool(getattr(self, "channel_is_primary", False)),
+            classification=classify_address(self.email, last_error_reason),
+            has_error=self.email.status == "error",
+            last_error=getattr(self, "channel_last_error", None),
+            last_error_code=getattr(self, "channel_last_error_code", "") or "",
+            last_error_reason=last_error_reason,
+            last_confirm=getattr(self, "channel_last_confirm", None),
+            error_count=getattr(self, "channel_error_count", 0) or 0,
+        )
 
     def get_review_data(self):
         """Get all the data on all open requests for the agency"""
@@ -587,12 +625,14 @@ class ReviewAgencyTask(Task):
 
         if is_email:
             if update_info:
-                AgencyEmail.objects.create(
-                    email=email_or_fax,
-                    agency=self.agency,
-                    request_type="primary",
-                    email_type="to",
-                )
+                # Promote a link the agency already has rather than adding a
+                # second one for the same address
+                link = self.agency.agencyemail_set.filter(email=email_or_fax).first()
+                if link is None:
+                    link = AgencyEmail(email=email_or_fax, agency=self.agency)
+                link.request_type = "primary"
+                link.email_type = "to"
+                link.save()
             for foia in foia_list:
                 foia.email = email_or_fax
                 if foia.fax and foia.fax.status != "good":
@@ -601,9 +641,11 @@ class ReviewAgencyTask(Task):
 
         elif is_fax:
             if update_info:
-                AgencyPhone.objects.create(
-                    phone=email_or_fax, agency=self.agency, request_type="primary"
-                )
+                link = self.agency.agencyphone_set.filter(phone=email_or_fax).first()
+                if link is None:
+                    link = AgencyPhone(phone=email_or_fax, agency=self.agency)
+                link.request_type = "primary"
+                link.save()
             for foia in foia_list:
                 foia.email = None
                 foia.fax = email_or_fax
@@ -615,6 +657,134 @@ class ReviewAgencyTask(Task):
                 foia.fax = None
                 foia.address = self.agency.get_addresses().first()
                 foia.save()
+
+    @property
+    def repair_outcome(self):
+        """What was done to this task, or None if nobody has acted on it
+
+        Recorded in form_data, which is a JSONField already meant for what the
+        resolving form submitted.  Deliberately not the note field: staff edit
+        that as free text and a structured payload would clobber their notes.
+        """
+        if not self.form_data:
+            return None
+        return self.form_data.get("repair")
+
+    @cached_property
+    def successor(self):
+        """The open task that reopened this channel after it was resolved
+
+        A property rather than a FK: the link is derivable, and a FK would
+        need backfilling for every existing task and could go stale.  Only
+        matched on a channel -- an agency level task has none, and matching on
+        the agency alone would link unrelated work.
+        """
+        if not self.resolved or self.email_id is None:
+            return None
+        return (
+            ReviewAgencyTask.objects.filter(
+                agency_id=self.agency_id, email_id=self.email_id, resolved=False
+            )
+            .order_by("-date_created", "-pk")
+            .first()
+        )
+
+    @classmethod
+    def repair_channels(
+        cls,
+        agency,
+        user,
+        *,
+        new_email=None,
+        channels=(),
+        foias=(),
+        update_info=False,
+        snail=False,
+        resolve=False,
+        reply="",
+    ):
+        """Repair one or several of an agency's channels in one pass
+
+        The whole submission is one transaction: a repair that updated the
+        agency's contact info but failed to resolve half the tasks would leave
+        a staffer unable to tell what actually happened.
+        """
+        # pylint: disable=too-many-arguments,too-many-locals,import-outside-toplevel
+        # MuckRock
+        from muckrock.task.tasks import submit_review_update
+
+        channel_pks = [channel.pk for channel in channels]
+        foias = list(foias)
+        foia_pks = [foia.pk for foia in foias]
+
+        if not channel_pks:
+            # No explicit channel selection: act on the tasks for the channels
+            # the submitted requests are actually sitting on.
+            channel_pks = {foia.email_id for foia in foias}
+        # An agency level task has no channel because it covers them all, so
+        # any repair on the agency is a repair on it too
+        tasks = list(
+            cls.objects.filter(agency=agency, resolved=False)
+            .filter(Q(email__in=channel_pks) | Q(email=None))
+            .select_related("email")
+        )
+        # Read before update_contact() repoints them.  Each task records the
+        # requests moved off its own channel; the agency level task records
+        # those on channels with no task of their own in this repair.
+        moved_by_channel = Counter(foia.email_id for foia in foias)
+        task_channels = {task_.email_id for task_ in tasks if task_.email_id}
+        moved_uncovered = sum(
+            count
+            for email_id, count in moved_by_channel.items()
+            if email_id not in task_channels
+        )
+
+        # A follow up without a contact change goes back to the same broken
+        # address and bounces, reopening the task being resolved
+        changed = new_email is not None or bool(snail)
+        send_reply = bool(reply) and bool(foia_pks) and changed
+
+        with transaction.atomic():
+            if changed:
+                # One agency level contact update for the whole submission,
+                # however many channels it covers.
+                representative = tasks[0] if tasks else cls(agency=agency)
+                representative.agency = agency
+                representative.update_contact(new_email, foias, update_info, snail)
+
+            outcome_base = {
+                "new_email": new_email.email if new_email is not None else None,
+                "snail_mail": bool(snail),
+                "followup_sent": send_reply,
+                "agency_info_updated": bool(update_info),
+                "by": user.username if user is not None else None,
+                "at": timezone.now().isoformat(),
+            }
+            for task_ in tasks:
+                outcome = dict(outcome_base)
+                outcome["old_email"] = (
+                    task_.email.email if task_.email is not None else None
+                )
+                if not changed:
+                    outcome["requests_updated"] = 0
+                elif task_.email_id:
+                    outcome["requests_updated"] = moved_by_channel[task_.email_id]
+                else:
+                    outcome["requests_updated"] = moved_uncovered
+                form_data = dict(task_.form_data or {})
+                form_data["repair"] = outcome
+                if resolve:
+                    task_.resolve(user, form_data)
+                else:
+                    task_.form_data = form_data
+                    task_.save()
+
+            if send_reply:
+                transaction.on_commit(
+                    lambda: submit_review_update.delay(foia_pks, reply)
+                )
+
+        return tasks
 
     def latest_response(self):
         """Returns the latest response from the agency"""

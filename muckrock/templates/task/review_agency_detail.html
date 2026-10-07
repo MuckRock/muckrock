@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load django_vite %}
+
+{% comment %}
+  Page styles live in assets/css/reviewAgency.css, imported by the
+  reviewAgency.ts entry alongside the repair component.
+{% endcomment %}
+
+{% block title %}Review channels &mdash; {{ agency.name }}{% endblock %}
+
+{% block content %}
+<article class="review-agency-detail">
+
+  <nav class="review-agency-back">
+    <a href="{% url 'review-agency-task-list' %}?agency={{ agency.pk }}">&larr; Back to task queue</a>
+  </nav>
+
+  {# One card for who the agency is, how to reach it, and how much work is left #}
+  <section class="review-agency-agency">
+    <header>
+      <h1>{{ agency.name }}</h1>
+      <p>{{ agency.jurisdiction }}</p>
+      <p>
+        <a href="{{ agency.get_absolute_url }}">Agency page</a>
+        &middot;
+        <a href="{% url 'admin:agency_agency_change' agency.pk %}">Admin</a>
+      </p>
+    </header>
+
+    {% comment %}
+      Only the primary email -- the channel roster below covers the rest.  The
+      website is usually where updated contact info turns up; the phone is for
+      calling to ask.
+    {% endcomment %}
+    <div class="review-agency-contact">
+      <dl>
+        <dt>Website</dt>
+        <dd>
+          {% if agency.website %}
+            <a href="{{ agency.website }}" target="_blank" rel="noopener">{{ agency.website }}</a>
+          {% else %}
+            None on record
+          {% endif %}
+        </dd>
+
+        <dt>FOIA web page</dt>
+        <dd>
+          {% if agency.url %}
+            <a href="{{ agency.url }}" target="_blank" rel="noopener">{{ agency.url }}</a>
+          {% else %}
+            None on record
+          {% endif %}
+        </dd>
+
+        {% if agency.portal %}
+          <dt>Portal</dt>
+          <dd>
+            <a href="{{ agency.portal.url }}" target="_blank" rel="noopener">{{ agency.portal.name }}</a>
+            ({{ agency.portal.get_type_display }})
+          </dd>
+        {% endif %}
+
+        <dt>Primary email</dt>
+        {% for agency_email in primary_emails %}
+          <dd>
+            <a href="mailto:{{ agency_email.email.email }}">{{ agency_email.email.email }}</a>
+            {% if agency_email.email.status == "error" %}<span class="red badge" title="{{ agency_email.error_summary }}">Error</span>{% endif %}
+          </dd>
+        {% empty %}
+          <dd>None on record</dd>
+        {% endfor %}
+
+        <dt>Phone</dt>
+        {% for agency_phone in phones %}
+          <dd>
+            <a href="tel:{{ agency_phone.phone.number.as_e164 }}">{{ agency_phone.phone.number.as_national }}</a>
+            {% if agency_phone.phone.status == "error" %}<span class="red badge" title="{{ agency_phone.error_summary }}">Error</span>{% endif %}
+          </dd>
+        {% empty %}
+          <dd>None on record</dd>
+        {% endfor %}
+
+        <dt>Fax</dt>
+        {% for agency_fax in faxes %}
+          <dd>
+            {{ agency_fax.phone.number.as_national }}
+            {% if agency_fax.request_type != "none" %}({{ agency_fax.request_type }}){% endif %}
+            {% if agency_fax.phone.status == "error" %}<span class="red badge" title="{{ agency_fax.error_summary }}">Error</span>{% endif %}
+          </dd>
+        {% empty %}
+          <dd>None on record</dd>
+        {% endfor %}
+
+        <dt>Mailing address</dt>
+        {% for agency_address in addresses %}
+          <dd>{{ agency_address.address|linebreaksbr }} ({{ agency_address.request_type }})</dd>
+        {% empty %}
+          <dd>None on record</dd>
+        {% endfor %}
+        {% if other_address_count %}
+          <dd>{{ other_address_count }} other address{{ other_address_count|pluralize:"es" }} (<a href="{% url 'admin:agency_agency_change' agency.pk %}">view in Admin</a>)</dd>
+        {% endif %}
+      </dl>
+    </div>
+
+    {# The scorecard: how much work is left to be done #}
+    <section class="review-agency-scorecard">
+      <dl>
+        <div class="review-agency-stat review-agency-stat--primary">
+          <dt>Blocked request{{ total_blocked|pluralize }}</dt>
+          <dd>{{ total_blocked }}</dd>
+        </div>
+
+        {% comment %}
+          Channel count is not an impact signal -- a long roster is not urgent
+          on its own, so these sit beside the blocked count, never instead of it
+        {% endcomment %}
+        <div class="review-agency-stat">
+          <dt>Known channel{{ channels_known|pluralize }}</dt>
+          <dd>{{ channels_known }}</dd>
+        </div>
+
+        <div class="review-agency-stat">
+          <dt>Broken</dt>
+          <dd>{{ channels_broken }}</dd>
+        </div>
+
+        <div class="review-agency-stat">
+          <dt>Carrying live traffic</dt>
+          <dd>{{ channels_active }}</dd>
+        </div>
+
+        <div class="review-agency-stat">
+          <dt>Last successful response</dt>
+          <dd>
+            {% if last_success %}
+              <time datetime="{{ last_success|date:'Y-m-d H:i' }}">
+                {{ last_success|date:'m/d/Y' }}
+              </time>
+            {% else %}
+              None on record
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+
+      {% if has_portal_channel %}
+        <p class="review-agency-warning">
+          <mark>This agency has at least one portal notification address.</mark>
+          Support for switching the agency to use a portal is coming soon.
+        </p>
+      {% endif %}
+    </section>
+  </section>
+
+  <section class="review-agency-channels">
+    {% comment %}
+      The component renders the full roster and owns selection state across
+      the channel cards, posting a normal form back here.  Repair is an action
+      taken on those channels.  Everything it needs arrives as props.
+    {% endcomment %}
+    {{ channels_json|json_script:"review-agency-data" }}
+    <div
+      id="review-agency-app"
+      data-action="{{ request.get_full_path }}"
+      data-email-search-url="{% url 'email-autocomplete' %}"
+    ></div>
+    {# The component needs a CSRF token to post with #}
+    <form style="display:none">{% csrf_token %}</form>
+
+    <noscript>
+      <form method="POST" action="">
+        {% csrf_token %}
+        {{ repair_form.as_p }}
+        <button type="submit" name="repair" value="true">Repair selected channels</button>
+      </form>
+    </noscript>
+  </section>
+
+</article>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  {% vite_asset 'muckrock/assets/js/reviewAgency.ts' %}
+{% endblock scripts %}

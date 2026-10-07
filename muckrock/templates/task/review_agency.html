@@ -2,30 +2,211 @@
 
 {% block title %}Review Agency Tasks{%endblock %}
 
+{% comment %}
+  Unstyled scaffold.  The job here is to get the complete channel summary in
+  front of a staffer without expanding anything -- which channel is broken,
+  how, how recently, and how much it is blocking.  Visual design happens by
+  hand afterward.
+{% endcomment %}
+
+{% comment %}
+  The generic form_data table stringifies the repair payload; the readout
+  below replaces it
+{% endcomment %}
+{% block task-form-data %}{% endblock %}
+
 {% block task-content %}
-  <div class="review-agency-placeholder collapsable" data-id="{{ task.pk }}">
-    <summary class="task__data">
-      <p>Loading...</p>
-    </summary>
+  {% if task.resolved or task.repair_outcome %}
+    {% comment %}
+      What was done, whether it held, and where it reopened -- #1869/#1870.
+      An open task can carry a repair too, when it was not resolved on submit;
+      it says so, since nothing else marks it as worked.
+    {% endcomment %}
+    <div class="review-agency-outcome">
+      <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
+      {% with outcome=task.repair_outcome %}
+        {% if outcome %}
+          <p>
+            <code>{{ outcome.old_email|default:"agency-level task" }}</code>
+            {% if outcome.new_email %}
+              &rarr; <code>{{ outcome.new_email }}</code>
+            {% elif outcome.snail_mail %}
+              &rarr; snail mail
+            {% else %}
+              &mdash; No contact change
+            {% endif %}
+            &middot;
+            {{ outcome.requests_updated }} request{{ outcome.requests_updated|pluralize }} updated
+            &middot;
+            {% if outcome.followup_sent %}Follow-up sent{% else %}No follow-up{% endif %}
+            {% if outcome.agency_info_updated %}&middot; Agency contact updated{% endif %}
+          </p>
+          <p>
+            by {{ outcome.by|default:"unknown" }}
+            {% if task.date_done %}
+              on <time datetime="{{ task.date_done|date:'Y-m-d H:i' }}">{{ task.date_done|date:'m/d/Y' }}</time>
+            {% endif %}
+          </p>
+        {% else %}
+          <p>Resolved with no repair recorded &mdash; No contact change.</p>
+        {% endif %}
+      {% endwith %}
+
+      {% if task.resolved %}
+        <h4>Did it hold?</h4>
+        <p>
+          {% if task.held %}
+            <mark>Held</mark> &mdash; the agency has communicated with us since this resolve.
+          {% else %}
+            <mark>Not verified</mark> &mdash; no response from the agency since this resolve.
+          {% endif %}
+        </p>
+
+        {% if task.successor %}
+          <p>
+            {# A resolve that did not hold is a signal, not noise #}
+            <mark>Reopened</mark> &mdash;
+            <a href="{{ task.successor.get_absolute_url }}">
+              a new task has been opened on this same channel
+            </a>.
+          </p>
+        {% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="review-agency-summary">
+    <header class="review-agency-summary__header">
+      <h4>
+        <a href="{{ task.agency.get_absolute_url }}">{{ task.agency.name }}</a>
+        <small>{{ task.agency.jurisdiction.name }}</small>
+      </h4>
+      <span class="review-agency-badges">
+        {% if task.agency.portal_id %}<span class="badge">Portal</span>{% endif %}
+        <span class="badge">{% if task.source %}{{ task.get_source_display }}{% else %}Unlabeled{% endif %}</span>
+        {% if task.agency.jurisdiction.level == 'f' %}<span class="badge">Federal</span>{% endif %}
+        {% if task.blocked_count >= 10 %}<span class="badge">High volume</span>{% endif %}
+        {% if not task.resolved and task.repair_outcome %}<span class="badge">Repaired, not resolved</span>{% endif %}
+      </span>
+    </header>
+
+    <p class="review-agency-impact">
+      {% if task.email_id %}
+        <strong>{{ task.blocked_count }}</strong> request{{ task.blocked_count|pluralize }} blocked on this channel
+        {% if task.agency_blocked_count != task.blocked_count %}
+          &middot; {{ task.agency_blocked_count }} across this agency
+        {% endif %}
+      {% else %}
+        {# Impact first; the agency's open load only as the share it blocks #}
+        <strong>{{ task.agency_blocked_count }}</strong> blocked request{{ task.agency_blocked_count|pluralize }}
+        {% if task.blocked_count %}
+          &middot; {% widthratio task.agency_blocked_count task.blocked_count 100 %}% of {{ task.blocked_count }} open
+        {% endif %}
+      {% endif %}
+      {% if task.agency_group_size > 1 %}
+        &middot; {{ task.agency_group_size }} channel tasks for this agency
+      {% endif %}
+    </p>
+
+    {% if task.channel %}
+      <dl class="review-agency-channel">
+        <dt>Channel</dt>
+        <dd>
+          <code>{{ task.channel.address.email }}</code>
+          {% if task.channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
+        </dd>
+
+        <dt>Problem</dt>
+        <dd>
+          {# Portal must be visually distinct: no replacement email repairs it #}
+          {% if task.channel.is_portal %}
+            <mark>Portal address</mark> &mdash; this agency appears to have moved
+            to a FOIA portal. An email replacement is the wrong repair.
+          {% elif task.channel.classification == 'noreply' %}
+            <mark>Do-not-reply address</mark> &mdash; point back at the agency's
+            real mailbox rather than inventing a new one.
+          {% elif task.channel.classification == 'reputation' %}
+            <mark>Sender reputation</mark> &mdash; no address swap fixes this.
+          {% else %}
+            Dead mailbox
+          {% endif %}
+        </dd>
+
+        <dt>Last error</dt>
+        <dd>
+          {% if task.channel.last_error %}
+            {{ task.channel.last_error_message }}
+            &middot;
+            <time datetime="{{ task.channel.last_error|date:'Y-m-d H:i' }}">
+              {{ task.channel.last_error|date:'m/d/Y' }}
+              ({{ task.channel.last_error_age }} day{{ task.channel.last_error_age|pluralize }} ago)
+            </time>
+            {% if task.channel.error_count > 1 %}
+              &middot; {{ task.channel.error_count }} errors total
+            {% endif %}
+            {% if task.channel.is_stale_error %}
+              <br><mark>Stale flag</mark> &mdash; nothing has bounced here in over two years.
+            {% endif %}
+          {% else %}
+            Flagged as broken, but no error event on record
+          {% endif %}
+        </dd>
+
+        <dt>Last success</dt>
+        <dd>
+          {% if task.channel.last_confirm %}
+            <time datetime="{{ task.channel.last_confirm|date:'Y-m-d H:i' }}">
+              {{ task.channel.last_confirm|date:'m/d/Y' }}
+              ({{ task.channel.last_confirm|timesince }} ago)
+            </time>
+          {% else %}
+            None on record
+          {% endif %}
+        </dd>
+      </dl>
+    {% endif %}
+    <div>
+      <a class="blue button" href="{% url 'review-agency-detail' pk=task.agency_id %}">
+        Repair this agency's channels &rarr;
+      </a>
+    </div>
   </div>
+
+  {# Legacy ajax data and repair form, kept collapsed until the revamped layout replaces them #}
+  <details class="review-agency-legacy">
+    <summary>Legacy repair tools</summary>
+    <div class="review-agency-placeholder collapsable" data-id="{{ task.pk }}">
+      <summary class="task__data">
+        <p>Loading...</p>
+      </summary>
+    </div>
+    {# The request checkboxes in lib/review_agency.html submit with this form #}
+    <form method="POST" action="{{ endpoint }}?{{ request.META.QUERY_STRING }}" class="review-agency-repair-form" id="{{ task.pk }}-repair-form">
+      {% csrf_token %}
+      <input type="hidden" name="task" value="{{ task.pk }}">
+      <div class="form-field">
+        <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
+        {{ form.email_or_fax }}
+        <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
+        {{ form.update_agency_info }}
+        <br>
+        <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
+        {{ form.snail_mail }}
+        <br>
+        <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
+        {{ form.resolve }}
+        <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
+        {{ form.reply }}
+        <span>Leave blank to not send a follow up to the new address</span>
+      </div>
+      <button type="submit" name="update" value="true" class="primary button">
+        Update email
+      </button>
+    </form>
+  </details>
 {% endblock %}
 
 {% block task-actions %}
-  <div class="form-field">
-    <label for="{{form.email_or_fax.id_for_label}}">{{form.email_or_fax.label}}</label>
-    {{ form.email_or_fax }}
-    <label class="check-label" for="{{form.update_agency_info.id_for_label}}">{{form.update_agency_info.label}}</label>
-    {{ form.update_agency_info }}
-    <br>
-    <label class="check-label" for="{{form.snail_mail.id_for_label}}">{{form.snail_mail.label}}</label>
-    {{ form.snail_mail }}
-    <br>
-    <label class="check-label" for="{{form.resolve.id_for_label}}">{{form.resolve.label}}</label>
-    {{ form.resolve }}
-    <label for="{{form.reply.id_for_label}}">{{form.reply.label}}</label>
-    {{ form.reply }}
-    <span>Leave blank to not send a follow up to the new address</span>
-  </div>
   <span class="task-defer">
     {% if not task.zendesk_ticket_id %}
       <button type="submit" name="zendesk" value="true" class="primary button">
@@ -35,9 +216,6 @@
     {% endif %}
   </span>
   <span class="task-buttons">
-    <button type="submit" name="update" value="true" class="primary button">
-      Update email
-    </button>
     <button class="button" type="submit" name="resolve" value="true">
       Resolve
     </button>
