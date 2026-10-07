@@ -58,8 +58,12 @@ from muckrock.foia.views import (
 from muckrock.jurisdiction.factories import ExampleAppealFactory
 from muckrock.jurisdiction.models import Appeal
 from muckrock.project.forms import ProjectManagerForm
-from muckrock.task.factories import PortalTaskFactory, ResponseTaskFactory
-from muckrock.task.models import PortalTask
+from muckrock.task.factories import (
+    PortalTaskFactory,
+    ResponseTaskFactory,
+    SnailMailTaskFactory,
+)
+from muckrock.task.models import PortalTask, SnailMailTask
 
 
 class TestFOIAViews(TestCase):
@@ -145,6 +149,29 @@ class TestFOIAViews(TestCase):
         assert "17 days" not in content
         assert "3 days" in content
         assert "11 days" in content
+
+    def test_foia_processing_list_sort_task_age(self):
+        """Processing requests can be sorted by the age of their open task"""
+
+        user = UserFactory(is_staff=True)
+        self.client.force_login(user)
+        no_task = FOIARequestFactory(status="submitted")
+        newer = FOIARequestFactory(status="submitted")
+        newer_task = PortalTaskFactory(communication__foia=newer)
+        older = FOIARequestFactory(status="submitted")
+        older_task = SnailMailTaskFactory(communication__foia=older)
+        PortalTask.objects.filter(pk=newer_task.pk).update(
+            date_created=timezone.now() - timedelta(days=5)
+        )
+        SnailMailTask.objects.filter(pk=older_task.pk).update(
+            date_created=timezone.now() - timedelta(days=9)
+        )
+
+        url = reverse("foia-list-processing")
+        response = get_allowed(self.client, url + "?sort=task_age&order=desc")
+        assert list(response.context["object_list"]) == [older, newer, no_task]
+        response = get_allowed(self.client, url + "?sort=task_age&order=asc")
+        assert list(response.context["object_list"]) == [no_task, newer, older]
 
     def test_foia_bad_sort(self):
         """Test sorting against a non-existant field"""
