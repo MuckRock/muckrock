@@ -110,6 +110,10 @@ class Task(models.Model):
         self.save()
         logging.info("User %s resolved task %s", user, self.pk)
 
+    def days_old(self):
+        """How many days since the task was created"""
+        return (timezone.now() - self.date_created).days
+
     def defer(self, date_deferred):
         """Defer the task to the given date"""
         self.date_deferred = date_deferred
