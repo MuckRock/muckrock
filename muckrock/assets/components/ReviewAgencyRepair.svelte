@@ -2,6 +2,10 @@
   /**
    * Repair one or several of an agency's broken communication channels.
    *
+   * A repair either points the selected requests at a replacement email, or
+   * moves them to the agency's portal, where each is resubmitted by hand
+   * through its own Portal Task.
+   *
    * Everything arrives as props; the only fetches are address suggestions for
    * the replacement email.  It owns selection state across the channel cards
    * and posts a normal form, so the server stays the single place where a
@@ -22,17 +26,17 @@
   // Stale requests on a healthy primary are waiting on the agency, not on a
   // broken address, so they do not disqualify it as the replacement.
   const primaryIsSound = !!primary && !primary.has_error && !primary.is_portal;
+  // The agency's portal, or null when a portal repair has to add one
+  const portal = data.portal ?? null;
+  const portalTypes = data.portal_types ?? [];
 
-  // Only a flagged email channel with requests stuck on it needs repair.  A
-  // healthy one may still have stale requests, but those are slow responses
-  // rather than delivery failures; a flagged one with nothing routed to it
-  // has nothing to move; and a portal is out of reach of an email repair.
-  // Anything already selected also shows, so the filter never hides part of
-  // what is about to be submitted.
+  // Only a flagged channel with requests stuck on it needs repair.  A healthy
+  // one may still have stale requests, but those are slow responses rather
+  // than delivery failures, and a flagged one with nothing routed to it has
+  // nothing to move.  Anything already selected also shows, so the filter
+  // never hides part of what is about to be submitted.
   function needsAttention(channel) {
-    return (
-      channel.has_error && channel.blocked_count > 0 && !channel.is_portal
-    );
+    return channel.has_error && channel.blocked_count > 0;
   }
 
   // Which channels the staffer is repairing, and which requests move with them.
@@ -47,6 +51,16 @@
   let resolve = $state(true);
   // Starts from the legacy task's follow-up text; clearing it sends none
   let reply = $state(data.default_reply ?? "");
+  // "email" or "portal": where the selected requests move to
+  const repairModes = [
+    { value: "email", label: "Send to email" },
+    { value: "portal", label: "Send to portal" },
+  ];
+  let repairVia = $state("email");
+  // Only used when the agency has no portal yet
+  let portalUrl = $state("");
+  let portalName = $state(data.agency?.name ?? "");
+  let portalType = $state("");
 
   // A portal channel cannot be repaired by swapping in another email address.
   // Surfacing that here as well as server side keeps a staffer from filling in
@@ -54,7 +68,9 @@
   let selectedPortals = $derived(
     channels.filter((c) => selectedChannels.has(c.id) && c.is_portal),
   );
-  let blockedByPortal = $derived(selectedPortals.length > 0 && !!newEmail);
+  let blockedByPortal = $derived(
+    repairVia === "email" && selectedPortals.length > 0 && !!newEmail,
+  );
   // The replacement itself must not be a portal notification address either:
   // mail to one never reaches the records office.  Same domain rule as the
   // server's classify_address().
@@ -67,8 +83,14 @@
   });
   // Mirrors the server: a follow-up only goes out with a contact change
   let contactChanges = $derived(!!newEmail || snailMail);
+  // A broken portal is a bigger problem than routing, so it stops the repair
+  let portalReady = $derived(
+    portal ? !portal.has_error : !!(portalUrl && portalName && portalType),
+  );
   let canRepair = $derived(
-    selectedChannels.size > 0 && !blockedByPortal && !replacementIsPortal,
+    repairVia === "portal"
+      ? selectedFoias.size > 0 && portalReady
+      : selectedChannels.size > 0 && !blockedByPortal && !replacementIsPortal,
   );
 
   let visibleChannels = $derived(
@@ -99,6 +121,15 @@
   // primary's selection touches the checkbox, so a manual choice otherwise
   // stands.
   function setSelection(channelIds, foiaIds) {
+    // A portal notification address is repaired by moving to the portal, so
+    // selecting the first one switches modes; after that the choice stands
+    const hadPortal = channels.some(
+      (c) => c.is_portal && selectedChannels.has(c.id),
+    );
+    const hasPortal = channels.some((c) => c.is_portal && channelIds.has(c.id));
+    if (!hadPortal && hasPortal) {
+      repairVia = "portal";
+    }
     if (primary) {
       const wasSelected = selectedChannels.has(primary.id);
       const isSelected = channelIds.has(primary.id);
@@ -185,6 +216,18 @@
     return iso ? new Date(iso).toLocaleDateString("en-US") : "";
   }
 
+  // Arrow keys move between tabs, as the ARIA tabs pattern expects
+  function switchTabByKey(event) {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (!step) return;
+    event.preventDefault();
+    const index = repairModes.findIndex((mode) => mode.value === repairVia);
+    const next =
+      repairModes[(index + step + repairModes.length) % repairModes.length];
+    repairVia = next.value;
+    document.getElementById(`repair-tab-${next.value}`)?.focus();
+  }
+
   function clearSelection() {
     setSelection(new Set(), new Set());
   }
@@ -193,6 +236,7 @@
 <form method="POST" {action} class="review-agency-repair-form">
   <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
   <input type="hidden" name="repair" value="true" />
+  <input type="hidden" name="repair_via" value={repairVia} />
   <input type="hidden" name="channel_pks" value={[...selectedChannels].join(",")} />
   <input type="hidden" name="foia_pks" value={[...selectedFoias].join(",")} />
 
@@ -267,8 +311,8 @@
 
           {#if channel.is_portal}
             <p class="repair-channel__warning">
-              This is a portal notification address. Switching the agency to a
-              portal is separate work &mdash; no replacement email repairs it.
+              This is a portal notification address. No replacement email
+              repairs it &mdash; move its requests to the agency's portal.
             </p>
           {/if}
 
@@ -374,77 +418,169 @@
 
   <!-- Flows straight on from the selection it acts on -->
   <fieldset class="repair-action" aria-label="Repair">
-    <p class="repair-action__summary">
-      Repairing <strong>{selectedChannels.size}</strong> channel(s),
-      moving <strong>{selectedFoias.size}</strong> of
-      <strong>{selectedStuck.blocked}</strong> blocked
-      {#if selectedStuck.stale}
-        and <strong>{selectedStuck.stale}</strong> stale
-      {/if}
-      request(s).
-    </p>
+    <div class="repair-tabs" role="tablist" aria-label="Where requests go">
+      {#each repairModes as mode (mode.value)}
+        <button
+          type="button"
+          role="tab"
+          id="repair-tab-{mode.value}"
+          class="repair-tab"
+          class:repair-tab--active={repairVia === mode.value}
+          aria-selected={repairVia === mode.value}
+          aria-controls="repair-panel"
+          tabindex={repairVia === mode.value ? 0 : -1}
+          onclick={() => (repairVia = mode.value)}
+          onkeydown={switchTabByKey}
+        >
+          {mode.label}
+        </button>
+      {/each}
+    </div>
 
-    <EmailAutocomplete
-      label="Replacement email address"
-      name="new_email"
-      url={emailSearchUrl}
-      bind:value={newEmail}
-    />
+    <div
+      class="repair-panel"
+      role="tabpanel"
+      id="repair-panel"
+      aria-labelledby="repair-tab-{repairVia}"
+    >
+      {#if repairVia === "portal"}
+        <p class="repair-action__summary">
+          Moving <strong>{selectedFoias.size}</strong> of
+          <strong>{selectedStuck.blocked}</strong> blocked
+          {#if selectedStuck.stale}
+            and <strong>{selectedStuck.stale}</strong> stale
+          {/if}
+          request(s) to the portal. Each is resubmitted by hand through its own
+          Portal Task.
+        </p>
 
-    {#if blockedByPortal}
-      <p class="repair-form__error" role="alert">
-        {selectedPortals.map((c) => c.email).join(", ")} is a portal
-        notification address. An email replacement is the wrong repair &mdash;
-        deselect it or clear the replacement address.
-      </p>
-    {/if}
+        {#if portal}
+          <p>
+            <span class="repair-field__label">Portal</span>
+            <a href={portal.url} target="_blank" rel="noopener">{portal.name}</a>
+            ({portal.type})
+          </p>
+          {#if portal.has_error}
+            <p class="repair-form__error" role="alert">
+              This portal is marked as an error. Find a working portal or review
+              the agency's contact methods before moving requests to it
+              (<a href={portal.admin_url}>edit in Admin</a>).
+            </p>
+          {/if}
+        {:else}
+          <p class="repair-channel__warning">
+            This agency has no portal. The one added here becomes its portal, so
+            its new requests will be submitted through it too.
+          </p>
+          <label>
+            <span class="repair-field__label">Portal URL</span>
+            <input
+              type="url"
+              name="portal_url"
+              required
+              placeholder="https://"
+              bind:value={portalUrl}
+            />
+            <small>An existing portal with this URL is reused.</small>
+          </label>
+          <label>
+            <span class="repair-field__label">Portal name</span>
+            <input type="text" name="portal_name" required bind:value={portalName} />
+          </label>
+          <label>
+            <span class="repair-field__label">Portal type</span>
+            <select name="portal_type" required bind:value={portalType}>
+              <option value="" disabled>Select a type</option>
+              {#each portalTypes as type (type.value)}
+                <option value={type.value}>{type.label}</option>
+              {/each}
+            </select>
+          </label>
+        {/if}
 
-    {#if replacementIsPortal}
-      <p class="repair-form__error" role="alert">
-        {newEmail} is a portal notification address. Mail sent to it does not
-        reach the agency &mdash; choose the agency's own mailbox.
-      </p>
-    {/if}
+        <label>
+          <input type="checkbox" name="resolve" bind:checked={resolve} />
+          Resolve the affected tasks
+        </label>
 
-    <label>
-      <input
-        type="checkbox"
-        name="update_agency_info"
-        bind:checked={updateAgencyInfo}
-      />
-      Make this the agency's primary contact
-    </label>
-
-    <label>
-      <input type="checkbox" name="snail_mail" bind:checked={snailMail} />
-      Fall back to snail mail
-    </label>
-
-    <label>
-      <input type="checkbox" name="resolve" bind:checked={resolve} />
-      Resolve the affected tasks
-    </label>
-
-    <label>
-      <span class="repair-field__label">Follow-up message</span>
-      <textarea
-        name="reply"
-        rows="5"
-        bind:value={reply}
-        disabled={!contactChanges}
-      ></textarea>
-      {#if contactChanges}
-        <small>Leave blank to send no follow-up.</small>
+        <button type="submit" class="primary button" disabled={!canRepair}>
+          Move to portal
+        </button>
       {:else}
-        <small>
-          No follow-up without a new address or snail mail &mdash; it would go
-          back to the broken address.
-        </small>
-      {/if}
-    </label>
+        <p class="repair-action__summary">
+          Repairing <strong>{selectedChannels.size}</strong> channel(s),
+          moving <strong>{selectedFoias.size}</strong> of
+          <strong>{selectedStuck.blocked}</strong> blocked
+          {#if selectedStuck.stale}
+            and <strong>{selectedStuck.stale}</strong> stale
+          {/if}
+          request(s).
+        </p>
 
-    <button type="submit" class="primary button" disabled={!canRepair}>
-      Apply repair
-    </button>
+        <EmailAutocomplete
+          label="Replacement email address"
+          name="new_email"
+          url={emailSearchUrl}
+          bind:value={newEmail}
+        />
+
+        {#if blockedByPortal}
+          <p class="repair-form__error" role="alert">
+            {selectedPortals.map((c) => c.email).join(", ")} is a portal
+            notification address. An email replacement is the wrong repair
+            &mdash; use <strong>Send to portal</strong> instead, or deselect
+            it.
+          </p>
+        {/if}
+
+        {#if replacementIsPortal}
+          <p class="repair-form__error" role="alert">
+            {newEmail} is a portal notification address. Mail sent to it does
+            not reach the agency &mdash; choose the agency's own mailbox.
+          </p>
+        {/if}
+
+        <label>
+          <input
+            type="checkbox"
+            name="update_agency_info"
+            bind:checked={updateAgencyInfo}
+          />
+          Make this the agency's primary contact
+        </label>
+
+        <label>
+          <input type="checkbox" name="snail_mail" bind:checked={snailMail} />
+          Fall back to snail mail
+        </label>
+
+        <label>
+          <input type="checkbox" name="resolve" bind:checked={resolve} />
+          Resolve the affected tasks
+        </label>
+
+        <label>
+          <span class="repair-field__label">Follow-up message</span>
+          <textarea
+            name="reply"
+            rows="5"
+            bind:value={reply}
+            disabled={!contactChanges}
+          ></textarea>
+          {#if contactChanges}
+            <small>Leave blank to send no follow-up.</small>
+          {:else}
+            <small>
+              No follow-up without a new address or snail mail &mdash; it would
+              go back to the broken address.
+            </small>
+          {/if}
+        </label>
+
+        <button type="submit" class="primary button" disabled={!canRepair}>
+          Apply repair
+        </button>
+      {/if}
+    </div>
   </fieldset>
 </form>

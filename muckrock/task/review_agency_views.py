@@ -23,7 +23,7 @@ from muckrock.core.views import class_view_decorator
 from muckrock.foia.models import FOIARequest
 from muckrock.task.channels import agency_channels, agency_rollup, serialize_channels
 from muckrock.task.forms import ChannelRepairForm
-from muckrock.task.models import ReviewAgencyTask
+from muckrock.task.models import PortalTask, ReviewAgencyTask
 
 
 @class_view_decorator(user_passes_test(lambda u: u.is_staff))
@@ -108,8 +108,9 @@ class ReviewAgencyDetailView(DetailView):
 
     def post(self, request, *args, **kwargs):
         """Apply a repair to one or several of this agency's channels"""
+        # pylint: disable=too-many-locals
         self.object = self.get_object()
-        form = ChannelRepairForm(request.POST)
+        form = ChannelRepairForm(request.POST, agency=self.object)
         if not form.is_valid():
             for field, errors in form.errors.items():
                 label = form.fields[field].label if field in form.fields else None
@@ -134,7 +135,7 @@ class ReviewAgencyDetailView(DetailView):
             or {foia.email.email for foia in foias if foia.email}
         )
 
-        tasks = ReviewAgencyTask.repair_channels(
+        tasks, skipped = ReviewAgencyTask.repair_channels(
             agency=self.object,
             user=request.user,
             new_email=form.cleaned_data["new_email"],
@@ -144,10 +145,18 @@ class ReviewAgencyDetailView(DetailView):
             snail=form.cleaned_data["snail_mail"],
             resolve=form.cleaned_data["resolve"],
             reply=form.cleaned_data["reply"],
+            portal=form.cleaned_data.get("portal"),
         )
         messages.success(
             request,
-            _repair_message(self.object, form.cleaned_data, foias, old_emails, tasks),
+            _repair_message(
+                self.object,
+                form.cleaned_data,
+                foias,
+                old_emails,
+                tasks,
+                skipped=skipped,
+            ),
         )
         # Back to the queue, scoped to this agency, where its new blocked total
         # shows whether anything is left before the task can be resolved.
@@ -164,25 +173,30 @@ def _plural(count, word):
     return "%d %s%s" % (count, word, "" if count == 1 else "s")
 
 
-def _repair_message(agency, data, foias, old_emails, tasks):
+def _repair_message(agency, data, foias, old_emails, tasks, *, skipped=()):
     """What a repair did, and what it left for the staffer to do
 
     Each part of the submission gets a clause, including the ones that did
     nothing -- a resolve with no replacement address is easy to submit by
     accident now resolve starts checked.  A task the repair touched but left
     open is named, since it no longer stands out in the queue on its own.
+    A request a portal move skipped is still on its channel, so it is not
+    counted as rerouted.
     """
+    foias = [foia for foia in foias if foia not in skipped]
     parts = []
-    if data["new_email"] or data["snail_mail"]:
+    portal = data.get("portal")
+    if portal or data["new_email"] or data["snail_mail"]:
         channels = _plural(len(old_emails), "channel")
         if 0 < len(old_emails) <= 3:
             channels += " (%s)" % ", ".join(old_emails)
-        target = data["new_email"].email if data["new_email"] else "snail mail"
         parts.append(
             "Rerouted %s on %s to %s."
-            % (_plural(len(foias), "request"), channels, target)
+            % (_plural(len(foias), "request"), channels, _repair_target(data))
         )
-        if data["update_agency_info"]:
+        if portal:
+            parts.append(_portal_summary(foias, skipped))
+        elif data["update_agency_info"]:
             parts.append("Agency contact updated.")
     else:
         parts.append("No contact change.")
@@ -207,6 +221,32 @@ def _repair_message(agency, data, foias, old_emails, tasks):
             "%d tasks are still open: %s." % (len(still_open), ", ".join(still_open))
         )
     return "%s: %s" % (agency.name, " ".join(parts))
+
+
+def _repair_target(data):
+    """Where a repair sent the requests"""
+    if data.get("portal"):
+        return data["portal"].name
+    if data["new_email"]:
+        return data["new_email"].email
+    return "snail mail"
+
+
+def _portal_summary(foias, skipped):
+    """How much portal work a move just queued, counted from what was made
+
+    A request with nothing to resend is named, so it can be found by hand.
+    """
+    count = PortalTask.objects.filter(
+        communication__foia__in=foias, resolved=False
+    ).count()
+    summary = "%s to file." % _plural(count, "Portal Task")
+    if skipped:
+        summary += " Skipped %s with no filed request to resend: %s." % (
+            _plural(len(skipped), "request"),
+            ", ".join("#%d" % foia.pk for foia in skipped),
+        )
+    return summary
 
 
 def _error_summary(message, when):
