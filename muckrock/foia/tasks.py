@@ -57,6 +57,7 @@ from muckrock.core.utils import get_dc_client, read_in_chunks, squarelet_get
 from muckrock.foia.constants import FILE_MAGIC_BYTES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
+    END_STATUS,
     FOIACommunication,
     FOIAComposer,
     FOIAFile,
@@ -403,6 +404,14 @@ def resolve_gloo_if_possible(resp_task, extracted_data):
 
     # do not resolve the task if gloo cannot determine the correct status
     if resp_task.predicted_status == "indeterminate":
+        return
+
+    # do not resolve the task if it would reopen a closed request,
+    # like when an agency replies to a user's thank you note
+    if (
+        resp_task.communication.foia.status in END_STATUS
+        and resp_task.predicted_status not in END_STATUS
+    ):
         return
 
     # do not resolve the task if gloo classifies a communication as completed
