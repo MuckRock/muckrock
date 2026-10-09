@@ -18,11 +18,49 @@ from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import EMBARGO_CHOICES, FOIARequest
+from muckrock.foia.models import EMBARGO_CHOICES, FOIACommunication, FOIARequest
 from muckrock.foia.models.log import FOIALogEntry
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
+
+
+def filter_communication_date_range(queryset, name, value):
+    """Match requests with a communication inside the given date range."""
+    # pylint: disable=unused-argument
+    comms = FOIACommunication.objects.all()
+    if value.start is not None:
+        comms = comms.filter(datetime__gte=value.start)
+    if value.stop is not None:
+        comms = comms.filter(datetime__lte=value.stop)
+    return queryset.filter(id__in=comms.values("foia_id"))
+
+
+def filter_minimum_pages(queryset, name, value):
+    """Match requests with at least one file of `value` or more pages"""
+    # pylint: disable=unused-argument
+    # 0 skips the filter because that's just the whole corpus
+    if value == 0:
+        return queryset
+    foia_ids = FOIACommunication.objects.filter(files__pages__gte=value).values(
+        "foia_id"
+    )
+    return queryset.filter(id__in=foia_ids)
+
+
+def filter_file_types(queryset, name, value):
+    """Match requests with at least one file ending in any of the given extensions."""
+    # pylint: disable=unused-argument
+    query = Q()
+    for file_type in value.split(","):
+        file_type = file_type.strip()
+        if not file_type:
+            continue
+        query |= Q(files__ffile__endswith=file_type)
+    if not query:
+        return queryset
+    foia_ids = FOIACommunication.objects.filter(query).values("foia_id")
+    return queryset.filter(id__in=foia_ids)
 
 
 class JurisdictionFilterSet(django_filters.FilterSet):
@@ -101,30 +139,19 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
     minimum_pages = django_filters.NumberFilter(
-        field_name="communications__files__pages",
-        lookup_expr="gte",
+        method=filter_minimum_pages,
         label="Min. Pages",
-        distinct=True,
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        field_name="communications__datetime",
+        method=filter_communication_date_range,
         label="Date Range",
-        lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
     file_types = django_filters.CharFilter(
-        label="File Types", method="filter_file_types"
+        method=filter_file_types,
+        label="File Types",
     )
-
-    def filter_file_types(self, queryset, name, value):
-        """Filter requests with certain types of files"""
-        # pylint: disable=unused-argument
-        file_types = value.split(",")
-        query = Q()
-        for file_type in file_types:
-            query |= Q(communications__files__ffile__endswith=file_type.strip())
-        return queryset.filter(query)
 
     class Meta:
         model = FOIARequest
@@ -160,30 +187,19 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
     minimum_pages = django_filters.NumberFilter(
-        field_name="communications__files__pages",
-        lookup_expr="gte",
+        method=filter_minimum_pages,
         label="Min. Pages",
-        distinct=True,
         widget=forms.NumberInput(),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        field_name="communications__datetime",
+        method=filter_communication_date_range,
         label="Date Range",
-        lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
     file_types = django_filters.CharFilter(
-        label="File Types", method="filter_file_types"
+        method=filter_file_types,
+        label="File Types",
     )
-
-    def filter_file_types(self, queryset, name, value):
-        """Filter requests with certain types of files"""
-        # pylint: disable=unused-argument
-        file_types = value.split(",")
-        query = Q()
-        for file_type in file_types:
-            query |= Q(communications__files__ffile__endswith=file_type.strip())
-        return queryset.filter(query)
 
     class Meta:
         model = FOIARequest
@@ -243,9 +259,8 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         ),
     )
     date_range = django_filters.DateFromToRangeFilter(
-        field_name="communications__datetime",
+        method=filter_communication_date_range,
         label="Date Range",
-        lookup_expr="contains",
         widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
