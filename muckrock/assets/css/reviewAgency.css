@@ -353,7 +353,46 @@
   margin-bottom: calc(var(--ra-vr) / 2);
 }
 
+/* Where the requests go.  Styled after the site's .tab, but not named for it:
+   tabs.js claims every .tab on the page for hash navigation. */
+.repair-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--ra-grey-7);
+  margin-bottom: var(--ra-vr);
+}
+
+.repair-tab {
+  margin-bottom: -1px;
+  padding: calc(var(--ra-vr) / 2) var(--ra-vr);
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+  background: none;
+  color: var(--ra-grey-3);
+  font: inherit;
+  cursor: pointer;
+}
+
+.repair-tab:hover {
+  color: inherit;
+}
+
+.repair-tab:focus-visible {
+  outline: 2px solid var(--ra-blue);
+  outline-offset: -2px;
+}
+
+.repair-tab--active {
+  border-color: var(--ra-grey-7);
+  border-bottom-color: var(--ra-white);
+  background: var(--ra-white);
+  color: inherit;
+  font-weight: 500;
+}
+
 .repair-action input[type="email"],
+.repair-action input[type="url"],
+.repair-action input[type="text"],
+.repair-action select,
 .repair-action textarea {
   display: block;
   width: 100%;

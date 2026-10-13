@@ -16,7 +16,10 @@ from django.test import TestCase
 from unittest import mock
 
 # MuckRock
+from muckrock.core.factories import AgencyFactory
 from muckrock.core.test_utils import RunCommitHooksMixin
+from muckrock.foia.factories import FOIACommunicationFactory
+from muckrock.portal.models import Portal
 from muckrock.task.forms import ChannelRepairForm
 from muckrock.task.tests.test_repair import ChannelRepairMixin
 from muckrock.task.tests.test_review_agency import ReviewAgencyQueueMixin
@@ -192,6 +195,56 @@ class RepairMessageTests(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         assert "Rerouted" not in message
         # the follow up would only bounce off the same broken address
         assert "No follow-up sent." in message
+
+
+@mock.patch("muckrock.task.tasks.submit_review_update.delay")
+class PortalReuseMessageTests(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
+    """Matching a known portal URL says whose portal it is
+
+    A shared portal is normal -- city departments often file through one GovQA
+    site -- but a mistyped URL can quietly attach another agency's.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.portal = Portal.objects.create(
+            url="https://city.govqa.us", name="City GovQA", type="govqa"
+        )
+        self.address, foias, _task = self.make_channel("city@mycusthelp.net")
+        FOIACommunicationFactory(foia=foias[0], category="n", response=False)
+        self.foias = foias
+
+    def repair(self, **data):
+        response = self.post(
+            repair_via="portal",
+            channel_pks=str(self.address.pk),
+            foia_pks=str(self.foias[0].pk),
+            **data,
+        )
+        return " ".join(str(m) for m in get_messages(response.wsgi_request))
+
+    def test_names_the_other_agencies_using_a_reused_portal(self, _mock_delay):
+        AgencyFactory(portal=self.portal)
+        message = self.repair(portal_url="HTTPS://CITY.GOVQA.US")
+        assert (
+            "Attached the existing portal City GovQA, also used by 1 other agency."
+            in message
+        )
+
+    def test_says_when_a_reused_portal_has_no_other_agency(self, _mock_delay):
+        message = self.repair(portal_url="https://city.govqa.us")
+        assert "Attached the existing portal City GovQA." in message
+
+    def test_silent_for_the_agencys_own_portal(self, _mock_delay):
+        self.agency.portal = self.portal
+        self.agency.save()
+        assert "Attached the existing portal" not in self.repair()
+
+    def test_silent_for_a_new_portal(self, _mock_delay):
+        message = self.repair(
+            portal_url="https://new.govqa.us", portal_name="New", portal_type="govqa"
+        )
+        assert "Attached the existing portal" not in message
 
 
 class RepairErrorMessageTests(ChannelRepairMixin, TestCase):

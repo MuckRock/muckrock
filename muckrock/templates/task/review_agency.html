@@ -28,7 +28,9 @@
         {% if outcome %}
           <p>
             <code>{{ outcome.old_email|default:"agency-level task" }}</code>
-            {% if outcome.new_email %}
+            {% if outcome.portal %}
+              &rarr; portal: {{ outcome.portal }}
+            {% elif outcome.new_email %}
               &rarr; <code>{{ outcome.new_email }}</code>
             {% elif outcome.snail_mail %}
               &rarr; snail mail

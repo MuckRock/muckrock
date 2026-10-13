@@ -17,6 +17,7 @@ command to fix rather than something this layer should hide.
 # Django
 from django.db.models import Count, Max, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
+from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
@@ -29,6 +30,7 @@ from muckrock.communication.models import (
     EmailError,
     EmailOpen,
 )
+from muckrock.portal.models import PORTAL_TYPES
 from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 # An error flag with no bounce event in two years tells you something different
@@ -98,6 +100,10 @@ NOREPLY_PREFIXES = (
     "notification",
     "notifications",
 )
+
+# Portal types a repair can add.  FOIAonline is discontinued: existing portals
+# keep the type, but no new one should get it.
+REPAIR_PORTAL_TYPES = [t for t in PORTAL_TYPES if t[0] != "foiaonline"]
 
 
 def classify_address(address, newest_reason=""):
@@ -403,6 +409,25 @@ def serialize_channels(agency, channels=None):
         # So the component can refuse a portal address as the replacement
         # before submitting, by the same rule the form applies
         "portal_domains": sorted(PORTAL_DOMAINS),
+        # Where a portal repair sends requests, or None when one must be added
+        "portal": _serialize_portal(agency.portal),
+        "portal_types": [
+            {"value": value, "label": label} for value, label in REPAIR_PORTAL_TYPES
+        ],
+    }
+
+
+def _serialize_portal(portal):
+    """The agency's portal as plain data, or None"""
+    if portal is None:
+        return None
+    return {
+        "id": portal.pk,
+        "name": portal.name,
+        "url": portal.url,
+        "type": portal.get_type_display(),
+        "has_error": portal.status == "error",
+        "admin_url": reverse("admin:portal_portal_change", args=[portal.pk]),
     }
 
 
