@@ -862,6 +862,64 @@ class TestPortalRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         message = str(list(get_messages(response.wsgi_request))[0])
         assert "2 Portal Tasks" in message
 
+    def use_portal(self):
+        """Give the agency a working portal"""
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+
+    def test_task_with_a_skipped_request_stays_open(self, _mock_delay):
+        """A skipped request is still blocked, so its task is not done
+
+        Found in local testing: Seattle's spdpdr@ task closed with all four of
+        its requests skipped and still on the broken address.
+        """
+        self.use_portal()
+        address, foias, _comms, task = self.make_portal_channel(blocked=1)
+        empty = FOIARequestFactory(agency=self.agency, email=address, status="ack")
+        response = self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks="%d,%d" % (foias[0].pk, empty.pk),
+            resolve="on",
+        )
+        task.refresh_from_db()
+        assert not task.resolved
+        assert task.repair_outcome["requests_updated"] == 1
+        message = str(list(get_messages(response.wsgi_request))[0])
+        assert "Task #%d (seattle@mycusthelp.net) is still open." % task.pk in message
+
+    def test_moved_requests_leave_the_broken_address(self, _mock_delay):
+        """Left on the old address, a filed request reads as blocked there again
+
+        The portal outranks email for sending, but the review queue counts
+        blocked requests by address.
+        """
+        self.use_portal()
+        address, foias, _comms, _task = self.make_portal_channel(blocked=1)
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+        )
+        foias[0].refresh_from_db()
+        assert foias[0].portal == self.agency.portal
+        assert foias[0].email is None
+
+    def test_message_counts_only_the_portal_tasks_it_made(self, _mock_delay):
+        """A Portal Task already open on a request is not new work"""
+        self.use_portal()
+        address, foias, comms, _task = self.make_portal_channel(blocked=1)
+        PortalTask.objects.create(category="n", communication=comms[0])
+        response = self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(foias[0].pk),
+        )
+        message = str(list(get_messages(response.wsgi_request))[0])
+        assert "1 Portal Task to file." in message
+
     def test_a_broken_portal_changes_nothing(self, _mock_delay):
         """Bailing out leaves the requests and task as they were"""
         self.agency.portal = Portal.objects.create(
@@ -899,7 +957,6 @@ class TestSubmitReviewUpdate(TestCase):
         failing = self.pks[0]
 
         def submit(foia, **kwargs):
-            # pylint: disable=unused-argument
             if foia.pk == failing:
                 raise ValueError("broken request")
 

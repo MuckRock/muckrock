@@ -135,6 +135,21 @@ class ReviewAgencyDetailView(DetailView):
             or {foia.email.email for foia in foias if foia.email}
         )
 
+        # A known portal the agency is not using yet: matched by URL, so a
+        # mistyped one can attach another agency's portal without a word
+        portal = form.cleaned_data.get("portal")
+        reused_portal = (
+            portal is not None
+            and portal.pk is not None
+            and portal.pk != self.object.portal_id
+        )
+        # Open Portal Tasks on these requests already, so the summary counts
+        # only the work this repair queued
+        existing_portal_tasks = set(
+            PortalTask.objects.filter(
+                communication__foia__in=foias, resolved=False
+            ).values_list("pk", flat=True)
+        )
         tasks, skipped = ReviewAgencyTask.repair_channels(
             agency=self.object,
             user=request.user,
@@ -156,6 +171,12 @@ class ReviewAgencyDetailView(DetailView):
                 old_emails,
                 tasks,
                 skipped=skipped,
+                existing_portal_tasks=existing_portal_tasks,
+                reused_portal_users=(
+                    portal.agencies.exclude(pk=self.object.pk).count()
+                    if reused_portal
+                    else None
+                ),
             ),
         )
         # Back to the queue, scoped to this agency, where its new blocked total
@@ -173,7 +194,17 @@ def _plural(count, word):
     return "%d %s%s" % (count, word, "" if count == 1 else "s")
 
 
-def _repair_message(agency, data, foias, old_emails, tasks, *, skipped=()):
+def _repair_message(
+    agency,
+    data,
+    foias,
+    old_emails,
+    tasks,
+    *,
+    skipped=(),
+    existing_portal_tasks=(),
+    reused_portal_users=None,
+):
     """What a repair did, and what it left for the staffer to do
 
     Each part of the submission gets a clause, including the ones that did
@@ -195,7 +226,9 @@ def _repair_message(agency, data, foias, old_emails, tasks, *, skipped=()):
             % (_plural(len(foias), "request"), channels, _repair_target(data))
         )
         if portal:
-            parts.append(_portal_summary(foias, skipped))
+            if reused_portal_users is not None:
+                parts.append(_reused_portal_note(portal, reused_portal_users))
+            parts.append(_portal_summary(foias, skipped, existing_portal_tasks))
         elif data["update_agency_info"]:
             parts.append("Agency contact updated.")
     else:
@@ -232,14 +265,27 @@ def _repair_target(data):
     return "snail mail"
 
 
-def _portal_summary(foias, skipped):
+def _reused_portal_note(portal, other_agencies):
+    """Which known portal a repair attached, and who else uses it"""
+    if not other_agencies:
+        return "Attached the existing portal %s." % portal.name
+    return "Attached the existing portal %s, also used by %d other %s." % (
+        portal.name,
+        other_agencies,
+        "agency" if other_agencies == 1 else "agencies",
+    )
+
+
+def _portal_summary(foias, skipped, existing_portal_tasks=()):
     """How much portal work a move just queued, counted from what was made
 
     A request with nothing to resend is named, so it can be found by hand.
     """
-    count = PortalTask.objects.filter(
-        communication__foia__in=foias, resolved=False
-    ).count()
+    count = (
+        PortalTask.objects.filter(communication__foia__in=foias, resolved=False)
+        .exclude(pk__in=existing_portal_tasks)
+        .count()
+    )
     summary = "%s to file." % _plural(count, "Portal Task")
     if skipped:
         summary += " Skipped %s with no filed request to resend: %s." % (

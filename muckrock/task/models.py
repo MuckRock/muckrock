@@ -776,6 +776,12 @@ class ReviewAgencyTask(Task):
                 "by": user.username if user is not None else None,
                 "at": timezone.now().isoformat(),
             }
+            # A skipped request is still blocked on its channel, so that task is
+            # not done; the agency level task waits for every broken channel
+            skipped_channels = {foia.email_id for foia in skipped}
+            broken_left = (
+                agency.foiarequest_set.get_open().filter(email__status="error").exists()
+            )
             for task_ in tasks:
                 outcome = dict(outcome_base)
                 outcome["old_email"] = (
@@ -789,7 +795,11 @@ class ReviewAgencyTask(Task):
                     outcome["requests_updated"] = moved_uncovered
                 form_data = dict(task_.form_data or {})
                 form_data["repair"] = outcome
-                if resolve:
+                if task_.email_id:
+                    done = task_.email_id not in skipped_channels
+                else:
+                    done = not broken_left
+                if resolve and done:
                     task_.resolve(user, form_data)
                 else:
                     task_.form_data = form_data
@@ -827,6 +837,9 @@ class ReviewAgencyTask(Task):
             if comm is None:
                 skipped.append(foia)
                 continue
+            # update_address() keeps the email for a portal, and the review
+            # queue would count the request as blocked on it again
+            foia.email = None
             foia.update_address("portal", email=None, fax=None)
             foia.submit(comm=comm)
         return skipped
