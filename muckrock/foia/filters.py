@@ -105,10 +105,10 @@ class CommunicationFileFilterSet(django_filters.FilterSet):
         # pylint: disable=unused-argument
         query = Q()
         for file_type in value.split(","):
-            file_type = file_type.strip()
-            if not file_type:
+            extension = file_type.strip().lstrip(".")
+            if not extension:
                 continue
-            query |= Q(files__ffile__endswith=file_type)
+            query |= Q(files__ffile__iendswith=f".{extension}")
         if not query:
             return queryset
         foia_ids = FOIACommunication.objects.filter(query).values("foia_id")
