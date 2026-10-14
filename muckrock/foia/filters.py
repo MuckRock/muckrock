@@ -5,7 +5,7 @@ Filters for FOIA models
 # Django
 from django import forms
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
 # Standard Library
 import re
@@ -18,7 +18,12 @@ from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import EMBARGO_CHOICES, FOIACommunication, FOIARequest
+from muckrock.foia.models import (
+    EMBARGO_CHOICES,
+    FOIACommunication,
+    FOIAFile,
+    FOIARequest,
+)
 from muckrock.foia.models.log import FOIALogEntry
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
@@ -78,6 +83,12 @@ class CommunicationDateRangeFilterSet(django_filters.FilterSet):
 class CommunicationFileFilterSet(django_filters.FilterSet):
     """Mix in for filtering requests by the files on their communications"""
 
+    has_files = django_filters.BooleanFilter(
+        method="filter_has_files",
+        label="Has Files",
+        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+    )
+
     minimum_pages = django_filters.NumberFilter(
         method="filter_minimum_pages",
         label="Min. Pages",
@@ -87,6 +98,13 @@ class CommunicationFileFilterSet(django_filters.FilterSet):
         method="filter_file_types",
         label="File Types",
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.request is None or not self.request.user.is_authenticated:
+            # Only logged in users can filter requests by whether they have files
+            # to deter untrackable scraping
+            self.filters.pop("has_files")
 
     def filter_minimum_pages(self, queryset, name, value):
         """Match requests with at least one file of `value` or more pages"""
@@ -113,6 +131,14 @@ class CommunicationFileFilterSet(django_filters.FilterSet):
             return queryset
         foia_ids = FOIACommunication.objects.filter(query).values("foia_id")
         return queryset.filter(id__in=foia_ids)
+
+    def filter_has_files(self, queryset, name, value):
+        """Match requests that have, or do not have, at least one file"""
+        # pylint: disable=unused-argument
+        files = FOIAFile.objects.filter(comm__foia=OuterRef("pk"))
+        if value:
+            return queryset.filter(Exists(files))
+        return queryset.exclude(Exists(files))
 
 
 class FOIARequestFilterSet(

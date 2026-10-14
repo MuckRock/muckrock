@@ -3,13 +3,15 @@ Tests for FOIA request filters
 """
 
 # Django
-from django.test import TestCase
+from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
 # Standard Library
 from datetime import datetime
 
 # MuckRock
+from muckrock.core.factories import UserFactory
 from muckrock.core.test_utils import assert_page_queries_do_not_scale
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
@@ -208,3 +210,44 @@ class FilterQueryScalingTests(TestCase):
         """The file types filter does not multiply rows by files or types"""
         url = "/foi/list/?file_types=pdf,%20csv"
         assert_page_queries_do_not_scale(self.client, url, self.create_one)
+
+
+class HasFilesFilterTests(TestCase):
+    """Tests for filter_has_files"""
+
+    def setUp(self):
+        self.filterset = FOIARequestFilterSet()
+        self.with_files = FOIARequestFactory()
+        self.no_files = FOIARequestFactory()
+        self.comm_only = FOIARequestFactory()
+        comm = FOIACommunicationFactory(foia=self.with_files)
+        FOIAFileFactory(comm=comm)
+        FOIAFileFactory(comm=comm)
+        FOIACommunicationFactory(foia=self.comm_only)
+        self.foias = FOIARequest.objects.filter(
+            pk__in=[self.with_files.pk, self.no_files.pk, self.comm_only.pk]
+        )
+
+    def filterset_for(self, user):
+        """Build the filterset for a request made by the given user"""
+        request = RequestFactory().get("/foi/list/")
+        request.user = user
+        return FOIARequestFilterSet(request.GET, queryset=self.foias, request=request)
+
+    def test_has_files(self):
+        """True keeps only requests with at least one file, once each"""
+        results = self.filterset.filter_has_files(self.foias, "has_files", True)
+        self.assertEqual(list(results), [self.with_files])
+
+    def test_has_no_files(self):
+        """False keeps requests with no files, with or without communications"""
+        results = self.filterset.filter_has_files(self.foias, "has_files", False)
+        self.assertEqual(set(results), {self.no_files, self.comm_only})
+
+    def test_logged_in_users_get_filter(self):
+        """Logged in users see the has files filter"""
+        self.assertIn("has_files", self.filterset_for(UserFactory()).filters)
+
+    def test_anonymous_users_do_not_get_filter(self):
+        """Logged out users do not see or use the has files filter"""
+        self.assertNotIn("has_files", self.filterset_for(AnonymousUser()).filters)
