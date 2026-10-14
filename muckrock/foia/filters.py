@@ -18,16 +18,18 @@ from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import (
-    EMBARGO_CHOICES,
-    FOIACommunication,
-    FOIAFile,
-    FOIARequest,
-)
+from muckrock.foia.models import EMBARGO_CHOICES, FOIACommunication, FOIARequest
 from muckrock.foia.models.log import FOIALogEntry
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
+
+
+def visible_communications(request):
+    """Communications the user can see, staff also see hidden ones"""
+    if request is not None and request.user.is_staff:
+        return FOIACommunication.objects.all()
+    return FOIACommunication.objects.visible()
 
 
 class JurisdictionFilterSet(django_filters.FilterSet):
@@ -72,7 +74,7 @@ class CommunicationDateRangeFilterSet(django_filters.FilterSet):
     def filter_communication_date_range(self, queryset, name, value):
         """Match requests with a communication inside the given date range."""
         # pylint: disable=unused-argument
-        comms = FOIACommunication.objects.all()
+        comms = visible_communications(self.request)
         if value.start is not None:
             comms = comms.filter(datetime__gte=value.start)
         if value.stop is not None:
@@ -112,10 +114,8 @@ class CommunicationFileFilterSet(django_filters.FilterSet):
         # 0 skips the filter because that's just the whole corpus
         if value == 0:
             return queryset
-        foia_ids = FOIACommunication.objects.filter(files__pages__gte=value).values(
-            "foia_id"
-        )
-        return queryset.filter(id__in=foia_ids)
+        comms = visible_communications(self.request).filter(files__pages__gte=value)
+        return queryset.filter(id__in=comms.values("foia_id"))
 
     def filter_file_types(self, queryset, name, value):
         """Match requests with at least one file
@@ -129,16 +129,18 @@ class CommunicationFileFilterSet(django_filters.FilterSet):
             query |= Q(files__ffile__iendswith=f".{extension}")
         if not query:
             return queryset
-        foia_ids = FOIACommunication.objects.filter(query).values("foia_id")
-        return queryset.filter(id__in=foia_ids)
+        comms = visible_communications(self.request).filter(query)
+        return queryset.filter(id__in=comms.values("foia_id"))
 
     def filter_has_files(self, queryset, name, value):
         """Match requests that have, or do not have, at least one file"""
         # pylint: disable=unused-argument
-        files = FOIAFile.objects.filter(comm__foia=OuterRef("pk"))
+        comms = visible_communications(self.request).filter(
+            foia=OuterRef("pk"), files__isnull=False
+        )
         if value:
-            return queryset.filter(Exists(files))
-        return queryset.exclude(Exists(files))
+            return queryset.filter(Exists(comms))
+        return queryset.exclude(Exists(comms))
 
 
 class FOIARequestFilterSet(

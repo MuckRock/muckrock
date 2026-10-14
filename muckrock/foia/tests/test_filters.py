@@ -251,3 +251,48 @@ class HasFilesFilterTests(TestCase):
     def test_anonymous_users_do_not_get_filter(self):
         """Logged out users do not see or use the has files filter"""
         self.assertNotIn("has_files", self.filterset_for(AnonymousUser()).filters)
+
+
+class HiddenCommunicationFilterTests(TestCase):
+    """Hidden communications only count for staff"""
+
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+        comm = FOIACommunicationFactory(
+            foia=self.foia, hidden=True, datetime=aware(2025, 1, 15)
+        )
+        FOIAFileFactory(comm=comm, pages=12, ffile__filename="report.pdf")
+        self.foias = FOIARequest.objects.filter(pk=self.foia.pk)
+
+    def filterset_for(self, user):
+        """Build the filterset for a request made by the given user"""
+        request = RequestFactory().get("/foi/list/")
+        request.user = user
+        return FOIARequestFilterSet(request.GET, queryset=self.foias, request=request)
+
+    def run_filters(self, filterset):
+        """Run every communication filter and return which ones matched"""
+        return {
+            "date_range": filterset.filter_communication_date_range(
+                self.foias, "date_range", slice(aware(2025, 1, 1), aware(2025, 2, 1))
+            ).exists(),
+            "minimum_pages": filterset.filter_minimum_pages(
+                self.foias, "minimum_pages", 10
+            ).exists(),
+            "file_types": filterset.filter_file_types(
+                self.foias, "file_types", "pdf"
+            ).exists(),
+            "has_files": filterset.filter_has_files(
+                self.foias, "has_files", True
+            ).exists(),
+        }
+
+    def test_hidden_ignored_for_users(self):
+        """A file on a hidden communication does not match for a regular user"""
+        results = self.run_filters(self.filterset_for(UserFactory()))
+        self.assertEqual(results, dict.fromkeys(results, False))
+
+    def test_hidden_counted_for_staff(self):
+        """Staff match on files from hidden communications"""
+        results = self.run_filters(self.filterset_for(UserFactory(is_staff=True)))
+        self.assertEqual(results, dict.fromkeys(results, True))
