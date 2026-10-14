@@ -6,6 +6,7 @@ Views for the Agency application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.views import redirect_to_login
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.http import JsonResponse
@@ -565,6 +566,12 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
     agency = None
     filter_class = FOIAFileFilterSet
 
+    def dispatch(self, request, *args, **kwargs):
+        """Send anonymous users to login when the killswitch is on."""
+        if settings.HIDE_FILES_FROM_SCRAPERS and not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        return super().dispatch(request, *args, **kwargs)
+
     def get_agency(self):
         """Returns the Agency for the files. Caches it as an attribute."""
         if self.agency is None:
@@ -585,8 +592,6 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
     def get_queryset(self):
         """Only files for one agency"""
         agency = self.get_agency()
-        if settings.HIDE_FILES_FROM_SCRAPERS and not self.request.user.is_authenticated:
-            return FOIAFile.objects.none()
         queryset = super().get_queryset()
         return queryset.filter(
             comm__foia__embargo_status="public", comm__foia__agency=agency
@@ -596,5 +601,4 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         context = super().get_context_data(**kwargs)
         context["agency"] = self.get_agency()
         context["agency_url"] = context["agency"].get_absolute_url()
-        context["hide_files_from_scrapers"] = settings.HIDE_FILES_FROM_SCRAPERS
         return context
