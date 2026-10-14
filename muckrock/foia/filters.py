@@ -5,7 +5,7 @@ Filters for FOIA models
 # Django
 from django import forms
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
 # Standard Library
 import re
@@ -18,11 +18,18 @@ from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
 from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
-from muckrock.foia.models import EMBARGO_CHOICES, FOIARequest
+from muckrock.foia.models import EMBARGO_CHOICES, FOIACommunication, FOIARequest
 from muckrock.foia.models.log import FOIALogEntry
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
 from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
+
+
+def visible_communications(request):
+    """Communications the user can see, staff also see hidden ones"""
+    if request is not None and request.user.is_staff:
+        return FOIACommunication.objects.all()
+    return FOIACommunication.objects.visible()
 
 
 class JurisdictionFilterSet(django_filters.FilterSet):
@@ -55,7 +62,90 @@ class JurisdictionFilterSet(django_filters.FilterSet):
         return queryset.filter(query)
 
 
-class FOIARequestFilterSet(JurisdictionFilterSet):
+class CommunicationDateRangeFilterSet(django_filters.FilterSet):
+    """Mix in for filtering requests by the dates of their communications"""
+
+    date_range = django_filters.DateFromToRangeFilter(
+        method="filter_communication_date_range",
+        label="Date Range",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
+
+    def filter_communication_date_range(self, queryset, name, value):
+        """Match requests with a communication inside the given date range."""
+        # pylint: disable=unused-argument
+        comms = visible_communications(self.request)
+        if value.start is not None:
+            comms = comms.filter(datetime__gte=value.start)
+        if value.stop is not None:
+            comms = comms.filter(datetime__lte=value.stop)
+        return queryset.filter(id__in=comms.values("foia_id"))
+
+
+class CommunicationFileFilterSet(django_filters.FilterSet):
+    """Mix in for filtering requests by the files on their communications"""
+
+    has_files = django_filters.BooleanFilter(
+        method="filter_has_files",
+        label="Has Files",
+        widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
+    )
+
+    minimum_pages = django_filters.NumberFilter(
+        method="filter_minimum_pages",
+        label="Min. Pages",
+        widget=forms.NumberInput(),
+    )
+    file_types = django_filters.CharFilter(
+        method="filter_file_types",
+        label="File Types",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.request is None or not self.request.user.is_authenticated:
+            # Only logged in users can filter requests by whether they have files
+            # to deter untrackable scraping
+            self.filters.pop("has_files")
+
+    def filter_minimum_pages(self, queryset, name, value):
+        """Match requests with at least one file of `value` or more pages"""
+        # pylint: disable=unused-argument
+        # 0 skips the filter because that's just the whole corpus
+        if value == 0:
+            return queryset
+        comms = visible_communications(self.request).filter(files__pages__gte=value)
+        return queryset.filter(id__in=comms.values("foia_id"))
+
+    def filter_file_types(self, queryset, name, value):
+        """Match requests with at least one file
+        ending in any of the given extensions."""
+        # pylint: disable=unused-argument
+        query = Q()
+        for file_type in value.split(","):
+            extension = file_type.strip().lstrip(".")
+            if not extension:
+                continue
+            query |= Q(files__ffile__iendswith=f".{extension}")
+        if not query:
+            return queryset
+        comms = visible_communications(self.request).filter(query)
+        return queryset.filter(id__in=comms.values("foia_id"))
+
+    def filter_has_files(self, queryset, name, value):
+        """Match requests that have, or do not have, at least one file"""
+        # pylint: disable=unused-argument
+        comms = visible_communications(self.request).filter(
+            foia=OuterRef("pk"), files__isnull=False
+        )
+        if value:
+            return queryset.filter(Exists(comms))
+        return queryset.exclude(Exists(comms))
+
+
+class FOIARequestFilterSet(
+    JurisdictionFilterSet, CommunicationDateRangeFilterSet, CommunicationFileFilterSet
+):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
 
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
@@ -100,38 +190,15 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
-    minimum_pages = django_filters.NumberFilter(
-        field_name="communications__files__pages",
-        lookup_expr="gte",
-        label="Min. Pages",
-        distinct=True,
-        widget=forms.NumberInput(),
-    )
-    date_range = django_filters.DateFromToRangeFilter(
-        field_name="communications__datetime",
-        label="Date Range",
-        lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
-    )
-    file_types = django_filters.CharFilter(
-        label="File Types", method="filter_file_types"
-    )
-
-    def filter_file_types(self, queryset, name, value):
-        """Filter requests with certain types of files"""
-        # pylint: disable=unused-argument
-        file_types = value.split(",")
-        query = Q()
-        for file_type in file_types:
-            query |= Q(communications__files__ffile__endswith=file_type.strip())
-        return queryset.filter(query)
 
     class Meta:
         model = FOIARequest
         fields = ["status", "user", "agency", "jurisdiction", "projects"]
 
 
-class MyFOIARequestFilterSet(JurisdictionFilterSet):
+class MyFOIARequestFilterSet(
+    JurisdictionFilterSet, CommunicationDateRangeFilterSet, CommunicationFileFilterSet
+):
     """Allows filtering a request by status, agency, jurisdiction, or tags."""
 
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
@@ -159,31 +226,6 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
-    minimum_pages = django_filters.NumberFilter(
-        field_name="communications__files__pages",
-        lookup_expr="gte",
-        label="Min. Pages",
-        distinct=True,
-        widget=forms.NumberInput(),
-    )
-    date_range = django_filters.DateFromToRangeFilter(
-        field_name="communications__datetime",
-        label="Date Range",
-        lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
-    )
-    file_types = django_filters.CharFilter(
-        label="File Types", method="filter_file_types"
-    )
-
-    def filter_file_types(self, queryset, name, value):
-        """Filter requests with certain types of files"""
-        # pylint: disable=unused-argument
-        file_types = value.split(",")
-        query = Q()
-        for file_type in file_types:
-            query |= Q(communications__files__ffile__endswith=file_type.strip())
-        return queryset.filter(query)
 
     class Meta:
         model = FOIARequest
@@ -222,7 +264,7 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
         fields = ["user", "agency", "jurisdiction"]
 
 
-class AgencyFOIARequestFilterSet(django_filters.FilterSet):
+class AgencyFOIARequestFilterSet(CommunicationDateRangeFilterSet):
     """Filters for agency users"""
 
     user = django_filters.ModelMultipleChoiceFilter(
@@ -241,12 +283,6 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2Multiple(
             url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
         ),
-    )
-    date_range = django_filters.DateFromToRangeFilter(
-        field_name="communications__datetime",
-        label="Date Range",
-        lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
     class Meta:
