@@ -13,6 +13,7 @@ from botocore.exceptions import ClientError
 # MuckRock
 from muckrock import agency, foia, task
 from muckrock.portal.forms import PortalForm
+from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 from muckrock.task.models import Task
 
 register = template.Library()
@@ -369,18 +370,11 @@ class ReviewAgencyTaskNode(TaskNode):
                 initial = str(fax[0])
             else:
                 initial = ""
-        followup_text = (
-            "To Whom It May Concern:\n"
-            "I wanted to follow up on the following request, copied below. "
-            "Please let me know when I can expect to receive a response.\n"
-            "Thanks for your help, and let me know if further "
-            "clarification is needed."
-        )
         extra_context["form"] = task.forms.ReviewAgencyTaskForm(
             initial={
                 "email_or_fax": initial,
                 "update_agency_info": not initial,
-                "reply": followup_text,
+                "reply": REVIEW_AGENCY_FOLLOWUP,
             },
             prefix=str(self.task.pk),
         )

@@ -6,7 +6,7 @@ Tests for site level functionality and helper functions for application tests
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 # Standard Library
@@ -14,10 +14,12 @@ import hashlib
 import logging
 from unittest import mock
 from unittest.mock import ANY, Mock, patch
+from urllib.parse import parse_qs, urlparse
 
 # Third Party
 import pytest
 from actstream.models import Action
+from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.accounts.models import Notification
@@ -114,6 +116,64 @@ class TestFunctional(TestCase):
         for obj in api_objs:
             print(obj)
             get_allowed(self.client, reverse("api-%s-list" % obj))
+
+
+class TestAPIV2CountPagination(TestCase):
+    """The APIv2 count parameter adds a total count to paginated responses"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=UserFactory(is_staff=True))
+        self.url = reverse("api2-requests-list")
+        for _ in range(3):
+            FOIARequestFactory()
+
+    def next_params(self, response):
+        """Query params on the response's next link"""
+        next_url = response.json()["next"]
+        return parse_qs(urlparse(next_url).query, keep_blank_values=True)
+
+    def test_no_count_by_default(self):
+        """Without ?count the response has no count"""
+        response = self.client.get(self.url)
+        assert response.status_code == 200
+        assert "count" not in response.json()
+
+    @override_settings(API_PAGINATION_COUNT_MODE=1)
+    def test_count_returned_first(self):
+        """?count adds the total count as the first key"""
+        response = self.client.get(self.url, {"count": ""})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] == 3
+        assert next(iter(data)) == "count"
+
+    @override_settings(API_PAGINATION_COUNT_MODE=1)
+    def test_count_any_value(self):
+        """Any value for count enables it, since only presence is checked"""
+        response = self.client.get(self.url, {"count": "0"})
+        assert response.status_code == 200
+        assert response.json()["count"] == 3
+
+    @override_settings(API_PAGINATION_COUNT_MODE=0)
+    def test_mode_0_ignores_count(self):
+        """Mode 0 never returns a count"""
+        response = self.client.get(self.url, {"count": ""})
+        assert response.status_code == 200
+        assert "count" not in response.json()
+
+    @override_settings(API_PAGINATION_COUNT_MODE=1)
+    def test_mode_1_keeps_count_on_next(self):
+        """Mode 1 keeps count on the next link"""
+        response = self.client.get(self.url, {"count": "", "page_size": 1})
+        assert "count" in self.next_params(response)
+
+    @override_settings(API_PAGINATION_COUNT_MODE=2)
+    def test_mode_2_strips_count_from_next(self):
+        """Mode 2 returns the count but strips it from the next link"""
+        response = self.client.get(self.url, {"count": "", "page_size": 1})
+        assert response.json()["count"] == 3
+        assert "count" not in self.next_params(response)
 
 
 class TestUnit(TestCase):

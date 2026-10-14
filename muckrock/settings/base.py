@@ -5,6 +5,7 @@ Django settings for muckrock project
 # Django
 from celery.concurrency import asynpool
 from celery.schedules import crontab
+from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
 # Standard Library
@@ -289,6 +290,7 @@ INSTALLED_APPS = (
     "django_extensions",
     "social_django",
     "muckrock.accounts",
+    "muckrock.accounts.stats_api",
     "muckrock.foia",
     "muckrock.news",
     "muckrock.core",
@@ -302,6 +304,7 @@ INSTALLED_APPS = (
     "muckrock.task",
     "muckrock.message",
     "muckrock.organization",
+    "muckrock.organization.stats_api",
     "muckrock.project",
     "muckrock.mailgun",
     "muckrock.foiamachine",
@@ -639,7 +642,17 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# Pagination defaults, default for standard pagination was 50
+# so this is what both standard and cursor fall back to
+DEFAULT_PAGE_SIZE = int(os.environ.get("DEFAULT_PAGE_SIZE", 50))
 MAX_PAGE_SIZE = int(os.environ.get("MAX_PAGE_SIZE", 100))
+APIV2_MAX_PAGE_SIZE = int(os.environ.get("APIV2_MAX_PAGE_SIZE", 100))
+
+# See muckrock/core/pagination.py to see what this does
+API_PAGINATION_COUNT_MODE = int(os.environ.get("API_PAGINATION_COUNT_MODE", 1))
+if API_PAGINATION_COUNT_MODE not in (0, 1, 2):
+    raise ImproperlyConfigured("API_PAGINATION_COUNT_MODE must be 0, 1 or 2")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "MuckRock API",
@@ -1018,3 +1031,5 @@ VERIFIED_REQUEST_CHECKS_BYPASS = boolcheck(
 
 # Killswitch for unauthenticated access to files
 HIDE_FILES_FROM_SCRAPERS = boolcheck(os.environ.get("HIDE_FILES_FROM_SCRAPERS", False))
+# Number of days for windows on our stats api
+REQUEST_WINDOW_DAYS = int(os.environ.get("REQUEST_WINDOW_DAYS", 90))

@@ -16,7 +16,7 @@ from dal_select2.widgets import ListSelect2
 from muckrock.accounts.models import Notification, StockResponse
 from muckrock.agency.models import Agency
 from muckrock.communication.forms import AddressForm
-from muckrock.communication.models import Address
+from muckrock.communication.models import Address, EmailAddress
 from muckrock.communication.utils import get_email_or_fax
 from muckrock.core import autocomplete
 from muckrock.core.utils import generate_status_action
@@ -24,6 +24,9 @@ from muckrock.foia.codes import CODE_CHOICES, CODES
 from muckrock.foia.models import STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.message.email import TemplateEmail
+from muckrock.portal.models import Portal
+from muckrock.task.channels import REPAIR_PORTAL_TYPES, classify_address
+from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 
 # pylint:disable=too-many-positional-arguments
@@ -81,6 +84,189 @@ class ReviewAgencyTaskForm(forms.Form):
 
         if not email_or_fax and not snail_mail:
             self.add_error("email_or_fax", "Required if snail mail is not checked")
+
+
+class ChannelRepairForm(forms.Form):
+    """Repair one or several of an agency's broken channels
+
+    One submitted replacement address can be applied across requests drawn
+    from several channels: the median multi channel agency has only 61% of its
+    blocked requests on its biggest channel, so single channel only repair
+    structurally cannot clear the backlog.
+    """
+
+    repair_via = forms.ChoiceField(
+        choices=[("email", "Email"), ("portal", "Portal")],
+        initial="email",
+        required=False,
+    )
+    new_email = forms.CharField(
+        label="Replacement email address",
+        required=False,
+        widget=ListSelect2(
+            url="email-autocomplete",
+            attrs={"data-placeholder": "Search for an email address"},
+        ),
+    )
+    channel_pks = forms.CharField(required=False, widget=forms.HiddenInput)
+    foia_pks = forms.CharField(required=False, widget=forms.HiddenInput)
+    update_agency_info = forms.BooleanField(
+        label="Update agency's main contact info?", required=False
+    )
+    snail_mail = forms.BooleanField(
+        label="Make snail mail the preferred communication method", required=False
+    )
+    # Moving a channel's requests almost always finishes its task; left off,
+    # the task sits open at zero blocked
+    resolve = forms.BooleanField(
+        label="Resolve after updating", required=False, initial=True
+    )
+    reply = forms.CharField(
+        label="Reply:",
+        required=False,
+        initial=REVIEW_AGENCY_FOLLOWUP,
+        widget=forms.Textarea(attrs={"rows": 5}),
+    )
+    # Only needed in portal mode when the agency has no portal yet
+    portal_url = forms.URLField(
+        label="Portal URL", required=False, max_length=255, assume_scheme="https"
+    )
+    portal_name = forms.CharField(label="Portal name", required=False, max_length=255)
+    portal_type = forms.ChoiceField(
+        label="Portal type",
+        choices=[("", "---")] + REPAIR_PORTAL_TYPES,
+        required=False,
+    )
+
+    def __init__(self, *args, agency=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.agency = agency
+
+    def clean_repair_via(self):
+        """Email unless portal is asked for, so older submissions still work"""
+        return self.cleaned_data.get("repair_via") or "email"
+
+    def clean_new_email(self):
+        """Resolve the address through fetch() so no case variant is created
+
+        A staffer typing FOIA@Agency.gov must land on the same row as
+        foia@agency.gov rather than minting a fresh variant of one mailbox.
+        """
+        value = self.cleaned_data["new_email"]
+        if not value:
+            return None
+        address = EmailAddress.objects.fetch(value)
+        if address is None:
+            raise forms.ValidationError("Enter a valid email address")
+        return address
+
+    def clean_channel_pks(self):
+        """The channels being repaired, as EmailAddress rows"""
+        return self._clean_pks("channel_pks")
+
+    def clean_foia_pks(self):
+        """The requests to repoint"""
+        return self._clean_pks("foia_pks")
+
+    def _clean_pks(self, field):
+        """A comma separated pk list as integers"""
+        raw = self.cleaned_data.get(field) or ""
+        pks = []
+        for part in raw.replace(",", " ").split():
+            try:
+                pks.append(int(part))
+            except ValueError as exc:
+                raise forms.ValidationError("Invalid selection") from exc
+        return pks
+
+    def clean(self):
+        """A replacement address is required unless snail mail is chosen
+
+        Portal classified channels are rejected outright: no replacement email
+        repairs a portal notification address, so offering the swap would walk
+        a staffer into a repair that is actively wrong.  Moving to a portal is
+        its own mode, validated separately.
+        """
+        cleaned_data = super().clean()
+        if cleaned_data.get("repair_via") == "portal":
+            return self._clean_portal(cleaned_data)
+
+        new_email = cleaned_data.get("new_email")
+        snail_mail = cleaned_data.get("snail_mail")
+        resolve = cleaned_data.get("resolve")
+
+        if not new_email and not snail_mail and not resolve:
+            self.add_error(
+                "new_email",
+                "Required unless snail mail is checked or you are only resolving",
+            )
+
+        channel_pks = cleaned_data.get("channel_pks") or []
+        if new_email and channel_pks:
+            portal_channels = [
+                address
+                for address in EmailAddress.objects.filter(pk__in=channel_pks)
+                if classify_address(address) == "portal"
+            ]
+            if portal_channels:
+                self.add_error(
+                    "new_email",
+                    "%s is a portal notification address. Switching this agency "
+                    "to a portal is out of scope -- an email replacement is the "
+                    "wrong repair." % ", ".join(a.email for a in portal_channels),
+                )
+        # The other direction is as wrong: mail to a portal notification
+        # address never reaches the records office, so moving requests onto
+        # one strands them
+        if new_email and classify_address(new_email) == "portal":
+            self.add_error(
+                "new_email",
+                "%s is a portal notification address. Mail sent to it does not "
+                "reach the agency -- choose the agency's own mailbox."
+                % new_email.email,
+            )
+        return cleaned_data
+
+    def _clean_portal(self, cleaned_data):
+        """The portal the selected requests move to
+
+        The agency's own portal when it has one; otherwise one described here,
+        reused when its URL is already known (URLs are unique) and built but
+        not saved when it is new, so creating it stays inside the repair's
+        transaction.  A portal marked Error is a bigger problem than routing,
+        so the repair stops rather than resubmitting into it.
+        """
+        if not cleaned_data.get("foia_pks"):
+            self.add_error("foia_pks", "Select at least one request to move")
+
+        portal = self.agency.portal if self.agency is not None else None
+        if portal is None:
+            url = cleaned_data.get("portal_url")
+            if not url:
+                self.add_error("portal_url", "Required to add a portal")
+                if not cleaned_data.get("portal_type"):
+                    self.add_error("portal_type", "Required to add a portal")
+                return cleaned_data
+            portal = Portal.objects.filter(url__iexact=url).first()
+            if portal is None:
+                for field in ("portal_name", "portal_type"):
+                    if not cleaned_data.get(field):
+                        self.add_error(field, "Required to add a portal")
+                portal = Portal(
+                    url=url,
+                    name=cleaned_data.get("portal_name"),
+                    type=cleaned_data.get("portal_type"),
+                )
+
+        if portal.status == "error":
+            self.add_error(
+                None,
+                "The portal %s is marked as an error. Find a working portal or "
+                "review the agency's contact methods before moving requests to "
+                "it." % portal.name,
+            )
+        cleaned_data["portal"] = portal
+        return cleaned_data
 
 
 class ResponseTaskForm(forms.Form):

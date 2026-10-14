@@ -35,16 +35,14 @@ from muckrock.organization.models import Organization
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model with relevant Profile fields."""
 
-    full_name = serializers.PrimaryKeyRelatedField(
-        queryset=Profile.objects.all(),
+    full_name = serializers.CharField(
         source="profile.full_name",
-        style={"base_template": "input.html"},
+        read_only=True,
         help_text="The full name of the user",
     )
-    uuid = serializers.PrimaryKeyRelatedField(
-        queryset=Profile.objects.all(),
+    uuid = serializers.UUIDField(
         source="profile.uuid",
-        style={"base_template": "input.html"},
+        read_only=True,
         help_text="The UUID of the user's profile",
     )
 

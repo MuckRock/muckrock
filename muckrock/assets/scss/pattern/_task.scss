@@ -227,8 +227,107 @@ $task-padding: $vr/4 $vr/2;
     }
 }
 
-/* Stale Agency Task */
+/* Review Agency Task */
 
+// The shared card chrome stacks a full $vr margin under the note, the
+// assignee row, and each control inside it.  Scoped here so the other task
+// queues keep their current spacing.
+.review-agency {
+    .task__note {
+        margin-bottom: 0;
+    }
+    .task__main > .task__data {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: $vr/4 $vr/2;
+        margin-bottom: 0;
+        border-bottom: 1px solid $color-grey-7;
+        font-size: 0.875em;
+        padding: 0 0.5em;
+        * {
+            margin-bottom: 0;
+        }
+        .assigned-chooser {
+            margin-right: $vr/2;
+        }
+        .tags-form {
+            display: flex;
+            flex: 0 1 auto;
+            align-items: center;
+            gap: $vr/4;
+            padding: $vr/2;
+            & .button {
+                margin-top: 0;
+            }
+        }
+    }
+}
+
+// Base styles give every block a full $vr bottom margin; the summary is dense
+// reference material, so it spaces itself with gaps instead.
+.review-agency-summary,
+.review-agency-outcome {
+    padding: $vr/2;
+    * {
+        margin-bottom: 0;
+    }
+}
+
+.review-agency-summary {
+    display: flex;
+    flex-direction: column;
+    gap: $vr/2;
+    margin-bottom: 0;
+}
+
+.review-agency-summary__header {
+    h4 {
+        margin-bottom: 0.5rem;
+    }
+    h4 small {
+        color: $color-grey-3;
+        font-weight: normal;
+    }
+}
+
+.review-agency-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $vr/4;
+}
+
+.review-agency-channel {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: $vr/4 $vr;
+    dt {
+        color: $color-grey-3;
+    }
+    dd {
+        margin-left: 0;
+    }
+    code {
+        margin-right: $vr/4;
+    }
+}
+
+.review-agency-channel--none {
+    color: $color-grey-3;
+}
+
+.review-agency-outcome {
+    border-bottom: 1px solid $color-grey-7;
+    h4 {
+        margin-top: $vr/2;
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+}
+
+// The inline repair panel and form, loaded over AJAX into each task
 .review-agency .review-requests {
     border-bottom: 1px solid $color-grey;
     header {
@@ -254,6 +353,44 @@ $task-padding: $vr/4 $vr/2;
 
 .review-agency .form-field {
     text-align: left;
+}
+
+.review-agency-legacy {
+    text-align: left;
+    border: 1px solid #d5dae0;
+    > summary {
+        display: list-item; // normalize's display: block hides the marker
+        cursor: pointer;
+        padding: 1em;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    form {
+        background: #f7f8fa;
+    }
+}
+
+// Mirrors the .task__actions / .task-post-actions form styles the repair form
+// had while it lived in the footer.  It can't share those classes: task.js
+// collects form.task-post-actions for batch actions.
+.review-agency-repair-form {
+    padding: $vr/4 $vr/2;
+    input, select, label {
+        display: block;
+        width: 100%;
+        margin-bottom: $vr;
+    }
+    label {
+        margin-bottom: 0;
+    }
+    label.check-label {
+        display: inline;
+    }
+    input[type="checkbox"] {
+        display: inline-block;
+        width: auto;
+        margin: 0 $vr/2;
+    }
 }
 
 /* New Agency Task */

@@ -125,6 +125,12 @@
 {% endblock %}
 
 {% block list-objects %}
+{% if hidden_count %}
+    <p class="task-list__hidden">
+        {{ hidden_count }} task{{ hidden_count|pluralize }} with no blocked requests hidden &middot;
+        <a href="{{ show_hidden_url }}">Show</a>
+    </p>
+{% endif %}
 {% for task in object_list %}
     {% include 'lib/task.html' %}
 {% endfor %}

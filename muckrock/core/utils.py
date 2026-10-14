@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group, User
 from django.core.cache import cache, caches
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
+from django.utils import timezone
 
 # Standard Library
 import datetime
@@ -37,6 +38,10 @@ from zenpy.lib.api_objects import (
     User as ZenUser,
 )
 from zenpy.lib.exception import APIException
+
+# MuckRock
+from muckrock.accounts.stats_api.models import UserStats
+from muckrock.organization.stats_api.models import OrganizationStats
 
 logger = logging.getLogger(__name__)
 
@@ -514,3 +519,20 @@ def requests_retry_session(
     session.mount("http://", adapter)
     session.mount("https://", adapter)
     return session
+
+
+def record_request_filed(user_id=None, organization_id=None, when=None):
+    """
+    Bump the request-filing watermark on the user and org stats rows.
+
+    Called explicitly from FOIAComposer.submit()
+    Updates existing rows only.
+    The creation signals + backfill guarantee rows exist.
+    """
+    when = when or timezone.now()
+    if user_id:
+        UserStats.objects.filter(user_id=user_id).update(last_request_at=when)
+    if organization_id:
+        OrganizationStats.objects.filter(organization_id=organization_id).update(
+            last_request_at=when
+        )

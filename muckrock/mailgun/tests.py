@@ -6,7 +6,7 @@ Tests for mailgun
 from django.conf import settings
 from django.core import mail
 from django.template.loader import render_to_string
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 # Standard Library
@@ -30,7 +30,14 @@ from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
 from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
-from muckrock.mailgun.views import bounces, delivered, opened, route_mailgun
+from muckrock.mailgun.views import (
+    _html_to_text,
+    _looks_like_html,
+    bounces,
+    delivered,
+    opened,
+    route_mailgun,
+)
 from muckrock.task.models import OrphanTask
 
 
@@ -313,6 +320,21 @@ class TestMailgunViewHandleRequest(RunCommitHooksMixin, TestMailgunViews):
         response = self.mailgun_route(to_=to_, sign=False)
         assert response.status_code == 403
 
+    @override_settings(DATA_UPLOAD_MAX_NUMBER_FILES=1)
+    @patch("muckrock.mailgun.views.sentry_sdk.capture_exception")
+    def test_too_many_files(self, mock_capture):
+        """Too many attachments returns 406 and reports to Sentry"""
+        foia = FOIARequestFactory()
+        to_ = foia.get_request_email()
+        attachments = [StringIO("File one"), StringIO("File two")]
+        attachments[0].name = "one.pdf"
+        attachments[1].name = "two.pdf"
+        response = self.mailgun_route(to_=to_, attachments=attachments)
+
+        assert response.status_code == 406
+        mock_capture.assert_called_once()
+        assert foia.communications.count() == 0
+
     def test_deleted(self):
         """Test a message to a deleted request"""
 
@@ -510,3 +532,66 @@ class TestMailgunViewWebHooks(TestMailgunViews):
         assert comm.emails.first().confirmed_datetime == datetime(
             2017, 1, 2, 17, tzinfo=pytz.utc
         )
+
+
+class TestMailgunHtmlBody(TestCase):
+    """Tests for detecting and converting HTML sent in a text/plain part
+    (as Granicus/GovQA does)"""
+
+    # This is a trimmed down and anonymized real govqa comm body.
+    # HTML in what should be plain text
+    # with a link and a tracking image
+    GOVQA_BODY = (
+        '<br><br><div style="text-align: center;">'
+        '<img alt="" src="https://track.example/logo.png" width="100%" /></div>\r\n'
+        "<div>\r\n"
+        "<div>Dear s,</div>\r\n"
+        "<div>&nbsp;</div>\r\n"
+        "<div>Thank you for registering with the Records Center.</div>\r\n"
+        "<div>&nbsp;</div>\r\n"
+        '<div>Reset here: <a title="Reset" '
+        'href="https://portal.example/reset?tok=abc" target="_blank">'
+        "Request Temporary Password</a></div>\r\n"
+        "</div>"
+    )
+
+    def test_looks_like_html_detects_leading_tag(self):
+        """Bodies that open with an HTML tag are detected"""
+        assert _looks_like_html(self.GOVQA_BODY)
+        assert _looks_like_html("<div>hello</div>")
+        # Case with a leading whitespace
+        assert _looks_like_html("  \r\n<br><br><div>x</div>")
+
+    def test_html_to_text_strips_tags_and_keeps_content(self):
+        """Conversion removes markup but preserves the readable text"""
+        result = _html_to_text(self.GOVQA_BODY)
+        assert "<div" not in result
+        assert "<img" not in result
+        assert "&nbsp;" not in result
+        assert "Dear s," in result
+        assert "Thank you for registering with the Records Center." in result
+
+    def test_html_to_text_preserves_links(self):
+        """Anchor hrefs are inlined as text so the URL isn't lost"""
+        result = _html_to_text(self.GOVQA_BODY)
+        assert "Request Temporary Password" in result
+        assert "https://portal.example/reset?tok=abc" in result
+
+    def test_html_to_text_trims_malformed_href(self):
+        """A missing closing quote must not drag ` target=` into the href"""
+        body = (
+            '<div><a href="https://portal.example/x=1 target="_blank">'
+            "click</a></div>"
+        )
+        result = _html_to_text(body)
+        assert "https://portal.example/x=1" in result
+        assert "target=" not in result
+
+    def test_html_to_text_returns_body_on_conversion_failure(self):
+        """If parsing/conversion raises, the original body is returned unchanged
+        rather than propagating the error into email ingest"""
+        body = "<div>some content</div>"
+        with patch(
+            "muckrock.mailgun.views.BeautifulSoup", side_effect=Exception("boom")
+        ):
+            assert _html_to_text(body) == body

@@ -4,9 +4,11 @@ Provides Jurisdiction application API views
 
 # Third Party
 import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 # MuckRock
+from muckrock.core.pagination import APIV2CursorPagination
 from muckrock.core.views import AuthenticatedAPIMixin
 from muckrock.jurisdiction.api_v2.serializers import JurisdictionSerializer
 from muckrock.jurisdiction.models import Jurisdiction
@@ -16,10 +18,10 @@ from muckrock.jurisdiction.models import Jurisdiction
 class JurisdictionViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
     """API views for Jurisdiction"""
 
-    queryset = Jurisdiction.objects.order_by("id").select_related("parent__parent")
+    queryset = Jurisdiction.objects.select_related("parent")
     serializer_class = JurisdictionSerializer
-    ordering_fields = ["abbrev", "level", "name"]
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
+    pagination_class = APIV2CursorPagination
 
     class JurisdictionFilter(django_filters.FilterSet):
         """API Filters for Jurisdictions"""
@@ -30,6 +32,19 @@ class JurisdictionViewSet(AuthenticatedAPIMixin, viewsets.ReadOnlyModelViewSet):
                 "ID of the parent jurisdiction. This defines the hierarchy between jurisdictions, "
                 "where a jurisdiction can have a federal or state parent. "
                 "Local jurisdictions cannot be parents."
+            ),
+        )
+        parent_name = django_filters.CharFilter(
+            field_name="parent__name",
+            lookup_expr="icontains",
+            label="The name of the parent jurisdiction.",
+        )
+        parent_abbrev = django_filters.CharFilter(
+            field_name="parent__abbrev",
+            lookup_expr="iexact",
+            label=(
+                "The abbreviation of the parent jurisdiction. For example, MA returns "
+                "the state's local jurisdictions."
             ),
         )
         name = django_filters.CharFilter(

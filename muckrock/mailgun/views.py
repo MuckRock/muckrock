@@ -5,6 +5,7 @@ Views for mailgun
 # Django
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import TooManyFilesSent
 from django.core.mail import EmailMessage
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden
@@ -16,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 # Standard Library
 import hashlib
 import hmac
+import html
 import json
 import logging
 import re
@@ -26,6 +28,8 @@ from email.utils import getaddresses
 from functools import wraps
 
 # Third Party
+import sentry_sdk
+from bs4 import BeautifulSoup
 from constance import config
 
 # MuckRock
@@ -104,15 +108,83 @@ def _get_mail_body(post, foia=None):
         "--- Please respond above this line ---\n",
     ]
     if stripped_text in bad_text:
-        return post.get("body-plain")
+        body = post.get("body-plain") or ""
     elif foia and foia.portal and foia.portal.type in ("nextrequest", "fbi"):
         # mailgun seems to improperly strip nextrequest and FBI messages
-        return post.get("body-plain")
+        body = post.get("body-plain") or ""
     else:
-        return "%s\n%s" % (
+        body = "%s\n%s" % (
             post.get("stripped-text", ""),
             post.get("stripped-signature", ""),
         )
+
+    # GovQA sends HTML with mimetype text/plain
+    # so the body we get is markup rather than text. We need
+    # to detect this reliably, strip it to readable text
+    # so it doesn't render as tag soup with linebreaks.
+    if _looks_like_html(body):
+        # I've added logging here to log when this happens
+        # In case it comes from different sender in the future too.
+        logger.info(
+            "[MAILGUN] Converting HTML body sent as text/plain from %s (foia %s)",
+            post.get("From", "unknown"),
+            foia.pk if foia else None,
+        )
+        body = _html_to_text(body)
+
+    return body
+
+
+def _looks_like_html(text):
+    """Body advertised as plain text but actually containing HTML markup.
+
+    Granicus/GovQA sends multipart/alternative mail whose text/plain part
+    is HTML. We need to be able to detect this with a heuristic and fix it.
+    """
+    if not text:
+        return False
+    head = text.lstrip()[:64].lower()
+    return head.startswith(
+        (
+            "<br",
+            "<div",
+            "<html",
+            "<table",
+            "<p",
+            "<strong",
+            "<span",
+            "<img",
+            "<center",
+            "<!doctype",
+        )
+    )
+
+
+def _html_to_text(body):
+    """Convert an HTML email body to readable plain text, preserving links."""
+    try:
+        soup = BeautifulSoup(body, "lxml")
+        for a in soup.find_all("a", href=True):
+            # GovQA emits malformed attrs (missing closing quote), so the parsed
+            # href can trail into ` target=`, `>`, or a stray quote. A valid URL
+            # contains none of these unescaped so we cut at the first one.
+            href = re.split(r'[\s>"\']', a["href"].strip(), 1)[0]
+            txt = a.get_text().strip()
+            # no usable URL "" returned, leave anchor text as-is
+            if not href:
+                continue
+            # Only show the URL if it's not already in the text
+            if href not in txt:
+                a.replace_with(f"{txt} ({href})" if txt else href)
+        text = soup.get_text("\n")
+        text = html.unescape(text)
+        text = text.replace("\xa0", " ")
+        text = re.sub(r"[ \t]+", " ", text)
+        text = re.sub(r"\n\s*\n\s*\n+", "\n\n", text)
+        return text.strip()
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("Failed to convert HTML email body", exc_info=sys.exc_info())
+        return body
 
 
 def mailgun_verify(function):
@@ -124,7 +196,19 @@ def mailgun_verify(function):
         if request.content_type == "application/json":
             data = json.loads(request.body.decode("utf8"))
         else:
-            data = request.POST
+            try:
+                data = request.POST
+            except TooManyFilesSent:
+                content_length = request.META.get("CONTENT_LENGTH", "unknown")
+                logger.warning(
+                    "[MAILGUN] Inbound email rejected: too many files. "
+                    "Content-Length=%s see Mailgun logs to identify",
+                    content_length,
+                )
+                # Log it in Sentry for visibility since we don't raise
+                sentry_sdk.capture_exception()
+                # 406 tells Mailgun not to retry delivery
+                return HttpResponse("Too many files", status=406)
         if _verify(data):
             return function(request)
         else:
@@ -463,7 +547,10 @@ def bounces(request, email_comm, timestamp):
     recipient.status = "error"
     recipient.save()
     ReviewAgencyTask.objects.ensure_one_created(
-        agency=email_comm.communication.foia.agency, resolved=False, source="email"
+        agency=email_comm.communication.foia.agency,
+        resolved=False,
+        source="email",
+        email=recipient,
     )
 
     # ensure we don't create an infinite loop of emails

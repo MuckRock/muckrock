@@ -7,7 +7,7 @@ from django.urls import re_path
 from django.views.generic.base import RedirectView
 
 # MuckRock
-from muckrock.task import views
+from muckrock.task import review_agency_views, views
 
 urlpatterns = [
     re_path(r"^$", RedirectView.as_view(url="/task/response/"), name="task-list"),
@@ -27,6 +27,12 @@ urlpatterns = [
         r"^review-agency/$",
         views.ReviewAgencyTaskList.as_view(),
         name="review-agency-task-list",
+    ),
+    # Before the numeric task route so "agency" is never read as a task pk
+    re_path(
+        r"^review-agency/agency/(?P<pk>\d+)/$",
+        review_agency_views.ReviewAgencyDetailView.as_view(),
+        name="review-agency-detail",
     ),
     re_path(
         r"^review-agency/(?P<pk>\d+)/$",

@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -18,6 +18,7 @@ from django.views.generic import FormView, TemplateView
 
 # Standard Library
 import logging
+from collections import Counter
 from datetime import datetime
 
 # Third Party
@@ -324,12 +325,85 @@ class SnailMailTaskList(TaskList):
 
 
 class ReviewAgencyTaskList(TaskList):
-    """List view for Review Agency Tasks"""
+    """List view for Review Agency Tasks
+
+    Ordered by impact -- the number of live requests each task is blocking.
+    Source, jurisdiction and age are filters and badges, never the primary
+    sort: a task blocking 1,075 requests must not read the same as one
+    blocking a single request at a local library.
+    """
 
     model = ReviewAgencyTask
     filter_class = ReviewAgencyTaskFilterSet
     title = "Review Agencies"
-    queryset = ReviewAgencyTask.objects.all().preload_list()
+    # Annotated here rather than in get_queryset() to
+    # guarantee before OrderedSortMixin sorts on it.
+    queryset = ReviewAgencyTask.objects.all().preload_list().annotate_blocked()
+    default_sort = "blocked_count"
+    default_order = "desc"
+    sort_map = {
+        "blocked_count": "blocked_count",
+        "date_created": "date_created",
+        "agency": "agency__name",
+        "source": "source",
+    }
+
+    def sort_queryset(self, queryset):
+        """Keep an agency's channels together under the impact ordering
+
+        Sorting on channel impact alone scatters a heavy agency's smaller
+        channels among other agencies' rows.  Ordering by the agency's total
+        first puts the agency in its rightful place in the queue and sorts its
+        channels inside that -- so several State Department rows read as one
+        agency with several broken channels, not as unrelated items.
+        """
+        queryset = super().sort_queryset(queryset)
+        if self.request.GET.get("sort", self.default_sort) == "blocked_count":
+            return queryset.order_by(
+                "-agency_blocked_count", "agency_id", "-blocked_count", "pk"
+            )
+        return queryset
+
+    # A repaired task can reach zero blocked while still open; it stays in
+    # view until someone resolves it rather than vanishing as zero impact
+    visible = Q(blocked_count__gt=0) | Q(form_data__has_key="repair")
+
+    def hides_zero_impact(self):
+        """Whether the zero impact tasks are left out of this view"""
+        return "pk" not in self.kwargs and not self.request.GET.get("zero_active")
+
+    def get_queryset(self):
+        """Default hide any zero-impact tasks out of the impact ordered view"""
+        queryset = super().get_queryset()
+        if self.hides_zero_impact():
+            queryset = queryset.filter(self.visible)
+        return queryset
+
+    def hidden_count(self):
+        """How many tasks the current filters match but the default hides"""
+        if not self.hides_zero_impact():
+            return 0
+        filter_ = self.filter_class(
+            self.request.GET, queryset=super().get_queryset(), request=self.request
+        )
+        return filter_.qs.exclude(self.visible).count()
+
+    def get_context_data(self, **kwargs):
+        """Add the agency grouping counts"""
+        context = super().get_context_data(**kwargs)
+        object_list = list(context["object_list"])
+        groups = Counter(task_.agency_id for task_ in object_list)
+        for task_ in object_list:
+            task_.agency_group_size = groups[task_.agency_id]
+        context["agency_groups"] = dict(groups)
+        # Say when the default is hiding something, so a task that drops out
+        # of view is never silently lost
+        context["hidden_count"] = self.hidden_count()
+        query = self.request.GET.copy()
+        query["zero_active"] = "1"
+        query.pop("page", None)
+        context["show_hidden_url"] = "?" + query.urlencode()
+        return context
 
     def task_post_helper(self, request, task, form_data=None):
         """Update the requests with new contact information"""

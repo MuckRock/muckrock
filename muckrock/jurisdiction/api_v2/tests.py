@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 
 # MuckRock
 from muckrock.core.factories import UserFactory
+from muckrock.core.test_utils import assert_queries_do_not_scale
 from muckrock.jurisdiction.factories import (
     FederalJurisdictionFactory,
     LocalJurisdictionFactory,
@@ -127,3 +128,56 @@ class JurisdictionViewSetTests(TestCase):
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_list_queries_do_not_scale(self):
+        """Listing jurisdictions must not add queries as jurisdictions grow"""
+        self.client.force_authenticate(user=self.user)
+        state = StateJurisdictionFactory.create(name="Scaling State", abbrev="SS")
+        counter = iter(range(1, 100))
+
+        def create_one():
+            # Because jurisdictions have a uniqueness constraint on name
+            # We differ each one made by the factory by the counter
+            LocalJurisdictionFactory.create(
+                name=f"Scaling Local {next(counter)}", parent=state
+            )
+
+        assert_queries_do_not_scale(self.client, self.url, create_one)
+
+    def _create_family(self):
+        """Two states with known local children"""
+        vermont = StateJurisdictionFactory.create(name="Vermont", abbrev="VT")
+        new_hampshire = StateJurisdictionFactory.create(
+            name="New Hampshire", abbrev="NH"
+        )
+        LocalJurisdictionFactory.create(name="Burlington", parent=vermont)
+        LocalJurisdictionFactory.create(name="Montpelier", parent=vermont)
+        LocalJurisdictionFactory.create(name="Concord", parent=new_hampshire)
+
+    def _names(self, response):
+        """Sorted jurisdiction names from a list response"""
+        return sorted(j["name"] for j in response.json()["results"])
+
+    def test_filter_by_parent_name(self):
+        """parent_name matches part of the parent's name, case-insensitive"""
+        self.client.force_authenticate(user=self.user)
+        self._create_family()
+        response = self.client.get(self.url, {"parent_name": "VERM"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == ["Burlington", "Montpelier"]
+
+    def test_filter_by_parent_abbrev(self):
+        """parent_abbrev matches the parent's full abbreviation, case-insensitive"""
+        self.client.force_authenticate(user=self.user)
+        self._create_family()
+        response = self.client.get(self.url, {"parent_abbrev": "vt"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == ["Burlington", "Montpelier"]
+
+    def test_filter_by_parent_abbrev_is_exact(self):
+        """A partial abbreviation matches nothing"""
+        self.client.force_authenticate(user=self.user)
+        self._create_family()
+        response = self.client.get(self.url, {"parent_abbrev": "V"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert self._names(response) == []

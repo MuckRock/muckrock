@@ -6,6 +6,7 @@ Celery tasks for the task application
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.utils import timezone
 
 # Standard Library
@@ -51,15 +52,21 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
     foias = FOIARequest.objects.filter(pk__in=foia_pks)
     muckrock_staff = User.objects.get(username="MuckrockStaff")
     for foia in foias:
-        FOIACommunication.objects.create(
-            foia=foia,
-            from_user=muckrock_staff,
-            to_user=foia.get_to_user(),
-            datetime=timezone.now(),
-            response=False,
-            communication=reply_text,
-        )
-        foia.submit(switch=True)
+        # One request failing must not stop the follow ups for the rest.  Its
+        # communication is rolled back with it, so it is not left looking sent.
+        try:
+            with transaction.atomic():
+                FOIACommunication.objects.create(
+                    foia=foia,
+                    from_user=muckrock_staff,
+                    to_user=foia.get_to_user(),
+                    datetime=timezone.now(),
+                    response=False,
+                    communication=reply_text,
+                )
+                foia.submit(switch=True)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Review agency follow up failed for request %s", foia.pk)
 
 
 @shared_task(

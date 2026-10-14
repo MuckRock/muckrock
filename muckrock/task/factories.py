@@ -105,6 +105,8 @@ class ReviewAgencyTaskFactory(factory.django.DjangoModelFactory):
         model = task.models.ReviewAgencyTask
 
     agency = factory.SubFactory("muckrock.core.factories.AgencyFactory")
+    # Null by default: a task with no channel is the staff/stale shape
+    email = None
 
 
 class PortalTaskFactory(factory.django.DjangoModelFactory):

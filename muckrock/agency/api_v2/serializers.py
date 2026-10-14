@@ -36,7 +36,6 @@ class AgencySerializer(serializers.ModelSerializer):
 
     types = serializers.StringRelatedField(
         many=True,
-        required=False,
         help_text="The types of the agency (e.g., Executive, Legislative, Police, etc).",
     )
     appeal_agency = serializers.PrimaryKeyRelatedField(
@@ -81,7 +80,7 @@ class AgencySerializer(serializers.ModelSerializer):
             "status": {"help_text": ("The current status of the agency")},
             "exempt": {
                 "help_text": (
-                    "Indicates whether the agency is exempt from records laws "
+                    "Indicates whether the agency is exempt from records laws."
                 )
             },
             "requires_proxy": {
@@ -89,12 +88,5 @@ class AgencySerializer(serializers.ModelSerializer):
                     "Indicates whether the agency requires a proxy "
                     "because of in-state residency laws."
                 )
-            },
-            "jurisdiction": {
-                "help_text": "The ID of the jurisdiction this agency operates under."
-            },
-            "parent": {"help_text": "The ID of the parent agency, if applicable."},
-            "appeal_agency": {
-                "help_text": "The ID of the agency to which appeals are directed, if applicable."
             },
         }

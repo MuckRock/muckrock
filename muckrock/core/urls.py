@@ -18,6 +18,7 @@ from rest_framework.routers import DefaultRouter
 
 # MuckRock
 import muckrock.accounts.api_v2.viewsets
+import muckrock.accounts.stats_api.views
 import muckrock.accounts.viewsets
 import muckrock.agency.api_v2.viewsets
 import muckrock.agency.viewsets
@@ -29,6 +30,7 @@ import muckrock.jurisdiction.urls
 import muckrock.jurisdiction.viewsets
 import muckrock.news.viewsets
 import muckrock.organization.api_v2.viewsets
+import muckrock.organization.stats_api.views
 import muckrock.project.api_v2.viewsets
 import muckrock.project.viewsets
 import muckrock.task.viewsets
@@ -138,6 +140,19 @@ router_v2.register(
     "api2-projects",
 )
 
+router_stats = DefaultRouter()
+router_stats.register(
+    r"users",
+    muckrock.accounts.stats_api.views.UserStatsViewSet,
+    "stats-users",
+)
+router_stats.register(
+    r"organizations",
+    muckrock.organization.stats_api.views.OrganizationStatsViewSet,
+    "stats-organizations",
+)
+
+
 urlpatterns = [
     re_path(r"^$", views.homepage, name="index"),
     re_path(r"^reset_cache/$", views.reset_homepage_cache, name="reset-cache"),
@@ -164,6 +179,7 @@ urlpatterns = [
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^search/$", views.SearchView.as_view(), name="search"),
     re_path(r"^api_v2/", include(router_v2.urls)),
+    re_path(r"^stats_api/", include(router_stats.urls)),
     re_path(r"^robots\.txt$", include("robots.urls")),
     re_path(
         r"^favicon.ico$",

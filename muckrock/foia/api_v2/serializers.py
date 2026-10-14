@@ -1,5 +1,5 @@
 """
-Serilizers for V2 of the FOIA API
+Serializers for V2 of the FOIA API
 """
 
 # Django
@@ -29,6 +29,7 @@ from muckrock.organization.models import Organization
                 "slug": "meeting-minutes",
                 "status": "processed",
                 "agency": 2,
+                "composer": 7,
                 "embargo_status": "public",
                 "user": 3,
                 "edit_collaborators": [4, 5],
@@ -36,6 +37,7 @@ from muckrock.organization.models import Organization
                 "datetime_submitted": "2018-05-20T07:08:48.911320-04:00",
                 "datetime_updated": "2019-02-18T05:00:01.355367-05:00",
                 "datetime_done": None,
+                "date_due": "2018-06-20",
                 "tracking_id": "ABC123-456",
                 "price": "0.00",
             },
@@ -96,22 +98,19 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             "slug",
             "status",
             "agency",
+            "composer",
             "embargo_status",  # public, embargo, or permanent
             "user",
             "edit_collaborators",
             "read_collaborators",
-            # request dates
             "datetime_submitted",
             "datetime_updated",
             "datetime_done",
-            # processing details
             "tracking_id",
             "price",
-            # connected models
             "tags",
-            # "notes",
-            # "communications",
             "edited_boilerplate",
+            "date_due",
         )
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for this FOIA request"},
@@ -126,15 +125,11 @@ class FOIARequestSerializer(serializers.ModelSerializer):
                     "permanent is only available to paid organizational members."
                 )
             },
-            "user": {"help_text": "The user who filed this FOIA request"},
             "edit_collaborators": {
                 "help_text": "The users who have been given edit access to this request"
             },
             "read_collaborators": {
                 "help_text": "The users who have been given view access to this request"
-            },
-            "datetime_submitted": {
-                "help_text": "The date and time when the request was submitted"
             },
             "datetime_updated": {
                 "help_text": "The date and time when the request was last updated"
@@ -144,6 +139,13 @@ class FOIARequestSerializer(serializers.ModelSerializer):
             },
             "price": {
                 "help_text": "The cost of processing this request, if applicable"
+            },
+            "date_due": {"help_text": "The date the agency's response is due."},
+            "composer": {
+                "help_text": (
+                    "The ID of the composer this request was filed from. Requests sent "
+                    "to multiple agencies at once share a composer."
+                )
             },
         }
 
@@ -158,23 +160,6 @@ class FOIARequestSerializer(serializers.ModelSerializer):
                 "embargo_status": "public",
                 "title": "Request for Meeting Minutes",
                 "requested_docs": "All meeting minutes from Q1 2023",
-            },
-        ),
-        OpenApiExample(
-            "Create FOIARequest Response Example",
-            value={
-                "id": 1,
-                "title": "Request for Meeting Minutes",
-                "slug": "meeting-minutes-1",
-                "status": "processing",
-                "agency": 2,
-                "embargo_status": "public",
-                "user": 3,
-                "datetime_submitted": "2023-01-20T08:00:00Z",
-                "datetime_updated": "2023-01-21T08:00:00Z",
-                "datetime_done": None,
-                "tracking_id": "ABC123-456",
-                "price": "0.00",
             },
         ),
     ]
@@ -296,30 +281,13 @@ class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
 
     ffile = serializers.SerializerMethodField(help_text="The URL of the file")
-    datetime = serializers.DateTimeField(
-        help_text="The date and time when the file was uploaded"
-    )
-    title = serializers.CharField(help_text="The title of the file")
-    source = serializers.CharField(
-        help_text="The source of the file (e.g., the agency or department)"
-    )
-    description = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        help_text="A description of the file",
-    )
-    doc_id = serializers.CharField(
-        help_text="The document identifier assigned to the file"
-    )
-    pages = serializers.IntegerField(help_text="The number of pages in the file")
 
     class Meta:
-        """Filters for foia files"""
+        """Fields for FOIA files"""
 
         model = FOIAFile
-        exclude = ("comm",)  # Exclude communications
+        exclude = ("comm",)
         read_only_fields = (
-            "ffile",
             "datetime",
             "title",
             "source",
@@ -327,6 +295,16 @@ class FOIAFileSerializer(serializers.ModelSerializer):
             "doc_id",
             "pages",
         )
+        extra_kwargs = {
+            "datetime": {"help_text": "The date and time when the file was uploaded"},
+            "title": {"help_text": "The title of the file"},
+            "source": {
+                "help_text": "The source of the file (e.g., the agency or department)"
+            },
+            "description": {"help_text": "A description of the file"},
+            "doc_id": {"help_text": "The document identifier assigned to the file"},
+            "pages": {"help_text": "The number of pages in the file"},
+        }
 
     def get_ffile(self, obj) -> str:
         """Get the ffile URL safely"""
@@ -354,6 +332,7 @@ class FOIAFileSerializer(serializers.ModelSerializer):
                 "I can expect to receive a response.\n\nThanks for your help, and let "
                 "me know if further clarification is needed.\n\n\n",
                 "status": None,
+                "files": [1215939],
             },
         )
     ]
@@ -362,14 +341,12 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Communication model"""
 
     files = serializers.PrimaryKeyRelatedField(
-        queryset=FOIAFile.objects.all(),
         many=True,
-        required=False,
+        read_only=True,
         help_text="The list of file IDs associated with this communication",
     )
     foia = serializers.PrimaryKeyRelatedField(
-        queryset=FOIARequest.objects.all(),
-        style={"base_template": "input.html"},
+        read_only=True,
         help_text="The ID of the associated request",
     )
 
@@ -392,9 +369,6 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             "id": {"help_text": "The unique identifier for this communication"},
-            "foia": {
-                "help_text": "The ID of the FOIA request associated with this communication"
-            },
             "from_user": {"help_text": "The ID of the user sending this communication"},
             "to_user": {"help_text": "The ID of the user receiving this communication"},
             "subject": {"help_text": "The subject of the communication"},
@@ -407,12 +381,37 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
             },
             "communication": {"help_text": "The content of the communication"},
             "status": {"help_text": "The status of the communication, if applicable"},
-            "files": {
-                "help_text": "The list of files associated with this communication"
-            },
         }
 
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Request Submitted",
+            description="The request was filed with every selected agency.",
+            value={
+                "status": "FOI Request submitted",
+                "location": "https://www.muckrock.com/foi/multirequest/request-for-meeting-minutes-151010/",  # pylint: disable=line-too-long
+                "requests": [101, 102],
+            },
+            response_only=True,
+            status_codes=["201"],
+        ),
+        OpenApiExample(
+            "Out of Requests",
+            description=(
+                "The organization has no requests remaining. The request was "
+                "saved as a draft at the returned location."
+            ),
+            value={
+                "status": "Out of requests.  FOI Request has been saved.",
+                "location": "https://www.muckrock.com/foi/multirequest/request-for-meeting-minutes-151010/",  # pylint: disable=line-too-long
+            },
+            response_only=True,
+            status_codes=["402"],
+        ),
+    ]
+)
 class FOIARequestCreateResponseSerializer(serializers.Serializer):
     """Documents the create endpoint's response body"""
 
@@ -423,3 +422,48 @@ class FOIARequestCreateResponseSerializer(serializers.Serializer):
         required=False,
         help_text="IDs of the created FOIA requests",
     )
+
+
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "FOIA Request Detail Example",
+            value={
+                "id": 1,
+                "title": "Meeting Minutes",
+                "requested_docs": "All the meeting minutes for the last 30 days",
+                "slug": "meeting-minutes",
+                "status": "processed",
+                "agency": 2,
+                "composer": 7,
+                "embargo_status": "public",
+                "user": 3,
+                "edit_collaborators": [4, 5],
+                "read_collaborators": [],
+                "datetime_submitted": "2018-05-20T07:08:48.911320-04:00",
+                "datetime_updated": "2019-02-18T05:00:01.355367-05:00",
+                "datetime_done": None,
+                "date_due": "2018-06-20",
+                "tracking_id": "ABC123-456",
+                "price": "0.00",
+                "tags": [],
+                "edited_boilerplate": False,
+                "communications": [101, 102, 103],
+            },
+        )
+    ]
+)
+class FOIARequestDetailSerializer(FOIARequestSerializer):
+    """FOIA request with its communication IDs, for single-request retrieves"""
+
+    communications = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True,
+        help_text="IDs of the communications on this request, oldest first",
+    )
+
+    class Meta(FOIARequestSerializer.Meta):
+        """Fields for a single FOIA request"""
+
+        # Inherits from FOIARequestSerializer and then also add communications
+        fields = (*FOIARequestSerializer.Meta.fields, "communications")

@@ -7,15 +7,17 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.db.models import Case, Count, Max, When
+from django.db.models import Case, Count, Max, Q, When
 from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import linebreaks, urlize
 
 # Standard Library
 import logging
+from collections import Counter
 from datetime import date
 from itertools import groupby
 
@@ -34,6 +36,7 @@ from muckrock.message.email import TemplateEmail
 from muckrock.message.tasks import support
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.tags.models import TaggedItemBase
+from muckrock.task.channels import Channel, classify_address
 from muckrock.task.constants import (
     FLAG_CATEGORIES,
     PORTAL_CATEGORIES,
@@ -342,6 +345,15 @@ class ReviewAgencyTask(Task):
     )
     agency = models.ForeignKey("agency.Agency", on_delete=models.PROTECT)
     source = models.CharField(max_length=5, choices=sources, blank=True, null=True)
+    # The specific broken channel this task is about.  Null for the staff and
+    # stale sources, which are genuinely about the agency.
+    email = models.ForeignKey(
+        "communication.EmailAddress",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="review_tasks",
+    )
 
     objects = ReviewAgencyTaskQuerySet.as_manager()
 
@@ -350,6 +362,32 @@ class ReviewAgencyTask(Task):
 
     def get_absolute_url(self):
         return reverse("review-agency-task", kwargs={"pk": self.pk})
+
+    @cached_property
+    def channel(self):
+        """The broken channel this task is about, as a Channel
+
+        Built from the annotations that annotate_channel() and
+        annotate_blocked() put on the queryset, so a queue row costs no
+        queries of its own.  Returns None for the staff and stale sources,
+        which have no channel.
+        """
+        if self.email is None:
+            return None
+
+        last_error_reason = getattr(self, "channel_last_error_reason", "") or ""
+        return Channel(
+            address=self.email,
+            blocked_count=getattr(self, "blocked_count", 0) or 0,
+            is_primary=bool(getattr(self, "channel_is_primary", False)),
+            classification=classify_address(self.email, last_error_reason),
+            has_error=self.email.status == "error",
+            last_error=getattr(self, "channel_last_error", None),
+            last_error_code=getattr(self, "channel_last_error_code", "") or "",
+            last_error_reason=last_error_reason,
+            last_confirm=getattr(self, "channel_last_confirm", None),
+            error_count=getattr(self, "channel_error_count", 0) or 0,
+        )
 
     def get_review_data(self):
         """Get all the data on all open requests for the agency"""
@@ -587,12 +625,14 @@ class ReviewAgencyTask(Task):
 
         if is_email:
             if update_info:
-                AgencyEmail.objects.create(
-                    email=email_or_fax,
-                    agency=self.agency,
-                    request_type="primary",
-                    email_type="to",
-                )
+                # Promote a link the agency already has rather than adding a
+                # second one for the same address
+                link = self.agency.agencyemail_set.filter(email=email_or_fax).first()
+                if link is None:
+                    link = AgencyEmail(email=email_or_fax, agency=self.agency)
+                link.request_type = "primary"
+                link.email_type = "to"
+                link.save()
             for foia in foia_list:
                 foia.email = email_or_fax
                 if foia.fax and foia.fax.status != "good":
@@ -601,9 +641,11 @@ class ReviewAgencyTask(Task):
 
         elif is_fax:
             if update_info:
-                AgencyPhone.objects.create(
-                    phone=email_or_fax, agency=self.agency, request_type="primary"
-                )
+                link = self.agency.agencyphone_set.filter(phone=email_or_fax).first()
+                if link is None:
+                    link = AgencyPhone(phone=email_or_fax, agency=self.agency)
+                link.request_type = "primary"
+                link.save()
             for foia in foia_list:
                 foia.email = None
                 foia.fax = email_or_fax
@@ -615,6 +657,192 @@ class ReviewAgencyTask(Task):
                 foia.fax = None
                 foia.address = self.agency.get_addresses().first()
                 foia.save()
+
+    @property
+    def repair_outcome(self):
+        """What was done to this task, or None if nobody has acted on it
+
+        Recorded in form_data, which is a JSONField already meant for what the
+        resolving form submitted.  Deliberately not the note field: staff edit
+        that as free text and a structured payload would clobber their notes.
+        """
+        if not self.form_data:
+            return None
+        return self.form_data.get("repair")
+
+    @cached_property
+    def successor(self):
+        """The open task that reopened this channel after it was resolved
+
+        A property rather than a FK: the link is derivable, and a FK would
+        need backfilling for every existing task and could go stale.  Only
+        matched on a channel -- an agency level task has none, and matching on
+        the agency alone would link unrelated work.
+        """
+        if not self.resolved or self.email_id is None:
+            return None
+        return (
+            ReviewAgencyTask.objects.filter(
+                agency_id=self.agency_id, email_id=self.email_id, resolved=False
+            )
+            .order_by("-date_created", "-pk")
+            .first()
+        )
+
+    @classmethod
+    def repair_channels(
+        cls,
+        agency,
+        user,
+        *,
+        new_email=None,
+        channels=(),
+        foias=(),
+        update_info=False,
+        snail=False,
+        resolve=False,
+        reply="",
+        portal=None,
+    ):
+        """Repair one or several of an agency's channels in one pass
+
+        The whole submission is one transaction: a repair that updated the
+        agency's contact info but failed to resolve half the tasks would leave
+        a staffer unable to tell what actually happened.
+
+        Returns the tasks the repair covered, and the requests a portal move
+        skipped because they had nothing to resend.
+
+        With a portal, the requests move to it instead of to an address, and
+        no follow-up is sent: it would go through the portal too, doubling
+        every request's portal work.
+        """
+        # pylint: disable=too-many-arguments,too-many-locals,import-outside-toplevel
+        # MuckRock
+        from muckrock.task.tasks import submit_review_update
+
+        channel_pks = [channel.pk for channel in channels]
+        foias = list(foias)
+        foia_pks = [foia.pk for foia in foias]
+
+        if not channel_pks:
+            # No explicit channel selection: act on the tasks for the channels
+            # the submitted requests are actually sitting on.
+            channel_pks = {foia.email_id for foia in foias}
+        # An agency level task has no channel because it covers them all, so
+        # any repair on the agency is a repair on it too
+        tasks = list(
+            cls.objects.filter(agency=agency, resolved=False)
+            .filter(Q(email__in=channel_pks) | Q(email=None))
+            .select_related("email")
+        )
+        # Read before update_contact() repoints them.  Each task records the
+        # requests moved off its own channel; the agency level task records
+        # those on channels with no task of their own in this repair.
+        moved_by_channel = Counter(foia.email_id for foia in foias)
+        task_channels = {task_.email_id for task_ in tasks if task_.email_id}
+
+        # A follow up without a contact change goes back to the same broken
+        # address and bounces, reopening the task being resolved.  After a
+        # portal move it would go through the portal too, doubling every
+        # request's portal work.
+        changed = new_email is not None or bool(snail) or portal is not None
+        send_reply = bool(reply) and bool(foia_pks) and changed and portal is None
+
+        skipped = []
+        with transaction.atomic():
+            if portal is not None:
+                skipped = cls._move_to_portal(agency, portal, foias)
+                # A skipped request stays on its channel, so it was not moved
+                moved_by_channel.subtract(foia.email_id for foia in skipped)
+            elif changed:
+                # One agency level contact update for the whole submission,
+                # however many channels it covers.
+                representative = tasks[0] if tasks else cls(agency=agency)
+                representative.agency = agency
+                representative.update_contact(new_email, foias, update_info, snail)
+            moved_uncovered = sum(
+                count
+                for email_id, count in moved_by_channel.items()
+                if email_id not in task_channels
+            )
+
+            outcome_base = {
+                "new_email": new_email.email if new_email is not None else None,
+                "snail_mail": bool(snail),
+                "portal": portal.name if portal is not None else None,
+                "followup_sent": send_reply,
+                "agency_info_updated": bool(update_info),
+                "by": user.username if user is not None else None,
+                "at": timezone.now().isoformat(),
+            }
+            # A skipped request is still blocked on its channel, so that task is
+            # not done; the agency level task waits for every broken channel
+            skipped_channels = {foia.email_id for foia in skipped}
+            broken_left = (
+                agency.foiarequest_set.get_open().filter(email__status="error").exists()
+            )
+            for task_ in tasks:
+                outcome = dict(outcome_base)
+                outcome["old_email"] = (
+                    task_.email.email if task_.email is not None else None
+                )
+                if not changed:
+                    outcome["requests_updated"] = 0
+                elif task_.email_id:
+                    outcome["requests_updated"] = moved_by_channel[task_.email_id]
+                else:
+                    outcome["requests_updated"] = moved_uncovered
+                form_data = dict(task_.form_data or {})
+                form_data["repair"] = outcome
+                if task_.email_id:
+                    done = task_.email_id not in skipped_channels
+                else:
+                    done = not broken_left
+                if resolve and done:
+                    task_.resolve(user, form_data)
+                else:
+                    task_.form_data = form_data
+                    task_.save()
+
+            if send_reply:
+                transaction.on_commit(
+                    lambda: submit_review_update.delay(foia_pks, reply)
+                )
+
+        return tasks, skipped
+
+    @staticmethod
+    def _move_to_portal(agency, portal, foias):
+        """Resubmit each request's initial communication through the portal
+
+        The same thing as resending each request by hand: an initial
+        submission goes through the manual portal path for every portal type,
+        so each request gets its own Portal Task for a staffer to file.  The
+        portal becomes the agency's, which routes its new requests there too.
+
+        The request resent is the first one we sent, not the first
+        communication: an agency reply can come first on imported requests.
+        A request with nothing sent is left where it is and returned, rather
+        than failing the whole repair.
+        """
+        if portal.pk is None:
+            portal.save()
+        if agency.portal_id != portal.pk:
+            agency.portal = portal
+            agency.save()
+        skipped = []
+        for foia in foias:
+            comm = foia.communications.filter(response=False).first()
+            if comm is None:
+                skipped.append(foia)
+                continue
+            # update_address() keeps the email for a portal, and the review
+            # queue would count the request as blocked on it again
+            foia.email = None
+            foia.update_address("portal", email=None, fax=None)
+            foia.submit(comm=comm)
+        return skipped
 
     def latest_response(self):
         """Returns the latest response from the agency"""
@@ -891,6 +1119,12 @@ class NewAgencyTask(Task):
     def _send_rejection_email(self, subject, extra_context):
         """Send the agency-rejection email. Callers own the subject and context.
         This adds the shared url and dispatches through the standard templates."""
+        if not (self.user and self.user.email):
+            logger.warning(
+                "Skipping agency rejection email for task %s: no recipient email",
+                self.pk,
+            )
+            return
         TemplateEmail(
             subject=subject,
             user=self.user,
