@@ -585,6 +585,8 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
     def get_queryset(self):
         """Only files for one agency"""
         agency = self.get_agency()
+        if settings.HIDE_FILES_FROM_SCRAPERS and not self.request.user.is_authenticated:
+            return FOIAFile.objects.none()
         queryset = super().get_queryset()
         return queryset.filter(
             comm__foia__embargo_status="public", comm__foia__agency=agency
@@ -594,4 +596,5 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
         context = super().get_context_data(**kwargs)
         context["agency"] = self.get_agency()
         context["agency_url"] = context["agency"].get_absolute_url()
+        context["hide_files_from_scrapers"] = settings.HIDE_FILES_FROM_SCRAPERS
         return context
