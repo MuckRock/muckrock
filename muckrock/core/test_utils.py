@@ -37,6 +37,22 @@ def assert_queries_do_not_scale(client, url, create_one, rows=10):
     assert len(set(counts)) == 1, f"Query count grew with rows: {counts}"
 
 
+def assert_page_queries_do_not_scale(client, url, create_one, rows=10):
+    """Like assert_queries_do_not_scale, but for HTML list pages using object_list"""
+    baseline = len(client.get(url).context["object_list"])
+
+    counts = []
+    for added in range(1, rows + 1):
+        create_one()
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.get(url)
+        assert response.status_code == 200
+        assert len(response.context["object_list"]) == baseline + added
+        counts.append(len(ctx.captured_queries))
+
+    assert len(set(counts)) == 1, f"Query count grew with rows: {counts}"
+
+
 def assert_max_queries(client, url, max_queries):
     """Assert that a single request to url runs at most max_queries queries."""
     # Cached queries shouldn't count, so run the test on the second get
