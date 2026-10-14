@@ -25,44 +25,6 @@ from muckrock.tags.models import Tag
 from muckrock.task.constants import SNAIL_MAIL_CATEGORIES
 
 
-def filter_communication_date_range(queryset, name, value):
-    """Match requests with a communication inside the given date range."""
-    # pylint: disable=unused-argument
-    comms = FOIACommunication.objects.all()
-    if value.start is not None:
-        comms = comms.filter(datetime__gte=value.start)
-    if value.stop is not None:
-        comms = comms.filter(datetime__lte=value.stop)
-    return queryset.filter(id__in=comms.values("foia_id"))
-
-
-def filter_minimum_pages(queryset, name, value):
-    """Match requests with at least one file of `value` or more pages"""
-    # pylint: disable=unused-argument
-    # 0 skips the filter because that's just the whole corpus
-    if value == 0:
-        return queryset
-    foia_ids = FOIACommunication.objects.filter(files__pages__gte=value).values(
-        "foia_id"
-    )
-    return queryset.filter(id__in=foia_ids)
-
-
-def filter_file_types(queryset, name, value):
-    """Match requests with at least one file ending in any of the given extensions."""
-    # pylint: disable=unused-argument
-    query = Q()
-    for file_type in value.split(","):
-        file_type = file_type.strip()
-        if not file_type:
-            continue
-        query |= Q(files__ffile__endswith=file_type)
-    if not query:
-        return queryset
-    foia_ids = FOIACommunication.objects.filter(query).values("foia_id")
-    return queryset.filter(id__in=foia_ids)
-
-
 class JurisdictionFilterSet(django_filters.FilterSet):
     """Mix in for including state inclusive jurisdiction filter"""
 
@@ -93,7 +55,69 @@ class JurisdictionFilterSet(django_filters.FilterSet):
         return queryset.filter(query)
 
 
-class FOIARequestFilterSet(JurisdictionFilterSet):
+class CommunicationDateRangeFilterSet(django_filters.FilterSet):
+    """Mix in for filtering requests by the dates of their communications"""
+
+    date_range = django_filters.DateFromToRangeFilter(
+        method="filter_communication_date_range",
+        label="Date Range",
+        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+    )
+
+    def filter_communication_date_range(self, queryset, name, value):
+        """Match requests with a communication inside the given date range."""
+        # pylint: disable=unused-argument
+        comms = FOIACommunication.objects.all()
+        if value.start is not None:
+            comms = comms.filter(datetime__gte=value.start)
+        if value.stop is not None:
+            comms = comms.filter(datetime__lte=value.stop)
+        return queryset.filter(id__in=comms.values("foia_id"))
+
+
+class CommunicationFileFilterSet(django_filters.FilterSet):
+    """Mix in for filtering requests by the files on their communications"""
+
+    minimum_pages = django_filters.NumberFilter(
+        method="filter_minimum_pages",
+        label="Min. Pages",
+        widget=forms.NumberInput(),
+    )
+    file_types = django_filters.CharFilter(
+        method="filter_file_types",
+        label="File Types",
+    )
+
+    def filter_minimum_pages(self, queryset, name, value):
+        """Match requests with at least one file of `value` or more pages"""
+        # pylint: disable=unused-argument
+        # 0 skips the filter because that's just the whole corpus
+        if value == 0:
+            return queryset
+        foia_ids = FOIACommunication.objects.filter(files__pages__gte=value).values(
+            "foia_id"
+        )
+        return queryset.filter(id__in=foia_ids)
+
+    def filter_file_types(self, queryset, name, value):
+        """Match requests with at least one file
+        ending in any of the given extensions."""
+        # pylint: disable=unused-argument
+        query = Q()
+        for file_type in value.split(","):
+            file_type = file_type.strip()
+            if not file_type:
+                continue
+            query |= Q(files__ffile__endswith=file_type)
+        if not query:
+            return queryset
+        foia_ids = FOIACommunication.objects.filter(query).values("foia_id")
+        return queryset.filter(id__in=foia_ids)
+
+
+class FOIARequestFilterSet(
+    JurisdictionFilterSet, CommunicationDateRangeFilterSet, CommunicationFileFilterSet
+):
     """Allows filtering a request by status, agency, jurisdiction, user, or tags."""
 
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
@@ -138,27 +162,15 @@ class FOIARequestFilterSet(JurisdictionFilterSet):
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
     )
-    minimum_pages = django_filters.NumberFilter(
-        method=filter_minimum_pages,
-        label="Min. Pages",
-        widget=forms.NumberInput(),
-    )
-    date_range = django_filters.DateFromToRangeFilter(
-        method=filter_communication_date_range,
-        label="Date Range",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
-    )
-    file_types = django_filters.CharFilter(
-        method=filter_file_types,
-        label="File Types",
-    )
 
     class Meta:
         model = FOIARequest
         fields = ["status", "user", "agency", "jurisdiction", "projects"]
 
 
-class MyFOIARequestFilterSet(JurisdictionFilterSet):
+class MyFOIARequestFilterSet(
+    JurisdictionFilterSet, CommunicationDateRangeFilterSet, CommunicationFileFilterSet
+):
     """Allows filtering a request by status, agency, jurisdiction, or tags."""
 
     status = django_filters.ChoiceFilter(choices=BLANK_STATUS)
@@ -185,20 +197,6 @@ class MyFOIARequestFilterSet(JurisdictionFilterSet):
         lookup_expr="isnull",
         exclude=True,
         widget=forms.Select(choices=NULL_BOOLEAN_CHOICES),
-    )
-    minimum_pages = django_filters.NumberFilter(
-        method=filter_minimum_pages,
-        label="Min. Pages",
-        widget=forms.NumberInput(),
-    )
-    date_range = django_filters.DateFromToRangeFilter(
-        method=filter_communication_date_range,
-        label="Date Range",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
-    )
-    file_types = django_filters.CharFilter(
-        method=filter_file_types,
-        label="File Types",
     )
 
     class Meta:
@@ -238,7 +236,7 @@ class ProcessingFOIARequestFilterSet(JurisdictionFilterSet):
         fields = ["user", "agency", "jurisdiction"]
 
 
-class AgencyFOIARequestFilterSet(django_filters.FilterSet):
+class AgencyFOIARequestFilterSet(CommunicationDateRangeFilterSet):
     """Filters for agency users"""
 
     user = django_filters.ModelMultipleChoiceFilter(
@@ -257,11 +255,6 @@ class AgencyFOIARequestFilterSet(django_filters.FilterSet):
         widget=autocomplete.ModelSelect2Multiple(
             url="tag-autocomplete", attrs={"data-placeholder": "Search tags"}
         ),
-    )
-    date_range = django_filters.DateFromToRangeFilter(
-        method=filter_communication_date_range,
-        label="Date Range",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
     )
 
     class Meta:
