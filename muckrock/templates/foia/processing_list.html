@@ -6,6 +6,7 @@
   <th width="10%" data-sort="date_submitted">Created</th>
   <th width="10%" data-sort="date_processing">Processing</th>
   <th width="10%">Task</th>
+  <th width="10%" data-sort="task_age">Task Age</th>
   <th width="10%">Ticket</th>
   <th width="10%">Category</th>
   <th width="10%">Reason</th>
@@ -18,7 +19,7 @@
   {% with object as foia %}
     <td><a class="bold" href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
     <td>{{ foia.composer.datetime_submitted|date:"m/d/Y" }}</td>
-    <td>{{ foia.processing_length }} days</td>
+    <td>{% if foia.status == "submitted" %}{{ foia.processing_length }} days{% else %}&mdash;{% endif %}</td>
     <td>
       {% if foia.portaltask_communications.0.open_portaltasks %}
         Portal
@@ -30,6 +31,19 @@
         Payment Info
       {% elif foia.agency.open_newagencytasks %}
         New Agency
+      {% endif %}
+    </td>
+    <td>
+      {% if foia.portaltask_communications.0.open_portaltasks %}
+        {{ foia.portaltask_communications.0.open_portaltasks.0.days_old }} days
+      {% elif foia.snailmailtask_communications.0.open_snailmailtasks %}
+        {{ foia.snailmailtask_communications.0.open_snailmailtasks.0.days_old }} days
+      {% elif foia.composer.open_multirequesttasks %}
+        {{ foia.composer.open_multirequesttasks.0.days_old }} days
+      {% elif foia.open_paymentinfotasks %}
+        {{ foia.open_paymentinfotasks.0.days_old }} days
+      {% elif foia.agency.open_newagencytasks %}
+        {{ foia.agency.open_newagencytasks.0.days_old }} days
       {% endif %}
     </td>
     <td class="processing-zendesk-cell">
