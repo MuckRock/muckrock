@@ -6,6 +6,7 @@ Views for the Agency application
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.views import redirect_to_login
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.http import JsonResponse
@@ -563,6 +564,12 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
     template_name = "agency/file_list.html"
     agency = None
     filter_class = FOIAFileFilterSet
+
+    def dispatch(self, request, *args, **kwargs):
+        """Send anonymous users to login when the killswitch is on."""
+        if not request.user.has_perm("foia.view_foiafile"):
+            return redirect_to_login(request.get_full_path())
+        return super().dispatch(request, *args, **kwargs)
 
     def get_agency(self):
         """Returns the Agency for the files. Caches it as an attribute."""

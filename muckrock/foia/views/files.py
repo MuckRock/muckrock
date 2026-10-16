@@ -1,8 +1,9 @@
 """FOIA views for handling files"""
 
 # Django
+from django.contrib.auth.views import redirect_to_login
 from django.http import Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView
@@ -21,6 +22,12 @@ class FileEmbedView(DetailView):
     queryset = FOIAFile.objects.filter(comm__foia__embargo_status="public")
     template_name = "foia/file/embed.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        """Show a login prompt instead of the file when the killswitch is on."""
+        if not request.user.has_perm("foia.view_foiafile"):
+            return render(request, "foia/file/embed_login.html", status=403)
+        return super().dispatch(request, *args, **kwargs)
+
 
 class FOIAFileListView(ModelFilterMixin, MRListView):
     """Presents a paginated list of files."""
@@ -32,6 +39,8 @@ class FOIAFileListView(ModelFilterMixin, MRListView):
 
     def dispatch(self, request, *args, **kwargs):
         """Prevent unauthorized users from viewing the files."""
+        if not request.user.has_perm("foia.view_foiafile"):
+            return redirect_to_login(request.get_full_path())
         foia = self.get_foia()
         if not foia.has_perm(request.user, "view"):
             raise Http404()
