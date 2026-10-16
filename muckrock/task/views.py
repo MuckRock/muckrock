@@ -14,6 +14,7 @@ from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonRespon
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.views.generic import FormView, TemplateView
 
 # Standard Library
@@ -379,14 +380,33 @@ class ReviewAgencyTaskList(TaskList):
             queryset = queryset.filter(self.visible)
         return queryset
 
+    @cached_property
+    def impact_counts(self):
+        """Visible and total task counts for the current filters
+
+        Counting computes the blocked count of every open task; read this
+        rather than counting the queryset again.
+        """
+        filter_ = self.filter_class(
+            self.request.GET, queryset=super().get_queryset(), request=self.request
+        )
+        return filter_.qs.aggregate(
+            total=Count("pk", distinct=True),
+            visible=Count("pk", filter=self.visible, distinct=True),
+        )
+
+    def get_paginator(self, queryset, per_page, **kwargs):
+        """Paginate with the visible count from impact_counts"""
+        paginator = super().get_paginator(queryset, per_page, **kwargs)
+        if self.hides_zero_impact():
+            paginator.count = self.impact_counts["visible"]
+        return paginator
+
     def hidden_count(self):
         """How many tasks the current filters match but the default hides"""
         if not self.hides_zero_impact():
             return 0
-        filter_ = self.filter_class(
-            self.request.GET, queryset=super().get_queryset(), request=self.request
-        )
-        return filter_.qs.exclude(self.visible).count()
+        return self.impact_counts["total"] - self.impact_counts["visible"]
 
     def get_context_data(self, **kwargs):
         """Add the agency grouping counts"""
