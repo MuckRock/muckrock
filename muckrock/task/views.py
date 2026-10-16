@@ -395,9 +395,17 @@ class ReviewAgencyTaskList(TaskList):
             visible=Count("pk", filter=self.visible, distinct=True),
         )
 
-    def get_paginator(self, queryset, per_page, **kwargs):
+    def get_paginator(
+        self, queryset, per_page, orphans=0, allow_empty_first_page=True, **kwargs
+    ):
         """Paginate with the visible count from impact_counts"""
-        paginator = super().get_paginator(queryset, per_page, **kwargs)
+        paginator = super().get_paginator(
+            queryset,
+            per_page,
+            orphans=orphans,
+            allow_empty_first_page=allow_empty_first_page,
+            **kwargs,
+        )
         if self.hides_zero_impact():
             paginator.count = self.impact_counts["visible"]
         return paginator
