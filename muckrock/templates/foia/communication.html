@@ -126,7 +126,7 @@
       </section>
     {% endif %}
     {% if communication.display_files %}
-      {% if hide_files_from_scrapers and not request.user.is_authenticated %}
+      {% if not perms.foia.view_foiafile %}
         <p class="empty">Please <a href="{% url 'acct-login' %}?next={{ request.path|urlencode }}">log in</a> to view files for this request.</p>
       {% else %}
         <ul class="files">

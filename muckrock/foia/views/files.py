@@ -1,7 +1,6 @@
 """FOIA views for handling files"""
 
 # Django
-from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
@@ -25,7 +24,7 @@ class FileEmbedView(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """Show a login prompt instead of the file when the killswitch is on."""
-        if settings.HIDE_FILES_FROM_SCRAPERS and not request.user.is_authenticated:
+        if not request.user.has_perm("foia.view_foiafile"):
             return render(request, "foia/file/embed_login.html", status=403)
         return super().dispatch(request, *args, **kwargs)
 
@@ -40,7 +39,7 @@ class FOIAFileListView(ModelFilterMixin, MRListView):
 
     def dispatch(self, request, *args, **kwargs):
         """Prevent unauthorized users from viewing the files."""
-        if settings.HIDE_FILES_FROM_SCRAPERS and not request.user.is_authenticated:
+        if not request.user.has_perm("foia.view_foiafile"):
             return redirect_to_login(request.get_full_path())
         foia = self.get_foia()
         if not foia.has_perm(request.user, "view"):
