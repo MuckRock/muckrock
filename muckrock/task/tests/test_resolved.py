@@ -178,6 +178,19 @@ class TestDidItHold(ResolvedReadoutMixin, TestCase):
         annotated = ReviewAgencyTask.objects.with_outcome().get(pk=task.pk)
         assert not annotated.held
 
+    def test_a_reopened_task_is_not_held_despite_a_later_response(self):
+        """An open task has nothing to have held, whatever its old date_done"""
+        task = self.resolved_task(days_ago=10)
+        ReviewAgencyTask.objects.filter(pk=task.pk).update(resolved=False)
+        foia = FOIARequestFactory(agency=self.agency, status="ack")
+        FOIACommunicationFactory(
+            foia=foia,
+            response=True,
+            datetime=timezone.now() - timedelta(days=2),
+        )
+        annotated = ReviewAgencyTask.objects.with_outcome().get(pk=task.pk)
+        assert not annotated.held
+
 
 class TestReopenLinkage(ResolvedReadoutMixin, TestCase):
     """A resolve that did not hold is a signal"""
