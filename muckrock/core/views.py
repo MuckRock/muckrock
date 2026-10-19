@@ -131,13 +131,8 @@ class ModelFilterMixin:
         We also apply pagination to the filter queryset.
         """
         filter_ = self.get_filter()
-        queryset = filter_.qs
-        if any(filter_.data.values()):
-            queryset = queryset.distinct()
-
-        context = super().get_context_data(object_list=queryset, **kwargs)
+        context = super().get_context_data(object_list=filter_.qs, **kwargs)
         context["filter"] = filter_
-
         return context
 
 
