@@ -36,6 +36,7 @@ from muckrock.task.models import (
     PaymentInfoTask,
     PortalTask,
     ResponseTask,
+    ReviewAgencyRepair,
     ReviewAgencyTask,
     SnailMailTask,
     StatusChangeTask,
@@ -47,16 +48,27 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(ignore_result=True, name="muckrock.task.tasks.submit_review_update")
-def submit_review_update(foia_pks, reply_text, **kwargs):
-    """Submit all the follow ups after updating agency contact information"""
+def submit_review_update(foia_pks, reply_text, repair_pk=None, **kwargs):
+    """Submit all the follow ups after updating agency contact information
+
+    Given the repair that queued them, each follow up is linked to it, so the
+    resolved task can show what was sent.  The legacy repair form, and jobs
+    queued before repairs were recorded, pass none.
+    """
     foias = FOIARequest.objects.filter(pk__in=foia_pks)
     muckrock_staff = User.objects.get(username="MuckrockStaff")
+    repair = (
+        ReviewAgencyRepair.objects.filter(pk=repair_pk).first()
+        if repair_pk is not None
+        else None
+    )
     for foia in foias:
         # One request failing must not stop the follow ups for the rest.  Its
-        # communication is rolled back with it, so it is not left looking sent.
+        # communication is rolled back with it, so it is not left looking sent
+        # -- or linked to the repair as if it had been.
         try:
             with transaction.atomic():
-                FOIACommunication.objects.create(
+                communication = FOIACommunication.objects.create(
                     foia=foia,
                     from_user=muckrock_staff,
                     to_user=foia.get_to_user(),
@@ -65,6 +77,8 @@ def submit_review_update(foia_pks, reply_text, **kwargs):
                     communication=reply_text,
                 )
                 foia.submit(switch=True)
+                if repair is not None:
+                    repair.communications.add(communication)
         except Exception:  # pylint: disable=broad-except
             logger.exception("Review agency follow up failed for request %s", foia.pk)
 

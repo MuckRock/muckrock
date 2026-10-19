@@ -351,6 +351,24 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
                     "agency__agencyaddress_set",
                     queryset=AgencyAddress.objects.select_related("address"),
                 ),
+                # A channel task shows its own repairs; an agency level task
+                # rolls up every repair on its agency
+                Prefetch("repairs", queryset=self._repairs()),
+                Prefetch("agency__review_repairs", queryset=self._repairs()),
+            )
+        )
+
+    @staticmethod
+    def _repairs():
+        """Repairs with what their readout links to"""
+        return task.models.ReviewAgencyRepair.objects.select_related(
+            "user", "new_email"
+        ).prefetch_related(
+            Prefetch(
+                "communications",
+                queryset=FOIACommunication.objects.select_related(
+                    "foia__agency__jurisdiction"
+                ).order_by("datetime", "pk"),
             )
         )
 

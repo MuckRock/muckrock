@@ -12,6 +12,7 @@ from django.db.models.functions import Cast, Now
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.utils.functional import cached_property
 from django.utils.html import linebreaks, urlize
 
@@ -671,6 +672,28 @@ class ReviewAgencyTask(Task):
         return self.form_data.get("repair")
 
     @cached_property
+    def repair_history(self):
+        """The recorded repairs this task should show, oldest first
+
+        A channel task shows the repairs that touched it.  An agency level
+        task covers every channel, so it shows every repair on the agency
+        while it was open -- including those made from its sibling channel
+        tasks, which is where an agency's address changes over time show up.
+        """
+        if self.email_id is not None:
+            return list(self.repairs.all())
+        return [
+            repair
+            for repair in self.agency.review_repairs.all()
+            if repair.datetime >= self.date_created
+            and (
+                not self.resolved
+                or not self.date_done
+                or repair.datetime <= self.date_done
+            )
+        ]
+
+    @cached_property
     def successor(self):
         """The open task that reopened this channel after it was resolved
 
@@ -751,6 +774,22 @@ class ReviewAgencyTask(Task):
 
         skipped = []
         with transaction.atomic():
+            repair = ReviewAgencyRepair(
+                agency=agency,
+                user=user,
+                new_email=new_email,
+                snail_mail=bool(snail),
+                agency_info_updated=bool(update_info),
+                requests_updated=len(foias) if changed else 0,
+                followup_sent=send_reply,
+                reply=reply if send_reply else "",
+                # Read before update_contact() mends the agency
+                before=ReviewAgencyRepair.snapshot(
+                    agency, set(channel_pks), moved_by_channel if changed else {}
+                ),
+            )
+            repair.save()
+            repair.tasks.set(tasks)
             if portal is not None:
                 skipped = cls._move_to_portal(agency, portal, foias)
                 # A skipped request stays on its channel, so it was not moved
@@ -807,7 +846,9 @@ class ReviewAgencyTask(Task):
 
             if send_reply:
                 transaction.on_commit(
-                    lambda: submit_review_update.delay(foia_pks, reply)
+                    lambda: submit_review_update.delay(
+                        foia_pks, reply, repair_pk=repair.pk
+                    )
                 )
 
         return tasks, skipped
@@ -866,6 +907,134 @@ class ReviewAgencyTask(Task):
             f"Review Agency Task\nAgency: {self.agency}\n"
             f"{settings.MUCKROCK_URL}{self.agency.get_absolute_url()}"
         )
+
+
+class ReviewAgencyRepair(models.Model):
+    """One repair submission on an agency's channels, as an audit trail
+
+    A task shows the agency as it is now, which is the wrong question once it
+    is resolved: the broken address drops off the task as soon as its requests
+    are moved, and nothing records what the follow ups said or where they
+    went (#1869, #1870).  This keeps what the channels looked like before the
+    repair, what it changed them to, and the communications it sent.
+
+    One row per submission rather than per task, because one submission can
+    resolve several channel tasks and the agency level task at once.
+    """
+
+    agency = models.ForeignKey(
+        "agency.Agency", on_delete=models.PROTECT, related_name="review_repairs"
+    )
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    datetime = models.DateTimeField(default=timezone.now, db_index=True)
+    tasks = models.ManyToManyField(ReviewAgencyTask, related_name="repairs")
+
+    # Not a hidden relation: merge_email_addresses discovers what to repoint
+    # from the reverse relations, and would skip a hidden one
+    new_email = models.ForeignKey(
+        "communication.EmailAddress",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="review_repairs",
+    )
+    snail_mail = models.BooleanField(default=False)
+    agency_info_updated = models.BooleanField(default=False)
+    requests_updated = models.PositiveIntegerField(default=0)
+    followup_sent = models.BooleanField(default=False)
+    # Only the text that actually went out; a reply typed on a repair that
+    # sent nothing must not read as if it had been sent
+    reply = models.TextField(blank=True)
+
+    # A frozen copy of the repaired channels and the agency's primary contacts
+    # as they were before the repair.  JSON because it is a snapshot: the
+    # point is that it does not follow the live rows as they change.
+    before = models.JSONField(default=dict, blank=True)
+    # Filled in by the follow up job as it sends each one
+    communications = models.ManyToManyField(
+        "foia.FOIACommunication", blank=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["datetime", "pk"]
+
+    def __str__(self):
+        return "Repair of %s at %s" % (self.agency, self.datetime)
+
+    @cached_property
+    def channels(self):
+        """The repaired channels as they were before the repair
+
+        With their dates parsed back out of the JSON for display.
+        """
+        channels = []
+        for channel in self.before.get("channels", []):
+            channel = dict(channel)
+            for key in ("last_error", "last_confirm"):
+                if channel.get(key):
+                    channel[key] = parse_datetime(channel[key])
+            channels.append(channel)
+        return channels
+
+    @property
+    def backfilled(self):
+        """Recorded after the fact, with no snapshot or follow up links"""
+        return bool(self.before.get("backfilled"))
+
+    @property
+    def new_email_display(self):
+        """Where the requests went, including a backfilled address since gone"""
+        if self.new_email is not None:
+            return self.new_email.email
+        return self.before.get("new_email")
+
+    @staticmethod
+    def snapshot(agency, channel_pks, moved_by_channel):
+        """What the repaired channels and the primary contacts look like now
+
+        Called before update_contact() so it reads the broken state.
+        """
+        # pylint: disable=import-outside-toplevel
+        # MuckRock
+        from muckrock.task.channels import agency_channels
+
+        channels = [
+            {
+                "email": channel.address.email,
+                "status": channel.address.status,
+                "classification": channel.classification,
+                "is_primary": channel.is_primary,
+                "last_error": _isoformat(channel.last_error),
+                "last_error_code": channel.last_error_code,
+                "last_error_reason": channel.last_error_reason,
+                "last_error_message": channel.last_error_message,
+                "error_count": channel.error_count,
+                "last_confirm": _isoformat(channel.last_confirm),
+                "requests_moved": moved_by_channel.get(channel.address.pk, 0),
+            }
+            for channel in agency_channels(agency)
+            if channel.address.pk in channel_pks
+        ]
+        return {
+            "channels": channels,
+            "primary_emails": sorted(
+                link.email.email
+                for link in agency.agencyemail_set.select_related("email")
+                if link.request_type == "primary" and link.email_type == "to"
+            ),
+            "primary_faxes": sorted(
+                link.phone.number.as_national
+                for link in agency.agencyphone_set.select_related("phone")
+                if link.request_type == "primary" and link.phone.type == "fax"
+            ),
+        }
+
+
+def _isoformat(value):
+    """A datetime for JSON, or None"""
+    return value.isoformat() if value is not None else None
 
 
 class FlaggedTask(Task):

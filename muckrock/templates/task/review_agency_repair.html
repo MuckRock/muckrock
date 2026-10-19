@@ -1,0 +1,93 @@
+{% comment %}
+  One recorded repair: the channels as they were before it, what it changed
+  them to, and what that touched.  Expects `repair` and `task`; the section
+  heading renders only with `show_heading`.
+{% endcomment %}
+<div class="review-agency-repair">
+<header class="review-agency-repair__header">
+  {% if show_heading %}
+    <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
+  {% endif %}
+  <span class="review-agency-repair__byline">
+    <time datetime="{{ repair.datetime|date:'Y-m-d H:i' }}">{{ repair.datetime|date:'m/d/Y' }}</time>
+    by {{ repair.user.username|default:"unknown" }}
+    {% if repair.backfilled %}
+      &middot; recorded before repair history was kept, so no error details
+    {% endif %}
+  </span>
+</header>
+<table class="review-agency-table">
+  <thead>
+    <tr>
+      <th scope="col">Before</th>
+      <th scope="col">After</th>
+      <th scope="col">Effects</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        {% for channel in repair.channels %}
+          <div>
+            <code>{{ channel.email }}</code>
+            {% if channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
+            {% if channel.status %}
+              <br>
+              {% if channel.last_error_message %}
+                {{ channel.last_error_message }}
+              {% elif channel.status == 'error' %}
+                Flagged as broken
+              {% else %}
+                Not flagged as broken
+              {% endif %}
+              {% if channel.last_error %}
+                &middot;
+                <time datetime="{{ channel.last_error|date:'Y-m-d H:i' }}">{{ channel.last_error|date:'m/d/Y' }}</time>
+              {% endif %}
+              {% if channel.error_count > 1 %}
+                &middot; {{ channel.error_count }} errors
+              {% endif %}
+            {% endif %}
+          </div>
+        {% empty %}
+          No specific channel
+        {% endfor %}
+        {% if repair.agency_info_updated and repair.before.primary_emails %}
+          <div>Primary: <code>{{ repair.before.primary_emails|join:", " }}</code></div>
+        {% endif %}
+      </td>
+      <td>
+        {% if repair.new_email_display %}
+          <code>{{ repair.new_email_display }}</code>
+        {% elif repair.snail_mail %}
+          Snail mail
+        {% else %}
+          No contact change
+        {% endif %}
+      </td>
+      <td>
+        {% with comms=repair.communications.all %}
+          {% if repair.followup_sent and comms %}
+            {# The requests touched, opened to the follow up sent on each #}
+            <details class="review-agency-followups">
+              <summary>
+                {{ repair.requests_updated }} request{{ repair.requests_updated|pluralize }} updated
+                &middot; follow-up sent
+              </summary>
+              <ul>
+                {% for comm in comms %}
+                  <li><a href="{{ comm.get_absolute_url }}">{{ comm.foia.title }}</a></li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% else %}
+            {{ repair.requests_updated }} request{{ repair.requests_updated|pluralize }} updated
+            {% if repair.followup_sent %}&middot; follow-up sent{% endif %}
+          {% endif %}
+        {% endwith %}
+        {% if repair.agency_info_updated %}<div>Agency contact updated</div>{% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>

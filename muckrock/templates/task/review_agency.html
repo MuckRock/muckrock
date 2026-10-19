@@ -16,63 +16,82 @@
 {% block task-form-data %}{% endblock %}
 
 {% block task-content %}
-  {% if task.resolved or task.repair_outcome %}
+  {% if task.resolved or task.repair_outcome or task.repair_history %}
     {% comment %}
-      What was done, whether it held, and where it reopened -- #1869/#1870.
+      What was done, and where it reopened -- #1869/#1870.
       An open task can carry a repair too, when it was not resolved on submit;
       it says so, since nothing else marks it as worked.
     {% endcomment %}
     <div class="review-agency-outcome">
-      <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
+      {% if task.repair_history %}
+        {% comment %}
+          Read from the snapshot each repair took, not the live agency: once a
+          broken address's requests move it no longer appears anywhere else.
+        {% endcomment %}
+        <div class="review-agency-history">
+          {% for repair in task.repair_history %}
+            {# The section heading shares a line with the first repair's byline #}
+            {% include "task/review_agency_repair.html" with show_heading=forloop.first %}
+          {% endfor %}
+        </div>
+      {% else %}
       {% with outcome=task.repair_outcome %}
         {% if outcome %}
-          <p>
-            <code>{{ outcome.old_email|default:"agency-level task" }}</code>
-            {% if outcome.portal %}
-              &rarr; portal: {{ outcome.portal }}
-            {% elif outcome.new_email %}
-              &rarr; <code>{{ outcome.new_email }}</code>
-            {% elif outcome.snail_mail %}
-              &rarr; snail mail
-            {% else %}
-              &mdash; No contact change
-            {% endif %}
-            &middot;
-            {{ outcome.requests_updated }} request{{ outcome.requests_updated|pluralize }} updated
-            &middot;
-            {% if outcome.followup_sent %}Follow-up sent{% else %}No follow-up{% endif %}
-            {% if outcome.agency_info_updated %}&middot; Agency contact updated{% endif %}
-          </p>
-          <p>
-            by {{ outcome.by|default:"unknown" }}
-            {% if task.date_done %}
-              on <time datetime="{{ task.date_done|date:'Y-m-d H:i' }}">{{ task.date_done|date:'m/d/Y' }}</time>
-            {% endif %}
-          </p>
+          {# Repairs from before history was kept: the same table, from the task's own summary #}
+          <div class="review-agency-repair">
+          <header class="review-agency-repair__header">
+            <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
+            <span class="review-agency-repair__byline">
+              {% if task.date_done %}
+                <time datetime="{{ task.date_done|date:'Y-m-d H:i' }}">{{ task.date_done|date:'m/d/Y' }}</time>
+              {% endif %}
+              by {{ outcome.by|default:"unknown" }}
+            </span>
+          </header>
+          <table class="review-agency-table">
+            <thead>
+              <tr>
+                <th scope="col">Before</th>
+                <th scope="col">After</th>
+                <th scope="col">Effects</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>{{ outcome.old_email|default:"agency-level task" }}</code></td>
+                <td>
+                  {% if outcome.new_email %}
+                    <code>{{ outcome.new_email }}</code>
+                  {% elif outcome.snail_mail %}
+                    Snail mail
+                  {% else %}
+                    No contact change
+                  {% endif %}
+                </td>
+                <td>
+                  {{ outcome.requests_updated }} request{{ outcome.requests_updated|pluralize }} updated
+                  {% if outcome.followup_sent %}&middot; follow-up sent{% endif %}
+                  {% if outcome.agency_info_updated %}<div>Agency contact updated</div>{% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
         {% else %}
+          <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
           <p>Resolved with no repair recorded &mdash; No contact change.</p>
         {% endif %}
       {% endwith %}
+      {% endif %}
 
-      {% if task.resolved %}
-        <h4>Did it hold?</h4>
+      {% if task.resolved and task.successor %}
         <p>
-          {% if task.held %}
-            <mark>Held</mark> &mdash; the agency has communicated with us since this resolve.
-          {% else %}
-            <mark>Not verified</mark> &mdash; no response from the agency since this resolve.
-          {% endif %}
+          {# A resolve that did not hold is a signal, not noise #}
+          <mark>Reopened</mark> &mdash;
+          <a href="{{ task.successor.get_absolute_url }}">
+            a new task has been opened on this same channel
+          </a>.
         </p>
-
-        {% if task.successor %}
-          <p>
-            {# A resolve that did not hold is a signal, not noise #}
-            <mark>Reopened</mark> &mdash;
-            <a href="{{ task.successor.get_absolute_url }}">
-              a new task has been opened on this same channel
-            </a>.
-          </p>
-        {% endif %}
       {% endif %}
     </div>
   {% endif %}
@@ -111,61 +130,66 @@
     </p>
 
     {% if task.channel %}
-      <dl class="review-agency-channel">
-        <dt>Channel</dt>
-        <dd>
-          <code>{{ task.channel.address.email }}</code>
-          {% if task.channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
-        </dd>
-
-        <dt>Problem</dt>
-        <dd>
-          {# Portal must be visually distinct: no replacement email repairs it #}
-          {% if task.channel.is_portal %}
-            <mark>Portal address</mark> &mdash; this agency appears to have moved
-            to a FOIA portal. An email replacement is the wrong repair.
-          {% elif task.channel.classification == 'noreply' %}
-            <mark>Do-not-reply address</mark> &mdash; point back at the agency's
-            real mailbox rather than inventing a new one.
-          {% elif task.channel.classification == 'reputation' %}
-            <mark>Sender reputation</mark> &mdash; no address swap fixes this.
-          {% else %}
-            Dead mailbox
-          {% endif %}
-        </dd>
-
-        <dt>Last error</dt>
-        <dd>
-          {% if task.channel.last_error %}
-            {{ task.channel.last_error_message }}
-            &middot;
-            <time datetime="{{ task.channel.last_error|date:'Y-m-d H:i' }}">
-              {{ task.channel.last_error|date:'m/d/Y' }}
-              ({{ task.channel.last_error_age }} day{{ task.channel.last_error_age|pluralize }} ago)
-            </time>
-            {% if task.channel.error_count > 1 %}
-              &middot; {{ task.channel.error_count }} errors total
-            {% endif %}
-            {% if task.channel.is_stale_error %}
-              <br><mark>Stale flag</mark> &mdash; nothing has bounced here in over two years.
-            {% endif %}
-          {% else %}
-            Flagged as broken, but no error event on record
-          {% endif %}
-        </dd>
-
-        <dt>Last success</dt>
-        <dd>
-          {% if task.channel.last_confirm %}
-            <time datetime="{{ task.channel.last_confirm|date:'Y-m-d H:i' }}">
-              {{ task.channel.last_confirm|date:'m/d/Y' }}
-              ({{ task.channel.last_confirm|timesince }} ago)
-            </time>
-          {% else %}
-            None on record
-          {% endif %}
-        </dd>
-      </dl>
+      <table class="review-agency-table review-agency-channel">
+        <thead>
+          <tr>
+            <th scope="col">Channel</th>
+            <th scope="col">Problem</th>
+            <th scope="col">Last error</th>
+            <th scope="col">Last success</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <code>{{ task.channel.address.email }}</code>
+              {% if task.channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
+            </td>
+            <td>
+              {# Portal must be visually distinct: no replacement email repairs it #}
+              {% if task.channel.is_portal %}
+                <mark>Portal address</mark> &mdash; this agency appears to have moved
+                to a FOIA portal. An email replacement is the wrong repair.
+              {% elif task.channel.classification == 'noreply' %}
+                <mark>Do-not-reply address</mark> &mdash; point back at the agency's
+                real mailbox rather than inventing a new one.
+              {% elif task.channel.classification == 'reputation' %}
+                <mark>Sender reputation</mark> &mdash; no address swap fixes this.
+              {% else %}
+                Dead mailbox
+              {% endif %}
+            </td>
+            <td>
+              {% if task.channel.last_error %}
+                {{ task.channel.last_error_message }}
+                <br>
+                <time datetime="{{ task.channel.last_error|date:'Y-m-d H:i' }}">
+                  {{ task.channel.last_error|date:'m/d/Y' }}
+                  ({{ task.channel.last_error_age }} day{{ task.channel.last_error_age|pluralize }} ago)
+                </time>
+                {% if task.channel.error_count > 1 %}
+                  &middot; {{ task.channel.error_count }} errors total
+                {% endif %}
+                {% if task.channel.is_stale_error %}
+                  <br><mark>Stale flag</mark> &mdash; nothing has bounced here in over two years.
+                {% endif %}
+              {% else %}
+                Flagged as broken, but no error event on record
+              {% endif %}
+            </td>
+            <td>
+              {% if task.channel.last_confirm %}
+                <time datetime="{{ task.channel.last_confirm|date:'Y-m-d H:i' }}">
+                  {{ task.channel.last_confirm|date:'m/d/Y' }}
+                  ({{ task.channel.last_confirm|timesince }} ago)
+                </time>
+              {% else %}
+                None on record
+              {% endif %}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     {% endif %}
     <div>
       <a class="blue button" href="{% url 'review-agency-detail' pk=task.agency_id %}">

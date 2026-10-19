@@ -360,6 +360,7 @@ class Agency(models.Model, RequestHelper):
             "foiarequest_set",
             "foiamachinerequest_set",
             "reviewagencytask_set",
+            "review_repairs",
             "flaggedtask_set",
             "newagencytask_set",
             "staleagencytask_set",
