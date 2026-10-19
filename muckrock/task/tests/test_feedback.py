@@ -10,7 +10,9 @@ say what happened and what is left.
 
 # Django
 from django.contrib.messages import get_messages
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
 # Standard Library
 from unittest import mock
@@ -60,6 +62,24 @@ class RepairedTaskQueueTests(ReviewAgencyQueueMixin, TestCase):
         assert response.context_data["hidden_count"] == 2
         assert "zero_active=1" in response.context_data["show_hidden_url"]
         self.assertContains(response, "2 tasks with no blocked requests hidden")
+
+    def test_queue_page_and_hidden_notice_share_one_count_of_blocked_requests(self):
+        """Each count recomputes every open task's blocked requests"""
+        self.make_task(blocked=2)
+        self.make_task(blocked=0)
+        with CaptureQueriesContext(connection) as queries:
+            response = self.client.get(self.url)
+        # The sidebar counters also count review tasks, but never blocked requests
+        task_counts = [
+            q["sql"]
+            for q in queries.captured_queries
+            if q["sql"].startswith("SELECT COUNT")
+            and '"task_reviewagencytask"' in q["sql"]
+            and '"foia_foiarequest"' in q["sql"]
+        ]
+        assert len(task_counts) == 1
+        assert response.context_data["paginator"].count == 1
+        assert response.context_data["hidden_count"] == 1
 
     def test_hidden_count_respects_the_other_filters(self):
         """Scoped to one agency, another agency's quiet task is not hidden here"""

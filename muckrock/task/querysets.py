@@ -5,6 +5,7 @@ Custom QuerySets for the Task application
 # Django
 from django.db import models
 from django.db.models import (
+    BooleanField,
     Case,
     Count,
     Exists,
@@ -410,13 +411,19 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
         older is not evidence about this repair, and our own outgoing mail is
         not evidence at all.
         """
+        # For an open task the subquery scans every communication at its agency
+        # and can never match; Postgres skips a CASE branch it does not take.
         return self.annotate(
-            held=Exists(
-                FOIACommunication.objects.filter(
-                    foia__agency=OuterRef("agency"),
-                    response=True,
-                    datetime__gt=OuterRef("date_done"),
-                )
+            held=Case(
+                When(resolved=False, then=Value(False)),
+                default=Exists(
+                    FOIACommunication.objects.filter(
+                        foia__agency=OuterRef("agency"),
+                        response=True,
+                        datetime__gt=OuterRef("date_done"),
+                    )
+                ),
+                output_field=BooleanField(),
             )
         )
 
