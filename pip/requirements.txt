@@ -58,7 +58,7 @@ celery==5.6.2
     #   -r pip/requirements.in
     #   django-celery-email
     #   sentry-sdk
-certifi==2024.7.4
+certifi==2026.10.19
     # via
     #   phaxio
     #   requests

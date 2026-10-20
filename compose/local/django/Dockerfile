@@ -3,9 +3,9 @@ FROM python:3.12
 
 ENV PYTHONUNBUFFERED 1
 
-# Upgrade pip to a minimum version (26.0 or newer) for security
+# Pin pip 26.2.2 by hash; older pip vendors certifi with compromised emSign CAs
 # Will need to update this as time goes on. 
-RUN python -m pip install --upgrade "pip>=26.0,<27.0"
+RUN python -m pip install "pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   # psycopg2 dependencies
@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl http://localhost/rootCA.pem > /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates
 
 
-RUN apt-get update && apt-get install -y libsodium-dev
+RUN apt-get update && apt-get install -y libsodium-dev ca-certificates
 ENV SODIUM_INSTALL=system
 
 # install NVM
