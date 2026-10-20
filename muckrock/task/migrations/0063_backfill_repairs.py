@@ -62,6 +62,9 @@ def backfill_repairs(apps, schema_editor):
             before={
                 "backfilled": True,
                 "new_email": new_email,
+                # Kept by name: portal names are not unique, so it is not
+                # matched back to a row
+                "portal": first.get("portal"),
                 "channels": [
                     {
                         "email": outcome["old_email"],

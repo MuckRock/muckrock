@@ -28,8 +28,9 @@ from muckrock.communication.factories import EmailAddressFactory
 from muckrock.communication.models import EmailAddress
 from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.core.test_utils import RunCommitHooksMixin
-from muckrock.foia.factories import FOIARequestFactory
+from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.portal.models import Portal
 from muckrock.task.factories import ReviewAgencyTaskFactory
 from muckrock.task.models import ReviewAgencyRepair, ReviewAgencyTask
 from muckrock.task.tasks import submit_review_update
@@ -119,6 +120,67 @@ class TestRepairRecord(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         self.run_commit_hooks()
         repair = ReviewAgencyRepair.objects.get()
         assert mock_delay.call_args.kwargs["repair_pk"] == repair.pk
+
+
+@mock.patch("muckrock.task.tasks.submit_review_update.delay")
+class TestPortalRepairRecord(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
+    """A move to a portal is recorded as one, not as no contact change"""
+
+    def setUp(self):
+        super().setUp()
+        self.agency.portal = Portal.objects.create(
+            url="https://seattle.govqa.us", name="Seattle GovQA", type="govqa"
+        )
+        self.agency.save()
+
+    def move(self, blocked=2, unsent=0):
+        """Move a channel's requests to the portal, `unsent` with nothing to resend"""
+        address, foias, task = self.make_channel(
+            "seattle@mycusthelp.net", blocked=blocked + unsent
+        )
+        comms = [
+            FOIACommunicationFactory(foia=foia, category="n", response=False)
+            for foia in foias[:blocked]
+        ]
+        self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=",".join(str(f.pk) for f in foias),
+            resolve="on",
+        )
+        return comms, task
+
+    def test_the_portal_is_recorded(self, _mock_delay):
+        """Where the requests went, and that nothing was sent by email"""
+        comms, _task = self.move()
+        repair = ReviewAgencyRepair.objects.get()
+        assert repair.portal == self.agency.portal
+        assert repair.new_email is None
+        assert repair.followup_sent is False
+        assert repair.requests_updated == 2
+        assert set(repair.communications.all()) == set(comms)
+
+    def test_skipped_requests_are_not_counted_as_moved(self, _mock_delay):
+        """A request with nothing to resend stays on its channel"""
+        comms, _task = self.move(blocked=1, unsent=1)
+        repair = ReviewAgencyRepair.objects.get()
+        assert repair.requests_updated == 1
+        (channel,) = repair.before["channels"]
+        assert channel["requests_moved"] == 1
+        assert set(repair.communications.all()) == set(comms)
+
+    def test_readout_names_the_portal(self, _mock_delay):
+        """The After column says portal, not no contact change"""
+        _comms, task = self.move()
+        response = self.client.get(
+            reverse("review-agency-task", kwargs={"pk": task.pk})
+        )
+        content = response.content.decode()
+        start = content.index("review-agency-history")
+        content = content[start:]
+        assert "Seattle GovQA" in content
+        assert "No contact change" not in content
+        assert "resubmitted through the portal" in content
 
 
 class TestFollowUpLinkage(TestCase):
@@ -374,6 +436,22 @@ class TestBackfill(TestCase):
         assert repair.new_email is None
         assert repair.before["new_email"] == "gone@agency.gov"
         assert not ReviewAgencyTask.objects.filter(email__email="gone@agency.gov")
+
+    def test_backfill_keeps_a_portal_move(self):
+        """A portal repair recorded before the history read as no change"""
+        agency_task = ReviewAgencyTaskFactory(source="staff")
+        self.recorded_task(
+            agency_task.agency,
+            "seattle@mycusthelp.net",
+            timezone.now().isoformat(),
+            new_email=None,
+            followup_sent=False,
+            portal="Seattle GovQA",
+        )
+        self.backfill()
+        repair = ReviewAgencyRepair.objects.get()
+        assert repair.new_email is None
+        assert repair.portal_display == "Seattle GovQA"
 
 
 class TestMerges(TestCase):

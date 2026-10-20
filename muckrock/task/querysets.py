@@ -362,7 +362,7 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
     def _repairs():
         """Repairs with what their readout links to"""
         return task.models.ReviewAgencyRepair.objects.select_related(
-            "user", "new_email"
+            "user", "new_email", "portal"
         ).prefetch_related(
             Prefetch(
                 "communications",

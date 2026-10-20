@@ -740,7 +740,8 @@ class ReviewAgencyTask(Task):
         no follow-up is sent: it would go through the portal too, doubling
         every request's portal work.
         """
-        # pylint: disable=too-many-arguments,too-many-locals,import-outside-toplevel
+        # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
+        # pylint: disable=too-many-statements,import-outside-toplevel
         # MuckRock
         from muckrock.task.tasks import submit_review_update
 
@@ -772,15 +773,21 @@ class ReviewAgencyTask(Task):
         changed = new_email is not None or bool(snail) or portal is not None
         send_reply = bool(reply) and bool(foia_pks) and changed and portal is None
 
-        skipped = []
+        resends, skipped = [], []
+        if portal is not None:
+            resends, skipped = cls._portal_resends(foias)
+            # A skipped request stays on its channel, so it was not moved
+            moved_by_channel.subtract(foia.email_id for foia in skipped)
+
         with transaction.atomic():
             repair = ReviewAgencyRepair(
                 agency=agency,
                 user=user,
                 new_email=new_email,
+                portal=portal,
                 snail_mail=bool(snail),
                 agency_info_updated=bool(update_info),
-                requests_updated=len(foias) if changed else 0,
+                requests_updated=len(foias) - len(skipped) if changed else 0,
                 followup_sent=send_reply,
                 reply=reply if send_reply else "",
                 # Read before update_contact() mends the agency
@@ -788,12 +795,13 @@ class ReviewAgencyTask(Task):
                     agency, set(channel_pks), moved_by_channel if changed else {}
                 ),
             )
+            if portal is not None and portal.pk is None:
+                portal.save()
             repair.save()
             repair.tasks.set(tasks)
             if portal is not None:
-                skipped = cls._move_to_portal(agency, portal, foias)
-                # A skipped request stays on its channel, so it was not moved
-                moved_by_channel.subtract(foia.email_id for foia in skipped)
+                cls._move_to_portal(agency, portal, resends)
+                repair.communications.set(comm for _foia, comm in resends)
             elif changed:
                 # One agency level contact update for the whole submission,
                 # however many channels it covers.
@@ -854,36 +862,42 @@ class ReviewAgencyTask(Task):
         return tasks, skipped
 
     @staticmethod
-    def _move_to_portal(agency, portal, foias):
+    def _portal_resends(foias):
+        """Pair each request with the communication a portal move resends
+
+        The request resent is the first one we sent, not the first
+        communication: an agency reply can come first on imported requests.
+        A request with nothing sent is returned as skipped, to be left where
+        it is rather than failing the whole repair.  Decided up front so the
+        repair records only what actually moved.
+        """
+        resends, skipped = [], []
+        for foia in foias:
+            comm = foia.communications.filter(response=False).first()
+            if comm is None:
+                skipped.append(foia)
+            else:
+                resends.append((foia, comm))
+        return resends, skipped
+
+    @staticmethod
+    def _move_to_portal(agency, portal, resends):
         """Resubmit each request's initial communication through the portal
 
         The same thing as resending each request by hand: an initial
         submission goes through the manual portal path for every portal type,
         so each request gets its own Portal Task for a staffer to file.  The
         portal becomes the agency's, which routes its new requests there too.
-
-        The request resent is the first one we sent, not the first
-        communication: an agency reply can come first on imported requests.
-        A request with nothing sent is left where it is and returned, rather
-        than failing the whole repair.
         """
-        if portal.pk is None:
-            portal.save()
         if agency.portal_id != portal.pk:
             agency.portal = portal
             agency.save()
-        skipped = []
-        for foia in foias:
-            comm = foia.communications.filter(response=False).first()
-            if comm is None:
-                skipped.append(foia)
-                continue
+        for foia, comm in resends:
             # update_address() keeps the email for a portal, and the review
             # queue would count the request as blocked on it again
             foia.email = None
             foia.update_address("portal", email=None, fax=None)
             foia.submit(comm=comm)
-        return skipped
 
     def latest_response(self):
         """Returns the latest response from the agency"""
@@ -940,6 +954,13 @@ class ReviewAgencyRepair(models.Model):
         on_delete=models.PROTECT,
         related_name="review_repairs",
     )
+    portal = models.ForeignKey(
+        "portal.Portal",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="review_repairs",
+    )
     snail_mail = models.BooleanField(default=False)
     agency_info_updated = models.BooleanField(default=False)
     requests_updated = models.PositiveIntegerField(default=0)
@@ -952,7 +973,8 @@ class ReviewAgencyRepair(models.Model):
     # as they were before the repair.  JSON because it is a snapshot: the
     # point is that it does not follow the live rows as they change.
     before = models.JSONField(default=dict, blank=True)
-    # Filled in by the follow up job as it sends each one
+    # Filled in by the follow up job as it sends each one, or, for a portal
+    # move, the communications resubmitted through the portal
     communications = models.ManyToManyField(
         "foia.FOIACommunication", blank=True, related_name="+"
     )
@@ -989,6 +1011,13 @@ class ReviewAgencyRepair(models.Model):
         if self.new_email is not None:
             return self.new_email.email
         return self.before.get("new_email")
+
+    @property
+    def portal_display(self):
+        """The portal the requests moved to, including a backfilled one"""
+        if self.portal is not None:
+            return self.portal.name
+        return self.before.get("portal")
 
     @staticmethod
     def snapshot(agency, channel_pks, moved_by_channel):

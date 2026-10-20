@@ -57,7 +57,9 @@
         {% endif %}
       </td>
       <td>
-        {% if repair.new_email_display %}
+        {% if repair.portal_display %}
+          Portal: {{ repair.portal_display }}
+        {% elif repair.new_email_display %}
           <code>{{ repair.new_email_display }}</code>
         {% elif repair.snail_mail %}
           Snail mail
@@ -67,12 +69,16 @@
       </td>
       <td>
         {% with comms=repair.communications.all %}
-          {% if repair.followup_sent and comms %}
-            {# The requests touched, opened to the follow up sent on each #}
+          {% if comms %}
+            {# The requests touched, opened to what was sent on each #}
             <details class="review-agency-followups">
               <summary>
                 {{ repair.requests_updated }} request{{ repair.requests_updated|pluralize }} updated
-                &middot; follow-up sent
+                {% if repair.portal_display %}
+                  &middot; resubmitted through the portal
+                {% else %}
+                  &middot; follow-up sent
+                {% endif %}
               </summary>
               <ul>
                 {% for comm in comms %}
@@ -82,7 +88,11 @@
             </details>
           {% else %}
             {{ repair.requests_updated }} request{{ repair.requests_updated|pluralize }} updated
-            {% if repair.followup_sent %}&middot; follow-up sent{% endif %}
+            {% if repair.portal_display %}
+              &middot; resubmitted through the portal
+            {% elif repair.followup_sent %}
+              &middot; follow-up sent
+            {% endif %}
           {% endif %}
         {% endwith %}
         {% if repair.agency_info_updated %}<div>Agency contact updated</div>{% endif %}

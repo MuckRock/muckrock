@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
         ("agency", "0034_agency_portal_payment_url"),
         ("communication", "0030_emailaddress_no_reply"),
         ("foia", "0117_alter_foiacommunication_opened"),
+        ("portal", "0008_portal_disable_automation"),
         ("task", "0061_reviewagencytask_email"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -63,6 +64,16 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="review_repairs",
                         to="communication.emailaddress",
+                    ),
+                ),
+                (
+                    "portal",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="review_repairs",
+                        to="portal.portal",
                     ),
                 ),
                 (
