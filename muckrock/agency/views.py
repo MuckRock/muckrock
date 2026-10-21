@@ -567,7 +567,7 @@ class AgencyFOIAFileListView(ModelFilterMixin, MRListView):
 
     def dispatch(self, request, *args, **kwargs):
         """Send anonymous users to login when the killswitch is on."""
-        if not request.user.has_perm("foia.view_foiafile"):
+        if not request.user.has_perm("foia.view_files"):
             return redirect_to_login(request.get_full_path())
         return super().dispatch(request, *args, **kwargs)
 

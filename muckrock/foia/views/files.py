@@ -24,7 +24,7 @@ class FileEmbedView(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """Show a login prompt instead of the file when the killswitch is on."""
-        if not request.user.has_perm("foia.view_foiafile"):
+        if not request.user.has_perm("foia.view_files"):
             return render(request, "foia/file/embed_login.html", status=403)
         return super().dispatch(request, *args, **kwargs)
 
@@ -39,7 +39,7 @@ class FOIAFileListView(ModelFilterMixin, MRListView):
 
     def dispatch(self, request, *args, **kwargs):
         """Prevent unauthorized users from viewing the files."""
-        if not request.user.has_perm("foia.view_foiafile"):
+        if not request.user.has_perm("foia.view_files"):
             return redirect_to_login(request.get_full_path())
         foia = self.get_foia()
         if not foia.has_perm(request.user, "view"):

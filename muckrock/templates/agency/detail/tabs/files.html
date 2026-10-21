@@ -1,6 +1,6 @@
 <section role="tabpanel" class="tab-panel files" id="files">
   <h2 class="tab-panel-heading">Files</h2>
-  {% if not perms.foia.view_foiafile %}
+  {% if not perms.foia.view_files %}
     <p class="empty">Please <a href="{% url 'acct-login' %}?next={{ request.path|urlencode }}">log in</a> to view files from this agency.</p>
   {% else %}
     {% if foia_files|length > 0 %}

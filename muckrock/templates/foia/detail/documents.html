@@ -20,7 +20,7 @@
         ></iframe>
     </div>
   {% endif %}
-  {% if not perms.foia.view_foiafile %}
+  {% if not perms.foia.view_files %}
     <p class="empty">Please <a href="{% url 'acct-login' %}?next={{ request.path|urlencode }}">log in</a> to view files for this request.</p>
   {% else %}
     {% if files %}
