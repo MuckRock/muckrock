@@ -62,7 +62,7 @@
         {% crowdfund foia.crowdfund.pk %}
       {% endif %}
 
-      {% compress_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk %}
+      {% compress_cache foia_cache_timeout foia_detail_bottom foia.pk request.user.pk perms.foia.view_files %}
 
         {% include "foia/detail/actions.html" %}
 

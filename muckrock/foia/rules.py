@@ -201,6 +201,12 @@ def has_perm_embargo(user):
     return backend.has_perm(user, "foia.embargo_perm_foiarequest")
 
 
+@predicate
+def files_hidden_from_scrapers(user):
+    """Killswitch for unauthenticated access to files"""
+    return settings.HIDE_FILES_FROM_SCRAPERS
+
+
 is_from_agency = is_agency_user & match_agency
 
 can_edit = is_owner | is_editor | is_staff | is_proxy
@@ -268,3 +274,4 @@ add_perm("foia.export_csv", has_feature_level(1))
 add_perm("foia.zip_download_foiarequest", can_edit)
 add_perm("foia.set_info_foiarequest", is_authenticated)
 add_perm("foia.unlimited_attachment_size", is_staff | is_agency_user)
+add_perm("foia.view_files", is_authenticated | ~files_hidden_from_scrapers)

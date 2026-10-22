@@ -322,7 +322,6 @@ class Detail(DetailView):
 
     def _get_config_context_data(self, context):
         """Get context data for configuration or administrative data"""
-
         context["sidebar_admin_url"] = reverse(
             "admin:foia_foiarequest_change", args=(self.foia.pk,)
         )
