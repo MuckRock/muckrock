@@ -11,6 +11,7 @@ from django.utils import timezone
 
 # Standard Library
 import logging
+from datetime import timedelta
 from unittest import mock
 
 # Third Party
@@ -79,6 +80,12 @@ class TaskTests(TestCase):
         assert (
             self.task.resolved_by == user
         ), "The resolving user should be recorded by the task."
+
+    def test_days_old(self):
+        """Tasks should report how many days since they were created"""
+        assert self.task.days_old() == 0
+        self.task.date_created = timezone.now() - timedelta(days=5)
+        assert self.task.days_old() == 5
 
 
 class OrphanTaskTests(TestCase):
