@@ -83,6 +83,16 @@ http {
 
 	limit_req_zone $limit_key zone=one:10m rate=1r/s;
 
+	map $host $icon_dir {
+		default       /icons;
+		~foiamachine  /foiamachine/icons;
+	}
+
+	map $host $apple_touch_icon {
+		default       logo.png;
+		~foiamachine  favicon-152.png;
+	}
+
 	log_format l2met 'measure#nginx.service=$request_time request_id=$http_x_request_id';
 	log_format compression '$remote_addr - $remote_user [$time_local] '
 	                       '"$request" $status $bytes_sent '
@@ -122,6 +132,18 @@ http {
 
 		location /.well-known/ {
 			root /app/well-known/;
+		}
+
+		location = /favicon.ico {
+			root /app/muckrock/assets;
+			try_files $icon_dir/favicon.ico =404;
+			expires 1d;
+		}
+
+		location ~ ^/apple-touch-icon(-precomposed)?\.png$ {
+			root /app/muckrock/assets;
+			try_files $icon_dir/$apple_touch_icon =404;
+			expires 1d;
 		}
 
 		location / {
