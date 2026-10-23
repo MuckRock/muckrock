@@ -121,6 +121,25 @@ class TestRepairRecord(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         repair = ReviewAgencyRepair.objects.get()
         assert mock_delay.call_args.kwargs["repair_pk"] == repair.pk
 
+    def test_a_submission_that_changed_nothing_is_not_recorded(self, _mock_delay):
+        """No contact change and no resolve leaves no history and no outcome
+
+        Called directly: the form refuses this submission before it gets here.
+        """
+        address, foias, task = self.make_channel("old@agency.gov")
+        _tasks, _skipped, repair = ReviewAgencyTask.repair_channels(
+            agency=self.agency,
+            user=self.user,
+            new_email=None,
+            channels=[address],
+            foias=foias,
+            reply="Please confirm receipt.",
+        )
+        assert repair is None
+        assert not ReviewAgencyRepair.objects.exists()
+        task.refresh_from_db()
+        assert task.repair_outcome is None
+
 
 @mock.patch("muckrock.task.tasks.submit_review_update.delay")
 class TestPortalRepairRecord(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
@@ -168,6 +187,57 @@ class TestPortalRepairRecord(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         (channel,) = repair.before["channels"]
         assert channel["requests_moved"] == 1
         assert set(repair.communications.all()) == set(comms)
+
+    def test_skipped_requests_are_recorded_against_their_channel(self, _mock_delay):
+        """What a portal move left behind is kept, to show what is still blocked"""
+        self.move(blocked=1, unsent=1)
+        unsent = FOIARequest.objects.get(agency=self.agency, communications=None)
+        repair = ReviewAgencyRepair.objects.get()
+        assert list(repair.skipped.all()) == [unsent]
+        (channel,) = repair.before["channels"]
+        assert channel["requests_skipped"] == [unsent.pk]
+
+    def test_a_portal_move_that_moved_nothing_is_not_recorded(self, _mock_delay):
+        """Every request skipped, onto the portal the agency already had"""
+        _comms, task = self.move(blocked=0, unsent=2)
+        assert not ReviewAgencyRepair.objects.exists()
+        task.refresh_from_db()
+        assert not task.resolved
+        assert task.repair_outcome is None
+
+    def test_readout_lists_the_requests_left_behind(self, _mock_delay):
+        """The open task says which requests still need another repair"""
+        _comms, task = self.move(blocked=1, unsent=1)
+        unsent = FOIARequest.objects.get(agency=self.agency, communications=None)
+        content = self.client.get(
+            reverse("review-agency-task", kwargs={"pk": task.pk})
+        ).content.decode()
+        content = content[content.index("review-agency-history") :]
+        assert "1 not moved" in content
+        assert unsent.get_absolute_url() in content
+
+    def page(self, task):
+        """The task as the queue renders it"""
+        return self.client.get(
+            reverse("review-agency-task", kwargs={"pk": task.pk})
+        ).content.decode()
+
+    def test_open_task_says_how_to_clear_requests_never_sent(self, _mock_delay):
+        """What a portal move left behind, and what will clear it, stays on the page"""
+        _comms, task = self.move(blocked=1, unsent=1)
+        content = self.page(task)
+        assert "1 never sent" in content
+        assert "reroute it by email or snail mail" in content
+
+    def test_agency_task_counts_requests_never_sent_on_broken_channels(
+        self, _mock_delay
+    ):
+        """The agency level task waits on every broken channel, so it says so too"""
+        agency_task = ReviewAgencyTaskFactory(
+            agency=self.agency, source="staff", resolved=False
+        )
+        self.move(blocked=1, unsent=2)
+        assert "2 never sent" in self.page(agency_task)
 
     def test_readout_names_the_portal(self, _mock_delay):
         """The After column says portal, not no contact change"""
@@ -293,6 +363,22 @@ class TestRepairHistoryReadout(ChannelRepairMixin, RunCommitHooksMixin, TestCase
         content = self.render(task)
         assert "review-agency-followups" in content
         assert comm.get_absolute_url() in content
+
+    def test_channel_task_shows_only_its_own_channel(self, _mock_delay):
+        """A repair across channels shows each task the channel it is about"""
+        first, first_foias, first_task = self.make_channel("a@agency.gov")
+        second, second_foias, _second_task = self.make_channel("b@agency.gov")
+        self.repair(
+            first,
+            first_foias + second_foias,
+            "new@agency.gov",
+            channel_pks="%d,%d" % (first.pk, second.pk),
+            update_agency_info="",
+        )
+        content = self.render(first_task)
+        assert "a@agency.gov" in content
+        assert "b@agency.gov" not in content
+        assert "same submission as 1 other channel" in content
 
     def test_agency_task_rolls_up_every_repair_on_the_agency(self, _mock_delay):
         """#1870: every address change, including those made via channel tasks"""

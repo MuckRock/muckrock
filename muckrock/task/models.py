@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 from django.utils.html import linebreaks, urlize
 
 # Standard Library
+import copy
 import logging
 from collections import Counter
 from datetime import date
@@ -681,9 +682,9 @@ class ReviewAgencyTask(Task):
         tasks, which is where an agency's address changes over time show up.
         """
         if self.email_id is not None:
-            return list(self.repairs.all())
+            return [repair.shown_on(self) for repair in self.repairs.all()]
         return [
-            repair
+            repair.shown_on(self)
             for repair in self.agency.review_repairs.all()
             if repair.datetime >= self.date_created
             and (
@@ -733,8 +734,11 @@ class ReviewAgencyTask(Task):
         agency's contact info but failed to resolve half the tasks would leave
         a staffer unable to tell what actually happened.
 
-        Returns the tasks the repair covered, and the requests a portal move
-        skipped because they had nothing to resend.
+        Returns the tasks the repair covered, the requests a portal move
+        skipped because they had nothing to resend, and the recorded repair.
+        A submission that changes nothing and resolves nothing is not
+        recorded, returns None for the repair, and leaves the tasks as they
+        were.
 
         With a portal, the requests move to it instead of to an address, and
         no follow-up is sent: it would go through the portal too, doubling
@@ -778,30 +782,23 @@ class ReviewAgencyTask(Task):
             resends, skipped = cls._portal_resends(foias)
             # A skipped request stays on its channel, so it was not moved
             moved_by_channel.subtract(foia.email_id for foia in skipped)
+        requests_updated = len(foias) - len(skipped) if changed else 0
+        portal_changed = portal is not None and (
+            portal.pk is None or agency.portal_id != portal.pk
+        )
 
         with transaction.atomic():
-            repair = ReviewAgencyRepair(
-                agency=agency,
-                user=user,
-                new_email=new_email,
-                portal=portal,
-                snail_mail=bool(snail),
-                agency_info_updated=bool(update_info),
-                requests_updated=len(foias) - len(skipped) if changed else 0,
-                followup_sent=send_reply,
-                reply=reply if send_reply else "",
-                # Read before update_contact() mends the agency
-                before=ReviewAgencyRepair.snapshot(
-                    agency, set(channel_pks), moved_by_channel if changed else {}
-                ),
+            # Read before update_contact() mends the agency
+            before = ReviewAgencyRepair.snapshot(
+                agency,
+                set(channel_pks),
+                moved_by_channel if changed else {},
+                skipped,
             )
             if portal is not None and portal.pk is None:
                 portal.save()
-            repair.save()
-            repair.tasks.set(tasks)
             if portal is not None:
                 cls._move_to_portal(agency, portal, resends)
-                repair.communications.set(comm for _foia, comm in resends)
             elif changed:
                 # One agency level contact update for the whole submission,
                 # however many channels it covers.
@@ -829,6 +826,40 @@ class ReviewAgencyTask(Task):
             broken_left = (
                 agency.foiarequest_set.get_open().filter(email__status="error").exists()
             )
+            done = {
+                task_.pk: (
+                    task_.email_id not in skipped_channels
+                    if task_.email_id
+                    else not broken_left
+                )
+                for task_ in tasks
+            }
+            # A submission that changed nothing would read on the task as a
+            # repair, hiding what still needs one
+            if not (
+                requests_updated
+                or portal_changed
+                or (update_info and changed and portal is None)
+                or (resolve and any(done.values()))
+            ):
+                return tasks, skipped, None
+
+            repair = ReviewAgencyRepair.objects.create(
+                agency=agency,
+                user=user,
+                new_email=new_email,
+                portal=portal,
+                snail_mail=bool(snail),
+                agency_info_updated=bool(update_info),
+                requests_updated=requests_updated,
+                followup_sent=send_reply,
+                reply=reply if send_reply else "",
+                before=before,
+            )
+            repair.tasks.set(tasks)
+            repair.communications.set(comm for _foia, comm in resends)
+            repair.skipped.set(skipped)
+
             for task_ in tasks:
                 outcome = dict(outcome_base)
                 outcome["old_email"] = (
@@ -842,11 +873,7 @@ class ReviewAgencyTask(Task):
                     outcome["requests_updated"] = moved_uncovered
                 form_data = dict(task_.form_data or {})
                 form_data["repair"] = outcome
-                if task_.email_id:
-                    done = task_.email_id not in skipped_channels
-                else:
-                    done = not broken_left
-                if resolve and done:
+                if resolve and done[task_.pk]:
                     task_.resolve(user, form_data)
                 else:
                     task_.form_data = form_data
@@ -859,7 +886,7 @@ class ReviewAgencyTask(Task):
                     )
                 )
 
-        return tasks, skipped
+        return tasks, skipped, repair
 
     @staticmethod
     def _portal_resends(foias):
@@ -978,6 +1005,8 @@ class ReviewAgencyRepair(models.Model):
     communications = models.ManyToManyField(
         "foia.FOIACommunication", blank=True, related_name="+"
     )
+    # Left on their channel by a portal move, having nothing to resend
+    skipped = models.ManyToManyField("foia.FOIARequest", blank=True, related_name="+")
 
     class Meta:
         ordering = ["datetime", "pk"]
@@ -1000,6 +1029,29 @@ class ReviewAgencyRepair(models.Model):
             channels.append(channel)
         return channels
 
+    def shown_on(self, task):
+        """A copy of this repair narrowed to what one task covers
+
+        A channel task gets only its own channel and the requests skipped on
+        it; an agency level task gets every channel.
+        """
+        shown = copy.copy(self)
+        shown.shown_channels = [
+            channel
+            for channel in self.channels
+            if task.email_id is None or channel["email"] == task.email.email
+        ]
+        shown.other_channels = len(self.channels) - len(shown.shown_channels)
+        skipped_pks = {
+            pk
+            for channel in shown.shown_channels
+            for pk in channel.get("requests_skipped", [])
+        }
+        shown.shown_skipped = [
+            foia for foia in self.skipped.all() if foia.pk in skipped_pks
+        ]
+        return shown
+
     @property
     def backfilled(self):
         """Recorded after the fact, with no snapshot or follow up links"""
@@ -1020,7 +1072,7 @@ class ReviewAgencyRepair(models.Model):
         return self.before.get("portal")
 
     @staticmethod
-    def snapshot(agency, channel_pks, moved_by_channel):
+    def snapshot(agency, channel_pks, moved_by_channel, skipped=()):
         """What the repaired channels and the primary contacts look like now
 
         Called before update_contact() so it reads the broken state.
@@ -1029,6 +1081,9 @@ class ReviewAgencyRepair(models.Model):
         # MuckRock
         from muckrock.task.channels import agency_channels
 
+        skipped_by_channel = {}
+        for foia in skipped:
+            skipped_by_channel.setdefault(foia.email_id, []).append(foia.pk)
         channels = [
             {
                 "email": channel.address.email,
@@ -1042,6 +1097,7 @@ class ReviewAgencyRepair(models.Model):
                 "error_count": channel.error_count,
                 "last_confirm": _isoformat(channel.last_confirm),
                 "requests_moved": moved_by_channel.get(channel.address.pk, 0),
+                "requests_skipped": skipped_by_channel.get(channel.address.pk, []),
             }
             for channel in agency_channels(agency)
             if channel.address.pk in channel_pks

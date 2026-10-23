@@ -129,6 +129,19 @@
       {% endif %}
     </p>
 
+    {# Only where a portal move is the likely repair: it is the one that skips these #}
+    {% if not task.resolved and task.unsent_count %}
+      {% if task.agency.portal_id or task.channel.is_portal %}
+        <p class="review-agency-unsent">
+          <mark>{{ task.unsent_count }} never sent</mark> &mdash;
+          {% if task.unsent_count == 1 %}this request has{% else %}these requests have{% endif %}
+          nothing to resend, so a portal move leaves {{ task.unsent_count|pluralize:"it,them" }} here.
+          To clear this task, reroute {{ task.unsent_count|pluralize:"it,them" }} by email or snail mail,
+          or close {{ task.unsent_count|pluralize:"it,them" }}.
+        </p>
+      {% endif %}
+    {% endif %}
+
     {% if task.channel %}
       <table class="review-agency-table review-agency-channel">
         <thead>

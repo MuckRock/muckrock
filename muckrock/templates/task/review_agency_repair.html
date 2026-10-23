@@ -1,7 +1,8 @@
 {% comment %}
   One recorded repair: the channels as they were before it, what it changed
-  them to, and what that touched.  Expects `repair` and `task`; the section
-  heading renders only with `show_heading`.
+  them to, and what that touched.  Expects `task` and a `repair` from its
+  repair_history, already narrowed to the task; the section heading renders
+  only with `show_heading`.
 {% endcomment %}
 <div class="review-agency-repair">
 <header class="review-agency-repair__header">
@@ -13,6 +14,9 @@
     by {{ repair.user.username|default:"unknown" }}
     {% if repair.backfilled %}
       &middot; recorded before repair history was kept, so no error details
+    {% endif %}
+    {% if repair.other_channels %}
+      &middot; same submission as {{ repair.other_channels }} other channel{{ repair.other_channels|pluralize }}
     {% endif %}
   </span>
 </header>
@@ -27,7 +31,7 @@
   <tbody>
     <tr>
       <td>
-        {% for channel in repair.channels %}
+        {% for channel in repair.shown_channels %}
           <div>
             <code>{{ channel.email }}</code>
             {% if channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
@@ -95,6 +99,20 @@
             {% endif %}
           {% endif %}
         {% endwith %}
+        {% if repair.shown_skipped %}
+          {# Still blocked: this is what the task has left #}
+          <details class="review-agency-followups">
+            <summary>
+              <mark>{{ repair.shown_skipped|length }} not moved</mark>
+              &middot; nothing sent to resubmit
+            </summary>
+            <ul>
+              {% for foia in repair.shown_skipped %}
+                <li><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
         {% if repair.agency_info_updated %}<div>Agency contact updated</div>{% endif %}
       </td>
     </tr>

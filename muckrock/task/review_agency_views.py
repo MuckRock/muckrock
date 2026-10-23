@@ -150,7 +150,7 @@ class ReviewAgencyDetailView(DetailView):
                 communication__foia__in=foias, resolved=False
             ).values_list("pk", flat=True)
         )
-        tasks, skipped = ReviewAgencyTask.repair_channels(
+        tasks, skipped, repair = ReviewAgencyTask.repair_channels(
             agency=self.object,
             user=request.user,
             new_email=form.cleaned_data["new_email"],
@@ -170,6 +170,7 @@ class ReviewAgencyDetailView(DetailView):
                 foias,
                 old_emails,
                 tasks,
+                recorded=repair is not None,
                 skipped=skipped,
                 existing_portal_tasks=existing_portal_tasks,
                 reused_portal_users=(
@@ -201,6 +202,7 @@ def _repair_message(
     old_emails,
     tasks,
     *,
+    recorded=True,
     skipped=(),
     existing_portal_tasks=(),
     reused_portal_users=None,
@@ -212,8 +214,19 @@ def _repair_message(
     accident now resolve starts checked.  A task the repair touched but left
     open is named, since it no longer stands out in the queue on its own.
     A request a portal move skipped is still on its channel, so it is not
-    counted as rerouted.
+    counted as rerouted; it is named last, as what is left to do.
     """
+    # pylint: disable=too-many-arguments,too-many-branches
+    if not recorded:
+        # Otherwise it reads as a repair, and the channels still listed as
+        # broken in the queue look like it failed
+        if skipped:
+            return "%s: Nothing changed. %s" % (agency.name, _skipped_note(skipped))
+        return (
+            "%s: Nothing changed. No requests were rerouted and no task was resolved."
+            % agency.name
+        )
+
     foias = [foia for foia in foias if foia not in skipped]
     parts = []
     portal = data.get("portal")
@@ -228,7 +241,7 @@ def _repair_message(
         if portal:
             if reused_portal_users is not None:
                 parts.append(_reused_portal_note(portal, reused_portal_users))
-            parts.append(_portal_summary(foias, skipped, existing_portal_tasks))
+            parts.append(_portal_summary(foias, existing_portal_tasks))
         elif data["update_agency_info"]:
             parts.append("Agency contact updated.")
     else:
@@ -253,7 +266,32 @@ def _repair_message(
         parts.append(
             "%d tasks are still open: %s." % (len(still_open), ", ".join(still_open))
         )
+    if skipped:
+        parts.append(_skipped_note(skipped))
     return "%s: %s" % (agency.name, " ".join(parts))
+
+
+def _skipped_note(skipped):
+    """Which requests a portal move left on each broken channel, and what to do"""
+    by_channel = {}
+    for foia in skipped:
+        email = foia.email.email if foia.email else "no email"
+        by_channel.setdefault(email, []).append("#%d" % foia.pk)
+    pronoun = "it" if len(skipped) == 1 else "them"
+    return (
+        "Not moved: %s with no filed request to resend, still on %s: %s. "
+        "Reroute %s by email or snail mail, or close %s."
+        % (
+            _plural(len(skipped), "request"),
+            "the broken channel" if len(by_channel) == 1 else "the broken channels",
+            "; ".join(
+                "%s (%s)" % (email, ", ".join(pks))
+                for email, pks in sorted(by_channel.items())
+            ),
+            pronoun,
+            pronoun,
+        )
+    )
 
 
 def _repair_target(data):
@@ -276,23 +314,14 @@ def _reused_portal_note(portal, other_agencies):
     )
 
 
-def _portal_summary(foias, skipped, existing_portal_tasks=()):
-    """How much portal work a move just queued, counted from what was made
-
-    A request with nothing to resend is named, so it can be found by hand.
-    """
+def _portal_summary(foias, existing_portal_tasks=()):
+    """How much portal work a move just queued, counted from what was made"""
     count = (
         PortalTask.objects.filter(communication__foia__in=foias, resolved=False)
         .exclude(pk__in=existing_portal_tasks)
         .count()
     )
-    summary = "%s to file." % _plural(count, "Portal Task")
-    if skipped:
-        summary += " Skipped %s with no filed request to resend: %s." % (
-            _plural(len(skipped), "request"),
-            ", ".join("#%d" % foia.pk for foia in skipped),
-        )
-    return summary
+    return "%s to file." % _plural(count, "Portal Task")
 
 
 def _error_summary(message, when):
