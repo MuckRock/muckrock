@@ -91,7 +91,7 @@ class TestResolvedOutcome(ResolvedReadoutMixin, TestCase):
         assert "old@agency.gov" in content
         assert "new@agency.gov" in content
         assert "3 request" in content
-        assert "Follow-up sent" in content
+        assert "follow-up sent" in content
         assert self.user.username in content
 
     def test_readout_says_when_no_contact_change_was_made(self):
@@ -101,18 +101,11 @@ class TestResolvedOutcome(ResolvedReadoutMixin, TestCase):
         )
         assert "No contact change" in content
 
-    def test_readout_reports_it_held(self):
-        """A response since the resolve is the evidence the repair worked"""
-        task = self.resolved_task(days_ago=10)
-        foia = FOIARequestFactory(agency=self.agency, status="ack")
-        FOIACommunicationFactory(
-            foia=foia, response=True, datetime=timezone.now() - timedelta(days=2)
-        )
-        assert "Held" in self.render(task)
-
-    def test_readout_reports_unverified(self):
-        """Nothing back yet, so we do not claim it worked"""
-        assert "Not verified" in self.render(self.resolved_task(days_ago=10))
+    def test_readout_leaves_out_whether_it_held(self):
+        """Kept compact: whether the repair held is not part of the readout"""
+        content = self.render(self.resolved_task(days_ago=10))
+        assert "Did it hold?" not in content
+        assert "Not verified" not in content
 
     def test_readout_links_a_reopen(self):
         """A resolve that did not hold links forward to the new task"""
