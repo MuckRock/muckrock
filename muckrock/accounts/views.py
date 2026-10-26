@@ -46,7 +46,12 @@ from muckrock.accounts.forms import (
     OrgPreferencesForm,
 )
 from muckrock.accounts.mixins import BuyRequestsMixin
-from muckrock.accounts.models import InternalNote, Notification, RecurringDonation
+from muckrock.accounts.models import (
+    InternalNote,
+    Notification,
+    Profile,
+    RecurringDonation,
+)
 from muckrock.accounts.utils import (
     can_see_internal_notes,
     mixpanel_event,
@@ -556,3 +561,8 @@ class UserAutocomplete(MRAutocompleteView):
     def get_selected_result_label(self, result):
         """Do not use HTML template for selected label"""
         return f"{result.profile.full_name} ({result.username})"
+
+
+def profile_by_uuid(request, uuid):
+    """Redirect a MuckRock Accounts user UUID to the user's profile"""
+    return redirect(get_object_or_404(Profile, uuid=uuid))

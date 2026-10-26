@@ -6,7 +6,7 @@ URL mappings for the accounts application
 from django.conf import settings
 from django.conf.urls import include
 from django.contrib.auth.decorators import login_required
-from django.urls import re_path, reverse_lazy
+from django.urls import path, re_path, reverse_lazy
 from django.views.generic import RedirectView
 
 # MuckRock
@@ -38,6 +38,7 @@ urlpatterns = [
         RedirectView.as_view(url=settings.SQUARELET_URL + "/accounts/password/reset/"),
         name="acct-reset-pw",
     ),
+    path("uuid/<uuid:uuid>/", views.profile_by_uuid, name="acct-profile-uuid"),
     re_path(
         r"^profile/$",
         login_required(views.ProfileView.as_view()),
