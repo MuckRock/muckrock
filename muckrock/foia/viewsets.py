@@ -213,11 +213,18 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     def _clean_document_request(self, document_request, full_text):
         """Clean document_request"""
         if full_text:
-            return full_text, True
+            text, edited_boilerplate = full_text, True
         elif document_request:
-            return document_request, False
+            text, edited_boilerplate = document_request, False
         else:
             raise forms.ValidationError("document_request or full_text required")
+
+        if len(text) > settings.REQUESTED_DOCS_MAX_LENGTH:
+            raise forms.ValidationError(
+                f"document_request or full_text must be "
+                f"{settings.REQUESTED_DOCS_MAX_LENGTH} characters or fewer"
+            )
+        return text, edited_boilerplate
 
     def _clean_attachments(self, attachments):
         """Clean attachments"""
