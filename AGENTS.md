@@ -69,11 +69,11 @@ inv celerybeat
 # Build JavaScript/CSS once
 inv npm "run build"
 
-# Watch mode for active development
-inv npm "run watch"
-
 # Lint JavaScript
 inv npm "run lint"
+
+# Run JavaScript tests (vitest, muckrock/assets/js/**/*.test.js)
+inv npm "run test"
 ```
 
 ### Testing
@@ -209,16 +209,15 @@ Most major models have custom QuerySet managers with `get_queryset()` methods fo
 
 **Build System:**
 
-- Webpack 5 for bundling (config in `config/webpack.config.js`)
-- Entry points: main, foiamachine, docViewer
-- Source in `muckrock/assets/js/` and `muckrock/assets/scss/`
-
+- Vite for bundling (config in `vite.config.js`), loaded into templates by `django-vite`
+- Entry points: main, foiamachine, docViewer, getHelp, reviewAgency, print
+- Source in `muckrock/assets/js/`, `muckrock/assets/scss/`, and Svelte components in `muckrock/assets/components/`
+- `inv up` starts the `muckrock_vite` container running the dev server on port 4201; with `DEBUG` on, Django serves assets from it, so no rebuild is needed while it runs
+- Tests and production read the built manifest at `muckrock/assets/dist/manifest.json`; run `inv npm "run build"` before tests that render templates
 **JavaScript Stack:**
 
-- React 15 (legacy) with Redux for state management
-- jQuery 3.6.4 (exposed globally, heavily used throughout)
-- jQuery UI 1.10.x for UI components
-- Babel for ES6+ transpilation
+- New code: Svelte 5 components and TypeScript (`getHelp.ts`, `reviewAgency.ts`)
+- Legacy: React 15 with Redux, jQuery 3.6.4 (exposed globally, heavily used throughout), jQuery UI 1.10.x
 
 **Key Modules:**
 
@@ -266,7 +265,7 @@ echo "127.0.0.1   dev.foiamachine.org" | sudo tee -a /etc/hosts
 - `base.py` - Common configuration
 - `local.py` - Development environment
 - `test.py` - Test environment
-- `staging.py` / `production.py` - Heroku deployments
+- `heroku.py` - Shared Heroku config, extended by `staging.py` / `production.py`
 
 **Database Migrations:**
 After model changes, create migrations inside the Django container:
@@ -288,10 +287,6 @@ inv manage migrate
 - Test settings: `muckrock.settings.test`
 - Gloo app excluded from tests (it's a git submodule)
 - Test files: `test_*.py` or `tests.py`
-
-Name the behaviour, not the mechanism: `renders the error state when
-OCR fails`, not `test handle error`. A test whose assertion would pass
-against the unfixed code is not a test.
 
 **Celery Scheduled Tasks:**
 Major periodic tasks include:
@@ -318,69 +313,6 @@ cd muckrock/gloo
 git submodule init
 git submodule update
 ```
-
-## Code comments
-
-Comments say **why**, not what. If the code already says it, delete the comment.
-
-- **One or two short sentences.** If it needs a paragraph, it belongs in a
-  doc comment, the PR description, or a doc under `docs/`.
-- **Keep the consequence, drop the lead-in.** The clause naming what the
-  code does is the half to cut; the clause saying what breaks otherwise is
-  the half worth keeping.
-- **Never describe code that is not there.** No "this used to...", no
-  narrating the change, no explaining why something was removed. `git log`
-  and the PR hold that.
-- **No reasoning out loud.** Don't walk through scenarios, anticipate
-  objections, or record the thought process behind a choice.
-- **Do comment the surprising**: a constraint an external system imposes,
-  an ordering requirement, a failure that cannot be seen locally. That is
-  what a reader cannot get from the code.
-
-```typescript
-// Good - a constraint you cannot see from here
-// The API rejects a redaction whose page range crosses a document split.
-
-// Bad - narrates the change
-// `currentPage` is now derived from the store instead of a prop, so
-// this component no longer needs to read it from context.
-```
-
-## Docstrings / doc comments
-
-One line on what it does. Add more only for a contract a caller needs:
-what it rejects/throws, what it returns in the edge case, ordering it
-requires, side effects it has, a cost worth avoiding.
-
-Two tests before you keep a second paragraph:
-
-- Does it restate the first line in more words? Delete it.
-- Would a caller behave differently for knowing it? Keep it, in one or two
-  sentences.
-
-```typescript
-// Good - the whole contract, one line
-/** Does the document still have pages pending OCR? */
-
-// Good - a second paragraph a caller acts on
-/**
- * The document's current processing status, or "error" if any page failed.
- *
- * Read from the cached store value; the document list renders one row
- * per document and cannot afford an API call each.
- */
-```
-
-## Pull request descriptions
-
-Open with one sentence on what changes. Then:
-
-- **Behaviour changes** — name them, or say "none".
-- **Migrations** — what they do, whether they reverse.
-- **What to check** — the QA steps, as a checklist.
-
-Bullets, not prose. Don't recount how the change came about or what was
-tried first.
 
 <!-- CLAUDE.md shared standard v1 — canonical copy: squarelet/CLAUDE.md -->
 
