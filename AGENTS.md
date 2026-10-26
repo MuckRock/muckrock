@@ -74,6 +74,11 @@ inv npm "run lint"
 
 # Run JavaScript tests (vitest, muckrock/assets/js/**/*.test.js)
 inv npm "run test"
+
+# Compare built CSS with scripts/css-baseline/ (Sass migration, issue #2220);
+# css:snapshot rewrites the baseline after an intended change
+inv npm "run css:diff"
+inv npm "run css:snapshot"
 ```
 
 ### Testing

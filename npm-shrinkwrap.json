@@ -30,6 +30,7 @@
       "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
         "eslint": "^8.57.1",
+        "postcss": "^8.5.15",
         "sass": "^1.77.0",
         "svelte": "^5.55.5",
         "vite": "^7.0.0",
