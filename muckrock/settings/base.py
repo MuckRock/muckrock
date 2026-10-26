@@ -1033,3 +1033,6 @@ VERIFIED_REQUEST_CHECKS_BYPASS = boolcheck(
 HIDE_FILES_FROM_SCRAPERS = boolcheck(os.environ.get("HIDE_FILES_FROM_SCRAPERS", False))
 # Number of days for windows on our stats api
 REQUEST_WINDOW_DAYS = int(os.environ.get("REQUEST_WINDOW_DAYS", 90))
+
+# Max length of requested docs in composer
+REQUESTED_DOCS_MAX_LENGTH = int(os.environ.get("REQUESTED_DOCS_MAX_LENGTH", 20000))
