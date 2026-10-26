@@ -31,6 +31,8 @@
         Payment Info
       {% elif foia.agency.open_newagencytasks %}
         New Agency
+      {% else %}
+        <span class="grey">No task</span>
       {% endif %}
     </td>
     <td>
@@ -44,6 +46,8 @@
         {{ foia.open_paymentinfotasks.0.days_old }} days
       {% elif foia.agency.open_newagencytasks %}
         {{ foia.agency.open_newagencytasks.0.days_old }} days
+      {% else %}
+        <span class="grey">No task</span>
       {% endif %}
     </td>
     <td class="processing-zendesk-cell">
