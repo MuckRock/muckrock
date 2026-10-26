@@ -10,6 +10,12 @@
 
 @use "sass:math";
 
+@mixin media($query) {
+    @media #{$query} {
+        @content;
+    }
+}
+
 @mixin vr {
     margin-top: 0;
     margin-bottom: $vr;

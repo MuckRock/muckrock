@@ -11,7 +11,8 @@
         }
     }
     .orphan {
-        @include row;
+        @include clearfix;
+        display: block;
         .orphan-head {
             margin-top: $vr*0.5;
             border-top: $border $color-grey;

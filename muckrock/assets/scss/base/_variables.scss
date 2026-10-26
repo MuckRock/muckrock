@@ -103,6 +103,6 @@ $border:        $border-width solid;
 ** Breakpoint Variables
 */
 
-$large-bp:      new-breakpoint(min-width 1100px 12);
-$medium-bp:     new-breakpoint(min-width 500px 6);
-$small-bp:      new-breakpoint(max-width 500px 4);
+$large-bp:      "screen and (min-width: 1100px)";
+$medium-bp:     "screen and (min-width: 500px)";
+$small-bp:      "screen and (max-width: 500px)";
