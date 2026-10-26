@@ -36,8 +36,9 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
             border-bottom: $border-width dotted color.adjust($color-title, $lightness: 20%, $space: hsl);
             color: $color-white;
             font-size: $size-6;
-            @include placeholder {
+            &::placeholder {
                 color: color.adjust($color-title, $lightness: 20%, $space: hsl);
+                opacity: 1;
             }
         }
     }
@@ -83,8 +84,9 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
             resize: none;
             border: none;
             border-radius: 0;
-            @include placeholder {
+            &::placeholder {
                 color: $color-grey-4;
+                opacity: 1;
             }
         }
     }
@@ -110,9 +112,9 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
             display: block;
             width: 100%;
             margin: 0;
-            @include placeholder { color: color.adjust($color-agency, $lightness: 20%, $space: hsl); }
+            &::placeholder { color: color.adjust($color-agency, $lightness: 20%, $space: hsl); opacity: 1; }
             &:disabled {
-                @include placeholder { color: color.adjust($color-white, $lightness: -2%, $space: hsl); }
+                &::placeholder { color: color.adjust($color-white, $lightness: -2%, $space: hsl); opacity: 1; }
                 background: $color-disabled;
                 border-bottom: none;
                 text-align: left;

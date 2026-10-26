@@ -553,7 +553,7 @@ We use rich nav items to display images behind nav items, like for news articles
     /* When the user navigation is on the bottom, put the logo in the middle. */
     justify-content: space-between;
     .brand {
-      @include flex(1 1 auto);
+      flex: 1 1 auto;
     }
     .section-toggle {
       order: -1;

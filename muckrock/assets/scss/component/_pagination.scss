@@ -3,27 +3,27 @@
 }
 
 .pagination__control {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 .pagination__control__item {
-    @include flex(1 1 15em);
+    flex: 1 1 15em;
     margin-bottom: $vr*0.5;
     text-align: center;
 }
 
 .pagination__links {
-    @include display(flex);
-    @include flex-wrap(wrap);
+    display: flex;
+    flex-wrap: wrap;
     @include border;
     border-right: none;
     border-bottom: none;
     & > span {
         flex: 1 1 15em;
-        @include display(flex);
-        @include flex-wrap(wrap);
+        display: flex;
+        flex-wrap: wrap;
     }
     .pagination__link {
         flex: 1 1 5em;

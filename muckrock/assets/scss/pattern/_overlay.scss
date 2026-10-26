@@ -11,9 +11,9 @@ $overlay-opacity: 0.9;
     top: 0;
     left: 0;
     text-align: center;
-    @include display(flex);
-    @include justify-content(center);
-    @include align-items(center);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: $color-white;
     background: rgba(0, 0, 0, $overlay-opacity);
     .icon {

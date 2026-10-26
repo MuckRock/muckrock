@@ -1,11 +1,11 @@
 .article
 {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include align-content(flex-start);
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
     .article__image
     {
-        @include flex(1 1 9em);
+        flex: 1 1 9em;
         margin: 0 $vr $vr*0.5 0;
         img
         {
@@ -15,7 +15,7 @@
     }
     .article__overview
     {
-        @include flex(3 1 18em);
+        flex: 3 1 18em;
     }
     .article__overview__title
     {
@@ -30,8 +30,8 @@
     }
     .article__overview__metadata
     {
-        @include display(flex);
-        @include justify-content(space-between);
+        display: flex;
+        justify-content: space-between;
         margin-bottom: $vr*0.25;
         font-size: $size-2;
         line-height: 1em;
@@ -47,7 +47,7 @@
 {
     .article__image
     {
-        @include flex(1 1 100%);
+        flex: 1 1 100%;
         margin: 0 0 $vr*0.5 0;
     }
     .article__overview__title
@@ -60,7 +60,7 @@
 .large.article
 {
     .article__image {
-        @include flex(0 1 100%);
+        flex: 0 1 100%;
         margin: 0 0 $vr*0.5;
     }
     .article__overview__title

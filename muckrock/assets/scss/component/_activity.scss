@@ -1,6 +1,6 @@
 .activity-container {
-    @include display(flex);
-    @include justify-content(space-between);
+    display: flex;
+    justify-content: space-between;
     @include border;
     @include border-radius;
     padding: $vr*0.5;

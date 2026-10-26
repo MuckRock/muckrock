@@ -3,9 +3,9 @@
 .list {
   @include padding;
   .empty {
-    @include display(flex);
-    @include justify-content(center);
-    @include align-items(center);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     min-height: 100%;
     color: $color-grey;
     font-weight: $bold;

@@ -1,7 +1,7 @@
 .donate {
-    @include display(flex);
-    @include align-items(center);
-    @include justify-content(center);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     @include padding;
     min-height: 100vh;
     background-color: $color-grey-3;

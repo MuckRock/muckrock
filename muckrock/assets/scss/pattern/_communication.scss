@@ -1,12 +1,12 @@
 .communication {
     .communication-header {
         & > * {
-            @include flex(1 1 auto);
+            flex: 1 1 auto;
         }
         .actionables {
-            @include display(flex);
-            @include justify-content(flex-end);
-            @include align-items(center);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
         }
         .options .icon {
             margin-left: $vr;
@@ -29,9 +29,9 @@
         font-weight: $bold;
     }
     .communication-metadata {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(center);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 0;
         background: $color-grey-7;
     }
@@ -92,7 +92,7 @@
             display: none;
         }
         .communication-header {
-            @include display(flex);
+            display: flex;
         }
     }
     .foia-backlink {

@@ -12,7 +12,7 @@ body {
     font-family: $sans-serif;
     font-weight: $normal;
     line-height: $lh;
-    @include font-feature-settings('liga', 'kern');
+    font-feature-settings: 'liga', 'kern';
 }
 
 article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {

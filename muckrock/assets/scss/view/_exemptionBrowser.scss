@@ -1,14 +1,14 @@
 .exemption-browser {
     .exemption-search {
         @include border;
-        @include display(flex);
+        display: flex;
         input {
-            @include flex(4 1 auto);
+            flex: 4 1 auto;
             border-radius: 0;
             border: none;
         }
         .button {
-            @include flex(1 1 auto);
+            flex: 1 1 auto;
         }
     }
 }
@@ -50,8 +50,8 @@
 
 .exemption__form {
     footer {
-        @include display(flex);
-        @include justify-content(space-between);
+        display: flex;
+        justify-content: space-between;
     }
 }
 

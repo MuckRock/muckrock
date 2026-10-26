@@ -3,6 +3,8 @@
  * baseline in scripts/css-baseline/.
  *
  *   npm run css:diff       exit 1 and print a unified diff if the CSS changed
+ *   npm run css:diff -- --ignore-prefixes
+ *                          the same, leaving out vendor-prefixed CSS on both sides
  *   npm run css:snapshot   overwrite the baseline with the current build
  *   npm run css:warnings -- step-N
  *                          record Sass deprecation warnings in
@@ -55,6 +57,21 @@ function joinSelectors(parents, children) {
   return joined;
 }
 
+const VENDOR_PREFIX = /^-(webkit|moz|ms|o)-/;
+// Unprefixed properties from the 2009 flexbox draft; no browser applies them.
+const LEGACY_FLEXBOX = /^box-(flex|flex-group|pack|align|orient|lines|direction|ordinal-group)$/;
+
+function isPrefixedDecl({ prop, value }) {
+  return (
+    VENDOR_PREFIX.test(prop) ||
+    VENDOR_PREFIX.test(value) ||
+    LEGACY_FLEXBOX.test(prop) ||
+    (prop === "display" && /^(inline-)?box$/.test(value))
+  );
+}
+
+const isPrefixedSelector = (selector) => /::?-(webkit|moz|ms|o)-/.test(selector);
+
 function cleanValue(value) {
   return value
     .replace(/\s+/g, " ")
@@ -65,8 +82,10 @@ function cleanValue(value) {
 /**
  * Turn a stylesheet into a flat list of rules, each with the at-rules that
  * wrap it, then print one block per rule.
+ *
+ * With ignorePrefixes, vendor-prefixed declarations and selectors are left out.
  */
-export function normalize(css) {
+export function normalize(css, { ignorePrefixes = false } = {}) {
   const blocks = [];
 
   function walk(container, selectors, atRules) {
@@ -81,6 +100,7 @@ export function normalize(css) {
     const children = [];
     container.each((node) => {
       if (node.type === "decl") {
+        if (ignorePrefixes && isPrefixedDecl(node)) return;
         decls.push(
           `${node.prop}: ${cleanValue(node.value)}${node.important ? " !important" : ""};`,
         );
@@ -92,7 +112,9 @@ export function normalize(css) {
 
     for (const node of children) {
       if (node.type === "rule") {
-        const own = node.selectors.map((s) => s.replace(/\s+/g, " ").trim());
+        let own = node.selectors.map((s) => s.replace(/\s+/g, " ").trim());
+        if (ignorePrefixes) own = own.filter((s) => !isPrefixedSelector(s));
+        if (!own.length) continue;
         walk(node, joinSelectors(selectors, own), atRules);
       } else if (node.type === "atrule") {
         const header = `@${node.name} ${cleanValue(node.params)}`.trim();
@@ -212,15 +234,26 @@ async function recordWarnings(name) {
   console.log(`Wrote ${path.relative(ROOT, file)}: ${locations.size} locations`);
 }
 
-function writeNormalized(dir, sheets) {
+function writeNormalized(dir, sheets, options) {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   for (const [name, css] of Object.entries(sheets)) {
-    fs.writeFileSync(path.join(dir, `${name}.css`), normalize(css));
+    fs.writeFileSync(path.join(dir, `${name}.css`), normalize(css, options));
   }
 }
 
-async function main(command, arg) {
+function readSheets(dir) {
+  return Object.fromEntries(
+    fs
+      .readdirSync(dir)
+      .filter((file) => file.endsWith(".css"))
+      .map((file) => [path.basename(file, ".css"), fs.readFileSync(path.join(dir, file), "utf8")]),
+  );
+}
+
+async function main(command, ...args) {
+  const [arg] = args;
+  const ignorePrefixes = args.includes("--ignore-prefixes");
   if (command === "warnings" && arg) {
     await recordWarnings(arg);
     return;
@@ -237,11 +270,16 @@ async function main(command, arg) {
     return;
   }
 
-  writeNormalized(CURRENT_DIR, sheets);
+  let baselineDir = BASELINE_DIR;
+  if (ignorePrefixes) {
+    baselineDir = path.join(WORK_DIR, "baseline");
+    writeNormalized(baselineDir, readSheets(BASELINE_DIR), { ignorePrefixes });
+  }
+  writeNormalized(CURRENT_DIR, sheets, { ignorePrefixes });
   try {
     execFileSync(
       "diff",
-      ["-ruN", path.relative(ROOT, BASELINE_DIR), path.relative(ROOT, CURRENT_DIR)],
+      ["-ruN", path.relative(ROOT, baselineDir), path.relative(ROOT, CURRENT_DIR)],
       { cwd: ROOT, stdio: "inherit" },
     );
     console.log("CSS matches the baseline.");
@@ -252,5 +290,5 @@ async function main(command, arg) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await main(process.argv[2], process.argv[3]);
+  await main(...process.argv.slice(2));
 }

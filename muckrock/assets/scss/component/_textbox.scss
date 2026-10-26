@@ -40,10 +40,10 @@
         padding: $vr*0.25 $vr*0.5;
     }
     .textbox__header {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include flex-wrap(wrap);
-        @include flex-direction(row);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        flex-direction: row;
         margin-bottom: 0;
         color: $color-white;
         p {
@@ -78,5 +78,5 @@
 
 .collapsable.collapsed {
     & > * { display: none !important; }
-    & > header { @include display(flex !important); }
+    & > header { display: flex !important; }
 }

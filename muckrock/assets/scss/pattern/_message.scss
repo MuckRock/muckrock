@@ -17,9 +17,9 @@
 }
 
 .message {
-    @include display(flex);
-    @include flex-direction(column);
-    @include align-items(stretch);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     @include message-color($color-grey-7, $color-black, $color-black);
     .symbol {
         $svg-size: 2.75em;
@@ -55,12 +55,12 @@
         }
     }
     @include media($medium-bp) {
-        @include flex-direction(row);
+        flex-direction: row;
         .symbol {
             text-align: center;
         }
         &.small {
-            @include flex-direction(column);
+            flex-direction: column;
             .symbol {
                 text-align: left;
             }

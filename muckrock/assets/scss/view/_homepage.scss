@@ -6,8 +6,8 @@
 }
 
 .foia.banner {
-    @include align-items(center);
-    @include justify-content(center);
+    align-items: center;
+    justify-content: center;
     background: rgba($color-blue-dark, 0.8);
     color: $color-white;
     padding-top: 3em;
@@ -49,16 +49,16 @@
     }
     .stats
     {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-around);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
         list-style: none;
         padding-left: 0;
     }
 
     .stat
     {
-        @include flex(1 1 8em);
+        flex: 1 1 8em;
         width: 7em;
         margin: 0 0 $vr 0;
         text-align: center;
@@ -93,8 +93,8 @@
     }
 
     .completed-requests {
-        @include display(flex);
-        @include justify-content(flex-start);
+        display: flex;
+        justify-content: flex-start;
         overflow-x: scroll;
         -webkit-overflow-scrolling: touch;
         padding: $vr $vr 0;
@@ -158,7 +158,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         }
     }
     .requests {
-        @include flex(1 1 200px);
+        flex: 1 1 200px;
         margin: 0 $vr $vr;
     }
     .projects {
@@ -173,9 +173,9 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 }
 
 .homepage-2025 {
-    @include display(flex);
-    @include flex-direction(column);
-    @include align-items(center);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background-color: $color-white;
     margin-top: 2.5rem;
     

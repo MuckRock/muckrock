@@ -43,8 +43,8 @@
     }
     header {
         margin-bottom: 0;
-        @include display(flex);
-        @include justify-content(space-between);
+        display: flex;
+        justify-content: space-between;
     }
     .error input {
         border-color: $color-red;
@@ -106,12 +106,12 @@
 }
 
 .oneline-form .field {
-    @include display(flex);
-    @include flex-wrap(wrap);
+    display: flex;
+    flex-wrap: wrap;
     margin: $vr*0.5 0;
     border: 1px solid $color-blue;
     input {
-        @include flex(3 1 auto);
+        flex: 3 1 auto;
         width: auto;
         border: none;
         line-height: $lh;
@@ -121,7 +121,7 @@
         -webkit-appearance: none;
     }
     .button {
-        @include flex(1 1 auto);
+        flex: 1 1 auto;
     }
     .icon {
         @include svg-color($color-white);

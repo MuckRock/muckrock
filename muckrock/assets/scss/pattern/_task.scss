@@ -48,7 +48,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     margin-bottom: 0;
     background: $color-grey-7;
     & > header {
-        @include display(flex);
+        display: flex;
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey;
         padding: $task-padding;
@@ -70,7 +70,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     margin-bottom: 0;
     background: $color-grey-7;
     & > header {
-        @include display(flex);
+        display: flex;
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey;
         padding: $task-padding;
@@ -116,7 +116,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     }
     z-index: -1;
     opacity: 0;
-    @include transition(opacity, .5s, linear);
+    transition: opacity, .5s, linear;
     &.visible {
         z-index: 1;
         opacity: .9;
@@ -202,9 +202,9 @@ $task-padding: $vr*0.25 $vr*0.5;
         border: none;
     }
     .submission-control {
-        @include display(flex);
-        @include justify-content(flex-start);
-        @include align-items(center);
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
     }
     .checkbox-field {
         margin-bottom: 0;
@@ -222,8 +222,8 @@ $task-padding: $vr*0.25 $vr*0.5;
         margin-bottom: 0;
     }
     .task__actions .submission-control {
-        @include display(flex);
-        @include justify-content(space-between);
+        display: flex;
+        justify-content: space-between;
     }
 }
 
@@ -447,12 +447,12 @@ $task-padding: $vr*0.25 $vr*0.5;
         resize: none;
     }
     main {
-        @include display(flex);
-        @include flex-wrap(wrap);
+        display: flex;
+        flex-wrap: wrap;
         margin-bottom: 0;
     }
     fieldset {
-        @include flex(1 0 50%);
+        flex: 1 0 50%;
         margin-bottom: $vr*0.5;
         padding: 0 $vr*0.5;
     }
@@ -494,7 +494,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     .response-input {
         margin-bottom: 0;
         text-align: left;
-        @include columns(3 12em);
+        columns: 3 12em;
         label {
             font-size: $size-2;
         }
@@ -513,7 +513,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     .response-input {
         margin-bottom: 0;
         text-align: left;
-        //@include columns(2 12em);
+        //columns: 2 12em;
         label {
             font-size: $size-2;
         }

@@ -20,8 +20,8 @@
 
 .foia-log__header {
     flex: 1 1 16em;
-    @include display(flex);
-    @include justify-content(space-between);
+    display: flex;
+    justify-content: space-between;
     flex-wrap: wrap;
     gap: .5em 1.5em;
     & p, & div {
@@ -47,9 +47,9 @@
 
 .foia-log__main {
     flex: 2 1 32em;
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     gap: 1em;
     font-size: $size-3;
 }
@@ -59,7 +59,7 @@
     padding: .5em $vr;
     order: -1;
     flex: 1 1 100%;
-    @include display(flex);
+    display: flex;
     gap: 1em 2em;
     border-bottom: 1px solid $color-grey-7;
     background-color: $color-grey-8;
@@ -67,7 +67,7 @@
 }
 
 .foia-log__subject {
-    @include flex(1 1 100%);
+    flex: 1 1 100%;
     margin: 0;
 }
 

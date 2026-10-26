@@ -65,14 +65,14 @@ $shadow-active: 0px;
         box-shadow: 0px $shadow-normal 0px 0px $color-dark;
     }
     &:hover {
-        @include transform(translateY($shadow-normal - $shadow-hover));
+        transform: translateY($shadow-normal - $shadow-hover);
         box-shadow: 0px $shadow-hover 0px 0px $color-dark;
         color: $color-white;
         background: $color-light;
         text-decoration: none;
     }
     &:active {
-        @include transform(translateY($shadow-normal - $shadow-active));
+        transform: translateY($shadow-normal - $shadow-active);
         box-shadow: 0px $shadow-active 0px 0px $color-dark;
         color: $color-white;
     }
@@ -113,7 +113,7 @@ $shadow-active: 0px;
     border-radius: 0;
     &:link, &:hover, &:active, &:visited {
         box-shadow: none;
-        @include transform(none);
+        transform: none;
     }
 }
 
@@ -139,7 +139,7 @@ $shadow-active: 0px;
     &:link, &:hover, &:active, &:visited {
         border: none;
         box-shadow: none;
-        @include transform(none);
+        transform: none;
     }
     &.red, &.failure {
         box-shadow: none;

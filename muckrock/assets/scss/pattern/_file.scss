@@ -1,5 +1,5 @@
 .file {
-    @include display(flex);
+    display: flex;
     width: 100%;
     padding: $vr*0.5;
     background: $color-white-pure;

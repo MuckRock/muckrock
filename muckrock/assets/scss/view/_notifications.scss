@@ -5,8 +5,8 @@
 }
 
 .notifications__header {
-    @include display(flex);
-    @include justify-content(space-between);
+    display: flex;
+    justify-content: space-between;
     h1 {
         margin-bottom: 0;
     }

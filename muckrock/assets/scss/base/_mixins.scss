@@ -52,7 +52,7 @@
 }
 
 @mixin textbox() {
-    @include box-sizing(border-box);
+    box-sizing: border-box;
     @include border;
     @include border-radius;
     border-color: $color-grey;
@@ -88,9 +88,9 @@
         background-color: $background;
         @include border-radius;
         border-color: $background;
-        @include transition(border-color .25s linear);
+        transition: border-color .25s linear;
         input {
-            @include appearance(none);
+            appearance: none;
             width: 75%;
             height: 100%;
             float: left;
@@ -98,8 +98,9 @@
             color: $color;
             background: transparent;
             border: none;
-            @include placeholder {
+            &::placeholder {
                 color: $color-grey-5;
+                opacity: 1;
             }
             &:focus {
                 outline: none;

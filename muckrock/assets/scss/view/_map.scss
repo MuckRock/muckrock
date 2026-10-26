@@ -1,6 +1,6 @@
 .map-container {
-    @include display(flex);
-    @include flex-wrap(wrap);
+    display: flex;
+    flex-wrap: wrap;
     width: 100%;
 }
 

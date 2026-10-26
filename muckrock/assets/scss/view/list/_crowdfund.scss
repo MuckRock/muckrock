@@ -2,9 +2,9 @@
     list-style-type: none;
     padding-left: 0;
     .crowdfund {
-        @include display(flex);
-        @include flex-direction(column);
-        @include justify-content(space-between);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         margin-bottom: $vr;
         @include border;
         @include border-radius;
@@ -13,19 +13,19 @@
             padding: $vr;
         }
         .left {
-            @include flex(1);
+            flex: 1;
         }
         .right {
-            @include display(flex);
-            @include flex-direction(column);
-            @include justify-content(space-between);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             border-top: 1px solid $color-grey;
             p {
                 margin-bottom: 0;
             }
         }
         @include media($medium-bp) {
-            @include flex-direction(row);
+            flex-direction: row;
             .right {
                 border-top: none;
                 border-left: 1px solid $color-grey;

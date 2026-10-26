@@ -8,8 +8,8 @@
 }
 .project__update {
     .project__update__header {
-        @include display(flex);
-        @include justify-content(space-between);
+        display: flex;
+        justify-content: space-between;
         @include padding;
         margin-bottom: 0;
         p {
@@ -82,17 +82,17 @@
     }
 
     .overview {
-        @include display(flex);
-        @include flex-flow(wrap);
+        display: flex;
+        flex-flow: wrap;
         @include padding;
         max-width: 60em;
         .overview__main {
-            @include flex(2 1 20em);
+            flex: 2 1 20em;
             min-width: 0;
             margin-bottom: $vr;
         }
         .overview__aside {
-            @include flex(1 1 10em);
+            flex: 1 1 10em;
             min-width: 0;
             @media (min-width: 33.25em) {
                 padding: 0 $vr;
@@ -123,7 +123,7 @@
                 display: block;
             }
             .info {
-                @include flex(1 1 auto);
+                flex: 1 1 auto;
                 padding: 0 $vr*0.25;
             }
             a .icon {
@@ -136,12 +136,12 @@
     }
 
     .objects {
-        @include display(flex);
-        @include flex-flow(wrap row);
+        display: flex;
+        flex-flow: wrap row;
         @include padding;
         max-width: 60em;
         .articles, .requests {
-            @include flex(1 1 20em);
+            flex: 1 1 20em;
         }
         .articles {
             margin-right: $vr;
@@ -160,13 +160,13 @@
   padding: 0;
 }
 .project.component .grid__column.third.project__header {
-  @include flex-basis(10em);
+  flex-basis: 10em;
 }
 .project__header {
-  @include flex-basis(10em);
-  @include display(flex);
-  @include flex-direction(column);
-  @include justify-content(flex-start);
+  flex-basis: 10em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   min-height: 10em;
   margin-bottom: 0;
   background-position: center;
@@ -175,7 +175,7 @@
   background-blend-mode: multiply;
 }
 .project__header__wrapper {
-  @include flex(1 1 100%);
+  flex: 1 1 100%;
   min-height: 100%;
   width: 100%;
   padding: $vr;
@@ -203,26 +203,26 @@
 
 /*
 .project.component {
-    @include flex(1 1 30em);
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
+    flex: 1 1 30em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     background: $color-white-pure;
     border: 1px solid $color-grey;
     @include border-radius;
     overflow: hidden;
     .project-header {
-        @include flex(0 1 100%);
-        @include display(flex);
+        flex: 0 1 100%;
+        display: flex;
         min-height: 15em;
         margin-bottom: 0;
         background-position: center;
         background-size: cover;
         background-color: $color-blue-dark;
         .project-header-wrapper {
-            @include display(inline-flex);
-            @include flex-direction(column);
-            @include justify-content(flex-end);
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: flex-end;
             min-height: 100%;
             width: 100%;
             padding: $vr;
@@ -253,7 +253,7 @@
         }
     }
     .overview {
-        @include flex(1 1 20em);
+        flex: 1 1 20em;
         margin-bottom: 0;
         h2 a, .stat a {
             color: $color-black;
@@ -266,17 +266,17 @@
         }
     }
     .details {
-        @include flex(1 1 10em);
+        flex: 1 1 10em;
         .crowdfund {
-            @include display(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(space-between);
-            @include align-items(flex-start);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
             .progress {
-                @include flex(0 1 100%);
+                flex: 0 1 100%;
             }
             .stats, .button {
-                @include flex(1 1 auto);
+                flex: 1 1 auto;
             }
         }
     }

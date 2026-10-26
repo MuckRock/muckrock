@@ -25,11 +25,11 @@
     background-size: cover;
     background-position: top right;
     .text {
-        @include display(flex);
-        @include flex-direction(row);
-        @include flex-wrap(wrap);
-        @include justify-content(space-around);
-        @include align-items(center);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
         height: 100%;
         padding: 2*$vr;
         background-color: rgba(0, 0, 0, 0.6);

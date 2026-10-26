@@ -14,14 +14,14 @@
         text-align: right;
     }
     .foia__single__header {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(center);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 0;
         padding: $vr*0.5;
         p {
-            @include flex(1);
+            flex: 1;
             margin-bottom: 0;
         }
     }
@@ -29,9 +29,9 @@
         padding: $vr*0.5;
     }
     .foia__single__footer {
-        @include display(flex);
+        display: flex;
         .basic.button {
-            @include flex(1);
+            flex: 1;
         }
     }
 }

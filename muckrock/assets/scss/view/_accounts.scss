@@ -1,34 +1,34 @@
 .account.plans {
     @include padding;
     & > header {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include flex-direction(column);
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
         @include media($large-bp) {
-            @include flex-direction(row);
+            flex-direction: row;
         }
         p {
             max-width: 20em;
         }
     }
     & > main {
-        @include display(flex);
+        display: flex;
         &.hidden {
             display: none;
         }
-        @include flex-direction(column);
-        @include align-items(center);
+        flex-direction: column;
+        align-items: center;
         @media all and (min-width: 768px) {
-            @include flex-direction(row);
-            @include align-items(stretch);
-            @include justify-content(space-around);
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: space-around;
         }
     }
     .plan {
-        @include flex(1);
-        @include display(flex);
-        @include flex-direction(column);
-        @include justify-content(space-between);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         @include border;
         @include border-radius;
         overflow: hidden;
@@ -84,20 +84,20 @@
 
 .account.settings {
     $breakpoint: 768px;
-    @include display(flex);
-    @include align-items(stretch);
-    @include flex-direction(column);
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
     @media all and (min-width: $breakpoint) {
-        @include flex-direction(row);
+        flex-direction: row;
         .request.main {
             margin-left: $vr * 2;
         }
     }
     header {
-        @include flex(1);
+        flex: 1;
     }
     main {
-        @include flex(3);
+        flex: 3;
     }
     table {
         p {
@@ -111,9 +111,9 @@
         }
     }
     footer {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(center);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .form {
         padding: $vr;
@@ -123,10 +123,10 @@
     }
     .profile.form {
         .full-name, .other-info {
-            @include display(flex);
+            display: flex;
             margin-bottom: 0;
             .field {
-                @include flex(1);
+                flex: 1;
             }
             .field:first-child {
                 margin-right: $vr;

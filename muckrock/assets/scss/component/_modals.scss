@@ -18,7 +18,7 @@
     @include media($medium-bp) {
         top: 25%;
         left: 50%;
-        @include transform(translateX(-50%));
+        transform: translateX(-50%);
         width: 50%;
         margin: 0;
     }
