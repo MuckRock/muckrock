@@ -207,7 +207,7 @@ class ResponseTaskNode(TaskNode):
             form_initial["status"] = initial_status
             form_initial["tracking_number"] = _foia.current_tracking_id()
             form_initial["date_estimate"] = _foia.date_estimate
-            extra_context["previous_communications"] = _foia.reverse_communications
+            extra_context["previous_communications"] = _foia.reverse_communications[:10]
         extra_context["response_form"] = task.forms.ResponseTaskForm(
             initial=form_initial, task=self.task
         )
