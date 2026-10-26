@@ -11,6 +11,7 @@ from rest_framework import serializers
 
 # MuckRock
 from muckrock.agency.models.agency import Agency
+from muckrock.foia.constants import REQUESTED_DOCS_MAX_LENGTH
 from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.foia.models.file import FOIAFile
 from muckrock.organization.models import Organization
@@ -180,7 +181,8 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         help_text="ID of the organization submitting this request",
     )
     requested_docs = serializers.CharField(
-        help_text="Description of the documents being requested"
+        help_text="Description of the documents being requested",
+        max_length=REQUESTED_DOCS_MAX_LENGTH,
     )
 
     tags = serializers.ListField(

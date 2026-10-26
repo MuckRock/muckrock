@@ -17,7 +17,10 @@ from muckrock.accounts.forms import BuyRequestForm
 from muckrock.accounts.utils import mini_login
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
-from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
+from muckrock.foia.constants import (
+    BLOCKED_FROM_FILING_MESSAGE,
+    REQUESTED_DOCS_MAX_LENGTH,
+)
 from muckrock.foia.forms.comms import ContactInfoForm
 from muckrock.foia.models import FOIAComposer
 
@@ -43,6 +46,7 @@ class BaseComposerForm(forms.ModelForm):
             }
         ),
         required=False,
+        max_length=REQUESTED_DOCS_MAX_LENGTH,
     )
     agencies = forms.ModelMultipleChoiceField(
         queryset=Agency.objects.get_approved(),
