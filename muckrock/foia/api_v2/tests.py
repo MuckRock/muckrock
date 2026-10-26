@@ -1,4 +1,5 @@
 # Django
+from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
@@ -496,6 +497,61 @@ class TestFOIARequestViewset(TestCase):
         self.client.force_authenticate(user=UserFactory.create(is_staff=True))
         response = self.client.get(reverse("api2-files-detail", kwargs={"pk": file.pk}))
         assert response.status_code == 200
+
+    def test_create_requested_docs_over_limit(self):
+        """requested_docs over the max length returns 400 and creates nothing"""
+        agency = AgencyFactory.create()
+        user = UserFactory.create()
+        _fund(user.profile.organization)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "a" * (settings.REQUESTED_DOCS_MAX_LENGTH + 1),
+            },
+            format="json",
+        )
+        assert response.status_code == 400, response.json()
+        assert "requested_docs" in response.json()
+        assert not FOIAComposer.objects.filter(user=user).exists()
+
+    def test_create_requested_docs_at_limit(self):
+        """requested_docs exactly at the max length is accepted"""
+        agency = AgencyFactory.create()
+        user = UserFactory.create()
+        _fund(user.profile.organization)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "a" * settings.REQUESTED_DOCS_MAX_LENGTH,
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.json()
+
+    def test_create_edited_boilerplate_over_limit(self):
+        """The limit also applies when requested_docs is the full letter"""
+        agency = AgencyFactory.create()
+        user = UserFactory.create()
+        _fund(user.profile.organization)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "a" * (settings.REQUESTED_DOCS_MAX_LENGTH + 1),
+                "edited_boilerplate": True,
+            },
+            format="json",
+        )
+        assert response.status_code == 400, response.json()
+        assert "requested_docs" in response.json()
 
 
 class TestFOIACommunicationViewset(TestCase):

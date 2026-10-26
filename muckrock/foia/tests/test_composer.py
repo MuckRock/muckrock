@@ -5,6 +5,7 @@ Tests for the FOIA Composer
 # pylint: disable=protected-access
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
@@ -238,3 +239,22 @@ class TestFOIAComposerForm(TestCase):
         """A blocked user may still save a draft"""
         form = self._blocked_user_form("save")
         assert form.is_valid()
+
+    def _requested_docs_form(self, requested_docs):
+        """A composer form saving the given requested_docs"""
+        return BaseComposerForm(
+            {"action": "save", "requested_docs": requested_docs, "tags": ""},
+            user=UserFactory(),
+            request=None,
+        )
+
+    def test_requested_docs_over_limit(self):
+        """requested_docs over the max length fails validation"""
+        form = self._requested_docs_form("a" * (settings.REQUESTED_DOCS_MAX_LENGTH + 1))
+        assert not form.is_valid()
+        assert "requested_docs" in form.errors
+
+    def test_requested_docs_at_limit(self):
+        """requested_docs exactly at the max length passes validation"""
+        form = self._requested_docs_form("a" * settings.REQUESTED_DOCS_MAX_LENGTH)
+        assert form.is_valid(), form.errors
