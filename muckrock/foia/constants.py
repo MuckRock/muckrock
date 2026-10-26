@@ -181,3 +181,6 @@ FILE_MAGIC_BYTES = {
     "docx": [b"PK\x03\x04"],  # OOXML zip container
     "doc": [b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"],  # legacy OLE2
 }
+
+# Max size of the requested_docs field in the composer
+REQUESTED_DOCS_MAX_LENGTH = 20000
