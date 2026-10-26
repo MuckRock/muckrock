@@ -37,7 +37,7 @@
     word-wrap: break-word;
     background: $color-white-pure;
     .textbox__header, .textbox__section, .textbox__footer {
-        padding: $vr/4 $vr/2;
+        padding: $vr*0.25 $vr*0.5;
     }
     .textbox__header {
         @include display(flex);

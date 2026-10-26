@@ -22,7 +22,7 @@ header {
     @include flex-wrap(wrap);
     @include align-items(center);
     @include justify-content(space-between);
-    padding: $vr/2;
+    padding: $vr*0.5;
 }
 
 .viewer {
@@ -50,7 +50,7 @@ svg {
 }
 
 .logo {
-    margin-right: $vr/2;
+    margin-right: $vr*0.5;
     svg {
         height: 2em;
         width: 2em;

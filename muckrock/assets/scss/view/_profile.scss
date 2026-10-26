@@ -32,7 +32,7 @@
         @include border;
         header, footer, textarea {
             margin: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
         }
         textarea {
             display: block;
@@ -63,7 +63,7 @@
         font-weight: $bold;
     }
     .links svg {
-        margin-right: $vr/2;
+        margin-right: $vr*0.5;
     }
     .project-group {
         @include display(flex);
@@ -80,9 +80,9 @@
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(center);
-        gap: $vr/2;
+        gap: $vr*0.5;
         // the buttons drop their margins, so leave room for the drop shadow
-        margin-bottom: $vr/4;
+        margin-bottom: $vr*0.25;
         > form {
             margin: 0;
         }

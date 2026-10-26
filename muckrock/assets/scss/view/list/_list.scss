@@ -31,7 +31,7 @@
     display: none;
     width: 100%;
     text-align: center;
-    padding: $vr/4 $vr/2;
+    padding: $vr*0.25 $vr*0.5;
     @include border;
     .icon {
         vertical-align: middle;
@@ -48,7 +48,7 @@
 
   @media(max-width:48em) {
     .grid__column {
-        margin-bottom: $vr/2;
+        margin-bottom: $vr*0.5;
     }
     .list__toggle {
         display: block;
@@ -84,7 +84,7 @@
 .list__sections a {
   display: block;
   width: 100%;
-  padding: $vr/4 $vr/2;
+  padding: $vr*0.25 $vr*0.5;
   font-weight: $bold;
   text-decoration: none;
   &:hover {
@@ -99,7 +99,7 @@
 .list__sections .counter {
     min-width: 3em;
     display: inline-block;
-    margin-right: $vr/4;
+    margin-right: $vr*0.25;
     text-align: center;
 }
 
@@ -108,7 +108,7 @@
 }
 
 .list .badge {
-  margin-right: $vr/4;
+  margin-right: $vr*0.25;
 }
 .list .project .badge {
   opacity: 1;

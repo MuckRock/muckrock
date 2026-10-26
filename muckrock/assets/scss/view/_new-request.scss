@@ -139,7 +139,7 @@ $color-advanced-container: lighten($color-agency, 40%);
     .permanent_embargo label,
     .no_proxy label {
       display: inline;
-      margin-right: $vr/2;
+      margin-right: $vr*0.5;
     }
     fieldset.advanced {
       color: $color-white;
@@ -249,7 +249,7 @@ $color-advanced-container: lighten($color-agency, 40%);
       right: 10px;
       z-index: 100;
       border-radius: 4px;
-      padding: 0 $vr/4;
+      padding: 0 $vr*0.25;
       background: $color-white;
       color: $color-black;
       font-weight: bold;
@@ -321,14 +321,14 @@ $color-advanced-container: lighten($color-agency, 40%);
         }
     }
     h2 {
-        margin-top: $vr/2;
+        margin-top: $vr*0.5;
     }
     p {
         @include vr;
         color: $color-grey-2;
     }
     .button {
-        margin: $vr/2 0 $vr 0;
+        margin: $vr*0.5 0 $vr 0;
     }
 }
 

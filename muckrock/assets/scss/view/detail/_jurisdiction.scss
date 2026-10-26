@@ -121,7 +121,7 @@ $right-column: 4 1 32em;
     float: left;
     margin-right: 2*$vr;
     @include border;
-    padding: $vr/2;
+    padding: $vr*0.5;
     background: $color-white-pure;
     p {
         font-weight: $bold;

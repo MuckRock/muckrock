@@ -1,11 +1,13 @@
 /* Buttons */
 
+@use "sass:math";
+
 $shadow-normal: 3px;
 $shadow-hover: 3px;
 $shadow-active: 0px;
 
 @mixin button-color($color) {
-    $color-light: lighten($color, $color-darken-amount/2);
+    $color-light: lighten($color, $color-darken-amount*0.5);
     $color-dark: darken($color, $color-darken-amount);
     border-color: $color-dark;
     background: $color;
@@ -31,10 +33,10 @@ $shadow-active: 0px;
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    margin: $vr/4 0;
+    margin: $vr*0.25 0;
     border: 1px solid $color-dark;
     border-radius: $border-radius;
-    padding: $vr/6 $vr/3;
+    padding: math.div($vr, 6) math.div($vr, 3);
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
     text-shadow: 0px -1px $color-dark;
     // Color

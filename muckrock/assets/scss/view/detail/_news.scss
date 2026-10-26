@@ -31,7 +31,7 @@
             font-weight: $bold;
         }
         h1, .kicker {
-            margin: $vr/2 0;
+            margin: $vr*0.5 0;
             font-weight: $bold;
             line-height: 1.25em;
         }
@@ -75,7 +75,7 @@
         margin-bottom: 0;
         background: $color-blue-light;
         color: $color-blue-dark;
-        padding: $vr/2;
+        padding: $vr*0.5;
         margin: 1rem 0;
         gap: 0;
 

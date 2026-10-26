@@ -6,7 +6,7 @@
     .article__image
     {
         @include flex(1 1 9em);
-        margin: 0 $vr $vr/2 0;
+        margin: 0 $vr $vr*0.5 0;
         img
         {
             display: block;
@@ -19,7 +19,7 @@
     }
     .article__overview__title
     {
-        margin-bottom: $vr/4;
+        margin-bottom: $vr*0.25;
         font-size: $size-4;
         font-weight: $bold;
         line-height: 1.2em;
@@ -32,7 +32,7 @@
     {
         @include display(flex);
         @include justify-content(space-between);
-        margin-bottom: $vr/4;
+        margin-bottom: $vr*0.25;
         font-size: $size-2;
         line-height: 1em;
         color: $color-grey-3;
@@ -48,7 +48,7 @@
     .article__image
     {
         @include flex(1 1 100%);
-        margin: 0 0 $vr/2 0;
+        margin: 0 0 $vr*0.5 0;
     }
     .article__overview__title
     {
@@ -61,7 +61,7 @@
 {
     .article__image {
         @include flex(0 1 100%);
-        margin: 0 0 $vr/2;
+        margin: 0 0 $vr*0.5;
     }
     .article__overview__title
     {

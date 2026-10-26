@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "css:diff": "node scripts/css-check.js diff",
     "css:snapshot": "node scripts/css-check.js snapshot",
+    "css:warnings": "node scripts/css-check.js warnings",
     "heroku-postbuild": "npm run build"
   },
   "repository": {

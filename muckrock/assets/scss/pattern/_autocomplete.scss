@@ -6,7 +6,7 @@ input.autocomplete.xhr-pending { background-image: none; }
   }
   .foia.choice {
     .main {
-      padding: $vr/4 $vr/2;
+      padding: $vr*0.25 $vr*0.5;
     }
     .title {
       margin-bottom: 0;
@@ -17,7 +17,7 @@ input.autocomplete.xhr-pending { background-image: none; }
   }
   .agency.choice {
     .main {
-      padding: $vr/4 $vr/2;
+      padding: $vr*0.25 $vr*0.5;
     }
     .name {
       margin-bottom: 0;
@@ -40,7 +40,7 @@ input.autocomplete.xhr-pending { background-image: none; }
     .info {
       display: inline-block;
       vertical-align: middle;
-      padding: $vr/4 $vr/2;
+      padding: $vr*0.25 $vr*0.5;
     }
     .meta {
       font-size: $size-2;

@@ -1,3 +1,5 @@
+@use "sass:math";
+
 $request-breakpoint: 768px;
 
 .request.properties {
@@ -31,20 +33,20 @@ $request-breakpoint: 768px;
             @include overflow-ellipsis;
         }
         .action {
-            margin-left: $vr/2;
+            margin-left: $vr*0.5;
             float: right;
         }
     }
     .hidden-form {
         display: none;
         @include border;
-        padding: $vr/2;
+        padding: $vr*0.5;
         //@include align-items(flex-start);
         //@include flex-wrap(wrap);
         @include justify-content(space-between);
         label, input[type="text"] {
             //@include flex(0 1 100%);
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
         }
         &.visible {
             //@include display(flex);
@@ -81,7 +83,7 @@ $request-breakpoint: 768px;
         @include flex-wrap(wrap);
         @include align-items(center);
         @include border;
-        padding: $vr/4 $vr/2;
+        padding: $vr*0.25 $vr*0.5;
         font-weight: $bold;
         p, footer {
             margin-bottom: 0;
@@ -165,7 +167,7 @@ $request-breakpoint: 768px;
     .auto-follow-up {
         @include display(flex);
         @include justify-content(space-between);
-        padding: $vr/2;
+        padding: $vr*0.5;
         border: 1px solid $color-blue;
         color: $color-blue;
         p {
@@ -199,7 +201,7 @@ $request-breakpoint: 768px;
         header {
             display: block;
             margin-bottom: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-bottom: 1px solid $color-grey;
             p {
                 margin-bottom: 0;
@@ -215,10 +217,10 @@ $request-breakpoint: 768px;
             border-radius: 0;
         }
         .help-text{
-            padding: 0 $vr/2;
+            padding: 0 $vr*0.5;
         }
         input[type="checkbox"] {
-            margin-left: $vr/2;
+            margin-left: $vr*0.5;
             margin-top: $vr * 0.75;
         }
         .currency {
@@ -242,19 +244,19 @@ $request-breakpoint: 768px;
             border-radius: 0;
         }
         .buttons {
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-top: 1px solid $color-grey;
             @include display(flex);
             @include justify-content(space-between);
         }
         .formset-forms {
-            padding: $vr/2;
+            padding: $vr*0.5;
         }
     }
     #inactive .composer-input {
         p {
             height: 15em;
-            padding: $vr/2;
+            padding: $vr*0.5;
             background-color: #FFF;
             color: $color-grey;
         }
@@ -285,7 +287,7 @@ $request-breakpoint: 768px;
         display: none;
         @include border-radius;
         border: 1px solid $color-black;
-        padding: $vr/4 $vr/2 $vr/2 $vr/2;
+        padding: $vr*0.25 $vr*0.5 $vr*0.5 $vr*0.5;
         background: $color-grey-2;
         color: $color-white;
         &.visible {
@@ -295,7 +297,7 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
             @include align-items(flex-start);
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
             h3 {
                 margin-bottom: 0;
             }
@@ -306,7 +308,7 @@ $request-breakpoint: 768px;
     }
     .files-list {
         .file {
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
         }
         .active .file {
             border-color: $color-blue;
@@ -352,7 +354,7 @@ $request-breakpoint: 768px;
             @include justify-content(space-between);
             @include align-items(flex-end);
             margin-bottom: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-bottom: 1px solid $color-grey;
             p {
                 font-size: $size-2;
@@ -362,7 +364,7 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
             @include align-items(center);
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-top: 1px solid $color-grey;
             p {
                 padding-left: $vr;
@@ -386,7 +388,7 @@ $request-breakpoint: 768px;
             @include display(flex);
             @include justify-content(space-between);
             margin-bottom: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
             background-color: $color-yellow;
             color: $color-black;
             p {
@@ -407,7 +409,7 @@ $request-breakpoint: 768px;
             background: $color-grey-7;
         }
         .note-body {
-            padding: $vr/2;
+            padding: $vr*0.5;
             background-color: $color-yellow-light;
             br {
               margin-bottom: 0;
@@ -582,7 +584,7 @@ $request-breakpoint: 768px;
             background-color: $color-white;
         }
         .person td {
-            padding: $vr/2;
+            padding: $vr*0.5;
             vertical-align: middle;
             text-align: right;
             &.name {
@@ -605,7 +607,7 @@ $request-breakpoint: 768px;
         }
         .access-badge {
             width: 5em;
-            padding: $vr/4 $vr/2;
+            padding: $vr*0.25 $vr*0.5;
             background: $color-grey;
             color: $color-white;
             text-align: center;
@@ -621,7 +623,7 @@ $request-breakpoint: 768px;
             }
         }
         button {
-            padding: $vr/6 $vr/2;
+            padding: math.div($vr, 6) $vr*0.5;
             width: 5em;
             @include media($medium-bp) {
                 margin: 0 0 4px;

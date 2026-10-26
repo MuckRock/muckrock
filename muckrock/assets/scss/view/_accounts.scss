@@ -70,7 +70,7 @@
         color: $color-green;
         border: 2px solid;
         @include border-radius;
-        padding: $vr/4;
+        padding: $vr*0.25;
         font-weight: $bold;
         text-align: center;
     }

@@ -4,6 +4,9 @@
  *
  *   npm run css:diff       exit 1 and print a unified diff if the CSS changed
  *   npm run css:snapshot   overwrite the baseline with the current build
+ *   npm run css:warnings -- step-N
+ *                          record Sass deprecation warnings in
+ *                          scripts/sass-warnings/step-N.txt
  *
  * Normalising removes differences that cannot change how a page renders
  * (comments, whitespace, nesting, how rules are grouped into at-rule blocks,
@@ -21,6 +24,13 @@ const BASELINE_DIR = path.join(ROOT, "scripts/css-baseline");
 const WORK_DIR = path.join(ROOT, "node_modules/.cache/css-check");
 const BUILD_DIR = path.join(WORK_DIR, "build");
 const CURRENT_DIR = path.join(WORK_DIR, "current");
+const WARNINGS_DIR = path.join(ROOT, "scripts/sass-warnings");
+const SASS_ENTRIES = [
+  "muckrock/assets/scss/style.scss",
+  "muckrock/assets/scss/docViewer.scss",
+  "muckrock/assets/scss/print.scss",
+  "muckrock/foiamachine/assets/scss/style.scss",
+];
 
 /** Flatten nested rules into "outer inner" selectors, as Sass does. */
 function joinSelectors(parents, children) {
@@ -154,6 +164,54 @@ async function buildCss() {
   return result;
 }
 
+/** Compile each Sass entry and report its warnings by type and location. */
+async function recordWarnings(name) {
+  const sass = await import("sass");
+  const byEntry = {};
+  const locations = new Map();
+
+  for (const entry of SASS_ENTRIES) {
+    const counts = (byEntry[entry] = {});
+    sass.compile(path.join(ROOT, entry), {
+      // Without verbose, Sass stops repeating a warning after five.
+      verbose: true,
+      logger: {
+        warn(message, { deprecationType, span }) {
+          const type = deprecationType?.id ?? "warn";
+          counts[type] = (counts[type] ?? 0) + 1;
+          const where = span?.url
+            ? `${path.relative(ROOT, fileURLToPath(span.url))}:${span.start.line + 1}`
+            : "(unknown)";
+          const key = `${type.padEnd(16)} ${where}`;
+          locations.set(key, (locations.get(key) ?? 0) + 1);
+        },
+      },
+    });
+  }
+
+  const lines = [`# Sass warnings: ${name}`, "", "## Count by entry and type", ""];
+  for (const [entry, counts] of Object.entries(byEntry)) {
+    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    lines.push(`${entry}: ${total}`);
+    for (const [type, n] of Object.entries(counts).sort()) {
+      lines.push(`  ${type.padEnd(16)} ${n}`);
+    }
+  }
+  lines.push(
+    "",
+    `## Locations (${locations.size}), with how often each fires across all entries`,
+    "",
+  );
+  for (const [key, n] of [...locations].sort(([a], [b]) => a.localeCompare(b))) {
+    lines.push(`${key}  x${n}`);
+  }
+
+  fs.mkdirSync(WARNINGS_DIR, { recursive: true });
+  const file = path.join(WARNINGS_DIR, `${name}.txt`);
+  fs.writeFileSync(file, lines.join("\n") + "\n");
+  console.log(`Wrote ${path.relative(ROOT, file)}: ${locations.size} locations`);
+}
+
 function writeNormalized(dir, sheets) {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
@@ -162,9 +220,13 @@ function writeNormalized(dir, sheets) {
   }
 }
 
-async function main(command) {
+async function main(command, arg) {
+  if (command === "warnings" && arg) {
+    await recordWarnings(arg);
+    return;
+  }
   if (command !== "snapshot" && command !== "diff") {
-    console.error("usage: node scripts/css-check.js snapshot|diff");
+    console.error("usage: node scripts/css-check.js snapshot|diff|warnings <step-name>");
     process.exit(2);
   }
   const sheets = await buildCss();
@@ -190,5 +252,5 @@ async function main(command) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await main(process.argv[2]);
+  await main(process.argv[2], process.argv[3]);
 }

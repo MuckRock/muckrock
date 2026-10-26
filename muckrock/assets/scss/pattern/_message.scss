@@ -28,13 +28,13 @@
         svg {
             width: $svg-size;
             height: $svg-size;
-            padding: $vr/2;
+            padding: $vr*0.5;
             vertical-align: middle;
         }
     }
     .text {
         flex: 1 1 auto;
-        padding: $vr/2;
+        padding: $vr*0.5;
     }
     .dismiss {
         flex: 0 0 auto;
@@ -42,7 +42,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        padding: $vr/2;
+        padding: $vr*0.5;
         opacity: 0.6;
         &:hover {
             opacity: 1;

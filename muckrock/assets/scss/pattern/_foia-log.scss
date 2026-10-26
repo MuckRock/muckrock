@@ -170,7 +170,7 @@
             }
             &__name {
                 font-weight: bold;
-                margin-bottom: $vr/4;
+                margin-bottom: $vr*0.25;
             }
             &__releases {
                 overflow: visible;
@@ -185,7 +185,7 @@
                     position: absolute;
                     top: auto;
                     width: 100%;
-                    margin-top: $vr/2;
+                    margin-top: $vr*0.5;
                     background: $color-white;
                     width: 18em;
                     padding: $vr;

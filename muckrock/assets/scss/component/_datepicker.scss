@@ -14,7 +14,7 @@
     @include justify-content(space-between);
     width: 100%;
     margin-bottom: 0;
-    padding: $vr/4;
+    padding: $vr*0.25;
     text-align: center;
     font-weight: $bold;
     a {

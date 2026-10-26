@@ -110,7 +110,7 @@ $request-breakpoint: 768px;
         }
         input {
             width: 100%;
-            padding: $vr/2;
+            padding: $vr*0.5;
         }
         label {
             display: block;

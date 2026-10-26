@@ -24,7 +24,7 @@
     }
     .from, .subject {
         margin-bottom: 0;
-        margin-right: $vr/2;
+        margin-right: $vr*0.5;
         @include overflow-ellipsis;
         font-weight: $bold;
     }
@@ -75,7 +75,7 @@
         label, input, select {
             display: block;
             width: 100%;
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
         }
         label {
             font-weight: $bold;

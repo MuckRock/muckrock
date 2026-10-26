@@ -10,7 +10,7 @@
         border-bottom-left-radius: $border-radius;
     }
     .button:last-child {
-        margin-bottom: $vr/4;
+        margin-bottom: $vr*0.25;
         border-top-right-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
     }

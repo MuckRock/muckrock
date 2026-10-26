@@ -10,8 +10,8 @@
         border: 1px solid $color-grey;
     }
     .redacted {
-        margin-left: $vr/4;
-        margin-right: $vr/4;
+        margin-left: $vr*0.25;
+        margin-right: $vr*0.25;
         background-color: $color-black;
         color: transparent;
         &:first-child {

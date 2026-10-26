@@ -139,7 +139,7 @@ ul, ol {
     }
     &.inline li {
         display: inline-block;
-        margin: 0 $vr/2 $vr/2 0;
+        margin: 0 $vr*0.5 $vr*0.5 0;
     }
 }
 
