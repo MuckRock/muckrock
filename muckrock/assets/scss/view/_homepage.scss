@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .banner-wrapper {
     background-size: cover;
     background-position: right center;
@@ -362,20 +364,20 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         background-blend-mode: soft-light;
 
         &#muckrock-requests {
-            background: lighten($color-red, 40%);
-            border-bottom: 1px solid lighten($color-red-dark, 20%);
+            background: color.adjust($color-red, $lightness: 40%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-red-dark, $lightness: 20%, $space: hsl);
         }
         &#documentcloud {
-            background: lighten($color-blue, 40%);
-            border-bottom: 1px solid lighten($color-blue-dark, 20%);
+            background: color.adjust($color-blue, $lightness: 40%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-blue-dark, $lightness: 20%, $space: hsl);
         }
         &#data-liberation-project {
-            background: lighten($color-yellow, 40%);
-            border-bottom: 1px solid lighten($color-yellow-dark, 20%);
+            background: color.adjust($color-yellow, $lightness: 40%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-yellow-dark, $lightness: 20%, $space: hsl);
         }
         &#sunlight-research-center {
-            background: lighten($color-orange, 30%);
-            border-bottom: 1px solid lighten($color-orange-dark, 20%);
+            background: color.adjust($color-orange, $lightness: 30%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-orange-dark, $lightness: 20%, $space: hsl);
         }
     }
 
@@ -510,7 +512,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         color: currentColor;
         &:hover {
             text-decoration: none;
-            background: lighten($color-blue, 25%);
+            background: color.adjust($color-blue, $lightness: 25%, $space: hsl);
         }
     }
 

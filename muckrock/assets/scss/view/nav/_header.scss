@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $nav-border: 1px solid $color-grey;
 $nav-background: #FFFFFF;
 
@@ -90,7 +92,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   cursor: pointer;
   color: $color-black;
   &:hover {
-    background: darken($nav-background, $color-darken-amount);
+    background: color.adjust($nav-background, $lightness: -$color-darken-amount, $space: hsl);
   }
   a {
     display: block;
@@ -113,7 +115,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       @include svg-color($color-white);
     }
     &:hover {
-      background: darken($color-blue, $color-darken-amount);
+      background: color.adjust($color-blue, $lightness: -$color-darken-amount, $space: hsl);
     }
   }
   &.red {
@@ -133,7 +135,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       @include svg-color($color-white);
     }
     &:hover {
-      background: darken($color-black, $color-darken-amount)
+      background: color.adjust($color-black, $lightness: -$color-darken-amount, $space: hsl)
     }
   }
   /* The label is hidden until the viewport is wide enough. */
@@ -349,12 +351,12 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       This helps maintain context for dropdowns, since the hover on a nav-item can disappear.
       */
       & > .nav-item {
-        background: darken($nav-background, $color-darken-amount);
+        background: color.adjust($nav-background, $lightness: -$color-darken-amount, $space: hsl);
         &.blue {
-          background: darken($color-blue, $color-darken-amount);
+          background: color.adjust($color-blue, $lightness: -$color-darken-amount, $space: hsl);
         }
         &.black {
-          background: darken($color-black, $color-darken-amount);
+          background: color.adjust($color-black, $lightness: -$color-darken-amount, $space: hsl);
         }
       }
     }

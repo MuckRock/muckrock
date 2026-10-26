@@ -1,10 +1,12 @@
+@use "sass:color";
+
 $color-title: #F26C5A;
 $color-jurisdiction: #5A90F2;
-$color-jurisdiction-picker: darken($color-jurisdiction, 10%);
-$color-agency: darken($color-jurisdiction-picker, 10%);
+$color-jurisdiction-picker: color.adjust($color-jurisdiction, $lightness: -10%, $space: hsl);
+$color-agency: color.adjust($color-jurisdiction-picker, $lightness: -10%, $space: hsl);
 $color-attachment: #F2B85A;
 $color-advanced: $color-agency;
-$color-advanced-container: lighten($color-agency, 40%);
+$color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: hsl);
 
 .new-request {
     .create-request {
@@ -30,11 +32,11 @@ $color-advanced-container: lighten($color-agency, 40%);
             padding: 0;
             border: none;
             border-radius: 0;
-            border-bottom: $border-width dotted lighten($color-title, 20%);
+            border-bottom: $border-width dotted color.adjust($color-title, $lightness: 20%, $space: hsl);
             color: $color-white;
             font-size: $size-6;
             @include placeholder {
-                color: lighten($color-title, 20%);
+                color: color.adjust($color-title, $lightness: 20%, $space: hsl);
             }
         }
     }
@@ -99,7 +101,7 @@ $color-advanced-container: lighten($color-agency, 40%);
             width: 100%;
             background-color: $color-agency;
             border: none;
-            border-bottom: 2*$border-width dotted lighten($color-agency, 20%);
+            border-bottom: 2*$border-width dotted color.adjust($color-agency, $lightness: 20%, $space: hsl);
             padding-left: 0;
             border-radius: 0;
             @include font-sizing(1.25, 3);
@@ -107,9 +109,9 @@ $color-advanced-container: lighten($color-agency, 40%);
             display: block;
             width: 100%;
             margin: 0;
-            @include placeholder { color: lighten($color-agency, 20%); }
+            @include placeholder { color: color.adjust($color-agency, $lightness: 20%, $space: hsl); }
             &:disabled {
-                @include placeholder { color: darken($color-white, 2%); }
+                @include placeholder { color: color.adjust($color-white, $lightness: -2%, $space: hsl); }
                 background: $color-disabled;
                 border-bottom: none;
                 text-align: left;

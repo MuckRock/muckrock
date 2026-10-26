@@ -1,3 +1,5 @@
+@use "sass:color";
+
 /* Buttons */
 
 @use "sass:math";
@@ -7,8 +9,8 @@ $shadow-hover: 3px;
 $shadow-active: 0px;
 
 @mixin button-color($color) {
-    $color-light: lighten($color, $color-darken-amount*0.5);
-    $color-dark: darken($color, $color-darken-amount);
+    $color-light: color.adjust($color, $lightness: $color-darken-amount*0.5, $space: hsl);
+    $color-dark: color.adjust($color, $lightness: -$color-darken-amount, $space: hsl);
     border-color: $color-dark;
     background: $color;
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
@@ -26,8 +28,8 @@ $shadow-active: 0px;
 }
 
 @mixin button($color) {
-    $color-light: lighten($color, $color-darken-amount);
-    $color-dark: darken($color, $color-darken-amount);
+    $color-light: color.adjust($color, $lightness: $color-darken-amount, $space: hsl);
+    $color-dark: color.adjust($color, $lightness: -$color-darken-amount, $space: hsl);
     // Metrics
     display: inline-flex;
     align-items: center;
@@ -143,16 +145,16 @@ $shadow-active: 0px;
         box-shadow: none;
         color: $color-red;
         &:hover {
-            color: darken($color-red, 10%);
-            background-color: lighten($color-red, 30%);
+            color: color.adjust($color-red, $lightness: -10%, $space: hsl);
+            background-color: color.adjust($color-red, $lightness: 30%, $space: hsl);
         }
     }
     &.blue, &.primary {
         box-shadow: none;
         color: $color-blue;
         &:hover {
-            color: darken($color-blue, 10%);
-            background-color: lighten($color-blue, 30%);
+            color: color.adjust($color-blue, $lightness: -10%, $space: hsl);
+            background-color: color.adjust($color-blue, $lightness: 30%, $space: hsl);
         }
         
     }

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 /*
 ** _mixins.scss
 **
@@ -65,7 +67,8 @@
     display: inline-block;
     padding: $vr*0.25 math.div($vr, 3) $vr*0.25 $vr*0.5;
     &:disabled {
-        background-color: lighten($color-disabled, 25%);
+        // +25% lightness overshoots 100%; clip it back to white.
+        background-color: color.to-gamut(color.adjust($color-disabled, $lightness: 25%, $space: hsl), $method: clip);
         border: 1px solid $color-disabled;
         color: $color-disabled;
     }
