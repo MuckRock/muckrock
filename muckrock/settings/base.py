@@ -1037,3 +1037,6 @@ REQUEST_WINDOW_DAYS = int(os.environ.get("REQUEST_WINDOW_DAYS", 90))
 
 # Max length of requested docs in composer
 REQUESTED_DOCS_MAX_LENGTH = int(os.environ.get("REQUESTED_DOCS_MAX_LENGTH", 20000))
+
+# Most recent communications shown in a task's collapsed history
+PREVIOUS_COMMUNICATIONS_LIMIT = int(os.environ.get("PREVIOUS_COMMUNICATIONS_LIMIT", 10))
