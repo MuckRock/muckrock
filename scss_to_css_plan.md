@@ -2,6 +2,8 @@
 
 Proposed as a series of small PRs, each one checked before the next starts.
 
+**Status:** Phases 0 and 1 are done (steps 0–5). Phase 2 has not started.
+
 ## What's there now
 
 - **Three Sass entry points:**
@@ -12,10 +14,10 @@ Proposed as a series of small PRs, each one checked before the next starts.
 - **Sass features our code depends on:**
   - **Bourbon prefix mixins**, roughly 450 calls (`display(flex)`, `flex`, `justify-content`, …). They add about 2,000 vendor-prefixed lines to `main.css`, mostly for browsers that no longer exist.
   - **Neat:** only `media($medium-bp)` (33 calls) and `row` (1). There's no grid usage.
-  - **Our own mixins:** 20. Our `border-radius`, `box-shadow` and `border` mixins have the same names as Bourbon's and override them. Easy to get wrong when removing Bourbon.
+  - **Our own mixins:** 20. Only `padding` and `button` share a name with a Bourbon mixin, and both were already overriding Bourbon's everywhere they're used.
   - **Other:** 6 `@extend`s, one `@if`, and `#{$all-text-inputs}` from Bourbon.
   - **42 nested `&__x` / `&--x` selectors.** Native CSS nesting does not support these (BEM name joining), so they have to be written out in full during the CSS conversion. This is the easiest place to introduce a silent bug.
-- **Build:** Vite already runs PostCSS and bundles plain-CSS `@import`, so we don't need a new build tool. (`AGENTS.md` still says Webpack, which is out of date.)
+- **Build:** Vite already runs PostCSS and bundles plain-CSS `@import`, so we don't need a new build tool.
 
 ## How we check each step
 
@@ -27,17 +29,26 @@ Some steps also need a quick look at a fixed list of pages: home, request detail
 
 **Phase 0: safety net**
 
-0. **Add the CSS diff script** with a baseline snapshot. Expected diff: none (it only adds tooling).
+0. ✅ **Add the CSS diff script** with a baseline snapshot. Expected diff: none (it only adds tooling).
+   - `npm run css:diff` / `css:snapshot` (`scripts/css-check.js`), baseline in `scripts/css-baseline/`.
+   - `npm run css:warnings -- step-N` records Sass warnings per step in `scripts/sass-warnings/`.
 
 **Phase 1: stay on Sass and remove every deprecated feature. Built CSS stays identical except where noted.**
 
-1. **Fix division:** `$vr/2` → `math.div` via `sass-migrator division`. Expected diff: none.
-2. **Fix colours:** `darken()`/`lighten()` → `color.adjust($lightness: …)`, which gives exactly the same colours. Expected diff: none.
-3. **Drop Neat:** a local `media` mixin with the 3 breakpoints, write out `row`, remove the Neat import. Expected diff: none.
-4. **Replace Bourbon's helpers that don't add prefixes:** `$all-text-inputs`, `placeholder`, `appearance`, `columns`, and so on. Rename our overriding mixins first so nothing changes meaning. Expected diff: none.
-5. **Replace Bourbon's prefix mixins with plain properties, then delete Bourbon.** Expected diff: only vendor-prefixed lines removed. The `if-function`, `elseif` and `global-builtin` warnings are gone after this.
+1. ✅ **Fix division:** `$vr/2` → `math.div` via `sass-migrator division`. Expected diff: none.
+   - The migrator uses multiplication for constant divisors (`$vr*0.5`) and `math.div` only for 3 and 6.
+2. ✅ **Fix colours:** `darken()`/`lighten()` → `color.adjust($lightness: …)`, which gives exactly the same colours. Expected diff: none.
+   - Not quite exact: `color.adjust` doesn't clamp at 100% lightness. The one overshoot (disabled input background) is clipped with `color.to-gamut`.
+3. ✅ **Drop Neat:** a local `media` mixin with the 3 breakpoints, write out `row`, remove the Neat import. Expected diff: none.
+   - Neat also emitted the global `* { box-sizing: border-box }`; it now lives in `base/_box-sizing.scss`.
+4. ✅ **Replace Bourbon's helpers that don't add prefixes:** `$all-text-inputs`, `placeholder`, `appearance`, `columns`, and so on. Rename our overriding mixins first so nothing changes meaning. Expected diff: none.
+   - Covered `$all-text-inputs`, `clearfix` and `border-*-radius`. `placeholder`, `appearance` and `columns` do add prefixes, so they moved to step 5. No renames were needed.
+5. ✅ **Replace Bourbon's prefix mixins with plain properties, then delete Bourbon.** Expected diff: only vendor-prefixed lines removed. The `if-function`, `elseif` and `global-builtin` warnings are gone after this.
+   - Also removed the non-standard 2009 flexbox properties (`box-pack`, `display: box`, …). Bourbon's `placeholder` only emitted prefixed selectors, so its 4 rules became `::placeholder`.
+   - `main.css` went from 220 KB to 167 KB minified. The baseline was re-snapshotted.
+   - Follow-up, not fixed here: `transition: opacity, .5s, linear` in `pattern/_task.scss` is three transitions; the commas are a bug.
 
-After Phase 1, the only warning left is `@import`.
+After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.scss`, 11 in `docViewer.scss`.
 
 **Phase 2: Sass → plain CSS**
 
@@ -49,7 +60,7 @@ After Phase 1, the only warning left is `@import`.
 
 ## Open decisions
 
-1. **Vendor prefixes (step 5):** recommend dropping them outright, since `display: flex` without prefixes works in every browser we'd still support. The alternative is adding `autoprefixer` with a target browser list (`browserslist`), which keeps any prefixes that are still needed.
+1. ✅ **Decided: drop them.** **Vendor prefixes (step 5):** recommend dropping them outright, since `display: flex` without prefixes works in every browser we'd still support. The alternative is adding `autoprefixer` with a target browser list (`browserslist`), which keeps any prefixes that are still needed.
 2. **The end state:** plain CSS, or PostCSS plugins that mimic Sass (`postcss-mixins`, `postcss-simple-vars`)? Recommend plain CSS: those plugins are basically Sass again with less tooling. The only exception would be `postcss-custom-media`, because CSS variables don't work inside `@media` queries.
 3. **Nesting (from step 6):** keep native CSS nesting (supported by all major browsers since 2023), or flatten everything? Recommend native nesting with `&__x` written out. Flattening is safer for very old browsers, but the files get much harder to read.
 4. **The `@import` warning during Phase 2:** turn it off temporarily (`silenceDeprecations: ['import']`) rather than migrating to `@use`. That migration would be thrown away once the files are plain CSS.
