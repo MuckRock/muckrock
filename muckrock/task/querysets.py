@@ -351,7 +351,29 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
                     "agency__agencyaddress_set",
                     queryset=AgencyAddress.objects.select_related("address"),
                 ),
+                # A channel task shows its own repairs; an agency level task
+                # rolls up every repair on its agency
+                Prefetch("repairs", queryset=self._repairs()),
+                Prefetch("agency__review_repairs", queryset=self._repairs()),
             )
+        )
+
+    @staticmethod
+    def _repairs():
+        """Repairs with what their readout links to"""
+        return task.models.ReviewAgencyRepair.objects.select_related(
+            "user", "new_email", "portal"
+        ).prefetch_related(
+            Prefetch(
+                "communications",
+                queryset=FOIACommunication.objects.select_related(
+                    "foia__agency__jurisdiction"
+                ).order_by("datetime", "pk"),
+            ),
+            Prefetch(
+                "skipped",
+                queryset=FOIARequest.objects.select_related("agency__jurisdiction"),
+            ),
         )
 
     def annotate_blocked(self):
@@ -360,7 +382,8 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
         This is the queue's ordering key.  A channel scoped task counts the
         open requests routed at its channel; an agency level task (staff or
         stale, with no channel) counts all of the agency's open requests,
-        because that task really is about the agency.
+        because that task really is about the agency.  `unsent_count` is how
+        many of the blocked requests have never been sent.
         """
         open_requests = FOIARequest.objects.get_open()
 
@@ -387,11 +410,42 @@ class ReviewAgencyTaskQuerySet(TaskQuerySet):
             .values("count"),
             output_field=IntegerField(),
         )
+        # Never sent, so a portal move has nothing to resend and leaves them
+        # blocked; the task page says what will clear them instead
+        unsent = open_requests.filter(
+            ~Exists(
+                FOIACommunication.objects.filter(foia=OuterRef("pk"), response=False)
+            ),
+            agency=OuterRef("agency"),
+        )
+        channel_unsent = Subquery(
+            unsent.filter(email=OuterRef("email"))
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
+        agency_unsent = Subquery(
+            unsent.filter(email__status="error")
+            .values("agency")
+            .annotate(count=Count("pk"))
+            .values("count"),
+            output_field=IntegerField(),
+        )
         return self.annotate(
             blocked_count=Coalesce(
                 Case(
                     When(email__isnull=True, then=agency_blocked),
                     default=channel_blocked,
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+                output_field=IntegerField(),
+            ),
+            unsent_count=Coalesce(
+                Case(
+                    When(email__isnull=True, then=agency_unsent),
+                    default=channel_unsent,
                     output_field=IntegerField(),
                 ),
                 Value(0),

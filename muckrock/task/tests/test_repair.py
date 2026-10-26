@@ -845,7 +845,30 @@ class TestPortalRepair(ChannelRepairMixin, RunCommitHooksMixin, TestCase):
         assert task.repair_outcome["requests_updated"] == 1
         message = str(list(get_messages(response.wsgi_request))[0])
         assert "Rerouted 1 request" in message
-        assert "Skipped 1 request with no filed request to resend" in message
+        assert (
+            "Not moved: 1 request with no filed request to resend, still on the "
+            "broken channel: seattle@mycusthelp.net (#%d)." % empty.pk
+        ) in message
+        # Last, as what is left to do, after the task it keeps open
+        assert message.index("still open") < message.index("Not moved")
+
+    def test_a_portal_move_that_moved_nothing_says_nothing_changed(self, _mock_delay):
+        """Rather than reporting 0 requests rerouted, as if it had been a repair"""
+        self.use_portal()
+        address, _foias, _comms, _task = self.make_portal_channel(blocked=0)
+        empty = FOIARequestFactory(agency=self.agency, email=address, status="ack")
+        response = self.post(
+            repair_via="portal",
+            channel_pks=str(address.pk),
+            foia_pks=str(empty.pk),
+            resolve="on",
+        )
+        message = str(list(get_messages(response.wsgi_request))[0])
+        assert message.startswith("%s: Nothing changed." % self.agency.name)
+        assert "Rerouted" not in message
+        assert "Portal Task" not in message
+        assert "seattle@mycusthelp.net (#%d)" % empty.pk in message
+        assert "Reroute it by email or snail mail, or close it." in message
 
     def test_message_counts_the_portal_tasks(self, _mock_delay):
         """The staffer is told how much portal work was just queued"""

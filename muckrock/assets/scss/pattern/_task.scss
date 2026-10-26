@@ -298,19 +298,63 @@ $task-padding: $vr*0.25 $vr*0.5;
     gap: $vr*0.25;
 }
 
-.review-agency-channel {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: $vr*0.25 $vr;
-    dt {
+// Channel facts and repair history: one compact row each, headings small
+// and muted so the values carry the scan.
+.review-agency-table {
+    font-size: 0.875em;
+    th {
+        text-align: left;
+        font-weight: normal;
         color: $color-grey-3;
+        background: $color-grey-7;
+        white-space: nowrap;
     }
-    dd {
-        margin-left: 0;
+    td {
+        vertical-align: top;
     }
     code {
         margin-right: $vr*0.25;
     }
+}
+
+.review-agency-repair th {
+    width: 33.33%;
+}
+
+.review-agency-repair__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 $vr*0.5;
+    padding-bottom: $vr*0.125;
+}
+
+// Pinned right even on later repairs, which have no heading beside them
+.review-agency-repair__byline {
+    margin-left: auto;
+    font-size: 0.875em;
+    color: $color-grey-3;
+}
+
+// Collapsed by default; open, it scrolls rather than stretching the row
+.review-agency-followups {
+    > summary {
+        display: list-item; // normalize's display: block hides the marker
+        cursor: pointer;
+    }
+    ul {
+        max-height: 10em;
+        overflow-y: auto;
+        margin: $vr*0.25 0 0;
+        padding-left: $vr;
+    }
+}
+
+.review-agency-history {
+    display: flex;
+    flex-direction: column;
+    gap: $vr*0.5;
 }
 
 .review-agency-channel--none {

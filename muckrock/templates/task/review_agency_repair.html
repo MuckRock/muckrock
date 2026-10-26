@@ -1,0 +1,121 @@
+{% comment %}
+  One recorded repair: the channels as they were before it, what it changed
+  them to, and what that touched.  Expects `task` and a `repair` from its
+  repair_history, already narrowed to the task; the section heading renders
+  only with `show_heading`.
+{% endcomment %}
+<div class="review-agency-repair">
+<header class="review-agency-repair__header">
+  {% if show_heading %}
+    <h4>{% if task.resolved %}What was done{% else %}Repaired, still open{% endif %}</h4>
+  {% endif %}
+  <span class="review-agency-repair__byline">
+    <time datetime="{{ repair.datetime|date:'Y-m-d H:i' }}">{{ repair.datetime|date:'m/d/Y' }}</time>
+    by {{ repair.user.username|default:"unknown" }}
+    {% if repair.backfilled %}
+      &middot; recorded before repair history was kept, so no error details
+    {% endif %}
+    {% if repair.other_channels %}
+      &middot; same submission as {{ repair.other_channels }} other channel{{ repair.other_channels|pluralize }}
+    {% endif %}
+  </span>
+</header>
+<table class="review-agency-table">
+  <thead>
+    <tr>
+      <th scope="col">Before</th>
+      <th scope="col">After</th>
+      <th scope="col">Effects</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        {% for channel in repair.shown_channels %}
+          <div>
+            <code>{{ channel.email }}</code>
+            {% if channel.is_primary %}<span class="blue badge">Primary</span>{% endif %}
+            {% if channel.status %}
+              <br>
+              {% if channel.last_error_message %}
+                {{ channel.last_error_message }}
+              {% elif channel.status == 'error' %}
+                Flagged as broken
+              {% else %}
+                Not flagged as broken
+              {% endif %}
+              {% if channel.last_error %}
+                &middot;
+                <time datetime="{{ channel.last_error|date:'Y-m-d H:i' }}">{{ channel.last_error|date:'m/d/Y' }}</time>
+              {% endif %}
+              {% if channel.error_count > 1 %}
+                &middot; {{ channel.error_count }} errors
+              {% endif %}
+            {% endif %}
+          </div>
+        {% empty %}
+          No specific channel
+        {% endfor %}
+        {% if repair.agency_info_updated and repair.before.primary_emails %}
+          <div>Primary: <code>{{ repair.before.primary_emails|join:", " }}</code></div>
+        {% endif %}
+      </td>
+      <td>
+        {% if repair.portal_display %}
+          Portal: {{ repair.portal_display }}
+        {% elif repair.new_email_display %}
+          <code>{{ repair.new_email_display }}</code>
+        {% elif repair.snail_mail %}
+          Snail mail
+        {% else %}
+          No contact change
+        {% endif %}
+      </td>
+      <td>
+        {% with comms=repair.communications.all %}
+          {% if comms %}
+            {# The requests touched, opened to what was sent on each #}
+            <details class="review-agency-followups">
+              <summary>
+                {{ repair.requests_updated }} request{{ repair.requests_updated|pluralize }} updated
+                {% if repair.portal_display %}
+                  &middot; resubmitted through the portal
+                {% else %}
+                  &middot; follow-up sent
+                {% endif %}
+              </summary>
+              <ul>
+                {% for comm in comms %}
+                  <li><a href="{{ comm.get_absolute_url }}">{{ comm.foia.title }}</a></li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% else %}
+            {{ repair.requests_updated }} request{{ repair.requests_updated|pluralize }} updated
+            {% if repair.portal_display %}
+              &middot; resubmitted through the portal
+            {% elif repair.followup_sent %}
+              &middot; follow-up sent
+            {% endif %}
+          {% endif %}
+        {% endwith %}
+        {% if repair.shown_skipped %}
+          {# Still blocked: this is what the task has left #}
+          <details class="review-agency-followups">
+            <summary>
+              <mark>{{ repair.shown_skipped|length }} not moved</mark>
+              &middot; nothing sent to resubmit
+            </summary>
+            <ul>
+              {% for foia in repair.shown_skipped %}
+                <li><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
+        {% if repair.agency_info_updated %}<div>Agency contact updated</div>{% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>

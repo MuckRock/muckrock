@@ -4565,22 +4565,61 @@ fieldset > fieldset + fieldset {
   gap: 0.296875rem;
 }
 
-.review-agency-channel {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.296875rem 1.1875rem;
+.review-agency-table {
+  font-size: 0.875em;
 }
 
-.review-agency-channel dt {
+.review-agency-table th {
+  text-align: left;
+  font-weight: normal;
+  color: #616c7a;
+  background: #d5dae0;
+  white-space: nowrap;
+}
+
+.review-agency-table td {
+  vertical-align: top;
+}
+
+.review-agency-table code {
+  margin-right: 0.296875rem;
+}
+
+.review-agency-repair th {
+  width: 33.33%;
+}
+
+.review-agency-repair__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 0.59375rem;
+  padding-bottom: 0.1484375rem;
+}
+
+.review-agency-repair__byline {
+  margin-left: auto;
+  font-size: 0.875em;
   color: #616c7a;
 }
 
-.review-agency-channel dd {
-  margin-left: 0;
+.review-agency-followups > summary {
+  display: list-item;
+  cursor: pointer;
 }
 
-.review-agency-channel code {
-  margin-right: 0.296875rem;
+.review-agency-followups ul {
+  max-height: 10em;
+  overflow-y: auto;
+  margin: 0.296875rem 0 0;
+  padding-left: 1.1875rem;
+}
+
+.review-agency-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.59375rem;
 }
 
 .review-agency-channel--none {
