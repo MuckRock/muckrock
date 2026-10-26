@@ -11,7 +11,11 @@
         }
     }
     .orphan {
-        @include clearfix;
+        &:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
         display: block;
         .orphan-head {
             margin-top: $vr*0.5;

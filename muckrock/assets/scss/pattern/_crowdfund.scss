@@ -12,7 +12,8 @@ $crowdfund-border: $border $crowdfund-color;
     background: #FFF;
 
     & > *:last-child {
-        @include border-bottom-radius($border-radius);
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
     }
 
     .crowdfund__widget__header, .crowdfund__widget__footer {

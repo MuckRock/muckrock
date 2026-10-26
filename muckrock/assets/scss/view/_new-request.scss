@@ -20,7 +20,8 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
         border-right: 2px solid $color-grey;
     }
     .title {
-        @include border-top-radius($border-radius);
+        border-top-left-radius: $border-radius;
+        border-top-right-radius: $border-radius;
         background-color: $color-title;
         border: 2px solid $color-red-dark;
         border-bottom: none;
@@ -230,7 +231,8 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
 
     footer.footer--submit, footer.footer--signup {
         padding: $vr;
-        @include border-bottom-radius($border-radius);
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
         border: 2px solid $color-grey-5;
         border-top: none;
     }
