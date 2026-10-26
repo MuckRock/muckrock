@@ -492,6 +492,13 @@ class FOIACommunication(models.Model):
         ordering = ["datetime"]
         verbose_name = "FOIA Communication"
         app_label = "foia"
+        indexes = [
+            models.Index(
+                fields=["id"],
+                include=["foia", "hidden"],
+                name="foiacomm_id_foia_hidden",
+            ),
+        ]
 
 
 class RawEmail(models.Model):
