@@ -140,7 +140,7 @@ http {
 			expires 1d;
 		}
 
-		location ~ ^/apple-touch-icon(-precomposed)?\.png$ {
+		location ~ ^/apple-touch-icon(-\d+x\d+)?(-precomposed)?\.png$ {
 			root /app/muckrock/assets;
 			try_files $icon_dir/$apple_touch_icon =404;
 			expires 1d;
