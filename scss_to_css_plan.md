@@ -46,7 +46,8 @@ Some steps also need a quick look at a fixed list of pages: home, request detail
 5. ✅ **Replace Bourbon's prefix mixins with plain properties, then delete Bourbon.** Expected diff: only vendor-prefixed lines removed. The `if-function`, `elseif` and `global-builtin` warnings are gone after this.
    - Also removed the non-standard 2009 flexbox properties (`box-pack`, `display: box`, …). Bourbon's `placeholder` only emitted prefixed selectors, so its 4 rules became `::placeholder`.
    - `main.css` went from 220 KB to 167 KB minified. The baseline was re-snapshotted.
-   - Follow-up, not fixed here: `transition: opacity, .5s, linear` in `pattern/_task.scss` is three transitions; the commas are a bug.
+   - Also fixed `transition: opacity, .5s, linear` in `pattern/_task.scss`, which the commas made three transitions.
+   - `sass` now requires `^1.79.0`, the first release with `color.adjust($space: …)` and `color.to-gamut`.
 
 After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.scss`, 11 in `docViewer.scss`.
 

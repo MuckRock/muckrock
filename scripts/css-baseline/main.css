@@ -4368,7 +4368,7 @@ fieldset > fieldset + fieldset {
 .task .overlay {
   z-index: -1;
   opacity: 0;
-  transition: opacity, 0.5s, linear;
+  transition: opacity 0.5s linear;
 }
 
 .task .overlay.visible {
