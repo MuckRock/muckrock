@@ -74,13 +74,22 @@ After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.s
    - ✅ `component/`, `pattern/`, `view/` and its subfolders, the doc viewer's rules and the vendored normalize and loader. Sass evaluated every variable expression and the result is inlined; BEM joins are written out; where Sass emitted declarations after a nested rule, the rule is split in two so the order holds. Every step's built CSS matched, and Playwright showed no change.
    - `style.css` declares `@charset "UTF-8"`, which Sass had added for the sortable-table arrows.
    - Only `base/_variables.scss` remains, unused; step 11 removes it with Sass.
-10. **Remove unused and dead CSS, one folder per PR.** Unlike steps 6–9, the CSS diff is expected to change: only the removed rules.
-    - A selector is dead when nothing MuckRock renders can match it. Search every place a class or ID can come from: Django templates, Python (form widget `attrs`, template tags, `mark_safe` HTML), JS/JSX/Svelte (`className`, `classList`, `addClass`, string building), third-party widgets (select2, jQuery UI, tooltipster, Fine Uploader, Tabulator) and HTML in agency and user content (communications, markdown).
-    - Classes built at runtime (`"status-" + value`) can't be found by search; review those by hand and keep them unless the full set of values is known.
-    - Also delete commented-out code blocks (for example in `view/_project.scss` and the banner's `@supports` block).
-    - Candidates found so far: `.create/.update/.activate.organization` and `.account.plans` (those pages moved to Squarelet), `.form.search`, `.crowdfund__widget … .sharing`, and the `.browse` block in `pattern/_foia-log.scss`.
-    - Check: `css:diff` shows only the removed rules, and the Playwright comparison of the page list shows no change.
-11. **Clean up:** remove the `sass` dependency and its options in `vite.config.js`, and update `AGENTS.md`.
+10. ⏸ **Remove unused and dead CSS:** moved to [Later: remove dead CSS](#later-remove-dead-css).
+11. ✅ **Clean up:** remove the `sass` dependency and its options in `vite.config.js`, and update `AGENTS.md`.
+    - Also removed `base/_variables.scss`, the `css:warnings` command and `scripts/sass-warnings/` (kept in history), and `.sass-cache` from `.gitignore`. Sass's exclusive dependencies (chokidar, immutable, @parcel/watcher and others) came out of the lockfile with it; `npm ci` accepts it.
+    - Moved `muckrock/assets/scss/` to `muckrock/assets/css/` and dropped the Sass partial underscores (including `vendor/normalize.css` and `vendor/loader.css`).
+    - The tests compare native nesting with literal flattened CSS instead of compiling Sass.
+    - Check: `css:diff` matches; Playwright comparison against a fresh reference from the previous commit is identical (only the known fading element).
+
+## Later: remove dead CSS
+
+Not started. One folder per PR, stacked on the Sass removal or after it merges. Unlike steps 6–9, the CSS diff is expected to change: only the removed rules.
+
+- A selector is dead when nothing MuckRock renders can match it. Search every place a class or ID can come from: Django templates, Python (form widget `attrs`, template tags, `mark_safe` HTML), JS/JSX/Svelte (`className`, `classList`, `addClass`, string building), third-party widgets (select2, jQuery UI, tooltipster, Fine Uploader, Tabulator) and HTML in agency and user content (communications, markdown).
+- Classes built at runtime (`"status-" + value`) can't be found by search; review those by hand and keep them unless the full set of values is known.
+- Also delete commented-out code blocks (for example in `view/project.css` and the banner's `@supports` block).
+- Candidates found so far: `.create/.update/.activate.organization` and `.account.plans` (those pages moved to Squarelet), `.form.search`, `.crowdfund__widget … .sharing`, and the `.browse` block in `pattern/foia-log.css`.
+- Check: `css:diff` shows only the removed rules, and the Playwright comparison of the page list shows no change.
 
 ## Open decisions
 
