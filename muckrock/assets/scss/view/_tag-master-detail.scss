@@ -3,17 +3,23 @@
     flex-wrap: wrap;
     .master {
         flex: 0 0 100%;
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             flex: 1;
         }
-        @include padding;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
     }
     .detail {
         flex: 0 0 100%;
         order: -1;
-        @include padding;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
         margin-bottom: $vr;
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             flex: 3;
             order: 2;
             margin-bottom: 0;
@@ -30,7 +36,7 @@
         outline: none;
     }
     .tag-table {
-        @include border;
+        border: $border $color-grey;
         border-left: none;
         border-right: none;
         max-height: 25em;

@@ -25,7 +25,9 @@
     .from, .subject {
         margin-bottom: 0;
         margin-right: calc(var(--vr) * 0.5);
-        @include overflow-ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
         font-weight: $bold;
     }
     .communication-metadata {

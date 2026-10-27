@@ -12,13 +12,13 @@
     @media(min-width: 48em) {
         min-height: 23em;
     }
-    @include media($small-bp) {
+    @media screen and (max-width: 500px) {
         padding-top: 1.5em;
     }
     h1 {
         font-size: $size-7;
         text-align: center;
-        @include media($small-bp) {
+        @media screen and (max-width: 500px) {
             font-size: $size-6;
         }
     }
@@ -33,7 +33,7 @@
     }
     .call-to-action {
         font-weight: $bold;
-        @include media($small-bp) {
+        @media screen and (max-width: 500px) {
             font-size: $size-2;
         }
         a {
@@ -78,14 +78,13 @@
         text-align: center;
         .button {
             display: block;
-            @include media($small-bp)
-            {
+            @media screen and (max-width: 500px) {
                 display: block;
                 max-width: 20em;
                 margin: 0 auto $vr;
             }
         }
-        @include media($small-bp) {
+        @media screen and (max-width: 500px) {
             margin: 1.5em auto;
         }
     }
@@ -145,7 +144,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 .homepage {
     .articles {
         padding-left: calc(var(--vr) * 0.5);
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             padding-left: $vr;
         }
     }
@@ -161,7 +160,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
     }
     .projects {
         padding: 0 calc(var(--vr) * 0.5);
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             padding: 0 $vr;
         }
     }

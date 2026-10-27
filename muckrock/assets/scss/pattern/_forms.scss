@@ -1,5 +1,8 @@
 .form {
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     .visible-fields fieldset input {
         width: 100%;
     }
@@ -122,7 +125,9 @@
         flex: 1 1 auto;
     }
     .icon {
-        @include svg-color($color-white);
+        path, polygon, rect, circle {
+            fill: $color-white;
+        }
         margin-right: calc(var(--vr) * 0.25);
         vertical-align: middle;
     }
@@ -160,7 +165,17 @@ input[type="datetime-local"],
 input[type="month"],
 input[type="time"],
 input[type="week"] {
-    @include input;
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    display: inline-block;
+    padding: calc(var(--vr) * 0.25) calc(var(--vr) / 3) calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+    &:disabled {
+        background-color: var(--color-disabled-lighten-25);
+        border: 1px solid $color-disabled;
+        color: $color-disabled;
+    }
 }
 
 textarea {
@@ -170,11 +185,8 @@ textarea {
 
 fieldset {
 
-    label, .errorlist {
-        @extend dfn;
-    }
 
-    @include media($large-bp) {
+    @media screen and (min-width: 1100px) {
         label.failure {
             float: left;
         }

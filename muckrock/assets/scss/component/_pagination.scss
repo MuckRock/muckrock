@@ -17,7 +17,7 @@
 .pagination__links {
     display: flex;
     flex-wrap: wrap;
-    @include border;
+    border: $border $color-grey;
     border-right: none;
     border-bottom: none;
     & > span {

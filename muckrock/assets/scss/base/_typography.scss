@@ -16,7 +16,11 @@ body {
 }
 
 article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
-    @include vr;
+    margin-top: 0;
+    margin-bottom: $vr;
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 
 // Headings
@@ -74,7 +78,13 @@ small, .small {
     line-height: $lh;
 }
 
-dfn, dt, .overline {
+dfn, dt, .overline,
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
+.update.organization label,
+fieldset label,
+fieldset .errorlist {
     display: block;
     font-size: $size-1;
     font-style: normal;
@@ -93,12 +103,12 @@ dd {
 
 pre {
     background-color: $color-grey-7;
-    @include border-radius;
+    border-radius: $border-radius;
 }
 
 code {
     padding: .2em .4em;
-    @include border-radius;
+    border-radius: $border-radius;
     font-family: $monospace;
     font-size: $size-2;
     background-color: $color-grey-7;

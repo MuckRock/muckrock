@@ -2,12 +2,12 @@
     width: 100%;
     // border: 1px solid $color-grey;
     background: $color-grey-7;
-    @include border-radius;
+    border-radius: $border-radius;
     overflow: hidden;
     .meter {
         display: block;
         background: $color-green;
         height: calc(var(--vr) * 0.25);
-        @include border-radius;
+        border-radius: $border-radius;
     }
 }

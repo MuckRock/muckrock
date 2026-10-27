@@ -61,13 +61,7 @@ strong {
   font-weight: bolder;
 }
 
-.account.plans .plan .superlative,
-.activate.organization label,
-.create.organization label,
-.update.organization label,
-dfn,
-fieldset .errorlist,
-fieldset label {
+dfn {
   font-style: italic;
 }
 
@@ -2812,19 +2806,7 @@ input.autocomplete.xhr-pending {
   white-space: nowrap;
 }
 
-.account.plans .plan .crowdfund__widget .overlay .dialog .sharing .superlative,
-.activate.organization .crowdfund__widget .overlay .dialog .sharing label,
-.create.organization .crowdfund__widget .overlay .dialog .sharing label,
-.crowdfund__widget .overlay .dialog .sharing .account.plans .plan .superlative,
-.crowdfund__widget .overlay .dialog .sharing .activate.organization label,
-.crowdfund__widget .overlay .dialog .sharing .create.organization label,
-.crowdfund__widget .overlay .dialog .sharing .update.organization label,
-.crowdfund__widget .overlay .dialog .sharing dfn,
-.crowdfund__widget .overlay .dialog .sharing fieldset .errorlist,
-.crowdfund__widget .overlay .dialog .sharing fieldset label,
-.update.organization .crowdfund__widget .overlay .dialog .sharing label,
-fieldset .crowdfund__widget .overlay .dialog .sharing .errorlist,
-fieldset .crowdfund__widget .overlay .dialog .sharing label {
+.crowdfund__widget .overlay .dialog .sharing dfn {
   display: none;
 }
 
@@ -3348,19 +3330,7 @@ fieldset .crowdfund__widget .overlay .dialog .sharing label {
   margin-bottom: 1.1875rem;
 }
 
-.account.plans .plan .form.search .superlative,
-.activate.organization .form.search label,
-.create.organization .form.search label,
-.form.search .account.plans .plan .superlative,
-.form.search .activate.organization label,
-.form.search .create.organization label,
-.form.search .update.organization label,
-.form.search dfn,
-.form.search fieldset .errorlist,
-.form.search fieldset label,
-.update.organization .form.search label,
-fieldset .form.search .errorlist,
-fieldset .form.search label {
+.form.search dfn {
   margin: 0.59375rem 0.296875rem;
 }
 
@@ -5094,19 +5064,7 @@ html {
   }
 }
 
-.account.plans .plan .profile .metadata .superlative,
-.activate.organization .profile .metadata label,
-.create.organization .profile .metadata label,
-.profile .metadata .account.plans .plan .superlative,
-.profile .metadata .activate.organization label,
-.profile .metadata .create.organization label,
-.profile .metadata .update.organization label,
-.profile .metadata dfn,
-.profile .metadata fieldset .errorlist,
-.profile .metadata fieldset label,
-.update.organization .profile .metadata label,
-fieldset .profile .metadata .errorlist,
-fieldset .profile .metadata label {
+.profile .metadata dfn {
   margin-bottom: 1.1875rem;
   font-weight: 500;
   font-size: 1rem;
@@ -10331,19 +10289,7 @@ footer.website-footer .global-footer .button:hover {
   color: #f7f8fa;
 }
 
-.account.plans .plan footer.website-footer .global-footer .superlative,
-.activate.organization footer.website-footer .global-footer label,
-.create.organization footer.website-footer .global-footer label,
-.update.organization footer.website-footer .global-footer label,
-fieldset footer.website-footer .global-footer .errorlist,
-fieldset footer.website-footer .global-footer label,
-footer.website-footer .global-footer .account.plans .plan .superlative,
-footer.website-footer .global-footer .activate.organization label,
-footer.website-footer .global-footer .create.organization label,
-footer.website-footer .global-footer .update.organization label,
-footer.website-footer .global-footer dfn,
-footer.website-footer .global-footer fieldset .errorlist,
-footer.website-footer .global-footer fieldset label {
+footer.website-footer .global-footer dfn {
   margin-bottom: 0.59375rem;
   color: #f7f8fa;
 }
