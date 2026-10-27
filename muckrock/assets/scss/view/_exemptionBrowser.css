@@ -1,6 +1,6 @@
 .exemption-browser {
     .exemption-search {
-        border: $border $color-grey;
+        border: var(--border-width) solid var(--color-grey);
         display: flex;
         input {
             flex: 4 1 auto;
@@ -14,13 +14,15 @@
 }
 
 .exemption__empty, .exemption__results--loading {
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
-    border: $border $color-grey;
+}
+.exemption__empty, .exemption__results--loading {
+    border: var(--border-width) solid var(--color-grey);
     border-top: none;
-    background: $color-grey-7;
+    background: var(--color-grey-7);
     text-align: center;
 }
 
@@ -29,20 +31,22 @@
 }
 
 .exemption__list__item, .exemption__detail {
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
-    border-color: $color-grey;
+}
+.exemption__list__item, .exemption__detail {
+    border-color: var(--color-grey);
 }
 
 .exemption__list__item {
     cursor: default;
     &:hover {
-        background: $color-blue;
-        color: $color-white;
+        background: var(--color-blue);
+        color: var(--color-white);
         .link {
-            color: $color-white;
+            color: var(--color-white);
         }
     }
 }
