@@ -27,14 +27,30 @@ const WORK_DIR = path.join(ROOT, "node_modules/.cache/css-check");
 const BUILD_DIR = path.join(WORK_DIR, "build");
 const CURRENT_DIR = path.join(WORK_DIR, "current");
 const WARNINGS_DIR = path.join(ROOT, "scripts/sass-warnings");
-const SASS_ENTRIES = [
-  "muckrock/assets/scss/style.scss",
-  "muckrock/assets/scss/docViewer.scss",
-];
+const SCSS_DIR = path.join(ROOT, "muckrock/assets/scss");
 
 /** Flatten nested rules into "outer inner" selectors, as Sass does. */
+/** [ids, classes, types] specificity; a function's arguments count as written. */
+export function specificity(selector) {
+  const plain = selector.replace(/::?[\w-]+\(/g, (m) => (m.startsWith("::") ? " " : " :x ")).replace(/[()]/g, " ");
+  const ids = (plain.match(/#[\w-]+/g) ?? []).length;
+  const classes = (plain.match(/\.[\w-]+|\[[^\]]*\]|(?<!:):(?!:)[\w-]+/g) ?? []).length;
+  const types = (plain.match(/(?<![\w.#:-])[a-z][\w-]*|::[\w-]+/gi) ?? []).length;
+  return [ids, classes, types];
+}
+
+const sameSpecificity = (selectors) =>
+  new Set(selectors.map((selector) => specificity(selector).join())).size <= 1;
+
 function joinSelectors(parents, children) {
   if (!parents.length) return children;
+  // Production builds write nested rules under a selector list as :is(list),
+  // which takes the list's highest specificity for every selector.
+  if (!sameSpecificity(parents)) {
+    throw new Error(
+      `rules nested in "${parents.join(", ")}" would take their highest specificity once built; write them out`,
+    );
+  }
   const joined = [];
   for (const parent of parents) {
     for (const child of children) {
@@ -217,7 +233,10 @@ function cleanValue(value, variables = new Map()) {
     .replace(/\s+/g, " ")
     .trim()
     // Sass writes 0.5 where hand-written CSS often has .5.
-    .replace(/(^|[^\w.#])\.(\d)/g, (match, before, digit) => `${before}0.${digit}`);
+    .replace(/(^|[^\w.#])\.(\d)/g, (match, before, digit) => `${before}0.${digit}`)
+    .replace(/(?<![\w#.-])(\d+)\.(\d*?)0+(?!\d)/g, (match, whole, fraction) =>
+      fraction ? `${whole}.${fraction}` : whole,
+    );
   return canonicalColors(evaluateCalc(value));
 }
 
@@ -227,6 +246,17 @@ function cleanSelector(selector) {
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\[([\w-]+)([~|^$*]?=)(["'])(-?[A-Za-z_][\w-]*)\3\]/g, "[$1$2$4]");
+}
+
+/** Expand :is(a, b) into separate selectors when that keeps every selector's specificity. */
+function expandIs(selector) {
+  const match = /:is\(([^()]*)\)/.exec(selector);
+  if (!match) return [selector];
+  const options = match[1].split(",").map((option) => option.trim());
+  if (!sameSpecificity(options)) return [selector];
+  return options.flatMap((option) =>
+    expandIs(selector.slice(0, match.index) + option + selector.slice(match.index + match[0].length)),
+  );
 }
 
 /**
@@ -272,7 +302,7 @@ export function normalize(css, { ignorePrefixes = false } = {}) {
 
     for (const node of children) {
       if (node.type === "rule") {
-        let own = node.selectors.map(cleanSelector);
+        let own = node.selectors.map(cleanSelector).flatMap(expandIs);
         if (ignorePrefixes) own = own.filter((s) => !isPrefixedSelector(s));
         if (!own.length) continue;
         walk(node, joinSelectors(selectors, own), atRules);
@@ -333,7 +363,7 @@ async function lowerForTargets(sheets) {
  * production build would treat differently, or that browsers cannot parse.
  */
 function checkSources() {
-  for (const file of fs.globSync("muckrock/**/assets/css/**/*.css", { cwd: ROOT })) {
+  for (const file of fs.globSync("muckrock/**/assets/{css,scss}/**/*.css", { cwd: ROOT })) {
     try {
       normalize(fs.readFileSync(path.join(ROOT, file), "utf8"));
     } catch (error) {
@@ -378,15 +408,22 @@ async function buildCss() {
   return result;
 }
 
-/** Compile each Sass entry and report its warnings by type and location. */
+/** Compile each remaining Sass partial, as Vite does, and report its warnings. */
 async function recordWarnings(name) {
   const sass = await import("sass");
   const byEntry = {};
   const locations = new Map();
 
-  for (const entry of SASS_ENTRIES) {
+  const partials = fs
+    .globSync("muckrock/{assets,foiamachine/assets}/**/*.scss", { cwd: ROOT })
+    .filter((file) => !file.endsWith("_variables.scss"))
+    .sort();
+  for (const entry of partials) {
     const counts = (byEntry[entry] = {});
-    sass.compile(path.join(ROOT, entry), {
+    const file = path.join(ROOT, entry);
+    sass.compileString(`@use "base/variables" as *;\n${fs.readFileSync(file, "utf8")}`, {
+      url: pathToFileURL(file),
+      loadPaths: [SCSS_DIR],
       // Without verbose, Sass stops repeating a warning after five.
       verbose: true,
       logger: {
@@ -404,7 +441,9 @@ async function recordWarnings(name) {
   }
 
   const lines = [`# Sass warnings: ${name}`, "", "## Count by entry and type", ""];
-  for (const [entry, counts] of Object.entries(byEntry)) {
+  const warned = Object.entries(byEntry).filter(([, counts]) => Object.keys(counts).length);
+  lines.push(`${Object.keys(byEntry).length} Sass files compiled, ${warned.length} with warnings`, "");
+  for (const [entry, counts] of warned) {
     const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
     lines.push(`${entry}: ${total}`);
     for (const [type, n] of Object.entries(counts).sort()) {

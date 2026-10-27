@@ -10826,7 +10826,7 @@ article.flatpage > h2 {
 
 .qq-upload-spinner {
   display: inline-block;
-  background: url(../vendor/vendor/fine-uploader/images/loading.gif);
+  background: url(../vendor/fine-uploader/images/loading.gif);
   width: 15px;
   height: 15px;
   vertical-align: text-bottom;
@@ -10838,7 +10838,7 @@ article.flatpage > h2 {
 
 .qq-drop-processing-spinner {
   display: inline-block;
-  background: url(../vendor/vendor/fine-uploader/images/processing.gif);
+  background: url(../vendor/fine-uploader/images/processing.gif);
   width: 24px;
   height: 24px;
   vertical-align: text-bottom;
@@ -10953,7 +10953,7 @@ INPUT.qq-edit-filename.qq-editing {
 
 .qq-edit-filename-icon {
   display: none;
-  background: url(../vendor/vendor/fine-uploader/images/edit.gif);
+  background: url(../vendor/fine-uploader/images/edit.gif);
   width: 15px;
   height: 15px;
   vertical-align: text-bottom;
