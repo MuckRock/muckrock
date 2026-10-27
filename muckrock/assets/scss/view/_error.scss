@@ -3,7 +3,7 @@
     width: 30em;
     margin: 0 auto;
     .error-404__page {
-        @include box-shadow;
+        box-shadow: 0px 4px 8px 0px $color-grey;
         margin: $vr;
         padding: calc(var(--vr) * 4) $vr $vr;
         background: $color-white-pure;

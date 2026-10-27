@@ -1,6 +1,6 @@
 .exemption-browser {
     .exemption-search {
-        @include border;
+        border: $border $color-grey;
         display: flex;
         input {
             flex: 4 1 auto;
@@ -14,8 +14,11 @@
 }
 
 .exemption__empty, .exemption__results--loading {
-    @include padding;
-    @include border;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
+    border: $border $color-grey;
     border-top: none;
     background: $color-grey-7;
     text-align: center;
@@ -26,7 +29,10 @@
 }
 
 .exemption__list__item, .exemption__detail {
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     border-color: $color-grey;
 }
 

@@ -1,16 +1,26 @@
-%draft-title {
+.foia-draft #id_title,
+.multirequest-draft .title input {
     width: 100%;
     background-color: $color-white;
     padding: 0;
     border: none;
     border-radius: 0;
     border-bottom: calc(2 * var(--border-width)) dotted $color-grey-4;
-    @include font-sizing(2);
-    @include media($small-bp) { @include font-sizing(1.5); }
+    font-size: 2em;
+    line-height: $lh;
+    margin: 0 0 $vr 0;
+    @media screen and (max-width: 500px) {
+        font-size: 1.5em;
+        line-height: $lh;
+        margin: 0 0 $vr 0;
+    }
 }
 
 .foia-draft {
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     .communication-body {
         padding: 0;
         height: 100%;
@@ -29,9 +39,6 @@
             font-size: $size-2;
         }
     }
-    #id_title {
-        @extend %draft-title;
-    }
     .buy-requests {
         border-color: $color-green;
     }
@@ -41,7 +48,10 @@
 }
 
 .multirequest-draft {
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     .communication-body textarea {
         border-radius: 0;
         font-family: $monospace;
@@ -49,7 +59,6 @@
     }
     .title {
         label { display: none; }
-        input { @extend %draft-title; }
     }
     .request .body textarea {
         height: 7.5em;

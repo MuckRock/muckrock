@@ -27,7 +27,13 @@ code {
     u { color: $color-green; }
 }
 
-dfn, dt {
+dfn, dt,
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
+.update.organization label,
+fieldset label,
+fieldset .errorlist {
     color: $color-grey-3;
 }
 

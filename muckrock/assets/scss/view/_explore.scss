@@ -8,7 +8,10 @@
   max-width: 50em;
   margin: 0 auto;
   align-items: flex-end;
-  @include padding;
+  padding: calc($vr * 0.5);
+  @media screen and (min-width: 500px) {
+      padding: $vr;
+  }
   & > * {
     margin-bottom: 0;
     padding: 0 $vr $vr;
@@ -17,8 +20,8 @@
   h1 {
     font-size: $size-7;
     line-height: 1em;
-    @include media($medium-bp) {
-      font-size: $size-9;
+    @media screen and (min-width: 500px) {
+        font-size: $size-9;
     }
   }
 }

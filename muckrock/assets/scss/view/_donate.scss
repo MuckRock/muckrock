@@ -2,16 +2,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     min-height: 100vh;
     background-color: $color-grey-3;
     background-size: cover;
     background-position: top center;
     .donate__form {
         max-width: 30em;
-        @include padding;
-        @include border;
-        @include border-radius;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
+        border: $border $color-grey;
+        border-radius: $border-radius;
         background: rgba(247, 248, 250, .9);
     }
     .currency {

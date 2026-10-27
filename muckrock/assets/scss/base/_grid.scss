@@ -18,7 +18,7 @@
     flex: 1 1 auto;
     min-width: 0;
     padding-right: calc(var(--vr) * 0.5);
-    @include media($medium-bp) {
+    @media screen and (min-width: 500px) {
         padding-right: $vr;
     }
     &:first-child {
