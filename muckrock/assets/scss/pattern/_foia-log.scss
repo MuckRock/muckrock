@@ -160,8 +160,8 @@
             background-color: $color-white;
             padding: $vr;
             margin: 0;
-            @include border;
-            @include border-radius;
+            border: $border $color-grey;
+            border-radius: $border-radius;
             &__jurisdiction {
                 margin: 0;
                 font-weight: 500;
@@ -188,9 +188,9 @@
                     background: $color-white;
                     width: 18em;
                     padding: $vr;
-                    @include border;
-                    @include border-radius;
-                    @include box-shadow;
+                    border: $border $color-grey;
+                    border-radius: $border-radius;
+                    box-shadow: 0px 4px 8px 0px $color-grey;
                     z-index: 1;
                     padding-left: 0;
                     & ul {

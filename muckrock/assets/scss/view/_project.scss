@@ -10,7 +10,10 @@
     .project__update__header {
         display: flex;
         justify-content: space-between;
-        @include padding;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
         margin-bottom: 0;
         p {
             margin-bottom: 0;
@@ -49,7 +52,10 @@
 }
 
 .project.detail {
-    @include padding(0);
+    padding: calc(0 * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: 0;
+    }
 
     .project__image {
         min-height: 45vh;
@@ -64,8 +70,11 @@
     }
 
     .prompt {
-        @include padding;
-        @include box-shadow;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
+        box-shadow: 0px 4px 8px 0px $color-grey;
         border: 1px solid $color-blue;
         background: $color-blue-light;
         color: $color-blue-dark;
@@ -84,7 +93,10 @@
     .overview {
         display: flex;
         flex-flow: wrap;
-        @include padding;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
         max-width: 60em;
         .overview__main {
             flex: 2 1 20em;
@@ -99,7 +111,7 @@
             }
         }
         .title {
-            @include media($medium-bp){
+            @media screen and (min-width: 500px) {
                 font-size: $size-9;
                 line-height: $lh;
             }
@@ -116,8 +128,8 @@
         }
         .contributor {
             margin-bottom: calc(var(--vr) * 0.25);
-            @include border;
-            @include border-radius;
+            border: $border $color-grey;
+            border-radius: $border-radius;
             overflow: hidden;
             a, img {
                 display: block;
@@ -127,9 +139,13 @@
                 padding: 0 calc(var(--vr) * 0.25);
             }
             a .icon {
-                @include svg-color($color-blue);
+                path, polygon, rect, circle {
+                    fill: $color-blue;
+                }
                 &:hover {
-                    @include svg-color($color-black);
+                    path, polygon, rect, circle {
+                        fill: $color-black;
+                    }
                 }
             }
         }
@@ -138,7 +154,10 @@
     .objects {
         display: flex;
         flex-flow: wrap row;
-        @include padding;
+        padding: calc($vr * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
         max-width: 60em;
         .articles, .requests {
             flex: 1 1 20em;
@@ -153,7 +172,7 @@
   width: 100%;
   background: $color-white-pure;
   border: 1px solid $color-grey;
-  @include border-radius;
+  border-radius: $border-radius;
   overflow: hidden;
 }
 .project.component .grid__column {
@@ -209,7 +228,7 @@
     justify-content: space-between;
     background: $color-white-pure;
     border: 1px solid $color-grey;
-    @include border-radius;
+    border-radius: $border-radius;
     overflow: hidden;
     .project-header {
         flex: 0 1 100%;
@@ -237,7 +256,7 @@
             max-width: 20em;
             font-size: $size-6;
             line-height: $lh;
-            @include media($medium-bp) {
+            @media screen and (min-width: 500px) {
                 font-size: $size-8;
                 line-height: $lh;
             }
@@ -248,7 +267,7 @@
     }
     .overview, .details {
         padding: $vr/2;
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             padding: $vr;
         }
     }

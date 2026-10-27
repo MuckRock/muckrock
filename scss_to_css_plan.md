@@ -25,6 +25,8 @@ The site has no visual tests, so the main check compares built CSS: build the CS
 
 Some steps also need a quick look at a fixed list of pages: home, request detail, new request, task list, doc viewer embed, FOIAMachine and the print view.
 
+From step 7, Playwright also compares the computed styles of every element (and hover states) on those pages before and after the change, and checks with `CSS.supports` that every declaration using `var()` is still valid. This catches what the CSS diff can't, such as an invalid declaration that browsers used to ignore becoming an override once it holds `var()`.
+
 ## Steps (one small PR each)
 
 **Phase 0: safety net**
@@ -62,9 +64,17 @@ After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.s
    - A declaration that was invalid, and so ignored, becomes an override once it holds `var()` (`.button`'s `text-shadow: inset …` blanked grey buttons' shadow). `css:diff` can't see this; a Playwright comparison of computed styles and a `CSS.supports` check of every `var()` declaration caught it.
    - ✅ 7b, spacing and type: fonts, weights, sizes, `--lh`, `--vr` and borders are tokens; 211 calculations are `calc(var(--vr) * N)`. Found a second ignored declaration the same way: `.foia-log__request-id { font-family: $size-1 }`, removed (probably meant `font-size`).
    - Breakpoints stay Sass strings until step 9, since `var()` can't be used in `@media`.
-8. **Remove the remaining Sass-only features:** write out the 20 mixins and 6 `@extend`s. Expected diff: none.
+8. ✅ **Remove the remaining Sass-only features:** write out the 20 mixins and 6 `@extend`s. Expected diff: none.
+   - It was 21 mixins and 5 `@extend`s (FOIAMachine's was step 6). Mixins are inlined at each `@include`; `media()` writes its query literally.
+   - Writing out `@extend dfn` puts its selectors in the `dfn` rules. Sass had also woven them into four descendant rules, as 48 selectors no template can match; those are dropped.
 9. **Convert the partials to `.css`, one folder per PR:** `base` → `component` → `pattern` → `view/*` → `docViewer`. Write out every `&__`/`&--`. Each PR's CSS diff must be empty after normalising.
-10. **Clean up:** remove the `sass` dependency and its options in `vite.config.js`, and update `AGENTS.md`.
+10. **Remove unused and dead CSS, one folder per PR.** Unlike steps 6–9, the CSS diff is expected to change: only the removed rules.
+    - A selector is dead when nothing MuckRock renders can match it. Search every place a class or ID can come from: Django templates, Python (form widget `attrs`, template tags, `mark_safe` HTML), JS/JSX/Svelte (`className`, `classList`, `addClass`, string building), third-party widgets (select2, jQuery UI, tooltipster, Fine Uploader, Tabulator) and HTML in agency and user content (communications, markdown).
+    - Classes built at runtime (`"status-" + value`) can't be found by search; review those by hand and keep them unless the full set of values is known.
+    - Also delete commented-out code blocks (for example in `view/_project.scss` and the banner's `@supports` block).
+    - Candidates found so far: `.create/.update/.activate.organization` and `.account.plans` (those pages moved to Squarelet), `.form.search`, `.crowdfund__widget … .sharing`, and the `.browse` block in `pattern/_foia-log.scss`.
+    - Check: `css:diff` shows only the removed rules, and the Playwright comparison of the page list shows no change.
+11. **Clean up:** remove the `sass` dependency and its options in `vite.config.js`, and update `AGENTS.md`.
 
 ## Open decisions
 

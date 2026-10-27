@@ -1,26 +1,113 @@
 /* Panels */
 
-.panel { @include panel; }
+.panel {
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
+}
 
-@mixin colored-panel($color, $border-color, $disabled: false) {
-    @include panel;
-    @if $disabled {
-        color: $color-white;
-    } @else {
-        color: $color;
-        background: none;
-    }
+.panel.default {
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
+    color: $color-grey;
+    background: none;
     padding: $vr;
-    border-color: $border-color;
+    border-color: var(--color-grey-darken-10);
     a {
         text-decoration: underline;
         color: $color-white;
         background-color: none;
     }
 }
-
-.panel.default  { @include colored-panel($color-grey, var(--color-grey-darken-10));           }
-.panel.primary  { @include colored-panel($color-blue, var(--color-blue-darken-10));           }
-.panel.success  { @include colored-panel($color-green, var(--color-green-darken-10));          }
-.panel.failure  { @include colored-panel($color-red, var(--color-red-darken-10));            }
-.panel.disabled { @include colored-panel($color-disabled, var(--color-disabled-darken-10), true); }
+.panel.primary {
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
+    color: $color-blue;
+    background: none;
+    padding: $vr;
+    border-color: var(--color-blue-darken-10);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+.panel.success {
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
+    color: $color-green;
+    background: none;
+    padding: $vr;
+    border-color: var(--color-green-darken-10);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+.panel.failure {
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
+    color: $color-red;
+    background: none;
+    padding: $vr;
+    border-color: var(--color-red-darken-10);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+.panel.disabled {
+    box-sizing: border-box;
+    border: $border $color-grey;
+    border-radius: $border-radius;
+    border-color: $color-grey;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
+    color: $color-white;
+    padding: $vr;
+    border-color: var(--color-disabled-darken-10);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}

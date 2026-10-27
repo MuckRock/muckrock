@@ -24,7 +24,7 @@
                 padding-right: 0;
             }
         }
-        @include media($large-bp) {
+        @media screen and (min-width: 1100px) {
             li {
                 display: block;
                 padding-right: 0;

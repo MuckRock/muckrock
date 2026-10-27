@@ -1,5 +1,5 @@
 .notifications__list {
-    @include border;
+    border: $border $color-grey;
 }
 
 .notifications__header {
@@ -28,6 +28,8 @@
     .icon {
         height: 4em;
         width: 4em;
-        @include svg-color($color-grey);
+        path, polygon, rect, circle {
+            fill: $color-grey;
+        }
     }
 }

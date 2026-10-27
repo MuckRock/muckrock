@@ -2,10 +2,6 @@ $nav-border: 1px solid $color-grey;
 $nav-background: #FFFFFF;
 $nav-background-darken-10: #e6e6e6;
 
-@mixin drop-shadow() {
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, .25);
-}
-
 /*
 We establish some basic rules for the global navigation, as well as rules for things it effects.
 The header is fixed, so we add a margin to whatever comes after it. Since this rule uses a *
@@ -26,7 +22,7 @@ since we break it into two pieces.
     left: 0;
     right: 0;
     border-bottom: $nav-border;
-    @include drop-shadow;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, .25);
   }
 }
 .global-header.global-header-hijacked {
@@ -99,7 +95,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   }
   .icon {
     vertical-align: middle;
-    @include svg-color($color-black);
+    path, polygon, rect, circle {
+        fill: $color-black;
+    }
   }
   .label {
     display: none;
@@ -111,7 +109,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
     background: $color-blue;
     color: $color-white;
     .icon {
-      @include svg-color($color-white);
+      path, polygon, rect, circle {
+          fill: $color-white;
+      }
     }
     &:hover {
       background: var(--color-blue-darken-10);
@@ -131,7 +131,9 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
     background: $color-black;
     color: $color-white;
     .icon {
-      @include svg-color($color-white);
+      path, polygon, rect, circle {
+          fill: $color-white;
+      }
     }
     &:hover {
       background: var(--color-black-darken-10)
@@ -195,7 +197,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   padding:6px;
   white-space: nowrap;
   .avatar {
-    @include border-radius;
+    border-radius: $border-radius;
     margin-bottom: 0;
     opacity: .9;
     vertical-align: middle;
@@ -299,8 +301,8 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       min-width: 5em;
       position: absolute;
       top: 100%;
-      @include border;
-      @include drop-shadow;
+      border: $border $color-grey;
+      box-shadow: 0px 2px 8px rgba(0, 0, 0, .25);
       background: $color-white-pure;
       z-index: 200;
       -webkit-overflow-scrolling: touch;
@@ -485,7 +487,7 @@ We use rich nav items to display images behind nav items, like for news articles
     left: 0;
     right: 0;
     border-bottom: $nav-border;
-    @include drop-shadow;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, .25);
   }
   .global-search {
     position: absolute;
@@ -515,7 +517,7 @@ We use rich nav items to display images behind nav items, like for news articles
       right: 0;
       left: 0;
       background: $color-white-pure;
-      @include drop-shadow;
+      box-shadow: 0px 2px 8px rgba(0, 0, 0, .25);
       &.visible {
         display: block;
       }

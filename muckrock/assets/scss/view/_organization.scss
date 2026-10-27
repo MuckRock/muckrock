@@ -13,13 +13,10 @@
         flex: 1;
     }
     aside {
-        @include border;
-        @include border-radius;
+        border: $border $color-grey;
+        border-radius: $border-radius;
         margin-right: $vr;
         padding: $vr;
-    }
-    label {
-        @extend dfn;
     }
     form input {
         display: block;
@@ -122,7 +119,7 @@ $request-breakpoint: 768px;
         margin-left: $vr;
     }
 
-    @include media($medium-bp) {
+    @media screen and (min-width: 500px) {
         .user.search.input {
             flex: 0 1 70%;
         }

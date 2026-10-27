@@ -1,5 +1,8 @@
 .profile {
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     .metadata {
         dfn {
             margin-bottom: $vr;
@@ -29,7 +32,7 @@
         &.visible {
             display: block;
         }
-        @include border;
+        border: $border $color-grey;
         header, footer, textarea {
             margin: 0;
             padding: calc(var(--vr) * 0.5);
@@ -55,7 +58,7 @@
         color: $color-grey;
     }
     .avatar {
-        @include border-radius;
+        border-radius: $border-radius;
         width: 100%;
         max-width: 300px;
     }

@@ -9,7 +9,7 @@
         font-weight: $bold;
         font-style: normal;
         line-height: $lh;
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             font-size: $size-6;
         }
     }

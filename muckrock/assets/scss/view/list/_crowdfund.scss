@@ -6,8 +6,8 @@
         flex-direction: column;
         justify-content: space-between;
         margin-bottom: $vr;
-        @include border;
-        @include border-radius;
+        border: $border $color-grey;
+        border-radius: $border-radius;
         .left, .right {
             margin-bottom: 0;
             padding: $vr;
@@ -24,7 +24,7 @@
                 margin-bottom: 0;
             }
         }
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             flex-direction: row;
             .right {
                 border-top: none;

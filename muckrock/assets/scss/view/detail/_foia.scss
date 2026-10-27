@@ -28,7 +28,9 @@ $request-breakpoint: 768px;
         }
         .label {
             max-width: 0;
-            @include overflow-ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
         .action {
             margin-left: calc(var(--vr) * 0.5);
@@ -37,7 +39,7 @@ $request-breakpoint: 768px;
     }
     .hidden-form {
         display: none;
-        @include border;
+        border: $border $color-grey;
         padding: calc(var(--vr) * 0.5);
         //align-items: flex-start;
         //flex-wrap: wrap;
@@ -80,7 +82,7 @@ $request-breakpoint: 768px;
         justify-content: space-between;
         flex-wrap: wrap;
         align-items: center;
-        @include border;
+        border: $border $color-grey;
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
         font-weight: $bold;
         p, footer {
@@ -147,7 +149,7 @@ $request-breakpoint: 768px;
 
     .communications-actions {
         margin-bottom: 0;
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             text-align: right;
         }
     }
@@ -194,8 +196,8 @@ $request-breakpoint: 768px;
     }
 
     .composer-input {
-        @include border;
-        @include box-shadow;
+        border: $border $color-grey;
+        box-shadow: 0px 4px 8px 0px $color-grey;
         header {
             display: block;
             margin-bottom: 0;
@@ -283,7 +285,7 @@ $request-breakpoint: 768px;
 .request .files {
     .active-document {
         display: none;
-        @include border-radius;
+        border-radius: $border-radius;
         border: 1px solid $color-black;
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5) calc(var(--vr) * 0.5) calc(var(--vr) * 0.5);
         background: $color-grey-2;
@@ -335,8 +337,8 @@ $request-breakpoint: 768px;
     }
 
     .add-note {
-        @include border;
-        @include box-shadow;
+        border: $border $color-grey;
+        box-shadow: 0px 4px 8px 0px $color-grey;
         .ProseMirror, textarea {
             display: block;
             overflow: hidden;
@@ -379,7 +381,7 @@ $request-breakpoint: 768px;
     }
 
     .note {
-        @include border;
+        border: $border $color-grey;
         border-color: $color-grey;
         background: $color-white-pure;
         .note-header {
@@ -510,7 +512,7 @@ $request-breakpoint: 768px;
 .request .access {
     .generate-private-link, .grant-access, .change-owner {
         padding: $vr;
-        @include border;
+        border: $border $color-grey;
         h3 {
             flex: 0 1 100%;
         }
@@ -566,7 +568,7 @@ $request-breakpoint: 768px;
             width: 100%;
         }
 
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             .user.search.input {
                 flex: 0 1 70%;
             }
@@ -596,7 +598,7 @@ $request-breakpoint: 768px;
             &.modify {
                 width: 5em;
             }
-            @include media($medium-bp) {
+            @media screen and (min-width: 500px) {
                 &.nostretch {
                     width:1%;
                     white-space:nowrap;
@@ -616,14 +618,14 @@ $request-breakpoint: 768px;
             &.reader {
                 background: $color-blue;
             }
-            @include media($medium-bp) {
+            @media screen and (min-width: 500px) {
                 font-size: $size-3;
             }
         }
         button {
             padding: calc(var(--vr) / 6) calc(var(--vr) * 0.5);
             width: 5em;
-            @include media($medium-bp) {
+            @media screen and (min-width: 500px) {
                 margin: 0 0 4px;
             }
         }

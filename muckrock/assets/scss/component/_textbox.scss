@@ -7,32 +7,8 @@
 ** Some implementations of this component are communications, questions, and task patterns.
 */
 
-@mixin color-textbox($color) {
-    border-color: $color;
-    .textbox__header {
-        background: $color;
-    }
-}
-
-@mixin hidden-color-textbox($color1, $color2) {
-    border-color: $color1;
-    .textbox__header::before {
-        content: "HIDDEN - ";
-        font-weight: bold;
-    }
-    .textbox__header {
-        background: repeating-linear-gradient(
-        45deg,
-        $color1,
-        $color1 10px,
-        $color2 10px,
-        $color2 20px
-        );
-    }
-}
-
 .textbox {
-    @include border;
+    border: $border $color-grey;
     position: relative;
     word-wrap: break-word;
     background: $color-white-pure;
@@ -58,19 +34,79 @@
     }
 }
 
-.textbox { @include color-textbox($color-black); }
-.blue.textbox { @include color-textbox($color-blue); }
-.green.textbox { @include color-textbox($color-green); }
-.red.textbox { @include color-textbox($color-red); }
-.yellow.textbox { @include color-textbox($color-yellow); }
-.grey.textbox { @include color-textbox($color-grey); }
+.textbox {
+    border-color: $color-black;
+    .textbox__header {
+        background: $color-black;
+    }
+}
+.blue.textbox {
+    border-color: $color-blue;
+    .textbox__header {
+        background: $color-blue;
+    }
+}
+.green.textbox {
+    border-color: $color-green;
+    .textbox__header {
+        background: $color-green;
+    }
+}
+.red.textbox {
+    border-color: $color-red;
+    .textbox__header {
+        background: $color-red;
+    }
+}
+.yellow.textbox {
+    border-color: $color-yellow;
+    .textbox__header {
+        background: $color-yellow;
+    }
+}
+.grey.textbox {
+    border-color: $color-grey;
+    .textbox__header {
+        background: $color-grey;
+    }
+}
 .yellow.textbox {
     .textbox__header {
         color: $color-black;
     }
 }
-.hidden.textbox { @include hidden-color_textbox($color-black, $color-grey-3); }
-.hidden.blue.textbox { @include hidden-color_textbox($color-blue, $color-blue-dark); }
+.hidden.textbox {
+    border-color: $color-black;
+    .textbox__header::before {
+        content: "HIDDEN - ";
+        font-weight: bold;
+    }
+    .textbox__header {
+        background: repeating-linear-gradient(
+        45deg,
+        $color-black,
+        $color-black 10px,
+        $color-grey-3 10px,
+        $color-grey-3 20px
+        );
+    }
+}
+.hidden.blue.textbox {
+    border-color: $color-blue;
+    .textbox__header::before {
+        content: "HIDDEN - ";
+        font-weight: bold;
+    }
+    .textbox__header {
+        background: repeating-linear-gradient(
+        45deg,
+        $color-blue,
+        $color-blue 10px,
+        $color-blue-dark 10px,
+        $color-blue-dark 20px
+        );
+    }
+}
 
 .collapsable > header {
     cursor: pointer;

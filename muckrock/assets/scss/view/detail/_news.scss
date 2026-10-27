@@ -2,7 +2,10 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    @include padding(0);
+    padding: calc(0 * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: 0;
+    }
 }
 
 .news__image {
@@ -19,8 +22,11 @@
     max-width: 42em;
     min-width: 0;
     flex: 3 1 24em;
-    @include padding;
-    @include media($medium-bp) {
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
+    @media screen and (min-width: 500px) {
         font-size: $size-4;
         line-height: $lh;
     }
@@ -46,7 +52,7 @@
     // Fixes for embedded content
     div[id^='viewer'] {
         margin: $vr auto;
-        @include media($large-bp) {
+        @media screen and (min-width: 1100px) {
             margin: $vr auto $vr 0;
         }
     }
@@ -92,7 +98,10 @@
 
 .news__aside {
     flex: 1 1 16em;
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     max-width: 24em;
     min-width: 0;
 }
@@ -104,7 +113,10 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 auto;
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     .articles__recent__header, .articles__related__header {
         flex: 0 1 100%;
     }

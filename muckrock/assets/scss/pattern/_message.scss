@@ -1,14 +1,3 @@
-@mixin message-color($light, $normal, $dark) {
-    background: $light;
-    color: $dark;
-    .symbol {
-        background: $normal;
-        path, rect, circle {
-            fill: $dark;
-        }
-    }
-}
-
 .messages {
     margin-bottom: 0;
     position: fixed;
@@ -20,7 +9,14 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    @include message-color($color-grey-7, $color-black, $color-black);
+    background: $color-grey-7;
+    color: $color-black;
+    .symbol {
+        background: $color-black;
+        path, rect, circle {
+            fill: $color-black;
+        }
+    }
     .symbol {
         $svg-size: 2.75em;
         flex: 0 0 $svg-size;
@@ -54,7 +50,7 @@
             fill: currentColor;
         }
     }
-    @include media($medium-bp) {
+    @media screen and (min-width: 500px) {
         flex-direction: row;
         .symbol {
             text-align: center;
@@ -69,19 +65,47 @@
 }
 
 .message.info {
-    @include message-color($color-blue-light, $color-blue, $color-blue-dark);
+    background: $color-blue-light;
+    color: $color-blue-dark;
+    .symbol {
+        background: $color-blue;
+        path, rect, circle {
+            fill: $color-blue-dark;
+        }
+    }
 }
 
 .message.success {
-    @include message-color($color-green-light, $color-green, $color-green-dark);
+    background: $color-green-light;
+    color: $color-green-dark;
+    .symbol {
+        background: $color-green;
+        path, rect, circle {
+            fill: $color-green-dark;
+        }
+    }
 }
 
 .message.warning {
-    @include message-color($color-yellow-light, $color-yellow, $color-yellow-dark);
+    background: $color-yellow-light;
+    color: $color-yellow-dark;
+    .symbol {
+        background: $color-yellow;
+        path, rect, circle {
+            fill: $color-yellow-dark;
+        }
+    }
 }
 
 .message.error {
-    @include message-color($color-red-light, $color-red, $color-red-dark);
+    background: $color-red-light;
+    color: $color-red-dark;
+    .symbol {
+        background: $color-red;
+        path, rect, circle {
+            fill: $color-red-dark;
+        }
+    }
 }
 
 @keyframes message-fade-in {

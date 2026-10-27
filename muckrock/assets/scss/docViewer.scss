@@ -33,7 +33,9 @@ header {
 svg {
     vertical-align: middle;
     fill-rule: evenodd;
-    @include svg-color($color-white);
+    path, polygon, rect, circle {
+        fill: $color-white;
+    }
 }
 
 .info {
@@ -55,7 +57,9 @@ svg {
         width: 2em;
     }
     &:hover svg {
-        @include svg-color($color-blue);
+        path, polygon, rect, circle {
+            fill: $color-blue;
+        }
     }
 }
 

@@ -58,7 +58,7 @@ $crowdfund-border: $border $crowdfund-color;
                 margin-bottom: 0;
                 text-align: left;
                 padding: calc(var(--vr) * 0.5);
-                @include media($medium-bp) {
+                @media screen and (min-width: 500px) {
                     margin-bottom: 0;
                 }
             }
@@ -186,7 +186,9 @@ $crowdfund-border: $border $crowdfund-color;
         color: $color-white;
         font-weight: $bold;
         .icon {
-            @include svg-color($color-white);
+            path, polygon, rect, circle {
+                fill: $color-white;
+            }
         }
         a, .action
         {

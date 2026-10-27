@@ -20,7 +20,9 @@ $overlay-opacity: 0.9;
         height: 1.5rem;
         width: 1.5rem;
         vertical-align: middle;
-        @include svg-color($color-white);
+        path, polygon, rect, circle {
+            fill: $color-white;
+        }
     }
 }
 

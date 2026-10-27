@@ -10,7 +10,7 @@
         z-index: 200;
         right: 0;
         background-color: $color-white;
-        @include border;
+        border: $border $color-grey;
         color: $color-black;
         list-style-type: none;
         padding-left: 0;

@@ -1,7 +1,10 @@
 /* Lists */
 
 .list {
-  @include padding;
+  padding: calc($vr * 0.5);
+  @media screen and (min-width: 500px) {
+      padding: $vr;
+  }
   .empty {
     display: flex;
     justify-content: center;
@@ -12,7 +15,7 @@
     text-align: center;
   }
   .filter.form {
-    @include border;
+    border: $border $color-grey;
     background-color: $color-grey-7;
     .button-group {
       width: 100%;
@@ -32,16 +35,20 @@
     width: 100%;
     text-align: center;
     padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-    @include border;
+    border: $border $color-grey;
     .icon {
         vertical-align: middle;
-        @include svg-color($color-blue);
+        path, polygon, rect, circle {
+            fill: $color-blue;
+        }
     }
     &:hover {
         color: $color-white;
         background: $color-blue;
         .icon {
-            @include svg-color($color-white);
+            path, polygon, rect, circle {
+                fill: $color-white;
+            }
         }
     }
   }
@@ -75,7 +82,7 @@
 }
 
 .list__sections li {
-  @include border;
+  border: $border $color-grey;
   border-bottom: 0;
   &:last-child {
     border-bottom: 1px solid $color-grey;

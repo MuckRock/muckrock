@@ -9,9 +9,21 @@
     }
     .icon {
         vertical-align: middle;
-        &.success { @include svg-color($color-green); }
-        &.error { @include svg-color($color-red); }
-        &.info { @include svg-color($color-blue); }
+        &.success {
+            path, polygon, rect, circle {
+                fill: $color-green;
+            }
+        }
+        &.error {
+            path, polygon, rect, circle {
+                fill: $color-red;
+            }
+        }
+        &.info {
+            path, polygon, rect, circle {
+                fill: $color-blue;
+            }
+        }
     }
     .notification__action, .notification__action--passive {
         display: inline-block;

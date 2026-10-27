@@ -1,8 +1,8 @@
 .foia__single {
     width: 100%;
     overflow: hidden;
-    @include border;
-    @include border-radius;
+    border: $border $color-grey;
+    border-radius: $border-radius;
     background-color: $color-white-pure;
     text-align: left;
     .title {

@@ -1,13 +1,16 @@
 /* Details */
 
 .detail {
-    @include padding;
+    padding: calc($vr * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: $vr;
+    }
     .header-container {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-end;
         justify-content: space-between;
-        @include media($medium-bp) {
+        @media screen and (min-width: 500px) {
             .aside .button {
                 float: right;
                 clear: right;

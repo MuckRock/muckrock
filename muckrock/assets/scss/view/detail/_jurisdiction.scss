@@ -120,7 +120,7 @@ $right-column: 4 1 32em;
     width: 12em;
     float: left;
     margin-right: calc(2 * var(--vr));
-    @include border;
+    border: $border $color-grey;
     padding: calc(var(--vr) * 0.5);
     background: $color-white-pure;
     p {

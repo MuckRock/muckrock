@@ -10,7 +10,7 @@ $color-agency-lighten-20: #5a90f2;
 
 .new-request {
     .create-request {
-        @include border-radius;
+        border-radius: $border-radius;
         background-color: $color-grey-7;
     }
     fieldset {
@@ -107,7 +107,9 @@ $color-agency-lighten-20: #5a90f2;
             border-bottom: calc(2 * var(--border-width)) dotted $color-agency-lighten-20;
             padding-left: 0;
             border-radius: 0;
-            @include font-sizing(1.25, 3);
+            font-size: 1.25em;
+            line-height: $lh;
+            margin: 0 0 $vr 0;
             color: $color-white;
             display: block;
             width: 100%;
@@ -309,7 +311,7 @@ $color-agency-lighten-20: #5a90f2;
 
 // Shown in place of the request form when a user is blocked from filing
 .filing-blocked {
-    @include border;
+    border: $border $color-grey;
     max-width: 32rem;
     margin: calc(2 * var(--vr)) auto;
     padding: calc(2 * var(--vr));
@@ -323,14 +325,20 @@ $color-agency-lighten-20: #5a90f2;
             $svg-size: 3.5rem;
             width: $svg-size;
             height: $svg-size;
-            @include svg-color($color-red);
+            path, polygon, rect, circle {
+                fill: $color-red;
+            }
         }
     }
     h2 {
         margin-top: calc(var(--vr) * 0.5);
     }
     p {
-        @include vr;
+        margin-top: 0;
+        margin-bottom: $vr;
+        &:last-child {
+            margin-bottom: 0;
+        }
         color: $color-grey-2;
     }
     .button {

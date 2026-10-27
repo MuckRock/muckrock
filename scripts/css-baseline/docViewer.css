@@ -252,8 +252,14 @@ code u {
   color: #52cc66;
 }
 
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
+.update.organization label,
 dfn,
-dt {
+dt,
+fieldset .errorlist,
+fieldset label {
   color: #616c7a;
 }
 
@@ -619,9 +625,15 @@ small {
   line-height: 1.4375em;
 }
 
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
 .overline,
+.update.organization label,
 dfn,
-dt {
+dt,
+fieldset .errorlist,
+fieldset label {
   display: block;
   font-size: 0.6875rem;
   font-style: normal;

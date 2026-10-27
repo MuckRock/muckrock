@@ -1,8 +1,8 @@
 .activity-container {
     display: flex;
     justify-content: space-between;
-    @include border;
-    @include border-radius;
+    border: $border $color-grey;
+    border-radius: $border-radius;
     padding: calc(var(--vr) * 0.5);
 }
 
