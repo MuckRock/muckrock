@@ -21,7 +21,7 @@ header {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
 }
 
 .viewer {
@@ -49,7 +49,7 @@ svg {
 }
 
 .logo {
-    margin-right: $vr*0.5;
+    margin-right: calc(var(--vr) * 0.5);
     svg {
         height: 2em;
         width: 2em;

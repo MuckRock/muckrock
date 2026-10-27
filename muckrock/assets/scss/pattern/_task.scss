@@ -1,11 +1,11 @@
-$task-padding: $vr*0.25 $vr*0.5;
+$task-padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
 
 .textbox__section.task__main {
     padding: 0;
 }
 
 .task__data {
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
     li {
         margin-left: $vr;
     }
@@ -39,7 +39,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 }
 
 .task__zendesk {
-  margin: $vr*0.5;
+  margin: calc(var(--vr) * 0.5);
   float: right;
 
 }
@@ -60,7 +60,7 @@ $task-padding: $vr*0.25 $vr*0.5;
         border-bottom: 1px solid $color-grey;
         max-width: 100%;
         height: 20em;
-        padding: $vr*0.5;
+        padding: calc(var(--vr) * 0.5);
         font-family: $monospace;
         font-size: $size-2;
     }
@@ -78,7 +78,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     }
     main {
         border-bottom: 1px solid $color-grey;
-        padding: $vr*0.5;
+        padding: calc(var(--vr) * 0.5);
     }
 }
 
@@ -241,7 +241,7 @@ $task-padding: $vr*0.25 $vr*0.5;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-        gap: $vr*0.25 $vr*0.5;
+        gap: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
         margin-bottom: 0;
         border-bottom: 1px solid $color-grey-7;
         font-size: 0.875em;
@@ -250,14 +250,14 @@ $task-padding: $vr*0.25 $vr*0.5;
             margin-bottom: 0;
         }
         .assigned-chooser {
-            margin-right: $vr*0.5;
+            margin-right: calc(var(--vr) * 0.5);
         }
         .tags-form {
             display: flex;
             flex: 0 1 auto;
             align-items: center;
-            gap: $vr*0.25;
-            padding: $vr*0.5;
+            gap: calc(var(--vr) * 0.25);
+            padding: calc(var(--vr) * 0.5);
             & .button {
                 margin-top: 0;
             }
@@ -269,7 +269,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 // reference material, so it spaces itself with gaps instead.
 .review-agency-summary,
 .review-agency-outcome {
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
     * {
         margin-bottom: 0;
     }
@@ -278,7 +278,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 .review-agency-summary {
     display: flex;
     flex-direction: column;
-    gap: $vr*0.5;
+    gap: calc(var(--vr) * 0.5);
     margin-bottom: 0;
 }
 
@@ -295,7 +295,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 .review-agency-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: $vr*0.25;
+    gap: calc(var(--vr) * 0.25);
 }
 
 // Channel facts and repair history: one compact row each, headings small
@@ -313,7 +313,7 @@ $task-padding: $vr*0.25 $vr*0.5;
         vertical-align: top;
     }
     code {
-        margin-right: $vr*0.25;
+        margin-right: calc(var(--vr) * 0.25);
     }
 }
 
@@ -326,8 +326,8 @@ $task-padding: $vr*0.25 $vr*0.5;
     flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
-    gap: 0 $vr*0.5;
-    padding-bottom: $vr*0.125;
+    gap: 0 calc(var(--vr) * 0.5);
+    padding-bottom: calc(var(--vr) * 0.125);
 }
 
 // Pinned right even on later repairs, which have no heading beside them
@@ -346,7 +346,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     ul {
         max-height: 10em;
         overflow-y: auto;
-        margin: $vr*0.25 0 0;
+        margin: calc(var(--vr) * 0.25) 0 0;
         padding-left: $vr;
     }
 }
@@ -354,7 +354,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 .review-agency-history {
     display: flex;
     flex-direction: column;
-    gap: $vr*0.5;
+    gap: calc(var(--vr) * 0.5);
 }
 
 .review-agency-channel--none {
@@ -364,7 +364,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 .review-agency-outcome {
     border-bottom: 1px solid $color-grey-7;
     h4 {
-        margin-top: $vr*0.5;
+        margin-top: calc(var(--vr) * 0.5);
         &:first-child {
             margin-top: 0;
         }
@@ -376,7 +376,7 @@ $task-padding: $vr*0.25 $vr*0.5;
     border-bottom: 1px solid $color-grey;
     header {
         margin-bottom: 0;
-        padding: $vr*0.5;
+        padding: calc(var(--vr) * 0.5);
         background: $color-grey-7;
     }
     header.error {
@@ -418,7 +418,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 // had while it lived in the footer.  It can't share those classes: task.js
 // collects form.task-post-actions for batch actions.
 .review-agency-repair-form {
-    padding: $vr*0.25 $vr*0.5;
+    padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
     input, select, label {
         display: block;
         width: 100%;
@@ -433,14 +433,14 @@ $task-padding: $vr*0.25 $vr*0.5;
     input[type="checkbox"] {
         display: inline-block;
         width: auto;
-        margin: 0 $vr*0.5;
+        margin: 0 calc(var(--vr) * 0.5);
     }
 }
 
 /* New Agency Task */
 
 .new-agency-forms {
-    padding: 0 $vr*0.5;
+    padding: 0 calc(var(--vr) * 0.5);
     .spam.button {
         float: left;
     }
@@ -452,7 +452,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 
 .new-agency.form {
     margin-top: 0;
-    margin-bottom: $vr*0.5;
+    margin-bottom: calc(var(--vr) * 0.5);
     padding: 0;
     border-radius: 0;
     background: $color-white;
@@ -497,8 +497,8 @@ $task-padding: $vr*0.25 $vr*0.5;
     }
     fieldset {
         flex: 1 0 50%;
-        margin-bottom: $vr*0.5;
-        padding: 0 $vr*0.5;
+        margin-bottom: calc(var(--vr) * 0.5);
+        padding: 0 calc(var(--vr) * 0.5);
     }
     .help-text {
         color: $color-grey-3;
@@ -575,7 +575,7 @@ $task-padding: $vr*0.25 $vr*0.5;
 .task .task-post-actions input[type="checkbox"] {
     float: none;
     display: inline-block;
-    margin: 0 $vr*0.5;
+    margin: 0 calc(var(--vr) * 0.5);
 }
 
 .snail-mail.task .task-post-actions {
