@@ -1,12 +1,12 @@
-@use "sass:color";
-
 $color-title: #F26C5A;
 $color-jurisdiction: #5A90F2;
-$color-jurisdiction-picker: color.adjust($color-jurisdiction, $lightness: -10%, $space: hsl);
-$color-agency: color.adjust($color-jurisdiction-picker, $lightness: -10%, $space: hsl);
+$color-jurisdiction-picker: #2b70ee; // $color-jurisdiction darkened 10%
+$color-agency: #1157d5; // $color-jurisdiction-picker darkened 10%
 $color-attachment: #F2B85A;
 $color-advanced: $color-agency;
-$color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: hsl);
+$color-advanced-container: #b9d0f9; // $color-agency lightened 40%
+$color-title-lighten-20: #f9c0b9;
+$color-agency-lighten-20: #5a90f2;
 
 .new-request {
     .create-request {
@@ -33,11 +33,11 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
             padding: 0;
             border: none;
             border-radius: 0;
-            border-bottom: $border-width dotted color.adjust($color-title, $lightness: 20%, $space: hsl);
+            border-bottom: $border-width dotted $color-title-lighten-20;
             color: $color-white;
             font-size: $size-6;
             &::placeholder {
-                color: color.adjust($color-title, $lightness: 20%, $space: hsl);
+                color: $color-title-lighten-20;
                 opacity: 1;
             }
         }
@@ -104,7 +104,7 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
             width: 100%;
             background-color: $color-agency;
             border: none;
-            border-bottom: 2*$border-width dotted color.adjust($color-agency, $lightness: 20%, $space: hsl);
+            border-bottom: 2*$border-width dotted $color-agency-lighten-20;
             padding-left: 0;
             border-radius: 0;
             @include font-sizing(1.25, 3);
@@ -112,9 +112,9 @@ $color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: 
             display: block;
             width: 100%;
             margin: 0;
-            &::placeholder { color: color.adjust($color-agency, $lightness: 20%, $space: hsl); opacity: 1; }
+            &::placeholder { color: $color-agency-lighten-20; opacity: 1; }
             &:disabled {
-                &::placeholder { color: color.adjust($color-white, $lightness: -2%, $space: hsl); opacity: 1; }
+                &::placeholder { color: var(--color-white-darken-2); opacity: 1; }
                 background: $color-disabled;
                 border-bottom: none;
                 text-align: left;

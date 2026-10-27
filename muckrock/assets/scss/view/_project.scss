@@ -181,7 +181,7 @@
   padding: $vr;
   color: $color-white;
   background: $color-black;
-  background: rgba($color-black, .75);
+  background: rgba(51, 60, 71, .75); // $color-black at 75%
   transition: background .25s linear;
   &:hover {
     color: $color-white;

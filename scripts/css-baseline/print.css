@@ -10,8 +10,8 @@ body,
 html {
   margin: 0;
   padding: 0;
-  background: #fff;
-  color: #111;
+  background: #ffffff;
+  color: #111111;
   font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
   font-size: 11pt;
   line-height: 1.5;
@@ -48,7 +48,7 @@ time {
 }
 
 .request-print__header {
-  border-bottom: 2pt solid #111;
+  border-bottom: 2pt solid #111111;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -57,7 +57,7 @@ time {
   font-size: 9pt;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #555;
+  color: #555555;
   margin: 0 0 0.5rem;
 }
 
@@ -68,7 +68,7 @@ time {
 
 .request-print__subtitle {
   font-size: 12pt;
-  color: #333;
+  color: #333333;
   margin: 0 0 1rem;
 }
 
@@ -82,18 +82,18 @@ time {
 
 .request-print__meta dt {
   font-weight: 600;
-  color: #555;
+  color: #555555;
 }
 
 .request-print__meta dd {
   margin: 0;
-  color: #111;
+  color: #111111;
 }
 
 .request-print__communication {
   break-inside: avoid;
   page-break-inside: avoid;
-  border: 1pt solid #ccc;
+  border: 1pt solid #cccccc;
   border-radius: 2pt;
   padding: 0.75rem 1rem;
   margin: 0 0 1rem;
@@ -104,11 +104,11 @@ time {
 }
 
 .request-print__communication.is-response {
-  border-left: 4pt solid #555;
+  border-left: 4pt solid #555555;
 }
 
 .request-print__communication-header {
-  border-bottom: 1pt dotted #ccc;
+  border-bottom: 1pt dotted #cccccc;
   padding-bottom: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 10pt;
@@ -120,7 +120,7 @@ time {
 
 .request-print__label {
   font-weight: 600;
-  color: #555;
+  color: #555555;
   display: inline-block;
   min-width: 3.5rem;
 }
@@ -136,18 +136,18 @@ time {
 }
 
 .request-print__communication-body blockquote {
-  border-left: 2pt solid #ccc;
+  border-left: 2pt solid #cccccc;
   margin: 0.5rem 0;
   padding-left: 0.75rem;
-  color: #333;
+  color: #333333;
 }
 
 .request-print__footer {
   margin-top: 2rem;
   padding-top: 0.75rem;
-  border-top: 1pt solid #ccc;
+  border-top: 1pt solid #cccccc;
   font-size: 9pt;
-  color: #555;
+  color: #555555;
 }
 
 @media print {
@@ -172,6 +172,6 @@ time {
   a[href^=http]::after {
     content: " (" attr(href) ")";
     font-size: 0.85em;
-    color: #555;
+    color: #555555;
   }
 }
