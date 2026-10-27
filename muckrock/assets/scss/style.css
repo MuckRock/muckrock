@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /* Third Party Frameworks */
-@import "../vendor/_normalize.scss";
+@import "../vendor/_normalize.css";
 @import "./base/_box-sizing.css";
 
 /* MuckRock */
@@ -10,7 +10,7 @@
 @import "./view/view.css";
 
 /* Third Party Styles */
-@import "../vendor/_loader.scss";
+@import "../vendor/_loader.css";
 @import "../vendor/fine-uploader/fine-uploader-new.css";
 @import "../vendor/tooltipster/tooltipster.bundle.css";
 @import "../vendor/pygments/pygments.css";
