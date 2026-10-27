@@ -1,8 +1,6 @@
-@use "sass:color";
-
 .banner {
     margin: 0;
-    background: color.adjust($color-blue-light, $lightness: 10%, $space: hsl);
+    background: var(--color-blue-light-lighten-10);
     color: $color-blue-dark;
     padding: .5rem;
     border-bottom: 1px solid #90caf9;
