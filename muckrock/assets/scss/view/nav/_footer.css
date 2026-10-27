@@ -12,41 +12,41 @@ footer.website-footer .global-footer {
     padding: 3rem;
     gap: 2rem 3rem;
 
-    color: $color-white;
-    background-color: $color-black;
+    color: var(--color-white);
+    background-color: var(--color-black);
 
     .logotype {
         display: inline-block;
-        margin-bottom: $vr;
-        color: $color-white;
+        margin-bottom: var(--vr);
+        color: var(--color-white);
         svg {
             fill: currentColor;
             width: auto;
             height: 2rem;
         }
         &:hover {
-            color: $color-blue;
+            color: var(--color-blue);
         }
     }
 
     a {
-        color: $color-grey-7;
+        color: var(--color-grey-7);
         &:hover {
-            color: $color-blue;
+            color: var(--color-blue);
             text-decoration: none;
         }
     }
 
     .button {
-        color: $color-white;
+        color: var(--color-white);
         &:hover {
-            color: $color-white;
+            color: var(--color-white);
         }
     }
 
     dfn {
         margin-bottom: calc(var(--vr) * 0.5);
-        color: $color-white;
+        color: var(--color-white);
     }
 
     ul {
@@ -55,8 +55,8 @@ footer.website-footer .global-footer {
     }
 
     li {
-        font-size: $size-3;
-        line-height: $lh;
+        font-size: var(--size-3);
+        line-height: var(--lh);
         margin-bottom: 0;
     }
 
@@ -105,7 +105,7 @@ footer.website-footer .global-footer {
 
     .social-link {
         display: flex;
-        color: $color-grey-7;
+        color: var(--color-grey-7);
 
         svg {
             width: 1.5rem;
@@ -118,7 +118,7 @@ footer.website-footer .global-footer {
         }
 
         &:hover {
-            color: $color-blue;
+            color: var(--color-blue);
         }
     }
 
@@ -142,7 +142,7 @@ footer.website-footer .newsletter-widget {
 }
 
 footer.website-footer .donation-widget {
-    color: $color-white;
+    color: var(--color-white);
     background: var(--blue-5, #053775);
     margin-bottom: 0;
 }

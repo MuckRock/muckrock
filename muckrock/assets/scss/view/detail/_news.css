@@ -22,23 +22,23 @@
     max-width: 42em;
     min-width: 0;
     flex: 3 1 24em;
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
     @media screen and (min-width: 500px) {
-        font-size: $size-4;
-        line-height: $lh;
+        font-size: var(--size-4);
+        line-height: var(--lh);
     }
     .news__article__header {
         time, .contributors {
-            color: $color-grey;
-            font-size: $size-2;
-            font-weight: $bold;
+            color: var(--color-grey);
+            font-size: var(--size-2);
+            font-weight: var(--bold);
         }
         h1, .kicker {
             margin: calc(var(--vr) * 0.5) 0;
-            font-weight: $bold;
+            font-weight: var(--bold);
             line-height: 1.25em;
         }
         .contributors {
@@ -49,15 +49,15 @@
             }
         }
     }
-    // Fixes for embedded content
+    /* Fixes for embedded content */
     div[id^='viewer'] {
-        margin: $vr auto;
+        margin: var(--vr) auto;
         @media screen and (min-width: 1100px) {
-            margin: $vr auto $vr 0;
+            margin: var(--vr) auto var(--vr) 0;
         }
     }
     iframe {
-        margin-bottom: $vr;
+        margin-bottom: var(--vr);
         border: none;
     }
     .iframe-container {
@@ -79,8 +79,8 @@
         flex-wrap: wrap;
         justify-content: space-between;
         margin-bottom: 0;
-        background: $color-blue-light;
-        color: $color-blue-dark;
+        background: var(--color-blue-light);
+        color: var(--color-blue-dark);
         padding: calc(var(--vr) * 0.5);
         margin: 1rem 0;
         gap: 0;
@@ -98,10 +98,12 @@
 
 .news__aside {
     flex: 1 1 16em;
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
+}
+.news__aside {
     max-width: 24em;
     min-width: 0;
 }
@@ -113,24 +115,24 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 auto;
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
     .articles__recent__header, .articles__related__header {
         flex: 0 1 100%;
     }
     .article {
         flex: 1 1 24em;
-        margin-right: $vr;
+        margin-right: var(--vr);
     }
 }
 
 .loupe {
     z-index: 500;
-    border: 2px solid $color-grey-3;
+    border: 2px solid var(--color-grey-3);
     border-radius: 50%;
-    background: $color-grey;
+    background: var(--color-grey);
     cursor: none;
 }
 .loupe img {

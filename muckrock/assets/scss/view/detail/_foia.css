@@ -1,27 +1,25 @@
-$request-breakpoint: 768px;
-
 .request.properties {
     display: flex;
     flex-direction: column;
     h1 {
-        font-size: $size-6;
-        font-weight: $bold;
+        font-size: var(--size-6);
+        font-weight: var(--bold);
     }
     .synopsis {
-        font-size: $size-4;
+        font-size: var(--size-4);
         line-height: calc(var(--lh) * 1.2);
         a {
-            border-bottom: 1px dotted $color-blue;
+            border-bottom: 1px dotted var(--color-blue);
             &:hover {
-                border-bottom: 1px solid $color-blue-dark;
+                border-bottom: 1px solid var(--color-blue-dark);
                 text-decoration: none;
             }
         }
     }
     .numbers, .dates, .portal-info, .upload-info {
-        font-size: $size-2;
+        font-size: var(--size-2);
         tr {
-            background-color: $color-white;
+            background-color: var(--color-white);
         }
         td {
             width: 50%;
@@ -39,17 +37,17 @@ $request-breakpoint: 768px;
     }
     .hidden-form {
         display: none;
-        border: $border $color-grey;
+        border: var(--border-width) solid var(--color-grey);
         padding: calc(var(--vr) * 0.5);
-        //align-items: flex-start;
-        //flex-wrap: wrap;
+        /* align-items: flex-start; */
+        /* flex-wrap: wrap; */
         justify-content: space-between;
         label, input[type="text"] {
-            //flex: 0 1 100%;
+            /* flex: 0 1 100%; */
             margin-bottom: calc(var(--vr) * 0.5);
         }
         &.visible {
-            //display: flex;
+            /* display: flex; */
             display: block;
         }
         footer {
@@ -72,7 +70,7 @@ $request-breakpoint: 768px;
       margin-bottom: 0;
     }
     header {
-      border-bottom: 1px solid $color-grey-7;
+      border-bottom: 1px solid var(--color-grey-7);
     }
 }
 
@@ -82,9 +80,9 @@ $request-breakpoint: 768px;
         justify-content: space-between;
         flex-wrap: wrap;
         align-items: center;
-        border: $border $color-grey;
+        border: var(--border-width) solid var(--color-grey);
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-        font-weight: $bold;
+        font-weight: var(--bold);
         p, footer {
             margin-bottom: 0;
         }
@@ -94,35 +92,35 @@ $request-breakpoint: 768px;
     }
 
     .signup.prompt {
-        color: $color-blue-dark;
-        border-color: $color-blue;
-        background-color: $color-blue-light;
+        color: var(--color-blue-dark);
+        border-color: var(--color-blue);
+        background-color: var(--color-blue-light);
     }
 
     .payment.prompt {
-        color: $color-green-dark;
-        border-color: $color-green;
-        background-color: $color-green-light;
+        color: var(--color-green-dark);
+        border-color: var(--color-green);
+        background-color: var(--color-green-light);
     }
 
     .file-download.prompt {
-        border-color: $color-yellow;
+        border-color: var(--color-yellow);
         justify-content: flex-start;
         p {
-          margin-left: $vr;
+          margin-left: var(--vr);
         }
     }
 
     .confirmation.prompt {
-        color: $color-green-dark;
-        border-color: $color-green;
-        background-color: $color-green-light;
+        color: var(--color-green-dark);
+        border-color: var(--color-green);
+        background-color: var(--color-green-light);
         font-weight: inherit;
         p {
             max-width: inherit;
         }
         ul {
-          margin-top: $vr;
+          margin-top: var(--vr);
         }
     }
 
@@ -155,7 +153,7 @@ $request-breakpoint: 768px;
     }
     .communications-settings {
         margin-bottom: 0;
-        margin-top: $vr;
+        margin-top: var(--vr);
         p {
             margin-bottom: 0;
         }
@@ -168,16 +166,16 @@ $request-breakpoint: 768px;
         display: flex;
         justify-content: space-between;
         padding: calc(var(--vr) * 0.5);
-        border: 1px solid $color-blue;
-        color: $color-blue;
+        border: 1px solid var(--color-blue);
+        color: var(--color-blue);
         p {
             margin-bottom: 0;
         }
         a {
-            color: $color-blue-dark;
+            color: var(--color-blue-dark);
             border-bottom: 1px dotted;
             &:hover {
-                color: $color-black;
+                color: var(--color-black);
                 border-bottom: 1px solid;
                 text-decoration: none;
             }
@@ -196,13 +194,13 @@ $request-breakpoint: 768px;
     }
 
     .composer-input {
-        border: $border $color-grey;
-        box-shadow: 0px 4px 8px 0px $color-grey;
+        border: var(--border-width) solid var(--color-grey);
+        box-shadow: 0px 4px 8px 0px var(--color-grey);
         header {
             display: block;
             margin-bottom: 0;
             padding: calc(var(--vr) * 0.5);
-            border-bottom: 1px solid $color-grey;
+            border-bottom: 1px solid var(--color-grey);
             p {
                 margin-bottom: 0;
                 &.help-text {
@@ -224,7 +222,7 @@ $request-breakpoint: 768px;
             margin-top: calc(var(--vr) * 0.75);
         }
         .currency {
-            font-size: $size-4;
+            font-size: var(--size-4);
         }
         .field {
             margin-bottom: 0;
@@ -232,8 +230,8 @@ $request-breakpoint: 768px;
                 border-bottom: 0;
             }
             input[type="text"], textarea {
-                border-top: 1px solid $color-grey;
-                border-bottom: 1px solid $color-grey;
+                border-top: 1px solid var(--color-grey);
+                border-bottom: 1px solid var(--color-grey);
             }
         }
         textarea {
@@ -245,7 +243,7 @@ $request-breakpoint: 768px;
         }
         .buttons {
             padding: calc(var(--vr) * 0.5);
-            border-top: 1px solid $color-grey;
+            border-top: 1px solid var(--color-grey);
             display: flex;
             justify-content: space-between;
         }
@@ -258,13 +256,13 @@ $request-breakpoint: 768px;
             height: 15em;
             padding: calc(var(--vr) * 0.5);
             background-color: #FFF;
-            color: $color-grey;
+            color: var(--color-grey);
         }
         span {
             border-bottom: 1px dotted;
             cursor: pointer;
             &:hover {
-                color: $color-blue;
+                color: var(--color-blue);
                 border-bottom: 1px solid;
             }
         }
@@ -272,7 +270,7 @@ $request-breakpoint: 768px;
     #agency-reply .composer-input {
         .field {
             input[type="text"], textarea {
-                border: 1px solid $color-grey;
+                border: 1px solid var(--color-grey);
             }
             input, textarea, select {
                 width: 97%;
@@ -285,11 +283,11 @@ $request-breakpoint: 768px;
 .request .files {
     .active-document {
         display: none;
-        border-radius: $border-radius;
-        border: 1px solid $color-black;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--color-black);
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5) calc(var(--vr) * 0.5) calc(var(--vr) * 0.5);
-        background: $color-grey-2;
-        color: $color-white;
+        background: var(--color-grey-2);
+        color: var(--color-white);
         &.visible {
             display: block;
         }
@@ -302,7 +300,7 @@ $request-breakpoint: 768px;
                 margin-bottom: 0;
             }
             .cancel.button {
-                margin-left: $vr;
+                margin-left: var(--vr);
             }
         }
     }
@@ -311,11 +309,11 @@ $request-breakpoint: 768px;
             margin-bottom: calc(var(--vr) * 0.5);
         }
         .active .file {
-            border-color: $color-blue;
-            background-color: $color-blue-light;
+            border-color: var(--color-blue);
+            background-color: var(--color-blue-light);
             .file-embed {
-                color: $color-black;
-                background-color: $color-white;
+                color: var(--color-black);
+                background-color: var(--color-white);
             }
         }
     }
@@ -337,8 +335,8 @@ $request-breakpoint: 768px;
     }
 
     .add-note {
-        border: $border $color-grey;
-        box-shadow: 0px 4px 8px 0px $color-grey;
+        border: var(--border-width) solid var(--color-grey);
+        box-shadow: 0px 4px 8px 0px var(--color-grey);
         .ProseMirror, textarea {
             display: block;
             overflow: hidden;
@@ -355,9 +353,9 @@ $request-breakpoint: 768px;
             align-items: flex-end;
             margin-bottom: 0;
             padding: calc(var(--vr) * 0.5);
-            border-bottom: 1px solid $color-grey;
+            border-bottom: 1px solid var(--color-grey);
             p {
-                font-size: $size-2;
+                font-size: var(--size-2);
             }
         }
         footer {
@@ -365,9 +363,9 @@ $request-breakpoint: 768px;
             justify-content: space-between;
             align-items: center;
             padding: calc(var(--vr) * 0.5);
-            border-top: 1px solid $color-grey;
+            border-top: 1px solid var(--color-grey);
             p {
-                padding-left: $vr;
+                padding-left: var(--vr);
             }
         }
         .field {
@@ -381,24 +379,24 @@ $request-breakpoint: 768px;
     }
 
     .note {
-        border: $border $color-grey;
-        border-color: $color-grey;
-        background: $color-white-pure;
+        border: var(--border-width) solid var(--color-grey);
+        border-color: var(--color-grey);
+        background: var(--color-white-pure);
         .note-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 0;
             padding: calc(var(--vr) * 0.5);
-            background-color: $color-yellow;
-            color: $color-black;
+            background-color: var(--color-yellow);
+            color: var(--color-black);
             p {
                 margin-bottom: 0;
             }
             a {
-                color: $color-black;
+                color: var(--color-black);
             }
             .note-author {
-                font-weight: $bold;
+                font-weight: var(--bold);
             }
         }
         .note-metadata {
@@ -406,11 +404,11 @@ $request-breakpoint: 768px;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0;
-            background: $color-grey-7;
+            background: var(--color-grey-7);
         }
         .note-body {
             padding: calc(var(--vr) * 0.5);
-            background-color: $color-yellow-light;
+            background-color: var(--color-yellow-light);
             br {
               margin-bottom: 0;
             }
@@ -422,13 +420,13 @@ $request-breakpoint: 768px;
 
     .note.check {
         .note-header {
-            background-color: $color-green;
+            background-color: var(--color-green);
         }
         .note-body {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
-            background-color: $color-green-light;
+            background-color: var(--color-green-light);
             font-variant: small-caps;
             .payto {
                 flex: 0 2 10rem;
@@ -437,11 +435,11 @@ $request-breakpoint: 768px;
                 flex: 0 1 5rem;
                 text-align: right;
                 .number, .amount span {
-                    font-size: $size-4;
+                    font-size: var(--size-4);
                 }
             }
         }
-        //http://kodhus.com/newsite/step-progress-bar-css-only/
+        /* http://kodhus.com/newsite/step-progress-bar-css-only/ */
         .progressbar {
             counter-reset: step;
             padding: 0;
@@ -452,11 +450,11 @@ $request-breakpoint: 768px;
                 width: 20%;
                 min-width: 5rem;
                 float: left;
-                font-size: $size-2;
+                font-size: var(--size-2);
                 position: relative;
                 text-align: center;
                 text-transform: uppercase;
-                color: $color-grey-4;
+                color: var(--color-grey-4);
             }
             li:before {
                 width: 30px;
@@ -464,19 +462,19 @@ $request-breakpoint: 768px;
                 content: counter(step);
                 counter-increment: step;
                 line-height: 30px;
-                border: 2px solid $color-grey-4;
+                border: 2px solid var(--color-grey-4);
                 display: block;
                 text-align: center;
                 margin: 0 auto 10px auto;
                 border-radius: 50%;
-                background-color: $color-white;
+                background-color: var(--color-white);
             }
             li:after {
                 width: 100%;
                 height: 2px;
                 content: '';
                 position: absolute;
-                background-color: $color-grey-4;
+                background-color: var(--color-grey-4);
                 top: 15px;
                 left: -50%;
                 z-index: -1;
@@ -485,24 +483,24 @@ $request-breakpoint: 768px;
                 content: none;
             }
             li.active {
-                color: $color-blue;
+                color: var(--color-blue);
             }
             li.active:before {
-                border-color: $color-blue;
-                background-color: $color-blue-light;
+                border-color: var(--color-blue);
+                background-color: var(--color-blue-light);
             }
             li.active + li:after {
-                background-color: $color-blue;
+                background-color: var(--color-blue);
             }
             li.error {
-                color: $color-red;
+                color: var(--color-red);
             }
             li.error:before {
-                border-color: $color-red;
-                background-color: $color-red-light;
+                border-color: var(--color-red);
+                background-color: var(--color-red-light);
             }
             li.error + li:after {
-                background-color: $color-red;
+                background-color: var(--color-red);
             }
         }
     }
@@ -511,8 +509,8 @@ $request-breakpoint: 768px;
 
 .request .access {
     .generate-private-link, .grant-access, .change-owner {
-        padding: $vr;
-        border: $border $color-grey;
+        padding: var(--vr);
+        border: var(--border-width) solid var(--color-grey);
         h3 {
             flex: 0 1 100%;
         }
@@ -527,19 +525,19 @@ $request-breakpoint: 768px;
         align-items: flex-start;
         input[type="text"] {
             flex: 0 1 100%;
-            margin-bottom: $vr;
+            margin-bottom: var(--vr);
             transition: background-color 1s ease-out;
             background-color: #FFF;
             &.success {
-                background-color: $color-green;
-                color: $color-black;
+                background-color: var(--color-green);
+                color: var(--color-black);
             }
         }
         button, .help-text {
             flex: 1;
         }
         .help-text {
-            padding-left: $vr;
+            padding-left: var(--vr);
         }
     }
     .grant-access .picker, .change-owner .picker {
@@ -556,12 +554,12 @@ $request-breakpoint: 768px;
             }
             label {
                 display: block;
-                font-size: $size-2;
+                font-size: var(--size-2);
             }
         }
         select[name="access"] {
             flex: 0 1 100%;
-            margin-bottom: $vr;
+            margin-bottom: var(--vr);
         }
 
         .user.hilight {
@@ -581,7 +579,7 @@ $request-breakpoint: 768px;
     }
     .people.with-access {
         .person {
-            background-color: $color-white;
+            background-color: var(--color-white);
         }
         .person td {
             padding: calc(var(--vr) * 0.5);
@@ -589,7 +587,7 @@ $request-breakpoint: 768px;
             text-align: right;
             &.name {
                 text-align: left;
-                font-weight: $bold;
+                font-weight: var(--bold);
             }
             &.access.nostretch {
                 width:1%;
@@ -608,18 +606,18 @@ $request-breakpoint: 768px;
         .access-badge {
             width: 5em;
             padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-            background: $color-grey;
-            color: $color-white;
+            background: var(--color-grey);
+            color: var(--color-white);
             text-align: center;
-            font-size: $size-2;
+            font-size: var(--size-2);
             &.editor {
-                background: $color-green;
+                background: var(--color-green);
             }
             &.reader {
-                background: $color-blue;
+                background: var(--color-blue);
             }
             @media screen and (min-width: 500px) {
-                font-size: $size-3;
+                font-size: var(--size-3);
             }
         }
         button {
@@ -631,7 +629,7 @@ $request-breakpoint: 768px;
         }
     }
     .change-owner h3 {
-      color: $color-red;
+      color: var(--color-red);
     }
 }
 
@@ -651,9 +649,9 @@ $request-breakpoint: 768px;
 .saved-search-delete {
   background: none;
   border: none;
-  color: $color-red;
+  color: var(--color-red);
   cursor: pointer;
-  font-size: $size-2;
+  font-size: var(--size-2);
   float: right;
 }
 
@@ -662,7 +660,7 @@ $request-breakpoint: 768px;
 }
 
 .saved-search-delete:hover {
-  color: $color-red-dark;
+  color: var(--color-red-dark);
 }
 
 #request-actions {
@@ -723,7 +721,7 @@ article.passcode-form {
   height: 60vh;
   padding: 7px;
   border: 1px solid black;
-  font-size: $size-2;
+  font-size: var(--size-2);
   overflow: auto;
   &.hide {
     display: none;
@@ -731,6 +729,6 @@ article.passcode-form {
 }
 
 .colophon-disclosure {
-  font-size: $size-2;
+  font-size: var(--size-2);
   text-align: center;
 }
