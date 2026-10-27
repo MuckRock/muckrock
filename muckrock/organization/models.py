@@ -31,17 +31,14 @@ stripe.api_version = "2015-10-16"
 
 
 def _calc_ent_requests(ent_data):
-    """Compute the request quota for one entitlement entry.
+    """The request quota one entitlement entry grants: base × quantity.
 
-    Uses ent_data["quantity"] (the per-subscription billing quantity sent by
-    Squarelet) rather than the stale org-level max_users field.
+    Squarelet shapes its entitlements so this matches the old
+    `base + extra users × per user` for every quantity; a plan is quantity 1
+    and extra requests are a pack line, whose quantity is how many it holds.
     """
-    r = ent_data["resources"]
-    base = r.get("base_requests", 0)
-    per_user = r.get("requests_per_user", 0)
-    minimum = r.get("minimum_users", 1)
-    quantity = ent_data.get("quantity", 1)
-    return base + max(0, quantity - minimum) * per_user
+    base = ent_data["resources"].get("base_requests", 0)
+    return base * ent_data.get("quantity", 1)
 
 
 class Organization(models.Model):

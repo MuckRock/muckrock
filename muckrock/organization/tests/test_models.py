@@ -22,6 +22,7 @@ from muckrock.organization.factories import (
     OrganizationEntitlementFactory,
     OrganizationFactory,
     ProfessionalEntitlementFactory,
+    RequestPackEntitlementFactory,
 )
 from muckrock.organization.models import Organization
 
@@ -146,6 +147,23 @@ def ent_json(entitlement, date_update, quantity=1):
 class TestSquareletUpdateData(TestCase):
     """Test cases for updating organization data from squarelet"""
 
+    def test_the_quota_is_base_times_quantity(self):
+        """Squarelet's entitlements are shaped so this is the whole formula."""
+        ent = EntitlementFactory(name="Flat", resources={"base_requests": 50})
+        organization = OrganizationFactory()
+        organization.update_data(
+            {
+                "name": organization.name,
+                "slug": organization.slug,
+                "individual": False,
+                "private": False,
+                "entitlements": [ent_json(ent, date(2019, 2, 21), quantity=3)],
+                "card": "",
+            }
+        )
+        organization.refresh_from_db()
+        assert organization.requests_per_month == 150
+
     def test_create_subscription(self):
         """Create a new subscription"""
         ent = OrganizationEntitlementFactory()
@@ -241,8 +259,8 @@ class TestSquareletUpdateData(TestCase):
         assert organization.requests_per_month == 50
         assert organization.monthly_requests == 50
 
-    def test_increase_max_users(self):
-        """Increase max users"""
+    def test_more_request_packs(self):
+        """More packs add their requests now"""
         ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory(
             entitlement=ent,
@@ -256,7 +274,10 @@ class TestSquareletUpdateData(TestCase):
                 "slug": organization.slug,
                 "individual": False,
                 "private": False,
-                "entitlements": [ent_json(ent, date(2019, 2, 21), quantity=9)],
+                "entitlements": [
+                    ent_json(ent, date(2019, 2, 21)),
+                    ent_json(RequestPackEntitlementFactory(), date(2019, 2, 21), 2),
+                ],
                 "card": "",
             }
         )
@@ -264,8 +285,8 @@ class TestSquareletUpdateData(TestCase):
         assert organization.requests_per_month == 70
         assert organization.monthly_requests == 53
 
-    def test_decrease_max_users(self):
-        """Decrease max users"""
+    def test_fewer_request_packs(self):
+        """Fewer packs lower the quota, not this month's remaining requests"""
         ent = OrganizationEntitlementFactory()
         organization = OrganizationFactory(
             entitlement=ent,
@@ -279,7 +300,10 @@ class TestSquareletUpdateData(TestCase):
                 "slug": organization.slug,
                 "individual": False,
                 "private": False,
-                "entitlements": [ent_json(ent, date(2019, 2, 21), quantity=7)],
+                "entitlements": [
+                    ent_json(ent, date(2019, 2, 21)),
+                    ent_json(RequestPackEntitlementFactory(), date(2019, 2, 21), 1),
+                ],
                 "card": "",
             }
         )
@@ -336,7 +360,7 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
                 organization,
                 [
                     ent_json(ent1, date_update, quantity=1),
-                    ent_json(ent2, date_update, quantity=5),
+                    ent_json(ent2, date_update, quantity=1),
                 ],
             )
         )
@@ -360,7 +384,7 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
             self._org_data(
                 organization,
                 [
-                    ent_json(paid, date_update, quantity=5),
+                    ent_json(paid, date_update, quantity=1),
                     ent_json(grant, date_update, quantity=1),
                 ],
             )
@@ -382,7 +406,7 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
                 organization,
                 [
                     ent_json(low, date_update, quantity=1),
-                    ent_json(high, date_update, quantity=5),
+                    ent_json(high, date_update, quantity=1),
                 ],
             )
         )
@@ -415,29 +439,22 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
         assert organization.entitlement.slug == ent1.slug
         assert organization.requests_per_month == 30
 
-    def test_quantity_below_minimum_does_not_reduce_base(self):
-        """quantity < minimum_users: base requests are not reduced"""
-        ent = OrganizationEntitlementFactory()  # min=5, base=50, per_user=5
+    def test_a_pack_s_quantity_multiplies_its_requests(self):
+        """A plan is quantity 1; extra requests are a pack line's quantity."""
+        ent = OrganizationEntitlementFactory()
+        pack = RequestPackEntitlementFactory()
         organization = OrganizationFactory()
-
         organization.update_data(
-            self._org_data(organization, [ent_json(ent, date(2024, 3, 1), quantity=2)])
+            self._org_data(
+                organization,
+                [
+                    ent_json(ent, date(2024, 3, 1), quantity=1),
+                    ent_json(pack, date(2024, 3, 1), quantity=3),
+                ],
+            )
         )
         organization.refresh_from_db()
-        # max(0, 2-5) = 0, so just base=50
-        assert organization.requests_per_month == 50
-
-    def test_quantity_above_minimum_adds_per_user_requests(self):
-        """quantity > minimum_users: extra quantity adds per-user requests"""
-        ent = OrganizationEntitlementFactory()  # min=5, base=50, per_user=5
-        organization = OrganizationFactory()
-
-        organization.update_data(
-            self._org_data(organization, [ent_json(ent, date(2024, 3, 1), quantity=8)])
-        )
-        organization.refresh_from_db()
-        # 50 + max(0, 8-5)*5 = 50 + 15 = 65
-        assert organization.requests_per_month == 65
+        assert organization.requests_per_month == 80
 
     def test_multi_entitlement_monthly_restore(self):
         """Monthly restore resets monthly_requests to sum of all entitlements"""
@@ -455,7 +472,7 @@ class TestSquareletUpdateDataMultiEntitlement(TestCase):
                 organization,
                 [
                     ent_json(ent1, date(2024, 3, 1), quantity=1),
-                    ent_json(ent2, date(2024, 3, 1), quantity=5),
+                    ent_json(ent2, date(2024, 3, 1), quantity=1),
                 ],
             )
         )

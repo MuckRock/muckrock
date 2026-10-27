@@ -69,7 +69,7 @@ class ProfessionalEntitlementFactory(EntitlementFactory):
     resources = {
         "minimum_users": 1,
         "base_requests": 20,
-        "requests_per_user": 0,
+        "requests_per_user": 20,
         "feature_level": 1,
     }
 
@@ -79,8 +79,19 @@ class OrganizationEntitlementFactory(EntitlementFactory):
 
     name = "Organization"
     resources = {
-        "minimum_users": 5,
+        "minimum_users": 1,
         "base_requests": 50,
-        "requests_per_user": 5,
+        "requests_per_user": 50,
         "feature_level": 2,
+    }
+
+
+class RequestPackEntitlementFactory(EntitlementFactory):
+    """Extra requests, sold by quantity alongside a plan"""
+
+    name = "MuckRock Request Pack"
+    resources = {
+        "minimum_users": 1,
+        "base_requests": 10,
+        "requests_per_user": 10,
     }

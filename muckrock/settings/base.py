@@ -471,16 +471,6 @@ SESAME_MAX_AGE = 60 * 10
 
 ASSETS_DEBUG = False
 
-MONTHLY_REQUESTS = {
-    "admin": 20,
-    "basic": 0,
-    "beta": 5,
-    "pro": 20,
-    "proxy": 20,
-    "org": 50,
-    "robot": 0,
-}
-
 LOGZIO_TOKEN = os.environ.get("LOGZIO_TOKEN", "")
 
 LOGGING = {
