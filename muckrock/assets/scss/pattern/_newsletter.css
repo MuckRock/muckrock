@@ -44,7 +44,6 @@
         line-height: normal;
     }
 
-
     .oneline-form {
         display: flex;
         min-width: 20rem;
@@ -98,7 +97,7 @@
         font-weight: 400;
         line-height: normal;
         a {
-            color: $color-blue;
+            color: var(--color-blue);
         }
     }
 }
