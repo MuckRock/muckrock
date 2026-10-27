@@ -12,6 +12,7 @@ from django.urls.exceptions import NoReverseMatch
 
 # Standard Library
 from unittest.mock import patch
+from uuid import uuid4
 
 # Third Party
 import pytest
@@ -246,3 +247,23 @@ class TestNotificationRead(TestCase):
         question = QuestionFactory()
         with pytest.raises(NoReverseMatch):
             question.get_absolute_url()
+
+
+class TestProfileByUUID(TestCase):
+    """Accounts links to a user's profile by their UUID"""
+
+    def test_a_profile_uuid_redirects_to_the_profile(self):
+        """The UUID resolves to the user's profile page"""
+        user = UserFactory()
+        response = self.client.get(
+            reverse("acct-profile-uuid", kwargs={"uuid": user.profile.uuid})
+        )
+        assert response.status_code == 302
+        assert response.url == user.profile.get_absolute_url()
+
+    def test_an_unknown_uuid_is_a_404(self):
+        """A UUID with no profile is not found"""
+        response = self.client.get(
+            reverse("acct-profile-uuid", kwargs={"uuid": uuid4()})
+        )
+        assert response.status_code == 404

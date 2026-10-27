@@ -89,6 +89,15 @@ class OrganizationDetailView(DetailView):
         return context
 
 
+def organization_by_uuid(request, uuid):
+    """Redirect a MuckRock Accounts organization UUID to its page"""
+    organization = get_object_or_404(Organization, uuid=uuid)
+    if organization.individual:
+        # Individual orgs share their user's UUID and have no page of their own
+        return redirect(get_object_or_404(User, profile__uuid=uuid).profile)
+    return redirect(organization)
+
+
 class OrganizationSquareletView(RedirectView):
     """Organization squarelet view redirects to squarelet"""
 
