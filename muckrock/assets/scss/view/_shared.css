@@ -1,11 +1,11 @@
-    ///////////////////////
-   //                   //
-  //      V I E W      //
- //                   //
-///////////////////////
+    /* ///////////////////// */
+   /* // */
+  /* V I E W      // */
+ /* // */
+/* ///////////////////// */
 
 html, body {
-    // Allows for full-height elements with CSS
+    /* Allows for full-height elements with CSS */
     min-height: 100%;
 }
 
@@ -15,7 +15,7 @@ html, body {
     min-height: 100vh;
     overflow: hidden;
     margin-bottom: 0;
-    background-color: $color-white;
+    background-color: var(--color-white);
 }
 
 .content {

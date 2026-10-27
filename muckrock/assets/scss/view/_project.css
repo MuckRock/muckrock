@@ -1,23 +1,26 @@
 .create.project {
     max-width: 40em;
-    margin: 0 auto $vr;
+    margin: 0 auto var(--vr);
 }
 .publish.project {
     max-width: 40em;
-    margin: 0 auto $vr;
+    margin: 0 auto var(--vr);
 }
 .project__update {
     .project__update__header {
         display: flex;
         justify-content: space-between;
-        padding: calc($vr * 0.5);
+        padding: calc(var(--vr) * 0.5);
         @media screen and (min-width: 500px) {
-            padding: $vr;
+            padding: var(--vr);
         }
+    }
+    .project__update__header {
         margin-bottom: 0;
         p {
             margin-bottom: 0;
         }
+    
     }
     .form {
         padding-top: 0;
@@ -28,8 +31,8 @@
     }
     .description textarea {
         min-height: 20em;
-        font-family: $monospace;
-        font-size: $size-2;
+        font-family: var(--monospace);
+        font-size: var(--size-2);
     }
     .description p {
         max-width: 40em;
@@ -39,14 +42,14 @@
 .project {
     .stats {
         .stat {
-            font-size: $size-2;
-            line-height: $lh;
+            font-size: var(--size-2);
+            line-height: var(--lh);
         }
         .value {
             display: block;
-            font-weight: $bold;
-            font-size: $size-4;
-            line-height: $lh;
+            font-weight: var(--bold);
+            font-size: var(--size-4);
+            line-height: var(--lh);
         }
     }
 }
@@ -62,25 +65,27 @@
         margin-bottom: 0;
         background-size: cover;
         background-position: center;
-        background-color: $color-grey-5;
+        background-color: var(--color-grey-5);
     }
 
     .prompt, .overview, .objects {
-        margin: 0 auto $vr;
+        margin: 0 auto var(--vr);
     }
 
     .prompt {
-        padding: calc($vr * 0.5);
+        padding: calc(var(--vr) * 0.5);
         @media screen and (min-width: 500px) {
-            padding: $vr;
+            padding: var(--vr);
         }
-        box-shadow: 0px 4px 8px 0px $color-grey;
-        border: 1px solid $color-blue;
-        background: $color-blue-light;
-        color: $color-blue-dark;
-        font-weight: $bold;
+    }
+    .prompt {
+        box-shadow: 0px 4px 8px 0px var(--color-grey);
+        border: 1px solid var(--color-blue);
+        background: var(--color-blue-light);
+        color: var(--color-blue-dark);
+        font-weight: var(--bold);
         ol {
-            padding-left: $vr;
+            padding-left: var(--vr);
         }
         a {
             text-decoration: underline;
@@ -88,48 +93,51 @@
         .strikethrough {
             text-decoration: line-through;
         }
+    
     }
 
     .overview {
         display: flex;
         flex-flow: wrap;
-        padding: calc($vr * 0.5);
+        padding: calc(var(--vr) * 0.5);
         @media screen and (min-width: 500px) {
-            padding: $vr;
+            padding: var(--vr);
         }
+    }
+    .overview {
         max-width: 60em;
         .overview__main {
             flex: 2 1 20em;
             min-width: 0;
-            margin-bottom: $vr;
+            margin-bottom: var(--vr);
         }
         .overview__aside {
             flex: 1 1 10em;
             min-width: 0;
             @media (min-width: 33.25em) {
-                padding: 0 $vr;
+                padding: 0 var(--vr);
             }
         }
         .title {
             @media screen and (min-width: 500px) {
-                font-size: $size-9;
-                line-height: $lh;
+                font-size: var(--size-9);
+                line-height: var(--lh);
             }
         }
         summary {
-            font-size: $size-4;
-            line-height: $lh;
+            font-size: var(--size-4);
+            line-height: var(--lh);
         }
         stat a {
-            color: $color-black;
+            color: var(--color-black);
             &:hover {
-                color: $color-blue;
+                color: var(--color-blue);
             }
         }
         .contributor {
             margin-bottom: calc(var(--vr) * 0.25);
-            border: $border $color-grey;
-            border-radius: $border-radius;
+            border: var(--border-width) solid var(--color-grey);
+            border-radius: var(--border-radius);
             overflow: hidden;
             a, img {
                 display: block;
@@ -140,39 +148,43 @@
             }
             a .icon {
                 path, polygon, rect, circle {
-                    fill: $color-blue;
+                    fill: var(--color-blue);
                 }
                 &:hover {
                     path, polygon, rect, circle {
-                        fill: $color-black;
+                        fill: var(--color-black);
                     }
                 }
             }
         }
+    
     }
 
     .objects {
         display: flex;
         flex-flow: wrap row;
-        padding: calc($vr * 0.5);
+        padding: calc(var(--vr) * 0.5);
         @media screen and (min-width: 500px) {
-            padding: $vr;
+            padding: var(--vr);
         }
+    }
+    .objects {
         max-width: 60em;
         .articles, .requests {
             flex: 1 1 20em;
         }
         .articles {
-            margin-right: $vr;
+            margin-right: var(--vr);
         }
+    
     }
 }
 
 .project.component {
   width: 100%;
-  background: $color-white-pure;
-  border: 1px solid $color-grey;
-  border-radius: $border-radius;
+  background: var(--color-white-pure);
+  border: 1px solid var(--color-grey);
+  border-radius: var(--border-radius);
   overflow: hidden;
 }
 .project.component .grid__column {
@@ -190,31 +202,31 @@
   margin-bottom: 0;
   background-position: center;
   background-size: cover;
-  background-color: $color-blue-light;
+  background-color: var(--color-blue-light);
   background-blend-mode: multiply;
 }
 .project__header__wrapper {
   flex: 1 1 100%;
   min-height: 100%;
   width: 100%;
-  padding: $vr;
-  color: $color-white;
-  background: $color-black;
-  background: rgba(51, 60, 71, .75); // $color-black at 75%
+  padding: var(--vr);
+  color: var(--color-white);
+  background: var(--color-black);
+  background: rgba(51, 60, 71, .75); /* $color-black at 75% */
   transition: background .25s linear;
   &:hover {
-    color: $color-white;
+    color: var(--color-white);
   }
 }
 .project__crowdfund {
-  padding: $vr $vr 0;
+  padding: var(--vr) var(--vr) 0;
   .stat {
     vertical-align: top;
-    margin-right: $vr;
+    margin-right: var(--vr);
   }
 }
 .project__overview {
-  padding: $vr;
+  padding: var(--vr);
   summary:empty {
     display: none;
   }

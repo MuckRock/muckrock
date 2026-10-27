@@ -1,5 +1,3 @@
-
-
 .create.organization, .update.organization, .activate.organization {
     display: flex;
     flex-wrap: wrap;
@@ -13,41 +11,40 @@
         flex: 1;
     }
     aside {
-        border: $border $color-grey;
-        border-radius: $border-radius;
-        margin-right: $vr;
-        padding: $vr;
+        border: var(--border-width) solid var(--color-grey);
+        border-radius: var(--border-radius);
+        margin-right: var(--vr);
+        padding: var(--vr);
     }
     form input {
         display: block;
-        margin-bottom: $vr;
+        margin-bottom: var(--vr);
         width: 100%;
     }
     .errorlist {
         list-style: none;
         padding-left: 0;
         margin-bottom: 0;
-        color: $color-red;
+        color: var(--color-red);
         li {
-            margin-bottom: $vr;
+            margin-bottom: var(--vr);
         }
         & + input {
-            color: $color-red-dark;
-            border-color: $color-red;
-            background: $color-red-light;
+            color: var(--color-red-dark);
+            border-color: var(--color-red);
+            background: var(--color-red-light);
         }
     }
 }
 
-$request-breakpoint: 768px;
 .organization.detail {
     display: flex;
     align-items: stretch;
     flex-direction: column;
-    @media all and (min-width: $request-breakpoint) {
+    @media all and (min-width: 768px) {
         flex-direction: row;
         & > * {
-            margin-left: $vr;
+            margin-left: var(--vr);
             &:first-child {
                 margin-left: 0;
             }
@@ -63,8 +60,8 @@ $request-breakpoint: 768px;
 
 .organization.detail .sidebar {
     h1 {
-        // font-size: $size-6;
-        font-weight: $bold;
+        /* font-size: $size-6; */
+        font-weight: var(--bold);
     }
     form {
         display: inline-block;
@@ -75,7 +72,7 @@ $request-breakpoint: 768px;
 }
 
 .organization.detail .tab-sections {
-    margin-bottom: $vr;
+    margin-bottom: var(--vr);
     .tab-section {
         display: none;
         margin-bottom: 0;
@@ -85,16 +82,16 @@ $request-breakpoint: 768px;
     }
     .empty {
         margin: calc(2 * var(--vr)) auto;
-        color: $color-grey;
-        font-size: $size-5;
-        font-weight: $bold;
+        color: var(--color-grey);
+        font-size: var(--size-5);
+        font-weight: var(--bold);
         text-align: center;
     }
 }
 
 .organization.detail .add-members {
-    border: 1px solid $color-grey;
-    padding: $vr;
+    border: 1px solid var(--color-grey);
+    padding: var(--vr);
     .add-members-input {
         display: flex;
         align-items: flex-end;
@@ -111,12 +108,12 @@ $request-breakpoint: 768px;
         }
         label {
             display: block;
-            font-size: $size-2;
+            font-size: var(--size-2);
         }
     }
     button {
         flex: 1;
-        margin-left: $vr;
+        margin-left: var(--vr);
     }
 
     @media screen and (min-width: 500px) {
