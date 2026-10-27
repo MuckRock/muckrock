@@ -3,16 +3,16 @@
     width: 30em;
     margin: 0 auto;
     .error-404__page {
-        box-shadow: 0px 4px 8px 0px $color-grey;
-        margin: $vr;
-        padding: calc(var(--vr) * 4) $vr $vr;
-        background: $color-white-pure;
-        border: 1px solid $color-grey;
+        box-shadow: 0px 4px 8px 0px var(--color-grey);
+        margin: var(--vr);
+        padding: calc(var(--vr) * 4) var(--vr) var(--vr);
+        background: var(--color-white-pure);
+        border: 1px solid var(--color-grey);
     }
     .redacted {
         margin-left: calc(var(--vr) * 0.25);
         margin-right: calc(var(--vr) * 0.25);
-        background-color: $color-black;
+        background-color: var(--color-black);
         color: transparent;
         &:first-child {
             margin-left: 0;
@@ -33,20 +33,20 @@
         height: 100%;
         padding: calc(2 * var(--vr));
         background-color: rgba(0, 0, 0, 0.6);
-        color: $color-white;
+        color: var(--color-white);
         h1 {
             font-size: calc(2 * var(--size-8));
         }
         h2 {
             max-width: 10em;
-            margin: 0 auto $vr;
+            margin: 0 auto var(--vr);
         }
         .error-report {
             max-width: 100%;
             width: 20em;
-            padding: $vr;
+            padding: var(--vr);
             background: rgba(0, 0, 0, 0.6);
-            border: 1px solid $color-black-pure;
+            border: 1px solid var(--color-black-pure);
         }
     }
 }

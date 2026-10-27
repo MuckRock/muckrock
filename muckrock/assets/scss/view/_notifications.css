@@ -1,5 +1,5 @@
 .notifications__list {
-    border: $border $color-grey;
+    border: var(--border-width) solid var(--color-grey);
 }
 
 .notifications__header {
@@ -12,8 +12,8 @@
 
 .notifications__list li {
     padding: calc(var(--vr) * 0.5);
-    background: $color-white-pure;
-    border-bottom: 1px solid $color-grey;
+    background: var(--color-white-pure);
+    border-bottom: 1px solid var(--color-grey);
     &:last-child {
         border-bottom: 0;
     }
@@ -24,12 +24,12 @@
 
 .notifications--empty {
     text-align: center;
-    padding: $vr;
+    padding: var(--vr);
     .icon {
         height: 4em;
         width: 4em;
         path, polygon, rect, circle {
-            fill: $color-grey;
+            fill: var(--color-grey);
         }
     }
 }

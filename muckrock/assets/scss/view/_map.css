@@ -6,7 +6,7 @@
 
 .map {
     flex: 3 1 45em;
-    padding-right: $vr;
+    padding-right: var(--vr);
 }
 
 .markers {
@@ -27,9 +27,9 @@
         width: 2em;
     }
     &.success .icon path {
-        fill: $color-green;
+        fill: var(--color-green);
     }
     &.failure .icon path {
-        fill: $color-red;
+        fill: var(--color-red);
     }
 }

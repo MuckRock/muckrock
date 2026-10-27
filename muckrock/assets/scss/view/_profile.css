@@ -1,26 +1,26 @@
 .profile {
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
     .metadata {
         dfn {
-            margin-bottom: $vr;
-            font-weight: $bold;
-            font-size: $size-3;
+            margin-bottom: var(--vr);
+            font-weight: var(--bold);
+            font-size: var(--size-3);
         }
         h1 {
-            font-size: $size-6;
-            font-weight: $bold;
+            font-size: var(--size-6);
+            font-weight: var(--bold);
         }
         h2 {
-            font-size: $size-5;
+            font-size: var(--size-5);
         }
     }
 }
 
 .profile .image {
-    margin: 0 0 $vr;
+    margin: 0 0 var(--vr);
     .header-image {
         margin-bottom: 0;
     }
@@ -32,7 +32,9 @@
         &.visible {
             display: block;
         }
-        border: $border $color-grey;
+    }
+    form {
+        border: var(--border-width) solid var(--color-grey);
         header, footer, textarea {
             margin: 0;
             padding: calc(var(--vr) * 0.5);
@@ -47,6 +49,7 @@
             display: flex;
             justify-content: space-between;
         }
+    
     }
 }
 
@@ -55,15 +58,15 @@
         margin-bottom: 0;
     }
     .username {
-        color: $color-grey;
+        color: var(--color-grey);
     }
     .avatar {
-        border-radius: $border-radius;
+        border-radius: var(--border-radius);
         width: 100%;
         max-width: 300px;
     }
     .title {
-        font-weight: $bold;
+        font-weight: var(--bold);
     }
     .links svg {
         margin-right: calc(var(--vr) * 0.5);
@@ -72,25 +75,25 @@
         display: flex;
         flex-wrap: wrap;
         .project-item {
-            margin-right: $vr;
+            margin-right: var(--vr);
         }
     }
-    // These buttons are a mix of spans, links and submit buttons wrapped in
-    // forms, so they will not line up on their own: the form is a block and
-    // breaks the row, and the inline-flex button group takes its baseline from
-    // its own children's margins.
+    /* These buttons are a mix of spans, links and submit buttons wrapped in */
+    /* forms, so they will not line up on their own: the form is a block and */
+    /* breaks the row, and the inline-flex button group takes its baseline from */
+    /* its own children's margins. */
     .actions > div {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: calc(var(--vr) * 0.5);
-        // the buttons drop their margins, so leave room for the drop shadow
+        /* the buttons drop their margins, so leave room for the drop shadow */
         margin-bottom: calc(var(--vr) * 0.25);
         > form {
             margin: 0;
         }
-        // only the buttons in the row itself - the contact modal is a child of
-        // this element too, and its buttons keep their own spacing
+        /* only the buttons in the row itself - the contact modal is a child of */
+        /* this element too, and its buttons keep their own spacing */
         > .button,
         > form > .button,
         > .button-group > .button {

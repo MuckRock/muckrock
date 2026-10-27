@@ -1,44 +1,44 @@
 .explore__header__wrapper {
   width: 100%;
-  background-color: $color-blue-light;
-  color: $color-blue-dark;
+  background-color: var(--color-blue-light);
+  color: var(--color-blue-dark);
 }
 
 .explore__header {
   max-width: 50em;
   margin: 0 auto;
   align-items: flex-end;
-  padding: calc($vr * 0.5);
+  padding: calc(var(--vr) * 0.5);
   @media screen and (min-width: 500px) {
-      padding: $vr;
+      padding: var(--vr);
   }
   & > * {
     margin-bottom: 0;
-    padding: 0 $vr $vr;
+    padding: 0 var(--vr) var(--vr);
     flex: 1 1 18rem;
   }
   h1 {
-    font-size: $size-7;
+    font-size: var(--size-7);
     line-height: 1em;
     @media screen and (min-width: 500px) {
-        font-size: $size-9;
+        font-size: var(--size-9);
     }
   }
 }
 
 .explore__main {
-  margin-bottom: $vr;
+  margin-bottom: var(--vr);
 }
 .explore__section {
-  margin: 0 auto $vr;
+  margin: 0 auto var(--vr);
   max-width: 50em;
-  padding-left: $vr;
+  padding-left: var(--vr);
 }
 
 .project.explore {
   .featured-projects {
-    margin-bottom: $vr;
-    padding-right: $vr;
+    margin-bottom: var(--vr);
+    padding-right: var(--vr);
   }
   .featured-projects .project {
     height: 100%;
@@ -47,13 +47,13 @@
 
 .news.explore {
   .featured-project {
-    border-top: 1px solid $color-grey;
-    padding-top: $vr;
+    border-top: 1px solid var(--color-grey);
+    padding-top: var(--vr);
     .featured-project__overview .h2 a {
-      color: $color-black;
+      color: var(--color-black);
       text-decoration: underline;
       &:hover {
-        color: $color-black;
+        color: var(--color-black);
       }
     }
   }
@@ -61,10 +61,10 @@
 
 .foia.explore {
   .news-request {
-    padding-top: $vr;
-    border-top: 1px solid $color-grey;
+    padding-top: var(--vr);
+    border-top: 1px solid var(--color-grey);
   }
   .news-request__article__title {
-    line-height: $vr;
+    line-height: var(--vr);
   }
 }

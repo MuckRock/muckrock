@@ -6,24 +6,30 @@
         @media screen and (min-width: 500px) {
             flex: 1;
         }
-        padding: calc($vr * 0.5);
+    }
+    .master {
+        padding: calc(var(--vr) * 0.5);
         @media screen and (min-width: 500px) {
-            padding: $vr;
+            padding: var(--vr);
         }
+    
     }
     .detail {
         flex: 0 0 100%;
         order: -1;
-        padding: calc($vr * 0.5);
+        padding: calc(var(--vr) * 0.5);
         @media screen and (min-width: 500px) {
-            padding: $vr;
+            padding: var(--vr);
         }
-        margin-bottom: $vr;
+    }
+    .detail {
+        margin-bottom: var(--vr);
         @media screen and (min-width: 500px) {
             flex: 3;
             order: 2;
             margin-bottom: 0;
         }
+    
     }
 }
 
@@ -31,12 +37,12 @@
     input.search {
         width: 100%;
         display: block;
-        margin-bottom: $vr;
+        margin-bottom: var(--vr);
         border-radius: 0;
         outline: none;
     }
     .tag-table {
-        border: $border $color-grey;
+        border: var(--border-width) solid var(--color-grey);
         border-left: none;
         border-right: none;
         max-height: 25em;
@@ -49,7 +55,7 @@
             border: none;
         }
         tr {
-            background-color: $color-white;
+            background-color: var(--color-white);
             &:first-child {
                 border-top: none;
             }
@@ -59,17 +65,17 @@
             a {
                 display: block;
                 padding: calc(var(--vr) * 0.5);
-                background-color: $color-white;
+                background-color: var(--color-white);
                 &.active, &:hover {
                     text-decoration: none;
-                    color: $color-white;
-                    background-color: $color-blue;
+                    color: var(--color-white);
+                    background-color: var(--color-blue);
                 }
             }
         }
     }
     .detail h1 {
-        font-weight: $bold;
+        font-weight: var(--bold);
     }
 }
 
@@ -77,10 +83,10 @@
     align-self: center;
     text-align: center;
     .call-to-action {
-        font-size: $size-5;
+        font-size: var(--size-5);
     }
     .tag {
-        font-size: $size-3;
+        font-size: var(--size-3);
     }
     ul {
         list-style-type: none;
