@@ -2,7 +2,7 @@
     header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: $vr*0.5;
+        margin-bottom: calc(var(--vr) * 0.5);
         border-bottom: 1px solid $color-grey-7;
     }
     form {
@@ -34,7 +34,7 @@
     }
     select {
         width: 100%;
-        margin-bottom: $vr*0.5;
+        margin-bottom: calc(var(--vr) * 0.5);
     }
 }
 

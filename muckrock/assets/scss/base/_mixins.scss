@@ -6,8 +6,6 @@
 ** At some point, mixins should be used to define utility classes to allow for quicker styling.
 */
 
-@use "sass:math";
-
 @mixin media($query) {
     @media #{$query} {
         @content;
@@ -43,7 +41,7 @@
 }
 
 @mixin padding($padding: $vr) {
-    padding: $padding*0.5;
+    padding: calc($padding * 0.5);
     @include media($medium-bp) {
         padding: $padding;
     }
@@ -61,15 +59,15 @@
     overflow: hidden;
     display: block;
     width: 100%;
-    margin:  $vr*0.5 0;
-    padding: math.div($vr, 6) math.div($vr, 3);
+    margin:  calc(var(--vr) * 0.5) 0;
+    padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
 
 }
 
 @mixin input() {
     @include textbox;
     display: inline-block;
-    padding: $vr*0.25 math.div($vr, 3) $vr*0.25 $vr*0.5;
+    padding: calc(var(--vr) * 0.25) calc(var(--vr) / 3) calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
     &:disabled {
         background-color: var(--color-disabled-lighten-25);
         border: 1px solid $color-disabled;
@@ -81,7 +79,7 @@
     form {
         display: block;
         width: 100%;
-        height: 2*$vr;
+        height: calc(2 * var(--vr));
         background-color: $background;
         @include border-radius;
         border-color: $background;

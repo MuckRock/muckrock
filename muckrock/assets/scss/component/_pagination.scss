@@ -10,7 +10,7 @@
 
 .pagination__control__item {
     flex: 1 1 15em;
-    margin-bottom: $vr*0.5;
+    margin-bottom: calc(var(--vr) * 0.5);
     text-align: center;
 }
 
@@ -27,7 +27,7 @@
     }
     .pagination__link {
         flex: 1 1 5em;
-        padding: $vr*0.25 $vr*0.5;
+        padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
         text-align: center;
         border-right: 1px solid $color-grey;
         border-bottom: 1px solid $color-grey;

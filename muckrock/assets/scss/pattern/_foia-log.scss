@@ -88,7 +88,6 @@
 .foia-log__request-id {
     margin: 0;
     font-family: $monospace;
-    font-family: $size-1;
 }
 
 /* Explore */
@@ -170,7 +169,7 @@
             }
             &__name {
                 font-weight: bold;
-                margin-bottom: $vr*0.25;
+                margin-bottom: calc(var(--vr) * 0.25);
             }
             &__releases {
                 overflow: visible;
@@ -185,7 +184,7 @@
                     position: absolute;
                     top: auto;
                     width: 100%;
-                    margin-top: $vr*0.5;
+                    margin-top: calc(var(--vr) * 0.5);
                     background: $color-white;
                     width: 18em;
                     padding: $vr;
@@ -195,7 +194,7 @@
                     z-index: 1;
                     padding-left: 0;
                     & ul {
-                        padding-left: 1.5*$vr;
+                        padding-left: calc(1.5 * var(--vr));
                     }
                     max-height: 25vh;
                     overflow-y: auto;

@@ -79,13 +79,13 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: $vr*0.25;
+  gap: calc(var(--vr) * 0.25);
   width: auto;
   height: 42px;
   min-width: 42px;
   white-space: nowrap;
   margin-bottom: 0;
-  padding: $vr*0.5;
+  padding: calc(var(--vr) * 0.5);
   font-weight: $bold;
   text-align: center;
   cursor: pointer;
@@ -103,7 +103,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   }
   .label {
     display: none;
-    margin: 0 $vr*0.25;
+    margin: 0 calc(var(--vr) * 0.25);
     vertical-align: middle;
     line-height: $lh;
   }
@@ -139,7 +139,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   }
   /* The label is hidden until the viewport is wide enough. */
   @media($label-bp) {
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
     .icon {
       margin-top: 0;
     }
@@ -328,7 +328,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       height: 42px;
       min-width: 42px;
       margin-bottom: 0;
-      padding: $vr*0.5;
+      padding: calc(var(--vr) * 0.5);
       vertical-align: middle;
       font-weight: $bold;
       text-align: left;
@@ -452,7 +452,7 @@ We use rich nav items to display images behind nav items, like for news articles
     position: absolute;
     z-index: 2;
     bottom: 0;
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
     font-weight: $bold;
     color: $color-white-pure;
     text-shadow: $color-black 1px 1px 1px;
