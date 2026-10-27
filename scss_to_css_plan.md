@@ -67,10 +67,13 @@ After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.s
 8. ✅ **Remove the remaining Sass-only features:** write out the 20 mixins and 6 `@extend`s. Expected diff: none.
    - It was 21 mixins and 5 `@extend`s (FOIAMachine's was step 6). Mixins are inlined at each `@include`; `media()` writes its query literally.
    - Writing out `@extend dfn` puts its selectors in the `dfn` rules. Sass had also woven them into four descendant rules, as 48 selectors no template can match; those are dropped.
-9. 🚧 **Convert the partials to `.css`, one folder per PR:** `base` → `component` → `pattern` → `view/*` → `docViewer`. Write out every `&__`/`&--`. Each PR's CSS diff must be empty after normalising.
+9. ✅ **Convert the partials to `.css`, one folder per PR:** `base` → `component` → `pattern` → `view/*` → `docViewer`. Write out every `&__`/`&--`. Each PR's CSS diff must be empty after normalising.
    - ✅ Entries and index files are plain-CSS `@import` lists, so Sass compiles each remaining partial on its own (with the variables from `additionalData`) and never sees converted CSS. Sass inlining a `.css` file moved its nested `@media` after the rule. No Sass warnings remain.
    - ✅ `base/`. Fixes three Fine Uploader images whose URLs Sass had rebased to a 404.
    - Production lowers rules nested under a selector list to `:is(list)`, which takes the list's highest specificity; `css:diff` refuses mixed-specificity parents in source, and they're written out flat.
+   - ✅ `component/`, `pattern/`, `view/` and its subfolders, the doc viewer's rules and the vendored normalize and loader. Sass evaluated every variable expression and the result is inlined; BEM joins are written out; where Sass emitted declarations after a nested rule, the rule is split in two so the order holds. Every step's built CSS matched, and Playwright showed no change.
+   - `style.css` declares `@charset "UTF-8"`, which Sass had added for the sortable-table arrows.
+   - Only `base/_variables.scss` remains, unused; step 11 removes it with Sass.
 10. **Remove unused and dead CSS, one folder per PR.** Unlike steps 6–9, the CSS diff is expected to change: only the removed rules.
     - A selector is dead when nothing MuckRock renders can match it. Search every place a class or ID can come from: Django templates, Python (form widget `attrs`, template tags, `mark_safe` HTML), JS/JSX/Svelte (`className`, `classList`, `addClass`, string building), third-party widgets (select2, jQuery UI, tooltipster, Fine Uploader, Tabulator) and HTML in agency and user content (communications, markdown).
     - Classes built at runtime (`"status-" + value`) can't be found by search; review those by hand and keep them unless the full set of values is known.
