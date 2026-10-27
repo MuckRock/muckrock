@@ -58,7 +58,11 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        // Add any SCSS options here if needed
+        // Each remaining Sass partial is compiled on its own, so it needs the
+        // global variables brought in; _variables.scss can't import itself.
+        loadPaths: [path.resolve(__dirname, "muckrock/assets/scss")],
+        additionalData: (source, filename) =>
+          filename.endsWith("_variables.scss") ? source : `@use "base/variables" as *;\n${source}`,
       },
     },
   },

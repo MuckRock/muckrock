@@ -11,7 +11,7 @@
     flex-wrap: wrap;
     align-items: stretch;
     padding-right: 0 !important;
-    // max-width: 75em;
+    /* max-width: 75em; */
 }
 
 .grid__column {
@@ -19,7 +19,7 @@
     min-width: 0;
     padding-right: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding-right: $vr;
+        padding-right: var(--vr);
     }
     &:first-child {
         padding-left: 0;
@@ -92,9 +92,9 @@
 }
 
 .mb1 {
-  margin-bottom: $vr;
+  margin-bottom: var(--vr);
 }
 
 .mr1 {
-  margin-right: $vr;
+  margin-right: var(--vr);
 }

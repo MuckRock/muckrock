@@ -3,8 +3,6 @@
 **
 ** The base establishes all of our SASS elements and the assumptions of our visual system.
 */
-
-@import 'variables';
-@import 'colors';
-@import 'grid';
-@import 'typography';
+@import "./_colors.css";
+@import "./_grid.css";
+@import "./_typography.css";

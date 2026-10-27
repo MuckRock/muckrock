@@ -11,20 +11,20 @@
 */
 
 body {
-    color: $color-black;
-    background-color: $color-white;
+    color: var(--color-black);
+    background-color: var(--color-white);
 }
 
 a {
-    color: $color-blue;
-    &:hover { color: $color-black; }
+    color: var(--color-blue);
+    &:hover { color: var(--color-black); }
 }
 
 code {
-    color: $color-black;
-    i, em { color: $color-blue; }
-    b, strong { color: $color-red; }
-    u { color: $color-green; }
+    color: var(--color-black);
+    i, em { color: var(--color-blue); }
+    b, strong { color: var(--color-red); }
+    u { color: var(--color-green); }
 }
 
 dfn, dt,
@@ -34,22 +34,22 @@ dfn, dt,
 .update.organization label,
 fieldset label,
 fieldset .errorlist {
-    color: $color-grey-3;
+    color: var(--color-grey-3);
 }
 
-.default { color: $color-grey; }
-.primary { color: $color-blue; }
-.success { color: $color-green; }
-.warning { color: $color-yellow; }
-.failure { color: $color-red; }
-.disabled { color: $color-grey-7; }
+.default { color: var(--color-grey); }
+.primary { color: var(--color-blue); }
+.success { color: var(--color-green); }
+.warning { color: var(--color-yellow); }
+.failure { color: var(--color-red); }
+.disabled { color: var(--color-grey-7); }
 
 .black {
-  color: $color-black;
+  color: var(--color-black);
 }
 .grey {
-  color: $color-grey;
+  color: var(--color-grey);
 }
 .white {
-  color: $color-white;
+  color: var(--color-white);
 }

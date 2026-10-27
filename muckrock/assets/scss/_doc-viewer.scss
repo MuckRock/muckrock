@@ -1,12 +1,3 @@
-// Third Party Frameworks
-@import '../vendor/normalize';
-@import 'base/box-sizing';
-
-@import 'base/base';
-@import 'component/button';
-@import 'component/viewer';
-@import 'pattern/button_group';
-
 body {
     background: $color-black;
     color: $color-white;
