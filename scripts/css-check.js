@@ -30,8 +30,6 @@ const WARNINGS_DIR = path.join(ROOT, "scripts/sass-warnings");
 const SASS_ENTRIES = [
   "muckrock/assets/scss/style.scss",
   "muckrock/assets/scss/docViewer.scss",
-  "muckrock/assets/scss/print.scss",
-  "muckrock/foiamachine/assets/scss/style.scss",
 ];
 
 /** Flatten nested rules into "outer inner" selectors, as Sass does. */
@@ -72,21 +70,65 @@ function isPrefixedDecl({ prop, value }) {
 
 const isPrefixedSelector = (selector) => /::?-(webkit|moz|ms|o)-/.test(selector);
 
-function cleanValue(value) {
-  return value
+/** Custom properties set only on a top-level :root rule, so var() can be replaced by the value. */
+function rootVariables(root) {
+  const values = new Map();
+  const setElsewhere = new Set();
+  root.walkDecls(/^--/, (decl) => {
+    const rule = decl.parent;
+    const atRoot =
+      rule.type === "rule" && rule.parent.type === "root" && rule.selector.trim() === ":root";
+    if (atRoot) values.set(decl.prop, decl.value);
+    else setElsewhere.add(decl.prop);
+  });
+  for (const name of setElsewhere) values.delete(name);
+  return values;
+}
+
+function resolveVariables(value, variables) {
+  const reference = /var\(\s*(--[\w-]+)\s*(?:,[^()]*)?\)/g;
+  // Variables may refer to other variables.
+  for (let depth = 0; depth < 10; depth++) {
+    const resolved = value.replace(reference, (match, name) =>
+      variables.has(name) ? variables.get(name) : match,
+    );
+    if (resolved === value) break;
+    value = resolved;
+  }
+  return value;
+}
+
+function cleanValue(value, variables = new Map()) {
+  return resolveVariables(value, variables)
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/#[0-9a-f]{3,8}\b/gi, (hex) => hex.toLowerCase());
+    .replace(/#[0-9a-f]{3,8}\b/gi, (hex) => hex.toLowerCase())
+    // Sass writes 0.5 where hand-written CSS often has .5.
+    .replace(/(^|[^\w.#])\.(\d)/g, (match, before, digit) => `${before}0.${digit}`);
+}
+
+// Sass drops the quotes around an attribute value that is a plain identifier.
+function cleanSelector(selector) {
+  return selector
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\[([\w-]+)([~|^$*]?=)(["'])(-?[A-Za-z_][\w-]*)\3\]/g, "[$1$2$4]");
 }
 
 /**
  * Turn a stylesheet into a flat list of rules, each with the at-rules that
  * wrap it, then print one block per rule.
  *
+ * var() references to :root custom properties are replaced by their values.
  * With ignorePrefixes, vendor-prefixed declarations and selectors are left out.
+ *
+ * Throws on a declaration that follows a nested rule: CSS applies it after
+ * that rule, where Sass moved it before, so flattening it would hide a change.
  */
 export function normalize(css, { ignorePrefixes = false } = {}) {
   const blocks = [];
+  const root = postcss.parse(css);
+  const variables = rootVariables(root);
 
   function walk(container, selectors, atRules) {
     let decls = [];
@@ -95,14 +137,18 @@ export function normalize(css, { ignorePrefixes = false } = {}) {
       decls = [];
     };
 
-    // Declarations after a nested rule still belong to the parent's block in
-    // Sass output, so collect them all before emitting children.
     const children = [];
     container.each((node) => {
       if (node.type === "decl") {
+        if (variables.has(node.prop)) return;
         if (ignorePrefixes && isPrefixedDecl(node)) return;
+        if (children.some((child) => child.nodes)) {
+          throw new Error(
+            `"${node.prop}" comes after a nested rule in "${selectors.join(", ")}"; move it above`,
+          );
+        }
         decls.push(
-          `${node.prop}: ${cleanValue(node.value)}${node.important ? " !important" : ""};`,
+          `${node.prop}: ${cleanValue(node.value, variables)}${node.important ? " !important" : ""};`,
         );
       } else if (node.type !== "comment") {
         children.push(node);
@@ -112,7 +158,7 @@ export function normalize(css, { ignorePrefixes = false } = {}) {
 
     for (const node of children) {
       if (node.type === "rule") {
-        let own = node.selectors.map((s) => s.replace(/\s+/g, " ").trim());
+        let own = node.selectors.map(cleanSelector);
         if (ignorePrefixes) own = own.filter((s) => !isPrefixedSelector(s));
         if (!own.length) continue;
         walk(node, joinSelectors(selectors, own), atRules);
@@ -127,7 +173,7 @@ export function normalize(css, { ignorePrefixes = false } = {}) {
     }
   }
 
-  walk(postcss.parse(css), [], []);
+  walk(root, [], []);
 
   return blocks
     .map(({ atRules, selectors, decls }) => {
@@ -148,6 +194,38 @@ export function normalize(css, { ignorePrefixes = false } = {}) {
     })
     .join("\n\n")
     .concat("\n");
+}
+
+/**
+ * Lower each sheet for Vite's browser targets, as its minified production
+ * build does, so nesting is compared as the :is() selectors browsers get.
+ */
+async function lowerForTargets(sheets) {
+  const { resolveConfig, transformWithEsbuild } = await import("vite");
+  const config = await resolveConfig({ root: ROOT, logLevel: "error" }, "build");
+  const lowered = {};
+  for (const [name, css] of Object.entries(sheets)) {
+    const result = await transformWithEsbuild(css, `${name}.css`, {
+      loader: "css",
+      target: config.build.cssTarget,
+    });
+    lowered[name] = result.code;
+  }
+  return lowered;
+}
+
+/**
+ * Throw if hand-written CSS uses nesting that the Vite dev server and the
+ * production build would treat differently, or that browsers cannot parse.
+ */
+function checkSources() {
+  for (const file of fs.globSync("muckrock/**/assets/css/**/*.css", { cwd: ROOT })) {
+    try {
+      normalize(fs.readFileSync(path.join(ROOT, file), "utf8"));
+    } catch (error) {
+      throw new Error(`${file}: ${error.message}`);
+    }
+  }
 }
 
 /** Build with Vite and return { entryName: css } from the manifest. */
@@ -262,7 +340,8 @@ async function main(command, ...args) {
     console.error("usage: node scripts/css-check.js snapshot|diff|warnings <step-name>");
     process.exit(2);
   }
-  const sheets = await buildCss();
+  checkSources();
+  const sheets = await lowerForTargets(await buildCss());
 
   if (command === "snapshot") {
     writeNormalized(BASELINE_DIR, sheets);
@@ -270,11 +349,11 @@ async function main(command, ...args) {
     return;
   }
 
-  let baselineDir = BASELINE_DIR;
-  if (ignorePrefixes) {
-    baselineDir = path.join(WORK_DIR, "baseline");
-    writeNormalized(baselineDir, readSheets(BASELINE_DIR), { ignorePrefixes });
-  }
+  // Re-processed so a change to the pipeline doesn't need a new snapshot.
+  const baselineDir = path.join(WORK_DIR, "baseline");
+  writeNormalized(baselineDir, await lowerForTargets(readSheets(BASELINE_DIR)), {
+    ignorePrefixes,
+  });
   writeNormalized(CURRENT_DIR, sheets, { ignorePrefixes });
   try {
     execFileSync(
