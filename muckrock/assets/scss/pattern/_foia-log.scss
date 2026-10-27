@@ -144,8 +144,8 @@
         }
     } 
     & .browse {
-        border-top: 1px solid rgba($color-white, .35);
-        background: rgba($color-white, .1);
+        border-top: 1px solid rgba(247, 248, 250, .35); // $color-white at 35%
+        background: rgba(247, 248, 250, .1); // $color-white at 10%
         &--inner {
             max-width: 72em;
             margin: 0 auto;

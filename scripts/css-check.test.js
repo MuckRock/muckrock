@@ -104,7 +104,7 @@ describe("normalize()", () => {
   it("keeps variables that are also set outside :root, since their value depends on scope", () => {
     const scoped = ":root { --ink: red; } .dark { --ink: white; } a { color: var(--ink); }";
     expect(normalize(scoped)).toContain("color: var(--ink);");
-    expect(normalize(scoped)).toContain("--ink: red;");
+    expect(normalize(scoped)).toContain("--ink: #ff0000;");
   });
 
   it("refuses a declaration after a nested rule, which CSS and Sass order differently", () => {
@@ -118,9 +118,37 @@ describe("normalize()", () => {
     expect(normalize('input[value="two words"] { color: red; }')).toContain('"two words"');
   });
 
+  it("evaluates calc() of one unit to the number Sass would have printed", () => {
+    const calc = `
+      :root { --vr: 1.1875rem; }
+      a { margin: calc(var(--vr) * 0.5) calc(var(--vr) / 3) calc(var(--vr) * -1) calc(2 * var(--vr)); }
+    `;
+    expect(normalize(calc)).toBe(
+      normalize("a { margin: 0.59375rem 0.3958333333rem -1.1875rem 2.375rem; }"),
+    );
+  });
+
+  it("leaves calc() alone when it mixes units", () => {
+    expect(normalize("a { width: calc(100% - 2rem); }")).toContain("calc(100% - 2rem)");
+  });
+
+  it("compares colours at the whole-number precision browsers render", () => {
+    expect(normalize("a { color: rgb(249.4494382022, 192.2359550562, 184.5505617978); }")).toBe(
+      normalize("a { color: #F9C0B9; }"),
+    );
+    expect(normalize("a { color: rgba(51, 60, 71, 0.8); border-color: #fff; }")).toBe(
+      normalize("a { color: #333c47cc; border-color: #ffffff; }"),
+    );
+    expect(normalize("a { color: #f9c0b9; }")).not.toBe(normalize("a { color: #f9c0ba; }"));
+    expect(normalize("a { color: white; background: transparent; }")).toBe(
+      normalize("a { color: #FFFFFF; background: rgba(0, 0, 0, 0); }"),
+    );
+    expect(normalize(".x { grid-area: red-zone; }")).toContain("red-zone");
+  });
+
   it("keeps bodyless at-rules and !important", () => {
     expect(normalize('@charset "UTF-8"; a { color: red !important; }')).toBe(
-      '@charset "UTF-8";\n\na {\n  color: red !important;\n}\n',
+      '@charset "UTF-8";\n\na {\n  color: #ff0000 !important;\n}\n',
     );
   });
 });

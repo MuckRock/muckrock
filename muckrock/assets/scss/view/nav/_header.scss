@@ -1,10 +1,9 @@
-@use "sass:color";
-
 $nav-border: 1px solid $color-grey;
 $nav-background: #FFFFFF;
+$nav-background-darken-10: #e6e6e6;
 
 @mixin drop-shadow() {
-  box-shadow: 0px 2px 8px rgba($color-black-pure, .25);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, .25);
 }
 
 /*
@@ -92,7 +91,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
   cursor: pointer;
   color: $color-black;
   &:hover {
-    background: color.adjust($nav-background, $lightness: -$color-darken-amount, $space: hsl);
+    background: $nav-background-darken-10;
   }
   a {
     display: block;
@@ -115,7 +114,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       @include svg-color($color-white);
     }
     &:hover {
-      background: color.adjust($color-blue, $lightness: -$color-darken-amount, $space: hsl);
+      background: var(--color-blue-darken-10);
     }
   }
   &.red {
@@ -135,7 +134,7 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       @include svg-color($color-white);
     }
     &:hover {
-      background: color.adjust($color-black, $lightness: -$color-darken-amount, $space: hsl)
+      background: var(--color-black-darken-10)
     }
   }
   /* The label is hidden until the viewport is wide enough. */
@@ -351,12 +350,12 @@ Nav items usually contain just an anchor or a span element, sometimes with an ic
       This helps maintain context for dropdowns, since the hover on a nav-item can disappear.
       */
       & > .nav-item {
-        background: color.adjust($nav-background, $lightness: -$color-darken-amount, $space: hsl);
+        background: $nav-background-darken-10;
         &.blue {
-          background: color.adjust($color-blue, $lightness: -$color-darken-amount, $space: hsl);
+          background: var(--color-blue-darken-10);
         }
         &.black {
-          background: color.adjust($color-black, $lightness: -$color-darken-amount, $space: hsl);
+          background: var(--color-black-darken-10);
         }
       }
     }
@@ -441,8 +440,8 @@ We use rich nav items to display images behind nav items, like for news articles
     width: 100%;
     height: 100%;
     background: $color-black;
-    background: rgba($color-black, .8);
-    background: linear-gradient(180deg, rgba($color-black-pure, .3), rgba($color-black-pure, 1));
+    background: rgba(51, 60, 71, .8); // $color-black at 80%
+    background: linear-gradient(180deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, 1));
     opacity: 1;
     transition: opacity .2s ease-in-out;
     &:hover {

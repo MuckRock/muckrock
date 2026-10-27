@@ -98,13 +98,127 @@ function resolveVariables(value, variables) {
   return value;
 }
 
+// Sass prints at most 10 decimal places.
+const formatNumber = (number) => String(Number(number.toFixed(10)));
+
+/** Value of a calc() expression of numbers sharing one unit, or null if it has anything else. */
+function evaluateExpression(expression) {
+  const tokens = expression.match(/\d*\.?\d+(?:e[+-]?\d+)?[a-z%]*|[-+*/()]|\S/gi) ?? [];
+  let position = 0;
+  const peek = () => tokens[position];
+  const fail = () => {
+    throw new Error("unsupported");
+  };
+
+  function primary() {
+    const token = tokens[position++];
+    if (token === "(") {
+      const value = sum();
+      if (tokens[position++] !== ")") fail();
+      return value;
+    }
+    if (token === "-") {
+      const value = primary();
+      return { number: -value.number, unit: value.unit };
+    }
+    const match = /^(\d*\.?\d+(?:e[+-]?\d+)?)([a-z%]*)$/i.exec(token ?? "");
+    if (!match) fail();
+    return { number: Number(match[1]), unit: match[2] };
+  }
+  function product() {
+    let left = primary();
+    while (peek() === "*" || peek() === "/") {
+      const operator = tokens[position++];
+      const right = primary();
+      if (operator === "*") {
+        if (left.unit && right.unit) fail();
+        left = { number: left.number * right.number, unit: left.unit || right.unit };
+      } else {
+        if (right.unit) fail();
+        left = { number: left.number / right.number, unit: left.unit };
+      }
+    }
+    return left;
+  }
+  function sum() {
+    let left = product();
+    while (peek() === "+" || peek() === "-") {
+      const operator = tokens[position++];
+      const right = product();
+      if (left.unit !== right.unit) fail();
+      left = {
+        number: operator === "+" ? left.number + right.number : left.number - right.number,
+        unit: left.unit,
+      };
+    }
+    return left;
+  }
+
+  try {
+    const result = sum();
+    if (position !== tokens.length) fail();
+    return `${formatNumber(result.number)}${result.unit}`;
+  } catch {
+    return null;
+  }
+}
+
+/** Replace calc() of plain numbers with its result, as Sass printed it. */
+function evaluateCalc(value) {
+  const innermost = /calc\(([^()]*(?:\([^()]*\)[^()]*)*)\)/g;
+  for (let depth = 0; depth < 10; depth++) {
+    const evaluated = value.replace(innermost, (match, expression) => {
+      const result = evaluateExpression(expression);
+      return result ?? match;
+    });
+    if (evaluated === value) break;
+    value = evaluated;
+  }
+  return value;
+}
+
+const NAMED_COLORS = {
+  aqua: "#00ffff", black: "#000000", blue: "#0000ff", fuchsia: "#ff00ff",
+  gray: "#808080", green: "#008000", grey: "#808080", lime: "#00ff00",
+  maroon: "#800000", navy: "#000080", olive: "#808000", orange: "#ffa500",
+  purple: "#800080", red: "#ff0000", silver: "#c0c0c0", teal: "#008080",
+  transparent: "#00000000", white: "#ffffff", yellow: "#ffff00",
+};
+const NAMED_COLOR = new RegExp(`(?<![\\w.-])(${Object.keys(NAMED_COLORS).join("|")})(?![\\w.-])`, "gi");
+
+/**
+ * Write named, hex, rgb() and rgba() colours as lowercase hex with whole-number
+ * channels, the precision browsers render at.
+ */
+function canonicalColors(value) {
+  const hex = (channels) =>
+    "#" +
+    channels
+      .map((channel) => Math.round(Math.min(255, Math.max(0, channel))).toString(16).padStart(2, "0"))
+      .join("")
+      .replace(/^([0-9a-f]{6})ff$/, "$1");
+  return value
+    .replace(NAMED_COLOR, (name) => NAMED_COLORS[name.toLowerCase()])
+    .replace(/#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi, (match, digits) => {
+      const full = digits.length <= 4 ? [...digits].map((d) => d + d).join("") : digits;
+      return hex(full.match(/../g).map((pair) => parseInt(pair, 16)));
+    })
+    .replace(
+      /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)(%?)\s*)?\)/gi,
+      (match, r, g, b, alpha = "1", percent) => {
+        const a = percent ? Number(alpha) / 100 : Number(alpha);
+        return hex([Number(r), Number(g), Number(b), a * 255]);
+      },
+    );
+}
+
 function cleanValue(value, variables = new Map()) {
-  return resolveVariables(value, variables)
+  value = resolveVariables(value, variables)
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/#[0-9a-f]{3,8}\b/gi, (hex) => hex.toLowerCase())
     // Sass writes 0.5 where hand-written CSS often has .5.
     .replace(/(^|[^\w.#])\.(\d)/g, (match, before, digit) => `${before}0.${digit}`);
+  return canonicalColors(evaluateCalc(value));
 }
 
 // Sass drops the quotes around an attribute value that is a plain identifier.
