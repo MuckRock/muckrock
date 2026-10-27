@@ -1,9 +1,9 @@
 /* Details */
 
 .detail {
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
     .header-container {
         display: flex;
@@ -27,7 +27,7 @@
             justify-content: space-between;
             max-width:38rem;
             margin-bottom: 0;
-            padding-right: $vr;
+            padding-right: var(--vr);
         }
     }
 
