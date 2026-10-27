@@ -1,22 +1,22 @@
 /* Lists */
 
 .list {
-  padding: calc($vr * 0.5);
+  padding: calc(var(--vr) * 0.5);
   @media screen and (min-width: 500px) {
-      padding: $vr;
+      padding: var(--vr);
   }
   .empty {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100%;
-    color: $color-grey;
-    font-weight: $bold;
+    color: var(--color-grey);
+    font-weight: var(--bold);
     text-align: center;
   }
   .filter.form {
-    border: $border $color-grey;
-    background-color: $color-grey-7;
+    border: var(--border-width) solid var(--color-grey);
+    background-color: var(--color-grey-7);
     .button-group {
       width: 100%;
     }
@@ -35,19 +35,19 @@
     width: 100%;
     text-align: center;
     padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-    border: $border $color-grey;
+    border: var(--border-width) solid var(--color-grey);
     .icon {
         vertical-align: middle;
         path, polygon, rect, circle {
-            fill: $color-blue;
+            fill: var(--color-blue);
         }
     }
     &:hover {
-        color: $color-white;
-        background: $color-blue;
+        color: var(--color-white);
+        background: var(--color-blue);
         .icon {
             path, polygon, rect, circle {
-                fill: $color-white;
+                fill: var(--color-white);
             }
         }
     }
@@ -82,26 +82,26 @@
 }
 
 .list__sections li {
-  border: $border $color-grey;
+  border: var(--border-width) solid var(--color-grey);
   border-bottom: 0;
   &:last-child {
-    border-bottom: 1px solid $color-grey;
+    border-bottom: 1px solid var(--color-grey);
   }
 }
 .list__sections a {
   display: block;
   width: 100%;
   padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-  font-weight: $bold;
+  font-weight: var(--bold);
   text-decoration: none;
   &:hover {
-    background: $color-blue;
-    color: $color-white;
+    background: var(--color-blue);
+    color: var(--color-white);
   }
 }
 .list__sections .current-tab a {
-  background: $color-blue;
-  color: $color-white;
+  background: var(--color-blue);
+  color: var(--color-white);
 }
 .list__sections .counter {
     min-width: 3em;
@@ -122,12 +122,12 @@
 }
 
 .news-list-article {
-  margin-bottom: $vr;
+  margin-bottom: var(--vr);
 }
 
 .news-list-article .article__overview {
-  padding-bottom: $vr;
-  border-bottom: 1px solid $color-grey;
+  padding-bottom: var(--vr);
+  border-bottom: 1px solid var(--color-grey);
 }
 .news-list-article:last-child .article__overview {
   margin-bottom: 0;

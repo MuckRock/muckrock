@@ -1,6 +1,3 @@
-$left-column: 1 1 19em;
-$right-column: 4 1 32em;
-
 .jurisdiction {
     display: flex;
     flex-wrap: wrap;
@@ -12,32 +9,32 @@ $right-column: 4 1 32em;
     flex: 0 1 100%;
     display: flex;
     flex-wrap: wrap;
-    margin-top: $vr;
+    margin-top: var(--vr);
     margin-bottom: 0;
     .jurisdiction__image {
         flex: 0 1 12em;
-        margin: $vr;
+        margin: var(--vr);
         margin-top: 0;
         img {
             margin-bottom: 0;
         }
         figcaption {
-            color: $color-grey;
-            font-size: $size-1;
-            line-height: $lh;
+            color: var(--color-grey);
+            font-size: var(--size-1);
+            line-height: var(--lh);
         }
     }
     .jurisdiction__info {
         flex: 1 1 20em;
-        margin: $vr;
+        margin: var(--vr);
         margin-top: 0;
     }
     .jurisdiction__name {
-        font-size: $size-4;
-        font-weight: $bold;
+        font-size: var(--size-4);
+        font-weight: var(--bold);
     }
     .jurisdiction__title {
-        font-size: $size-8;
+        font-size: var(--size-8);
         line-height: calc(var(--lh) * .7);
     }
     @media (max-width: 35.625em) {
@@ -47,7 +44,7 @@ $right-column: 4 1 32em;
             flex: 0 1 100%;
         }
         .jurisdiction__name {
-            font-size: $size-4;
+            font-size: var(--size-4);
         }
         .jurisdiction__image img {
             max-width: 8em;
@@ -55,9 +52,9 @@ $right-column: 4 1 32em;
     }
 }
 .jurisdiction__aside {
-    flex: $left-column;
+    flex: 1 1 19em;
     & > * {
-        margin: 0 $vr $vr;
+        margin: 0 var(--vr) var(--vr);
     }
     .jurisdiction__actions {
         flex: 1 1 20em;
@@ -73,7 +70,7 @@ $right-column: 4 1 32em;
     }
     .button-group {
         width: 100%;
-        margin-bottom: $vr;
+        margin-bottom: var(--vr);
         justify-content: center;
     }
     @media (max-width: 54.3125em) {
@@ -83,23 +80,23 @@ $right-column: 4 1 32em;
     }
 }
 .jurisdiction__main {
-    flex: $right-column;
+    flex: 4 1 32em;
     min-width: 0;
-    margin: 0 $vr $vr;
+    margin: 0 var(--vr) var(--vr);
     .jurisdiction__stats {
         display: flex;
         flex-wrap: wrap;
         & > * {
             flex: 1 1 auto;
-            margin-right: $vr;
+            margin-right: var(--vr);
         }
     }
     .analysis {
         h2 {
-            font-size: $size-6;
+            font-size: var(--size-6);
         }
         h3 {
-            border-bottom: 1px solid $color-grey;
+            border-bottom: 1px solid var(--color-grey);
         }
     }
 }
@@ -108,11 +105,11 @@ $right-column: 4 1 32em;
         margin-bottom: 0;
     }
     .law__summary {
-        font-size: $size-2;
+        font-size: var(--size-2);
     }
     @media (max-width: 35.625em) {
         .law__name {
-            font-size: $size-4;
+            font-size: var(--size-4);
         }
     }
 }
@@ -120,15 +117,15 @@ $right-column: 4 1 32em;
     width: 12em;
     float: left;
     margin-right: calc(2 * var(--vr));
-    border: $border $color-grey;
+    border: var(--border-width) solid var(--color-grey);
     padding: calc(var(--vr) * 0.5);
-    background: $color-white-pure;
+    background: var(--color-white-pure);
     p {
-        font-weight: $bold;
+        font-weight: var(--bold);
         margin-bottom: 0;
     }
     ol {
-        padding-left: $vr;
+        padding-left: var(--vr);
     }
     @media (max-width: 35.625em) {
         float: none;
@@ -136,17 +133,17 @@ $right-column: 4 1 32em;
     }
 }
 .jurisdiction__point__symbol {
-    font-size: $size-5;
-    font-weight: $bold;
+    font-size: var(--size-5);
+    font-weight: var(--bold);
     &.red {
-        color: $color-red;
+        color: var(--color-red);
     }
     &.green {
-        color: $color-green;
+        color: var(--color-green);
     }
 }
 
-// https://stackoverflow.com/questions/20456694/grid-of-responsive-squares/20457076#20457076
+/* https://stackoverflow.com/questions/20456694/grid-of-responsive-squares/20457076#20457076 */
 .place-map {
 	.cell {
 		float: left;
@@ -157,19 +154,22 @@ $right-column: 4 1 32em;
 		overflow: hidden;
   }
   .state {
-    color: $color-white;
-    background: $color-grey-5;
-    outline: $border $color-grey-6;
+    color: var(--color-white);
+    background: var(--color-grey-5);
+    outline: var(--border-width) solid var(--color-grey-6);
     transition: background 0.2s linear;
     .avg-response-time {
-      font-size: $size-5;
+      font-size: var(--size-5);
       @media (max-width: 48em) {
-        font-size: $size-2;
+        font-size: var(--size-2);
       }
+    }
+    .avg-response-time {
       margin: 0;
+    
     }
     .abbrev {
-      font-size: $size-3;
+      font-size: var(--size-3);
       margin: 0;
       @media (max-width: 48em) {
         display: none;
@@ -177,16 +177,16 @@ $right-column: 4 1 32em;
     }
   }
   .state.yes {
-    background: $color-green;
+    background: var(--color-green);
   }
   .state.no {
-    background: $color-red;
+    background: var(--color-red);
   }
   .state.maybe {
-    background: $color-yellow;
+    background: var(--color-yellow);
   }
   .state:hover {
-    background: $color-grey-5;
+    background: var(--color-grey-5);
   }
   .state-content {
     position: absolute;
@@ -223,11 +223,13 @@ div.place-map::after {
 .small-maps {
   width: 100%;
   .state {
-    font-size: $size-3;
+    font-size: var(--size-3);
     @media (max-width: 48em) {
-      font-size: $size-2;
+      font-size: var(--size-2);
     }
   }
+}
+.small-maps {
   margin-top: 2em;
   h2 {
     margin-top: 3em;

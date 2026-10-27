@@ -5,12 +5,12 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        margin-bottom: $vr;
-        border: $border $color-grey;
-        border-radius: $border-radius;
+        margin-bottom: var(--vr);
+        border: var(--border-width) solid var(--color-grey);
+        border-radius: var(--border-radius);
         .left, .right {
             margin-bottom: 0;
-            padding: $vr;
+            padding: var(--vr);
         }
         .left {
             flex: 1;
@@ -19,7 +19,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border-top: 1px solid $color-grey;
+            border-top: 1px solid var(--color-grey);
             p {
                 margin-bottom: 0;
             }
@@ -28,10 +28,10 @@
             flex-direction: row;
             .right {
                 border-top: none;
-                border-left: 1px solid $color-grey;
+                border-left: 1px solid var(--color-grey);
             }
             .view {
-                font-size: $size-4;
+                font-size: var(--size-4);
             }
         }
     }

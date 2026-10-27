@@ -6,7 +6,7 @@
         }
         input[type=search] {
             width: 75%;
-            margin-right: $vr;
+            margin-right: var(--vr);
         }
         input[type=submit] {
             flex: auto;
@@ -19,7 +19,7 @@
         }
         li {
             display: inline-block;
-            padding-right: $vr;
+            padding-right: var(--vr);
             &:last-child {
                 padding-right: 0;
             }
