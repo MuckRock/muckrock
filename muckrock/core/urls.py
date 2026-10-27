@@ -182,10 +182,6 @@ urlpatterns = [
     re_path(r"^stats_api/", include(router_stats.urls)),
     re_path(r"^robots\.txt$", include("robots.urls")),
     re_path(
-        r"^favicon.ico$",
-        RedirectView.as_view(url=settings.STATIC_URL + "icons/favicon.ico"),
-    ),
-    re_path(
         r"^sitemap\.xml$",
         django.contrib.sitemaps.views.index,
         {"sitemaps": sitemaps},

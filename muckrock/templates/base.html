@@ -19,9 +19,11 @@
     <link rel="alternate" type="application/rss+xml" title="MuckRock News Feed" href="{% url 'news-feed' %}" />
     {% endblock rss %}
     <!-- Load Assets -->
-    <link rel="shortcut icon"       href="{% static 'icons/favicon.ico' %}" />
+    <link rel="icon"                href="{% static 'icons/favicon.ico' %}" sizes="16x16 24x24" />
+    <link rel="icon"                href="{% static 'icons/favicon.svg' %}" type="image/svg+xml" />
+    <link rel="icon"                href="{% static 'icons/icon-192.png' %}" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon"    href="{% static 'icons/apple-touch-icon.png' %}" sizes="180x180" />
     <link rel="mask-icon"           href="{% static 'icons/favicon.svg' %}" color="#367AF0" />
-    <link rel="apple-touch-icon"    href="{% static 'icons/logo.png' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'hijack/hijack-styles.css' %}" />
     <link href="{% static 'vendor/select2/dist/css/select2.css' %}" type="text/css" media="screen" rel="stylesheet" />
     <link href="{% static 'admin/css/autocomplete.css' %}" type="text/css" media="screen" rel="stylesheet" />
