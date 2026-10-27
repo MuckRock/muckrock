@@ -6,9 +6,6 @@
  *   npm run css:diff -- --ignore-prefixes
  *                          the same, leaving out vendor-prefixed CSS on both sides
  *   npm run css:snapshot   overwrite the baseline with the current build
- *   npm run css:warnings -- step-N
- *                          record Sass deprecation warnings in
- *                          scripts/sass-warnings/step-N.txt
  *
  * Normalising removes differences that cannot change how a page renders
  * (comments, whitespace, nesting, how rules are grouped into at-rule blocks,
@@ -26,8 +23,6 @@ const BASELINE_DIR = path.join(ROOT, "scripts/css-baseline");
 const WORK_DIR = path.join(ROOT, "node_modules/.cache/css-check");
 const BUILD_DIR = path.join(WORK_DIR, "build");
 const CURRENT_DIR = path.join(WORK_DIR, "current");
-const WARNINGS_DIR = path.join(ROOT, "scripts/sass-warnings");
-const SCSS_DIR = path.join(ROOT, "muckrock/assets/scss");
 
 /** Flatten nested rules into "outer inner" selectors, as Sass does. */
 /** [ids, classes, types] specificity; a function's arguments count as written. */
@@ -363,7 +358,7 @@ async function lowerForTargets(sheets) {
  * production build would treat differently, or that browsers cannot parse.
  */
 function checkSources() {
-  for (const file of fs.globSync("muckrock/**/assets/{css,scss}/**/*.css", { cwd: ROOT })) {
+  for (const file of fs.globSync("muckrock/**/assets/css/**/*.css", { cwd: ROOT })) {
     try {
       normalize(fs.readFileSync(path.join(ROOT, file), "utf8"));
     } catch (error) {
@@ -379,8 +374,6 @@ async function buildCss() {
     root: ROOT,
     logLevel: "error",
     build: { outDir: BUILD_DIR, emptyOutDir: true, minify: false },
-    // Sass deprecation warnings would bury the diff.
-    css: { preprocessorOptions: { scss: { logger: { warn() {} } } } },
   });
   const manifest = JSON.parse(
     fs.readFileSync(path.join(BUILD_DIR, "manifest.json"), "utf8"),
@@ -408,63 +401,6 @@ async function buildCss() {
   return result;
 }
 
-/** Compile each remaining Sass partial, as Vite does, and report its warnings. */
-async function recordWarnings(name) {
-  const sass = await import("sass");
-  const byEntry = {};
-  const locations = new Map();
-
-  const partials = fs
-    .globSync("muckrock/{assets,foiamachine/assets}/**/*.scss", { cwd: ROOT })
-    .filter((file) => !file.endsWith("_variables.scss"))
-    .sort();
-  for (const entry of partials) {
-    const counts = (byEntry[entry] = {});
-    const file = path.join(ROOT, entry);
-    sass.compileString(`@use "base/variables" as *;\n${fs.readFileSync(file, "utf8")}`, {
-      url: pathToFileURL(file),
-      loadPaths: [SCSS_DIR],
-      // Without verbose, Sass stops repeating a warning after five.
-      verbose: true,
-      logger: {
-        warn(message, { deprecationType, span }) {
-          const type = deprecationType?.id ?? "warn";
-          counts[type] = (counts[type] ?? 0) + 1;
-          const where = span?.url
-            ? `${path.relative(ROOT, fileURLToPath(span.url))}:${span.start.line + 1}`
-            : "(unknown)";
-          const key = `${type.padEnd(16)} ${where}`;
-          locations.set(key, (locations.get(key) ?? 0) + 1);
-        },
-      },
-    });
-  }
-
-  const lines = [`# Sass warnings: ${name}`, "", "## Count by entry and type", ""];
-  const warned = Object.entries(byEntry).filter(([, counts]) => Object.keys(counts).length);
-  lines.push(`${Object.keys(byEntry).length} Sass files compiled, ${warned.length} with warnings`, "");
-  for (const [entry, counts] of warned) {
-    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
-    lines.push(`${entry}: ${total}`);
-    for (const [type, n] of Object.entries(counts).sort()) {
-      lines.push(`  ${type.padEnd(16)} ${n}`);
-    }
-  }
-  lines.push(
-    "",
-    `## Locations (${locations.size}), with how often each fires across all entries`,
-    "",
-  );
-  for (const [key, n] of [...locations].sort(([a], [b]) => a.localeCompare(b))) {
-    lines.push(`${key}  x${n}`);
-  }
-
-  fs.mkdirSync(WARNINGS_DIR, { recursive: true });
-  const file = path.join(WARNINGS_DIR, `${name}.txt`);
-  fs.writeFileSync(file, lines.join("\n") + "\n");
-  console.log(`Wrote ${path.relative(ROOT, file)}: ${locations.size} locations`);
-}
-
 function writeNormalized(dir, sheets, options) {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
@@ -483,14 +419,9 @@ function readSheets(dir) {
 }
 
 async function main(command, ...args) {
-  const [arg] = args;
   const ignorePrefixes = args.includes("--ignore-prefixes");
-  if (command === "warnings" && arg) {
-    await recordWarnings(arg);
-    return;
-  }
   if (command !== "snapshot" && command !== "diff") {
-    console.error("usage: node scripts/css-check.js snapshot|diff|warnings <step-name>");
+    console.error("usage: node scripts/css-check.js snapshot|diff [--ignore-prefixes]");
     process.exit(2);
   }
   checkSources();

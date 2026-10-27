@@ -1,8 +1,8 @@
 /*
-** _base.scss
+** base.css
 **
 ** The base establishes all of our SASS elements and the assumptions of our visual system.
 */
-@import "./_colors.css";
-@import "./_grid.css";
-@import "./_typography.css";
+@import "./colors.css";
+@import "./grid.css";
+@import "./typography.css";

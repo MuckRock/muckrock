@@ -12,7 +12,7 @@ window.qq = qq;
 
 // Import styles
 import './css/tokens.css'
-import './scss/style.css'
+import './css/style.css'
 
 // Static import so the full module graph loads as part of this module's
 // dependency tree. This ensures inline <script type="module"> tags in

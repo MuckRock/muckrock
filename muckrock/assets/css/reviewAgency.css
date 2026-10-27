@@ -3,7 +3,7 @@
 **
 ** Styles for the review agency detail page and its repair component.
 ** Imported by js/reviewAgency.ts, so the template's markup and the Svelte
-** component's markup share one stylesheet.  Values mirror scss/base/_variables.scss.
+** component's markup share one stylesheet.  Values mirror tokens.css.
 */
 
 .review-agency-detail {

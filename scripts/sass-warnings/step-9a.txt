@@ -1,9 +1,0 @@
-# Sass warnings: step-9a
-
-## Count by entry and type
-
-78 Sass files compiled, 0 with warnings
-
-
-## Locations (0), with how often each fires across all entries
-

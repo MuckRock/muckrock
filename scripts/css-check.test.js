@@ -1,21 +1,16 @@
 import { describe, it, expect } from "vitest";
-import * as sass from "sass";
 
 import { normalize } from "./css-check";
 
-const compileScss = (scss) => sass.compileString(scss).css;
-
 describe("normalize()", () => {
-  it("treats native CSS nesting as equal to the Sass it replaces", () => {
-    const scss = `
-      .card, .panel {
-        color: #FFF;
-        > .title { font-weight: bold; }
-        &:hover, &.active { color: red; }
-        @media (min-width: 40em) {
-          padding: 1rem;
-          .title { font-size: 2rem; }
-        }
+  it("treats native CSS nesting as equal to the flattened rules Sass printed", () => {
+    const flattened = `
+      .card, .panel { color: #FFF; }
+      .card > .title, .panel > .title { font-weight: bold; }
+      .card:hover, .card.active, .panel:hover, .panel.active { color: red; }
+      @media (min-width: 40em) {
+        .card, .panel { padding: 1rem; }
+        .card .title, .panel .title { font-size: 2rem; }
       }
     `;
     const nativeCss = `
@@ -29,7 +24,7 @@ describe("normalize()", () => {
         }
       }
     `;
-    expect(normalize(nativeCss)).toBe(normalize(compileScss(scss)));
+    expect(normalize(nativeCss)).toBe(normalize(flattened));
   });
 
   it("refuses a BEM selector built from &, which native nesting cannot express", () => {
@@ -87,7 +82,7 @@ describe("normalize()", () => {
   });
 
   it("gives the same result when run on its own output", () => {
-    const once = normalize(compileScss(".a { b, c > d { color: red; } @media print { e: f; } }"));
+    const once = normalize(".a { b, c > d { color: red; } @media print { e: f; } }");
     expect(normalize(once)).toBe(once);
   });
 
