@@ -91,6 +91,33 @@ describe("normalize()", () => {
     expect(normalize(once)).toBe(once);
   });
 
+  it("replaces :root variables with their values", () => {
+    const withVariables = `
+      :root { --ink: #362522; --line: 1px solid var(--ink); }
+      a { color: var(--ink); border: var(--line); }
+    `;
+    expect(normalize(withVariables)).toBe(
+      normalize("a { color: #362522; border: 1px solid #362522; }"),
+    );
+  });
+
+  it("keeps variables that are also set outside :root, since their value depends on scope", () => {
+    const scoped = ":root { --ink: red; } .dark { --ink: white; } a { color: var(--ink); }";
+    expect(normalize(scoped)).toContain("color: var(--ink);");
+    expect(normalize(scoped)).toContain("--ink: red;");
+  });
+
+  it("refuses a declaration after a nested rule, which CSS and Sass order differently", () => {
+    expect(() => normalize(".a { b { color: red; } color: blue; }")).toThrow(/"color" comes after/);
+  });
+
+  it("treats Sass's number and attribute-selector formatting as equal to the source's", () => {
+    expect(normalize('a[href^="http"], input[type="text"] { margin: .5em -.25em; }')).toBe(
+      normalize("a[href^=http], input[type=text] { margin: 0.5em -0.25em; }"),
+    );
+    expect(normalize('input[value="two words"] { color: red; }')).toContain('"two words"');
+  });
+
   it("keeps bodyless at-rules and !important", () => {
     expect(normalize('@charset "UTF-8"; a { color: red !important; }')).toBe(
       '@charset "UTF-8";\n\na {\n  color: red !important;\n}\n',

@@ -1,2 +1,2 @@
 import "vite/modulepreload-polyfill";
-import "./scss/print.scss";
+import "./css/print.css";

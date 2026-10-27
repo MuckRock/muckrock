@@ -216,7 +216,7 @@ Most major models have custom QuerySet managers with `get_queryset()` methods fo
 
 - Vite for bundling (config in `vite.config.js`), loaded into templates by `django-vite`
 - Entry points: main, foiamachine, docViewer, getHelp, reviewAgency, print
-- Source in `muckrock/assets/js/`, `muckrock/assets/scss/`, and Svelte components in `muckrock/assets/components/`
+- Source in `muckrock/assets/js/`, `muckrock/assets/scss/` (moving to plain CSS in `muckrock/assets/css/`, issue #2220), and Svelte components in `muckrock/assets/components/`
 - `inv up` starts the `muckrock_vite` container running the dev server on port 4201; with `DEBUG` on, Django serves assets from it, so no rebuild is needed while it runs
 - Tests and production read the built manifest at `muckrock/assets/dist/manifest.json`; run `inv npm "run build"` before tests that render templates
 **JavaScript Stack:**

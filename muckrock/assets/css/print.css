@@ -1,5 +1,5 @@
-// Print stylesheet for FOIA request detail pages.
-// Intentionally standalone — does not import the main app styles.
+/* Print stylesheet for FOIA request detail pages.
+   Intentionally standalone — does not import the main app styles. */
 
 @page {
   margin: 0.75in;
@@ -132,7 +132,7 @@ time {
   font-size: 11pt;
   word-wrap: break-word;
 
-  // Tame any rich HTML carried over from emails.
+  /* Tame any rich HTML carried over from emails. */
   img {
     max-width: 100%;
     height: auto;
@@ -154,7 +154,7 @@ time {
   color: #555;
 }
 
-// Print-specific tweaks.
+/* Print-specific tweaks. */
 @media print {
   body.print {
     padding: 0;
@@ -168,7 +168,7 @@ time {
     color: inherit;
   }
 
-  // Show URLs after links for context.
+  /* Show URLs after links for context. */
   a[href^="http"]::after {
     content: " (" attr(href) ")";
     font-size: 0.85em;
