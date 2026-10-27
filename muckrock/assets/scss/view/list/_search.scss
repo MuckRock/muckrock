@@ -15,7 +15,7 @@
     }
     .list-filters {
         label {
-            padding-left: $vr*0.25;
+            padding-left: calc(var(--vr) * 0.25);
         }
         li {
             display: inline-block;

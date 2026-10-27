@@ -21,7 +21,7 @@
         }
     }
     .dropdown-list-item {
-        padding: $vr*0.25;
+        padding: calc(var(--vr) * 0.25);
         cursor: pointer;
         &:hover {
             color: $color-black;

@@ -17,24 +17,24 @@
 ** work, then we fall back to the browser's default sans-serif font.
 */
 
-$sans-serif:    'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-$monospace:     'Source Code Pro', 'Courier Prime', monospace;
+$sans-serif:    var(--sans-serif);
+$monospace:     var(--monospace);
 
-$bold:          500;
-$normal:        400;
+$bold:          var(--bold);
+$normal:        var(--normal);
 
-$size-1:        0.6875rem;
-$size-2:        0.8125rem;
-$size-3:        1.0000rem;
-$size-4:        1.1875rem;
-$size-5:        1.4375rem;
-$size-6:        1.6875rem;
-$size-7:        2.0625rem;
-$size-8:        2.5000rem;
-$size-9:        3.0000rem;
+$size-1:        var(--size-1);
+$size-2:        var(--size-2);
+$size-3:        var(--size-3);
+$size-4:        var(--size-4);
+$size-5:        var(--size-5);
+$size-6:        var(--size-6);
+$size-7:        var(--size-7);
+$size-8:        var(--size-8);
+$size-9:        var(--size-9);
 
-$lh:            1.4375em;
-$vr:            1.1875rem;
+$lh:            var(--lh);
+$vr:            var(--vr);
 
 /*
 ** Color Variables
@@ -92,8 +92,8 @@ $color-odd-background:  var(--color-odd-background);
 ** Border Variables
 */
 
-$border-width:  1px;
-$border-radius: 4px;
+$border-width:  var(--border-width);
+$border-radius: var(--border-radius);
 $border:        $border-width solid;
 
 /*

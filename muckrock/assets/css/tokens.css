@@ -3,6 +3,31 @@
    with 40% more HSL lightness. */
 
 :root {
+    /* Typography */
+    --sans-serif: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    --monospace: "Source Code Pro", "Courier Prime", monospace;
+
+    --bold: 500;
+    --normal: 400;
+
+    --size-1: 0.6875rem;
+    --size-2: 0.8125rem;
+    --size-3: 1rem;
+    --size-4: 1.1875rem;
+    --size-5: 1.4375rem;
+    --size-6: 1.6875rem;
+    --size-7: 2.0625rem;
+    --size-8: 2.5rem;
+    --size-9: 3rem;
+
+    /* Line height and the vertical rhythm unit */
+    --lh: 1.4375em;
+    --vr: 1.1875rem;
+
+    /* Borders */
+    --border-width: 1px;
+    --border-radius: 4px;
+
     /* Greys, from black (1) to white (8) */
     --color-grey-1: #333C47;
     --color-grey-2: #495361;

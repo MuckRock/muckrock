@@ -3,7 +3,7 @@
     justify-content: space-between;
     @include border;
     @include border-radius;
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
 }
 
 .activity {

@@ -104,7 +104,7 @@ $color-agency-lighten-20: #5a90f2;
             width: 100%;
             background-color: $color-agency;
             border: none;
-            border-bottom: 2*$border-width dotted $color-agency-lighten-20;
+            border-bottom: calc(2 * var(--border-width)) dotted $color-agency-lighten-20;
             padding-left: 0;
             border-radius: 0;
             @include font-sizing(1.25, 3);
@@ -144,7 +144,7 @@ $color-agency-lighten-20: #5a90f2;
     .permanent_embargo label,
     .no_proxy label {
       display: inline;
-      margin-right: $vr*0.5;
+      margin-right: calc(var(--vr) * 0.5);
     }
     fieldset.advanced {
       color: $color-white;
@@ -255,7 +255,7 @@ $color-agency-lighten-20: #5a90f2;
       right: 10px;
       z-index: 100;
       border-radius: 4px;
-      padding: 0 $vr*0.25;
+      padding: 0 calc(var(--vr) * 0.25);
       background: $color-white;
       color: $color-black;
       font-weight: bold;
@@ -311,10 +311,10 @@ $color-agency-lighten-20: #5a90f2;
 .filing-blocked {
     @include border;
     max-width: 32rem;
-    margin: 2*$vr auto;
-    padding: 2*$vr;
+    margin: calc(2 * var(--vr)) auto;
+    padding: calc(2 * var(--vr));
     border-color: $color-grey-7;
-    border-radius: 4*$border-radius;
+    border-radius: calc(4 * var(--border-radius));
     background-color: $color-white-pure;
     text-align: center;
     .symbol {
@@ -327,14 +327,14 @@ $color-agency-lighten-20: #5a90f2;
         }
     }
     h2 {
-        margin-top: $vr*0.5;
+        margin-top: calc(var(--vr) * 0.5);
     }
     p {
         @include vr;
         color: $color-grey-2;
     }
     .button {
-        margin: $vr*0.5 0 $vr 0;
+        margin: calc(var(--vr) * 0.5) 0 $vr 0;
     }
 }
 

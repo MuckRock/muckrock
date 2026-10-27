@@ -1,9 +1,7 @@
-@use "sass:math";
-
 .tag {
     display: inline-block;
-    margin-bottom: math.div($vr, 6);
-    padding: 0 $vr*0.25;
+    margin-bottom: calc(var(--vr) / 6);
+    padding: 0 calc(var(--vr) * 0.25);
     background: $color-blue;
     color: $color-white;
     font-size: $size-3;

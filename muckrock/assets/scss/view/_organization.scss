@@ -87,7 +87,7 @@ $request-breakpoint: 768px;
         display: block;
     }
     .empty {
-        margin: 2*$vr auto;
+        margin: calc(2 * var(--vr)) auto;
         color: $color-grey;
         font-size: $size-5;
         font-weight: $bold;
@@ -110,7 +110,7 @@ $request-breakpoint: 768px;
         }
         input {
             width: 100%;
-            padding: $vr*0.5;
+            padding: calc(var(--vr) * 0.5);
         }
         label {
             display: block;

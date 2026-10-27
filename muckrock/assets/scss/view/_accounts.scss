@@ -70,7 +70,7 @@
         color: $color-green;
         border: 2px solid;
         @include border-radius;
-        padding: $vr*0.25;
+        padding: calc(var(--vr) * 0.25);
         font-weight: $bold;
         text-align: center;
     }
@@ -90,7 +90,7 @@
     @media all and (min-width: $breakpoint) {
         flex-direction: row;
         .request.main {
-            margin-left: $vr * 2;
+            margin-left: calc(var(--vr) * 2);
         }
     }
     header {

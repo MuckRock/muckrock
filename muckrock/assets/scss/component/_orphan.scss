@@ -3,10 +3,10 @@
         overflow: hidden;
         fieldset {
             display: block;
-            margin: 0 $vr $vr*0.5 0;
+            margin: 0 $vr calc(var(--vr) * 0.5) 0;
             label, input {
                 float: left;
-                margin: 0 $vr*0.25 0 0;
+                margin: 0 calc(var(--vr) * 0.25) 0 0;
             }
         }
     }
@@ -18,12 +18,12 @@
         }
         display: block;
         .orphan-head {
-            margin-top: $vr*0.5;
+            margin-top: calc(var(--vr) * 0.5);
             border-top: $border $color-grey;
-            padding-top: $vr*0.5;
+            padding-top: calc(var(--vr) * 0.5);
             div {
                 float: left;
-                margin-right: $vr*0.5;
+                margin-right: calc(var(--vr) * 0.5);
                 &:last-child {
                     margin-right: 0;
                 }

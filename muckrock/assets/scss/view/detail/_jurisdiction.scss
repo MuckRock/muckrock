@@ -38,7 +38,7 @@ $right-column: 4 1 32em;
     }
     .jurisdiction__title {
         font-size: $size-8;
-        line-height: $lh * .7;
+        line-height: calc(var(--lh) * .7);
     }
     @media (max-width: 35.625em) {
         justify-content: center;
@@ -119,9 +119,9 @@ $right-column: 4 1 32em;
 .jurisdiction__toc {
     width: 12em;
     float: left;
-    margin-right: 2*$vr;
+    margin-right: calc(2 * var(--vr));
     @include border;
-    padding: $vr*0.5;
+    padding: calc(var(--vr) * 0.5);
     background: $color-white-pure;
     p {
         font-weight: $bold;

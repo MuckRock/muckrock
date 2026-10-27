@@ -2,7 +2,7 @@
     display: flex;
     align-items: flex-start;
     .symbol {
-        margin-right: $vr*0.5;
+        margin-right: calc(var(--vr) * 0.5);
     }
     .text {
         flex: 1;

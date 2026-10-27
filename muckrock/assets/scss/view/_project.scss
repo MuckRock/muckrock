@@ -115,7 +115,7 @@
             }
         }
         .contributor {
-            margin-bottom: $vr*0.25;
+            margin-bottom: calc(var(--vr) * 0.25);
             @include border;
             @include border-radius;
             overflow: hidden;
@@ -124,7 +124,7 @@
             }
             .info {
                 flex: 1 1 auto;
-                padding: 0 $vr*0.25;
+                padding: 0 calc(var(--vr) * 0.25);
             }
             a .icon {
                 @include svg-color($color-blue);
