@@ -3,7 +3,7 @@
 @import "./base/_box-sizing.css";
 
 @import "./base/base.css";
-@import "./component/_button.scss";
-@import "./component/_viewer.scss";
+@import "./component/_button.css";
+@import "./component/_viewer.css";
 @import "./pattern/_button_group.scss";
 @import "./_doc-viewer.scss";

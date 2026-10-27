@@ -1,0 +1,8 @@
+svg.icon {
+    height: var(--size-3);
+    width: var(--size-3);
+    fill-rule: evenodd;
+    path, polygon, rect, circle {
+        fill: var(--color-black);
+    }
+}

@@ -4,13 +4,13 @@
     margin: calc(2 * var(--vr)) 0;
     blockquote {
         margin-bottom: 0;
-        border-left: 4px solid $color-black;
-        font-size: $size-5;
-        font-weight: $bold;
+        border-left: 4px solid var(--color-black);
+        font-size: var(--size-5);
+        font-weight: var(--bold);
         font-style: normal;
-        line-height: $lh;
+        line-height: var(--lh);
         @media screen and (min-width: 500px) {
-            font-size: $size-6;
+            font-size: var(--size-6);
         }
     }
     .sharing {
@@ -24,23 +24,29 @@
         width: 2em;
         border-radius: 100%;
         .icon {
-            height: $size-4;
-            width: $size-4;
+            height: var(--size-4);
+            width: var(--size-4);
         }
         path {
-            fill: $color-white;
+            fill: var(--color-white);
         }
-        background: $color-black;
+    }
+    .sharing a {
+        background: var(--color-black);
         &.twitter {
-            background: $color-twitter;
+            background: var(--color-twitter);
         }
         &.facebook {
-            background: $color-facebook;
+            background: var(--color-facebook);
         }
+    }
+    .sharing a {
         transition: transform .25s ease-out;
         transform: scale(0.8);
         &:hover {
             transform: scale(1.0);
         }
+    
+    
     }
 }

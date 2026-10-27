@@ -8,10 +8,10 @@
 */
 
 .textbox {
-    border: $border $color-grey;
+    border: var(--border-width) solid var(--color-grey);
     position: relative;
     word-wrap: break-word;
-    background: $color-white-pure;
+    background: var(--color-white-pure);
     .textbox__header, .textbox__section, .textbox__footer {
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
     }
@@ -21,12 +21,12 @@
         flex-wrap: wrap;
         flex-direction: row;
         margin-bottom: 0;
-        color: $color-white;
+        color: var(--color-white);
         p {
             margin-bottom: 0;
         }
         a {
-            color: $color-white;
+            color: var(--color-white);
         }
     }
     .textbox__footer {
@@ -35,76 +35,64 @@
 }
 
 .textbox {
-    border-color: $color-black;
+    border-color: var(--color-black);
     .textbox__header {
-        background: $color-black;
+        background: var(--color-black);
     }
 }
 .blue.textbox {
-    border-color: $color-blue;
+    border-color: var(--color-blue);
     .textbox__header {
-        background: $color-blue;
+        background: var(--color-blue);
     }
 }
 .green.textbox {
-    border-color: $color-green;
+    border-color: var(--color-green);
     .textbox__header {
-        background: $color-green;
+        background: var(--color-green);
     }
 }
 .red.textbox {
-    border-color: $color-red;
+    border-color: var(--color-red);
     .textbox__header {
-        background: $color-red;
+        background: var(--color-red);
     }
 }
 .yellow.textbox {
-    border-color: $color-yellow;
+    border-color: var(--color-yellow);
     .textbox__header {
-        background: $color-yellow;
+        background: var(--color-yellow);
     }
 }
 .grey.textbox {
-    border-color: $color-grey;
+    border-color: var(--color-grey);
     .textbox__header {
-        background: $color-grey;
+        background: var(--color-grey);
     }
 }
 .yellow.textbox {
     .textbox__header {
-        color: $color-black;
+        color: var(--color-black);
     }
 }
 .hidden.textbox {
-    border-color: $color-black;
+    border-color: var(--color-black);
     .textbox__header::before {
         content: "HIDDEN - ";
         font-weight: bold;
     }
     .textbox__header {
-        background: repeating-linear-gradient(
-        45deg,
-        $color-black,
-        $color-black 10px,
-        $color-grey-3 10px,
-        $color-grey-3 20px
-        );
+        background: repeating-linear-gradient(45deg, var(--color-black), var(--color-black) 10px, var(--color-grey-3) 10px, var(--color-grey-3) 20px);
     }
 }
 .hidden.blue.textbox {
-    border-color: $color-blue;
+    border-color: var(--color-blue);
     .textbox__header::before {
         content: "HIDDEN - ";
         font-weight: bold;
     }
     .textbox__header {
-        background: repeating-linear-gradient(
-        45deg,
-        $color-blue,
-        $color-blue 10px,
-        $color-blue-dark 10px,
-        $color-blue-dark 20px
-        );
+        background: repeating-linear-gradient(45deg, var(--color-blue), var(--color-blue) 10px, var(--color-blue-dark) 10px, var(--color-blue-dark) 20px);
     }
 }
 

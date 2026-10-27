@@ -6,7 +6,7 @@ table {
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
     }
     tbody tr, thead th {
-        border: $border $color-grey-6;
+        border: var(--border-width) solid var(--color-grey-6);
     }
 }
 
@@ -47,12 +47,12 @@ table.sortable .sorted-by {
     }
     .st-key, .st-val {
         display: table-cell;
-        font-size: $size-2;
+        font-size: var(--size-2);
     }
     .st-key {
         width: 25%;
-        font-weight: $bold;
-        font-size: $size-2;
+        font-weight: var(--bold);
+        font-size: var(--size-2);
     }
 }
 

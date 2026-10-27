@@ -9,14 +9,14 @@
         position: absolute;
         z-index: 200;
         right: 0;
-        background-color: $color-white;
-        border: $border $color-grey;
-        color: $color-black;
+        background-color: var(--color-white);
+        border: var(--border-width) solid var(--color-grey);
+        color: var(--color-black);
         list-style-type: none;
         padding-left: 0;
         a {
             display: block;
-            color: $color-black;
+            color: var(--color-black);
             text-decoration: none;
         }
     }
@@ -24,8 +24,8 @@
         padding: calc(var(--vr) * 0.25);
         cursor: pointer;
         &:hover {
-            color: $color-black;
-            background-color: $color-grey-7;
+            color: var(--color-black);
+            background-color: var(--color-grey-7);
         }
     }
     &.visible {
