@@ -1,7 +1,7 @@
 .form {
-    padding: calc($vr * 0.5);
+    padding: calc(var(--vr) * 0.5);
     @media screen and (min-width: 500px) {
-        padding: $vr;
+        padding: var(--vr);
     }
     .visible-fields fieldset input {
         width: 100%;
@@ -17,7 +17,7 @@
         }
         .formset-container {
             display: block;
-            margin-bottom: $vr;
+            margin-bottom: var(--vr);
         }
     }
 
@@ -48,23 +48,23 @@
         justify-content: space-between;
     }
     .error input {
-        border-color: $color-red;
+        border-color: var(--color-red);
     }
     .required {
-        color: $color-grey;
-        font-size: $size-2;
+        color: var(--color-grey);
+        font-size: var(--size-2);
     }
     .errorlist {
         display: inline-block;
         margin-bottom: 0;
         padding: 0;
         list-style: none;
-        color: $color-red;
-        font-size: $size-2;
+        color: var(--color-red);
+        font-size: var(--size-2);
     }
     label {
         margin-right: calc(var(--vr) * 0.5);
-        font-weight: $bold;
+        font-weight: var(--bold);
     }
     input, select, textarea {
         display: block;
@@ -98,10 +98,10 @@
             margin-right: 0;
         }
         label[for*="clear_id"] {
-            font-weight: $normal;
+            font-weight: var(--normal);
         }
         input[id*="clear_id"] {
-            margin-left: $vr;
+            margin-left: var(--vr);
         }
     }
 }
@@ -110,14 +110,14 @@
     display: flex;
     flex-wrap: wrap;
     margin: calc(var(--vr) * 0.5) 0;
-    border: 1px solid $color-blue;
+    border: 1px solid var(--color-blue);
     input {
         flex: 3 1 auto;
         width: auto;
         border: none;
-        line-height: $lh;
+        line-height: var(--lh);
         border-radius: 0;
-        color: $color-black;
+        color: var(--color-black);
         appearance: none;
         -webkit-appearance: none;
     }
@@ -126,10 +126,13 @@
     }
     .icon {
         path, polygon, rect, circle {
-            fill: $color-white;
+            fill: var(--color-white);
         }
+    }
+    .icon {
         margin-right: calc(var(--vr) * 0.25);
         vertical-align: middle;
+    
     }
 }
 
@@ -145,8 +148,8 @@
 }
 
 .help-text {
-    font-size: $size-2;
-    line-height: $lh;
+    font-size: var(--size-2);
+    line-height: var(--lh);
     opacity: .75;
 }
 
@@ -166,16 +169,16 @@ input[type="month"],
 input[type="time"],
 input[type="week"] {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     display: inline-block;
     padding: calc(var(--vr) * 0.25) calc(var(--vr) / 3) calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-    &:disabled {
-        background-color: var(--color-disabled-lighten-25);
-        border: 1px solid $color-disabled;
-        color: $color-disabled;
-    }
+}
+textarea:disabled, input[type="email"]:disabled, input[type="number"]:disabled, input[type="password"]:disabled, input[type="search"]:disabled, input[type="tel"]:disabled, input[type="text"]:disabled, input[type="url"]:disabled, input[type="color"]:disabled, input[type="date"]:disabled, input[type="datetime"]:disabled, input[type="datetime-local"]:disabled, input[type="month"]:disabled, input[type="time"]:disabled, input[type="week"]:disabled {
+    background-color: var(--color-disabled-lighten-25);
+    border: 1px solid var(--color-disabled);
+    color: var(--color-disabled);
 }
 
 textarea {
@@ -184,7 +187,6 @@ textarea {
 }
 
 fieldset {
-
 
     @media screen and (min-width: 1100px) {
         label.failure {
@@ -197,7 +199,7 @@ fieldset {
 
     input + label {
         float: left;
-        margin-right: $vr;
+        margin-right: var(--vr);
     }
 
     & > fieldset, & > fieldset + fieldset {
@@ -212,12 +214,12 @@ fieldset {
   &:first-child {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    border-right-color: $color-grey-6;
+    border-right-color: var(--color-grey-6);
   }
   &:last-child {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    border-left-color: $color-grey-6;
+    border-left-color: var(--color-grey-6);
   }
 }
 .input-range, .input-range .labels {

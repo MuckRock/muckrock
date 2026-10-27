@@ -1,16 +1,16 @@
 .foia__single {
     width: 100%;
     overflow: hidden;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    background-color: $color-white-pure;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    background-color: var(--color-white-pure);
     text-align: left;
     .title {
-        font-weight: $bold;
+        font-weight: var(--bold);
         margin-bottom: calc(var(--vr) * 0.5);
     }
     .files {
-        font-weight: $bold;
+        font-weight: var(--bold);
         text-align: right;
     }
     .foia__single__header {

@@ -11,17 +11,17 @@
         vertical-align: middle;
         &.success {
             path, polygon, rect, circle {
-                fill: $color-green;
+                fill: var(--color-green);
             }
         }
         &.error {
             path, polygon, rect, circle {
-                fill: $color-red;
+                fill: var(--color-red);
             }
         }
         &.info {
             path, polygon, rect, circle {
-                fill: $color-blue;
+                fill: var(--color-blue);
             }
         }
     }
@@ -30,8 +30,8 @@
         margin-bottom: 0;
     }
     .timestamp {
-        color: $color-grey;
-        font-size: $size-2;
+        color: var(--color-grey);
+        font-size: var(--size-2);
         float: right;
     }
 }

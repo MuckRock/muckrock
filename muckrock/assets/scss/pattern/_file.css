@@ -2,18 +2,18 @@
     display: flex;
     width: 100%;
     padding: calc(var(--vr) * 0.5);
-    background: $color-white-pure;
-    border: 1px solid $color-grey;
+    background: var(--color-white-pure);
+    border: 1px solid var(--color-grey);
     .file-image {
         margin-bottom: 0;
         max-width: 3em;
         &.thumbnail img {
-            border: 1px solid $color-grey;
+            border: 1px solid var(--color-grey);
         }
     }
     .file-info {
         width: 100%;
-        margin-left: $vr;
+        margin-left: var(--vr);
         .title {
             margin-bottom: calc(var(--vr) * 0.5);
         }
@@ -27,7 +27,7 @@
         padding-left: 0;
         li {
             display: inline-block;
-            margin-right: $vr;
+            margin-right: var(--vr);
         }
     }
     .file-embed {
@@ -39,8 +39,8 @@
         }
         textarea {
             display: block;
-            font-family: $monospace;
-            font-size: $size-2;
+            font-family: var(--monospace);
+            font-size: var(--size-2);
             margin-bottom: 0;
             resize: none;
             white-space: nowrap;

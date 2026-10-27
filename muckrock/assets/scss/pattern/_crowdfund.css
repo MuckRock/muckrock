@@ -1,46 +1,40 @@
-$crowdfund-color: $color-green;
-$crowdfund-color-dark: $color-green-dark;
-$crowdfund-color-light: $color-green-light;
-$crowdfund-border: $border $crowdfund-color;
-
 .crowdfund__widget {
     display: flex;
     flex-direction: column;
     overflow: visible;
-    margin: 0 auto $vr;
-    border: $crowdfund-border;
+    margin: 0 auto var(--vr);
+    border: var(--border-width) solid var(--color-green);
     background: #FFF;
 
     & > *:last-child {
-        border-bottom-left-radius: $border-radius;
-        border-bottom-right-radius: $border-radius;
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
     }
 
     .crowdfund__widget__header, .crowdfund__widget__footer {
         flex: 0 0 auto;
         margin-bottom: 0;
         padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-        color: $crowdfund-color-dark;
-        background-color: $crowdfund-color-light;
+        color: var(--color-green-dark);
+        background-color: var(--color-green-light);
     }
 
     .crowdfund__widget__header {
-        border-bottom: $crowdfund-border;
+        border-bottom: var(--border-width) solid var(--color-green);
         h1 {
-            font-size: $size-3;
-            line-height: $lh;
-            font-weight: $bold;
+            font-size: var(--size-3);
+            line-height: var(--lh);
+            font-weight: var(--bold);
             margin: 0;
             a {
-                color: $crowdfund-color-dark;
+                color: var(--color-green-dark);
             }
         }
         .action {
-            font-size: $size-2;
+            font-size: var(--size-2);
             margin-right: calc(var(--vr) * 0.5);
         }
     }
-
 
     main {
         flex: auto;
@@ -78,8 +72,8 @@ $crowdfund-border: $border $crowdfund-color;
     .stats {
         margin-bottom: 0;
         text-align: center;
-        font-size: $size-2;
-        line-height: $lh;
+        font-size: var(--size-2);
+        line-height: var(--lh);
     }
 
     .contributor-list {
@@ -92,7 +86,7 @@ $crowdfund-border: $border $crowdfund-color;
 }
 
 .crowdfund__widget__footer {
-    border-top: $crowdfund-border;
+    border-top: var(--border-width) solid var(--color-green);
     form > section {
         margin-bottom: 0;
     }
@@ -102,7 +96,7 @@ $crowdfund-border: $border $crowdfund-color;
     .anonymity input[type="text"] {
         width: 100%;
         border-radius: 0;
-        border: 1px solid $color-green;
+        border: 1px solid var(--color-green);
     }
     .anonymity p {
         margin-bottom: calc(var(--vr) * 0.25);
@@ -112,23 +106,23 @@ $crowdfund-border: $border $crowdfund-color;
         flex-wrap: wrap;
         align-items: stretch;
         margin: calc(var(--vr) * 0.5) 0;
-        border: 1px solid $color-green;
+        border: 1px solid var(--color-green);
         input {
             flex: 3 1 auto;
             appearance: none;
             border: none;
-            line-height: $lh;
+            line-height: var(--lh);
             border-radius: 0;
-            color: $color-green-dark;
+            color: var(--color-green-dark);
         }
         button {
             flex: 1 1 auto;
         }
     }
     button:disabled {
-        background: $color-grey-7;
+        background: var(--color-grey-7);
         &:hover {
-            background: $color-grey-7;
+            background: var(--color-grey-7);
         }
     }
 }
@@ -140,22 +134,22 @@ $crowdfund-border: $border $crowdfund-color;
     .contributor {
         &.summary {
             margin-bottom: 0;
-            font-weight: $bold;
+            font-weight: var(--bold);
             cursor: default;
         }
         &.dropdown {
             display: none;
             position: absolute;
-            margin: $vr;
+            margin: var(--vr);
             bottom: 0;
             z-index: 1;
-            border-radius: $border-radius;
+            border-radius: var(--border-radius);
             padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
-            background-color: $color-black;
-            color: $color-white;
+            background-color: var(--color-black);
+            color: var(--color-white);
             opacity: 0;
             list-style-type: none;
-            font-size: $size-2;
+            font-size: var(--size-2);
             transition: opacity .25s .25s linear;
         }
         &.summary:hover + .dropdown, &.dropdown:hover {
@@ -183,35 +177,31 @@ $crowdfund-border: $border $crowdfund-color;
     .overlay .dialog
     {
         width: 32em;
-        color: $color-white;
-        font-weight: $bold;
+        color: var(--color-white);
+        font-weight: var(--bold);
         .icon {
             path, polygon, rect, circle {
-                fill: $color-white;
+                fill: var(--color-white);
             }
         }
-        a, .action
-        {
-            color: $color-white;
-            &:hover
-            {
-                color: $color-white-pure;
-            }
+        a, .action {
+            color: var(--color-white);
         }
+        a:hover, .action:hover { color: var(--color-white-pure); }
         p
         {
             margin-bottom: calc(var(--vr) * 0.5);
         }
         input {
-            color: $color-black;
+            color: var(--color-black);
         }
         textarea
         {
-            color: $color-black;
-            font-family: $monospace;
-            font-size: $size-2;
+            color: var(--color-black);
+            font-family: var(--monospace);
+            font-size: var(--size-2);
             text-align: center;
-            font-weight: $normal;
+            font-weight: var(--normal);
             resize: none;
             white-space: nowrap;
         }
@@ -266,6 +256,6 @@ $crowdfund-border: $border $crowdfund-color;
     }
     .loader, .dialog
     {
-        padding: $vr;
+        padding: var(--vr);
     }
 }
