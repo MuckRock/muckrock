@@ -1,6 +1,6 @@
 body {
-    background: $color-black;
-    color: $color-white;
+    background: var(--color-black);
+    color: var(--color-white);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -25,7 +25,7 @@ svg {
     vertical-align: middle;
     fill-rule: evenodd;
     path, polygon, rect, circle {
-        fill: $color-white;
+        fill: var(--color-white);
     }
 }
 
@@ -34,9 +34,9 @@ svg {
     align-items: center;
     margin-bottom: 0;
     a {
-        color: $color-white;
+        color: var(--color-white);
         &:hover {
-            color: $color-blue;
+            color: var(--color-blue);
         }
     }
 }
@@ -49,7 +49,7 @@ svg {
     }
     &:hover svg {
         path, polygon, rect, circle {
-            fill: $color-blue;
+            fill: var(--color-blue);
         }
     }
 }
@@ -57,14 +57,14 @@ svg {
 .file-embed {
     display: none;
     width: 100%;
-    padding: $vr;
+    padding: var(--vr);
     position: absolute;
     z-index: 1;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(51, 60, 71, .8); // $color-black at 80%
+    background: rgba(51, 60, 71, .8); /* $color-black at 80% */
     &.visible {
         display: flex;
         flex-direction: column;
@@ -76,10 +76,10 @@ svg {
     }
     textarea {
         display: block;
-        color: $color-black;
+        color: var(--color-black);
         width: 100%;
-        font-family: $monospace;
-        font-size: $size-2;
+        font-family: var(--monospace);
+        font-size: var(--size-2);
         resize: none;
         white-space: nowrap;
         overflow-x: scroll;
@@ -88,7 +88,7 @@ svg {
         width: 100%;
         cursor: pointer;
         &:hover {
-            color: $color-blue;
+            color: var(--color-blue);
         }
     }
 }
