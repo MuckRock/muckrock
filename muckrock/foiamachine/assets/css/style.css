@@ -1,29 +1,28 @@
-/* Colors */
+:root {
+    /* Colors */
+    --pure-black: #000000;
+    --black: #362522;
+    --dark-grey: #666;
+    --light-grey: #ccc;
+    --white: #f8f7f6;
+    --pure-white: #FFFFFF;
 
-$pure-black: #000000;
-$black: #362522;
-$dark-grey: #666;
-$light-grey: #ccc;
-$white: #f8f7f6;
-$pure-white: #FFFFFF;
+    --blue: blue;
+    --red: red;
 
-$blue: blue;
-$red: red;
+    --primary: #fb5238;
 
-$primary: #fb5238;
-
-/* Typography */
-
-$lh: 1.6;
-$serif: "Georgia", serif;
-$system: -apple-system, BlinkMacSystemFont,
-        'avenir next', avenir,
-        helvetica, 'helvetica neue',
+    /* Typography */
+    --lh: 1.6;
+    --serif: "Georgia", serif;
+    --system: -apple-system, BlinkMacSystemFont,
+        "avenir next", avenir,
+        helvetica, "helvetica neue",
         ubuntu,
         roboto, noto,
-        'segoe ui', arial,
+        "segoe ui", arial,
         sans-serif;
-
+}
 
 * {
     box-sizing: border-box;
@@ -50,11 +49,11 @@ html {
 body {
     margin: 0;
     padding: 0;
-    font-family: $system;
+    font-family: var(--system);
     text-rendering: optimizeLegibility;
-    line-height: $lh;
-    background: $white;
-    color: $black;
+    line-height: var(--lh);
+    background: var(--white);
+    color: var(--black);
 }
 main {
     max-width: 50rem;
@@ -62,14 +61,14 @@ main {
     padding: 0 1em;
 }
 a {
-    color: $primary;
+    color: var(--primary);
     opacity: .8;
 }
 a:hover {
     opacity: .6;
 }
 a:visited {
-    color: $primary;
+    color: var(--primary);
 }
 table {
     width: 100%;
@@ -84,8 +83,8 @@ td {
     padding: .25em;
 }
 table.ruled td {
-    border-top: 1px solid $light-grey;
-    border-bottom: 1px solid $light-grey;
+    border-top: 1px solid var(--light-grey);
+    border-bottom: 1px solid var(--light-grey);
 }
 td.top {
     vertical-align: top;
@@ -100,10 +99,10 @@ td p {
     font-size: .8em;
 }
 .red {
-    color: $red;
+    color: var(--red);
 }
 .grey {
-    color: $dark-grey;
+    color: var(--dark-grey);
 }
 .select-all {
     -webkit-user-select: all;
@@ -161,7 +160,8 @@ td p {
     display: flex;
     align-items: flex-end;
 }
-.align-center {
+.align-center,
+.exemption-search {
     display: flex;
     align-items: center;
 }
@@ -185,36 +185,36 @@ td p {
 
 .button {
     font-size: 1rem;
-    line-height: $lh;
+    line-height: var(--lh);
     font-weight: bold;
     padding: .25em .75em;
     border: none;
     border-radius: 9999px;
-    background: $primary;
-    color: $pure-white;
+    background: var(--primary);
+    color: var(--pure-white);
     opacity: .8;
     cursor: pointer;
     text-decoration: none;
 }
 .button:hover {
-    color: $pure-white;
+    color: var(--pure-white);
     opacity: .6;
 }
 .button:active {
-    color: $pure-white;
+    color: var(--pure-white);
 }
 .button:visited {
-    color: $pure-white;
+    color: var(--pure-white);
 }
 .button:disabled {
     opacity: .4;
     cursor: pointer;
 }
 .blue.button {
-    background: $blue;
+    background: var(--blue);
 }
 .red.button {
-    background: $red;
+    background: var(--red);
 }
 .small.button, .small .button {
     font-size: .8rem;
@@ -228,13 +228,13 @@ td p {
     font-weight: bold;
     font-size: .6em;
     background: #666;
-    color: $pure-white;
+    color: var(--pure-white);
 }
 .red.badge {
-    background: $red;
+    background: var(--red);
 }
 .blue.badge {
-    background: $blue;
+    background: var(--blue);
 }
 
 /* Forms and fields */
@@ -247,7 +247,7 @@ input, textarea, select {
     font-size: .8rem;
 }
 input, textarea {
-    border: 1px solid $light-grey;
+    border: 1px solid var(--light-grey);
     padding: .25em;
 }
 textarea {
@@ -278,7 +278,7 @@ input[type="file"] {
     font-weight: bold;
 }
 .field .required {
-    color: $dark-grey;
+    color: var(--dark-grey);
     font-size: .8rem;
 }
 .field .help-text {
@@ -293,7 +293,7 @@ input[type="file"] {
     margin: 0;
     padding: 0;
     list-style: none;
-    color: $red;
+    color: var(--red);
     font-size: .8rem;
 }
 
@@ -324,10 +324,10 @@ input[type="file"] {
     fill-rule: evenodd;
 }
 .icon path, .icon rect, .icon circle {
-    fill: $black;
+    fill: var(--black);
 }
 .error.icon path {
-    fill: $red;
+    fill: var(--red);
 }
 
 /* Global nav */
@@ -337,19 +337,19 @@ input[type="file"] {
     margin: 0 auto;
 }
 .topnav {
-    border-bottom: 1px solid $light-grey;
-    background: $pure-white;
+    border-bottom: 1px solid var(--light-grey);
+    background: var(--pure-white);
 }
 .bottomnav {
     margin-top: 2rem;
-    border-top: 1px solid $light-grey;
+    border-top: 1px solid var(--light-grey);
     text-align: center;
     .mascot.icon {
         margin-top: 1em;
         height: 2em;
         width: 2em;
         path {
-            fill: $dark-grey;
+            fill: var(--dark-grey);
         }
     }
 }
@@ -378,8 +378,8 @@ input[type="file"] {
 
 /* Filter form */
 .filter.form {
-    background: $pure-white;
-    border: 1px solid $light-grey;
+    background: var(--pure-white);
+    border: 1px solid var(--light-grey);
 }
 .filter.form .visible-fields {
     display: flex;
@@ -397,7 +397,7 @@ input[type="file"] {
     align-items: center;
     justify-content: center;
     min-height: 100%;
-    color: $dark-grey;
+    color: var(--dark-grey);
 }
 
 /* Homepage */
@@ -405,29 +405,29 @@ input[type="file"] {
 .homepage-header {
     margin-bottom: 1rem;
     padding: 3rem 0;
-    background: $primary;
+    background: var(--primary);
     background-position: center;
     background-size: cover;
-    // color: $white;
+    /* color: var(--white); */
     text-align: center;
     .mascot.icon {
         height: 4em;
         width: 4em;
         path {
-            // fill: $pure-white;
+            /* fill: var(--pure-white); */
         }
     }
     .button {
-        background: $black;
-        color: $primary;
+        background: var(--black);
+        color: var(--primary);
         opacity: 1;
         &:hover {
-            background: $white;
+            background: var(--white);
         }
     }
     .badge {
         background: transparent;
-        color: $black;
+        color: var(--black);
         border: 3px solid;
     }
     h1 {
@@ -440,16 +440,16 @@ input[type="file"] {
 .homepage-footer {
     padding: 1rem;
     justify-content: center;
-    background: $primary;
+    background: var(--primary);
     h2 {
         margin-right: .5em;
     }
     .button {
-        background: $black;
-        color: $primary;
+        background: var(--black);
+        color: var(--primary);
         opacity: 1;
         &:hover {
-            background: $white;
+            background: var(--white);
         }
     }
     & + .bottomnav {
@@ -460,12 +460,12 @@ input[type="file"] {
 .homepage {
     h2, p {
         margin-top: 0;
-        line-height: $lh;
+        line-height: var(--lh);
     }
     .row:not(:first-child) {
         margin-bottom: 1rem;
         padding-top: 1rem;
-        border-top: 3px solid $light-grey;
+        border-top: 3px solid var(--light-grey);
     }
     h2 {
         padding-right: 1rem;
@@ -476,15 +476,15 @@ input[type="file"] {
 
 .communication {
     margin-bottom: 1em;
-    border: 1px solid $light-grey;
-    background: $pure-white;
+    border: 1px solid var(--light-grey);
+    background: var(--pure-white);
 }
 .communication table {
     width: auto;
 }
 .communication header {
     padding: .5rem 1rem;
-    border-bottom: 1px solid $light-grey;
+    border-bottom: 1px solid var(--light-grey);
 }
 .communication header .badge {
     display: block;
@@ -496,7 +496,7 @@ input[type="file"] {
 .communication__message {
     overflow: hidden;
     padding: 0 1em;
-    font-family: $serif;
+    font-family: var(--serif);
 }
 .communication.sent {
     color: #000350;
@@ -508,7 +508,7 @@ input[type="file"] {
 
 .file {
     padding: .5rem 1rem;
-    border-top: 1px solid $light-grey;
+    border-top: 1px solid var(--light-grey);
 }
 .sent .file {
     border-top-color: #ccccff;
@@ -525,18 +525,17 @@ input[type="file"] {
 }
 
 .exemption-search {
-    @extend .align-center;
     margin-bottom: 1rem;
     input {
         flex: 1 1 auto;
         padding-left: 1rem;
-        line-height: $lh;
+        line-height: var(--lh);
         border-top-left-radius: 9999px;
         border-bottom-left-radius: 9999px;
     }
     button {
         flex: 1 1 25%;
-        border: 1px solid $primary;
+        border: 1px solid var(--primary);
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
     }
@@ -545,8 +544,8 @@ input[type="file"] {
 .exemption__results {
     margin-bottom: 1rem;
     padding: 1rem;
-    border: 1px solid $dark-grey;
-    background: $light-grey;
+    border: 1px solid var(--dark-grey);
+    background: var(--light-grey);
 }
 
 .exemption__empty {
@@ -559,25 +558,25 @@ input[type="file"] {
 .exemption__detail {
     margin: 1rem 0;
     padding: 0 .5em;
-    border: 1px solid $light-grey;
-    background: $pure-white;
+    border: 1px solid var(--light-grey);
+    background: var(--pure-white);
 }
 
 .exemption__list__item {
     margin-bottom: 1rem;
     padding: 0 .5em;
-    border: 1px solid $dark-grey;
-    background: $white;
+    border: 1px solid var(--dark-grey);
+    background: var(--white);
     cursor: pointer;
     &:hover {
-        background: $primary;
-        color: $pure-white;
+        background: var(--primary);
+        color: var(--pure-white);
         .link {
-            color: $pure-white;
+            color: var(--pure-white);
         }
     }
     .link {
-        color: $primary;
+        color: var(--primary);
         text-decoration: underline;
     }
 }
@@ -599,8 +598,8 @@ input[type="file"] {
 .exemption__form {
     margin-bottom: 1rem;
     padding: 0 1rem;
-    border: 1px solid $light-grey;
-    background: $pure-white;
+    border: 1px solid var(--light-grey);
+    background: var(--pure-white);
     position: relative;
     footer {
         margin-bottom: 1rem;
@@ -614,7 +613,7 @@ input[type="file"] {
         bottom: 0;
         left: 0;
         z-index: 1;
-        background: rgba($white, .9);
+        background: rgba(248, 247, 246, .9); /* --white at 90% */
         display: flex;
         justify-content: center;
         align-items: center;

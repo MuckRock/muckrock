@@ -2,7 +2,7 @@
 
 Proposed as a series of small PRs, each one checked before the next starts.
 
-**Status:** Phases 0 and 1 are done (steps 0–5). Phase 2 has not started.
+**Status:** Phases 0 and 1 are done (steps 0–5, PR #2312). Phase 2 is in progress on `2220-css-phase-2`, stacked on it.
 
 ## What's there now
 
@@ -53,7 +53,10 @@ After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.s
 
 **Phase 2: Sass → plain CSS**
 
-6. **Pilot on the two easy files:** `print.scss` and FOIAMachine. This tests the Vite plain-CSS path and the nesting decision on low-risk files.
+6. ✅ **Pilot on the two easy files:** `print.scss` and FOIAMachine. This tests the Vite plain-CSS path and the nesting decision on low-risk files.
+   - Now `muckrock/assets/css/print.css` and `muckrock/foiamachine/assets/css/style.css`; FOIAMachine's variables are `:root` custom properties.
+   - Vite's targets (Chrome 107, Safari 16) can't parse nesting; the production build lowers it, writing multi-selector parents as `:is(…)`, whose specificity can differ from Sass's expansion. `css:diff` now lowers both sides the same way, so it compares what production ships.
+   - esbuild moves a declaration that follows a nested rule above it, but the dev server serves raw nesting, where it applies after. `css:diff` checks the `.css` sources and refuses those, and `&__x` / `&--x`.
 7. **Turn colours and spacing into CSS variables** (`tokens.css` with `:root { --color-… }`). Work out the derived colours as fixed hex values first, because CSS variables can't go through Sass colour functions. The diff script swaps the variables back for their values so the comparison stays exact.
 8. **Remove the remaining Sass-only features:** write out the 20 mixins and 6 `@extend`s. Expected diff: none.
 9. **Convert the partials to `.css`, one folder per PR:** `base` → `component` → `pattern` → `view/*` → `docViewer`. Write out every `&__`/`&--`. Each PR's CSS diff must be empty after normalising.
@@ -62,8 +65,8 @@ After Phase 1, the only warning left is `@import`. ✅ Confirmed: 90 in `style.s
 ## Open decisions
 
 1. ✅ **Decided: drop them.** **Vendor prefixes (step 5):** recommend dropping them outright, since `display: flex` without prefixes works in every browser we'd still support. The alternative is adding `autoprefixer` with a target browser list (`browserslist`), which keeps any prefixes that are still needed.
-2. **The end state:** plain CSS, or PostCSS plugins that mimic Sass (`postcss-mixins`, `postcss-simple-vars`)? Recommend plain CSS: those plugins are basically Sass again with less tooling. The only exception would be `postcss-custom-media`, because CSS variables don't work inside `@media` queries.
-3. **Nesting (from step 6):** keep native CSS nesting (supported by all major browsers since 2023), or flatten everything? Recommend native nesting with `&__x` written out. Flattening is safer for very old browsers, but the files get much harder to read.
+2. ✅ **Decided: plain CSS.** **The end state:** plain CSS, or PostCSS plugins that mimic Sass (`postcss-mixins`, `postcss-simple-vars`)? Recommend plain CSS: those plugins are basically Sass again with less tooling. The only exception would be `postcss-custom-media`, because CSS variables don't work inside `@media` queries.
+3. ✅ **Decided: native nesting.** **Nesting (from step 6):** keep native CSS nesting (supported by all major browsers since 2023; Vite's targets predate it, so production builds lower it), or flatten everything? Recommend native nesting with `&__x` written out. Flattening is safer for very old browsers, but the files get much harder to read.
 4. **The `@import` warning during Phase 2:** turn it off temporarily (`silenceDeprecations: ['import']`) rather than migrating to `@use`. That migration would be thrown away once the files are plain CSS.
 
 ---
