@@ -1,8 +1,8 @@
 .activity-container {
     display: flex;
     justify-content: space-between;
-    border: $border $color-grey;
-    border-radius: $border-radius;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
     padding: calc(var(--vr) * 0.5);
 }
 
@@ -11,5 +11,5 @@
 }
 
 .activity-time {
-    font-size: $size-2;
+    font-size: var(--size-2);
 }

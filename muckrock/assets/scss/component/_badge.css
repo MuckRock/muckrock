@@ -2,28 +2,28 @@
     display: inline-block;
     padding: 0 calc(var(--vr) * 0.25);
     border-radius: 4px;
-    background: $color-grey;
-    color: $color-white;
-    font-weight: $bold;
+    background: var(--color-grey);
+    color: var(--color-white);
+    font-weight: var(--bold);
     white-space: nowrap;
 }
 
 .red.badge, .failure.badge, .inactive.badge {
-    background: $color-red;
+    background: var(--color-red);
 }
 
 .green.badge, .success.badge, .active.badge {
-    background: $color-green;
+    background: var(--color-green);
 }
 
 .blue.badge, .primary.badge {
-    background: $color-blue;
+    background: var(--color-blue);
 }
 
 .blue-dark.badge, .staff.badge {
-    background: $color-blue-dark;
+    background: var(--color-blue-dark);
 }
 
 .yellow.badge, .warning.badge {
-    background: $color-yellow;
+    background: var(--color-yellow);
 }

@@ -2,9 +2,9 @@
 
 .panel {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     overflow: hidden;
     display: block;
     width: 100%;
@@ -14,100 +14,100 @@
 
 .panel.default {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     overflow: hidden;
     display: block;
     width: 100%;
     margin:  calc(var(--vr) * 0.5) 0;
     padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
-    color: $color-grey;
+    color: var(--color-grey);
     background: none;
-    padding: $vr;
+    padding: var(--vr);
     border-color: var(--color-grey-darken-10);
     a {
         text-decoration: underline;
-        color: $color-white;
+        color: var(--color-white);
         background-color: none;
     }
 }
 .panel.primary {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     overflow: hidden;
     display: block;
     width: 100%;
     margin:  calc(var(--vr) * 0.5) 0;
     padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
-    color: $color-blue;
+    color: var(--color-blue);
     background: none;
-    padding: $vr;
+    padding: var(--vr);
     border-color: var(--color-blue-darken-10);
     a {
         text-decoration: underline;
-        color: $color-white;
+        color: var(--color-white);
         background-color: none;
     }
 }
 .panel.success {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     overflow: hidden;
     display: block;
     width: 100%;
     margin:  calc(var(--vr) * 0.5) 0;
     padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
-    color: $color-green;
+    color: var(--color-green);
     background: none;
-    padding: $vr;
+    padding: var(--vr);
     border-color: var(--color-green-darken-10);
     a {
         text-decoration: underline;
-        color: $color-white;
+        color: var(--color-white);
         background-color: none;
     }
 }
 .panel.failure {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     overflow: hidden;
     display: block;
     width: 100%;
     margin:  calc(var(--vr) * 0.5) 0;
     padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
-    color: $color-red;
+    color: var(--color-red);
     background: none;
-    padding: $vr;
+    padding: var(--vr);
     border-color: var(--color-red-darken-10);
     a {
         text-decoration: underline;
-        color: $color-white;
+        color: var(--color-white);
         background-color: none;
     }
 }
 .panel.disabled {
     box-sizing: border-box;
-    border: $border $color-grey;
-    border-radius: $border-radius;
-    border-color: $color-grey;
+    border: var(--border-width) solid var(--color-grey);
+    border-radius: var(--border-radius);
+    border-color: var(--color-grey);
     overflow: hidden;
     display: block;
     width: 100%;
     margin:  calc(var(--vr) * 0.5) 0;
     padding: calc(var(--vr) / 6) calc(var(--vr) / 3);
-    color: $color-white;
-    padding: $vr;
+    color: var(--color-white);
+    padding: var(--vr);
     border-color: var(--color-disabled-darken-10);
     a {
         text-decoration: underline;
-        color: $color-white;
+        color: var(--color-white);
         background-color: none;
     }
 }

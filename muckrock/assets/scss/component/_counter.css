@@ -1,0 +1,23 @@
+.counter {
+    border-radius: calc(var(--border-radius) * 2);
+    padding: 0 calc(var(--vr) * 0.5);
+    background: var(--color-grey-7);
+    color: var(--color-black);
+    font-size: var(--size-2);
+    font-weight: var(--bold);
+    &.blue {
+        background: var(--color-blue);
+        color: var(--color-white);
+    }
+    &.red {
+        background: var(--color-red);
+        color: var(--color-white);
+    }
+    &.green {
+        background: var(--color-green);
+        color: var(--color-white);
+    }
+    &.yellow {
+        background: var(--color-yellow);
+    }
+}

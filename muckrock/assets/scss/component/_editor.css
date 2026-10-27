@@ -12,13 +12,13 @@
     box-shadow: none;
     transform: none;
     &:hover {
-        color: $color-blue;
+        color: var(--color-blue);
         transform: none;
     }
 }
 /* Customize the ProseMirror style */
 .ProseMirror {
-    background: $color-white-pure;
+    background: var(--color-white-pure);
 }
 .ProseMirror-content {
     outline: none;
@@ -31,23 +31,23 @@
 .ProseMirror
 .ProseMirror h3::before {
     content: '### ';
-    color: $color-grey;
+    color: var(--color-grey);
 }
 .ProseMirror h4::before {
     content: '#### ';
-    color: $color-grey;
+    color: var(--color-grey);
 }
 .ProseMirror h5::before {
     content: '##### ';
-    color: $color-grey;
+    color: var(--color-grey);
 }
 .ProseMirror h6::before {
     content: '###### ';
-    color: $color-grey;
+    color: var(--color-grey);
 }
 .ProseMirror {
     *::before, *::after {
-        color: $color-grey;
+        color: var(--color-grey);
     }
     h1::before { content: '# '; }
     h2::before { content: '## '; }
