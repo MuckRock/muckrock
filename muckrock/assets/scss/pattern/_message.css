@@ -9,21 +9,20 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    background: $color-grey-7;
-    color: $color-black;
+    background: var(--color-grey-7);
+    color: var(--color-black);
     .symbol {
-        background: $color-black;
+        background: var(--color-black);
         path, rect, circle {
-            fill: $color-black;
+            fill: var(--color-black);
         }
     }
     .symbol {
-        $svg-size: 2.75em;
-        flex: 0 0 $svg-size;
+        flex: 0 0 2.75em;
         text-align: left;
         svg {
-            width: $svg-size;
-            height: $svg-size;
+            width: 2.75em;
+            height: 2.75em;
             padding: calc(var(--vr) * 0.5);
             vertical-align: middle;
         }
@@ -65,45 +64,45 @@
 }
 
 .message.info {
-    background: $color-blue-light;
-    color: $color-blue-dark;
+    background: var(--color-blue-light);
+    color: var(--color-blue-dark);
     .symbol {
-        background: $color-blue;
+        background: var(--color-blue);
         path, rect, circle {
-            fill: $color-blue-dark;
+            fill: var(--color-blue-dark);
         }
     }
 }
 
 .message.success {
-    background: $color-green-light;
-    color: $color-green-dark;
+    background: var(--color-green-light);
+    color: var(--color-green-dark);
     .symbol {
-        background: $color-green;
+        background: var(--color-green);
         path, rect, circle {
-            fill: $color-green-dark;
+            fill: var(--color-green-dark);
         }
     }
 }
 
 .message.warning {
-    background: $color-yellow-light;
-    color: $color-yellow-dark;
+    background: var(--color-yellow-light);
+    color: var(--color-yellow-dark);
     .symbol {
-        background: $color-yellow;
+        background: var(--color-yellow);
         path, rect, circle {
-            fill: $color-yellow-dark;
+            fill: var(--color-yellow-dark);
         }
     }
 }
 
 .message.error {
-    background: $color-red-light;
-    color: $color-red-dark;
+    background: var(--color-red-light);
+    color: var(--color-red-dark);
     .symbol {
-        background: $color-red;
+        background: var(--color-red);
         path, rect, circle {
-            fill: $color-red-dark;
+            fill: var(--color-red-dark);
         }
     }
 }

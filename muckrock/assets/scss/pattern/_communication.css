@@ -9,18 +9,21 @@
             align-items: center;
         }
         .options .icon {
-            margin-left: $vr;
+            margin-left: var(--vr);
             path {
-                fill: $color-white;
+                fill: var(--color-white);
             }
+        }
+        .options .icon {
             opacity: .7;
             &:hover {
                 opacity: .9;
             }
+        
         }
     }
     .dropdown a {
-        color: $color-black;
+        color: var(--color-black);
     }
     .from, .subject {
         margin-bottom: 0;
@@ -28,14 +31,14 @@
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        font-weight: $bold;
+        font-weight: var(--bold);
     }
     .communication-metadata {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 0;
-        background: $color-grey-7;
+        background: var(--color-grey-7);
     }
     .communication-body {
         margin-bottom: 0;
@@ -46,7 +49,7 @@
         padding-left: 0;
         & > li {
             display: block;
-            border-top: 1px dotted $color-grey;
+            border-top: 1px dotted var(--color-grey);
         }
         .file {
             border: none;
@@ -62,15 +65,15 @@
         left: 0;
         width: 100%;
         margin-bottom: 0;
-        color: $color-white;
+        color: var(--color-white);
     }
     .communication-action {
         width: 100%;
         height: 100%;
         margin-bottom: 0;
-        padding: $vr;
-        background-color: $color-grey-2;
-        color: $color-white;
+        padding: var(--vr);
+        background-color: var(--color-grey-2);
+        color: var(--color-white);
         &.visible {
             display: block;
         }
@@ -80,13 +83,13 @@
             margin-bottom: calc(var(--vr) * 0.5);
         }
         label {
-            font-weight: $bold;
+            font-weight: var(--bold);
         }
         input, select {
-            color: $color-black;
+            color: var(--color-black);
         }
         .errorlist {
-            color: $color-red-light;
+            color: var(--color-red-light);
         }
     }
     &.collapsed {
@@ -98,6 +101,6 @@
         }
     }
     .foia-backlink {
-        font-weight: $bold;
+        font-weight: var(--bold);
     }
 }

@@ -6,7 +6,7 @@
     .article__image
     {
         flex: 1 1 9em;
-        margin: 0 $vr calc(var(--vr) * 0.5) 0;
+        margin: 0 var(--vr) calc(var(--vr) * 0.5) 0;
         img
         {
             display: block;
@@ -20,12 +20,12 @@
     .article__overview__title
     {
         margin-bottom: calc(var(--vr) * 0.25);
-        font-size: $size-4;
-        font-weight: $bold;
+        font-size: var(--size-4);
+        font-weight: var(--bold);
         line-height: 1.2em;
         a
         {
-            color: $color-black;
+            color: var(--color-black);
         }
     }
     .article__overview__metadata
@@ -33,13 +33,13 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: calc(var(--vr) * 0.25);
-        font-size: $size-2;
+        font-size: var(--size-2);
         line-height: 1em;
-        color: $color-grey-3;
+        color: var(--color-grey-3);
     }
     .article__overview__project, .article__overview__author {
-        color: $color-grey-3;
-        font-weight: $bold;
+        color: var(--color-grey-3);
+        font-weight: var(--bold);
     }
 }
 
@@ -52,7 +52,7 @@
     }
     .article__overview__title
     {
-        font-size: $size-3;
+        font-size: var(--size-3);
         line-height: 1.2em;
     }
 }
@@ -65,7 +65,7 @@
     }
     .article__overview__title
     {
-        font-size: $size-5;
+        font-size: var(--size-5);
         line-height: 1.2em;
     }
 }

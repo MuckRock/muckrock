@@ -1,0 +1,212 @@
+/* Component */
+
+.foia-log {
+    background: var(--color-white-pure);
+    border: var(--border-width) solid var(--color-grey-5);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    
+    font-size: var(--size-2);
+    margin: var(--vr) auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.foia-log__header, .foia-log__main {
+    margin: 0;
+    padding: 0.75rem var(--vr);
+}
+
+.foia-log__header {
+    flex: 1 1 16em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5em 1.5em;
+    & p, & div {
+        margin: 0;
+    }
+}
+.foia-log__header__left, .foia-log__header__right {
+    flex: 1 1 12em;
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+    line-height: 1.4;
+    & strong {
+        display: inline-block;
+        min-width: 3em;
+        font-weight: 700;
+        font-size: .75em;
+        text-transform: uppercase;
+        text-align: right;
+        margin-right: 1em;
+    }
+}
+
+.foia-log__main {
+    flex: 2 1 32em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1em;
+    font-size: var(--size-3);
+}
+
+.foia-log__footer {
+    margin: 0;
+    padding: 0.5em var(--vr);
+    order: -1;
+    flex: 1 1 100%;
+    display: flex;
+    gap: 1em 2em;
+    border-bottom: 1px solid var(--color-grey-7);
+    background-color: var(--color-grey-8);
+    font-weight: 700;
+}
+
+.foia-log__subject {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+.foia-log-detail {
+    max-width: 64rem;
+    margin: 2em auto;
+    padding: 0 var(--vr);
+}
+
+.foia-log-detail header ul {
+    text-align: right;
+}
+
+.foia-log-detail:last-child {
+    margin-bottom: 2em;
+}
+
+.foia-log__request-id {
+    margin: 0;
+    font-family: var(--monospace);
+}
+
+/* Explore */
+
+.foia-log-explore {
+    & .explore__header__wrapper {
+        padding: 6rem 0 0;
+        background-color: var(--color-yellow-light);
+        mix-blend-mode: multiply;
+        position: relative;
+        & .grid__column.third {
+            display: none;
+        }
+        & .grid__column.two-thirds {
+            text-align: center;
+        }
+        & .background-image {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: none;
+            z-index: -1;
+            opacity: .1;
+        }
+    }
+    & .basic.button {
+        background-color: var(--color-yellow-dark);
+    }
+    & .oneline-form .field {
+        border-color: var(--color-yellow-dark);
+    }
+    & .foia-log-metrics {
+        margin: 2em 0;
+        font-size: .8em;
+        text-align: center;
+    }
+    & .foia-log-metrics .stat {
+        font-size: 1.5em;
+        font-weight: 700;
+    }  
+    & .education {
+        max-width: 72em;
+        margin: 0 auto;
+        padding: 1em;
+        & h2 {
+            font-size: 2em;
+            margin: 2em;
+            text-align: center;
+        }
+    } 
+    & .browse {
+        border-top: 1px solid rgba(247, 248, 250, .35); /* $color-white at 35% */
+        background: rgba(247, 248, 250, .1); /* $color-white at 10% */
+    }
+    & .browse--inner {
+        max-width: 72em;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+        gap: var(--vr);
+        padding: var(--vr);
+    }
+    & .browse {
+        .agency-card {
+            width: 100%;
+            max-width: 18em;
+            display: inline-block;
+            background-color: var(--color-white);
+            padding: var(--vr);
+            margin: 0;
+            border: var(--border-width) solid var(--color-grey);
+            border-radius: var(--border-radius);
+        }
+        .agency-card__jurisdiction {
+            margin: 0;
+            font-weight: 500;
+            font-size: .875em;
+        }
+        .agency-card__name {
+            font-weight: bold;
+            margin-bottom: calc(var(--vr) * 0.25);
+        }
+        .agency-card__releases {
+            overflow: visible;
+        }
+        .agency-card__releases__count {
+            display: list-item;
+            margin-bottom: 0;
+            font-weight: 500;
+            font-size: .875em;
+            cursor: pointer;
+        }
+        .agency-card__releases__list {
+            position: absolute;
+            top: auto;
+            width: 100%;
+            margin-top: calc(var(--vr) * 0.5);
+            background: var(--color-white);
+            width: 18em;
+            padding: var(--vr);
+            border: var(--border-width) solid var(--color-grey);
+            border-radius: var(--border-radius);
+            box-shadow: 0px 4px 8px 0px var(--color-grey);
+            z-index: 1;
+            padding-left: 0;
+            & ul {
+                padding-left: calc(1.5 * var(--vr));
+            }
+        }
+        .agency-card__releases__list {
+            max-height: 25vh;
+            overflow-y: auto;
+        
+        }
+    
+    }
+}
+

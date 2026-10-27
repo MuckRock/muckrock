@@ -1,35 +1,41 @@
 .question {
     .question-header {
         .options .icon {
-            margin-left: $vr;
+            margin-left: var(--vr);
             path {
-                fill: $color-white;
+                fill: var(--color-white);
             }
+        }
+        .options .icon {
             opacity: .7;
             &:hover {
                 opacity: .9;
             }
+        
         }
     }
     .dropdown a {
-        color: $color-black;
+        color: var(--color-black);
     }
 }
 
 .answer {
     .answer-header {
         .options .icon {
-            margin-left: $vr;
+            margin-left: var(--vr);
             path {
-                fill: $color-white;
+                fill: var(--color-white);
             }
+        }
+        .options .icon {
             opacity: .7;
             &:hover {
                 opacity: .9;
             }
+        
         }
     }
     .dropdown a {
-        color: $color-black;
+        color: var(--color-black);
     }
 }

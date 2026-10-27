@@ -3,7 +3,7 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: calc(var(--vr) * 0.5);
-        border-bottom: 1px solid $color-grey-7;
+        border-bottom: 1px solid var(--color-grey-7);
     }
     form {
         display: none;
@@ -22,7 +22,7 @@
     .deck {
         display: block;
         width: 100%;
-        margin-bottom: $vr;
+        margin-bottom: var(--vr);
     }
 }
 
