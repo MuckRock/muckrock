@@ -146,6 +146,25 @@ describe("normalize()", () => {
     expect(normalize(".x { grid-area: red-zone; }")).toContain("red-zone");
   });
 
+  it("treats :is() of equally specific selectors as the separate selectors", () => {
+    expect(normalize(":is(ul, ol).inline li { margin: 0; }")).toBe(
+      normalize("ul.inline li, ol.inline li { margin: 0; }"),
+    );
+    expect(normalize(":is(a, .link):hover { color: red; }")).toContain(":is(a, .link):hover");
+  });
+
+  it("refuses rules nested under selectors of different specificity, which :is() would change", () => {
+    expect(() => normalize("a, .link { &:hover { color: red; } }")).toThrow(/highest specificity/);
+    expect(() => normalize("ul, ol { &.inline { margin: 0; } }")).not.toThrow();
+  });
+
+  it("ignores trailing zeros in numbers", () => {
+    expect(normalize("a { transition-timing-function: cubic-bezier(0.230, 0.635, 0.320, 1.0); }")).toBe(
+      normalize("a { transition-timing-function: cubic-bezier(0.23, 0.635, 0.32, 1); }"),
+    );
+    expect(normalize("a { width: 100px; color: #100; }")).toContain("100px");
+  });
+
   it("keeps bodyless at-rules and !important", () => {
     expect(normalize('@charset "UTF-8"; a { color: red !important; }')).toBe(
       '@charset "UTF-8";\n\na {\n  color: #ff0000 !important;\n}\n',

@@ -9,59 +9,59 @@
 
 body {
     font-size: 16px;
-    font-family: $sans-serif;
-    font-weight: $normal;
-    line-height: $lh;
+    font-family: var(--sans-serif);
+    font-weight: var(--normal);
+    line-height: var(--lh);
     font-feature-settings: 'liga', 'kern';
 }
 
 article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
     margin-top: 0;
-    margin-bottom: $vr;
+    margin-bottom: var(--vr);
     &:last-child {
         margin-bottom: 0;
     }
 }
 
-// Headings
+/* Headings */
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-    font-weight: $bold;
-    line-height: $lh;
+    font-weight: var(--bold);
+    line-height: var(--lh);
 }
 
-h1, .h1 { font-size: $size-6; }
-h2, .h2 { font-size: $size-5; }
-h3, .h3 { font-size: $size-4; }
-h4, .h4 { font-size: $size-3; }
-h5, .h5 { font-size: $size-2; }
-h6, .h6 { font-size: $size-1; }
+h1, .h1 { font-size: var(--size-6); }
+h2, .h2 { font-size: var(--size-5); }
+h3, .h3 { font-size: var(--size-4); }
+h4, .h4 { font-size: var(--size-3); }
+h5, .h5 { font-size: var(--size-2); }
+h6, .h6 { font-size: var(--size-1); }
 
-// Paragraph
+/* Paragraph */
 
 p:empty {
     display: none;
 }
 
-b, strong, .bold { font-weight: $bold; }
+b, strong, .bold { font-weight: var(--bold); }
 
 a, .link {
-    color: $color-blue;
+    color: var(--color-blue);
     text-decoration: none;
-    &:hover { text-decoration: underline; }
-    &.disabled {
-        color: $color-grey;
-        &:hover {
-            color: $color-grey;
-            text-decoration: none;
-        }
-    }
+}
+a:hover, .link:hover { text-decoration: underline; }
+a.disabled, .link.disabled {
+    color: var(--color-grey);
+}
+a.disabled:hover, .link.disabled:hover {
+    color: var(--color-grey);
+    text-decoration: none;
 }
 
 blockquote {
     margin-left: 0;
-    padding-left: $vr;
-    border-left: 1px solid $color-grey;
+    padding-left: var(--vr);
+    border-left: 1px solid var(--color-grey);
     font-style: italic;
     i, em { font-style: normal; }
 }
@@ -69,13 +69,13 @@ blockquote {
 small, .small {
     font-size: 0.8125em;
     font-style: normal;
-    line-height: $lh;
+    line-height: var(--lh);
 }
 
 .larger {
     font-size: 1.1875em;
     font-style: normal;
-    line-height: $lh;
+    line-height: var(--lh);
 }
 
 dfn, dt, .overline,
@@ -86,37 +86,37 @@ dfn, dt, .overline,
 fieldset label,
 fieldset .errorlist {
     display: block;
-    font-size: $size-1;
+    font-size: var(--size-1);
     font-style: normal;
-    font-weight: $bold;
+    font-weight: var(--bold);
     text-transform: uppercase;
     letter-spacing: 2px;
-    line-height: $lh;
+    line-height: var(--lh);
 }
 
 dd {
     -webkit-margin-start: 0;
     & + dt {
-        margin-top: $vr;
+        margin-top: var(--vr);
     }
 }
 
 pre {
-    background-color: $color-grey-7;
-    border-radius: $border-radius;
+    background-color: var(--color-grey-7);
+    border-radius: var(--border-radius);
 }
 
 code {
     padding: .2em .4em;
-    border-radius: $border-radius;
-    font-family: $monospace;
-    font-size: $size-2;
-    background-color: $color-grey-7;
+    border-radius: var(--border-radius);
+    font-family: var(--monospace);
+    font-size: var(--size-2);
+    background-color: var(--color-grey-7);
 }
 
 hr {
     border-top: none;
-    border-bottom: 1px solid $color-grey;
+    border-bottom: 1px solid var(--color-grey);
 }
 
 img, audio, video, embed, iframe {
@@ -124,12 +124,12 @@ img, audio, video, embed, iframe {
 }
 
 figcaption {
-    font-size: $size-2;
+    font-size: var(--size-2);
 }
 
 th {
-    font-size: $size-2;
-    font-weight: $bold;
+    font-size: var(--size-2);
+    font-weight: var(--bold);
     text-align: left;
     vertical-align: top;
 }
@@ -159,7 +159,7 @@ ul, ol {
 }
 
 .mono {
-    font-family: $monospace;
+    font-family: var(--monospace);
 }
 
 .force-select {
@@ -168,7 +168,7 @@ ul, ol {
 }
 
 p.error {
-    color: $color-red;
+    color: var(--color-red);
 }
 
 .small-caps {
