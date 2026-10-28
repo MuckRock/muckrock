@@ -10,11 +10,11 @@
 }
 
 .ui-datepicker-header {
-    @include display(flex);
-    @include justify-content(space-between);
+    display: flex;
+    justify-content: space-between;
     width: 100%;
     margin-bottom: 0;
-    padding: $vr/4;
+    padding: $vr*0.25;
     text-align: center;
     font-weight: $bold;
     a {
@@ -23,15 +23,15 @@
 }
 
 .ui-datepicker-prev {
-    @include order(-1);
+    order: -1;
 }
 
 .ui-datepicker-title {
-    @include order(0);
+    order: 0;
 }
 
 .ui-datepicker-next {
-    @include order(1);
+    order: 1;
 }
 
 a.ui-state-disabled {

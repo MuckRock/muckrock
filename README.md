@@ -128,7 +128,7 @@ Both linting and formatting are checked on CodeShip. Please ensure your code is 
 `inv manage` will allow you to easily run Django manage.py commands.
 
 - `inv manage migrate` to migrate database
-  `inv npm` will allow you to run NPM commands. `inv npm "run build"` should be run to rebuild assets if any javascript or CSS is changed. If you will be editing a lot of javascript or CSS, you can run `inv npm "run watch"`.
+  `inv npm` will allow you to run NPM commands. `inv up` starts a Vite dev server (the `muckrock_vite` container) that serves javascript and CSS changes live, so you don't need to rebuild while it's running. Run `inv npm "run build"` to update the built assets used by tests and production.
   `inv heroku` will open a python shell on Heroku.
 
 ## Pip Tools

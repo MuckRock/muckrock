@@ -1,8 +1,10 @@
+@use "sass:math";
+
 $request-breakpoint: 768px;
 
 .request.properties {
-    @include display(flex);
-    @include flex-direction(column);
+    display: flex;
+    flex-direction: column;
     h1 {
         font-size: $size-6;
         font-weight: $bold;
@@ -31,29 +33,29 @@ $request-breakpoint: 768px;
             @include overflow-ellipsis;
         }
         .action {
-            margin-left: $vr/2;
+            margin-left: $vr*0.5;
             float: right;
         }
     }
     .hidden-form {
         display: none;
         @include border;
-        padding: $vr/2;
-        //@include align-items(flex-start);
-        //@include flex-wrap(wrap);
-        @include justify-content(space-between);
+        padding: $vr*0.5;
+        //align-items: flex-start;
+        //flex-wrap: wrap;
+        justify-content: space-between;
         label, input[type="text"] {
-            //@include flex(0 1 100%);
-            margin-bottom: $vr/2;
+            //flex: 0 1 100%;
+            margin-bottom: $vr*0.5;
         }
         &.visible {
-            //@include display(flex);
-            @include display(block);
+            //display: flex;
+            display: block;
         }
         footer {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include flex-direction(row-reverse);
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row-reverse;
         }
     }
     .portal-info, .upload-info {
@@ -76,12 +78,12 @@ $request-breakpoint: 768px;
 
 .request.main {
     .prompt {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include flex-wrap(wrap);
-        @include align-items(center);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        align-items: center;
         @include border;
-        padding: $vr/4 $vr/2;
+        padding: $vr*0.25 $vr*0.5;
         font-weight: $bold;
         p, footer {
             margin-bottom: 0;
@@ -105,7 +107,7 @@ $request-breakpoint: 768px;
 
     .file-download.prompt {
         border-color: $color-yellow;
-        @include justify-content(flex-start);
+        justify-content: flex-start;
         p {
           margin-left: $vr;
         }
@@ -135,14 +137,14 @@ $request-breakpoint: 768px;
 .request .communications {
 
     .communications-controls {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(center);
-        @include flex-wrap(wrap);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     .communications.filter {
-        @include flex(0 1 50%);
+        flex: 0 1 50%;
     }
 
     .communications-actions {
@@ -159,13 +161,13 @@ $request-breakpoint: 768px;
         }
     }
     .communications-list {
-        @include display(flex);
-        @include flex-direction(column);
+        display: flex;
+        flex-direction: column;
     }
     .auto-follow-up {
-        @include display(flex);
-        @include justify-content(space-between);
-        padding: $vr/2;
+        display: flex;
+        justify-content: space-between;
+        padding: $vr*0.5;
         border: 1px solid $color-blue;
         color: $color-blue;
         p {
@@ -199,7 +201,7 @@ $request-breakpoint: 768px;
         header {
             display: block;
             margin-bottom: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-bottom: 1px solid $color-grey;
             p {
                 margin-bottom: 0;
@@ -215,10 +217,10 @@ $request-breakpoint: 768px;
             border-radius: 0;
         }
         .help-text{
-            padding: 0 $vr/2;
+            padding: 0 $vr*0.5;
         }
         input[type="checkbox"] {
-            margin-left: $vr/2;
+            margin-left: $vr*0.5;
             margin-top: $vr * 0.75;
         }
         .currency {
@@ -242,19 +244,19 @@ $request-breakpoint: 768px;
             border-radius: 0;
         }
         .buttons {
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-top: 1px solid $color-grey;
-            @include display(flex);
-            @include justify-content(space-between);
+            display: flex;
+            justify-content: space-between;
         }
         .formset-forms {
-            padding: $vr/2;
+            padding: $vr*0.5;
         }
     }
     #inactive .composer-input {
         p {
             height: 15em;
-            padding: $vr/2;
+            padding: $vr*0.5;
             background-color: #FFF;
             color: $color-grey;
         }
@@ -285,17 +287,17 @@ $request-breakpoint: 768px;
         display: none;
         @include border-radius;
         border: 1px solid $color-black;
-        padding: $vr/4 $vr/2 $vr/2 $vr/2;
+        padding: $vr*0.25 $vr*0.5 $vr*0.5 $vr*0.5;
         background: $color-grey-2;
         color: $color-white;
         &.visible {
             display: block;
         }
         header {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(flex-start);
-            margin-bottom: $vr/2;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: $vr*0.5;
             h3 {
                 margin-bottom: 0;
             }
@@ -306,7 +308,7 @@ $request-breakpoint: 768px;
     }
     .files-list {
         .file {
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
         }
         .active .file {
             border-color: $color-blue;
@@ -322,16 +324,16 @@ $request-breakpoint: 768px;
 .request .notes, .request .communications {
 
     .notes-controls {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(center);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         p {
             margin-bottom: 0;
         }
     }
 
     .notes.filter {
-        @include flex(0 1 50%);
+        flex: 0 1 50%;
     }
 
     .add-note {
@@ -348,21 +350,21 @@ $request-breakpoint: 768px;
             margin-bottom: 0;
         }
         header {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(flex-end);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
             margin-bottom: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
             border-bottom: 1px solid $color-grey;
             p {
                 font-size: $size-2;
             }
         }
         footer {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(center);
-            padding: $vr/2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: $vr*0.5;
             border-top: 1px solid $color-grey;
             p {
                 padding-left: $vr;
@@ -383,10 +385,10 @@ $request-breakpoint: 768px;
         border-color: $color-grey;
         background: $color-white-pure;
         .note-header {
-            @include display(flex);
-            @include justify-content(space-between);
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 0;
-            padding: $vr/2;
+            padding: $vr*0.5;
             background-color: $color-yellow;
             color: $color-black;
             p {
@@ -400,14 +402,14 @@ $request-breakpoint: 768px;
             }
         }
         .note-metadata {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include align-items(center);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 0;
             background: $color-grey-7;
         }
         .note-body {
-            padding: $vr/2;
+            padding: $vr*0.5;
             background-color: $color-yellow-light;
             br {
               margin-bottom: 0;
@@ -423,9 +425,9 @@ $request-breakpoint: 768px;
             background-color: $color-green;
         }
         .note-body {
-            @include display(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(space-around);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
             background-color: $color-green-light;
             font-variant: small-caps;
             .payto {
@@ -512,7 +514,7 @@ $request-breakpoint: 768px;
         padding: $vr;
         @include border;
         h3 {
-            @include flex(0 1 100%);
+            flex: 0 1 100%;
         }
         button {
             max-width: 10em;
@@ -520,13 +522,13 @@ $request-breakpoint: 768px;
         }
     }
     .generate-private-link {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include align-items(flex-start);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
         input[type="text"] {
-            @include flex(0 1 100%);
+            flex: 0 1 100%;
             margin-bottom: $vr;
-            @include transition(background-color 1s ease-out);
+            transition: background-color 1s ease-out;
             background-color: #FFF;
             &.success {
                 background-color: $color-green;
@@ -534,16 +536,16 @@ $request-breakpoint: 768px;
             }
         }
         button, .help-text {
-            @include flex(1);
+            flex: 1;
         }
         .help-text {
             padding-left: $vr;
         }
     }
     .grant-access .picker, .change-owner .picker {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include align-items(flex-end);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
         .user.search.input {
             margin-bottom: 0;
             .users {
@@ -558,7 +560,7 @@ $request-breakpoint: 768px;
             }
         }
         select[name="access"] {
-            @include flex(0 1 100%);
+            flex: 0 1 100%;
             margin-bottom: $vr;
         }
 
@@ -568,10 +570,10 @@ $request-breakpoint: 768px;
 
         @include media($medium-bp) {
             .user.search.input {
-                @include flex(0 1 70%);
+                flex: 0 1 70%;
             }
             select[name="access"] {
-                @include flex(0 1 25%);
+                flex: 0 1 25%;
                 margin-left: 4%;
                 margin-bottom: 0;
             }
@@ -582,7 +584,7 @@ $request-breakpoint: 768px;
             background-color: $color-white;
         }
         .person td {
-            padding: $vr/2;
+            padding: $vr*0.5;
             vertical-align: middle;
             text-align: right;
             &.name {
@@ -605,7 +607,7 @@ $request-breakpoint: 768px;
         }
         .access-badge {
             width: 5em;
-            padding: $vr/4 $vr/2;
+            padding: $vr*0.25 $vr*0.5;
             background: $color-grey;
             color: $color-white;
             text-align: center;
@@ -621,7 +623,7 @@ $request-breakpoint: 768px;
             }
         }
         button {
-            padding: $vr/6 $vr/2;
+            padding: math.div($vr, 6) $vr*0.5;
             width: 5em;
             @include media($medium-bp) {
                 margin: 0 0 4px;

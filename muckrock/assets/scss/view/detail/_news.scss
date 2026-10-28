@@ -1,12 +1,12 @@
 .news.detail {
-    @include display(flex);
-    @include justify-content(center);
-    @include flex-wrap(wrap);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
     @include padding(0);
 }
 
 .news__image {
-    @include flex(0 1 100%);
+    flex: 0 1 100%;
     margin-bottom: 0;
     img {
         display: block;
@@ -18,7 +18,7 @@
 .news__article {
     max-width: 42em;
     min-width: 0;
-    @include flex(3 1 24em);
+    flex: 3 1 24em;
     @include padding;
     @include media($medium-bp) {
         font-size: $size-4;
@@ -31,13 +31,13 @@
             font-weight: $bold;
         }
         h1, .kicker {
-            margin: $vr/2 0;
+            margin: $vr*0.5 0;
             font-weight: $bold;
             line-height: 1.25em;
         }
         .contributors {
-            @include display(flex);
-            @include justify-content(space-between);
+            display: flex;
+            justify-content: space-between;
             .authors, .editors {
                 margin-bottom: 0;
             }
@@ -69,18 +69,18 @@
     }
 
     .newsletter-widget {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
         margin-bottom: 0;
         background: $color-blue-light;
         color: $color-blue-dark;
-        padding: $vr/2;
+        padding: $vr*0.5;
         margin: 1rem 0;
         gap: 0;
 
         .call-to-action {
-            @include flex(1 1 20em);
+            flex: 1 1 20em;
             width: 100%;
             max-width: unset;
             padding: 1rem;
@@ -91,7 +91,7 @@
 }
 
 .news__aside {
-    @include flex(1 1 16em);
+    flex: 1 1 16em;
     @include padding;
     max-width: 24em;
     min-width: 0;
@@ -101,15 +101,15 @@
 }
 .articles__recent, .articles__related {
     max-width: 72em;
-    @include display(flex);
-    @include flex-wrap(wrap);
+    display: flex;
+    flex-wrap: wrap;
     margin: 0 auto;
     @include padding;
     .articles__recent__header, .articles__related__header {
-        @include flex(0 1 100%);
+        flex: 0 1 100%;
     }
     .article {
-        @include flex(1 1 24em);
+        flex: 1 1 24em;
         margin-right: $vr;
     }
 }

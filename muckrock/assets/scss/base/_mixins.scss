@@ -1,3 +1,5 @@
+@use "sass:color";
+
 /*
 ** _mixins.scss
 **
@@ -5,6 +7,14 @@
 ** It is used to quickly apply a uniform value to an element.
 ** At some point, mixins should be used to define utility classes to allow for quicker styling.
 */
+
+@use "sass:math";
+
+@mixin media($query) {
+    @media #{$query} {
+        @content;
+    }
+}
 
 @mixin vr {
     margin-top: 0;
@@ -35,14 +45,14 @@
 }
 
 @mixin padding($padding: $vr) {
-    padding: $padding/2;
+    padding: $padding*0.5;
     @include media($medium-bp) {
         padding: $padding;
     }
 }
 
 @mixin textbox() {
-    @include box-sizing(border-box);
+    box-sizing: border-box;
     @include border;
     @include border-radius;
     border-color: $color-grey;
@@ -53,17 +63,18 @@
     overflow: hidden;
     display: block;
     width: 100%;
-    margin:  $vr/2 0;
-    padding: $vr/6 $vr/3;
+    margin:  $vr*0.5 0;
+    padding: math.div($vr, 6) math.div($vr, 3);
 
 }
 
 @mixin input() {
     @include textbox;
     display: inline-block;
-    padding: $vr/4 $vr/3 $vr/4 $vr/2;
+    padding: $vr*0.25 math.div($vr, 3) $vr*0.25 $vr*0.5;
     &:disabled {
-        background-color: lighten($color-disabled, 25%);
+        // +25% lightness overshoots 100%; clip it back to white.
+        background-color: color.to-gamut(color.adjust($color-disabled, $lightness: 25%, $space: hsl), $method: clip);
         border: 1px solid $color-disabled;
         color: $color-disabled;
     }
@@ -77,9 +88,9 @@
         background-color: $background;
         @include border-radius;
         border-color: $background;
-        @include transition(border-color .25s linear);
+        transition: border-color .25s linear;
         input {
-            @include appearance(none);
+            appearance: none;
             width: 75%;
             height: 100%;
             float: left;
@@ -87,8 +98,9 @@
             color: $color;
             background: transparent;
             border: none;
-            @include placeholder {
+            &::placeholder {
                 color: $color-grey-5;
+                opacity: 1;
             }
             &:focus {
                 outline: none;

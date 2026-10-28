@@ -1,7 +1,6 @@
 // Third Party Frameworks
 @import '../vendor/normalize';
-@import '../vendor/bourbon/bourbon';
-@import '../vendor/neat/neat';
+@import 'base/box-sizing';
 
 @import 'base/base';
 @import 'component/button';
@@ -11,22 +10,22 @@
 body {
     background: $color-black;
     color: $color-white;
-    @include display(flex);
-    @include flex-direction(column);
+    display: flex;
+    flex-direction: column;
     height: 100vh;
 }
 
 header {
-    @include flex(0 0 auto);
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include align-items(center);
-    @include justify-content(space-between);
-    padding: $vr/2;
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: $vr*0.5;
 }
 
 .viewer {
-    @include flex(1 1 auto);
+    flex: 1 1 auto;
     margin-bottom: 0;
     height: auto !important;
 }
@@ -38,8 +37,8 @@ svg {
 }
 
 .info {
-    @include display(flex);
-    @include align-items(center);
+    display: flex;
+    align-items: center;
     margin-bottom: 0;
     a {
         color: $color-white;
@@ -50,7 +49,7 @@ svg {
 }
 
 .logo {
-    margin-right: $vr/2;
+    margin-right: $vr*0.5;
     svg {
         height: 2em;
         width: 2em;
@@ -72,10 +71,10 @@ svg {
     right: 0;
     background: rgba($color-black, .8);
     &.visible {
-        @include display(flex);
-        @include flex-direction(column);
-        @include align-items(center);
-        @include justify-content(center);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
     div {
         width: 100%;

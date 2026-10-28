@@ -1,11 +1,13 @@
+@use "sass:color";
+
 .banner-wrapper {
     background-size: cover;
     background-position: right center;
 }
 
 .foia.banner {
-    @include align-items(center);
-    @include justify-content(center);
+    align-items: center;
+    justify-content: center;
     background: rgba($color-blue-dark, 0.8);
     color: $color-white;
     padding-top: 3em;
@@ -47,16 +49,16 @@
     }
     .stats
     {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-around);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
         list-style: none;
         padding-left: 0;
     }
 
     .stat
     {
-        @include flex(1 1 8em);
+        flex: 1 1 8em;
         width: 7em;
         margin: 0 0 $vr 0;
         text-align: center;
@@ -64,7 +66,7 @@
         {
             font-weight: $bold;
             font-size: $size-5;
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
         }
         .key
         {
@@ -91,8 +93,8 @@
     }
 
     .completed-requests {
-        @include display(flex);
-        @include justify-content(flex-start);
+        display: flex;
+        justify-content: flex-start;
         overflow-x: scroll;
         -webkit-overflow-scrolling: touch;
         padding: $vr $vr 0;
@@ -144,7 +146,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 
 .homepage {
     .articles {
-        padding-left: $vr/2;
+        padding-left: $vr*0.5;
         @include media($medium-bp) {
             padding-left: $vr;
         }
@@ -156,11 +158,11 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         }
     }
     .requests {
-        @include flex(1 1 200px);
+        flex: 1 1 200px;
         margin: 0 $vr $vr;
     }
     .projects {
-        padding: 0 $vr/2;
+        padding: 0 $vr*0.5;
         @include media($medium-bp) {
             padding: 0 $vr;
         }
@@ -171,9 +173,9 @@ If the browser support multiplying backgrounds, use that instead of the banner b
 }
 
 .homepage-2025 {
-    @include display(flex);
-    @include flex-direction(column);
-    @include align-items(center);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     background-color: $color-white;
     margin-top: 2.5rem;
     
@@ -362,20 +364,20 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         background-blend-mode: soft-light;
 
         &#muckrock-requests {
-            background: lighten($color-red, 40%);
-            border-bottom: 1px solid lighten($color-red-dark, 20%);
+            background: color.adjust($color-red, $lightness: 40%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-red-dark, $lightness: 20%, $space: hsl);
         }
         &#documentcloud {
-            background: lighten($color-blue, 40%);
-            border-bottom: 1px solid lighten($color-blue-dark, 20%);
+            background: color.adjust($color-blue, $lightness: 40%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-blue-dark, $lightness: 20%, $space: hsl);
         }
         &#data-liberation-project {
-            background: lighten($color-yellow, 40%);
-            border-bottom: 1px solid lighten($color-yellow-dark, 20%);
+            background: color.adjust($color-yellow, $lightness: 40%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-yellow-dark, $lightness: 20%, $space: hsl);
         }
         &#sunlight-research-center {
-            background: lighten($color-orange, 30%);
-            border-bottom: 1px solid lighten($color-orange-dark, 20%);
+            background: color.adjust($color-orange, $lightness: 30%, $space: hsl);
+            border-bottom: 1px solid color.adjust($color-orange-dark, $lightness: 20%, $space: hsl);
         }
     }
 
@@ -510,7 +512,7 @@ If the browser support multiplying backgrounds, use that instead of the banner b
         color: currentColor;
         &:hover {
             text-decoration: none;
-            background: lighten($color-blue, 25%);
+            background: color.adjust($color-blue, $lightness: 25%, $space: hsl);
         }
     }
 

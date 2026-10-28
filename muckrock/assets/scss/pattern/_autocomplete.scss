@@ -1,3 +1,5 @@
+@use "sass:color";
+
 input.autocomplete.xhr-pending { background-image: none; }
 
 .select2, .select2-dropdown {
@@ -6,7 +8,7 @@ input.autocomplete.xhr-pending { background-image: none; }
   }
   .foia.choice {
     .main {
-      padding: $vr/4 $vr/2;
+      padding: $vr*0.25 $vr*0.5;
     }
     .title {
       margin-bottom: 0;
@@ -17,7 +19,7 @@ input.autocomplete.xhr-pending { background-image: none; }
   }
   .agency.choice {
     .main {
-      padding: $vr/4 $vr/2;
+      padding: $vr*0.25 $vr*0.5;
     }
     .name {
       margin-bottom: 0;
@@ -40,7 +42,7 @@ input.autocomplete.xhr-pending { background-image: none; }
     .info {
       display: inline-block;
       vertical-align: middle;
-      padding: $vr/4 $vr/2;
+      padding: $vr*0.25 $vr*0.5;
     }
     .meta {
       font-size: $size-2;
@@ -62,8 +64,8 @@ input.autocomplete.xhr-pending { background-image: none; }
 .select2-selection.agencies {
   a {
     text-decoration: underline;
-    color: lighten($color-blue, 30%);
-    &:hover { color: lighten($color-blue, 20%); }
+    color: color.adjust($color-blue, $lightness: 30%, $space: hsl);
+    &:hover { color: color.adjust($color-blue, $lightness: 20%, $space: hsl); }
   }
   .select2-selection__choice {
     padding: 5px;

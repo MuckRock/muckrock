@@ -1,12 +1,12 @@
 .article
 {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include align-content(flex-start);
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
     .article__image
     {
-        @include flex(1 1 9em);
-        margin: 0 $vr $vr/2 0;
+        flex: 1 1 9em;
+        margin: 0 $vr $vr*0.5 0;
         img
         {
             display: block;
@@ -15,11 +15,11 @@
     }
     .article__overview
     {
-        @include flex(3 1 18em);
+        flex: 3 1 18em;
     }
     .article__overview__title
     {
-        margin-bottom: $vr/4;
+        margin-bottom: $vr*0.25;
         font-size: $size-4;
         font-weight: $bold;
         line-height: 1.2em;
@@ -30,9 +30,9 @@
     }
     .article__overview__metadata
     {
-        @include display(flex);
-        @include justify-content(space-between);
-        margin-bottom: $vr/4;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: $vr*0.25;
         font-size: $size-2;
         line-height: 1em;
         color: $color-grey-3;
@@ -47,8 +47,8 @@
 {
     .article__image
     {
-        @include flex(1 1 100%);
-        margin: 0 0 $vr/2 0;
+        flex: 1 1 100%;
+        margin: 0 0 $vr*0.5 0;
     }
     .article__overview__title
     {
@@ -60,8 +60,8 @@
 .large.article
 {
     .article__image {
-        @include flex(0 1 100%);
-        margin: 0 0 $vr/2;
+        flex: 0 1 100%;
+        margin: 0 0 $vr*0.5;
     }
     .article__overview__title
     {

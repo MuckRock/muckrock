@@ -11,10 +11,11 @@
     display: block;
     margin-bottom: -1px;
     color: $color-grey-3;
-    padding: $vr/2;
+    padding: $vr*0.5;
     cursor: pointer;
     outline: none;
-    @include border-top-radius(4px);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     &:hover {
         color: $color-black;
         text-decoration: none;

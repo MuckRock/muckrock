@@ -63,6 +63,6 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["muckrock/assets/js/**/*.test.{js,jsx}"],
+    include: ["muckrock/assets/js/**/*.test.{js,jsx}", "scripts/**/*.test.js"],
   },
 });

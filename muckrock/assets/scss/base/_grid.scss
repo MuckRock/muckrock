@@ -7,17 +7,17 @@
 */
 
 .grid__row {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include align-items(stretch);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
     padding-right: 0 !important;
     // max-width: 75em;
 }
 
 .grid__column {
-    @include flex(1 1 auto);
+    flex: 1 1 auto;
     min-width: 0;
-    padding-right: $vr/2;
+    padding-right: $vr*0.5;
     @include media($medium-bp) {
         padding-right: $vr;
     }
@@ -25,42 +25,42 @@
         padding-left: 0;
     }
     &.quarter, &.one-quarter {
-        @include flex-basis(25%);
+        flex-basis: 25%;
     }
     &.half, &.two-quarters {
-        @include flex-basis(50%);
+        flex-basis: 50%;
     }
     &.three-quarters {
-        @include flex-basis(75%);
+        flex-basis: 75%;
     }
     &.third, &.one-third {
-        @include flex-basis(33%);
+        flex-basis: 33%;
     }
     &.two-thirds {
-        @include flex-basis(66%);
+        flex-basis: 66%;
     }
     &.full, &.four-quarters, &.three-thirds {
-        @include flex-basis(100%);
+        flex-basis: 100%;
         padding-left: 0;
     }
     @media (max-width: 48em) {
         &.quarter, &.one-quarter {
-            @include flex-basis(50%);
+            flex-basis: 50%;
         }
         &.half, &.two-quarters, &.three-quarters {
-            @include flex-basis(100%);
+            flex-basis: 100%;
             padding-left: 0;
         }
     }
     @media (max-width: 38em) {
         &.third, &.one-third, &.two-thirds {
-            @include flex-basis(100%);
+            flex-basis: 100%;
             padding-left: 0;
         }
     }
     @media (max-width: 28em) {
         &.quarter, &.one-quarter {
-            @include flex-basis(100%);
+            flex-basis: 100%;
             padding-left: 0;
         }
     }
@@ -70,21 +70,21 @@
 }
 
 .space-between {
-  @include display(flex);
-  @include flex-wrap(wrap);
-  @include justify-content(space-between);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .align-baseline {
-  @include display(flex);
-  @include flex-wrap(wrap);
-  @include align-items(baseline);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
 }
 
 .align-center {
-  @include display(flex);
-  @include flex-wrap(wrap);
-  @include align-items(center);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .mb0 {

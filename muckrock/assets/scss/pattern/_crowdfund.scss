@@ -4,21 +4,22 @@ $crowdfund-color-light: $color-green-light;
 $crowdfund-border: $border $crowdfund-color;
 
 .crowdfund__widget {
-    @include display(flex);
-    @include flex-direction(column);
+    display: flex;
+    flex-direction: column;
     overflow: visible;
     margin: 0 auto $vr;
     border: $crowdfund-border;
     background: #FFF;
 
     & > *:last-child {
-        @include border-bottom-radius($border-radius);
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
     }
 
     .crowdfund__widget__header, .crowdfund__widget__footer {
-        @include flex(0 0 auto);
+        flex: 0 0 auto;
         margin-bottom: 0;
-        padding: $vr/4 $vr/2;
+        padding: $vr*0.25 $vr*0.5;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
@@ -36,27 +37,27 @@ $crowdfund-border: $border $crowdfund-color;
         }
         .action {
             font-size: $size-2;
-            margin-right: $vr/2;
+            margin-right: $vr*0.5;
         }
     }
 
 
     main {
-        @include flex(auto);
-        @include display(flex);
-        @include flex-direction(column);
-        @include justify-content(space-between);
+        flex: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         margin-bottom: 0;
         .row {
-            @include display(flex);
-            @include flex-wrap(wrap);
-            @include justify-content(space-between);
-            @include align-items(center);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
             & > * {
-                @include flex(1 1 25);
+                flex: 1 1 25;
                 margin-bottom: 0;
                 text-align: left;
-                padding: $vr/2;
+                padding: $vr*0.5;
                 @include media($medium-bp) {
                     margin-bottom: 0;
                 }
@@ -66,7 +67,7 @@ $crowdfund-border: $border $crowdfund-color;
 
     .description {
         margin-bottom: 0;
-        padding: $vr/2;
+        padding: $vr*0.5;
     }
 
     .progress, .meter {
@@ -85,7 +86,7 @@ $crowdfund-border: $border $crowdfund-color;
         margin-top: 0;
         li {
             display: inline-block;
-            padding: 0 $vr/2 0 0;
+            padding: 0 $vr*0.5 0 0;
         }
     }
 }
@@ -96,7 +97,7 @@ $crowdfund-border: $border $crowdfund-color;
         margin-bottom: 0;
     }
     .anonymity input[type="checkbox"] {
-        margin-right: $vr/4;
+        margin-right: $vr*0.25;
     }
     .anonymity input[type="text"] {
         width: 100%;
@@ -104,24 +105,24 @@ $crowdfund-border: $border $crowdfund-color;
         border: 1px solid $color-green;
     }
     .anonymity p {
-        margin-bottom: $vr/4;
+        margin-bottom: $vr*0.25;
     }
     .crowdfund__donate {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include align-items(stretch);
-        margin: $vr/2 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        margin: $vr*0.5 0;
         border: 1px solid $color-green;
         input {
-            @include flex(3 1 auto);
-            @include appearance(none);
+            flex: 3 1 auto;
+            appearance: none;
             border: none;
             line-height: $lh;
             border-radius: 0;
             color: $color-green-dark;
         }
         button {
-            @include flex(1 1 auto);
+            flex: 1 1 auto;
         }
     }
     button:disabled {
@@ -149,13 +150,13 @@ $crowdfund-border: $border $crowdfund-color;
             bottom: 0;
             z-index: 1;
             border-radius: $border-radius;
-            padding: $vr/4 $vr/2;
+            padding: $vr*0.25 $vr*0.5;
             background-color: $color-black;
             color: $color-white;
             opacity: 0;
             list-style-type: none;
             font-size: $size-2;
-            @include transition(opacity .25s .25s linear);
+            transition: opacity .25s .25s linear;
         }
         &.summary:hover + .dropdown, &.dropdown:hover {
             display: block;
@@ -169,9 +170,9 @@ $crowdfund-border: $border $crowdfund-color;
     position: relative;
     .overlay
     {
-        @include display(flex);
-        @include justify-content(center);
-        @include align-items(center);
+        display: flex;
+        justify-content: center;
+        align-items: center;
         position: absolute;
         top: 0;
         left: 0;
@@ -197,7 +198,7 @@ $crowdfund-border: $border $crowdfund-color;
         }
         p
         {
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
         }
         input {
             color: $color-black;
@@ -231,9 +232,9 @@ $crowdfund-border: $border $crowdfund-color;
         }
     }
     .overlay .dialog header {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(baseline);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
         h1 {
             margin-bottom: 0;
         }
@@ -244,9 +245,9 @@ $crowdfund-border: $border $crowdfund-color;
         }
     }
     .overlay .dialog footer {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(baseline);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
     }
 }
 

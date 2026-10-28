@@ -1,12 +1,16 @@
+@use "sass:color";
+
 /* Buttons */
+
+@use "sass:math";
 
 $shadow-normal: 3px;
 $shadow-hover: 3px;
 $shadow-active: 0px;
 
 @mixin button-color($color) {
-    $color-light: lighten($color, $color-darken-amount/2);
-    $color-dark: darken($color, $color-darken-amount);
+    $color-light: color.adjust($color, $lightness: $color-darken-amount*0.5, $space: hsl);
+    $color-dark: color.adjust($color, $lightness: -$color-darken-amount, $space: hsl);
     border-color: $color-dark;
     background: $color;
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
@@ -24,17 +28,17 @@ $shadow-active: 0px;
 }
 
 @mixin button($color) {
-    $color-light: lighten($color, $color-darken-amount);
-    $color-dark: darken($color, $color-darken-amount);
+    $color-light: color.adjust($color, $lightness: $color-darken-amount, $space: hsl);
+    $color-dark: color.adjust($color, $lightness: -$color-darken-amount, $space: hsl);
     // Metrics
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    margin: $vr/4 0;
+    margin: $vr*0.25 0;
     border: 1px solid $color-dark;
     border-radius: $border-radius;
-    padding: $vr/6 $vr/3;
+    padding: math.div($vr, 6) math.div($vr, 3);
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
     text-shadow: 0px -1px $color-dark;
     // Color
@@ -61,14 +65,14 @@ $shadow-active: 0px;
         box-shadow: 0px $shadow-normal 0px 0px $color-dark;
     }
     &:hover {
-        @include transform(translateY($shadow-normal - $shadow-hover));
+        transform: translateY($shadow-normal - $shadow-hover);
         box-shadow: 0px $shadow-hover 0px 0px $color-dark;
         color: $color-white;
         background: $color-light;
         text-decoration: none;
     }
     &:active {
-        @include transform(translateY($shadow-normal - $shadow-active));
+        transform: translateY($shadow-normal - $shadow-active);
         box-shadow: 0px $shadow-active 0px 0px $color-dark;
         color: $color-white;
     }
@@ -109,7 +113,7 @@ $shadow-active: 0px;
     border-radius: 0;
     &:link, &:hover, &:active, &:visited {
         box-shadow: none;
-        @include transform(none);
+        transform: none;
     }
 }
 
@@ -135,22 +139,22 @@ $shadow-active: 0px;
     &:link, &:hover, &:active, &:visited {
         border: none;
         box-shadow: none;
-        @include transform(none);
+        transform: none;
     }
     &.red, &.failure {
         box-shadow: none;
         color: $color-red;
         &:hover {
-            color: darken($color-red, 10%);
-            background-color: lighten($color-red, 30%);
+            color: color.adjust($color-red, $lightness: -10%, $space: hsl);
+            background-color: color.adjust($color-red, $lightness: 30%, $space: hsl);
         }
     }
     &.blue, &.primary {
         box-shadow: none;
         color: $color-blue;
         &:hover {
-            color: darken($color-blue, 10%);
-            background-color: lighten($color-blue, 30%);
+            color: color.adjust($color-blue, $lightness: -10%, $space: hsl);
+            background-color: color.adjust($color-blue, $lightness: 30%, $space: hsl);
         }
         
     }

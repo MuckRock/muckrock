@@ -1,7 +1,7 @@
 .search.list {
     .list-actions {
         #global-search {
-            @include display(flex);
+            display: flex;
             width: 100%;
         }
         input[type=search] {
@@ -9,13 +9,13 @@
             margin-right: $vr;
         }
         input[type=submit] {
-            @include flex(auto);
+            flex: auto;
             margin: 0;
         }
     }
     .list-filters {
         label {
-            padding-left: $vr/4;
+            padding-left: $vr*0.25;
         }
         li {
             display: inline-block;

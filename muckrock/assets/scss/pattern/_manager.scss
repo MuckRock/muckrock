@@ -1,8 +1,8 @@
 .manager {
     header {
-        @include display(flex);
-        @include justify-content(space-between);
-        margin-bottom: $vr/2;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: $vr*0.5;
         border-bottom: 1px solid $color-grey-7;
     }
     form {
@@ -11,9 +11,9 @@
             display: block;
         }
         footer {
-            @include display(flex);
-            @include justify-content(space-between);
-            @include flex-direction(row-reverse);
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row-reverse;
         }
     }
     input[type="text"] {
@@ -34,15 +34,15 @@
     }
     select {
         width: 100%;
-        margin-bottom: $vr/2;
+        margin-bottom: $vr*0.5;
     }
 }
 
 .embargo.manager {
     .permanent, .expiration {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(flex-start);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
     }
 }
 

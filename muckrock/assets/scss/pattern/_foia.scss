@@ -7,31 +7,31 @@
     text-align: left;
     .title {
         font-weight: $bold;
-        margin-bottom: $vr/2;
+        margin-bottom: $vr*0.5;
     }
     .files {
         font-weight: $bold;
         text-align: right;
     }
     .foia__single__header {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include justify-content(space-between);
-        @include align-items(center);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 0;
-        padding: $vr/2;
+        padding: $vr*0.5;
         p {
-            @include flex(1);
+            flex: 1;
             margin-bottom: 0;
         }
     }
     .foia__single__main {
-        padding: $vr/2;
+        padding: $vr*0.5;
     }
     .foia__single__footer {
-        @include display(flex);
+        display: flex;
         .basic.button {
-            @include flex(1);
+            flex: 1;
         }
     }
 }

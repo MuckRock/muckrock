@@ -12,7 +12,7 @@ body {
     font-family: $sans-serif;
     font-weight: $normal;
     line-height: $lh;
-    @include font-feature-settings('liga', 'kern');
+    font-feature-settings: 'liga', 'kern';
 }
 
 article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
@@ -139,7 +139,7 @@ ul, ol {
     }
     &.inline li {
         display: inline-block;
-        margin: 0 $vr/2 $vr/2 0;
+        margin: 0 $vr*0.5 $vr*0.5 0;
     }
 }
 

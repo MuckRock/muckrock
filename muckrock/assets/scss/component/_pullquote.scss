@@ -1,6 +1,6 @@
 .pullquote {
-    @include display(flex);
-    @include align-items(flex-start);
+    display: flex;
+    align-items: flex-start;
     margin: 2*$vr 0;
     blockquote {
         margin-bottom: 0;
@@ -17,9 +17,9 @@
         width: 40%;
     }
     .sharing a {
-        @include display(inline-flex);
-        @include justify-content(center);
-        @include align-items(center);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
         height: 2em;
         width: 2em;
         border-radius: 100%;

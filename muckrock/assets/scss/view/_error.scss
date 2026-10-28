@@ -10,8 +10,8 @@
         border: 1px solid $color-grey;
     }
     .redacted {
-        margin-left: $vr/4;
-        margin-right: $vr/4;
+        margin-left: $vr*0.25;
+        margin-right: $vr*0.25;
         background-color: $color-black;
         color: transparent;
         &:first-child {
@@ -25,11 +25,11 @@
     background-size: cover;
     background-position: top right;
     .text {
-        @include display(flex);
-        @include flex-direction(row);
-        @include flex-wrap(wrap);
-        @include justify-content(space-around);
-        @include align-items(center);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
         height: 100%;
         padding: 2*$vr;
         background-color: rgba(0, 0, 0, 0.6);

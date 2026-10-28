@@ -3,25 +3,25 @@
 .detail {
     @include padding;
     .header-container {
-        @include display(flex);
-        @include flex-wrap(wrap);
-        @include align-items(flex-end);
-        @include justify-content(space-between);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
         @include media($medium-bp) {
             .aside .button {
                 float: right;
                 clear: right;
-                margin-bottom: $vr/2;
+                margin-bottom: $vr*0.5;
             }
             .tag-manager {
                 margin-bottom: 0;
             }
         }
         .main {
-            @include flex(2);
-            @include display(flex);
-            @include flex-direction(column);
-            @include justify-content(space-between);
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             max-width:38rem;
             margin-bottom: 0;
             padding-right: $vr;

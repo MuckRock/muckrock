@@ -1,10 +1,12 @@
+@use "sass:color";
+
 $color-title: #F26C5A;
 $color-jurisdiction: #5A90F2;
-$color-jurisdiction-picker: darken($color-jurisdiction, 10%);
-$color-agency: darken($color-jurisdiction-picker, 10%);
+$color-jurisdiction-picker: color.adjust($color-jurisdiction, $lightness: -10%, $space: hsl);
+$color-agency: color.adjust($color-jurisdiction-picker, $lightness: -10%, $space: hsl);
 $color-attachment: #F2B85A;
 $color-advanced: $color-agency;
-$color-advanced-container: lighten($color-agency, 40%);
+$color-advanced-container: color.adjust($color-agency, $lightness: 40%, $space: hsl);
 
 .new-request {
     .create-request {
@@ -18,7 +20,8 @@ $color-advanced-container: lighten($color-agency, 40%);
         border-right: 2px solid $color-grey;
     }
     .title {
-        @include border-top-radius($border-radius);
+        border-top-left-radius: $border-radius;
+        border-top-right-radius: $border-radius;
         background-color: $color-title;
         border: 2px solid $color-red-dark;
         border-bottom: none;
@@ -30,11 +33,12 @@ $color-advanced-container: lighten($color-agency, 40%);
             padding: 0;
             border: none;
             border-radius: 0;
-            border-bottom: $border-width dotted lighten($color-title, 20%);
+            border-bottom: $border-width dotted color.adjust($color-title, $lightness: 20%, $space: hsl);
             color: $color-white;
             font-size: $size-6;
-            @include placeholder {
-                color: lighten($color-title, 20%);
+            &::placeholder {
+                color: color.adjust($color-title, $lightness: 20%, $space: hsl);
+                opacity: 1;
             }
         }
     }
@@ -80,8 +84,9 @@ $color-advanced-container: lighten($color-agency, 40%);
             resize: none;
             border: none;
             border-radius: 0;
-            @include placeholder {
+            &::placeholder {
                 color: $color-grey-4;
+                opacity: 1;
             }
         }
     }
@@ -99,7 +104,7 @@ $color-advanced-container: lighten($color-agency, 40%);
             width: 100%;
             background-color: $color-agency;
             border: none;
-            border-bottom: 2*$border-width dotted lighten($color-agency, 20%);
+            border-bottom: 2*$border-width dotted color.adjust($color-agency, $lightness: 20%, $space: hsl);
             padding-left: 0;
             border-radius: 0;
             @include font-sizing(1.25, 3);
@@ -107,9 +112,9 @@ $color-advanced-container: lighten($color-agency, 40%);
             display: block;
             width: 100%;
             margin: 0;
-            @include placeholder { color: lighten($color-agency, 20%); }
+            &::placeholder { color: color.adjust($color-agency, $lightness: 20%, $space: hsl); opacity: 1; }
             &:disabled {
-                @include placeholder { color: darken($color-white, 2%); }
+                &::placeholder { color: color.adjust($color-white, $lightness: -2%, $space: hsl); opacity: 1; }
                 background: $color-disabled;
                 border-bottom: none;
                 text-align: left;
@@ -139,7 +144,7 @@ $color-advanced-container: lighten($color-agency, 40%);
     .permanent_embargo label,
     .no_proxy label {
       display: inline;
-      margin-right: $vr/2;
+      margin-right: $vr*0.5;
     }
     fieldset.advanced {
       color: $color-white;
@@ -228,7 +233,8 @@ $color-advanced-container: lighten($color-agency, 40%);
 
     footer.footer--submit, footer.footer--signup {
         padding: $vr;
-        @include border-bottom-radius($border-radius);
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
         border: 2px solid $color-grey-5;
         border-top: none;
     }
@@ -249,7 +255,7 @@ $color-advanced-container: lighten($color-agency, 40%);
       right: 10px;
       z-index: 100;
       border-radius: 4px;
-      padding: 0 $vr/4;
+      padding: 0 $vr*0.25;
       background: $color-white;
       color: $color-black;
       font-weight: bold;
@@ -321,14 +327,14 @@ $color-advanced-container: lighten($color-agency, 40%);
         }
     }
     h2 {
-        margin-top: $vr/2;
+        margin-top: $vr*0.5;
     }
     p {
         @include vr;
         color: $color-grey-2;
     }
     .button {
-        margin: $vr/2 0 $vr 0;
+        margin: $vr*0.5 0 $vr 0;
     }
 }
 

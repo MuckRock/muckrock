@@ -1,3 +1,5 @@
+@use "sass:math";
+
 .form {
     @include padding;
     .visible-fields fieldset input {
@@ -19,15 +21,15 @@
     }
 
     &.search {
-        dfn { margin: $vr/2 $vr/4; }
+        dfn { margin: $vr*0.5 $vr*0.25; }
         .search-filters {
             margin: 0;
             li {
                 display: inline-block;
-                padding: 0 $vr/4;
+                padding: 0 $vr*0.25;
             }
             label {
-                padding-left: $vr/6;
+                padding-left: math.div($vr, 6);
             }
         }
     }
@@ -41,8 +43,8 @@
     }
     header {
         margin-bottom: 0;
-        @include display(flex);
-        @include justify-content(space-between);
+        display: flex;
+        justify-content: space-between;
     }
     .error input {
         border-color: $color-red;
@@ -60,7 +62,7 @@
         font-size: $size-2;
     }
     label {
-        margin-right: $vr/2;
+        margin-right: $vr*0.5;
         font-weight: $bold;
     }
     input, select, textarea {
@@ -69,8 +71,8 @@
     }
     input[type="checkbox"], input[type="radio"] {
         width: auto;
-        margin-top: $vr/4;
-        margin-right: $vr/2;
+        margin-top: $vr*0.25;
+        margin-right: $vr*0.5;
         float: left;
     }
     textarea {
@@ -79,13 +81,13 @@
         margin-bottom: 0;
     }
     .help-text {
-        margin-top: $vr/4;
+        margin-top: $vr*0.25;
         clear: left;
     }
     &.image {
         .preview {
             display: block;
-            margin-bottom: $vr/2;
+            margin-bottom: $vr*0.5;
             max-width: 20em;
         }
         input {
@@ -104,12 +106,12 @@
 }
 
 .oneline-form .field {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    margin: $vr/2 0;
+    display: flex;
+    flex-wrap: wrap;
+    margin: $vr*0.5 0;
     border: 1px solid $color-blue;
     input {
-        @include flex(3 1 auto);
+        flex: 3 1 auto;
         width: auto;
         border: none;
         line-height: $lh;
@@ -119,11 +121,11 @@
         -webkit-appearance: none;
     }
     .button {
-        @include flex(1 1 auto);
+        flex: 1 1 auto;
     }
     .icon {
         @include svg-color($color-white);
-        margin-right: $vr/4;
+        margin-right: $vr*0.25;
         vertical-align: middle;
     }
 }
@@ -145,7 +147,21 @@
     opacity: .75;
 }
 
-textarea, #{$all-text-inputs} {
+textarea,
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="text"],
+input[type="url"],
+input[type="color"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"],
+input[type="week"] {
     @include input;
 }
 
@@ -184,11 +200,13 @@ fieldset {
   margin-right: 0;
   float: left;
   &:first-child {
-    @include border-right-radius(0);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     border-right-color: $color-grey-6;
   }
   &:last-child {
-    @include border-left-radius(0);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
     border-left-color: $color-grey-6;
   }
 }
