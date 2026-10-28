@@ -661,6 +661,7 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
     "PREPROCESSING_HOOKS": ["muckrock.core.utils.custom_preprocessing_hook"],
+    "REDOC_DIST": "https://cdn.jsdelivr.net/npm/redoc@2",
 }
 
 SIMPLE_JWT = {
