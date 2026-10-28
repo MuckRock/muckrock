@@ -7,7 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db import transaction
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, OuterRef, Prefetch, Q, Subquery
+from django.db.models.functions import Coalesce, Now
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -600,6 +601,7 @@ class BaseProcessingRequestList(RequestList):
         "title": "title",
         "date_submitted": "composer__datetime_submitted",
         "date_processing": "date_processing",
+        "task_age": "task_age",
     }
 
     def dispatch(self, *args, **kwargs):
@@ -666,8 +668,33 @@ class BaseProcessingRequestList(RequestList):
                     to_attr="open_newagencytasks",
                 ),
             )
+            .annotate(task_age=self.task_age())
         )
         return objects
+
+    @staticmethod
+    def task_age():
+        """
+        Age of the oldest open task, checking task types in the same priority
+        order the template uses to pick which task to display.
+        Requests without an open task have an age of zero.
+        """
+
+        def oldest(task, **filters):
+            return Subquery(
+                task.objects.filter(resolved=False, **filters)
+                .order_by("date_created")
+                .values("date_created")[:1]
+            )
+
+        return Now() - Coalesce(
+            oldest(PortalTask, communication__foia=OuterRef("pk")),
+            oldest(SnailMailTask, communication__foia=OuterRef("pk")),
+            oldest(MultiRequestTask, composer=OuterRef("composer")),
+            oldest(PaymentInfoTask, foia=OuterRef("pk")),
+            oldest(NewAgencyTask, agency=OuterRef("agency")),
+            Now(),
+        )
 
 
 class ProcessingRequestList(BaseProcessingRequestList):
