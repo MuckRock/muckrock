@@ -4,6 +4,7 @@ FOIA forms for composing requests
 
 # Django
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User
 
 # Third Party
@@ -43,6 +44,7 @@ class BaseComposerForm(forms.ModelForm):
             }
         ),
         required=False,
+        max_length=settings.REQUESTED_DOCS_MAX_LENGTH,
     )
     agencies = forms.ModelMultipleChoiceField(
         queryset=Agency.objects.get_approved(),

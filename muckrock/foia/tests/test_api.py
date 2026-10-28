@@ -32,6 +32,7 @@ from muckrock.foia.models import FOIAComposer
 class TestFOIAViewsetCreate(TestCase):
     """Unit Tests for FOIA API Viewset create method"""
 
+    # pylint:disable=too-many-public-methods
     def setUp(self):
         self.mocker = requests_mock.Mocker()
         mock_squarelet(self.mocker)
@@ -71,7 +72,7 @@ class TestFOIAViewsetCreate(TestCase):
             reverse("api-foia-list"),
             json.dumps(data),
             content_type="application/json",
-            **headers
+            **headers,
         )
         assert response.status_code == code, "Code: {}\nResponse: {}".format(
             response.status_code, response
@@ -107,7 +108,7 @@ class TestFOIAViewsetCreate(TestCase):
             reverse("api-foia-list"),
             json.dumps(data),
             content_type="application/json",
-            **headers
+            **headers,
         )
         assert response.status_code == 201, response
         assert len(response.json()["Requests"]) == 1
@@ -271,6 +272,36 @@ class TestFOIAViewsetCreate(TestCase):
             status="Out of requests.  FOI Request has been saved.",
         )
 
+    def test_document_request_over_limit(self):
+        """Test document_request over the max length"""
+        max_length = settings.REQUESTED_DOCS_MAX_LENGTH
+        self.api_call(
+            {"document_request": "a" * (max_length + 1)},
+            code=400,
+            status=(
+                f"document_request or full_text must be "
+                f"{max_length} characters or fewer"
+            ),
+        )
+        assert not FOIAComposer.objects.exists()
+
+    def test_full_text_over_limit(self):
+        """Test full_text over the max length"""
+        max_length = settings.REQUESTED_DOCS_MAX_LENGTH
+        self.api_call(
+            {"full_text": "a" * (max_length + 1)},
+            code=400,
+            status=(
+                f"document_request or full_text must be "
+                f"{max_length} characters or fewer"
+            ),
+        )
+        assert not FOIAComposer.objects.exists()
+
+    def test_document_request_at_limit(self):
+        """Test document_request exactly at the max length"""
+        self.api_call({"document_request": "a" * settings.REQUESTED_DOCS_MAX_LENGTH})
+
 
 class TestFOIAViewsetUpdate(TestCase):
     """Unit Tests for FOIA API Viewset update method"""
@@ -292,7 +323,7 @@ class TestFOIAViewsetUpdate(TestCase):
             reverse("api-foia-detail", kwargs={"pk": foia.pk}),
             json.dumps(data),
             content_type="application/json",
-            **headers
+            **headers,
         )
         assert response.status_code == 200, "Code: {}\nResponse: {}".format(
             response.status_code, response.content

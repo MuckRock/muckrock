@@ -3,6 +3,7 @@ Serializers for V2 of the FOIA API
 """
 
 # Django
+from django.conf import settings
 from django.contrib.auth.models import User
 
 # Third Party
@@ -180,7 +181,8 @@ class FOIARequestCreateSerializer(serializers.ModelSerializer):
         help_text="ID of the organization submitting this request",
     )
     requested_docs = serializers.CharField(
-        help_text="Description of the documents being requested"
+        help_text="Description of the documents being requested",
+        max_length=settings.REQUESTED_DOCS_MAX_LENGTH,
     )
 
     tags = serializers.ListField(
