@@ -75,8 +75,8 @@ inv npm "run lint"
 # Run JavaScript tests (vitest, muckrock/assets/js/**/*.test.js)
 inv npm "run test"
 
-# Compare built CSS with scripts/css-baseline/ (Sass migration, issue #2220);
-# css:snapshot rewrites the baseline after an intended change
+# Compare built CSS with scripts/css-baseline/; css:snapshot rewrites the
+# baseline after an intended change
 inv npm "run css:diff"
 inv npm "run css:snapshot"
 ```
@@ -216,7 +216,7 @@ Most major models have custom QuerySet managers with `get_queryset()` methods fo
 
 - Vite for bundling (config in `vite.config.js`), loaded into templates by `django-vite`
 - Entry points: main, foiamachine, docViewer, getHelp, reviewAgency, print
-- Source in `muckrock/assets/js/`, `muckrock/assets/scss/`, and Svelte components in `muckrock/assets/components/`
+- Source in `muckrock/assets/js/`, plain CSS in `muckrock/assets/css/` (native nesting, `:root` tokens in `tokens.css`, no preprocessor), and Svelte components in `muckrock/assets/components/`
 - `inv up` starts the `muckrock_vite` container running the dev server on port 4201; with `DEBUG` on, Django serves assets from it, so no rebuild is needed while it runs
 - Tests and production read the built manifest at `muckrock/assets/dist/manifest.json`; run `inv npm "run build"` before tests that render templates
 **JavaScript Stack:**

@@ -272,13 +272,13 @@
   padding-right: 0;
 }
 
-.repair-requests td:nth-child(n + 3) {
+.repair-requests td:nth-child(n+3) {
   width: 1px;
   white-space: nowrap;
   color: var(--ra-grey-3);
 }
 
-.repair-requests input[type="checkbox"] {
+.repair-requests input[type=checkbox] {
   margin: 0;
 }
 
@@ -330,7 +330,7 @@
 .repair-tab {
   margin-bottom: -1px;
   padding: calc(var(--ra-vr) / 2) var(--ra-vr);
-  border: 1px solid transparent;
+  border: 1px solid #00000000;
   border-radius: 4px 4px 0 0;
   background: none;
   color: var(--ra-grey-3);
@@ -355,9 +355,9 @@
   font-weight: 500;
 }
 
-.repair-action input[type="email"],
-.repair-action input[type="text"],
-.repair-action input[type="url"],
+.repair-action input[type=email],
+.repair-action input[type=text],
+.repair-action input[type=url],
 .repair-action select,
 .repair-action textarea {
   display: block;
@@ -366,7 +366,7 @@
   margin-bottom: 0;
 }
 
-.repair-action input[type="checkbox"] {
+.repair-action input[type=checkbox] {
   margin-right: 0.25em;
 }
 
@@ -393,7 +393,7 @@
   border: 1px solid var(--ra-grey-7);
   border-radius: 4px;
   background: var(--ra-white);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px #0000001a;
 }
 
 .email-autocomplete__list[hidden] {

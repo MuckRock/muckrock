@@ -69,8 +69,8 @@ td {
 }
 
 table.ruled td {
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
 }
 
 td.top {
@@ -90,11 +90,11 @@ td p {
 }
 
 .red {
-  color: red;
+  color: #ff0000;
 }
 
 .grey {
-  color: #666;
+  color: #666666;
 }
 
 .select-all {
@@ -223,11 +223,11 @@ td p {
 }
 
 .blue.button {
-  background: blue;
+  background: #0000ff;
 }
 
 .red.button {
-  background: red;
+  background: #ff0000;
 }
 
 .small .button,
@@ -240,16 +240,16 @@ td p {
   border-radius: 4px;
   font-weight: bold;
   font-size: 0.6em;
-  background: #666;
+  background: #666666;
   color: #ffffff;
 }
 
 .red.badge {
-  background: red;
+  background: #ff0000;
 }
 
 .blue.badge {
-  background: blue;
+  background: #0000ff;
 }
 
 input,
@@ -267,7 +267,7 @@ textarea {
 
 input,
 textarea {
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   padding: 0.25em;
 }
 
@@ -307,7 +307,7 @@ input[type=file] {
 }
 
 .field .required {
-  color: #666;
+  color: #666666;
   font-size: 0.8rem;
 }
 
@@ -325,7 +325,7 @@ input[type=file] {
   margin: 0;
   padding: 0;
   list-style: none;
-  color: red;
+  color: #ff0000;
   font-size: 0.8rem;
 }
 
@@ -361,7 +361,7 @@ input[type=file] {
 }
 
 .error.icon path {
-  fill: red;
+  fill: #ff0000;
 }
 
 .bottomnav,
@@ -371,13 +371,13 @@ input[type=file] {
 }
 
 .topnav {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #cccccc;
   background: #ffffff;
 }
 
 .bottomnav {
   margin-top: 2rem;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #cccccc;
   text-align: center;
 }
 
@@ -388,7 +388,7 @@ input[type=file] {
 }
 
 .bottomnav .mascot.icon path {
-  fill: #666;
+  fill: #666666;
 }
 
 .topnav .inline li {
@@ -419,7 +419,7 @@ input[type=file] {
 
 .filter.form {
   background: #ffffff;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
 }
 
 .filter.form .visible-fields {
@@ -440,7 +440,7 @@ input[type=file] {
   align-items: center;
   justify-content: center;
   min-height: 100%;
-  color: #666;
+  color: #666666;
 }
 
 .homepage-header {
@@ -468,7 +468,7 @@ input[type=file] {
 }
 
 .homepage-header .badge {
-  background: transparent;
+  background: #00000000;
   color: #362522;
   border: 3px solid;
 }
@@ -512,7 +512,7 @@ input[type=file] {
 .homepage .row:not(:first-child) {
   margin-bottom: 1rem;
   padding-top: 1rem;
-  border-top: 3px solid #ccc;
+  border-top: 3px solid #cccccc;
 }
 
 .homepage h2 {
@@ -521,7 +521,7 @@ input[type=file] {
 
 .communication {
   margin-bottom: 1em;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   background: #ffffff;
 }
 
@@ -531,7 +531,7 @@ input[type=file] {
 
 .communication header {
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #cccccc;
 }
 
 .communication header .badge {
@@ -557,7 +557,7 @@ input[type=file] {
 
 .file {
   padding: 0.5rem 1rem;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #cccccc;
 }
 
 .sent .file {
@@ -595,8 +595,8 @@ input[type=file] {
 .exemption__results {
   margin-bottom: 1rem;
   padding: 1rem;
-  border: 1px solid #666;
-  background: #ccc;
+  border: 1px solid #666666;
+  background: #cccccc;
 }
 
 .exemption__empty {
@@ -610,14 +610,14 @@ input[type=file] {
 .exemption__detail {
   margin: 1rem 0;
   padding: 0 0.5em;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   background: #ffffff;
 }
 
 .exemption__list__item {
   margin-bottom: 1rem;
   padding: 0 0.5em;
-  border: 1px solid #666;
+  border: 1px solid #666666;
   background: #f8f7f6;
   cursor: pointer;
 }
@@ -639,6 +639,7 @@ input[type=file] {
 .exemption__detail__appeal blockquote {
   font-style: italic;
   white-space: pre-line;
+  -webkit-user-select: all;
   user-select: all;
 }
 
@@ -653,7 +654,7 @@ input[type=file] {
 .exemption__form {
   margin-bottom: 1rem;
   padding: 0 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   background: #ffffff;
   position: relative;
 }
@@ -671,7 +672,7 @@ input[type=file] {
   bottom: 0;
   left: 0;
   z-index: 1;
-  background: rgba(248, 247, 246, 0.9);
+  background: #f8f7f6e6;
   display: flex;
   justify-content: center;
   align-items: center;

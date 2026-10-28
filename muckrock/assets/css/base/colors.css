@@ -1,0 +1,55 @@
+/*
+** colors.css
+**
+** Here is where we define our color scheme, and any additional colors.
+** The MuckRock color scheme contains 8 shades of grey, from black (1) to white (8).
+** It contains a family of four colors, along with light and dark variants: red, yellow, green, and blue.
+** Blue is the primary color and signals action.
+** Red is the accent color signals an error.
+** Yellow signals a warning.
+** Green signals success or payment.
+*/
+
+body {
+    color: var(--color-black);
+    background-color: var(--color-white);
+}
+
+a {
+    color: var(--color-blue);
+    &:hover { color: var(--color-black); }
+}
+
+code {
+    color: var(--color-black);
+    i, em { color: var(--color-blue); }
+    b, strong { color: var(--color-red); }
+    u { color: var(--color-green); }
+}
+
+dfn, dt,
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
+.update.organization label,
+fieldset label,
+fieldset .errorlist {
+    color: var(--color-grey-3);
+}
+
+.default { color: var(--color-grey); }
+.primary { color: var(--color-blue); }
+.success { color: var(--color-green); }
+.warning { color: var(--color-yellow); }
+.failure { color: var(--color-red); }
+.disabled { color: var(--color-grey-7); }
+
+.black {
+  color: var(--color-black);
+}
+.grey {
+  color: var(--color-grey);
+}
+.white {
+  color: var(--color-white);
+}

@@ -1,0 +1,105 @@
+input.autocomplete.xhr-pending { background-image: none; }
+
+.select2, .select2-dropdown {
+  .user.choice {
+    padding: 0;
+  }
+  .foia.choice {
+    .main {
+      padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+    }
+    .title {
+      margin-bottom: 0;
+    }
+    .meta {
+      font-size: var(--size-2);
+    }
+  }
+  .agency.choice {
+    .main {
+      padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+    }
+    .name {
+      margin-bottom: 0;
+    }
+    .jurisdiction {
+      font-size: var(--size-2);
+    }
+  }
+  .article.choice {
+    .image, .title {
+      margin-bottom: 0;
+    }
+    .image {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .title {
+      font-weight: var(--bold);
+    }
+    .info {
+      display: inline-block;
+      vertical-align: middle;
+      padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+    }
+    .meta {
+      font-size: var(--size-2);
+    }
+  }
+  .choice .exempt-note {
+    font-size: var(--size-3);
+    margin-left: var(--vr);
+    font-style: italic;
+  }
+}
+
+.select2 .choice__text {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.select2-selection.agencies {
+  a {
+    text-decoration: underline;
+    color: var(--color-blue-lighten-30);
+    &:hover { color: var(--color-blue-lighten-20); }
+  }
+  .select2-selection__choice {
+    padding: 5px;
+  }
+}
+
+.select2 {
+  font-family: var(--sans-serif);
+  color: var(--color-black);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  width: 100%;
+  background: var(--color-white-pure);
+  white-space: normal;
+}
+
+.select2-search--inline {
+  /*this will make the container disappear, making the child the one who sets the width of the element*/
+  display: contents;
+}
+
+.select2-search__field:placeholder-shown {
+  /*makes the placeholder to be 100% of the width while there are no options selected*/
+  width: 100% !important;
+}
+
+.create-request .select2-selection__clear::before {
+  content: "Clear all";
+  visibility: visible;
+}
+
+.create-request .select2-selection__clear {
+  visibility: hidden;
+}
+
+.field .select2-container {
+  min-width: inherit;
+}

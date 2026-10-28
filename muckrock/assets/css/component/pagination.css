@@ -1,0 +1,39 @@
+.pagination__control, .pagination__links {
+    margin-bottom: 0;
+}
+
+.pagination__control {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.pagination__control__item {
+    flex: 1 1 15em;
+    margin-bottom: calc(var(--vr) * 0.5);
+    text-align: center;
+}
+
+.pagination__links {
+    display: flex;
+    flex-wrap: wrap;
+    border: var(--border-width) solid var(--color-grey);
+    border-right: none;
+    border-bottom: none;
+    & > span {
+        flex: 1 1 15em;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .pagination__link {
+        flex: 1 1 5em;
+        padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+        text-align: center;
+        border-right: 1px solid var(--color-grey);
+        border-bottom: 1px solid var(--color-grey);
+    }
+}
+
+.pagination__link {
+
+}

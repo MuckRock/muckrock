@@ -1,0 +1,67 @@
+/* Reset some visual bugs caused by overeager style on our part. Oops! */
+.ProseMirror-menubar,
+.ProseMirror-menu-dropdown-item,
+.ProseMirror-menu-submenu-label,
+.ProseMirror-prompt form,
+.ProseMirror-prompt form div {
+    margin-bottom: 0;
+}
+.ProseMirror-prompt button {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    &:hover {
+        color: var(--color-blue);
+        transform: none;
+    }
+}
+/* Customize the ProseMirror style */
+.ProseMirror {
+    background: var(--color-white-pure);
+}
+.ProseMirror-content {
+    outline: none;
+    min-height: 10em;
+    margin-bottom: 0;
+}
+
+/* Customize the display of some elements */
+.ProseMirror
+.ProseMirror
+.ProseMirror h3::before {
+    content: '### ';
+    color: var(--color-grey);
+}
+.ProseMirror h4::before {
+    content: '#### ';
+    color: var(--color-grey);
+}
+.ProseMirror h5::before {
+    content: '##### ';
+    color: var(--color-grey);
+}
+.ProseMirror h6::before {
+    content: '###### ';
+    color: var(--color-grey);
+}
+.ProseMirror {
+    *::before, *::after {
+        color: var(--color-grey);
+    }
+    h1::before { content: '# '; }
+    h2::before { content: '## '; }
+    h3::before { content: '### '; }
+    h4::before { content: '#### '; }
+    h5::before { content: '##### '; }
+    h6::before { content: '###### '; }
+    b::before,  b::after, strong::before, strong::after { content: '**'; }
+    i::before, i::after, em::before, em::after { content: '_'; }
+    code::before, code::after { content: '`'; }
+    a::before { content: '['; }
+    a::after { content: ']'; }
+    .ProseMirror-tooltipmenu-linktext {
+        a::before { content: '('; }
+        a::after { content: ')'; }
+    }
+}

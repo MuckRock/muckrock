@@ -1,0 +1,106 @@
+.communication {
+    .communication-header {
+        & > * {
+            flex: 1 1 auto;
+        }
+        .actionables {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .options .icon {
+            margin-left: var(--vr);
+            path {
+                fill: var(--color-white);
+            }
+        }
+        .options .icon {
+            opacity: .7;
+            &:hover {
+                opacity: .9;
+            }
+        
+        }
+    }
+    .dropdown a {
+        color: var(--color-black);
+    }
+    .from, .subject {
+        margin-bottom: 0;
+        margin-right: calc(var(--vr) * 0.5);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-weight: var(--bold);
+    }
+    .communication-metadata {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0;
+        background: var(--color-grey-7);
+    }
+    .communication-body {
+        margin-bottom: 0;
+    }
+    .files {
+        list-style-type: none;
+        margin-bottom: 0;
+        padding-left: 0;
+        & > li {
+            display: block;
+            border-top: 1px dotted var(--color-grey);
+        }
+        .file {
+            border: none;
+        }
+    }
+    .communication-actions, .communication-action {
+        display: none;
+    }
+    .communication-actions {
+        position: relative;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin-bottom: 0;
+        color: var(--color-white);
+    }
+    .communication-action {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        padding: var(--vr);
+        background-color: var(--color-grey-2);
+        color: var(--color-white);
+        &.visible {
+            display: block;
+        }
+        label, input, select {
+            display: block;
+            width: 100%;
+            margin-bottom: calc(var(--vr) * 0.5);
+        }
+        label {
+            font-weight: var(--bold);
+        }
+        input, select {
+            color: var(--color-black);
+        }
+        .errorlist {
+            color: var(--color-red-light);
+        }
+    }
+    &.collapsed {
+        & > * {
+            display: none;
+        }
+        .communication-header {
+            display: flex;
+        }
+    }
+    .foia-backlink {
+        font-weight: var(--bold);
+    }
+}

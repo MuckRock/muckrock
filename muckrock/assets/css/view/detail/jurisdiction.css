@@ -1,0 +1,248 @@
+.jurisdiction {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    max-width: 64em;
+    margin: 0 auto;
+}
+.jurisdiction__header {
+    flex: 0 1 100%;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: var(--vr);
+    margin-bottom: 0;
+    .jurisdiction__image {
+        flex: 0 1 12em;
+        margin: var(--vr);
+        margin-top: 0;
+        img {
+            margin-bottom: 0;
+        }
+        figcaption {
+            color: var(--color-grey);
+            font-size: var(--size-1);
+            line-height: var(--lh);
+        }
+    }
+    .jurisdiction__info {
+        flex: 1 1 20em;
+        margin: var(--vr);
+        margin-top: 0;
+    }
+    .jurisdiction__name {
+        font-size: var(--size-4);
+        font-weight: var(--bold);
+    }
+    .jurisdiction__title {
+        font-size: var(--size-8);
+        line-height: calc(var(--lh) * .7);
+    }
+    @media (max-width: 35.625em) {
+        justify-content: center;
+        text-align: center;
+        .jurisdiction__info, .jurisdiction__image {
+            flex: 0 1 100%;
+        }
+        .jurisdiction__name {
+            font-size: var(--size-4);
+        }
+        .jurisdiction__image img {
+            max-width: 8em;
+        }
+    }
+}
+.jurisdiction__aside {
+    flex: 1 1 19em;
+    & > * {
+        margin: 0 var(--vr) var(--vr);
+    }
+    .jurisdiction__actions {
+        flex: 1 1 20em;
+    }
+    .jurisdiction__requests {
+        flex: 1 1 10em;
+        .see-all {
+            float: right;
+        }
+    }
+    .jurisdiction__stats {
+        flex: 1;
+    }
+    .button-group {
+        width: 100%;
+        margin-bottom: var(--vr);
+        justify-content: center;
+    }
+    @media (max-width: 54.3125em) {
+        .jurisdiction__stats {
+            display: none;
+        }
+    }
+}
+.jurisdiction__main {
+    flex: 4 1 32em;
+    min-width: 0;
+    margin: 0 var(--vr) var(--vr);
+    .jurisdiction__stats {
+        display: flex;
+        flex-wrap: wrap;
+        & > * {
+            flex: 1 1 auto;
+            margin-right: var(--vr);
+        }
+    }
+    .analysis {
+        h2 {
+            font-size: var(--size-6);
+        }
+        h3 {
+            border-bottom: 1px solid var(--color-grey);
+        }
+    }
+}
+.law {
+    .law__name, .law__citation {
+        margin-bottom: 0;
+    }
+    .law__summary {
+        font-size: var(--size-2);
+    }
+    @media (max-width: 35.625em) {
+        .law__name {
+            font-size: var(--size-4);
+        }
+    }
+}
+.jurisdiction__toc {
+    width: 12em;
+    float: left;
+    margin-right: calc(2 * var(--vr));
+    border: var(--border-width) solid var(--color-grey);
+    padding: calc(var(--vr) * 0.5);
+    background: var(--color-white-pure);
+    p {
+        font-weight: var(--bold);
+        margin-bottom: 0;
+    }
+    ol {
+        padding-left: var(--vr);
+    }
+    @media (max-width: 35.625em) {
+        float: none;
+        width: 100%;
+    }
+}
+.jurisdiction__point__symbol {
+    font-size: var(--size-5);
+    font-weight: var(--bold);
+    &.red {
+        color: var(--color-red);
+    }
+    &.green {
+        color: var(--color-green);
+    }
+}
+
+/* https://stackoverflow.com/questions/20456694/grid-of-responsive-squares/20457076#20457076 */
+.place-map {
+	.cell {
+		float: left;
+		position: relative;
+		width: 8%;
+		padding-bottom : 8%; /* = width for a 1:1 aspect ratio */
+		margin: 0.5%;
+		overflow: hidden;
+  }
+  .state {
+    color: var(--color-white);
+    background: var(--color-grey-5);
+    outline: var(--border-width) solid var(--color-grey-6);
+    transition: background 0.2s linear;
+    .avg-response-time {
+      font-size: var(--size-5);
+      @media (max-width: 48em) {
+        font-size: var(--size-2);
+      }
+    }
+    .avg-response-time {
+      margin: 0;
+    
+    }
+    .abbrev {
+      font-size: var(--size-3);
+      margin: 0;
+      @media (max-width: 48em) {
+        display: none;
+      }
+    }
+  }
+  .state.yes {
+    background: var(--color-green);
+  }
+  .state.no {
+    background: var(--color-red);
+  }
+  .state.maybe {
+    background: var(--color-yellow);
+  }
+  .state:hover {
+    background: var(--color-grey-5);
+  }
+  .state-content {
+    position: absolute;
+    height: 90%; /* = 100% - 2*5% padding */
+    width: 90%; /* = 100% - 2*5% padding */
+    padding: 5%;
+    text-align: center;
+  }
+
+  .table{
+    display: table;
+    height: 100%;
+    width: 100%;
+  }
+  .table-cell{
+    display: table-cell;
+    vertical-align: middle;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+div.place-map::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.top-map {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.small-maps {
+  width: 100%;
+  .state {
+    font-size: var(--size-3);
+    @media (max-width: 48em) {
+      font-size: var(--size-2);
+    }
+  }
+}
+.small-maps {
+  margin-top: 2em;
+  h2 {
+    margin-top: 3em;
+  }
+  .place-map {
+    margin-right: 3em;
+  }
+}
+
+.explore__section.jurisdiction-explore {
+  max-width: 62.5em;
+  .credits {
+    font-style: italic;
+    margin-top: 4rem;
+  }
+}

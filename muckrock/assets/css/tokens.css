@@ -1,0 +1,103 @@
+/* Design tokens for the main site. Derived shades are named for how they
+   were made from the palette, e.g. --color-red-lighten-40 is --color-red
+   with 40% more HSL lightness. */
+
+:root {
+    /* Typography */
+    --sans-serif: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    --monospace: "Source Code Pro", "Courier Prime", monospace;
+
+    --bold: 500;
+    --normal: 400;
+
+    --size-1: 0.6875rem;
+    --size-2: 0.8125rem;
+    --size-3: 1rem;
+    --size-4: 1.1875rem;
+    --size-5: 1.4375rem;
+    --size-6: 1.6875rem;
+    --size-7: 2.0625rem;
+    --size-8: 2.5rem;
+    --size-9: 3rem;
+
+    /* Line height and the vertical rhythm unit */
+    --lh: 1.4375em;
+    --vr: 1.1875rem;
+
+    /* Borders */
+    --border-width: 1px;
+    --border-radius: 4px;
+
+    /* Greys, from black (1) to white (8) */
+    --color-grey-1: #333C47;
+    --color-grey-2: #495361;
+    --color-grey-3: #616C7A;
+    --color-grey-4: #7B8694;
+    --color-grey-5: #97A1AD;
+    --color-grey-6: #B5BDC7;
+    --color-grey-7: #D5DAE0;
+    --color-grey-8: #F7F8FA;
+
+    --color-black: var(--color-grey-1);
+    --color-white: var(--color-grey-8);
+    --color-grey: var(--color-grey-5);
+    --color-black-pure: #000000;
+    --color-white-pure: #FFFFFF;
+
+    /* Colours, each with light and dark variants */
+    --color-red: #CC5C52;
+    --color-red-light: #FACAC8;
+    --color-red-dark: #662C29;
+    --color-yellow-light: #F8E8CA;
+    --color-yellow: #D3BC35;
+    --color-yellow-dark: #947026;
+    --color-orange-light: #FFC2BA;
+    --color-orange: #EC7B6B;
+    --color-orange-dark: #69515C;
+    --color-green: #52CC66;
+    --color-green-light: #BBFAC6;
+    --color-green-dark: #296633;
+    --color-blue: #4582CC;
+    --color-blue-light: #BBD6FA;
+    --color-blue-dark: #294366;
+
+    --color-disabled: var(--color-grey-7);
+
+    --color-facebook: #3B5998;
+    --color-twitter: #55ACEE;
+    --color-reddit: #FF4500;
+    --color-email: #981e1e;
+    --color-bluesky: #1185fe;
+    --color-youtube: #FF0302;
+    --color-linkedin: #0A66C2;
+
+    /* Derived shades */
+    --color-odd-background: #e7eaf0;
+    --color-white-darken-2: #f1f3f6;
+    --color-black-darken-10: #1e2329;
+    --color-grey-lighten-10: #b4bbc3;
+    --color-grey-darken-10: #7a8797;
+    --color-disabled-darken-10: #b8c0ca;
+    --color-disabled-lighten-25: #ffffff; /* overshoots 100% lightness, so clipped to white */
+    --color-red-lighten-5: #d26f66;
+    --color-red-darken-10: #b54036;
+    --color-red-lighten-30: #efcbc8;
+    --color-red-lighten-40: #faf0f0;
+    --color-red-dark-lighten-20: #af4b46;
+    --color-green-lighten-5: #66d277;
+    --color-green-darken-10: #36b54a;
+    --color-yellow-lighten-5: #d8c34a;
+    --color-yellow-darken-10: #af9b26;
+    --color-yellow-lighten-40: #f7f4dd;
+    --color-yellow-dark-lighten-20: #d2a74e;
+    --color-orange-lighten-30: #fdf4f3;
+    --color-orange-dark-lighten-20: #9e828f;
+    --color-blue-lighten-5: #598fd1;
+    --color-blue-darken-10: #3069ae;
+    --color-blue-lighten-20: #95b8e2;
+    --color-blue-lighten-25: #a9c5e7;
+    --color-blue-lighten-30: #bdd3ed;
+    --color-blue-lighten-40: #e5eef8;
+    --color-blue-dark-lighten-20: #4673af;
+    --color-blue-light-lighten-10: #ebf3fd;
+}

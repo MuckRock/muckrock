@@ -1,0 +1,50 @@
+.modal {
+    display: none;
+    &.visible {
+        display: block;
+    }
+}
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 500;
+    max-width: 100%;
+    margin: 5%;
+    border-radius: var(--border-radius);
+    padding: var(--vr);
+
+    background-color: var(--color-white);
+
+    @media screen and (min-width: 500px) {
+        top: 25%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50%;
+        margin: 0;
+    }
+
+    h1, h2 { text-align: center; }
+    h2 {
+        font-size: 1em;
+        line-height: var(--lh);
+        margin: 0 0 var(--vr) 0;
+    }
+    textarea {
+        resize: vertical;
+        width: 100%;
+        height: 10em;
+        margin-top: calc(var(--vr) * 0.5);
+    }
+    select {
+      width: 100%;
+    }
+    &.embed textarea {
+        text-align: left;
+        width: 100%;
+        height: 10em;
+        resize: none;
+        font-size: 0.9em;
+    }
+    button { float: right; }
+}

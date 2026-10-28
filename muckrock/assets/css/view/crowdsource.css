@@ -1,0 +1,115 @@
+.input-control .control-icon {
+  font-family: form-builder-font;
+}
+
+.crowdsource.form {
+  margin: 0 auto;
+  display: flex;
+  overflow: visible;
+  flex-wrap: wrap;
+  & .crowdsource-form__header { flex: 1 1 100%; }
+  & .crowdsource-form__inputs {
+    flex: 1 1 16em;
+    margin-right: 1.5em;
+  }
+  & .crowdsource-form__data {
+    flex: 4 1 44em;
+    div {
+      top: 75px;
+      position: sticky;
+    }
+  }
+}
+
+/* Needed for sticky to work */
+.container.container-overflow-visible {
+  overflow: visible;
+}
+
+.crowdsource.detail .actions form {
+  display: inline-block;
+}
+
+.assignment-response {
+  display: flex;
+  flex-wrap: wrap;
+  .textbox__header {
+    flex: 1 1 100%;
+  }
+  .textbox__section.actionables {
+    flex: 1 1 100%;
+  }
+  .textbox__section {
+    flex: 1 1 50%;
+  }
+  .embed {
+    flex: 1 1 50%;
+  }
+}
+
+#pencil-svg, #email-svg {
+  display: none;
+}
+
+#assignment-responses .edit-link {
+  margin-right: 0.5em;
+  &:hover {
+    text-decoration: none;
+    g {
+      stroke: var(--color-grey-5);
+    }
+  }
+}
+
+#assignment-responses .message-link {
+  margin-right: 1em;
+  svg {
+    stroke: var(--color-white);
+  }
+  &:hover {
+    text-decoration: none;
+    svg {
+      stroke: var(--color-grey-5);
+    }
+  }
+  &.success {
+    svg {
+      stroke: var(--color-green);
+    }
+  }
+  &.failure {
+    svg {
+      stroke: var(--color-red);
+    }
+  }
+}
+
+.crowdsource__explore__header {
+  table {
+    background: inherit;
+    tr {
+      border-style: none;
+    }
+    td {
+      padding-top: 1.2rem;
+      padding-right: 0.5rem;
+    }
+    .number {
+      font-size: var(--size-8);
+      text-align: right;
+    }
+  }
+}
+
+.crowdsource-daily-response-table {
+  max-width: 15rem;
+  overflow-y: scroll;
+  max-height: 20rem;
+}
+
+#build-wrap .name-wrap {
+  display: none !important;
+}
+
+.crowdsource-form__data {
+}

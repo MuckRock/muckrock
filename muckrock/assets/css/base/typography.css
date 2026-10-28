@@ -1,0 +1,180 @@
+/*
+** typography.css
+**
+** MuckRock uses a single typeface, Source Sans Pro, in the vast majority of its layout.
+** The one exception is the use of the monospaced Source Code Pro when a monospaced font is required.
+** In addition to setting standard values and scales for the typography, this file also defines
+** a number of utility classes for modifying base classes.
+*/
+
+body {
+    font-size: 16px;
+    font-family: var(--sans-serif);
+    font-weight: var(--normal);
+    line-height: var(--lh);
+    font-feature-settings: 'liga', 'kern';
+}
+
+article, aside, blockquote, body, br, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
+    margin-top: 0;
+    margin-bottom: var(--vr);
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Headings */
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: var(--bold);
+    line-height: var(--lh);
+}
+
+h1, .h1 { font-size: var(--size-6); }
+h2, .h2 { font-size: var(--size-5); }
+h3, .h3 { font-size: var(--size-4); }
+h4, .h4 { font-size: var(--size-3); }
+h5, .h5 { font-size: var(--size-2); }
+h6, .h6 { font-size: var(--size-1); }
+
+/* Paragraph */
+
+p:empty {
+    display: none;
+}
+
+b, strong, .bold { font-weight: var(--bold); }
+
+a, .link {
+    color: var(--color-blue);
+    text-decoration: none;
+}
+a:hover, .link:hover { text-decoration: underline; }
+a.disabled, .link.disabled {
+    color: var(--color-grey);
+}
+a.disabled:hover, .link.disabled:hover {
+    color: var(--color-grey);
+    text-decoration: none;
+}
+
+blockquote {
+    margin-left: 0;
+    padding-left: var(--vr);
+    border-left: 1px solid var(--color-grey);
+    font-style: italic;
+    i, em { font-style: normal; }
+}
+
+small, .small {
+    font-size: 0.8125em;
+    font-style: normal;
+    line-height: var(--lh);
+}
+
+.larger {
+    font-size: 1.1875em;
+    font-style: normal;
+    line-height: var(--lh);
+}
+
+dfn, dt, .overline,
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
+.update.organization label,
+fieldset label,
+fieldset .errorlist {
+    display: block;
+    font-size: var(--size-1);
+    font-style: normal;
+    font-weight: var(--bold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: var(--lh);
+}
+
+dd {
+    -webkit-margin-start: 0;
+    & + dt {
+        margin-top: var(--vr);
+    }
+}
+
+pre {
+    background-color: var(--color-grey-7);
+    border-radius: var(--border-radius);
+}
+
+code {
+    padding: .2em .4em;
+    border-radius: var(--border-radius);
+    font-family: var(--monospace);
+    font-size: var(--size-2);
+    background-color: var(--color-grey-7);
+}
+
+hr {
+    border-top: none;
+    border-bottom: 1px solid var(--color-grey);
+}
+
+img, audio, video, embed, iframe {
+    max-width: 100%;
+}
+
+figcaption {
+    font-size: var(--size-2);
+}
+
+th {
+    font-size: var(--size-2);
+    font-weight: var(--bold);
+    text-align: left;
+    vertical-align: top;
+}
+
+td { vertical-align: top; }
+
+.truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+ul, ol {
+    &.nostyle {
+        list-style: none;
+        padding-left: 0;
+    }
+    &.inline li {
+        display: inline-block;
+        margin: 0 calc(var(--vr) * 0.5) calc(var(--vr) * 0.5) 0;
+    }
+}
+
+.nomargin {
+    margin: 0;
+    margin-bottom: 0;
+}
+
+.mono {
+    font-family: var(--monospace);
+}
+
+.force-select {
+    -webkit-user-select: all;
+    user-select: all;
+}
+
+p.error {
+    color: var(--color-red);
+}
+
+.small-caps {
+    font-variant: small-caps;
+}
+
+br.nomb {
+  margin-bottom: 0;
+}

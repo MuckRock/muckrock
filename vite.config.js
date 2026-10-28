@@ -55,13 +55,6 @@ export default defineConfig({
       ],
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        // Add any SCSS options here if needed
-      },
-    },
-  },
   test: {
     include: ["muckrock/assets/js/**/*.test.{js,jsx}", "scripts/**/*.test.js"],
   },

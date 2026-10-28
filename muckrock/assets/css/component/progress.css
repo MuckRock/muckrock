@@ -1,0 +1,13 @@
+.progress {
+    width: 100%;
+    /* border: 1px solid $color-grey; */
+    background: var(--color-grey-7);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    .meter {
+        display: block;
+        background: var(--color-green);
+        height: calc(var(--vr) * 0.25);
+        border-radius: var(--border-radius);
+    }
+}

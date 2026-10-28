@@ -1,0 +1,41 @@
+.question {
+    .question-header {
+        .options .icon {
+            margin-left: var(--vr);
+            path {
+                fill: var(--color-white);
+            }
+        }
+        .options .icon {
+            opacity: .7;
+            &:hover {
+                opacity: .9;
+            }
+        
+        }
+    }
+    .dropdown a {
+        color: var(--color-black);
+    }
+}
+
+.answer {
+    .answer-header {
+        .options .icon {
+            margin-left: var(--vr);
+            path {
+                fill: var(--color-white);
+            }
+        }
+        .options .icon {
+            opacity: .7;
+            &:hover {
+                opacity: .9;
+            }
+        
+        }
+    }
+    .dropdown a {
+        color: var(--color-black);
+    }
+}

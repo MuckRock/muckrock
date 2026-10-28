@@ -1,0 +1,261 @@
+.crowdfund__widget {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    margin: 0 auto var(--vr);
+    border: var(--border-width) solid var(--color-green);
+    background: #FFF;
+
+    & > *:last-child {
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+    }
+
+    .crowdfund__widget__header, .crowdfund__widget__footer {
+        flex: 0 0 auto;
+        margin-bottom: 0;
+        padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+        color: var(--color-green-dark);
+        background-color: var(--color-green-light);
+    }
+
+    .crowdfund__widget__header {
+        border-bottom: var(--border-width) solid var(--color-green);
+        h1 {
+            font-size: var(--size-3);
+            line-height: var(--lh);
+            font-weight: var(--bold);
+            margin: 0;
+            a {
+                color: var(--color-green-dark);
+            }
+        }
+        .action {
+            font-size: var(--size-2);
+            margin-right: calc(var(--vr) * 0.5);
+        }
+    }
+
+    main {
+        flex: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-bottom: 0;
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            & > * {
+                flex: 1 1 25;
+                margin-bottom: 0;
+                text-align: left;
+                padding: calc(var(--vr) * 0.5);
+                @media screen and (min-width: 500px) {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+
+    .description {
+        margin-bottom: 0;
+        padding: calc(var(--vr) * 0.5);
+    }
+
+    .progress, .meter {
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+
+    .stats {
+        margin-bottom: 0;
+        text-align: center;
+        font-size: var(--size-2);
+        line-height: var(--lh);
+    }
+
+    .contributor-list {
+        margin-top: 0;
+        li {
+            display: inline-block;
+            padding: 0 calc(var(--vr) * 0.5) 0 0;
+        }
+    }
+}
+
+.crowdfund__widget__footer {
+    border-top: var(--border-width) solid var(--color-green);
+    form > section {
+        margin-bottom: 0;
+    }
+    .anonymity input[type="checkbox"] {
+        margin-right: calc(var(--vr) * 0.25);
+    }
+    .anonymity input[type="text"] {
+        width: 100%;
+        border-radius: 0;
+        border: 1px solid var(--color-green);
+    }
+    .anonymity p {
+        margin-bottom: calc(var(--vr) * 0.25);
+    }
+    .crowdfund__donate {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        margin: calc(var(--vr) * 0.5) 0;
+        border: 1px solid var(--color-green);
+        input {
+            flex: 3 1 auto;
+            appearance: none;
+            border: none;
+            line-height: var(--lh);
+            border-radius: 0;
+            color: var(--color-green-dark);
+        }
+        button {
+            flex: 1 1 auto;
+        }
+    }
+    button:disabled {
+        background: var(--color-grey-7);
+        &:hover {
+            background: var(--color-grey-7);
+        }
+    }
+}
+
+.crowdfund__widget {
+    .contributors {
+        position: relative;
+    }
+    .contributor {
+        &.summary {
+            margin-bottom: 0;
+            font-weight: var(--bold);
+            cursor: default;
+        }
+        &.dropdown {
+            display: none;
+            position: absolute;
+            margin: var(--vr);
+            bottom: 0;
+            z-index: 1;
+            border-radius: var(--border-radius);
+            padding: calc(var(--vr) * 0.25) calc(var(--vr) * 0.5);
+            background-color: var(--color-black);
+            color: var(--color-white);
+            opacity: 0;
+            list-style-type: none;
+            font-size: var(--size-2);
+            transition: opacity .25s .25s linear;
+        }
+        &.summary:hover + .dropdown, &.dropdown:hover {
+            display: block;
+            opacity: .9;
+        }
+    }
+}
+
+.crowdfund__widget
+{
+    position: relative;
+    .overlay
+    {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(33, 38, 46, .9);
+    }
+    .overlay .dialog
+    {
+        width: 32em;
+        color: var(--color-white);
+        font-weight: var(--bold);
+        .icon {
+            path, polygon, rect, circle {
+                fill: var(--color-white);
+            }
+        }
+        a, .action {
+            color: var(--color-white);
+        }
+        a:hover, .action:hover { color: var(--color-white-pure); }
+        p
+        {
+            margin-bottom: calc(var(--vr) * 0.5);
+        }
+        input {
+            color: var(--color-black);
+        }
+        textarea
+        {
+            color: var(--color-black);
+            font-family: var(--monospace);
+            font-size: var(--size-2);
+            text-align: center;
+            font-weight: var(--normal);
+            resize: none;
+            white-space: nowrap;
+        }
+        .sharing dfn
+        {
+            display: none;
+        }
+        .newsletter-widget
+        {
+            padding: 0;
+            border: none;
+            background: none;
+            .call-to-action
+            {
+                display: none;
+            }
+            .field {
+                margin: 0;
+            }
+        }
+    }
+    .overlay .dialog header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        h1 {
+            margin-bottom: 0;
+        }
+        .icon {
+            height: 1.5rem;
+            width: 1.5rem;
+            vertical-align: middle;
+        }
+    }
+    .overlay .dialog footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+}
+
+/* Crowdfund state */
+
+.crowdfund__widget .overlay
+{
+    z-index: -1;
+    opacity: 0;
+    &.visible
+    {
+        z-index: 1;
+        opacity: 1;
+    }
+    .loader, .dialog
+    {
+        padding: var(--vr);
+    }
+}

@@ -42,7 +42,7 @@ template {
 }
 
 a {
-  background: transparent;
+  background: #00000000;
 }
 
 a:active,
@@ -69,8 +69,8 @@ h1 {
 }
 
 mark {
-  background: #ff0;
-  color: #000;
+  background: #ffff00;
+  color: #000000;
 }
 
 small {
@@ -252,8 +252,14 @@ code u {
   color: #52cc66;
 }
 
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
+.update.organization label,
 dfn,
-dt {
+dt,
+fieldset .errorlist,
+fieldset label {
   color: #616c7a;
 }
 
@@ -619,9 +625,15 @@ small {
   line-height: 1.4375em;
 }
 
+.account.plans .plan .superlative,
+.activate.organization label,
+.create.organization label,
 .overline,
+.update.organization label,
 dfn,
-dt {
+dt,
+fieldset .errorlist,
+fieldset label {
   display: block;
   font-size: 0.6875rem;
   font-style: normal;
@@ -730,11 +742,11 @@ br.nomb {
   justify-content: center;
   gap: 0.375rem;
   margin: 0.296875rem 0;
-  border: 1px solid rgb(122.4838709677, 135.2258064516, 150.5161290323);
+  border: 1px solid #7a8797;
   border-radius: 4px;
   padding: 0.1979166667rem 0.3958333333rem;
-  box-shadow: 0px 3px 0px 0px rgb(122.4838709677, 135.2258064516, 150.5161290323);
-  text-shadow: 0px -1px rgb(122.4838709677, 135.2258064516, 150.5161290323);
+  box-shadow: 0px 3px 0px 0px #7a8797;
+  text-shadow: 0px -1px #7a8797;
   background: #97a1ad;
   color: #f7f8fa;
 }
@@ -750,7 +762,6 @@ br.nomb {
   font-weight: 500;
   text-align: center;
   text-decoration: none;
-  text-shadow: inset 0px 1px #97a1ad;
   transition-property: box-shadow transform;
   transition-duration: 0.15s;
   transition-timing-function: ease;
@@ -761,20 +772,20 @@ br.nomb {
 
 .button:link,
 .button:visited {
-  box-shadow: 0px 3px 0px 0px rgb(122.4838709677, 135.2258064516, 150.5161290323);
+  box-shadow: 0px 3px 0px 0px #7a8797;
 }
 
 .button:hover {
   transform: translateY(0px);
-  box-shadow: 0px 3px 0px 0px rgb(122.4838709677, 135.2258064516, 150.5161290323);
+  box-shadow: 0px 3px 0px 0px #7a8797;
   color: #f7f8fa;
-  background: rgb(179.5161290323, 186.7741935484, 195.4838709677);
+  background: #b4bbc3;
   text-decoration: none;
 }
 
 .button:active {
   transform: translateY(3px);
-  box-shadow: 0px 0px 0px 0px rgb(122.4838709677, 135.2258064516, 150.5161290323);
+  box-shadow: 0px 0px 0px 0px #7a8797;
   color: #f7f8fa;
 }
 
@@ -797,106 +808,106 @@ br.nomb {
 
 .button.blue,
 .button.primary {
-  border-color: rgb(47.7721518987, 104.9113924051, 174.2278481013);
+  border-color: #3069ae;
   background: #4582cc;
-  box-shadow: 0px 3px 0px 0px rgb(47.7721518987, 104.9113924051, 174.2278481013);
-  text-shadow: 0px -1px rgb(47.7721518987, 104.9113924051, 174.2278481013);
+  box-shadow: 0px 3px 0px 0px #3069ae;
+  text-shadow: 0px -1px #3069ae;
 }
 
 .button.blue:link,
 .button.blue:visited,
 .button.primary:link,
 .button.primary:visited {
-  box-shadow: 0px 3px 0px 0px rgb(47.7721518987, 104.9113924051, 174.2278481013);
+  box-shadow: 0px 3px 0px 0px #3069ae;
 }
 
 .button.blue:hover,
 .button.primary:hover {
-  background: rgb(89.0126582278, 143.4493670886, 209.4873417722);
-  box-shadow: 0px 3px 0px 0px rgb(47.7721518987, 104.9113924051, 174.2278481013);
+  background: #598fd1;
+  box-shadow: 0px 3px 0px 0px #3069ae;
 }
 
 .button.blue:active,
 .button.primary:active {
-  box-shadow: 0px 0px 0px 0px rgb(47.7721518987, 104.9113924051, 174.2278481013);
+  box-shadow: 0px 0px 0px 0px #3069ae;
 }
 
 .button.green,
 .button.success {
-  border-color: rgb(53.5044642857, 181.4955357143, 74.4866071429);
+  border-color: #36b54a;
   background: #52cc66;
-  box-shadow: 0px 3px 0px 0px rgb(53.5044642857, 181.4955357143, 74.4866071429);
-  text-shadow: 0px -1px rgb(53.5044642857, 181.4955357143, 74.4866071429);
+  box-shadow: 0px 3px 0px 0px #36b54a;
+  text-shadow: 0px -1px #36b54a;
 }
 
 .button.green:link,
 .button.green:visited,
 .button.success:link,
 .button.success:visited {
-  box-shadow: 0px 3px 0px 0px rgb(53.5044642857, 181.4955357143, 74.4866071429);
+  box-shadow: 0px 3px 0px 0px #36b54a;
 }
 
 .button.green:hover,
 .button.success:hover {
-  background: rgb(101.6941964286, 209.8058035714, 119.4174107143);
-  box-shadow: 0px 3px 0px 0px rgb(53.5044642857, 181.4955357143, 74.4866071429);
+  background: #66d277;
+  box-shadow: 0px 3px 0px 0px #36b54a;
 }
 
 .button.green:active,
 .button.success:active {
-  box-shadow: 0px 0px 0px 0px rgb(53.5044642857, 181.4955357143, 74.4866071429);
+  box-shadow: 0px 0px 0px 0px #36b54a;
 }
 
 .button.failure,
 .button.red {
-  border-color: rgb(181.4955357143, 63.9955357143, 53.5044642857);
+  border-color: #b54036;
   background: #cc5c52;
-  box-shadow: 0px 3px 0px 0px rgb(181.4955357143, 63.9955357143, 53.5044642857);
-  text-shadow: 0px -1px rgb(181.4955357143, 63.9955357143, 53.5044642857);
+  box-shadow: 0px 3px 0px 0px #b54036;
+  text-shadow: 0px -1px #b54036;
 }
 
 .button.failure:link,
 .button.failure:visited,
 .button.red:link,
 .button.red:visited {
-  box-shadow: 0px 3px 0px 0px rgb(181.4955357143, 63.9955357143, 53.5044642857);
+  box-shadow: 0px 3px 0px 0px #b54036;
 }
 
 .button.failure:hover,
 .button.red:hover {
-  background: rgb(209.8058035714, 110.5558035714, 101.6941964286);
-  box-shadow: 0px 3px 0px 0px rgb(181.4955357143, 63.9955357143, 53.5044642857);
+  background: #d26f66;
+  box-shadow: 0px 3px 0px 0px #b54036;
 }
 
 .button.failure:active,
 .button.red:active {
-  box-shadow: 0px 0px 0px 0px rgb(181.4955357143, 63.9955357143, 53.5044642857);
+  box-shadow: 0px 0px 0px 0px #b54036;
 }
 
 .button.warning,
 .button.yellow {
-  border-color: rgb(174.9024390244, 154.987804878, 38.0975609756);
+  border-color: #af9b26;
   background: #d3bc35;
-  box-shadow: 0px 3px 0px 0px rgb(174.9024390244, 154.987804878, 38.0975609756);
-  text-shadow: 0px -1px rgb(174.9024390244, 154.987804878, 38.0975609756);
+  box-shadow: 0px 3px 0px 0px #af9b26;
+  text-shadow: 0px -1px #af9b26;
 }
 
 .button.warning:link,
 .button.warning:visited,
 .button.yellow:link,
 .button.yellow:visited {
-  box-shadow: 0px 3px 0px 0px rgb(174.9024390244, 154.987804878, 38.0975609756);
+  box-shadow: 0px 3px 0px 0px #af9b26;
 }
 
 .button.warning:hover,
 .button.yellow:hover {
-  background: rgb(215.5609756098, 194.9451219512, 73.9390243902);
-  box-shadow: 0px 3px 0px 0px rgb(174.9024390244, 154.987804878, 38.0975609756);
+  background: #d8c34a;
+  box-shadow: 0px 3px 0px 0px #af9b26;
 }
 
 .button.warning:active,
 .button.yellow:active {
-  box-shadow: 0px 0px 0px 0px rgb(174.9024390244, 154.987804878, 38.0975609756);
+  box-shadow: 0px 0px 0px 0px #af9b26;
 }
 
 .button svg {
@@ -930,7 +941,7 @@ br.nomb {
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  background: transparent;
+  background: #00000000;
   color: currentColor;
   border: none;
   font-weight: 500;
@@ -958,8 +969,8 @@ br.nomb {
 
 .ghost.button.failure:hover,
 .ghost.button.red:hover {
-  color: rgb(181.4955357143, 63.9955357143, 53.5044642857);
-  background-color: rgb(238.8348214286, 203.3348214286, 200.1651785714);
+  color: #b54036;
+  background-color: #efcbc8;
 }
 
 .ghost.button.blue,
@@ -970,8 +981,8 @@ br.nomb {
 
 .ghost.button.blue:hover,
 .ghost.button.primary:hover {
-  color: rgb(47.7721518987, 104.9113924051, 174.2278481013);
-  background-color: rgb(189.0759493671, 210.6962025316, 236.9240506329);
+  color: #3069ae;
+  background-color: #bdd3ed;
 }
 
 .ghost.button svg {
@@ -999,7 +1010,7 @@ img.DV-pixelping {
 
 #viewer-iframe {
   width: 100%;
-  border: 1px solid #aaa;
+  border: 1px solid #aaaaaa;
 }
 
 .button-group {
@@ -1098,7 +1109,7 @@ svg rect {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(51, 60, 71, 0.8);
+  background: #333c47cc;
 }
 
 .file-embed.visible {

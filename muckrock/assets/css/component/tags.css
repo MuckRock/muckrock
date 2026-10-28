@@ -1,0 +1,28 @@
+.tag {
+    display: inline-block;
+    margin-bottom: calc(var(--vr) / 6);
+    padding: 0 calc(var(--vr) * 0.25);
+    background: var(--color-blue);
+    color: var(--color-white);
+    font-size: var(--size-3);
+    line-height: var(--lh);
+    &:hover {
+        color: var(--color-white);
+        background: var(--color-blue-dark);
+        text-decoration: none;
+    }
+}
+
+.tag-list {
+    margin-bottom: var(--vr);
+}
+.tag-list li {
+    display: inline-block;
+}
+
+button.tag, .button.tag {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+button.tag:hover, .button.tag:hover { box-shadow: none; }

@@ -1,0 +1,29 @@
+.badge {
+    display: inline-block;
+    padding: 0 calc(var(--vr) * 0.25);
+    border-radius: 4px;
+    background: var(--color-grey);
+    color: var(--color-white);
+    font-weight: var(--bold);
+    white-space: nowrap;
+}
+
+.red.badge, .failure.badge, .inactive.badge {
+    background: var(--color-red);
+}
+
+.green.badge, .success.badge, .active.badge {
+    background: var(--color-green);
+}
+
+.blue.badge, .primary.badge {
+    background: var(--color-blue);
+}
+
+.blue-dark.badge, .staff.badge {
+    background: var(--color-blue-dark);
+}
+
+.yellow.badge, .warning.badge {
+    background: var(--color-yellow);
+}

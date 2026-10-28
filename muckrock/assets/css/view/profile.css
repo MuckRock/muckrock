@@ -1,0 +1,114 @@
+.profile {
+    padding: calc(var(--vr) * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: var(--vr);
+    }
+    .metadata {
+        dfn {
+            margin-bottom: var(--vr);
+            font-weight: var(--bold);
+            font-size: var(--size-3);
+        }
+        h1 {
+            font-size: var(--size-6);
+            font-weight: var(--bold);
+        }
+        h2 {
+            font-size: var(--size-5);
+        }
+    }
+}
+
+.profile .image {
+    margin: 0 0 var(--vr);
+    .header-image {
+        margin-bottom: 0;
+    }
+}
+
+.profile .flag {
+    form {
+        display: none;
+        &.visible {
+            display: block;
+        }
+    }
+    form {
+        border: var(--border-width) solid var(--color-grey);
+        header, footer, textarea {
+            margin: 0;
+            padding: calc(var(--vr) * 0.5);
+        }
+        textarea {
+            display: block;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+        }
+        footer {
+            display: flex;
+            justify-content: space-between;
+        }
+    
+    }
+}
+
+.account.profile {
+    .fullname {
+        margin-bottom: 0;
+    }
+    .username {
+        color: var(--color-grey);
+    }
+    .avatar {
+        border-radius: var(--border-radius);
+        width: 100%;
+        max-width: 300px;
+    }
+    .title {
+        font-weight: var(--bold);
+    }
+    .links svg {
+        margin-right: calc(var(--vr) * 0.5);
+    }
+    .project-group {
+        display: flex;
+        flex-wrap: wrap;
+        .project-item {
+            margin-right: var(--vr);
+        }
+    }
+    /* These buttons are a mix of spans, links and submit buttons wrapped in */
+    /* forms, so they will not line up on their own: the form is a block and */
+    /* breaks the row, and the inline-flex button group takes its baseline from */
+    /* its own children's margins. */
+    .actions > div {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: calc(var(--vr) * 0.5);
+        /* the buttons drop their margins, so leave room for the drop shadow */
+        margin-bottom: calc(var(--vr) * 0.25);
+        > form {
+            margin: 0;
+        }
+        /* only the buttons in the row itself - the contact modal is a child of */
+        /* this element too, and its buttons keep their own spacing */
+        > .button,
+        > form > .button,
+        > .button-group > .button {
+            margin: 0;
+        }
+    }
+}
+
+.api-token {
+  input {
+    font-family: monospace;
+    width: 100%;
+    display: none;
+  }
+  a {
+    font-style: italic;
+  }
+}
