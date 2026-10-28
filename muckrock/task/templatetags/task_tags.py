@@ -201,13 +201,15 @@ class ResponseTaskNode(TaskNode):
         form_initial = {}
         communication = self.task.communication
         predicted_status = self.task.predicted_status
-        _foia = communication.foia
-        if _foia:
-            initial_status = predicted_status if predicted_status else _foia.status
+        foia_ = communication.foia
+        if foia_:
+            initial_status = predicted_status if predicted_status else foia_.status
             form_initial["status"] = initial_status
-            form_initial["tracking_number"] = _foia.current_tracking_id()
-            form_initial["date_estimate"] = _foia.date_estimate
-            extra_context["previous_communications"] = _foia.reverse_communications
+            form_initial["tracking_number"] = foia_.current_tracking_id()
+            form_initial["date_estimate"] = foia_.date_estimate
+            extra_context["previous_communications"] = foia_.reverse_communications[
+                : settings.PREVIOUS_COMMUNICATIONS_LIMIT  # 10 by default
+            ]
         extra_context["response_form"] = task.forms.ResponseTaskForm(
             initial=form_initial, task=self.task
         )
@@ -301,7 +303,7 @@ class PortalTaskNode(TaskNode):
                     "word_to_pass": foia_.portal_password,
                 }
                 extra_context["previous_communications"] = foia_.reverse_communications[
-                    :10
+                    : settings.PREVIOUS_COMMUNICATIONS_LIMIT  # 10 by default
                 ]
             else:
                 form_initial = {}
@@ -403,7 +405,9 @@ class PaymentInfoTaskNode(TaskNode):
         foia_ = self.task.foia
         extra_context = super().get_extra_context()
         extra_context["form"] = task.forms.PaymentInfoTaskForm(agency=foia_.agency)
-        extra_context["previous_communications"] = foia_.reverse_communications
+        extra_context["previous_communications"] = foia_.reverse_communications[
+            : settings.PREVIOUS_COMMUNICATIONS_LIMIT  # 10 by default
+        ]
         extra_context["check_address"] = foia_.agency.get_addresses("check").first()
         return extra_context
 
