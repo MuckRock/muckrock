@@ -22,12 +22,12 @@ from html import unescape
 from random import choice
 
 # Third Party
-from bleach.sanitizer import Cleaner
 from micawber import Provider, bootstrap_basic
 from micawber.exceptions import ProviderNotFoundException
 from taggit.managers import TaggableManager
 
 # MuckRock
+from muckrock.core.sanitize import clean_html
 from muckrock.crowdsource import fields
 from muckrock.crowdsource.querysets import (
     CrowdsourceDataQuerySet,
@@ -137,15 +137,14 @@ class Crowdsource(models.Model):
         """Create the crowdsource form from the form builder json"""
         form_data = json.loads(form_json)
         seen_labels = set()
-        cleaner = Cleaner(tags=[], attributes={}, styles=[], strip=True)
         # reset the order for all fields to avoid violating the unique constraint
         # it also allows for detection of deleted fields
         self.fields.update(order=None)
         for order, field_data in enumerate(form_data):
-            label = cleaner.clean(field_data["label"])[:255]
+            label = clean_html(field_data["label"], tags=())[:255]
             label = unescape(label)
             label = self._uniqify_label_name(seen_labels, label)
-            description = cleaner.clean(field_data.get("description", ""))[:255]
+            description = clean_html(field_data.get("description", ""), tags=())[:255]
             kwargs = {
                 "label": label,
                 "type": field_data["type"],
@@ -170,9 +169,9 @@ class Crowdsource(models.Model):
                 field.choices.all().delete()
                 for choice_order, value in enumerate(field_data["values"]):
                     field.choices.update_or_create(
-                        choice=cleaner.clean(value["label"])[:255],
+                        choice=clean_html(value["label"], tags=())[:255],
                         defaults={
-                            "value": cleaner.clean(value["value"])[:255],
+                            "value": clean_html(value["value"], tags=())[:255],
                             "order": choice_order,
                         },
                     )

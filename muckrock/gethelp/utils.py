@@ -7,10 +7,10 @@ from django.core.cache import cache
 from collections import defaultdict
 
 # Third Party
-import bleach
 import markdown
 
 # MuckRock
+from muckrock.core.sanitize import clean_html
 from muckrock.gethelp.models import Category, Problem
 
 CACHE_KEY = "gethelp:problems_by_category"
@@ -27,7 +27,7 @@ def _render_markdown(text):
     if not text:
         return ""
     html = markdown.markdown(text)
-    return bleach.clean(
+    return clean_html(
         html,
         tags=[
             "p",

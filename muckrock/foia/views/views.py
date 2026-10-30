@@ -7,10 +7,8 @@ from django.contrib.auth.decorators import permission_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
-# Third Party
-import bleach
-
 # MuckRock
+from muckrock.core.sanitize import clean_html
 from muckrock.core.views import MRAutocompleteView
 from muckrock.foia.codes import CODES
 from muckrock.foia.constants import EMAIL_ATTRIBUTES, EMAIL_STYLES, EMAIL_TAGS
@@ -67,12 +65,11 @@ def raw(request, idx):
     data = {
         "raw": raw_email.raw_email,
         "text": text,
-        "html": bleach.clean(
+        "html": clean_html(
             html,
             tags=EMAIL_TAGS,
             attributes=EMAIL_ATTRIBUTES,
-            styles=EMAIL_STYLES,
-            strip=True,
+            filter_style_properties=set(EMAIL_STYLES),
         ),
         "html_src": html,
         "response": comm.response,

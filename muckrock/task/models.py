@@ -24,13 +24,13 @@ from datetime import date
 from itertools import groupby
 
 # Third Party
-import bleach
 from taggit.managers import TaggableManager
 
 # MuckRock
 from muckrock.communication.models import Check, EmailAddress, PhoneNumber
 from muckrock.core.forms import TagManagerForm
 from muckrock.core.models import ExtractDay
+from muckrock.core.sanitize import clean_html
 from muckrock.core.utils import create_zendesk_ticket, zoho_get, zoho_post
 from muckrock.foia.models import STATUS, FOIATemplate
 from muckrock.jurisdiction.models import Jurisdiction
@@ -1192,7 +1192,7 @@ class FlaggedTask(Task):
         contact_id = self.get_contact_id(self.user)
         if contact_id is None:
             return None
-        description = bleach.clean(self.text)
+        description = clean_html(self.text)
         subject = description[:50] or "-No Subject-"
         description = linebreaks(urlize(description))
 
