@@ -18,7 +18,6 @@ import zlib
 from email.parser import Parser
 
 # Third Party
-import bleach
 import markdown
 import smartypants as _smartypants
 from constance import config
@@ -26,6 +25,7 @@ from sorl.thumbnail.templatetags.thumbnail import thumbnail
 
 # MuckRock
 from muckrock.core.forms import NewsletterSignupForm, TagManagerForm
+from muckrock.core.sanitize import ALLOWED_ATTRIBUTES, ALLOWED_TAGS, clean_html
 from muckrock.foia.models import FOIARequest
 from muckrock.project.forms import ProjectManagerForm
 
@@ -274,7 +274,7 @@ def get_attr(obj, attr):
 def smartypants(text):
     """Renders typographically-correct quotes with the smartpants library"""
     smart_text = _smartypants.smartypants(text)
-    return mark_safe(bleach.clean(smart_text))
+    return mark_safe(clean_html(smart_text))
 
 
 @register.filter(name="markdown")
@@ -291,8 +291,8 @@ def markdown_filter(text, _safe=None):
         "pymdownx.magiclink",
     ]
     markdown_text = markdown.markdown(text, extensions=extensions)
-    # Next bleach the markdown
-    allowed_tags = bleach.ALLOWED_TAGS + [
+    # Next sanitize the markdown
+    allowed_tags = ALLOWED_TAGS | {
         "h1",
         "h2",
         "h3",
@@ -303,8 +303,8 @@ def markdown_filter(text, _safe=None):
         "img",
         "iframe",
         "a",
-    ]
-    allowed_attributes = bleach.ALLOWED_ATTRIBUTES.copy()
+    }
+    allowed_attributes = ALLOWED_ATTRIBUTES.copy()
     allowed_attributes.update(
         {
             "iframe": [
@@ -319,18 +319,14 @@ def markdown_filter(text, _safe=None):
             "a": ["href", "title", "name"],
         }
     )
-    # allows bleaching to be avoided
+    # allows sanitizing to be avoided
     if _safe == "safe":
-        bleached_text = markdown_text
-    elif _safe == "strip":
-        bleached_text = bleach.clean(
-            markdown_text, tags=allowed_tags, attributes=allowed_attributes, strip=True
-        )
+        sanitized_text = markdown_text
     else:
-        bleached_text = bleach.clean(
+        sanitized_text = clean_html(
             markdown_text, tags=allowed_tags, attributes=allowed_attributes
         )
-    return mark_safe(bleached_text)
+    return mark_safe(sanitized_text)
 
 
 @register.filter

@@ -35,8 +35,6 @@ beautifulsoup4==4.13.4
     #   micawber
 billiard==4.2.1
     # via celery
-bleach==4.1.0
-    # via -r pip/requirements.in
 boto3==1.42.65
     # via
     #   -r pip/requirements.in
@@ -303,6 +301,8 @@ multidict==6.7.1
     #   -r pip/requirements.in
     #   aiohttp
     #   yarl
+nh3==0.3.7
+    # via -r pip/requirements.in
 oauthlib==3.3.1
     # via
     #   requests-oauthlib
@@ -311,7 +311,6 @@ orderedmultidict==1.0.1
     # via furl
 packaging==23.2
     # via
-    #   bleach
     #   gunicorn
     #   kombu
     #   pikepdf
@@ -477,7 +476,6 @@ sentry-sdk[celery,django]==2.53.0
 six==1.17.0
     # via
     #   -r pip/requirements.in
-    #   bleach
     #   click-repl
     #   furl
     #   orderedmultidict
@@ -548,8 +546,6 @@ vine==5.1.0
     #   kombu
 wcwidth==0.1.7
     # via prompt-toolkit
-webencodings==0.5.1
-    # via bleach
 wrapt==1.17.2
     # via
     #   deprecated
