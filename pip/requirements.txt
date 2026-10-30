@@ -97,7 +97,7 @@ defusedxml==0.7.1
     #   social-auth-core
 deprecated==1.2.14
     # via pikepdf
-django==5.2.15
+django==5.2.18
     # via
     #   -r pip/requirements.in
     #   daily-active-users
@@ -192,7 +192,7 @@ django-vite==3.0.4
     # via -r pip/requirements.in
 django-watson==1.5.5
     # via -r pip/requirements.in
-djangorestframework==3.16.1
+djangorestframework==3.18.3
     # via
     #   -r pip/requirements.in
     #   djangorestframework-simplejwt
@@ -329,7 +329,7 @@ pickleshare==0.7.5
     # via ipython
 pikepdf==9.5.1
     # via img2pdf
-pillow==12.3.0
+pillow==13.0.0
     # via
     #   -r pip/requirements.in
     #   easy-thumbnails
@@ -364,11 +364,11 @@ ptyprocess==0.6.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pyasn1==0.4.2
+pyasn1==0.6.5
     # via
     #   pyasn1-modules
     #   rsa
-pyasn1-modules==0.2.1
+pyasn1-modules==0.4.1
     # via google-auth
 pycparser==2.20
     # via cffi
@@ -380,7 +380,7 @@ pydantic-core==2.33.2
     # via pydantic
 pygments==2.15.1
     # via ipython
-pyjwt[crypto]==2.12.0
+pyjwt[crypto]==2.15.1
     # via
     #   djangorestframework-simplejwt
     #   social-auth-core
@@ -388,7 +388,7 @@ pymdown-extensions==10.21
     # via -r pip/requirements.in
 pyparsing==3.3.2
     # via httplib2
-pypdf==6.15.0
+pypdf==6.21.4
     # via -r pip/requirements.in
 python-dateutil==2.9.0
     # via
@@ -496,9 +496,9 @@ social-auth-core==4.8.5
     #   social-auth-app-django
 sorl-thumbnail==12.11.0
     # via -r pip/requirements.in
-soupsieve==2.7
+soupsieve==3.0.4
     # via beautifulsoup4
-sqlparse==0.5.4
+sqlparse==0.6.0
     # via
     #   django
     #   django-debug-toolbar
@@ -531,7 +531,7 @@ tzlocal==5.3.1
     # via celery
 uritemplate==3.0.0
     # via drf-spectacular
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   botocore
     #   phaxio

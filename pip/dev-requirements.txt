@@ -76,7 +76,7 @@ defusedxml==0.7.1
     #   py-serializable
 dill==0.4.0
     # via pylint
-django==5.2.15
+django==5.2.18
     # via
     #   -c pip/requirements.txt
     #   -r pip/dev-requirements.in
@@ -297,7 +297,7 @@ six==1.17.0
     #   requests-mock
 sortedcontainers==2.4.0
     # via cyclonedx-python-lib
-sqlparse==0.5.4
+sqlparse==0.6.0
     # via
     #   -c pip/requirements.txt
     #   django
@@ -321,7 +321,7 @@ traitlets==5.14.3
     #   -c pip/requirements.txt
     #   ipython
     #   matplotlib-inline
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   -c pip/requirements.txt
     #   botocore
