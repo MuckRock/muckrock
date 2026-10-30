@@ -13,7 +13,7 @@ import sys
 
 # Third Party
 import requests
-from simplejson.scanner import JSONDecodeError
+from requests.exceptions import JSONDecodeError
 
 # MuckRock
 from muckrock.accounts.models import Profile

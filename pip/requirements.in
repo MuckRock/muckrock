@@ -1,6 +1,6 @@
--e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps # For generating news sitemaps
--e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch # for opensearch.xml
--e git+https://github.com/MuckRock/govqa-py@main#egg=govqa # for govqa integration
+django_news_sitemaps @ git+https://github.com/theatlantic/django-news-sitemaps.git@d965096f467360b3f715ddd18252fe92a5958322 # For generating news sitemaps (django3x branch)
+django-opensearch @ git+https://github.com/MuckRock/django-opensearch.git@7358c925021869c1b01f50debd4de70c08e4ad02 # for opensearch.xml (master branch)
+govqa @ git+https://github.com/MuckRock/govqa-py@bab2a8803926e4347a9be3ba43b818368926f47c # for govqa integration (main branch)
 aiohttp
 baml-py # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
@@ -14,7 +14,6 @@ django-activity-stream # Used for notifications
 django-anymail[mailgun] # Use for sending email on production
 django-autocomplete-light==3.12.1 # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
-django-choices # Define choices for a field
 django-constance # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
 django-debug-toolbar # Toolbar for debugging
@@ -41,19 +40,16 @@ django<6 # Django is kinda important...
 djangorestframework # The API framework
 djangorestframework_simplejwt # JWT auth for DRF
 dogslow # Monitors slow requests
-drf-nested-routers # Nested resources for DRF
 drf-spectacular # DRF documentation
 easy-thumbnails # Used for thumbnailing images
 emoji # Stripe emoji's for pdf generation
 fpdf # Used to generate PDFs
 furl # Used to manipulate urls
 fuzzywuzzy # fuzzy string matching for FM agency import
-google-api-python-client # Google analytics
 gunicorn # Python WSGI app server
 httplib2==0.32.0 # Used by oauth2client
 img2pdf # convert images to PDFs
 ipython # better python shell
-jsonfield # Used for storing JSON data, required by django-geojson
 lob # sending mail via lob.com
 logzio-python-handler # For logging API requests
 markdown # Used for rendering Markdown, obviously!
@@ -67,7 +63,6 @@ plaid-python # for access to bank account information
 psycopg2-binary # Interface to postgres DB
 pycryptodome # Reading encypted PDFs
 pydantic # for gloo
-pyjwkest # for oauth
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
 phaxio # For sending faxes through Phaxio
@@ -80,7 +75,6 @@ requests # HTTP for humans
 rules # Rule based permissions
 scout-apm # performance monitoring
 sentry-sdk[django, celery] # Sentry integration for exception monitoring
-simplejson # json decoder for requests
 six>=1.17.0 # Required for packages with Python 2 compatibility support
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
@@ -89,7 +83,5 @@ social-auth-core # for oauth client
 sorl-thumbnail # used for squarlet avatars
 stripe # Stripe payment processor integration
 tiktoken # Used by gloo
-unidecode # Used for unicode decoding
-xlrd # Used to read excel files
 zenpy # library for zendesk API
 zipstream # Write zip files streamingly

@@ -1,5 +1,5 @@
+-c requirements.txt
 coverage # Used to generate coverage reports in dev
-dj-inmemorystorage # in memory file storage for faster testing
 django-debug-toolbar
 django<6 # django
 factory-boy # Used for creating test data
@@ -15,6 +15,5 @@ pytest-django # Used for testing
 pytest-sugar # Used for testing
 six>=1.17.0 # Required for packages with Python 2 compatibility support
 requests-mock # Mock for http requests
-whoosh # Used for search backend in development
 black # code formatter
 django-silk # profiler
