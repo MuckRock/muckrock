@@ -56,7 +56,7 @@ class TestCommunication(test.TestCase):
             foia_file = comm.files.first()
             assert foia_file.title == "tmp"
             assert foia_file.ffile.file.name == "tmp.txt"
-            assert foia_file.ffile.read() == "The file contents"
+            assert foia_file.ffile.read() == b"The file contents"
         finally:
             try:
                 os.remove("tmp.txt")
@@ -71,7 +71,7 @@ class TestCommunication(test.TestCase):
         foia_file = comm.files.first()
         assert foia_file.title == "doc"
         assert foia_file.ffile.file.name == "doc.pdf"
-        assert foia_file.ffile.read() == "More contents"
+        assert foia_file.ffile.read() == b"More contents"
 
     def test_orphan_error(self):
         """Orphans should raise an error"""
