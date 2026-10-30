@@ -4,12 +4,6 @@
 #
 #    pip-compile pip/requirements.in
 #
--e git+https://github.com/theatlantic/django-news-sitemaps.git@django3x#egg=django_news_sitemaps
-    # via -r pip/requirements.in
--e git+https://github.com/MuckRock/django-opensearch.git@master#egg=django-opensearch
-    # via -r pip/requirements.in
--e git+https://github.com/MuckRock/govqa-py@main#egg=govqa
-    # via -r pip/requirements.in
 aiohappyeyeballs==2.6.1
     # via aiohttp
 aiohttp==3.14.3
@@ -112,7 +106,6 @@ django==5.2.15
     #   django-appconf
     #   django-autocomplete-light
     #   django-celery-email
-    #   django-choices
     #   django-cors-headers
     #   django-debug-toolbar
     #   django-extensions
@@ -133,10 +126,8 @@ django==5.2.15
     #   djangorestframework
     #   djangorestframework-simplejwt
     #   dogslow
-    #   drf-nested-routers
     #   drf-spectacular
     #   easy-thumbnails
-    #   jsonfield
     #   sentry-sdk
     #   social-auth-app-django
 django-activity-stream==1.4.2
@@ -150,8 +141,6 @@ django-appconf==1.0.4
 django-autocomplete-light==3.12.1
     # via -r pip/requirements.in
 django-celery-email==3.0.0
-    # via -r pip/requirements.in
-django-choices==1.6.1
     # via -r pip/requirements.in
 django-constance==4.3.4
     # via -r pip/requirements.in
@@ -174,6 +163,10 @@ django-ipware==2.1.0
 django-localflavor==3.1
     # via -r pip/requirements.in
 django-mathfilters==0.4.0
+    # via -r pip/requirements.in
+django-news-sitemaps @ git+https://github.com/theatlantic/django-news-sitemaps.git@d965096f467360b3f715ddd18252fe92a5958322
+    # via -r pip/requirements.in
+django-opensearch @ git+https://github.com/MuckRock/django-opensearch.git@7358c925021869c1b01f50debd4de70c08e4ad02
     # via -r pip/requirements.in
 django-phonenumber-field==6.0.0
     # via -r pip/requirements.in
@@ -203,13 +196,10 @@ djangorestframework==3.16.1
     # via
     #   -r pip/requirements.in
     #   djangorestframework-simplejwt
-    #   drf-nested-routers
     #   drf-spectacular
 djangorestframework-simplejwt==5.5.1
     # via -r pip/requirements.in
 dogslow==1.2
-    # via -r pip/requirements.in
-drf-nested-routers==0.91
     # via -r pip/requirements.in
 drf-spectacular==0.27.2
     # via -r pip/requirements.in
@@ -230,17 +220,13 @@ frozenlist==1.4.0
 furl==1.0.1
     # via -r pip/requirements.in
 future==0.18.3
-    # via
-    #   pyjwkest
-    #   python-documentcloud
+    # via python-documentcloud
 fuzzywuzzy==0.18.0
     # via -r pip/requirements.in
 google-api-core==2.30.0
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-api-python-client==1.6.5
-    # via -r pip/requirements.in
 google-auth==2.48.0
     # via
     #   google-api-core
@@ -258,13 +244,12 @@ google-resumable-media==2.8.0
     # via google-cloud-storage
 googleapis-common-protos==1.72.0
     # via google-api-core
+govqa @ git+https://github.com/MuckRock/govqa-py@bab2a8803926e4347a9be3ba43b818368926f47c
+    # via -r pip/requirements.in
 gunicorn==23.0.0
     # via -r pip/requirements.in
 httplib2==0.32.0
-    # via
-    #   -r pip/requirements.in
-    #   google-api-python-client
-    #   oauth2client
+    # via -r pip/requirements.in
 idna==3.10
     # via
     #   requests
@@ -277,12 +262,10 @@ ipython==8.10.0
     # via -r pip/requirements.in
 jedi==0.19.2
     # via ipython
-jmespath==0.10.0
+jmespath==1.1.0
     # via
     #   boto3
     #   botocore
-jsonfield==2.0.2
-    # via -r pip/requirements.in
 jsonschema==4.21.1
     # via
     #   drf-spectacular
@@ -320,8 +303,6 @@ multidict==6.7.1
     #   -r pip/requirements.in
     #   aiohttp
     #   yarl
-oauth2client==4.1.2
-    # via google-api-python-client
 oauthlib==3.3.1
     # via
     #   requests-oauthlib
@@ -385,27 +366,20 @@ pure-eval==0.2.3
     # via stack-data
 pyasn1==0.4.2
     # via
-    #   oauth2client
     #   pyasn1-modules
     #   rsa
 pyasn1-modules==0.2.1
-    # via
-    #   google-auth
-    #   oauth2client
+    # via google-auth
 pycparser==2.20
     # via cffi
 pycryptodome==3.18.0
     # via -r pip/requirements.in
-pycryptodomex==3.19.1
-    # via pyjwkest
 pydantic==2.11.10
     # via -r pip/requirements.in
 pydantic-core==2.33.2
     # via pydantic
 pygments==2.15.1
     # via ipython
-pyjwkest==1.4.0
-    # via -r pip/requirements.in
 pyjwt[crypto]==2.12.0
     # via
     #   djangorestframework-simplejwt
@@ -473,7 +447,6 @@ requests[security]==2.32.5
     #   phaxio
     #   plaid-python
     #   premailer
-    #   pyjwkest
     #   python-documentcloud
     #   python-squarelet
     #   requests-oauthlib
@@ -490,9 +463,7 @@ rpds-py==0.18.0
     #   jsonschema
     #   referencing
 rsa==4.7
-    # via
-    #   google-auth
-    #   oauth2client
+    # via google-auth
 rules==2.2
     # via -r pip/requirements.in
 s3transfer==0.16.0
@@ -503,19 +474,14 @@ scrapelib==2.4.1
     # via govqa
 sentry-sdk[celery,django]==2.53.0
     # via -r pip/requirements.in
-simplejson==3.16.0
-    # via -r pip/requirements.in
 six==1.17.0
     # via
     #   -r pip/requirements.in
     #   bleach
     #   click-repl
     #   furl
-    #   google-api-python-client
-    #   oauth2client
     #   orderedmultidict
     #   phaxio
-    #   pyjwkest
     #   python-dateutil
     #   zenpy
 smart-open==1.10.0
@@ -563,12 +529,8 @@ tzdata==2025.3
     # via kombu
 tzlocal==5.3.1
     # via celery
-unidecode==0.4.19
-    # via -r pip/requirements.in
 uritemplate==3.0.0
-    # via
-    #   drf-spectacular
-    #   google-api-python-client
+    # via drf-spectacular
 urllib3==2.7.0
     # via
     #   botocore
@@ -592,8 +554,6 @@ wrapt==1.17.2
     # via
     #   deprecated
     #   scout-apm
-xlrd==1.1.0
-    # via -r pip/requirements.in
 yarl==1.23.0
     # via aiohttp
 zenpy==2.0.47

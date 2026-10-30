@@ -41,8 +41,7 @@ BROKER_BACKEND = "memory"
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 
-STORAGES["default"]["BACKEND"] = "inmemorystorage.InMemoryStorage"
-
+STORAGES["default"]["BACKEND"] = "django.core.files.storage.InMemoryStorage"
 LOGGING = {}
 
 TEMPLATES[0]["OPTIONS"]["debug"] = True
