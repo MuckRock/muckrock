@@ -5,11 +5,9 @@ Forms for FOIA Machine
 # Django
 from django import forms
 
-# Third Party
-import bleach
-
 # MuckRock
 from muckrock.core import autocomplete
+from muckrock.core.sanitize import clean_html
 from muckrock.foiamachine.models import (
     STATUS,
     FoiaMachineCommunication,
@@ -74,7 +72,7 @@ class FoiaMachineCommunicationForm(forms.ModelForm):
             self.initial["message"] = self.initial["message"].replace("<div>", "")
             self.initial["message"] = self.initial["message"].replace("</div>", "\n")
             self.initial["message"] = self.initial["message"].replace("<br>", "\n")
-            self.initial["message"] = bleach.clean(self.initial["message"], strip=True)
+            self.initial["message"] = clean_html(self.initial["message"])
 
     files = forms.FileField(
         required=False,

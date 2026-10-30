@@ -332,9 +332,7 @@ wcwidth==0.1.7
     #   -c pip/requirements.txt
     #   prompt-toolkit
 webencodings==0.5.1
-    # via
-    #   -c pip/requirements.txt
-    #   html5lib
+    # via html5lib
 werkzeug==3.1.6
     # via moto
 wheel==0.38.4
