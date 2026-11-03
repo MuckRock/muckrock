@@ -584,31 +584,43 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
 
 @shared_task
 def followup_requests():
-    """Follow up on any requests that need following up on"""
-    log = []
+    """Queue follow ups for all due requests, spread over FOLLOWUP_SPREAD_MINUTES"""
     # weekday returns 5 for sat and 6 for sun
     is_weekday = date.today().weekday() < 5
-    if config.ENABLE_FOLLOWUP and (config.ENABLE_WEEKEND_FOLLOWUP or is_weekday):
-        num_requests = FOIARequest.objects.get_followup().count()
-        try:
-            for foia in FOIARequest.objects.get_followup():
-                try:
-                    foia.followup()
-                    log.append("%s - %d - %s" % (foia.status, foia.pk, foia.title))
-                except AnymailError as exc:
-                    logger.error(
-                        "Mailgun error during followups: %s",
-                        exc,
-                        exc_info=sys.exc_info(),
-                    )
-        except SoftTimeLimitExceeded:
-            logger.warning(
-                "Follow ups did not complete in time. Completed %d out of %d",
-                num_requests - FOIARequest.objects.get_followup().count(),
-                num_requests,
-            )
+    if not config.ENABLE_FOLLOWUP or not (config.ENABLE_WEEKEND_FOLLOWUP or is_weekday):
+        return
+    foia_pks = list(FOIARequest.objects.get_followup().values_list("pk", flat=True))
+    if not foia_pks:
+        return
+    # Sending them all at once trips Google's per-recipient rate limit on the
+    # diagnostics BCC address.
+    interval = config.FOLLOWUP_SPREAD_MINUTES * 60 / len(foia_pks)
+    for i, foia_pk in enumerate(foia_pks):
+        followup_request.apply_async(args=[foia_pk], countdown=int(i * interval))
+    logger.info(
+        "Queued %d follow ups over %d minutes",
+        len(foia_pks),
+        config.FOLLOWUP_SPREAD_MINUTES,
+    )
 
-        logger.info("Follow Ups:\n%s", "\n".join(log))
+
+@shared_task
+def followup_request(foia_pk):
+    """Send a follow up for the request if it is still due"""
+    # The request may have been answered or followed up since it was queued.
+    if not config.ENABLE_FOLLOWUP:
+        return
+    foia = FOIARequest.objects.get_followup().filter(pk=foia_pk).first()
+    if foia is None:
+        return
+    try:
+        foia.followup()
+    except AnymailError as exc:
+        logger.error(
+            "Mailgun error during followups: %s",
+            exc,
+            exc_info=sys.exc_info(),
+        )
 
 
 @shared_task
