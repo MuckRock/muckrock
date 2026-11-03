@@ -818,6 +818,10 @@ CONSTANCE_CONFIG = OrderedDict(
             (15, "Number of days between auto followups for state and local requests"),
         ),
         (
+            "FOLLOWUP_SPREAD_MINUTES",
+            (120, "Minutes over which each night's auto followups are spread out"),
+        ),
+        (
             "MODERATION_KEYWORDS",
             ("!\n?", "Keywords to trigger manual moderation - one per line"),
         ),
@@ -893,6 +897,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FOLLOWUP_DAYS_PORTAL",
         "FOLLOWUP_DAYS_FEDERAL",
         "FOLLOWUP_DAYS_OTHER",
+        "FOLLOWUP_SPREAD_MINUTES",
         "MODERATION_KEYWORDS",
         "MODERATION_REGEX",
         "NOREPLY_EMAILS",
