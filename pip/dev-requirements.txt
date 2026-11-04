@@ -20,7 +20,7 @@ backcall==0.2.0
     # via
     #   -c pip/requirements.txt
     #   ipython
-black==26.3.1
+black==26.10.1
     # via -r pip/dev-requirements.in
 boolean-py==5.0
     # via license-expression
@@ -76,7 +76,7 @@ defusedxml==0.7.1
     #   py-serializable
 dill==0.4.0
     # via pylint
-django==5.2.18
+django==5.2.19
     # via
     #   -c pip/requirements.txt
     #   -r pip/dev-requirements.in
@@ -104,7 +104,7 @@ gprof2dot==2019.11.30
     # via django-silk
 html5lib==1.1
     # via pip-audit
-idna==3.10
+idna==3.20
     # via
     #   -c pip/requirements.txt
     #   requests
@@ -151,7 +151,7 @@ mdurl==0.1.2
     # via markdown-it-py
 moto[s3]==5.1.22
     # via -r pip/dev-requirements.in
-msgpack==1.1.2
+msgpack==1.2.4
     # via cachecontrol
 mypy-extensions==0.4.3
     # via black
@@ -216,14 +216,14 @@ pycparser==2.20
     # via
     #   -c pip/requirements.txt
     #   cffi
-pygments==2.15.1
+pygments==2.20.0
     # via
     #   -c pip/requirements.txt
     #   django-silk
     #   ipython
     #   pytest
     #   rich
-pylint==4.0.5
+pylint==4.0.10
     # via
     #   pylint-django
     #   pylint-plugin-utils
@@ -239,7 +239,7 @@ pyproject-hooks==1.0.0
     # via
     #   build
     #   pip-tools
-pytest==9.0.2
+pytest==9.0.3
     # via
     #   -r pip/dev-requirements.in
     #   pytest-django
@@ -267,7 +267,7 @@ pyyaml==6.0.1
     #   -c pip/requirements.txt
     #   moto
     #   responses
-requests==2.32.5
+requests==2.33.1
     # via
     #   -c pip/requirements.txt
     #   cachecontrol
@@ -333,7 +333,7 @@ wcwidth==0.1.7
     #   prompt-toolkit
 webencodings==0.5.1
     # via html5lib
-werkzeug==3.1.6
+werkzeug==3.1.9
     # via moto
 wheel==0.38.4
     # via pip-tools

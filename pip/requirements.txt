@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.14.3
+aiohttp==3.14.4
     # via -r pip/requirements.in
 aiosignal==1.4.0
     # via aiohttp
@@ -95,7 +95,7 @@ defusedxml==0.7.1
     #   social-auth-core
 deprecated==1.2.14
     # via pikepdf
-django==5.2.18
+django==5.2.19
     # via
     #   -r pip/requirements.in
     #   daily-active-users
@@ -248,7 +248,7 @@ gunicorn==23.0.0
     # via -r pip/requirements.in
 httplib2==0.32.0
     # via -r pip/requirements.in
-idna==3.10
+idna==3.20
     # via
     #   requests
     #   yarl
@@ -296,7 +296,7 @@ memoize==1.0.0
     # via -r pip/requirements.in
 micawber==0.6.2
     # via -r pip/requirements.in
-multidict==6.7.1
+multidict==6.9.1
     # via
     #   -r pip/requirements.in
     #   aiohttp
@@ -371,13 +371,13 @@ pyasn1-modules==0.4.1
     # via google-auth
 pycparser==2.20
     # via cffi
-pycryptodome==3.18.0
+pycryptodome==3.19.1
     # via -r pip/requirements.in
 pydantic==2.11.10
     # via -r pip/requirements.in
 pydantic-core==2.33.2
     # via pydantic
-pygments==2.15.1
+pygments==2.20.0
     # via ipython
 pyjwt[crypto]==2.15.1
     # via
@@ -435,7 +435,7 @@ regex==2023.12.25
     # via tiktoken
 reportlab==4.4.1
     # via -r pip/requirements.in
-requests[security]==2.32.5
+requests[security]==2.33.1
     # via
     #   -r pip/requirements.in
     #   django-anymail
@@ -550,7 +550,7 @@ wrapt==1.17.2
     # via
     #   deprecated
     #   scout-apm
-yarl==1.23.0
+yarl==1.25.1
     # via aiohttp
 zenpy==2.0.47
     # via -r pip/requirements.in
