@@ -129,7 +129,7 @@ def format_check(c):
     """Check your code format"""
     c.run(
         DJANGO_RUN_USER.format(
-            cmd='sh -c"'
+            cmd='sh -c "'
             "black --check muckrock --exclude migrations\\|vendor\\|gloo && "
             "isort --check-only muckrock --skip ./muckrock/gloo"
             '"'
