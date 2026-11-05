@@ -22,6 +22,7 @@ import emoji
 import img2pdf
 import pypdf
 from fpdf import FPDF
+from fpdf.enums import XPos, YPos
 from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
 
@@ -167,13 +168,11 @@ class PDF(FPDF):
         """Add page number to the footer"""
         self.set_y(-25)
         self.set_font("Times", "I", 10)
-        self.cell(0, 10, "Page {} of {{nb}}".format(self.page_no()), 0, 0, "C")
+        self.cell(0, 10, "Page {} of {{nb}}".format(self.page_no()), align="C")
 
     def configure(self):
         """Configure common settings"""
-        self.add_font(
-            "DejaVu", "", os.path.join(settings.FONT_PATH, "DejaVuSerif.ttf"), uni=True
-        )
+        self.add_font("DejaVu", "", os.path.join(settings.FONT_PATH, "DejaVuSerif.ttf"))
         self.alias_nb_pages()
         self.add_page()
 
@@ -234,7 +233,7 @@ class MailPDF(PDF):
         """Add an extra line to the header"""
         x = self.get_x()
         y = self.get_y()
-        self.set_font("Arial", "b", 18)
+        self.set_font("Helvetica", "B", 18)
         self.set_xy(3.5 * 72, (72 * 3) / 4)
         self.cell(0, 0, text)
         self.set_xy(x, y)
@@ -270,10 +269,9 @@ class MailPDF(PDF):
                 else:
                     page.scale_to(PDF_WIDTH, PDF_HEIGHT)
 
-    def _handle_file(self, file_, files, merger):
+    def _handle_file(self, file_, files, merger, total_pages):
         """Determine if we can attach the file"""
         img_exts = ["jpg", "jpeg", "png"]
-        total_pages = self.page
 
         if file_.get_extension() in img_exts:
             mem_file = BytesIO(img2pdf.convert(file_.ffile))
@@ -330,12 +328,12 @@ class MailPDF(PDF):
                 num_msgs = 0
             return new_pdf.prepare(address_override, num_msgs=num_msgs)
 
-        self.page = min(self.page, self.page_limit)
+        letter_pages = min(self.page, self.page_limit)
         writer = PdfWriter(strict=False)
-        writer.append(BytesIO(self.output(dest="S").encode("latin-1")))
+        writer.append(BytesIO(bytes(self.output())), pages=(0, letter_pages))
         files = []
         for file_ in self.comm.files.all():
-            total_pages = self._handle_file(file_, files, writer)
+            total_pages = self._handle_file(file_, files, writer, letter_pages)
 
         single_pdf = BytesIO()
         try:
@@ -370,8 +368,10 @@ class SnailMailPDF(MailPDF):
         # New letter rectangle
         self.rect(6.8 * 72, 10, 1.2 * 72, 72 / 4, "F")
         # Fold lines
-        self.dashed_line(0, 4 * 72, 72 / 4, 4 * 72, 2, 2)
-        self.dashed_line(8.25 * 72, 4 * 72, 8.5 * 72, 4 * 72, 2, 2)
+        self.set_dash_pattern(dash=2, gap=2)
+        self.line(0, 4 * 72, 72 / 4, 4 * 72)
+        self.line(8.25 * 72, 4 * 72, 8.5 * 72, 4 * 72)
+        self.set_dash_pattern()
 
         # Check notification
         if self.amount:
@@ -414,7 +414,7 @@ class CoverPDF(PDF):
         self.configure()
         self.set_font("DejaVu", "", 14)
         title = "Bulk Snail Mail Cover Letter for {}".format(date.today())
-        self.cell(0, 0, title, 0, 1, "C")
+        self.cell(0, 0, title, align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         self.ln(10)
         self.set_font("DejaVu", "", 10)
         lines = []

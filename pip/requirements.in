@@ -11,7 +11,7 @@ cryptography==50.0.0 # Used by token handling libraries
 daily-active-users # Log daily active users
 django-activity-stream # Used for notifications
 django-anymail[mailgun] # Use for sending email on production
-django-autocomplete-light==3.12.1 # Autocomplete drop down inputs
+django-autocomplete-light # Autocomplete drop down inputs
 django-celery-email # Send emails asynchronously using Celery
 django-constance # Use for dynamic settings
 django-cors-headers # Allows access to API endpoints from non-MuckRock domains
@@ -37,11 +37,10 @@ django-watson # Used for search
 django<6 # Django is kinda important...
 djangorestframework # The API framework
 djangorestframework_simplejwt # JWT auth for DRF
-dogslow # Monitors slow requests
 drf-spectacular # DRF documentation
 easy-thumbnails # Used for thumbnailing images
 emoji # Stripe emoji's for pdf generation
-fpdf # Used to generate PDFs
+fpdf2 # Used to generate PDFs
 furl # Used to manipulate urls
 gunicorn # Python WSGI app server
 httplib2==0.32.0 # Used by oauth2client
@@ -50,7 +49,6 @@ ipython # better python shell
 lob # sending mail via lob.com
 logzio-python-handler # For logging API requests
 markdown # Used for rendering Markdown, obviously!
-memoize # cachable properties
 micawber # Used for embeds in assignments
 multidict>6.4
 nh3 # Used to sanitize any HTML we're rendering

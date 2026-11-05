@@ -103,7 +103,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
 
     blank_pdf = FPDF()
     blank_pdf.add_page()
-    blank = BytesIO(blank_pdf.output(dest="S").encode("latin-1"))
+    blank = BytesIO(bytes(blank_pdf.output()))
     for snail in snails.iterator():
         # generate the pdf and merge all pdf attachments
         pdf = SnailMailPDF(
@@ -125,7 +125,7 @@ def snail_mail_bulk_pdf_task(pdf_name, get, **kwargs):
     cover_pdf.generate()
     if cover_pdf.page % 2 == 1:
         cover_pdf.add_page()
-    bulk_merger.merge(0, BytesIO(cover_pdf.output(dest="S").encode("latin-1")))
+    bulk_merger.merge(0, BytesIO(bytes(cover_pdf.output())))
 
     bulk_pdf = BytesIO()
     bulk_merger.write(bulk_pdf)

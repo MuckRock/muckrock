@@ -23,12 +23,16 @@ import requests
 import stripe
 from actstream.models import Action
 from localflavor.us.models import USStateField
-from memoize import mproperty
 from phonenumber_field.modelfields import PhoneNumberField
 
 # MuckRock
 from muckrock.accounts.querysets import ProfileQuerySet
-from muckrock.core.utils import cache_get_or_set, squarelet_get, stripe_retry_on_error
+from muckrock.core.utils import (
+    cache_get_or_set,
+    mproperty,
+    squarelet_get,
+    stripe_retry_on_error,
+)
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)

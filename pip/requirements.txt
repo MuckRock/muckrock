@@ -122,7 +122,6 @@ django==5.2.19
     #   django-vite
     #   djangorestframework
     #   djangorestframework-simplejwt
-    #   dogslow
     #   drf-spectacular
     #   easy-thumbnails
     #   sentry-sdk
@@ -135,7 +134,7 @@ django-appconf==1.0.4
     # via
     #   django-celery-email
     #   django-opensearch
-django-autocomplete-light==3.12.1
+django-autocomplete-light==5.0.0
     # via -r pip/requirements.in
 django-celery-email==3.0.0
     # via -r pip/requirements.in
@@ -194,8 +193,6 @@ djangorestframework==3.18.3
     #   drf-spectacular
 djangorestframework-simplejwt==5.5.1
     # via -r pip/requirements.in
-dogslow==1.2
-    # via -r pip/requirements.in
 drf-spectacular==0.27.2
     # via -r pip/requirements.in
 easy-thumbnails==2.10.1
@@ -206,7 +203,9 @@ executing==2.2.0
     # via stack-data
 fastjsonschema==2.19.1
     # via python-documentcloud
-fpdf==1.7.2
+fonttools==4.68.0
+    # via fpdf2
+fpdf2==2.9.0
     # via -r pip/requirements.in
 frozenlist==1.4.0
     # via
@@ -285,8 +284,6 @@ markdown==3.10.2
     #   pymdown-extensions
 matplotlib-inline==0.1.7
     # via ipython
-memoize==1.0.0
-    # via -r pip/requirements.in
 micawber==0.6.2
     # via -r pip/requirements.in
 multidict==6.9.1
@@ -325,6 +322,7 @@ pillow==13.0.0
     # via
     #   -r pip/requirements.in
     #   easy-thumbnails
+    #   fpdf2
     #   img2pdf
     #   pikepdf
     #   reportlab

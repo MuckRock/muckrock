@@ -58,14 +58,6 @@ PHONE_NUMBER_LINK = os.environ.get(
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
-DOGSLOW = True
-DOGSLOW_LOG_TO_FILE = False
-DOGSLOW_TIMER = 25
-DOGSLOW_EMAIL_TO = os.environ.get("DOGSLOW_EMAIL_TO", "mitch@muckrock.com")
-DOGSLOW_EMAIL_FROM = "info@muckrock.com"
-DOGSLOW_LOGGER = "dogslow"  # can be anything, but must match `logger` below
-DOGSLOW_LOG_TO_SENTRY = True
-
 ADMINS = (("Mitchell Kotler", "mitch@muckrock.com"),)
 
 MANAGERS = ADMINS
@@ -209,7 +201,6 @@ MIDDLEWARE = (
     "corsheaders.middleware.CorsMiddleware",
     "django_hosts.middleware.HostsRequestMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "dogslow.WatchdogMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -507,10 +498,6 @@ LOGGING = {
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
         },
-        "dogslow": {
-            "level": "WARNING",
-            "class": "sentry_sdk.integrations.logging.EventHandler",
-        },
     },
     "loggers": {
         "django": {"handlers": ["null"], "propagate": True, "level": "INFO"},
@@ -529,7 +516,6 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-        "dogslow": {"level": "WARNING", "handlers": ["dogslow"]},
         "http_requests": {
             "handlers": ["console"],
             "level": "INFO",
