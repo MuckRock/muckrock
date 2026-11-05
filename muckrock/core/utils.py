@@ -20,6 +20,7 @@ import time
 import uuid
 from email.message import Message
 from email.utils import collapse_rfc2231_value
+from functools import wraps
 from hashlib import md5
 
 # Third Party
@@ -148,6 +149,25 @@ def cache_get_or_set(key, update, timeout):
         value = update()
         cache.set(key, value, timeout)
     return value
+
+
+def mproperty(fn):
+    """A property computed once per instance, which unlike cached_property can
+    take a setter.
+
+    The setter does not update the cached value; the next read returns the
+    value from before the set.
+    """
+    attribute = f"_memo_{fn.__name__}"
+
+    @property
+    @wraps(fn)
+    def _property(self):
+        if not hasattr(self, attribute):
+            setattr(self, attribute, fn(self))
+        return getattr(self, attribute)
+
+    return _property
 
 
 def retry_on_error(error, func, *args, **kwargs):
