@@ -343,7 +343,7 @@ class SnailMailTaskTests(TestCase):
         comm = FOIACommunicationFactory(communication="Thank you\U0001f60a\n\n")
         pdf = SnailMailPDF(comm, "n", switch=False)
         pdf.generate()
-        pdf.output(dest="S").encode("latin-1")
+        pdf.output()
 
 
 class PaymentInfoTaskTests(TestCase):
