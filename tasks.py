@@ -272,7 +272,9 @@ def pip_compile(c, upgrade=False, package=None):
 @task
 def build(c):
     """Build the docker images"""
-    c.run("docker compose build")
+    # The django image fetches Squarelet's root CA from localhost while building,
+    # and bake refuses host networking unless it is allowed explicitly.
+    c.run("docker buildx bake -f local.yml --allow=network.host --load")
 
 
 @task(name="update-staging-db")
