@@ -122,7 +122,6 @@ django==5.2.19
     #   django-vite
     #   djangorestframework
     #   djangorestframework-simplejwt
-    #   dogslow-sentry
     #   drf-spectacular
     #   easy-thumbnails
     #   sentry-sdk
@@ -193,8 +192,6 @@ djangorestframework==3.18.3
     #   djangorestframework-simplejwt
     #   drf-spectacular
 djangorestframework-simplejwt==5.5.1
-    # via -r pip/requirements.in
-dogslow-sentry==2.0.1
     # via -r pip/requirements.in
 drf-spectacular==0.27.2
     # via -r pip/requirements.in
@@ -461,9 +458,7 @@ scout-apm==3.5.3
 scrapelib==2.4.1
     # via govqa
 sentry-sdk[celery,django]==2.53.0
-    # via
-    #   -r pip/requirements.in
-    #   dogslow-sentry
+    # via -r pip/requirements.in
 six==1.17.0
     # via
     #   -r pip/requirements.in
