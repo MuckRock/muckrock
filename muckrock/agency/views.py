@@ -25,8 +25,8 @@ from string import capwords
 from time import time
 
 # Third Party
-from fuzzywuzzy import fuzz, process
 from smart_open.smart_open_lib import smart_open
+from thefuzz import fuzz, process
 
 # MuckRock
 from muckrock.agency.constants import FOIA_FILE_LIMIT, FOIA_LOG_LIMIT
@@ -351,7 +351,7 @@ class AgencyAutocomplete(MRAutocompleteView):
             query,
             {a: a.name for a in choices},
             scorer=fuzz.partial_ratio,
-            score_cutoff=83,
+            score_cutoff=settings.AGENCY_FUZZY_MATCH_CUTOFF,
             limit=10,
         )
 

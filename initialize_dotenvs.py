@@ -109,18 +109,6 @@ CONFIG = [
                 ],
             },
             {
-                "name": "Plaid",
-                "url": "https://plaid.com",
-                "description": "Plaid is used for checking our bank account",
-                "envvars": [
-                    ("PLAID_CLIENT_ID", ""),
-                    ("PLAID_SECRET", ""),
-                    ("PLAID_PUBLIC_KEY", ""),
-                    ("PLAID_ENV", ""),
-                    ("PLAID_ACCESS_TOKEN", ""),
-                ],
-            },
-            {
                 "name": "OPENAI_API_KEY", 
                 "url": "https://openai.com/",
                 "description": "We use OpenAI to automate some support tasks",

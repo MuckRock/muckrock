@@ -979,13 +979,9 @@ THUMBNAIL_PRESERVE_FORMAT = True
 # For easy thumbnails
 THUMBNAIL_PRESERVE_EXTENSIONS = ("png",)
 
+# Minimum thefuzz partial_ratio score (0-100) for agency name matching
+AGENCY_FUZZY_MATCH_CUTOFF = int(os.environ.get("AGENCY_FUZZY_MATCH_CUTOFF", 83))
 
-# Plaid allows programtic access to our bank account transactions
-PLAID_CLIENT_ID = os.environ.get("PLAID_CLIENT_ID")
-PLAID_SECRET = os.environ.get("PLAID_SECRET")
-PLAID_PUBLIC_KEY = os.environ.get("PLAID_PUBLIC_KEY")
-PLAID_ENV = os.environ.get("PLAID_ENV", "development")
-PLAID_ACCESS_TOKEN = os.environ.get("PLAID_ACCESS_TOKEN")
 
 # ZenDesk
 USE_ZENDESK = boolcheck(os.environ.get("USE_ZENDESK", False))

@@ -117,7 +117,6 @@ django==5.2.19
     #   django-reversion
     #   django-sesame
     #   django-simple-history
-    #   django-sslify
     #   django-storages
     #   django-taggit
     #   django-vite
@@ -180,8 +179,6 @@ django-sesame==3.2.3
     # via -r pip/requirements.in
 django-simple-history==3.10.1
     # via -r pip/requirements.in
-django-sslify==0.2.7
-    # via -r pip/requirements.in
 django-storages==1.12.3
     # via -r pip/requirements.in
 django-taggit==6.1.0
@@ -219,8 +216,6 @@ furl==1.0.1
     # via -r pip/requirements.in
 future==0.18.3
     # via python-documentcloud
-fuzzywuzzy==0.18.0
-    # via -r pip/requirements.in
 google-api-core==2.30.0
     # via
     #   google-cloud-core
@@ -272,8 +267,6 @@ jsonschema-specifications==2023.12.1
     # via jsonschema
 kombu==5.6.2
     # via celery
-levenshtein==0.25.1
-    # via python-levenshtein
 listcrunch==1.0.1
     # via python-documentcloud
 lob==4.0.1
@@ -335,8 +328,6 @@ pillow==13.0.0
     #   img2pdf
     #   pikepdf
     #   reportlab
-plaid-python==3.4.0
-    # via -r pip/requirements.in
 premailer==3.0.0
     # via django-premailer
 prompt-toolkit==3.0.31
@@ -399,8 +390,6 @@ python-dateutil==2.9.0
     #   zenpy
 python-documentcloud==4.8.1
     # via -r pip/requirements.in
-python-levenshtein==0.25.1
-    # via -r pip/requirements.in
 python-redis-lock[django]==3.7.0
     # via -r pip/requirements.in
 python-squarelet==0.3.0
@@ -417,7 +406,7 @@ pyyaml==6.0.1
     #   pymdown-extensions
     #   python-documentcloud
 rapidfuzz==3.14.3
-    # via levenshtein
+    # via thefuzz
 ratelimit==2.2.1
     # via
     #   python-documentcloud
@@ -444,7 +433,6 @@ requests[security]==2.33.1
     #   lob
     #   logzio-python-handler
     #   phaxio
-    #   plaid-python
     #   premailer
     #   python-documentcloud
     #   python-squarelet
@@ -503,6 +491,8 @@ sqlparse==0.6.0
 stack-data==0.6.3
     # via ipython
 stripe==8.11.0
+    # via -r pip/requirements.in
+thefuzz==0.22.1
     # via -r pip/requirements.in
 tiktoken==0.12.0
     # via -r pip/requirements.in

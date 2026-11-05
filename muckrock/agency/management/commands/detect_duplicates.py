@@ -7,8 +7,8 @@ from django.urls import reverse
 import csv
 
 # Third Party
-from fuzzywuzzy import fuzz, process
 from smart_open.smart_open_lib import smart_open
+from thefuzz import fuzz, process
 
 # MuckRock
 from muckrock.agency.models import Agency
@@ -19,7 +19,9 @@ class Command(BaseCommand):
     """Detect duplicate agencies"""
 
     def add_arguments(self, parser):
-        parser.add_argument("--cutoff", type=int, default=83)
+        parser.add_argument(
+            "--cutoff", type=int, default=settings.AGENCY_FUZZY_MATCH_CUTOFF
+        )
 
     def handle(self, *args, **kwargs):
         cutoff = kwargs["cutoff"]
