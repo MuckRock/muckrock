@@ -458,9 +458,7 @@ scout-apm==3.5.3
 scrapelib==2.4.1
     # via govqa
 sentry-sdk[celery,django]==2.53.0
-    # via
-    #   -r pip/requirements.in
-    #   dogslow-sentry
+    # via -r pip/requirements.in
 six==1.17.0
     # via
     #   -r pip/requirements.in

@@ -68,7 +68,7 @@ reportlab # Used for adding text to PDFs for form filling in
 requests # HTTP for humans
 rules # Rule based permissions
 scout-apm # performance monitoring
-sentry-sdk[django, celery]<3 # Sentry integration; <3 because dogslow-sentry uses Hub, removed in 3.0 (see #2342)
+sentry-sdk[django, celery] # Sentry integration for exception monitoring
 six>=1.17.0 # Required for packages with Python 2 compatibility support
 smart-open # Use for streaming files from S3
 smartypants # Used for typographically-correct quotes
