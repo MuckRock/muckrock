@@ -14,8 +14,8 @@ import csv
 import re
 
 # Third Party
-from fuzzywuzzy import fuzz, process
 from localflavor.us.us_states import STATE_CHOICES
+from thefuzz import fuzz, process
 
 # MuckRock
 from muckrock.agency.models import Agency, AgencyAddress, AgencyEmail, AgencyPhone
@@ -125,7 +125,7 @@ class Importer:
             datum["agency"],
             {a: a.name for a in agencies},
             scorer=fuzz.partial_ratio,
-            score_cutoff=83,
+            score_cutoff=settings.AGENCY_FUZZY_MATCH_CUTOFF,
         )
         if match:
             _agency_name, score, agency = match

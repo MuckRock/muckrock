@@ -3,6 +3,7 @@ import os
 
 # Third Party
 from invoke import task
+from invoke.exceptions import Exit
 
 DOCKER_COMPOSE_RUN_OPT = (
     f"docker compose -f local.yml run {{opt}} --rm {{service}} {{cmd}}"
@@ -18,6 +19,8 @@ DJANGO_RUN = DOCKER_COMPOSE_RUN.format(service="muckrock_django", cmd="{cmd}")
 DJANGO_RUN_USER = DOCKER_COMPOSE_RUN_OPT_USER.format(
     opt="", service="muckrock_django", cmd="{cmd}"
 )
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Release
 # --------------------------------------------------------------------------------
@@ -272,6 +275,18 @@ def pip_compile(c, upgrade=False, package=None):
 @task
 def build(c):
     """Build the docker images"""
+    squarelet = os.environ.get("SQUARELET_PATH") or "../squarelet"
+    cert = os.path.normpath(
+        os.path.join(ROOT, squarelet, "config", "certs", "rootCA.pem")
+    )
+    if not os.path.exists(cert):
+        raise Exit(
+            f"Squarelet's root certificate is missing: {cert}\n"
+            "The django image needs it to trust Squarelet over HTTPS. Either:\n"
+            "  - check out Squarelet next to MuckRock and run `inv mkcert` there, or\n"
+            "  - set SQUARELET_PATH to your Squarelet checkout",
+            code=1,
+        )
     c.run("docker compose build")
 
 

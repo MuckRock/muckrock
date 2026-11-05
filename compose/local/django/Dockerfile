@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ghostscript
 
 # set up makecert root CA
-RUN curl http://localhost/rootCA.pem > /usr/local/share/ca-certificates/rootCA.crt && update-ca-certificates
+COPY --from=squarelet_certs rootCA.pem /usr/local/share/ca-certificates/rootCA.crt
+RUN update-ca-certificates
 
 
 RUN apt-get update && apt-get install -y libsodium-dev ca-certificates

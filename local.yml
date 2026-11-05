@@ -9,7 +9,8 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-      network: host
+      additional_contexts:
+        squarelet_certs: ${SQUARELET_PATH:-../squarelet}/config/certs
     image: muckrock_local_django
     depends_on:
       - muckrock_redis
