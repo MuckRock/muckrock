@@ -15,8 +15,9 @@ import hmac
 import itertools
 import os
 import time
+from contextlib import contextmanager
 from datetime import date, datetime
-from io import StringIO
+from io import BytesIO, StringIO
 from unittest.mock import Mock, patch
 
 # Third Party
@@ -24,6 +25,7 @@ import boto3
 import pytz
 import requests
 import requests_mock
+from botocore.exceptions import ClientError
 from freezegun import freeze_time
 from moto import mock_aws
 
@@ -32,7 +34,7 @@ from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
 from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
-from muckrock.mailgun.utils import download_links
+from muckrock.mailgun.utils import download_links, note_failed_download
 from muckrock.mailgun.views import (
     _html_to_text,
     _looks_like_html,
@@ -41,7 +43,8 @@ from muckrock.mailgun.views import (
     opened,
     route_mailgun,
 )
-from muckrock.task.models import OrphanTask
+from muckrock.task.factories import FlaggedTaskFactory
+from muckrock.task.models import FlaggedTask, OrphanTask
 
 
 # pylint:disable=too-many-positional-arguments
@@ -607,19 +610,25 @@ class TestDownloadLinks(TestCase):
     LINK = "https://www.dropbox.com/scl/fo/abc/def?rlkey=xyz&dl=0"
     DOWNLOAD = "https://www.dropbox.com/scl/fo/abc/def?rlkey=xyz&dl=1"
 
+    def setUp(self):
+        self.uploads = {}
+        patch("muckrock.mailgun.utils.smart_open", new=self.fake_smart_open).start()
+        self.note = patch("muckrock.mailgun.utils.note_failed_download").start()
+        self.addCleanup(patch.stopall)
+
+    @contextmanager
+    def fake_smart_open(self, path, *_args, **_kwargs):
+        """Record what would be written to S3, keeping it only on a clean exit"""
+        buffer = BytesIO()
+        yield buffer
+        self.uploads[path] = buffer.getvalue()
+
     def make_comm(self, text=None):
-        """Mock communication whose attach_file records what was saved"""
-        comm = Mock(pk=1, communication=text or f"Records here: {self.LINK}")
-        comm.saved = {}
-
-        def capture(file_=None, name=None):
-            comm.saved[name] = file_.read()
-
-        comm.attach_file.side_effect = capture
-        return comm
+        """Mock communication with the given text"""
+        return Mock(pk=1, communication=text or f"Records here: {self.LINK}")
 
     def test_downloads_and_attaches(self):
-        """A file under the cap is streamed and attached with its filename"""
+        """A file under the cap is streamed to S3 and attached by path"""
         comm = self.make_comm()
         with requests_mock.Mocker() as mock_requests:
             mock_requests.get(
@@ -631,7 +640,10 @@ class TestDownloadLinks(TestCase):
                 },
             )
             download_links(comm)
-        assert comm.saved == {"records.zip": b"zip bytes"}
+        assert list(self.uploads.values()) == [b"zip bytes"]
+        path = list(self.uploads)[0].split("/", 3)[3]
+        comm.attach_file.assert_called_once_with(path=path, name="records.zip")
+        self.note.assert_not_called()
 
     def test_content_length_over_cap(self):
         """A Content-Length over the cap is skipped before reading the body"""
@@ -641,25 +653,31 @@ class TestDownloadLinks(TestCase):
                 self.DOWNLOAD, content=b"x" * 10, headers={"Content-Length": "1000"}
             )
             download_links(comm)
+        assert not self.uploads
         comm.attach_file.assert_not_called()
+        self.note.assert_called_once()
 
     def test_stream_over_cap(self):
-        """A body over the cap with no Content-Length is skipped mid-stream"""
+        """A body over the cap with no Content-Length is aborted mid-stream"""
         comm = self.make_comm()
         with requests_mock.Mocker() as mock_requests:
             mock_requests.get(self.DOWNLOAD, content=b"x" * 200)
             download_links(comm)
+        assert not self.uploads
         comm.attach_file.assert_not_called()
+        self.note.assert_called_once()
 
     def test_deadline_exceeded(self):
-        """A download running past the deadline is skipped"""
+        """A download running past the deadline is aborted mid-stream"""
         comm = self.make_comm()
         with requests_mock.Mocker() as mock_requests, patch(
             "muckrock.mailgun.utils.time.monotonic", side_effect=itertools.count(0, 500)
         ):
             mock_requests.get(self.DOWNLOAD, content=b"abc")
             download_links(comm)
+        assert not self.uploads
         comm.attach_file.assert_not_called()
+        self.note.assert_called_once()
 
     def test_http_error(self):
         """An HTTP error skips the link instead of attaching the error page"""
@@ -668,6 +686,7 @@ class TestDownloadLinks(TestCase):
             mock_requests.get(self.DOWNLOAD, status_code=404, content=b"Not Found")
             download_links(comm)
         comm.attach_file.assert_not_called()
+        self.note.assert_called_once()
 
     def test_connection_error(self):
         """A connection error skips the link instead of crashing"""
@@ -676,6 +695,19 @@ class TestDownloadLinks(TestCase):
             mock_requests.get(self.DOWNLOAD, exc=requests.exceptions.ConnectionError)
             download_links(comm)
         comm.attach_file.assert_not_called()
+        self.note.assert_called_once()
+
+    def test_storage_error(self):
+        """An S3 error skips the link and notes it instead of crashing"""
+        comm = self.make_comm()
+        error = ClientError({"Error": {"Code": "AccessDenied"}}, "UploadPart")
+        with requests_mock.Mocker() as mock_requests, patch(
+            "muckrock.mailgun.utils.smart_open", side_effect=error
+        ):
+            mock_requests.get(self.DOWNLOAD, content=b"abc")
+            download_links(comm)
+        comm.attach_file.assert_not_called()
+        self.note.assert_called_once()
 
     def test_no_links(self):
         """A communication with no Dropbox links makes no requests"""
@@ -683,3 +715,64 @@ class TestDownloadLinks(TestCase):
         with requests_mock.Mocker():
             download_links(comm)
         comm.attach_file.assert_not_called()
+        self.note.assert_not_called()
+
+
+@override_settings(MAX_LINK_DOWNLOAD_SIZE=100, CELERY_TASK_TIME_LIMIT=300)
+class TestDownloadLinksDatabase(TestCase):
+    """Tests for download_links against real communications, files and flags"""
+
+    LINK = "https://www.dropbox.com/scl/fo/abc/def?rlkey=xyz&dl=0"
+    DOWNLOAD = "https://www.dropbox.com/scl/fo/abc/def?rlkey=xyz&dl=1"
+
+    def setUp(self):
+        patch("muckrock.mailgun.utils.smart_open", new=self.fake_smart_open).start()
+        self.addCleanup(patch.stopall)
+        self.comm = FOIACommunicationFactory(communication=f"Records here: {self.LINK}")
+        self.flag = FlaggedTaskFactory(
+            foia=self.comm.foia,
+            category="download file",
+            text="A download link to Dropbox was found.  Please download the "
+            f"file(s) and attach them to the request:\n{self.LINK}",
+            note="staff note\n",
+        )
+
+    @contextmanager
+    def fake_smart_open(self, *_args, **_kwargs):
+        """Stand in for S3 so attach_file only records the path"""
+        yield BytesIO()
+
+    def test_attaches_by_path(self):
+        """A file under the cap is attached to the communication by its S3 path"""
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(
+                self.DOWNLOAD,
+                content=b"zip bytes",
+                headers={"Content-Disposition": 'attachment; filename="records.zip"'},
+            )
+            download_links(self.comm)
+        assert self.comm.files.count() == 1
+        assert self.comm.files.first().ffile.name.endswith("records.zip")
+        self.flag.refresh_from_db()
+        assert self.flag.note == "staff note\n"
+
+    def test_stream_over_cap_leaves_no_file(self):
+        """An aborted stream attaches nothing and notes the flag"""
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(self.DOWNLOAD, content=b"x" * 200)
+            download_links(self.comm)
+        assert self.comm.files.count() == 0
+        self.flag.refresh_from_db()
+        assert self.flag.note == (
+            "staff note\n"
+            f"Automatic download failed for {self.LINK} (exceeded 100 bytes)\n"
+        )
+
+    def test_note_skips_resolved_flag(self):
+        """A resolved flag is left alone and no new flag is created"""
+        self.flag.resolved = True
+        self.flag.save()
+        note_failed_download(self.comm, self.LINK, "boom")
+        self.flag.refresh_from_db()
+        assert self.flag.note == "staff note\n"
+        assert FlaggedTask.objects.count() == 1
