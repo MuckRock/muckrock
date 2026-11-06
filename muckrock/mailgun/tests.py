@@ -12,16 +12,20 @@ from django.urls import reverse
 # Standard Library
 import hashlib
 import hmac
+import itertools
 import os
 import time
+from contextlib import contextmanager
 from datetime import date, datetime
-from io import StringIO
+from io import BytesIO, StringIO
 from unittest.mock import Mock, patch
 
 # Third Party
 import boto3
 import pytz
+import requests
 import requests_mock
+from botocore.exceptions import ClientError
 from freezegun import freeze_time
 from moto import mock_aws
 
@@ -30,6 +34,7 @@ from muckrock.communication.models import EmailAddress, EmailError, EmailOpen
 from muckrock.core.test_utils import RunCommitHooksMixin
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.models import FOIACommunication
+from muckrock.mailgun.utils import download_links
 from muckrock.mailgun.views import (
     _html_to_text,
     _looks_like_html,
@@ -595,3 +600,120 @@ class TestMailgunHtmlBody(TestCase):
             "muckrock.mailgun.views.BeautifulSoup", side_effect=Exception("boom")
         ):
             assert _html_to_text(body) == body
+
+
+@override_settings(MAX_LINK_DOWNLOAD_SIZE=100, CELERY_TASK_TIME_LIMIT=300)
+class TestDownloadLinks(TestCase):
+    """Tests for downloading linked files from incoming mail, all or nothing"""
+
+    LINK = "https://www.dropbox.com/scl/fo/abc/def?rlkey=xyz&dl=0"
+    DOWNLOAD = "https://www.dropbox.com/scl/fo/abc/def?rlkey=xyz&dl=1"
+    LINK_2 = "https://www.dropbox.com/scl/fo/ghi/jkl?rlkey=xyz&dl=0"
+    DOWNLOAD_2 = "https://www.dropbox.com/scl/fo/ghi/jkl?rlkey=xyz&dl=1"
+
+    def setUp(self):
+        self.uploads = {}
+        patch("muckrock.mailgun.utils.smart_open", new=self.fake_smart_open).start()
+        self.storage = patch("muckrock.mailgun.utils.default_storage").start()
+        self.addCleanup(patch.stopall)
+
+    @contextmanager
+    def fake_smart_open(self, path, *_args, **_kwargs):
+        """Record what would be written to S3, keeping it only on a clean exit"""
+        buffer = BytesIO()
+        yield buffer
+        self.uploads[path] = buffer.getvalue()
+
+    def make_comm(self, text=None):
+        """Mock communication with the given text"""
+        return Mock(pk=1, communication=text or f"Records here: {self.LINK}")
+
+    def test_downloads_and_attaches(self):
+        """A file under the cap is streamed to S3 and attached by path"""
+        comm = self.make_comm()
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(
+                self.DOWNLOAD,
+                content=b"zip bytes",
+                headers={"Content-Disposition": 'attachment; filename="records.zip"'},
+            )
+            download_links(comm)
+        assert list(self.uploads.values()) == [b"zip bytes"]
+        comm.attach_file.assert_called_once()
+        assert comm.attach_file.call_args.kwargs["name"] == "records.zip"
+
+    def test_content_length_over_cap(self):
+        """A Content-Length over the cap is skipped before reading the body"""
+        comm = self.make_comm()
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(
+                self.DOWNLOAD, content=b"x" * 10, headers={"Content-Length": "1000"}
+            )
+            download_links(comm)
+        assert not self.uploads
+        comm.attach_file.assert_not_called()
+
+    def test_stream_over_cap(self):
+        """A body over the cap with no Content-Length is aborted mid-stream"""
+        comm = self.make_comm()
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(self.DOWNLOAD, content=b"x" * 200)
+            download_links(comm)
+        assert not self.uploads
+        comm.attach_file.assert_not_called()
+
+    def test_deadline_exceeded(self):
+        """A download running past the deadline is aborted mid-stream"""
+        comm = self.make_comm()
+        with requests_mock.Mocker() as mock_requests, patch(
+            "muckrock.mailgun.utils.time.monotonic", side_effect=itertools.count(0, 500)
+        ):
+            mock_requests.get(self.DOWNLOAD, content=b"abc")
+            download_links(comm)
+        assert not self.uploads
+        comm.attach_file.assert_not_called()
+
+    def test_http_error(self):
+        """An HTTP error attaches nothing instead of the error page"""
+        comm = self.make_comm()
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(self.DOWNLOAD, status_code=404, content=b"Not Found")
+            download_links(comm)
+        comm.attach_file.assert_not_called()
+
+    def test_connection_error(self):
+        """A connection error attaches nothing instead of crashing"""
+        comm = self.make_comm()
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(self.DOWNLOAD, exc=requests.exceptions.ConnectionError)
+            download_links(comm)
+        comm.attach_file.assert_not_called()
+
+    def test_storage_error(self):
+        """An S3 error attaches nothing instead of crashing"""
+        comm = self.make_comm()
+        error = ClientError({"Error": {"Code": "AccessDenied"}}, "UploadPart")
+        with requests_mock.Mocker() as mock_requests, patch(
+            "muckrock.mailgun.utils.smart_open", side_effect=error
+        ):
+            mock_requests.get(self.DOWNLOAD, content=b"abc")
+            download_links(comm)
+        comm.attach_file.assert_not_called()
+
+    def test_partial_failure_attaches_nothing(self):
+        """If any link fails, nothing is attached and earlier uploads are deleted"""
+        comm = self.make_comm(text=f"Part one: {self.LINK} Part two: {self.LINK_2}")
+        with requests_mock.Mocker() as mock_requests:
+            mock_requests.get(self.DOWNLOAD, content=b"first")
+            mock_requests.get(self.DOWNLOAD_2, status_code=404)
+            download_links(comm)
+        comm.attach_file.assert_not_called()
+        assert len(self.uploads) == 1
+        self.storage.delete.assert_called_once()
+
+    def test_no_links(self):
+        """A communication with no Dropbox links makes no requests"""
+        comm = self.make_comm(text="No links here")
+        with requests_mock.Mocker():
+            download_links(comm)
+        comm.attach_file.assert_not_called()

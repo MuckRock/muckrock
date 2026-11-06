@@ -389,7 +389,7 @@ def _handle_request(request, mail_id):
             email_comm.cc_emails.set(cc_emails)
             transaction.on_commit(lambda: RawEmail.objects.make(message_id))
             comm.process_attachments(request.FILES)
-            transaction.on_commit(lambda: download_links(comm.pk))
+            transaction.on_commit(lambda: download_links.delay(comm.pk))
 
             if foia.portal:
                 transaction.on_commit(lambda: foia.portal.receive_msg(comm))
