@@ -16,7 +16,11 @@ from muckrock.mailgun import utils
 logger = logging.getLogger(__name__)
 
 
-@shared_task(ignore_result=True, name="muckrock.mailgun.tasks.download_links")
+@shared_task(
+    ignore_result=True,
+    name="muckrock.mailgun.tasks.download_links",
+    soft_time_limit=int(settings.CELERY_TASK_TIME_LIMIT) - 30,
+)
 def download_links(comm_pk):
     """Download links from the communication"""
     if not settings.ENABLE_DOWNLOAD_LINKS:

@@ -3,6 +3,7 @@ Utilities for handling incoming mail
 """
 
 # Django
+from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
 
 # Standard Library
@@ -79,6 +80,22 @@ def stream_to_s3(response, path, start, deadline):
             file_.write(chunk)
 
 
+def download_link(communication, link, deadline):
+    """Stream one link to S3 and return its filename and S3 path"""
+    start = time.monotonic()
+    with requests.get(link, timeout=10, stream=True) as response:
+        response.raise_for_status()
+        length = response.headers.get("Content-Length", "")
+        if length.isdigit() and int(length) > settings.MAX_LINK_DOWNLOAD_SIZE:
+            raise DownloadSkipped(f"Content-Length {length} over cap")
+        _, params = parse_header(response.headers.get("content-disposition", ""))
+        name = params.get("filename", "Untitled")
+        path = get_path(name)
+        logger.info("[DL:%s] Saving file %s", communication.pk, name)
+        stream_to_s3(response, path, start, deadline)
+    return name, path
+
+
 def download_links(communication):
     """Download links from the communication, streaming each straight to S3"""
     # Half the task time limit, leaving room for other links
@@ -88,36 +105,24 @@ def download_links(communication):
 
     for downloader in downloaders:
         logger.info("[DL:%s] Looking for %s links", communication.pk, downloader.name)
-        for found in downloader.p_link.findall(communication.communication):
+        links = downloader.p_link.findall(communication.communication)
+        for index, found in enumerate(links):
             link = downloader.preprocess(found)
             logger.info("[DL:%s] Trying to download %s", communication.pk, link)
-            start = time.monotonic()
             try:
-                with requests.get(link, timeout=10, stream=True) as response:
-                    response.raise_for_status()
-                    length = response.headers.get("Content-Length", "")
-                    if (
-                        length.isdigit()
-                        and int(length) > settings.MAX_LINK_DOWNLOAD_SIZE
-                    ):
-                        logger.warning(
-                            "[DL:%s] Skipping %s, Content-Length %s over cap",
-                            communication.pk,
-                            link,
-                            length,
-                        )
-                        note_failed_download(
-                            communication, found, f"Content-Length {length} over cap"
-                        )
-                        continue
-                    _, params = parse_header(
-                        response.headers.get("content-disposition", "")
-                    )
-                    name = params.get("filename", "Untitled")
-                    path = get_path(name)
-                    logger.info("[DL:%s] Saving file %s", communication.pk, name)
-                    stream_to_s3(response, path, start, deadline)
+                name, path = download_link(communication, link, deadline)
                 communication.attach_file(path=path, name=name)
+            except SoftTimeLimitExceeded:
+                logger.error(
+                    "[DL:%s] Task ran out of time with %s links left",
+                    communication.pk,
+                    len(links) - index,
+                )
+                for remaining in links[index:]:
+                    note_failed_download(
+                        communication, remaining, "task ran out of time"
+                    )
+                return
             except DownloadSkipped as exc:
                 logger.warning("[DL:%s] Skipping %s, %s", communication.pk, link, exc)
                 note_failed_download(communication, found, exc)
