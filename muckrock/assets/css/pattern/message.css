@@ -1,0 +1,142 @@
+.messages {
+    margin-bottom: 0;
+    position: fixed;
+    width: 100%;
+    z-index: 500;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--color-grey-7);
+    color: var(--color-black);
+    .symbol {
+        background: var(--color-black);
+        path, rect, circle {
+            fill: var(--color-black);
+        }
+    }
+    .symbol {
+        flex: 0 0 2.75em;
+        text-align: left;
+        svg {
+            width: 2.75em;
+            height: 2.75em;
+            padding: calc(var(--vr) * 0.5);
+            vertical-align: middle;
+        }
+    }
+    .text {
+        flex: 1 1 auto;
+        padding: calc(var(--vr) * 0.5);
+    }
+    .dismiss {
+        flex: 0 0 auto;
+        align-self: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: calc(var(--vr) * 0.5);
+        opacity: 0.6;
+        &:hover {
+            opacity: 1;
+        }
+        svg {
+            display: block;
+            width: 1em;
+            height: 1em;
+            fill: currentColor;
+        }
+    }
+    @media screen and (min-width: 500px) {
+        flex-direction: row;
+        .symbol {
+            text-align: center;
+        }
+        &.small {
+            flex-direction: column;
+            .symbol {
+                text-align: left;
+            }
+        }
+    }
+}
+
+.message.info {
+    background: var(--color-blue-light);
+    color: var(--color-blue-dark);
+    .symbol {
+        background: var(--color-blue);
+        path, rect, circle {
+            fill: var(--color-blue-dark);
+        }
+    }
+}
+
+.message.success {
+    background: var(--color-green-light);
+    color: var(--color-green-dark);
+    .symbol {
+        background: var(--color-green);
+        path, rect, circle {
+            fill: var(--color-green-dark);
+        }
+    }
+}
+
+.message.warning {
+    background: var(--color-yellow-light);
+    color: var(--color-yellow-dark);
+    .symbol {
+        background: var(--color-yellow);
+        path, rect, circle {
+            fill: var(--color-yellow-dark);
+        }
+    }
+}
+
+.message.error {
+    background: var(--color-red-light);
+    color: var(--color-red-dark);
+    .symbol {
+        background: var(--color-red);
+        path, rect, circle {
+            fill: var(--color-red-dark);
+        }
+    }
+}
+
+@keyframes message-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes message-dismiss {
+    from {
+        opacity: 1;
+        max-height: 10rem;
+        margin-bottom: 0;
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+        margin-bottom: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+}
+
+.message--fade-in {
+    animation: message-fade-in 0.3s ease-out;
+}
+
+.message--dismiss {
+    animation: message-dismiss 0.4s ease-in-out forwards;
+}

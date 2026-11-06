@@ -25,7 +25,7 @@ ul.svelte-18k9wlv {
   padding: 0.625rem 0.75rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  background: white;
+  background: #ffffff;
   cursor: pointer;
   font-size: 0.875rem;
   font-family: inherit;
@@ -38,7 +38,7 @@ ul.svelte-18k9wlv {
 
 .get-help__category-other.svelte-18k9wlv {
   font-style: italic;
-  color: #666;
+  color: #666666;
 }
 
 .get-help__contact-form.svelte-11pgd15 {
@@ -51,7 +51,7 @@ textarea.svelte-11pgd15 {
   width: 100%;
   margin: 0;
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   border-radius: 4px;
   font-family: inherit;
   font-size: 0.875rem;
@@ -64,13 +64,13 @@ textarea.svelte-11pgd15 {
 }
 
 .get-help__contact-form-error.svelte-11pgd15 {
-  color: #b00;
+  color: #bb0000;
   font-size: 0.8125rem;
   margin: 0;
 }
 
 .get-help__problem-item.svelte-ea1jvn {
-  background-color: #fff;
+  background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
 }
@@ -186,7 +186,7 @@ h3.svelte-c21tj0 {
   appearance: none;
   border: none;
   border-radius: 4px;
-  background-color: transparent;
+  background-color: #00000000;
   color: #4582cc;
   font-weight: 500;
   align-self: flex-start;

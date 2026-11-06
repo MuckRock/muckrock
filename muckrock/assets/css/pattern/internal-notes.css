@@ -1,0 +1,95 @@
+/* Private staff notes about a user */
+/* Shown on profile, composer detail and multirequest task pages */
+
+.internal-notes {
+    margin: var(--vr) 0;
+    padding: calc(var(--vr) * 0.5) var(--vr);
+    border-left: 4px solid var(--color-red);
+    background-color: var(--color-grey-8);
+
+    h3 small {
+        display: block;
+        color: var(--color-grey-3);
+        font-weight: normal;
+    }
+
+    .internal-notes__list {
+        margin: 0;
+        padding: 0;
+    }
+
+    .internal-notes__empty {
+        color: var(--color-grey-3);
+    }
+
+    /* set the add form apart from the last note's Edit button */
+    .internal-notes__add {
+        margin-top: var(--vr);
+        border-top: 1px solid var(--color-grey-7);
+        padding-top: calc(var(--vr) * 0.5);
+
+        /* the button closes the form again, so it says so while it is open */
+        .internal-notes__label-open {
+            display: none;
+        }
+
+        &[open] {
+            .internal-notes__label-closed {
+                display: none;
+            }
+
+            .internal-notes__label-open {
+                display: inline;
+            }
+        }
+    }
+
+    .internal-note {
+        padding: calc(var(--vr) * 0.5) 0;
+        border-bottom: 1px solid var(--color-grey-7);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .internal-note__meta {
+        margin-bottom: calc(var(--vr) * 0.25);
+        color: var(--color-grey-3);
+        font-size: .875em;
+
+        > * {
+            margin-right: calc(var(--vr) * 0.5);
+        }
+    }
+
+    .internal-note__by {
+        font-weight: bold;
+        color: var(--color-black);
+    }
+
+    .internal-note__category,
+    .internal-note__warning {
+        padding: 0 calc(var(--vr) * 0.25);
+        border-radius: 2px;
+        background-color: var(--color-grey-7);
+    }
+
+    .internal-note__warning {
+        background-color: var(--color-red-light);
+        color: var(--color-red-dark);
+    }
+
+    .internal-note--warning .internal-note__text {
+        font-weight: bold;
+    }
+
+    /* the disclosure triangle would show up inside the button */
+    summary.button {
+        list-style: none;
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+    }
+}

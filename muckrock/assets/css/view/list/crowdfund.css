@@ -1,0 +1,38 @@
+.crowdfund-list {
+    list-style-type: none;
+    padding-left: 0;
+    .crowdfund {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-bottom: var(--vr);
+        border: var(--border-width) solid var(--color-grey);
+        border-radius: var(--border-radius);
+        .left, .right {
+            margin-bottom: 0;
+            padding: var(--vr);
+        }
+        .left {
+            flex: 1;
+        }
+        .right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-top: 1px solid var(--color-grey);
+            p {
+                margin-bottom: 0;
+            }
+        }
+        @media screen and (min-width: 500px) {
+            flex-direction: row;
+            .right {
+                border-top: none;
+                border-left: 1px solid var(--color-grey);
+            }
+            .view {
+                font-size: var(--size-4);
+            }
+        }
+    }
+}

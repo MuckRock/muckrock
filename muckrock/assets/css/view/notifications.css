@@ -1,0 +1,35 @@
+.notifications__list {
+    border: var(--border-width) solid var(--color-grey);
+}
+
+.notifications__header {
+    display: flex;
+    justify-content: space-between;
+    h1 {
+        margin-bottom: 0;
+    }
+}
+
+.notifications__list li {
+    padding: calc(var(--vr) * 0.5);
+    background: var(--color-white-pure);
+    border-bottom: 1px solid var(--color-grey);
+    &:last-child {
+        border-bottom: 0;
+    }
+    &.unread {
+        background: var(--color-blue-light-lighten-10);
+    }
+}
+
+.notifications--empty {
+    text-align: center;
+    padding: var(--vr);
+    .icon {
+        height: 4em;
+        width: 4em;
+        path, polygon, rect, circle {
+            fill: var(--color-grey);
+        }
+    }
+}

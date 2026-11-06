@@ -1,0 +1,70 @@
+.exemption-browser {
+    .exemption-search {
+        border: var(--border-width) solid var(--color-grey);
+        display: flex;
+        input {
+            flex: 4 1 auto;
+            border-radius: 0;
+            border: none;
+        }
+        .button {
+            flex: 1 1 auto;
+        }
+    }
+}
+
+.exemption__empty, .exemption__results--loading {
+    padding: calc(var(--vr) * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: var(--vr);
+    }
+}
+.exemption__empty, .exemption__results--loading {
+    border: var(--border-width) solid var(--color-grey);
+    border-top: none;
+    background: var(--color-grey-7);
+    text-align: center;
+}
+
+.exemption__list__item {
+    border-top: none;
+}
+
+.exemption__list__item, .exemption__detail {
+    padding: calc(var(--vr) * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: var(--vr);
+    }
+}
+.exemption__list__item, .exemption__detail {
+    border-color: var(--color-grey);
+}
+
+.exemption__list__item {
+    cursor: default;
+    &:hover {
+        background: var(--color-blue);
+        color: var(--color-white);
+        .link {
+            color: var(--color-white);
+        }
+    }
+}
+
+.exemption__detail__appeal {
+    .button {
+        display: block;
+        width: 100%;
+    }
+}
+
+.exemption__form {
+    footer {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.exemption__backButton {
+    text-align: left;
+}

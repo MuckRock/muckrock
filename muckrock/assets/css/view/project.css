@@ -1,0 +1,315 @@
+.create.project {
+    max-width: 40em;
+    margin: 0 auto var(--vr);
+}
+.publish.project {
+    max-width: 40em;
+    margin: 0 auto var(--vr);
+}
+.project__update {
+    .project__update__header {
+        display: flex;
+        justify-content: space-between;
+        padding: calc(var(--vr) * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: var(--vr);
+        }
+    }
+    .project__update__header {
+        margin-bottom: 0;
+        p {
+            margin-bottom: 0;
+        }
+    
+    }
+    .form {
+        padding-top: 0;
+    }
+    .switch, .wysiwyg-toggle__label {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .description textarea {
+        min-height: 20em;
+        font-family: var(--monospace);
+        font-size: var(--size-2);
+    }
+    .description p {
+        max-width: 40em;
+    }
+}
+
+.project {
+    .stats {
+        .stat {
+            font-size: var(--size-2);
+            line-height: var(--lh);
+        }
+        .value {
+            display: block;
+            font-weight: var(--bold);
+            font-size: var(--size-4);
+            line-height: var(--lh);
+        }
+    }
+}
+
+.project.detail {
+    padding: calc(0 * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: 0;
+    }
+
+    .project__image {
+        min-height: 45vh;
+        margin-bottom: 0;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--color-grey-5);
+    }
+
+    .prompt, .overview, .objects {
+        margin: 0 auto var(--vr);
+    }
+
+    .prompt {
+        padding: calc(var(--vr) * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: var(--vr);
+        }
+    }
+    .prompt {
+        box-shadow: 0px 4px 8px 0px var(--color-grey);
+        border: 1px solid var(--color-blue);
+        background: var(--color-blue-light);
+        color: var(--color-blue-dark);
+        font-weight: var(--bold);
+        ol {
+            padding-left: var(--vr);
+        }
+        a {
+            text-decoration: underline;
+        }
+        .strikethrough {
+            text-decoration: line-through;
+        }
+    
+    }
+
+    .overview {
+        display: flex;
+        flex-flow: wrap;
+        padding: calc(var(--vr) * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: var(--vr);
+        }
+    }
+    .overview {
+        max-width: 60em;
+        .overview__main {
+            flex: 2 1 20em;
+            min-width: 0;
+            margin-bottom: var(--vr);
+        }
+        .overview__aside {
+            flex: 1 1 10em;
+            min-width: 0;
+            @media (min-width: 33.25em) {
+                padding: 0 var(--vr);
+            }
+        }
+        .title {
+            @media screen and (min-width: 500px) {
+                font-size: var(--size-9);
+                line-height: var(--lh);
+            }
+        }
+        summary {
+            font-size: var(--size-4);
+            line-height: var(--lh);
+        }
+        stat a {
+            color: var(--color-black);
+            &:hover {
+                color: var(--color-blue);
+            }
+        }
+        .contributor {
+            margin-bottom: calc(var(--vr) * 0.25);
+            border: var(--border-width) solid var(--color-grey);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            a, img {
+                display: block;
+            }
+            .info {
+                flex: 1 1 auto;
+                padding: 0 calc(var(--vr) * 0.25);
+            }
+            a .icon {
+                path, polygon, rect, circle {
+                    fill: var(--color-blue);
+                }
+                &:hover {
+                    path, polygon, rect, circle {
+                        fill: var(--color-black);
+                    }
+                }
+            }
+        }
+    
+    }
+
+    .objects {
+        display: flex;
+        flex-flow: wrap row;
+        padding: calc(var(--vr) * 0.5);
+        @media screen and (min-width: 500px) {
+            padding: var(--vr);
+        }
+    }
+    .objects {
+        max-width: 60em;
+        .articles, .requests {
+            flex: 1 1 20em;
+        }
+        .articles {
+            margin-right: var(--vr);
+        }
+    
+    }
+}
+
+.project.component {
+  width: 100%;
+  background: var(--color-white-pure);
+  border: 1px solid var(--color-grey);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+.project.component .grid__column {
+  padding: 0;
+}
+.project.component .grid__column.third.project__header {
+  flex-basis: 10em;
+}
+.project__header {
+  flex-basis: 10em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 10em;
+  margin-bottom: 0;
+  background-position: center;
+  background-size: cover;
+  background-color: var(--color-blue-light);
+  background-blend-mode: multiply;
+}
+.project__header__wrapper {
+  flex: 1 1 100%;
+  min-height: 100%;
+  width: 100%;
+  padding: var(--vr);
+  color: var(--color-white);
+  background: var(--color-black);
+  background: rgba(51, 60, 71, .75); /* $color-black at 75% */
+  transition: background .25s linear;
+  &:hover {
+    color: var(--color-white);
+  }
+}
+.project__crowdfund {
+  padding: var(--vr) var(--vr) 0;
+  .stat {
+    vertical-align: top;
+    margin-right: var(--vr);
+  }
+}
+.project__overview {
+  padding: var(--vr);
+  summary:empty {
+    display: none;
+  }
+}
+
+/*
+.project.component {
+    flex: 1 1 30em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    background: $color-white-pure;
+    border: 1px solid $color-grey;
+    border-radius: $border-radius;
+    overflow: hidden;
+    .project-header {
+        flex: 0 1 100%;
+        display: flex;
+        min-height: 15em;
+        margin-bottom: 0;
+        background-position: center;
+        background-size: cover;
+        background-color: $color-blue-dark;
+        .project-header-wrapper {
+            display: inline-flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 100%;
+            width: 100%;
+            padding: $vr;
+            background: rgb(52, 61, 71);
+            background: rgba(52, 61, 71, .8);
+            &:hover {
+                background: rgba(52, 61, 71, .6);
+            }
+            transition: background .25s linear;
+        }
+        h2 {
+            max-width: 20em;
+            font-size: $size-6;
+            line-height: $lh;
+            @media screen and (min-width: 500px) {
+                font-size: $size-8;
+                line-height: $lh;
+            }
+        }
+        a {
+            color: $color-white;
+        }
+    }
+    .overview, .details {
+        padding: $vr/2;
+        @media screen and (min-width: 500px) {
+            padding: $vr;
+        }
+    }
+    .overview {
+        flex: 1 1 20em;
+        margin-bottom: 0;
+        h2 a, .stat a {
+            color: $color-black;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+        .more {
+            font-weight: $bold;
+        }
+    }
+    .details {
+        flex: 1 1 10em;
+        .crowdfund {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            .progress {
+                flex: 0 1 100%;
+            }
+            .stats, .button {
+                flex: 1 1 auto;
+            }
+        }
+    }
+}
+*/
