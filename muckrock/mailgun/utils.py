@@ -3,8 +3,9 @@ Utilities for handling incoming mail
 """
 
 # Django
-from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.db import transaction
 
 # Standard Library
 import logging
@@ -19,7 +20,6 @@ from smart_open.smart_open_lib import smart_open
 # MuckRock
 from muckrock.core.utils import parse_header
 from muckrock.foia.models.file import get_path
-from muckrock.task.models import FlaggedTask
 
 logger = logging.getLogger(__name__)
 
@@ -40,30 +40,6 @@ class DownloadSkipped(Exception):
     """Raised when a download exceeds the size cap or the deadline"""
 
 
-def note_failed_download(communication, link, reason):
-    """Note a failed link on the request's open download-file flag"""
-    task = (
-        FlaggedTask.objects.filter(
-            foia=communication.foia,
-            category="download file",
-            resolved=False,
-            text__contains=link,
-        )
-        .order_by("-date_created")
-        .first()
-    )
-    if task is None:
-        logger.error(
-            "[DL:%s] Download of %s failed and no open flag to note it on (%s)",
-            communication.pk,
-            link,
-            reason,
-        )
-        return
-    task.note += f"Automatic download failed for {link} ({reason})\n"
-    task.save(update_fields=["note"])
-
-
 def stream_to_s3(response, path, start, deadline):
     """Stream a response body to S3, aborting the upload if over the cap or deadline"""
     full_path = f"s3://{settings.AWS_MEDIA_BUCKET_NAME}/{path}"
@@ -80,9 +56,8 @@ def stream_to_s3(response, path, start, deadline):
             file_.write(chunk)
 
 
-def download_link(communication, link, deadline):
+def download_link(communication, link, start, deadline):
     """Stream one link to S3 and return its filename and S3 path"""
-    start = time.monotonic()
     with requests.get(link, timeout=10, stream=True) as response:
         response.raise_for_status()
         length = response.headers.get("Content-Length", "")
@@ -96,41 +71,49 @@ def download_link(communication, link, deadline):
     return name, path
 
 
+def delete_downloaded(communication, downloaded):
+    """Remove files already uploaded to S3 when the batch is abandoned"""
+    for _, path in downloaded:
+        try:
+            default_storage.delete(path)
+        except (BotoCoreError, ClientError) as exc:
+            logger.error("[DL:%s] Could not delete %s: %s", communication.pk, path, exc)
+
+
 def download_links(communication):
-    """Download links from the communication, streaming each straight to S3"""
-    # Half the task time limit, leaving room for other links
+    """Download all links in the communication, attaching them only if all succeed"""
+    # One deadline for the whole batch, half the task time limit
     deadline = int(settings.CELERY_TASK_TIME_LIMIT) / 2
+    start = time.monotonic()
     downloaders = [DropboxDownloader]
+    downloaded = []
+    current = None
     logger.info("Trying to download links for communication %s", communication.pk)
 
-    for downloader in downloaders:
-        logger.info("[DL:%s] Looking for %s links", communication.pk, downloader.name)
-        links = downloader.p_link.findall(communication.communication)
-        for index, found in enumerate(links):
-            link = downloader.preprocess(found)
-            logger.info("[DL:%s] Trying to download %s", communication.pk, link)
-            try:
-                name, path = download_link(communication, link, deadline)
-                communication.attach_file(path=path, name=name)
-            except SoftTimeLimitExceeded:
-                logger.error(
-                    "[DL:%s] Task ran out of time with %s links left",
-                    communication.pk,
-                    len(links) - index,
+    try:
+        for downloader in downloaders:
+            for found in downloader.p_link.findall(communication.communication):
+                current = downloader.preprocess(found)
+                logger.info("[DL:%s] Trying to download %s", communication.pk, current)
+                downloaded.append(
+                    download_link(communication, current, start, deadline)
                 )
-                for remaining in links[index:]:
-                    note_failed_download(
-                        communication, remaining, "task ran out of time"
-                    )
-                return
-            except DownloadSkipped as exc:
-                logger.warning("[DL:%s] Skipping %s, %s", communication.pk, link, exc)
-                note_failed_download(communication, found, exc)
-            except requests.exceptions.RequestException as exc:
-                logger.info("[DL:%s] Error %s", communication.pk, exc)
-                note_failed_download(communication, found, exc)
-            except (BotoCoreError, ClientError) as exc:
-                logger.error(
-                    "[DL:%s] Storage error saving %s: %s", communication.pk, link, exc
-                )
-                note_failed_download(communication, found, f"storage error: {exc}")
+    except (DownloadSkipped, requests.exceptions.RequestException) as exc:
+        logger.warning(
+            "[DL:%s] Attaching nothing, %s failed: %s", communication.pk, current, exc
+        )
+        delete_downloaded(communication, downloaded)
+        return
+    except (BotoCoreError, ClientError) as exc:
+        logger.error(
+            "[DL:%s] Attaching nothing, storage error on %s: %s",
+            communication.pk,
+            current,
+            exc,
+        )
+        delete_downloaded(communication, downloaded)
+        return
+
+    with transaction.atomic():
+        for name, path in downloaded:
+            communication.attach_file(path=path, name=name)
