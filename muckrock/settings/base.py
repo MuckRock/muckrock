@@ -1021,6 +1021,9 @@ MAX_LINK_DOWNLOAD_SIZE = int(
     os.environ.get("MAX_LINK_DOWNLOAD_SIZE", 500 * 1024 * 1024)
 )
 
+# Automatically download files from Dropbox links in incoming mail
+ENABLE_DOWNLOAD_LINKS = boolcheck(os.environ.get("ENABLE_DOWNLOAD_LINKS", True))
+
 # APIv1 Killswitch
 ENABLE_API_V1 = boolcheck(os.environ.get("ENABLE_API_V1", True))
 
