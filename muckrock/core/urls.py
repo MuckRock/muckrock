@@ -41,7 +41,7 @@ from muckrock.core.views import handler500  # pylint: disable=unused-import
 from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.foia.views.communications import FOIACommunicationDirectAgencyView
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
-from muckrock.news.sitemap import ArticleSitemap
+from muckrock.news.sitemap import ArticleNewsSitemap, ArticleSitemap
 from muckrock.project.sitemap import ProjectSitemap
 
 admin.site.index_template = "admin/custom_index.html"
@@ -54,6 +54,8 @@ sitemaps = {
     "Project": ProjectSitemap,
     "Flatpages": FlatPageSitemap,
 }
+
+news_sitemaps = {"articles": ArticleNewsSitemap}
 
 router = DefaultRouter()
 router.register(
@@ -193,14 +195,25 @@ urlpatterns = [
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),
-    re_path(r"^news-sitemaps/", include("news_sitemaps.urls")),
+    re_path(
+        r"^news-sitemaps/index\.xml$",
+        django.contrib.sitemaps.views.index,
+        {"sitemaps": news_sitemaps, "sitemap_url_name": "news-sitemap"},
+        name="news-sitemap-index",
+    ),
+    re_path(
+        r"^news-sitemaps/(?P<section>.+)\.xml$",
+        django.contrib.sitemaps.views.sitemap,
+        {"sitemaps": news_sitemaps, "template_name": "news/sitemap.xml"},
+        name="news-sitemap",
+    ),
     re_path(r"^__debug__/", include(debug_toolbar.urls)),
     re_path(
         r"^donate/thanks/$", views.DonationThanksView.as_view(), name="donate-thanks"
     ),
     re_path(r"^landing/$", views.LandingView.as_view(), name="landing"),
     re_path(r"^hijack/", include("hijack.urls")),
-    re_path(r"^opensearch/", include("opensearch.urls")),
+    path("opensearch/opensearch.xml", views.opensearch, name="opensearch"),
     re_path(
         r"^election/$",
         RedirectView.as_view(url=settings.SQUARELET_URL + "/election-hub/"),

@@ -1,5 +1,3 @@
-django_news_sitemaps @ git+https://github.com/theatlantic/django-news-sitemaps.git@d965096f467360b3f715ddd18252fe92a5958322 # For generating news sitemaps (django3x branch)
-django-opensearch @ git+https://github.com/MuckRock/django-opensearch.git@7358c925021869c1b01f50debd4de70c08e4ad02 # for opensearch.xml (master branch)
 govqa @ git+https://github.com/MuckRock/govqa-py@84d08f5bfbb7a7ed163dc7a36951fdf9c3760183 # for govqa integration (main branch)
 aiohttp
 baml-py # For using gloo to use ChatGPT
@@ -79,4 +77,3 @@ stripe # Stripe payment processor integration
 thefuzz # fuzzy string matching for agency import and dedupe
 tiktoken # Used by gloo
 zenpy # library for zendesk API
-zipstream # Write zip files streamingly

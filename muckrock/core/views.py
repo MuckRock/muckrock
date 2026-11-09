@@ -421,6 +421,16 @@ def homepage(request):
     return render(request, "homepage-2025.html", context)
 
 
+def opensearch(request):
+    """OpenSearch description, so browsers can offer MuckRock as a search engine"""
+    return render(
+        request,
+        "opensearch.xml",
+        {"search_url": request.build_absolute_uri(reverse("search"))},
+        content_type="application/opensearchdescription+xml",
+    )
+
+
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""

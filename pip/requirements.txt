@@ -110,8 +110,6 @@ django==5.2.19
     #   django-filter
     #   django-hijack
     #   django-localflavor
-    #   django-news-sitemaps
-    #   django-opensearch
     #   django-phonenumber-field
     #   django-redis
     #   django-reversion
@@ -159,10 +157,6 @@ django-ipware==2.1.0
 django-localflavor==3.1
     # via -r pip/requirements.in
 django-mathfilters==0.4.0
-    # via -r pip/requirements.in
-django-news-sitemaps @ git+https://github.com/theatlantic/django-news-sitemaps.git@d965096f467360b3f715ddd18252fe92a5958322
-    # via -r pip/requirements.in
-django-opensearch @ git+https://github.com/MuckRock/django-opensearch.git@7358c925021869c1b01f50debd4de70c08e4ad02
     # via -r pip/requirements.in
 django-phonenumber-field==6.0.0
     # via -r pip/requirements.in
@@ -543,6 +537,4 @@ wrapt==1.17.2
 yarl==1.25.1
     # via aiohttp
 zenpy==2.0.47
-    # via -r pip/requirements.in
-zipstream==1.1.4
     # via -r pip/requirements.in

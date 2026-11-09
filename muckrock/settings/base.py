@@ -262,7 +262,6 @@ INSTALLED_APPS = (
     "gunicorn",
     "localflavor",
     "mathfilters",
-    "news_sitemaps",
     "rest_framework",
     "rest_framework.authtoken",
     "reversion",
@@ -275,7 +274,6 @@ INSTALLED_APPS = (
     "django_hosts",
     "hijack",
     "django_filters",
-    "opensearch",
     "constance",
     "constance.backends.database",
     "django_extensions",
@@ -579,9 +577,6 @@ LOB_BANK_ACCOUNT_ID = os.environ.get("LOB_BANK_ACCOUNT_ID")
 
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 
-PUBLICATION_NAME = "MuckRock"
-PUBLICATION_TIME_ZONE = "-05:00"
-
 url = urllib.parse.urlparse(
     os.environ.get("DATABASE_URL", "postgres://vagrant@localhost/muckrock")
 )
@@ -770,10 +765,6 @@ ALLOWED_FILE_EXTS = [
 PHONENUMBER_DB_FORMAT = "INTERNATIONAL"
 PHONENUMBER_DEFAULT_REGION = "US"
 PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
-
-OPENSEARCH_CONTACT_EMAIL = "mitch@muckrock.com"
-OPENSEARCH_SHORT_NAME = "MuckRock"
-OPENSEARCH_DESCRIPTION = "Search MuckRock for public documents and news"
 
 # for generating pdfs using FPDF
 FONT_PATH = "/usr/share/fonts/truetype/dejavu/"

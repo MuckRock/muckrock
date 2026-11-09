@@ -8,10 +8,12 @@ from django.urls import reverse
 from django.utils import timezone
 
 # Standard Library
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 # Third Party
 import pytz
+from freezegun import freeze_time
 
 # MuckRock
 from muckrock.core.factories import ArticleFactory, ProjectFactory, UserFactory
@@ -233,3 +235,53 @@ class TestNewsArticleViews(TestCase):
         assert (
             response.status_code == 403
         ), "The server should return a 403 Forbidden error code."
+
+
+@freeze_time("2026-11-05 12:00:00")
+class TestNewsSitemap(TestCase):
+    """Google News sitemap"""
+
+    ns = {
+        "s": "http://www.sitemaps.org/schemas/sitemap/0.9",
+        "news": "http://www.google.com/schemas/sitemap-news/0.9",
+    }
+
+    def setUp(self):
+        self.recent = ArticleFactory(
+            title="Courts & <Cops>",
+            publish=True,
+            pub_date=datetime(2026, 11, 4, 14, 30, 15, 123456, tzinfo=pytz.utc),
+        )
+        ArticleFactory(publish=True, pub_date=datetime(2026, 11, 1, tzinfo=pytz.utc))
+        ArticleFactory(publish=False, pub_date=datetime(2026, 11, 4, tzinfo=pytz.utc))
+
+    def test_lists_only_articles_published_in_the_last_two_days(self):
+        response = self.client.get("/news-sitemaps/articles.xml")
+
+        assert response.status_code == 200
+        urls = ET.fromstring(response.content).findall("s:url", self.ns)
+        assert [u.find("s:loc", self.ns).text for u in urls] == [
+            "http://example.com" + self.recent.get_absolute_url()
+        ]
+        news = urls[0].find("news:news", self.ns)
+        assert news.find("news:title", self.ns).text == "Courts & <Cops>"
+        assert news.find("news:publication/news:name", self.ns).text == "MuckRock"
+        assert news.find("news:publication/news:language", self.ns).text == "en"
+        assert (
+            news.find("news:publication_date", self.ns).text
+            == "2026-11-04T09:30:15-05:00"
+        )
+
+    def test_index_links_to_the_articles_sitemap(self):
+        response = self.client.get("/news-sitemaps/index.xml")
+
+        assert response.status_code == 200
+        locs = ET.fromstring(response.content).findall("s:sitemap/s:loc", self.ns)
+        assert [loc.text for loc in locs] == [
+            "http://example.com/news-sitemaps/articles.xml"
+        ]
+
+    def test_unknown_section_is_not_found(self):
+        response = self.client.get("/news-sitemaps/nope.xml")
+
+        assert response.status_code == 404
