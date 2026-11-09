@@ -1,11 +1,11 @@
 django_news_sitemaps @ git+https://github.com/theatlantic/django-news-sitemaps.git@d965096f467360b3f715ddd18252fe92a5958322 # For generating news sitemaps (django3x branch)
 django-opensearch @ git+https://github.com/MuckRock/django-opensearch.git@7358c925021869c1b01f50debd4de70c08e4ad02 # for opensearch.xml (master branch)
-govqa @ git+https://github.com/MuckRock/govqa-py@bab2a8803926e4347a9be3ba43b818368926f47c # for govqa integration (main branch)
+govqa @ git+https://github.com/MuckRock/govqa-py@84d08f5bfbb7a7ed163dc7a36951fdf9c3760183 # for govqa integration (main branch)
 aiohttp
 baml-py # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
 boto3 # Used to access AWS
-celery # Used to run async tasks
+celery[redis] # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 cryptography==50.0.0 # Used by token handling libraries
 daily-active-users # Log daily active users

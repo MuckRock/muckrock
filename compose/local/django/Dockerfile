@@ -60,8 +60,6 @@ RUN curl https://cli-assets.heroku.com/install.sh | sh
 COPY ./pip /pip
 #RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
 #RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
-# Update setuptools
-RUN pip install --upgrade setuptools==80.9.0
 # Use pre-built wheel
 RUN pip install wheel
 # Install requirements

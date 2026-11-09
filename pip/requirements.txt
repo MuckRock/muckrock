@@ -45,7 +45,7 @@ botocore==1.42.65
     #   s3transfer
 cachetools==3.1.1
     # via zenpy
-celery==5.6.2
+celery[redis]==5.6.2
     # via
     #   -r pip/requirements.in
     #   django-celery-email
@@ -168,7 +168,7 @@ django-phonenumber-field==6.0.0
     # via -r pip/requirements.in
 django-premailer==0.2.0
     # via -r pip/requirements.in
-django-redis==5.1.0
+django-redis==7.0.0
     # via python-redis-lock
 django-reversion==6.1.0
     # via -r pip/requirements.in
@@ -236,7 +236,7 @@ google-resumable-media==2.8.0
     # via google-cloud-storage
 googleapis-common-protos==1.72.0
     # via google-api-core
-govqa @ git+https://github.com/MuckRock/govqa-py@bab2a8803926e4347a9be3ba43b818368926f47c
+govqa @ git+https://github.com/MuckRock/govqa-py@84d08f5bfbb7a7ed163dc7a36951fdf9c3760183
     # via -r pip/requirements.in
 gunicorn==23.0.0
     # via -r pip/requirements.in
@@ -264,7 +264,7 @@ jsonschema==4.21.1
     #   govqa
 jsonschema-specifications==2023.12.1
     # via jsonschema
-kombu==5.6.2
+kombu[redis]==5.6.2
     # via celery
 listcrunch==1.0.1
     # via python-documentcloud
@@ -409,10 +409,11 @@ ratelimit==2.2.1
     # via
     #   python-documentcloud
     #   python-squarelet
-redis==3.5.3
+redis==6.4.0
     # via
     #   -r pip/requirements.in
     #   django-redis
+    #   kombu
     #   python-redis-lock
 referencing==0.34.0
     # via
@@ -505,6 +506,7 @@ typing-extensions==4.12.2
     #   aiohttp
     #   aiosignal
     #   beautifulsoup4
+    #   django-redis
     #   pydantic
     #   pydantic-core
     #   stripe
@@ -544,6 +546,3 @@ zenpy==2.0.47
     # via -r pip/requirements.in
 zipstream==1.1.4
     # via -r pip/requirements.in
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
