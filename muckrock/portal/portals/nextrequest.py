@@ -30,7 +30,6 @@ from muckrock.portal.tasks import portal_task
 from muckrock.task.models import PortalTask
 
 
-# pylint:disable = too-many-positional-arguments
 class NextRequestPortal(PortalAutoReceiveMixin, ManualPortal):
     """NextRequest Portal integration"""
 

@@ -29,7 +29,6 @@ from muckrock.task.channels import REPAIR_PORTAL_TYPES, classify_address
 from muckrock.task.constants import REVIEW_AGENCY_FOLLOWUP
 
 
-# pylint:disable=too-many-positional-arguments
 class FlaggedTaskForm(forms.Form):
     """Simple form for acting on a FlaggedTask"""
 
