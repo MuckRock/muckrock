@@ -134,7 +134,7 @@ django-appconf==1.0.4
     # via
     #   django-celery-email
     #   django-opensearch
-django-autocomplete-light==5.0.0
+django-autocomplete-light==3.12.1
     # via -r pip/requirements.in
 django-celery-email==3.0.0
     # via -r pip/requirements.in
