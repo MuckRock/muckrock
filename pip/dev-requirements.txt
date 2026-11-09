@@ -232,9 +232,7 @@ pylint-django==2.7.0
 pylint-plugin-utils==0.9.0
     # via pylint-django
 pyparsing==3.3.2
-    # via
-    #   -c pip/requirements.txt
-    #   pip-requirements-parser
+    # via pip-requirements-parser
 pyproject-hooks==1.0.0
     # via
     #   build

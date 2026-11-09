@@ -234,8 +234,6 @@ govqa @ git+https://github.com/MuckRock/govqa-py@84d08f5bfbb7a7ed163dc7a36951fdf
     # via -r pip/requirements.in
 gunicorn==23.0.0
     # via -r pip/requirements.in
-httplib2==0.32.0
-    # via -r pip/requirements.in
 idna==3.20
     # via
     #   requests
@@ -354,8 +352,6 @@ pyasn1-modules==0.4.1
     # via google-auth
 pycparser==2.20
     # via cffi
-pycryptodome==3.19.1
-    # via -r pip/requirements.in
 pydantic==2.11.10
     # via -r pip/requirements.in
 pydantic-core==2.33.2
@@ -368,8 +364,6 @@ pyjwt[crypto]==2.15.1
     #   social-auth-core
 pymdown-extensions==10.21
     # via -r pip/requirements.in
-pyparsing==3.3.2
-    # via httplib2
 pypdf==6.21.4
     # via -r pip/requirements.in
 python-dateutil==2.9.0
