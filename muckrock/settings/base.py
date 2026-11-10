@@ -1030,6 +1030,9 @@ ENABLE_API_V1 = boolcheck(os.environ.get("ENABLE_API_V1", True))
 # User agent to identify our service
 SERVICE_USER_AGENT = os.environ.get("SERVICE_USER_AGENT", "muckrock requests")
 
+# User agent for OIDC login calls from social-auth-core
+SOCIAL_AUTH_SQUARELET_USER_AGENT = SERVICE_USER_AGENT
+
 # API_v2 auth switch
 API_V2_AUTH = boolcheck(os.environ.get("API_V2_AUTH", True))
 

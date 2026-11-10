@@ -17,6 +17,7 @@ class SquareletBackend(OpenIdConnectAuth):
 
     name = "squarelet"
     OIDC_ENDPOINT = settings.SQUARELET_URL + "/openid"
+    SEND_USER_AGENT = True
 
     # Password grant support
     # In order to override as few methods as possible, we pass in the pass grant
