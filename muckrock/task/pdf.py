@@ -164,8 +164,16 @@ def handle_embedding(file):
 class PDF(FPDF):
     """Shared PDF settings"""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.footed_pages = set()
+
     def footer(self):
         """Add page number to the footer"""
+        # output() draws the current page's footer again after prepare() truncates
+        if self.page in self.footed_pages:
+            return
+        self.footed_pages.add(self.page)
         self.set_y(-25)
         self.set_font("Times", "I", 10)
         self.cell(0, 10, "Page {} of {{nb}}".format(self.page_no()), align="C")
@@ -329,8 +337,12 @@ class MailPDF(PDF):
             return new_pdf.prepare(address_override, num_msgs=num_msgs)
 
         letter_pages = min(self.page, self.page_limit)
+        # fpdf2 fills in {nb} from len(self.pages) when it writes the file
+        for page in range(letter_pages + 1, len(self.pages) + 1):
+            del self.pages[page]
+        self.page = letter_pages
         writer = PdfWriter(strict=False)
-        writer.append(BytesIO(bytes(self.output())), pages=(0, letter_pages))
+        writer.append(BytesIO(bytes(self.output())))
         files = []
         for file_ in self.comm.files.all():
             total_pages = self._handle_file(file_, files, writer, letter_pages)
