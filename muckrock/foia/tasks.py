@@ -29,6 +29,7 @@ import sys
 import tempfile
 from datetime import date, datetime, time
 from random import randint
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 # Third Party
 import boto3
@@ -41,7 +42,6 @@ from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
 from phaxio import PhaxioApi
-from zipstream import ZIP_DEFLATED, ZipFile
 
 # MuckRock
 from muckrock.communication.models import (
@@ -1079,18 +1079,20 @@ class ZipRequest(AsyncFileDownloadTask):
         def clean(filename):
             return re.sub('[<>:"/\\\\|?*]', "_", filename)
 
-        with ZipFile(mode="w", compression=ZIP_DEFLATED, allowZip64=True) as zip_file:
+        with ZipFile(out_file, mode="w", compression=ZIP_DEFLATED) as zip_file:
             for i, comm in enumerate(self.foia.communications.all()):
                 file_name = "{:03d}_{}_comm.txt".format(i, comm.datetime)
                 zip_file.writestr(clean(file_name), comm.communication.encode("utf8"))
                 for ffile in comm.files.all():
-                    zip_file.write_iter(
-                        clean(ffile.name()),
-                        # read in 5MB chunks at a time
-                        read_in_chunks(ffile.ffile, size=5 * 1024 * 1024),
+                    info = ZipInfo(
+                        clean(ffile.name()), date_time=datetime.now().timetuple()[:6]
                     )
-            for data in zip_file:
-                out_file.write(data)
+                    info.compress_type = ZIP_DEFLATED
+                    # Sizes aren't known until the file is streamed, so allow
+                    # entries over 2 GiB up front.
+                    with zip_file.open(info, mode="w", force_zip64=True) as entry:
+                        for chunk in read_in_chunks(ffile.ffile, size=5 * 1024 * 1024):
+                            entry.write(chunk)
 
 
 @shared_task(

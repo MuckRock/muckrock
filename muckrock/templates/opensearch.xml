@@ -1,0 +1,9 @@
+{% load static %}<?xml version="1.0" encoding="UTF-8" ?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+    <Contact>mitch@muckrock.com</Contact>
+    <ShortName>MuckRock</ShortName>
+    <Description>Search MuckRock for public documents and news</Description>
+    <Image width="16" height="16" type="image/x-icon">{% static "favicon.ico" %}</Image>
+    <Url type="text/html" template="{{ search_url }}?q={searchTerms}"/>
+    <InputEncoding>UTF-8</InputEncoding>
+</OpenSearchDescription>

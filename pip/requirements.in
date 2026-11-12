@@ -1,11 +1,9 @@
-django_news_sitemaps @ git+https://github.com/theatlantic/django-news-sitemaps.git@d965096f467360b3f715ddd18252fe92a5958322 # For generating news sitemaps (django3x branch)
-django-opensearch @ git+https://github.com/MuckRock/django-opensearch.git@7358c925021869c1b01f50debd4de70c08e4ad02 # for opensearch.xml (master branch)
-govqa @ git+https://github.com/MuckRock/govqa-py@bab2a8803926e4347a9be3ba43b818368926f47c # for govqa integration (main branch)
+govqa @ git+https://github.com/MuckRock/govqa-py@84d08f5bfbb7a7ed163dc7a36951fdf9c3760183 # for govqa integration (main branch)
 aiohttp
 baml-py # For using gloo to use ChatGPT
 beautifulsoup4 # used for parsing html
 boto3 # Used to access AWS
-celery # Used to run async tasks
+celery[redis] # Used to run async tasks
 chardet # Detect character encodings for user uploaded text files
 cryptography==50.0.0 # Used by token handling libraries
 daily-active-users # Log daily active users
@@ -37,20 +35,17 @@ django-watson # Used for search
 django<6 # Django is kinda important...
 djangorestframework # The API framework
 djangorestframework_simplejwt # JWT auth for DRF
-dogslow # Monitors slow requests
 drf-spectacular # DRF documentation
 easy-thumbnails # Used for thumbnailing images
 emoji # Stripe emoji's for pdf generation
-fpdf # Used to generate PDFs
+fpdf2 # Used to generate PDFs
 furl # Used to manipulate urls
 gunicorn # Python WSGI app server
-httplib2==0.32.0 # Used by oauth2client
 img2pdf # convert images to PDFs
 ipython # better python shell
 lob # sending mail via lob.com
 logzio-python-handler # For logging API requests
 markdown # Used for rendering Markdown, obviously!
-memoize # cachable properties
 micawber # Used for embeds in assignments
 multidict>6.4
 nh3 # Used to sanitize any HTML we're rendering
@@ -58,7 +53,6 @@ pdfrw # Used for reading/writing PDFs for form filling in
 phonenumberslite # Library for validating and formatting phone numbers
 pillow # Used by Django for image handling
 psycopg2-binary # Interface to postgres DB
-pycryptodome # Reading encypted PDFs
 pydantic # for gloo
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
@@ -81,4 +75,3 @@ stripe # Stripe payment processor integration
 thefuzz # fuzzy string matching for agency import and dedupe
 tiktoken # Used by gloo
 zenpy # library for zendesk API
-zipstream # Write zip files streamingly

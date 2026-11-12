@@ -32,6 +32,7 @@ from muckrock.foia.factories import (
     FOIARequestFactory,
     FOIATemplateFactory,
 )
+from muckrock.jurisdiction.factories import LocalJurisdictionFactory
 
 
 class TestAgencyUnit(TestCase):
@@ -310,3 +311,22 @@ class TestAgencyForm(TestCase):
     def test_instance_form(self):
         """The form should validate given only instance data"""
         assert self.form.is_valid()
+
+
+class TestAgencyComposerAutocomplete(TestCase):
+    """Creating a new agency from the composer's agency search"""
+
+    def test_creates_a_pending_agency_in_the_named_jurisdiction(self):
+        boston = LocalJurisdictionFactory()
+        self.client.force_login(UserFactory())
+
+        response = self.client.post(
+            reverse("agency-composer-autocomplete"),
+            {"text": "police department, Boston, MA"},
+        )
+
+        assert response.status_code == 200
+        agency = Agency.objects.get(pk=response.json()["id"])
+        assert agency.name == "Police Department"
+        assert agency.jurisdiction == boston
+        assert agency.status == "pending"

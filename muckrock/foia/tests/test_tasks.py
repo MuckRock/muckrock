@@ -5,8 +5,10 @@ from django.db import connection, reset_queries
 from django.test import TestCase, override_settings
 
 # Standard Library
-from datetime import date, timedelta
+import io
+from datetime import date, datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
+from zipfile import ZipFile
 
 # Third Party
 import boto3
@@ -16,10 +18,15 @@ from moto import mock_aws
 
 # MuckRock
 from muckrock.core.factories import UserFactory
-from muckrock.foia.factories import FOIAFileFactory, FOIARequestFactory
+from muckrock.foia.factories import (
+    FOIACommunicationFactory,
+    FOIAFileFactory,
+    FOIARequestFactory,
+)
 from muckrock.foia.tasks import (
     ExportCsv,
     InvalidFileTypeError,
+    ZipRequest,
     classify_status,
     followup_request,
     followup_requests,
@@ -103,6 +110,43 @@ class ExportCsvTests(TestCase):
             return num_queries
 
         assert get_num_queries(1) == get_num_queries(10)
+
+
+class S3LikeWriter(io.BytesIO):
+    """Reports its position but cannot seek, like smart_open's S3 writer"""
+
+    def seekable(self):
+        return False
+
+    def seek(self, *args):
+        raise io.UnsupportedOperation("seek")
+
+
+class ZipRequestTests(TestCase):
+    """Zip archive of a request's communications and files"""
+
+    def test_writes_every_communication_and_file_to_an_unseekable_stream(self):
+        comm = FOIACommunicationFactory(
+            datetime=datetime(2026, 11, 4, 9, 30, tzinfo=timezone.utc),
+            communication="Responsive records attached.",
+        )
+        FOIAFileFactory(
+            comm=comm, ffile__filename="records.pdf", ffile__data=b"%PDF-1.4 records"
+        )
+        out = S3LikeWriter()
+
+        ZipRequest(comm.foia.user.pk, comm.foia.pk).generate_file(out)
+
+        with ZipFile(io.BytesIO(out.getvalue())) as zip_file:
+            assert zip_file.testzip() is None
+            assert zip_file.namelist() == [
+                "000_2026-11-04 09_30_00+00_00_comm.txt",
+                "records.pdf",
+            ]
+            assert zip_file.read("000_2026-11-04 09_30_00+00_00_comm.txt") == (
+                b"Responsive records attached."
+            )
+            assert zip_file.read("records.pdf") == b"%PDF-1.4 records"
 
 
 @mock_aws

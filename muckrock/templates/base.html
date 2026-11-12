@@ -1,7 +1,6 @@
 {% load static %}
 {% load django_vite %}
 {% load hijack_tags %}
-{% load opensearch_tags %}
 <!doctype html>
 
 <html lang="en-US">
@@ -88,7 +87,7 @@
       <meta name="twitter:description" content="MuckRock is a collaborative news site that gives you the tools to hold the government accountable." />
       <meta name="twitter:image:src" content="{% static 'icons/logo.png' %}" />
     {% endblock twitter_card %}
-    {% opensearch_meta %}
+    <link rel="search" type="application/opensearchdescription+xml" title="Search MuckRock for public documents and news" href="{% url "opensearch" %}" />
     <script type="application/ld+json">
 { "@context" : "http://schema.org",
           "@type" : "Organization",

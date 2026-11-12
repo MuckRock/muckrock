@@ -19,11 +19,10 @@ from email.parser import BytesParser
 
 # Third Party
 import chardet
-from memoize import mproperty
 
 # MuckRock
 from muckrock.core.storage import PrivateMediaRootS3BotoStorage
-from muckrock.core.utils import UnclosableFile, new_action
+from muckrock.core.utils import UnclosableFile, mproperty, new_action
 from muckrock.foia.models.file import FOIAFile
 from muckrock.foia.models.request import STATUS, FOIARequest
 from muckrock.foia.querysets import FOIACommunicationQuerySet, RawEmailQuerySet

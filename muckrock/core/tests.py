@@ -12,6 +12,7 @@ from django.urls import reverse
 # Standard Library
 import hashlib
 import logging
+import xml.etree.ElementTree as ET
 from unittest import mock
 from unittest.mock import ANY, Mock, patch
 from urllib.parse import parse_qs, urlparse
@@ -85,7 +86,6 @@ class TestFunctional(TestCase):
         get_allowed(self.client, "/sitemap-News.xml")
         get_allowed(self.client, "/sitemap-Jurisdiction.xml")
         get_allowed(self.client, "/sitemap-Agency.xml")
-        get_allowed(self.client, "/sitemap-Question.xml")
         get_allowed(self.client, "/sitemap-FOIA.xml")
         get_allowed(self.client, "/news-sitemaps/index.xml")
         get_allowed(self.client, "/news-sitemaps/articles.xml")
@@ -458,3 +458,31 @@ class DismissBannerViewTest(TestCase):
         json_data = response.json()
         assert json_data["success"] is False
         assert "Method not allowed" in json_data["error"]
+
+
+class OpenSearchTests(TestCase):
+    """OpenSearch description for browser search integration"""
+
+    def test_anonymous_visitors_get_a_description_pointing_at_site_search(self):
+        response = self.client.get("/opensearch/opensearch.xml")
+
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/opensearchdescription+xml"
+        ns = {"os": "http://a9.com/-/spec/opensearch/1.1/"}
+        doc = ET.fromstring(response.content)
+        assert doc.find("os:ShortName", ns).text == "MuckRock"
+        assert (
+            doc.find("os:Url", ns).get("template")
+            == "http://testserver/search/?q={searchTerms}"
+        )
+
+    def test_pages_link_to_the_description(self):
+        response = self.client.get(reverse("index"))
+
+        self.assertContains(
+            response,
+            '<link rel="search" type="application/opensearchdescription+xml" '
+            'title="Search MuckRock for public documents and news" '
+            'href="/opensearch/opensearch.xml" />',
+            html=True,
+        )
