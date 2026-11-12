@@ -55,7 +55,7 @@
 }
 
 .project.detail {
-    padding: calc(0 * 0.5);
+    padding: 0;
     @media screen and (min-width: 500px) {
         padding: 0;
     }

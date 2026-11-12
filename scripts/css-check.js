@@ -168,6 +168,8 @@ function evaluateExpression(expression) {
   try {
     const result = sum();
     if (position !== tokens.length) fail();
+    // A unitless calc() is a <number>, which browsers drop where a length is expected.
+    if (!result.unit) fail();
     return `${formatNumber(result.number)}${result.unit}`;
   } catch {
     return null;

@@ -123,6 +123,10 @@ describe("normalize()", () => {
     );
   });
 
+  it("leaves a unitless calc() alone, since browsers drop it where a length is expected", () => {
+    expect(normalize("a { padding: calc(0 * 0.5); }")).toContain("calc(0 * 0.5)");
+  });
+
   it("leaves calc() alone when it mixes units", () => {
     expect(normalize("a { width: calc(100% - 2rem); }")).toContain("calc(100% - 2rem)");
   });
