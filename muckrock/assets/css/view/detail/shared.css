@@ -1,0 +1,39 @@
+/* Details */
+
+.detail {
+    padding: calc(var(--vr) * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: var(--vr);
+    }
+    .header-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        @media screen and (min-width: 500px) {
+            .aside .button {
+                float: right;
+                clear: right;
+                margin-bottom: calc(var(--vr) * 0.5);
+            }
+            .tag-manager {
+                margin-bottom: 0;
+            }
+        }
+        .main {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            max-width:38rem;
+            margin-bottom: 0;
+            padding-right: var(--vr);
+        }
+    }
+
+    &.flatpage {
+        max-width: 45em;
+        margin: 0 auto;
+    }
+
+}

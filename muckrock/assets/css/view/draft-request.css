@@ -1,0 +1,68 @@
+.foia-draft #id_title,
+.multirequest-draft .title input {
+    width: 100%;
+    background-color: var(--color-white);
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    border-bottom: calc(2 * var(--border-width)) dotted var(--color-grey-4);
+    font-size: 2em;
+    line-height: var(--lh);
+    margin: 0 0 var(--vr) 0;
+    @media screen and (max-width: 500px) {
+        font-size: 1.5em;
+        line-height: var(--lh);
+        margin: 0 0 var(--vr) 0;
+    }
+}
+
+.foia-draft {
+    padding: calc(var(--vr) * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: var(--vr);
+    }
+    .communication-body {
+        padding: 0;
+        height: 100%;
+        background-color: white;
+        textarea {
+            display: block;
+            overflow-y: scroll;
+            resize: vertical;
+            width: 100%;
+            height: 20em;
+            border: none;
+            border-top: 1px solid var(--color-grey);
+            border-radius: 0;
+            padding: calc(var(--vr) * 0.5);
+            font-family: var(--monospace);
+            font-size: var(--size-2);
+        }
+    }
+    .buy-requests {
+        border-color: var(--color-green);
+    }
+    .button-group {
+        width: 100%;
+    }
+}
+
+.multirequest-draft {
+    padding: calc(var(--vr) * 0.5);
+    @media screen and (min-width: 500px) {
+        padding: var(--vr);
+    }
+    .communication-body textarea {
+        border-radius: 0;
+        font-family: var(--monospace);
+        font-size: var(--size-2);
+    }
+    .title {
+        label { display: none; }
+    }
+    .request .body textarea {
+        height: 7.5em;
+        border-top: var(--border-width) solid var(--color-grey);
+        border-bottom: var(--border-width) solid var(--color-grey);
+    }
+}

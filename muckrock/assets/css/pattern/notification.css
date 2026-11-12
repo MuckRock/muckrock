@@ -1,0 +1,37 @@
+.notification {
+    display: flex;
+    align-items: flex-start;
+    .symbol {
+        margin-right: calc(var(--vr) * 0.5);
+    }
+    .text {
+        flex: 1;
+    }
+    .icon {
+        vertical-align: middle;
+        &.success {
+            path, polygon, rect, circle {
+                fill: var(--color-green);
+            }
+        }
+        &.error {
+            path, polygon, rect, circle {
+                fill: var(--color-red);
+            }
+        }
+        &.info {
+            path, polygon, rect, circle {
+                fill: var(--color-blue);
+            }
+        }
+    }
+    .notification__action, .notification__action--passive {
+        display: inline-block;
+        margin-bottom: 0;
+    }
+    .timestamp {
+        color: var(--color-grey);
+        font-size: var(--size-2);
+        float: right;
+    }
+}

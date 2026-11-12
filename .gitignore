@@ -4,7 +4,6 @@
 .ruby-version
 .coverage
 .webassets-cache
-.sass-cache
 whoosh
 htmlcov
 static

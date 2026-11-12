@@ -1,6 +1,7 @@
 import $ from 'jquery';
 
-import '../scss/docViewer.scss';
+import '../css/tokens.css';
+import '../css/docViewer.css';
 
 $('.toggle-embed').click(function(){
     const embed = $('.file-embed');

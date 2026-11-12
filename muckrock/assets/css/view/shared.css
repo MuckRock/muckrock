@@ -1,0 +1,24 @@
+    /* ///////////////////// */
+   /* // */
+  /* V I E W      // */
+ /* // */
+/* ///////////////////// */
+
+html, body {
+    /* Allows for full-height elements with CSS */
+    min-height: 100%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden;
+    margin-bottom: 0;
+    background-color: var(--color-white);
+}
+
+.content {
+    flex: 1 1 auto;
+    margin-bottom: 0;
+}
