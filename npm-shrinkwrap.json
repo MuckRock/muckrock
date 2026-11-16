@@ -15,9 +15,7 @@
         "jquery-ui": "1.10.x",
         "jquery.tabulator": "^3.3.2",
         "js-cookie": "^2.1.0",
-        "lodash": "^4.14.2",
         "prosemirror": "^0.6.0",
-        "punycode": "^2.3.0",
         "react": "^15.3.0",
         "react-dom": "^15.3.0",
         "react-redux": "^4.4.5",
@@ -2586,6 +2584,7 @@
     },
     "node_modules/punycode": {
       "version": "2.3.1",
+      "dev": true,
       "license": "MIT",
       "engines": {
         "node": ">=6"
