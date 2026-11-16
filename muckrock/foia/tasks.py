@@ -22,11 +22,11 @@ from django.utils import timezone
 import asyncio
 import csv
 import logging
+import mimetypes
 import os
 import os.path
 import re
 import sys
-import tempfile
 from datetime import date, datetime, time
 from random import randint
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
@@ -41,9 +41,9 @@ from documentcloud import DocumentCloud
 from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
-from phaxio import PhaxioApi
 
 # MuckRock
+from muckrock.communication import phaxio
 from muckrock.communication.models import (
     Check,
     EmailCommunication,
@@ -531,8 +531,6 @@ def classify_status(task_pk, **kwargs):
 def send_fax(comm_id, subject, body, error_count, **kwargs):
     """Send a fax using the Phaxio API"""
 
-    api = PhaxioApi(api_key=settings.PHAXIO_KEY, api_secret=settings.PHAXIO_SECRET)
-
     try:
         comm = FOIACommunication.objects.get(pk=comm_id)
     except FOIACommunication.DoesNotExist as exc:
@@ -552,34 +550,30 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
             kwargs=kwargs,
         )
 
-    # create temporary .txt file for body
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt") as tmp_file:
-        tmp_file.write(body)
-        tmp_file_path = tmp_file.name
-
-    files = [f.ffile for f in comm.files.all()] + [tmp_file_path]
+    files = []
+    for foia_file in comm.files.all():
+        with foia_file.ffile.open("rb") as ffile:
+            name = os.path.basename(foia_file.ffile.name)
+            content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
+            files.append((name, ffile.read(), content_type))
+    files.append(("message.txt", body.encode("utf8"), "text/plain"))
     callback_url = "{}{}".format(settings.MUCKROCK_URL, reverse("phaxio-callback"))
 
     fax = FaxCommunication.objects.create(
         communication=comm, sent_datetime=timezone.now(), to_number=comm.foia.fax
     )
 
-    try:
-        results = api.Fax.send(
-            to=comm.foia.fax.as_e164,
-            header_text=subject[:45],
-            files=files,
-            batch_delay=settings.PHAXIO_BATCH_DELAY,
-            batch_collision_avoidance=True,
-            callback_url=callback_url,
-            tags_dict={"fax_id": fax.pk, "error_count": error_count},
-            test_fail=kwargs.get("test_fail"),
-        )
-        fax.fax_id = results.data.id
-        fax.save()
-    finally:
-        if os.path.exists(tmp_file_path):
-            os.remove(tmp_file_path)
+    fax.fax_id = phaxio.create_fax(
+        to=comm.foia.fax.as_e164,
+        files=files,
+        tags={"fax_id": fax.pk, "error_count": error_count},
+        header_text=subject[:45],
+        batch_delay=settings.PHAXIO_BATCH_DELAY,
+        batch_collision_avoidance=True,
+        callback_url=callback_url,
+        test_fail=kwargs.get("test_fail"),
+    )
+    fax.save()
 
 
 @shared_task

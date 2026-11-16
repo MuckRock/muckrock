@@ -52,7 +52,6 @@ celery[redis]==5.6.2
     #   sentry-sdk
 certifi==2026.10.19
     # via
-    #   phaxio
     #   requests
     #   scout-apm
     #   sentry-sdk
@@ -129,9 +128,7 @@ django-activity-stream==1.4.2
 django-anymail[mailgun]==9.1
     # via -r pip/requirements.in
 django-appconf==1.0.4
-    # via
-    #   django-celery-email
-    #   django-opensearch
+    # via django-celery-email
 django-autocomplete-light==3.12.1
     # via -r pip/requirements.in
 django-celery-email==3.0.0
@@ -302,8 +299,6 @@ pdfrw==0.4
     # via -r pip/requirements.in
 pexpect==4.6.0
     # via ipython
-phaxio==0.3
-    # via -r pip/requirements.in
 phonenumberslite==8.8.2
     # via -r pip/requirements.in
 pickleshare==0.7.5
@@ -371,7 +366,6 @@ python-dateutil==2.9.0
     #   botocore
     #   celery
     #   govqa
-    #   phaxio
     #   python-documentcloud
     #   zenpy
 python-documentcloud==4.8.1
@@ -419,7 +413,6 @@ requests[security]==2.33.1
     #   google-cloud-storage
     #   lob
     #   logzio-python-handler
-    #   phaxio
     #   premailer
     #   python-documentcloud
     #   python-squarelet
@@ -454,7 +447,6 @@ six==1.17.0
     #   click-repl
     #   furl
     #   orderedmultidict
-    #   phaxio
     #   python-dateutil
     #   zenpy
 smart-open==1.10.0
@@ -510,7 +502,6 @@ uritemplate==3.0.0
 urllib3==2.8.0
     # via
     #   botocore
-    #   phaxio
     #   python-documentcloud
     #   python-squarelet
     #   requests
