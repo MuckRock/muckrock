@@ -20,9 +20,9 @@ import time
 
 # Third Party
 import dateutil.parser
-import lob
 
 # MuckRock
+from muckrock.communication import lob
 from muckrock.communication.models import MailCommunication
 from muckrock.core.utils import new_action
 
@@ -56,7 +56,7 @@ def lob_webhook(request):
         if data["event_type"]["id"] == "check.failed":
             check_id = data["reference_id"]
             logger.info("Lob webhook: Check Failed %s", check_id)
-            check = lob.Check.retrieve(check_id)
+            check = lob.retrieve_check(check_id)
             mail_id = check["metadata"]["mail_id"]
             mail = MailCommunication.objects.get(pk=mail_id)
             mail.communication.foia.flaggedtask_set.create(

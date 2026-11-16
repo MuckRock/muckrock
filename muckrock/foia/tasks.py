@@ -33,7 +33,6 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 # Third Party
 import boto3
-import lob
 import requests
 from anymail.exceptions import AnymailError
 from constance import config
@@ -44,6 +43,7 @@ from documentcloud.toolbox import grouper
 from phaxio import PhaxioApi
 
 # MuckRock
+from muckrock.communication import lob
 from muckrock.communication.models import (
     Check,
     EmailCommunication,
@@ -71,8 +71,6 @@ from muckrock.task.pdf import LobPDF
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 
 logger = logging.getLogger(__name__)
-
-lob.api_key = settings.LOB_SECRET_KEY
 
 
 class InvalidFileTypeError(Exception):
@@ -1209,29 +1207,30 @@ def prepare_snail_mail(
             lob_obj = _lob_create_check(comm, prepared_pdf, mail, address, amount)
         else:
             lob_obj = _lob_create_letter(comm, prepared_pdf, mail, certified)
-        mail.lob_id = lob_obj.id
+        mail.lob_id = lob_obj["id"]
         mail.save()
         comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
         comm.foia.save(comment="sent via lob")
         comm.foia.update()
-    except lob.error.APIConnectionError as exc:
+    except lob.LobTimeoutError as exc:
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
             args=[comm_pk, comm.category, switch, extra, certified, force, num_msgs],
             kwargs=kwargs,
             exc=exc,
         )
-    except lob.error.LobError as exc:
+    except lob.LobError as exc:
         logger.error(exc, exc_info=sys.exc_info())
         create_snail_mail_task("lob", exc.args[0])
 
 
 def _lob_create_letter(comm, prepared_pdf, mail, certified):
     """Send a letter via Lob"""
-    return lob.Letter.create(
+    return lob.create_letter(
+        prepared_pdf,
         description="Letter for communication {}".format(comm.pk),
-        to_address=comm.foia.address.lob_format(comm.foia.agency),
-        from_address={
+        to=comm.foia.address.lob_format(comm.foia.agency),
+        from_={
             "name": settings.ADDRESS_NAME,
             "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
             "address_line1": settings.ADDRESS_STREET,
@@ -1240,7 +1239,6 @@ def _lob_create_letter(comm, prepared_pdf, mail, certified):
             "address_zip": settings.ADDRESS_ZIP,
         },
         color=False,
-        file=prepared_pdf,
         double_sided=True,
         metadata={"mail_id": mail.pk},
         extra_service=certified,
@@ -1257,10 +1255,11 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
         if len(memo) > 40:
             memo = old_memo
 
-    check = lob.Check.create(
+    check = lob.create_check(
+        prepared_pdf,
         description="Check for communication {}".format(comm.pk),
-        to_address=check_address.lob_format(comm.foia.agency),
-        from_address={
+        to=check_address.lob_format(comm.foia.agency),
+        from_={
             "name": settings.ADDRESS_NAME,
             "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
             "address_line1": settings.ADDRESS_STREET,
@@ -1271,11 +1270,10 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
         bank_account=settings.LOB_BANK_ACCOUNT_ID,
         amount=amount,
         memo=memo,
-        attachment=prepared_pdf,
         metadata={"mail_id": mail.pk},
     )
     mr_check = Check.objects.create(
-        number=check.check_number,
+        number=check["check_number"],
         agency=comm.foia.agency,
         amount=amount,
         communication=comm,
