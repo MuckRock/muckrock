@@ -3,14 +3,18 @@ Tests for PDF generation
 """
 
 # Django
+from django.core.files.base import ContentFile
 from django.test import TestCase
 
+# Standard Library
+from io import BytesIO
+
 # Third Party
-from pypdf import PdfReader
+from pypdf import PdfReader, PdfWriter
 
 # MuckRock
 from muckrock.communication.models import MailCommunication
-from muckrock.foia.factories import FOIACommunicationFactory
+from muckrock.foia.factories import FOIACommunicationFactory, FOIAFileFactory
 from muckrock.task.factories import SnailMailTaskFactory
 from muckrock.task.pdf import LobPDF, SnailMailPDF
 
@@ -51,3 +55,24 @@ class PDFTests(TestCase):
         assert len(reader.pages) == pdf.page_limit
         last_page = reader.pages[-1].extract_text()
         assert last_page.count(f"Page {pdf.page_limit} of {pdf.page_limit}") == 1
+
+    def test_attaches_an_aes_encrypted_pdf_with_no_open_password(self):
+        """An AES-encrypted attachment that opens without a password is merged"""
+        source = PdfWriter()
+        source.add_blank_page(width=612, height=792)
+        source.add_blank_page(width=612, height=792)
+        source.encrypt(user_password="", owner_password="owner", algorithm="AES-256")
+        encrypted = BytesIO()
+        source.write(encrypted)
+
+        communication = FOIACommunicationFactory()
+        attachment = FOIAFileFactory(
+            comm=communication,
+            ffile=ContentFile(encrypted.getvalue(), name="encrypted.pdf"),
+        )
+        pdf = LobPDF(communication, "n", False, 0)
+        prepared_pdf, page_count, files, _ = pdf.prepare()
+
+        assert files == [(attachment, "attached", 2)]
+        assert page_count == 3
+        assert len(PdfReader(prepared_pdf).pages) == 3
