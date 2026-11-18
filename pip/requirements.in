@@ -43,6 +43,7 @@ furl # Used to manipulate urls
 gunicorn # Python WSGI app server
 img2pdf # convert images to PDFs
 ipython # better python shell
+lob-python # sending mail via lob.com
 logzio-python-handler # For logging API requests
 markdown # Used for rendering Markdown, obviously!
 micawber # Used for embeds in assignments

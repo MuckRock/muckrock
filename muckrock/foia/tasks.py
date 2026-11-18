@@ -40,6 +40,16 @@ from documentcloud import DocumentCloud
 from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
+from lob_python import ApiException, OpenApiException
+from lob_python.api.checks_api import ChecksApi
+from lob_python.api.letters_api import LettersApi
+from lob_python.model.address_domestic import AddressDomestic
+from lob_python.model.address_editable import AddressEditable
+from lob_python.model.check_editable import CheckEditable
+from lob_python.model.chk_use_type import ChkUseType
+from lob_python.model.letter_editable import LetterEditable
+from lob_python.model.ltr_use_type import LtrUseType
+from lob_python.model.metadata_model import MetadataModel
 from phaxio import PhaxioApi
 
 # MuckRock
@@ -1137,7 +1147,7 @@ def prepare_snail_mail(
     comm_pk, switch, extra, certified, force=False, num_msgs=5, **kwargs
 ):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals, too-many-branches
     comm = FOIACommunication.objects.get(pk=comm_pk)
     # amount may be a string if it was JSON serialized from a Decimal
     amount = float(extra.get("amount", 0))
@@ -1204,48 +1214,62 @@ def prepare_snail_mail(
     # send via lob
     try:
         if comm.category == "p":
-            lob_obj = _lob_create_check(comm, prepared_pdf, mail, address, amount)
+            lob_obj = _lob_create_check(comm, mail, address, amount)
         else:
-            lob_obj = _lob_create_letter(comm, prepared_pdf, mail, certified)
-        mail.lob_id = lob_obj["id"]
-        mail.save()
-        comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
-        comm.foia.save(comment="sent via lob")
-        comm.foia.update()
-    except lob.LobTimeoutError as exc:
+            lob_obj = _lob_create_letter(comm, mail, certified)
+    except ApiException as exc:
+        if exc.status != 504:
+            logger.error(exc, exc_info=sys.exc_info())
+            create_snail_mail_task("lob", lob.error_message(exc))
+            return
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
             args=[comm_pk, comm.category, switch, extra, certified, force, num_msgs],
             kwargs=kwargs,
             exc=exc,
         )
-    except lob.LobError as exc:
+    except OpenApiException as exc:
+        # lob-python validates the request before sending it, so Lob never saw it
         logger.error(exc, exc_info=sys.exc_info())
-        create_snail_mail_task("lob", exc.args[0])
+        create_snail_mail_task("lob", str(exc))
+        return
+
+    mail.lob_id = lob_obj["id"]
+    mail.save()
+    comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
+    comm.foia.save(comment="sent via lob")
+    comm.foia.update()
 
 
-def _lob_create_letter(comm, prepared_pdf, mail, certified):
+def _lob_from_address(comm):
+    """MuckRock's return address, as Lob's address fields"""
+    return {
+        "name": settings.ADDRESS_NAME,
+        "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
+        "address_line1": settings.ADDRESS_STREET,
+        "address_city": settings.ADDRESS_CITY,
+        "address_state": settings.ADDRESS_STATE,
+        "address_zip": settings.ADDRESS_ZIP,
+    }
+
+
+def _lob_create_letter(comm, mail, certified):
     """Send a letter via Lob"""
-    return lob.create_letter(
-        prepared_pdf,
+    letter = LetterEditable(
         description="Letter for communication {}".format(comm.pk),
-        to=comm.foia.address.lob_format(comm.foia.agency),
-        from_={
-            "name": settings.ADDRESS_NAME,
-            "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
-            "address_line1": settings.ADDRESS_STREET,
-            "address_city": settings.ADDRESS_CITY,
-            "address_state": settings.ADDRESS_STATE,
-            "address_zip": settings.ADDRESS_ZIP,
-        },
+        to=AddressEditable(**comm.foia.address.lob_format(comm.foia.agency)),
+        _from=AddressEditable(**_lob_from_address(comm)),
+        file=mail.pdf.url,
+        use_type=LtrUseType("operational"),
         color=False,
         double_sided=True,
-        metadata={"mail_id": mail.pk},
+        metadata=MetadataModel(mail_id=str(mail.pk)),
         extra_service=certified,
     )
+    return lob.call(LettersApi, "create", letter)
 
 
-def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
+def _lob_create_check(comm, mail, check_address, amount):
     """Send a check via Lob"""
     memo = "MR {}".format(comm.foia.pk)
     tracking_number = comm.foia.current_tracking_id()
@@ -1255,22 +1279,20 @@ def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
         if len(memo) > 40:
             memo = old_memo
 
-    check = lob.create_check(
-        prepared_pdf,
-        description="Check for communication {}".format(comm.pk),
-        to=check_address.lob_format(comm.foia.agency),
-        from_={
-            "name": settings.ADDRESS_NAME,
-            "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
-            "address_line1": settings.ADDRESS_STREET,
-            "address_city": settings.ADDRESS_CITY,
-            "address_state": settings.ADDRESS_STATE,
-            "address_zip": settings.ADDRESS_ZIP,
-        },
-        bank_account=settings.LOB_BANK_ACCOUNT_ID,
-        amount=amount,
-        memo=memo,
-        metadata={"mail_id": mail.pk},
+    check = lob.call(
+        ChecksApi,
+        "create",
+        CheckEditable(
+            description="Check for communication {}".format(comm.pk),
+            to=AddressDomestic(**check_address.lob_format(comm.foia.agency)),
+            _from=AddressDomestic(**_lob_from_address(comm)),
+            bank_account=settings.LOB_BANK_ACCOUNT_ID,
+            amount=amount,
+            memo=memo,
+            attachment=mail.pdf.url,
+            use_type=ChkUseType("operational"),
+            metadata=MetadataModel(mail_id=str(mail.pk)),
+        ),
     )
     mr_check = Check.objects.create(
         number=check["check_number"],

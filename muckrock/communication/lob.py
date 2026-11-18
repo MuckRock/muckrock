@@ -1,78 +1,37 @@
 """
-Client for the Lob print-and-mail API
+Lob API access through lob-python
 """
 
 # Django
 from django.conf import settings
 
-# Third Party
-import requests
+# Standard Library
+import json
 
-LOB_API = "https://api.lob.com/v1"
+# Third Party
+import lob_python
+
 TIMEOUT = (10, 120)
 
 
-class LobError(Exception):
-    """Lob rejected the request; args[0] is Lob's error message"""
+def call(api_class, method, *args):
+    """Call a lob-python API method, returning Lob's response as a dict
+
+    Raises lob_python.ApiException when Lob returns an error.
+    """
+    config = lob_python.Configuration(username=settings.LOB_SECRET_KEY)
+    with lob_python.ApiClient(config) as client:
+        # Lob has already acted by the time the response is parsed, so skip
+        # lob-python's response models: a parse error would read as a rejection.
+        response = getattr(api_class(client), method)(
+            *args, _preload_content=False, _request_timeout=TIMEOUT
+        )
+    return json.loads(response.data)
 
 
-class LobTimeoutError(LobError):
-    """Lob's gateway timed out, so the request may be retried"""
-
-
-def _form(params):
-    """Flatten nested params into the `key[subkey]` form fields Lob expects"""
-    form = {}
-    for key, value in params.items():
-        if isinstance(value, dict):
-            for subkey, subvalue in value.items():
-                form[f"{key}[{subkey}]"] = subvalue
-        elif isinstance(value, bool):
-            form[key] = str(value).lower()
-        elif value is not None:
-            form[key] = value
-    return form
-
-
-def _request(method, path, **kwargs):
-    response = requests.request(
-        method,
-        f"{LOB_API}{path}",
-        auth=(settings.LOB_SECRET_KEY, ""),
-        timeout=TIMEOUT,
-        **kwargs,
-    )
-    if response.status_code == 504:
-        raise LobTimeoutError(response.text or response.reason)
+def error_message(exc):
+    """Lob's error message from an ApiException, or the HTTP reason"""
     try:
-        payload = response.json()
-    except ValueError as exc:
-        raise LobError(response.text or response.reason) from exc
-    if not response.ok:
-        raise LobError(payload.get("error", {}).get("message", response.text))
-    return payload
-
-
-def create_letter(file, to, from_, **params):
-    """Mail a letter, returning Lob's letter object"""
-    return _request(
-        "POST",
-        "/letters",
-        data=_form({"to": to, "from": from_, **params}),
-        files={"file": ("letter.pdf", file, "application/pdf")},
-    )
-
-
-def create_check(attachment, to, from_, **params):
-    """Mail a check, returning Lob's check object"""
-    return _request(
-        "POST",
-        "/checks",
-        data=_form({"to": to, "from": from_, **params}),
-        files={"attachment": ("attachment.pdf", attachment, "application/pdf")},
-    )
-
-
-def retrieve_check(check_id):
-    """Fetch Lob's check object"""
-    return _request("GET", f"/checks/{check_id}")
+        return json.loads(exc.body)["error"]["message"]
+    except (TypeError, ValueError, KeyError):
+        return str(exc.reason)
