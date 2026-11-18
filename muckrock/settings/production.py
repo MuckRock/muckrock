@@ -31,3 +31,9 @@ else:
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
 SCOUT_NAME = "MuckRock"
+
+# Only the web dyno sets this; workers and migrations need to run long.
+if statement_timeout := os.environ.get("DB_STATEMENT_TIMEOUT", default=""):
+    DATABASES["default"]["OPTIONS"] = {  # noqa F405
+        "options": f"-c statement_timeout={statement_timeout}"
+    }
