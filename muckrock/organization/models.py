@@ -222,7 +222,7 @@ class Organization(models.Model):
             if field in data:
                 setattr(self, field, data[field])
 
-        # leaves out number_requests from the save so the balance isn't clobbered after payment. See #2354
+        # leave out number_requests from the save so a concurrent balance change isn't clobbered, see #2354
         update_fields = fields + [
             "entitlement",
             "requests_per_month",
@@ -422,7 +422,7 @@ class Organization(models.Model):
         resp_json = resp.json()
         if "card" in resp_json:
             self.card = resp_json["card"]
-            self.save()
+            self.save(update_fields=["card"])
 
     def confirm_payment_intent(self, payment_intent_id):
         """Confirm a charge after 3DS authentication via Squarelet API."""
@@ -437,7 +437,7 @@ class Organization(models.Model):
         resp_json = resp.json()
         if "card" in resp_json:
             self.card = resp_json["card"]
-            self.save()
+            self.save(update_fields=["card"])
 
 
 class Membership(models.Model):
