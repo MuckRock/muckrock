@@ -11,10 +11,19 @@ from django.test.utils import CaptureQueriesContext
 from django.utils.text import slugify
 
 # Standard Library
+import base64
+import json
 import re
 import uuid
+from email.parser import BytesParser
+from email.policy import HTTP
+from io import BytesIO
 from unittest.mock import MagicMock, patch
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, parse_qsl, urlsplit
+
+# Third Party
+from urllib3 import HTTPResponse
+from urllib3.connectionpool import HTTPConnectionPool
 
 
 def assert_queries_do_not_scale(client, url, create_one, rows=10):
@@ -186,3 +195,104 @@ class RunCommitHooksMixin:
                 lambda a: False,
             ):
                 transaction.get_connection(using=db_name).run_and_clear_commit_hooks()
+
+
+def _nest(pairs):
+    """Turn form keys like `to[name]` into nested dicts; the last repeat wins"""
+    nested = {}
+    for key, value in pairs:
+        if "[" in key and not key.endswith("[]"):
+            outer, inner = key.rstrip("]").split("[", 1)
+            nested.setdefault(outer, {})[inner] = value
+        else:
+            nested[key] = value
+    return nested
+
+
+def _scalar(value):
+    if isinstance(value, dict):
+        return {k: _scalar(v) for k, v in value.items() if v is not None}
+    if isinstance(value, bytes):
+        return value
+    return str(value).lower() if str(value) in ("True", "False") else str(value)
+
+
+class ApiRequest:
+    """A request sent to a faked API, decoded from any body encoding
+
+    `params` holds the fields as nested strings; `parts` keeps every multipart
+    part, in order, as (name, filename, payload).
+    """
+
+    def __init__(self, method, url, headers, body):
+        self.method = method
+        self.path = urlsplit(url).path
+        self.headers = {k.lower(): v for k, v in (headers or {}).items()}
+        self.parts = []
+        if isinstance(body, str):
+            body = body.encode("utf8")
+        self.params = self._decode(body or b"")
+
+    @property
+    def basic_auth(self):
+        """The (username, password) sent with HTTP basic auth"""
+        encoded = self.headers["authorization"].removeprefix("Basic ")
+        return tuple(base64.b64decode(encoded).decode("utf8").split(":", 1))
+
+    def _decode(self, body):
+        content_type = self.headers.get("content-type", "")
+        if content_type.startswith("multipart/form-data"):
+            message = BytesParser(policy=HTTP).parsebytes(
+                f"Content-Type: {content_type}\r\n\r\n".encode() + body
+            )
+            for part in message.iter_parts():
+                name = part.get_param("name", header="content-disposition")
+                payload = part.get_payload(decode=True)
+                filename = part.get_filename()
+                self.parts.append(
+                    (name, filename, payload if filename else payload.decode("utf8"))
+                )
+            return _scalar(_nest((name, value) for name, _, value in self.parts))
+        if content_type.startswith("application/x-www-form-urlencoded"):
+            return _scalar(_nest(parse_qsl(body.decode("utf8"))))
+        if body:
+            return _scalar(json.loads(body))
+        return {}
+
+
+class FakeApi:
+    """Stands in for an HTTP API on `host`, answering requests in the order queued
+
+    Patches urllib3's connection pool, so it fakes the wire for requests and
+    for any client library built on urllib3 alike.
+    """
+
+    def __init__(self, host):
+        self.host = host
+        self.requests = []
+        self._responses = []
+
+    def respond(self, body, status=200):
+        self._responses.append((status, body))
+
+    def __enter__(self):
+        self._patch = patch.object(
+            HTTPConnectionPool, "urlopen", autospec=True, side_effect=self._urlopen
+        )
+        self._patch.start()
+        return self
+
+    def __exit__(self, *exc):
+        self._patch.stop()
+
+    def _urlopen(self, pool, method, url, body=None, headers=None, **kwargs):
+        assert pool.host == self.host, f"unexpected request to {pool.host}"
+        self.requests.append(ApiRequest(method, url, headers, body))
+        status, response = self._responses.pop(0)
+        return HTTPResponse(
+            body=BytesIO(json.dumps(response).encode("utf8")),
+            headers={"Content-Type": "application/json"},
+            status=status,
+            reason="OK" if status == 200 else "Error",
+            preload_content=False,
+        )
