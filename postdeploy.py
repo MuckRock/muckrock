@@ -4,7 +4,6 @@
 """
 
 # Standard Library
-#!/usr/bin/env python3
 import os
 import sys
 
@@ -20,6 +19,8 @@ REVIEW_APP_URL = (
 GITHUB_CLIENT = os.environ["GITHUB_ACTIONS_CLIENT"]
 GITHUB_SECRET = os.environ["GITHUB_ACTIONS_SECRET"]
 os.environ["https_proxy"] = os.environ["FIXIE_URL"]
+SERVICE_USER_AGENT = os.environ.get("SERVICE_USER_AGENT", "muckrock requests")
+USER_AGENT = f"{requests.utils.default_user_agent()} {SERVICE_USER_AGENT} review-app"
 
 
 def get_access_token():
@@ -27,7 +28,11 @@ def get_access_token():
     token_url = f"{SQUARELET_URL}/openid/token"
     data = {"grant_type": "client_credentials"}
     resp = requests.post(
-        token_url, auth=(GITHUB_CLIENT, GITHUB_SECRET), data=data, timeout=20
+        token_url,
+        auth=(GITHUB_CLIENT, GITHUB_SECRET),
+        data=data,
+        headers={"User-Agent": USER_AGENT},
+        timeout=20,
     )
     resp.raise_for_status()
     return resp.json()["access_token"]
@@ -47,6 +52,7 @@ def patch_redirect_uri(client_id, redirect_uri, cmd_action):
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
     }
     resp = requests.patch(endpoint, json=payload, headers=headers, timeout=30)
     resp.raise_for_status()
