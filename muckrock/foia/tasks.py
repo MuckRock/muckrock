@@ -33,7 +33,6 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 # Third Party
 import boto3
-import lob
 import requests
 from anymail.exceptions import AnymailError
 from constance import config
@@ -41,11 +40,12 @@ from documentcloud import DocumentCloud
 from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
+from lob_python import ApiException
 from phaxio import PhaxioApi
+from urllib3.exceptions import ReadTimeoutError
 
 # MuckRock
 from muckrock.communication.models import (
-    Check,
     EmailCommunication,
     FaxCommunication,
     MailCommunication,
@@ -54,6 +54,7 @@ from muckrock.communication.models import (
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import get_dc_client, read_in_chunks, squarelet_get
+from muckrock.foia import lob
 from muckrock.foia.constants import FILE_MAGIC_BYTES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
@@ -66,13 +67,10 @@ from muckrock.foia.models import (
 )
 from muckrock.gloo.app.process_request import RequestStatus, process_request
 from muckrock.task.models import ResponseTask, SnailMailTask
-from muckrock.task.pdf import LobPDF
 
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 
 logger = logging.getLogger(__name__)
-
-lob.api_key = settings.LOB_SECRET_KEY
 
 
 class InvalidFileTypeError(Exception):
@@ -1139,7 +1137,6 @@ def prepare_snail_mail(
     comm_pk, switch, extra, certified, force=False, num_msgs=5, **kwargs
 ):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
-    # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
     # amount may be a string if it was JSON serialized from a Decimal
     amount = float(extra.get("amount", 0))
@@ -1180,109 +1177,48 @@ def prepare_snail_mail(
         )
         address = comm.foia.address
 
-    for test, reason in [
-        (not config.AUTO_LOB and not force, "auto"),
-        (not address, "addr"),
-        (address and address.lob_errors(comm.foia.agency), "badadd"),
-        (comm.category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
-        (comm.category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
-        (amount > settings.CHECK_LIMIT and not force, "limit"),
-    ]:
-        if test:
-            create_snail_mail_task(reason)
-            return
+    reason = lob.skip_reason(comm, address, amount, force)
+    if reason:
+        create_snail_mail_task(reason)
+        return
 
-    pdf = LobPDF(comm, comm.category, switch, amount=amount)
-    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address, num_msgs)
+    mail, reason = lob.prepare_mail(
+        comm,
+        address,
+        switch,
+        amount,
+        num_msgs,
+        retrying=bool(prepare_snail_mail.request.retries),
+    )
+    if reason:
+        create_snail_mail_task(reason)
+        return
 
-    for test, reason in [
-        (prepared_pdf is None, "pdf"),
-        (total_page_count > 12, "page"),
-    ]:
-        if test:
-            create_snail_mail_task(reason)
-            return
-
-    # send via lob
+    # Retries keep the task ID, so Lob sends at most one letter per send.
+    idempotency_key = prepare_snail_mail.request.id
     try:
         if comm.category == "p":
-            lob_obj = _lob_create_check(comm, prepared_pdf, mail, address, amount)
+            mail.lob_id = lob.create_check(
+                comm, mail, address, amount, idempotency_key
+            ).id
         else:
-            lob_obj = _lob_create_letter(comm, prepared_pdf, mail, certified)
-        mail.lob_id = lob_obj.id
-        mail.save()
-        comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
-        comm.foia.save(comment="sent via lob")
-        comm.foia.update()
-    except lob.error.APIConnectionError as exc:
+            mail.lob_id = lob.create_letter(comm, mail, certified, idempotency_key).id
+    except (ApiException, ReadTimeoutError) as exc:
+        if isinstance(exc, ApiException) and exc.status != 504:
+            logger.error(exc, exc_info=sys.exc_info())
+            create_snail_mail_task("lob", lob.error_message(exc))
+            return
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
-            args=[comm_pk, comm.category, switch, extra, certified, force, num_msgs],
+            args=[comm_pk, switch, extra, certified, force, num_msgs],
             kwargs=kwargs,
             exc=exc,
         )
-    except lob.error.LobError as exc:
-        logger.error(exc, exc_info=sys.exc_info())
-        create_snail_mail_task("lob", exc.args[0])
 
-
-def _lob_create_letter(comm, prepared_pdf, mail, certified):
-    """Send a letter via Lob"""
-    return lob.Letter.create(
-        description="Letter for communication {}".format(comm.pk),
-        to_address=comm.foia.address.lob_format(comm.foia.agency),
-        from_address={
-            "name": settings.ADDRESS_NAME,
-            "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
-            "address_line1": settings.ADDRESS_STREET,
-            "address_city": settings.ADDRESS_CITY,
-            "address_state": settings.ADDRESS_STATE,
-            "address_zip": settings.ADDRESS_ZIP,
-        },
-        color=False,
-        file=prepared_pdf,
-        double_sided=True,
-        metadata={"mail_id": mail.pk},
-        extra_service=certified,
-    )
-
-
-def _lob_create_check(comm, prepared_pdf, mail, check_address, amount):
-    """Send a check via Lob"""
-    memo = "MR {}".format(comm.foia.pk)
-    tracking_number = comm.foia.current_tracking_id()
-    if tracking_number:
-        old_memo = memo
-        memo += " / {}".format(tracking_number)
-        if len(memo) > 40:
-            memo = old_memo
-
-    check = lob.Check.create(
-        description="Check for communication {}".format(comm.pk),
-        to_address=check_address.lob_format(comm.foia.agency),
-        from_address={
-            "name": settings.ADDRESS_NAME,
-            "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
-            "address_line1": settings.ADDRESS_STREET,
-            "address_city": settings.ADDRESS_CITY,
-            "address_state": settings.ADDRESS_STATE,
-            "address_zip": settings.ADDRESS_ZIP,
-        },
-        bank_account=settings.LOB_BANK_ACCOUNT_ID,
-        amount=amount,
-        memo=memo,
-        attachment=prepared_pdf,
-        metadata={"mail_id": mail.pk},
-    )
-    mr_check = Check.objects.create(
-        number=check.check_number,
-        agency=comm.foia.agency,
-        amount=amount,
-        communication=comm,
-        user=User.objects.get(username="MuckrockStaff"),
-    )
-    mr_check.send_email()
-    return check
+    mail.save()
+    comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
+    comm.foia.save(comment="sent via lob")
+    comm.foia.update()
 
 
 @shared_task(
