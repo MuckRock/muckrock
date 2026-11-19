@@ -29,20 +29,16 @@ from muckrock.foia.tasks import prepare_snail_mail
 from muckrock.task.models import FlaggedTask, SnailMailTask
 
 
-def lob_response(body, status=200):
-    """A raw HTTP response from Lob, as lob-python returns it"""
-    return Mock(
-        status=status,
-        reason="OK" if status == 200 else "Error",
-        data=json.dumps(body).encode("utf8"),
-        getheaders=dict,
-    )
-
-
 def lob_error(message, status=422, exc_class=ApiException):
     """The exception lob-python raises for an error response from Lob"""
     body = {"error": {"message": message, "status_code": status}}
-    return exc_class(http_resp=lob_response(body, status))
+    http_resp = Mock(
+        status=status,
+        reason="Error",
+        data=json.dumps(body).encode("utf8"),
+        getheaders=dict,
+    )
+    return exc_class(http_resp=http_resp)
 
 
 def sent(mock_api_method):
@@ -79,7 +75,7 @@ class PrepareSnailMailTests(TestCase):
 
     @patch.object(LettersApi, "create", autospec=True)
     def test_sends_a_letter_linking_to_the_stored_pdf(self, create):
-        create.return_value = lob_response({"id": "ltr_abc123"})
+        create.return_value = Mock(id="ltr_abc123")
         prepare_snail_mail(self.comm.pk, False, {}, None)
 
         mail = MailCommunication.objects.get(communication=self.comm)
@@ -101,7 +97,7 @@ class PrepareSnailMailTests(TestCase):
 
     @patch.object(LettersApi, "create", autospec=True)
     def test_sends_a_certified_letter(self, create):
-        create.return_value = lob_response({"id": "ltr_abc123"})
+        create.return_value = Mock(id="ltr_abc123")
         prepare_snail_mail(self.comm.pk, False, {}, "certified")
 
         assert sent(create)["extra_service"] == "certified"
@@ -110,7 +106,7 @@ class PrepareSnailMailTests(TestCase):
     def test_sends_a_check_with_the_stored_pdf_attached(self, create):
         comm = self.payment_comm()
         self.foia.add_tracking_id("ABC-123")
-        create.return_value = lob_response({"id": "chk_abc123", "check_number": 10062})
+        create.return_value = Mock(id="chk_abc123", check_number=10062)
         prepare_snail_mail(comm.pk, False, {"amount": "25.00"}, None)
 
         mail = MailCommunication.objects.get(communication=comm)
@@ -177,8 +173,8 @@ class LobWebhookTests(TestCase):
         mail = MailCommunication.objects.create(
             communication=comm, sent_datetime=comm.datetime
         )
-        get.return_value = lob_response(
-            {"id": "chk_534f10783683daa0", "metadata": {"mail_id": str(mail.pk)}}
+        get.return_value = Mock(
+            id="chk_534f10783683daa0", metadata={"mail_id": str(mail.pk)}
         )
         payload = {
             "event_type": {"id": "check.failed"},

@@ -21,6 +21,7 @@ from django.utils import timezone
 # Standard Library
 import asyncio
 import csv
+import json
 import logging
 import os
 import os.path
@@ -40,7 +41,7 @@ from documentcloud import DocumentCloud
 from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
-from lob_python import ApiException, OpenApiException
+from lob_python import ApiClient, ApiException, Configuration
 from lob_python.api.checks_api import ChecksApi
 from lob_python.api.letters_api import LettersApi
 from lob_python.model.address_domestic import AddressDomestic
@@ -53,7 +54,6 @@ from lob_python.model.metadata_model import MetadataModel
 from phaxio import PhaxioApi
 
 # MuckRock
-from muckrock.communication import lob
 from muckrock.communication.models import (
     Check,
     EmailCommunication,
@@ -81,6 +81,8 @@ from muckrock.task.pdf import LobPDF
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 
 logger = logging.getLogger(__name__)
+
+LOB_TIMEOUT = (10, 120)
 
 
 class InvalidFileTypeError(Exception):
@@ -1147,7 +1149,7 @@ def prepare_snail_mail(
     comm_pk, switch, extra, certified, force=False, num_msgs=5, **kwargs
 ):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
-    # pylint: disable=too-many-locals, too-many-branches
+    # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
     # amount may be a string if it was JSON serialized from a Decimal
     amount = float(extra.get("amount", 0))
@@ -1220,7 +1222,7 @@ def prepare_snail_mail(
     except ApiException as exc:
         if exc.status != 504:
             logger.error(exc, exc_info=sys.exc_info())
-            create_snail_mail_task("lob", lob.error_message(exc))
+            create_snail_mail_task("lob", _lob_error_message(exc))
             return
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
@@ -1228,17 +1230,20 @@ def prepare_snail_mail(
             kwargs=kwargs,
             exc=exc,
         )
-    except OpenApiException as exc:
-        # lob-python validates the request before sending it, so Lob never saw it
-        logger.error(exc, exc_info=sys.exc_info())
-        create_snail_mail_task("lob", str(exc))
-        return
 
-    mail.lob_id = lob_obj["id"]
+    mail.lob_id = lob_obj.id
     mail.save()
     comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
     comm.foia.save(comment="sent via lob")
     comm.foia.update()
+
+
+def _lob_error_message(exc):
+    """Lob's error message from an ApiException, or the HTTP reason"""
+    try:
+        return json.loads(exc.body)["error"]["message"]
+    except (TypeError, ValueError, KeyError):
+        return str(exc.reason)
 
 
 def _lob_from_address(comm):
@@ -1266,7 +1271,8 @@ def _lob_create_letter(comm, mail, certified):
         metadata=MetadataModel(mail_id=str(mail.pk)),
         extra_service=certified,
     )
-    return lob.call(LettersApi, "create", letter)
+    with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
+        return LettersApi(client).create(letter, _request_timeout=LOB_TIMEOUT)
 
 
 def _lob_create_check(comm, mail, check_address, amount):
@@ -1279,23 +1285,21 @@ def _lob_create_check(comm, mail, check_address, amount):
         if len(memo) > 40:
             memo = old_memo
 
-    check = lob.call(
-        ChecksApi,
-        "create",
-        CheckEditable(
-            description="Check for communication {}".format(comm.pk),
-            to=AddressDomestic(**check_address.lob_format(comm.foia.agency)),
-            _from=AddressDomestic(**_lob_from_address(comm)),
-            bank_account=settings.LOB_BANK_ACCOUNT_ID,
-            amount=amount,
-            memo=memo,
-            attachment=mail.pdf.url,
-            use_type=ChkUseType("operational"),
-            metadata=MetadataModel(mail_id=str(mail.pk)),
-        ),
+    check_editable = CheckEditable(
+        description="Check for communication {}".format(comm.pk),
+        to=AddressDomestic(**check_address.lob_format(comm.foia.agency)),
+        _from=AddressDomestic(**_lob_from_address(comm)),
+        bank_account=settings.LOB_BANK_ACCOUNT_ID,
+        amount=amount,
+        memo=memo,
+        attachment=mail.pdf.url,
+        use_type=ChkUseType("operational"),
+        metadata=MetadataModel(mail_id=str(mail.pk)),
     )
+    with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
+        check = ChecksApi(client).create(check_editable, _request_timeout=LOB_TIMEOUT)
     mr_check = Check.objects.create(
-        number=check["check_number"],
+        number=check.check_number,
         agency=comm.foia.agency,
         amount=amount,
         communication=comm,

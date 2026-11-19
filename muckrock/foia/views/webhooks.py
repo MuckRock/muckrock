@@ -20,10 +20,10 @@ import time
 
 # Third Party
 import dateutil.parser
+from lob_python import ApiClient, Configuration
 from lob_python.api.checks_api import ChecksApi
 
 # MuckRock
-from muckrock.communication import lob
 from muckrock.communication.models import MailCommunication
 from muckrock.core.utils import new_action
 
@@ -57,8 +57,9 @@ def lob_webhook(request):
         if data["event_type"]["id"] == "check.failed":
             check_id = data["reference_id"]
             logger.info("Lob webhook: Check Failed %s", check_id)
-            check = lob.call(ChecksApi, "get", check_id)
-            mail_id = check["metadata"]["mail_id"]
+            with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
+                check = ChecksApi(client).get(check_id)
+            mail_id = check.metadata["mail_id"]
             mail = MailCommunication.objects.get(pk=mail_id)
             mail.communication.foia.flaggedtask_set.create(
                 category="payment",
