@@ -21,7 +21,6 @@ from django.utils import timezone
 # Standard Library
 import asyncio
 import csv
-import json
 import logging
 import os
 import os.path
@@ -41,22 +40,12 @@ from documentcloud import DocumentCloud
 from documentcloud.constants import BULK_LIMIT
 from documentcloud.exceptions import DocumentCloudError
 from documentcloud.toolbox import grouper
-from lob_python import ApiClient, ApiException, Configuration
-from lob_python.api.checks_api import ChecksApi
-from lob_python.api.letters_api import LettersApi
-from lob_python.model.address_domestic import AddressDomestic
-from lob_python.model.address_editable import AddressEditable
-from lob_python.model.check_editable import CheckEditable
-from lob_python.model.chk_use_type import ChkUseType
-from lob_python.model.letter_editable import LetterEditable
-from lob_python.model.ltr_use_type import LtrUseType
-from lob_python.model.metadata_model import MetadataModel
+from lob_python import ApiException
 from phaxio import PhaxioApi
 from urllib3.exceptions import ReadTimeoutError
 
 # MuckRock
 from muckrock.communication.models import (
-    Check,
     EmailCommunication,
     FaxCommunication,
     MailCommunication,
@@ -65,6 +54,7 @@ from muckrock.communication.models import (
 from muckrock.core.models import ExtractDay
 from muckrock.core.tasks import AsyncFileDownloadTask
 from muckrock.core.utils import get_dc_client, read_in_chunks, squarelet_get
+from muckrock.foia import lob
 from muckrock.foia.constants import FILE_MAGIC_BYTES
 from muckrock.foia.exceptions import SizeError
 from muckrock.foia.models import (
@@ -77,13 +67,10 @@ from muckrock.foia.models import (
 )
 from muckrock.gloo.app.process_request import RequestStatus, process_request
 from muckrock.task.models import ResponseTask, SnailMailTask
-from muckrock.task.pdf import LobPDF
 
 foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)"
 
 logger = logging.getLogger(__name__)
-
-LOB_TIMEOUT = (10, 120)
 
 
 class InvalidFileTypeError(Exception):
@@ -1150,7 +1137,6 @@ def prepare_snail_mail(
     comm_pk, switch, extra, certified, force=False, num_msgs=5, **kwargs
 ):
     """Determine if we should use Lob or a snail mail task to send this snail mail"""
-    # pylint: disable=too-many-locals
     comm = FOIACommunication.objects.get(pk=comm_pk)
     # amount may be a string if it was JSON serialized from a Decimal
     amount = float(extra.get("amount", 0))
@@ -1191,19 +1177,12 @@ def prepare_snail_mail(
         )
         address = comm.foia.address
 
-    for test, reason in [
-        (not config.AUTO_LOB and not force, "auto"),
-        (not address, "addr"),
-        (address and address.lob_errors(comm.foia.agency), "badadd"),
-        (comm.category == "a" and not config.AUTO_LOB_APPEAL and not force, "appeal"),
-        (comm.category == "p" and not config.AUTO_LOB_PAY and not force, "pay"),
-        (amount > settings.CHECK_LIMIT and not force, "limit"),
-    ]:
-        if test:
-            create_snail_mail_task(reason)
-            return
+    reason = lob.skip_reason(comm, address, amount, force)
+    if reason:
+        create_snail_mail_task(reason)
+        return
 
-    mail, reason = _lob_mail(
+    mail, reason = lob.prepare_mail(
         comm,
         address,
         switch,
@@ -1219,13 +1198,15 @@ def prepare_snail_mail(
     idempotency_key = prepare_snail_mail.request.id
     try:
         if comm.category == "p":
-            lob_obj = _lob_create_check(comm, mail, address, amount, idempotency_key)
+            mail.lob_id = lob.create_check(
+                comm, mail, address, amount, idempotency_key
+            ).id
         else:
-            lob_obj = _lob_create_letter(comm, mail, certified, idempotency_key)
+            mail.lob_id = lob.create_letter(comm, mail, certified, idempotency_key).id
     except (ApiException, ReadTimeoutError) as exc:
         if isinstance(exc, ApiException) and exc.status != 504:
             logger.error(exc, exc_info=sys.exc_info())
-            create_snail_mail_task("lob", _lob_error_message(exc))
+            create_snail_mail_task("lob", lob.error_message(exc))
             return
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
@@ -1234,109 +1215,10 @@ def prepare_snail_mail(
             exc=exc,
         )
 
-    mail.lob_id = lob_obj.id
     mail.save()
     comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
     comm.foia.save(comment="sent via lob")
     comm.foia.update()
-
-
-def _lob_mail(comm, address, switch, amount, num_msgs, retrying):
-    """The MailCommunication to send through Lob, or the reason to mail it by hand
-
-    Returns (mail, None) or (None, reason). A retry reuses the first attempt's
-    PDF: Lob may already have that attempt, and a retry under the same
-    idempotency key must send the same file.
-    """
-    if retrying:
-        mail = MailCommunication.objects.filter(communication=comm).first()
-        if mail and mail.pdf:
-            return mail, None
-
-    pdf = LobPDF(comm, comm.category, switch, amount=amount)
-    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address, num_msgs)
-    if prepared_pdf is None:
-        return None, "pdf"
-    if total_page_count > 12:
-        return None, "page"
-    return mail, None
-
-
-def _lob_error_message(exc):
-    """Lob's error message from an ApiException, or the HTTP reason"""
-    try:
-        return json.loads(exc.body)["error"]["message"]
-    except (TypeError, ValueError, KeyError):
-        return str(exc.reason)
-
-
-def _lob_from_address(comm):
-    """MuckRock's return address, as Lob's address fields"""
-    return {
-        "name": settings.ADDRESS_NAME,
-        "company": settings.ADDRESS_DEPT.format(pk=comm.foia.pk),
-        "address_line1": settings.ADDRESS_STREET,
-        "address_city": settings.ADDRESS_CITY,
-        "address_state": settings.ADDRESS_STATE,
-        "address_zip": settings.ADDRESS_ZIP,
-    }
-
-
-def _lob_create_letter(comm, mail, certified, idempotency_key):
-    """Send a letter via Lob"""
-    letter = LetterEditable(
-        description="Letter for communication {}".format(comm.pk),
-        to=AddressEditable(**comm.foia.address.lob_format(comm.foia.agency)),
-        _from=AddressEditable(**_lob_from_address(comm)),
-        file=mail.pdf.url,
-        use_type=LtrUseType("operational"),
-        color=False,
-        double_sided=True,
-        metadata=MetadataModel(mail_id=str(mail.pk)),
-        extra_service=certified,
-    )
-    with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
-        return LettersApi(client).create(
-            letter, idempotency_key=idempotency_key, _request_timeout=LOB_TIMEOUT
-        )
-
-
-def _lob_create_check(comm, mail, check_address, amount, idempotency_key):
-    """Send a check via Lob"""
-    memo = "MR {}".format(comm.foia.pk)
-    tracking_number = comm.foia.current_tracking_id()
-    if tracking_number:
-        old_memo = memo
-        memo += " / {}".format(tracking_number)
-        if len(memo) > 40:
-            memo = old_memo
-
-    check_editable = CheckEditable(
-        description="Check for communication {}".format(comm.pk),
-        to=AddressDomestic(**check_address.lob_format(comm.foia.agency)),
-        _from=AddressDomestic(**_lob_from_address(comm)),
-        bank_account=settings.LOB_BANK_ACCOUNT_ID,
-        amount=amount,
-        memo=memo,
-        attachment=mail.pdf.url,
-        use_type=ChkUseType("operational"),
-        metadata=MetadataModel(mail_id=str(mail.pk)),
-    )
-    with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
-        check = ChecksApi(client).create(
-            check_editable,
-            idempotency_key=idempotency_key,
-            _request_timeout=LOB_TIMEOUT,
-        )
-    mr_check = Check.objects.create(
-        number=check.check_number,
-        agency=comm.foia.agency,
-        amount=amount,
-        communication=comm,
-        user=User.objects.get(username="MuckrockStaff"),
-    )
-    mr_check.send_email()
-    return check
 
 
 @shared_task(
