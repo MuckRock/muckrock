@@ -30,7 +30,9 @@ def phaxio_sent(fax_id=1234):
 
 
 def file_parts(request):
-    return [part for part in request.parts if part[0] in ("file", "file[]")]
+    """The files in a request, which all go up as `file[]`"""
+    assert "file" not in {part[0] for part in request.parts}
+    return [part for part in request.parts if part[0] == "file[]"]
 
 
 @override_settings(
@@ -101,6 +103,22 @@ class SendFaxTests(TestCase):
         ]
         assert all(filename.endswith(".pdf") for _, filename, _ in parts[:2])
         assert parts[2][2] == b"Body"
+
+    def test_leaves_out_attachments_phaxio_cannot_fax(self):
+        FOIAFileFactory(
+            comm=self.comm,
+            ffile=ContentFile(b"%PDF-1.4 records", name="fax_records.pdf"),
+        )
+        FOIAFileFactory(
+            comm=self.comm,
+            ffile=ContentFile(b"PK\x03\x04 spreadsheet", name="fees.xlsx"),
+        )
+        with FakeApi("api.phaxio.com") as phaxio:
+            phaxio.respond(phaxio_sent())
+            send_fax(self.comm.pk, "Subject", "Body", 0)
+
+        parts = file_parts(phaxio.requests[0])
+        assert [payload for _, _, payload in parts] == [b"%PDF-1.4 records", b"Body"]
 
     def test_passes_test_fail_through_to_phaxio(self):
         with FakeApi("api.phaxio.com") as phaxio:

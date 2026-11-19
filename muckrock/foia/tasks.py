@@ -72,6 +72,8 @@ foia_url = r"(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<i
 
 logger = logging.getLogger(__name__)
 
+FAXABLE_EXTENSIONS = {"docx", "pdf", "tif", "jpg", "txt", "html", "png"}
+
 lob.api_key = settings.LOB_SECRET_KEY
 
 
@@ -552,6 +554,11 @@ def send_fax(comm_id, subject, body, error_count, **kwargs):
 
     files = []
     for foia_file in comm.files.all():
+        if foia_file.get_extension() not in FAXABLE_EXTENSIONS:
+            logger.warning(
+                "send_fax: skipping attachment %s that Phaxio cannot fax", foia_file.pk
+            )
+            continue
         with foia_file.ffile.open("rb") as ffile:
             name = os.path.basename(foia_file.ffile.name)
             content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"

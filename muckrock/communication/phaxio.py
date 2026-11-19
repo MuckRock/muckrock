@@ -24,13 +24,11 @@ def create_fax(to, files, tags, **params):
             data[key] = str(value).lower()
         elif value is not None:
             data[key] = value
-    # Phaxio documents `file[]` for sending several files
-    file_key = "file" if len(files) == 1 else "file[]"
     response = requests.post(
         f"{PHAXIO_API}/faxes",
         auth=(settings.PHAXIO_KEY, settings.PHAXIO_SECRET),
         data=data,
-        files=[(file_key, file_) for file_ in files],
+        files=[("file[]", file_) for file_ in files],
         timeout=TIMEOUT,
     )
     response.raise_for_status()
