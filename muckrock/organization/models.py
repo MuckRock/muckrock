@@ -221,7 +221,17 @@ class Organization(models.Model):
         for field in fields:
             if field in data:
                 setattr(self, field, data[field])
-        self.save()
+
+        # leaves out number_requests from the save so the balance isn't clobbered after payment. See #2354
+        update_fields = fields + [
+            "entitlement",
+            "requests_per_month",
+            "monthly_requests",
+            "date_update",
+            "parent",
+            "merged",
+        ]
+        self.save(update_fields=update_fields)
 
         if data.get("groups"):
             groups = []
