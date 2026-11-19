@@ -52,6 +52,7 @@ from lob_python.model.letter_editable import LetterEditable
 from lob_python.model.ltr_use_type import LtrUseType
 from lob_python.model.metadata_model import MetadataModel
 from phaxio import PhaxioApi
+from urllib3.exceptions import ReadTimeoutError
 
 # MuckRock
 from muckrock.communication.models import (
@@ -1202,31 +1203,33 @@ def prepare_snail_mail(
             create_snail_mail_task(reason)
             return
 
-    pdf = LobPDF(comm, comm.category, switch, amount=amount)
-    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address, num_msgs)
+    mail, reason = _lob_mail(
+        comm,
+        address,
+        switch,
+        amount,
+        num_msgs,
+        retrying=bool(prepare_snail_mail.request.retries),
+    )
+    if reason:
+        create_snail_mail_task(reason)
+        return
 
-    for test, reason in [
-        (prepared_pdf is None, "pdf"),
-        (total_page_count > 12, "page"),
-    ]:
-        if test:
-            create_snail_mail_task(reason)
-            return
-
-    # send via lob
+    # Retries keep the task ID, so Lob sends at most one letter per send.
+    idempotency_key = prepare_snail_mail.request.id
     try:
         if comm.category == "p":
-            lob_obj = _lob_create_check(comm, mail, address, amount)
+            lob_obj = _lob_create_check(comm, mail, address, amount, idempotency_key)
         else:
-            lob_obj = _lob_create_letter(comm, mail, certified)
-    except ApiException as exc:
-        if exc.status != 504:
+            lob_obj = _lob_create_letter(comm, mail, certified, idempotency_key)
+    except (ApiException, ReadTimeoutError) as exc:
+        if isinstance(exc, ApiException) and exc.status != 504:
             logger.error(exc, exc_info=sys.exc_info())
             create_snail_mail_task("lob", _lob_error_message(exc))
             return
         prepare_snail_mail.retry(
             countdown=(2**prepare_snail_mail.request.retries) * 300 + randint(0, 300),
-            args=[comm_pk, comm.category, switch, extra, certified, force, num_msgs],
+            args=[comm_pk, switch, extra, certified, force, num_msgs],
             kwargs=kwargs,
             exc=exc,
         )
@@ -1236,6 +1239,27 @@ def prepare_snail_mail(
     comm.foia.status = comm.foia.sent_status(comm.category == "a", comm.thanks)
     comm.foia.save(comment="sent via lob")
     comm.foia.update()
+
+
+def _lob_mail(comm, address, switch, amount, num_msgs, retrying):
+    """The MailCommunication to send through Lob, or the reason to mail it by hand
+
+    Returns (mail, None) or (None, reason). A retry reuses the first attempt's
+    PDF: Lob may already have that attempt, and a retry under the same
+    idempotency key must send the same file.
+    """
+    if retrying:
+        mail = MailCommunication.objects.filter(communication=comm).first()
+        if mail and mail.pdf:
+            return mail, None
+
+    pdf = LobPDF(comm, comm.category, switch, amount=amount)
+    prepared_pdf, total_page_count, _files, mail = pdf.prepare(address, num_msgs)
+    if prepared_pdf is None:
+        return None, "pdf"
+    if total_page_count > 12:
+        return None, "page"
+    return mail, None
 
 
 def _lob_error_message(exc):
@@ -1258,7 +1282,7 @@ def _lob_from_address(comm):
     }
 
 
-def _lob_create_letter(comm, mail, certified):
+def _lob_create_letter(comm, mail, certified, idempotency_key):
     """Send a letter via Lob"""
     letter = LetterEditable(
         description="Letter for communication {}".format(comm.pk),
@@ -1272,10 +1296,12 @@ def _lob_create_letter(comm, mail, certified):
         extra_service=certified,
     )
     with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
-        return LettersApi(client).create(letter, _request_timeout=LOB_TIMEOUT)
+        return LettersApi(client).create(
+            letter, idempotency_key=idempotency_key, _request_timeout=LOB_TIMEOUT
+        )
 
 
-def _lob_create_check(comm, mail, check_address, amount):
+def _lob_create_check(comm, mail, check_address, amount, idempotency_key):
     """Send a check via Lob"""
     memo = "MR {}".format(comm.foia.pk)
     tracking_number = comm.foia.current_tracking_id()
@@ -1297,7 +1323,11 @@ def _lob_create_check(comm, mail, check_address, amount):
         metadata=MetadataModel(mail_id=str(mail.pk)),
     )
     with ApiClient(Configuration(username=settings.LOB_SECRET_KEY)) as client:
-        check = ChecksApi(client).create(check_editable, _request_timeout=LOB_TIMEOUT)
+        check = ChecksApi(client).create(
+            check_editable,
+            idempotency_key=idempotency_key,
+            _request_timeout=LOB_TIMEOUT,
+        )
     mr_check = Check.objects.create(
         number=check.check_number,
         agency=comm.foia.agency,

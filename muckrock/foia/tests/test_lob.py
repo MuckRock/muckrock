@@ -20,6 +20,7 @@ from lob_python import ApiClient, ApiException
 from lob_python.api.checks_api import ChecksApi
 from lob_python.api.letters_api import LettersApi
 from lob_python.exceptions import ServiceException
+from urllib3.exceptions import ReadTimeoutError
 
 # MuckRock
 from muckrock.communication.models import Address, Check, MailCommunication
@@ -27,6 +28,7 @@ from muckrock.core.factories import UserFactory
 from muckrock.foia.factories import FOIACommunicationFactory, FOIARequestFactory
 from muckrock.foia.tasks import prepare_snail_mail
 from muckrock.task.models import FlaggedTask, SnailMailTask
+from muckrock.task.pdf import LobPDF
 
 
 def lob_error(message, status=422, exc_class=ApiException):
@@ -39,6 +41,16 @@ def lob_error(message, status=422, exc_class=ApiException):
         getheaders=dict,
     )
     return exc_class(http_resp=http_resp)
+
+
+TASK_ID = "a1b2c3d4-task"
+
+
+def send(comm_pk, extra, certified, retries=0):
+    """Run prepare_snail_mail as Celery would, with a task ID"""
+    return prepare_snail_mail.apply(
+        args=[comm_pk, False, extra, certified], task_id=TASK_ID, retries=retries
+    )
 
 
 def sent(mock_api_method):
@@ -76,7 +88,7 @@ class PrepareSnailMailTests(TestCase):
     @patch.object(LettersApi, "create", autospec=True)
     def test_sends_a_letter_linking_to_the_stored_pdf(self, create):
         create.return_value = Mock(id="ltr_abc123")
-        prepare_snail_mail(self.comm.pk, False, {}, None)
+        send(self.comm.pk, {}, None)
 
         mail = MailCommunication.objects.get(communication=self.comm)
         params = sent(create)
@@ -90,6 +102,7 @@ class PrepareSnailMailTests(TestCase):
         assert params["double_sided"] is True
         assert params["metadata"] == {"mail_id": str(mail.pk)}
         assert params.get("extra_service") is None
+        assert create.call_args.kwargs["idempotency_key"] == TASK_ID
         assert mail.lob_id == "ltr_abc123"
         self.foia.refresh_from_db()
         assert self.foia.status == "ack"
@@ -98,7 +111,7 @@ class PrepareSnailMailTests(TestCase):
     @patch.object(LettersApi, "create", autospec=True)
     def test_sends_a_certified_letter(self, create):
         create.return_value = Mock(id="ltr_abc123")
-        prepare_snail_mail(self.comm.pk, False, {}, "certified")
+        send(self.comm.pk, {}, "certified")
 
         assert sent(create)["extra_service"] == "certified"
 
@@ -107,7 +120,7 @@ class PrepareSnailMailTests(TestCase):
         comm = self.payment_comm()
         self.foia.add_tracking_id("ABC-123")
         create.return_value = Mock(id="chk_abc123", check_number=10062)
-        prepare_snail_mail(comm.pk, False, {"amount": "25.00"}, None)
+        send(comm.pk, {"amount": "25.00"}, None)
 
         mail = MailCommunication.objects.get(communication=comm)
         params = sent(create)
@@ -117,6 +130,7 @@ class PrepareSnailMailTests(TestCase):
         assert params["amount"] == 25.0
         assert params["memo"] == f"MR {self.foia.pk} / ABC-123"
         assert params["metadata"] == {"mail_id": str(mail.pk)}
+        assert create.call_args.kwargs["idempotency_key"] == TASK_ID
         assert mail.lob_id == "chk_abc123"
         check = Check.objects.get(communication=comm)
         assert check.number == 10062
@@ -127,24 +141,56 @@ class PrepareSnailMailTests(TestCase):
         self, create
     ):
         create.side_effect = lob_error("address_zip is invalid")
-        prepare_snail_mail(self.comm.pk, False, {}, None)
+        send(self.comm.pk, {}, None)
 
         task = SnailMailTask.objects.get(communication=self.comm)
         assert task.reason == "lob"
         assert task.error_msg == "address_zip is invalid"
         assert MailCommunication.objects.get(communication=self.comm).lob_id == ""
 
-    @patch("muckrock.foia.tasks.prepare_snail_mail.retry", side_effect=Retry())
-    @patch.object(LettersApi, "create", autospec=True)
-    def test_retries_when_lob_times_out(self, create, mock_retry):
-        create.side_effect = lob_error(
-            "Gateway Timeout", status=504, exc_class=ServiceException
-        )
-        with self.assertRaises(Retry):
-            prepare_snail_mail(self.comm.pk, False, {}, None)
+    def assert_retries_after(self, error):
+        with patch.object(
+            LettersApi, "create", autospec=True, side_effect=error
+        ), patch(
+            "muckrock.foia.tasks.prepare_snail_mail.retry", side_effect=Retry()
+        ) as retry:
+            with self.assertRaises(Retry):
+                send(self.comm.pk, {"amount": 0}, "certified")
 
-        mock_retry.assert_called_once()
+        retry.assert_called_once()
+        assert retry.call_args.kwargs["args"] == [
+            self.comm.pk,
+            False,
+            {"amount": 0},
+            "certified",
+            False,
+            5,
+        ]
         assert not SnailMailTask.objects.exists()
+
+    def test_retries_with_the_same_arguments_when_lob_times_out(self):
+        self.assert_retries_after(
+            lob_error("Gateway Timeout", status=504, exc_class=ServiceException)
+        )
+
+    def test_retries_with_the_same_arguments_when_lobs_response_times_out(self):
+        self.assert_retries_after(ReadTimeoutError(None, None, "Read timed out."))
+
+    def test_a_retry_sends_lob_the_first_attempts_pdf_under_the_same_key(self):
+        self.assert_retries_after(ReadTimeoutError(None, None, "Read timed out."))
+        first_url = MailCommunication.objects.get(communication=self.comm).pdf.url
+
+        with patch.object(
+            LettersApi, "create", autospec=True, return_value=Mock(id="ltr_abc123")
+        ) as create, patch.object(LobPDF, "prepare", autospec=True) as prepare:
+            send(self.comm.pk, {"amount": 0}, "certified", retries=1)
+
+        prepare.assert_not_called()
+        assert sent(create)["file"] == first_url
+        assert create.call_args.kwargs["idempotency_key"] == TASK_ID
+        assert MailCommunication.objects.get(communication=self.comm).lob_id == (
+            "ltr_abc123"
+        )
 
 
 def signed_post(client, payload, key="secret"):
