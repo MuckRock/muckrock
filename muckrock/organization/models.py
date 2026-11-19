@@ -222,7 +222,8 @@ class Organization(models.Model):
             if field in data:
                 setattr(self, field, data[field])
 
-        # leave out number_requests from the save so a concurrent balance change isn't clobbered, see #2354
+        # leave out number_requests from the save
+        # so a concurrent balance change isn't clobbered, see #2354
         update_fields = fields + [
             "entitlement",
             "requests_per_month",
@@ -335,7 +336,8 @@ class Organization(models.Model):
                 request_count[count] += deduct_amount
                 if amount == 0:
                     break
-            current_organization.save()
+            update_fields = ["monthly_requests", "number_requests"]
+            current_organization.save(update_fields=update_fields)
             if amount == 0:
                 break
 
@@ -350,12 +352,13 @@ class Organization(models.Model):
         """Return requests to the organization's balance"""
         self.monthly_requests = F("monthly_requests") + amounts["monthly"]
         self.number_requests = F("number_requests") + amounts["regular"]
-        self.save()
+        update_fields = ["monthly_requests", "number_requests"]
+        self.save(update_fields=update_fields)
 
     def add_requests(self, amount):
         """Add requests"""
         self.number_requests = F("number_requests") + amount
-        self.save()
+        self.save(update_fields=["number_requests"])
 
     def get_total_number_requests(self):
         """Pooled purchased (non-expiring) requests across this org and the orgs
