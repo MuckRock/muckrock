@@ -1029,3 +1029,6 @@ REQUESTED_DOCS_MAX_LENGTH = int(os.environ.get("REQUESTED_DOCS_MAX_LENGTH", 2000
 
 # Most recent communications shown in a task's collapsed history
 PREVIOUS_COMMUNICATIONS_LIMIT = int(os.environ.get("PREVIOUS_COMMUNICATIONS_LIMIT", 10))
+
+# Max amount of requests that can be comped in a single transaction
+MAX_REQUESTS_CHANGE = int(os.environ.get("MAX_REQUESTS_CHANGE", 250))
