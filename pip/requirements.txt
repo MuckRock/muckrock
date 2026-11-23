@@ -257,7 +257,7 @@ kombu[redis]==5.6.2
     # via celery
 listcrunch==1.0.1
     # via python-documentcloud
-lob==4.0.1
+lob-python==5.2.1
     # via -r pip/requirements.in
 logzio-python-handler==4.1.9
     # via -r pip/requirements.in
@@ -366,6 +366,7 @@ python-dateutil==2.9.0
     #   botocore
     #   celery
     #   govqa
+    #   lob-python
     #   python-documentcloud
     #   zenpy
 python-documentcloud==4.8.1
@@ -411,7 +412,6 @@ requests[security]==2.33.1
     #   django-anymail
     #   google-api-core
     #   google-cloud-storage
-    #   lob
     #   logzio-python-handler
     #   premailer
     #   python-documentcloud
@@ -502,6 +502,7 @@ uritemplate==3.0.0
 urllib3==2.8.0
     # via
     #   botocore
+    #   lob-python
     #   python-documentcloud
     #   python-squarelet
     #   requests
