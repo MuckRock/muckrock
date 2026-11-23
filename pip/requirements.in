@@ -56,7 +56,6 @@ psycopg2-binary # Interface to postgres DB
 pydantic # for gloo
 pymdown-extensions # Adds more helpful Markdown extensions
 pypdf # Used to manipulate PDFs
-phaxio # For sending faxes through Phaxio
 python-documentcloud # for uploading to documentcloud
 python-redis-lock[django] # use a redis cache with a locking mechanism
 redis # Redis integration - for use with celery

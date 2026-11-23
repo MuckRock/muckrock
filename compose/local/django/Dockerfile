@@ -8,36 +8,14 @@ ENV PYTHONUNBUFFERED 1
 RUN python -m pip install "pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  # psycopg2 dependencies
-  #&& apt-get install build-deps gcc python2-dev musl-dev \
-  #&& apt-get install postgresql-dev \
-  # Pillow dependencies
-  #&& apt-get install jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev \
-  # CFFI dependencies
-  #&& apt-get install libffi-dev py-cffi \
-  # Translations dependencies
-  #&& apt-get install gettext \
   # https://docs.djangoproject.com/en/dev/ref/django-admin/#dbshell
   postgresql-client \
-  # for downloading dependencies from git
-  #&& apt-get install git \
-  # xml parser
-  #&& apt-get install libxml2-dev libxslt-dev \
-  # for numpy / scipy
-  #&& apt-get install openblas-dev gfortran g++ \
-  # memcahced
-  libmemcached-dev \
-  # for imagediet
-  #&& apt-get install libmagic
+  # embeds fonts in attachments before mailing (muckrock/task/pdf.py)
   ghostscript
 
 # set up makecert root CA
 COPY --from=squarelet_certs rootCA.pem /usr/local/share/ca-certificates/rootCA.crt
 RUN update-ca-certificates
-
-
-RUN apt-get update && apt-get install -y libsodium-dev ca-certificates
-ENV SODIUM_INSTALL=system
 
 # install NVM
 ENV NVM_DIR /usr/local/nvm
@@ -53,15 +31,10 @@ RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash 
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-# heroku cli
-RUN curl https://cli-assets.heroku.com/install.sh | sh
-
 # Requirements are installed here to ensure they will be cached.
 COPY ./pip /pip
 #RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/requirements.txt
 #RUN --mount=type=cache,target=/root/.cache/pip pip install -r /pip/dev-requirements.txt
-# Use pre-built wheel
-RUN pip install wheel
 # Install requirements
 RUN pip install -r /pip/requirements.txt
 RUN pip install -r /pip/dev-requirements.txt

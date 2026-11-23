@@ -52,7 +52,6 @@ celery[redis]==5.6.2
     #   sentry-sdk
 certifi==2026.10.19
     # via
-    #   phaxio
     #   requests
     #   scout-apm
     #   sentry-sdk
@@ -300,8 +299,6 @@ pdfrw==0.4
     # via -r pip/requirements.in
 pexpect==4.6.0
     # via ipython
-phaxio==0.3
-    # via -r pip/requirements.in
 phonenumberslite==8.8.2
     # via -r pip/requirements.in
 pickleshare==0.7.5
@@ -370,7 +367,6 @@ python-dateutil==2.9.0
     #   celery
     #   govqa
     #   lob-python
-    #   phaxio
     #   python-documentcloud
     #   zenpy
 python-documentcloud==4.8.1
@@ -417,7 +413,6 @@ requests[security]==2.33.1
     #   google-api-core
     #   google-cloud-storage
     #   logzio-python-handler
-    #   phaxio
     #   premailer
     #   python-documentcloud
     #   python-squarelet
@@ -452,7 +447,6 @@ six==1.17.0
     #   click-repl
     #   furl
     #   orderedmultidict
-    #   phaxio
     #   python-dateutil
     #   zenpy
 smart-open==1.10.0
@@ -509,7 +503,6 @@ urllib3==2.8.0
     # via
     #   botocore
     #   lob-python
-    #   phaxio
     #   python-documentcloud
     #   python-squarelet
     #   requests
