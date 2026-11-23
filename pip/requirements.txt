@@ -129,9 +129,7 @@ django-activity-stream==1.4.2
 django-anymail[mailgun]==9.1
     # via -r pip/requirements.in
 django-appconf==1.0.4
-    # via
-    #   django-celery-email
-    #   django-opensearch
+    # via django-celery-email
 django-autocomplete-light==3.12.1
     # via -r pip/requirements.in
 django-celery-email==3.0.0
@@ -260,7 +258,7 @@ kombu[redis]==5.6.2
     # via celery
 listcrunch==1.0.1
     # via python-documentcloud
-lob==4.0.1
+lob-python==5.2.1
     # via -r pip/requirements.in
 logzio-python-handler==4.1.9
     # via -r pip/requirements.in
@@ -371,6 +369,7 @@ python-dateutil==2.9.0
     #   botocore
     #   celery
     #   govqa
+    #   lob-python
     #   phaxio
     #   python-documentcloud
     #   zenpy
@@ -417,7 +416,6 @@ requests[security]==2.33.1
     #   django-anymail
     #   google-api-core
     #   google-cloud-storage
-    #   lob
     #   logzio-python-handler
     #   phaxio
     #   premailer
@@ -510,6 +508,7 @@ uritemplate==3.0.0
 urllib3==2.8.0
     # via
     #   botocore
+    #   lob-python
     #   phaxio
     #   python-documentcloud
     #   python-squarelet
