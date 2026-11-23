@@ -22,13 +22,13 @@ class OrganizationAdminForm(forms.ModelForm):
     """Adjust purchased requests by an amount instead of setting them"""
 
     number_requests_change = forms.IntegerField(
-        label="Add/remove purchased requests",
+        label="Change number requests by",
         initial=0,
         required=False,
         min_value=-settings.MAX_REQUESTS_CHANGE,
         max_value=settings.MAX_REQUESTS_CHANGE,
         help_text=(
-            "Positive to add, negative to remove "
+            "Added to Number requests above. Use a negative number to remove "
             f"(max {settings.MAX_REQUESTS_CHANGE} at a time)"
         ),
     )
@@ -41,7 +41,10 @@ class OrganizationAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
         number_change = cleaned_data.get("number_requests_change") or 0
         if self.instance.number_requests + number_change < 0:
-            raise forms.ValidationError("Purchased requests cannot go below 0")
+            raise forms.ValidationError(
+                "Number requests cannot go below 0 "
+                f"(currently {self.instance.number_requests})"
+            )
         return cleaned_data
 
 

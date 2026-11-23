@@ -63,7 +63,7 @@ class TestOrganizationAdminRequestChange(TestCase):
     def test_cannot_go_below_zero(self):
         response = self.post_change({"number_requests_change": -6})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Purchased requests cannot go below 0")
+        self.assertContains(response, "Number requests cannot go below 0")
         self.assertEqual(self.get_balance(), 5)
 
     def test_cannot_exceed_max_change(self):
