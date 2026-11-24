@@ -222,13 +222,6 @@ class List(MRFilterListView):
         return objects
 
 
-def redirect_flag(request, **kwargs):
-    """Redirect flag urls to base agency"""
-    # filter None from kwargs
-    kwargs = {k: v for k, v in kwargs.items() if v is not None}
-    return redirect("jurisdiction-detail", **kwargs)
-
-
 class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""
 

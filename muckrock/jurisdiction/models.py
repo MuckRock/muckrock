@@ -146,21 +146,11 @@ class Jurisdiction(models.Model, RequestHelper):
             slugs.update({"fed_slug": self.slug})
         return slugs
 
-    def get_url(self, view):
-        """The url for this object"""
-        view = "jurisdiction-%s" % view
-        slugs = self.get_slugs()
-        return reverse(view, kwargs=slugs)
-
     def save(self, *args, **kwargs):
         """Normalize fields before saving"""
         self.slug = slugify(self.slug)
         self.name = self.name.strip()
         super().save(*args, **kwargs)
-
-    def get_url_flag(self):
-        """So we can call from template"""
-        return self.get_url("flag")
 
     @property
     def legal(self):
