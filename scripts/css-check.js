@@ -16,6 +16,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { transform as lightningTransform } from "lightningcss";
 import postcss from "postcss";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -342,17 +343,46 @@ export function normalize(css, { ignorePrefixes = false } = {}) {
  * build does, so nesting is compared as the :is() selectors browsers get.
  */
 async function lowerForTargets(sheets) {
-  const { resolveConfig, transformWithEsbuild } = await import("vite");
+  const { resolveConfig } = await import("vite");
   const config = await resolveConfig({ root: ROOT, logLevel: "error" }, "build");
+  const targets = lightningTargets(config.build.cssTarget);
   const lowered = {};
   for (const [name, css] of Object.entries(sheets)) {
-    const result = await transformWithEsbuild(css, `${name}.css`, {
-      loader: "css",
-      target: config.build.cssTarget,
+    const result = lightningTransform({
+      filename: `${name}.css`,
+      code: Buffer.from(css),
+      targets,
     });
-    lowered[name] = result.code;
+    lowered[name] = result.code.toString();
   }
   return lowered;
+}
+
+const LIGHTNING_BROWSERS = {
+  chrome: "chrome",
+  edge: "edge",
+  firefox: "firefox",
+  ios: "ios_saf",
+  opera: "opera",
+  safari: "safari",
+};
+
+/**
+ * Convert esbuild-style targets ("safari16.4") to Lightning CSS targets, as
+ * Vite does before minifying; Vite does not export its own converter.
+ *
+ * Throws on a target it cannot map, rather than lowering for the wrong browsers.
+ */
+export function lightningTargets(cssTarget) {
+  const targets = {};
+  for (const entry of [cssTarget].flat()) {
+    const match = /^([a-z]+)(\d+)(?:\.(\d+))?$/.exec(entry);
+    const browser = match && LIGHTNING_BROWSERS[match[1]];
+    if (!browser) throw new Error(`Unsupported CSS target "${entry}"`);
+    const version = (Number(match[2]) << 16) | (Number(match[3] ?? 0) << 8);
+    if (!targets[browser] || version < targets[browser]) targets[browser] = version;
+  }
+  return targets;
 }
 
 /**
@@ -435,11 +465,11 @@ async function main(command, ...args) {
     return;
   }
 
-  // Re-processed so a change to the pipeline doesn't need a new snapshot.
+  // Re-normalised so a change to normalize() doesn't need a new snapshot, but
+  // not re-lowered: Lightning CSS orders declarations differently once
+  // normalize() has resolved var(), so lowering twice adds false differences.
   const baselineDir = path.join(WORK_DIR, "baseline");
-  writeNormalized(baselineDir, await lowerForTargets(readSheets(BASELINE_DIR)), {
-    ignorePrefixes,
-  });
+  writeNormalized(baselineDir, readSheets(BASELINE_DIR), { ignorePrefixes });
   writeNormalized(CURRENT_DIR, sheets, { ignorePrefixes });
   try {
     execFileSync(

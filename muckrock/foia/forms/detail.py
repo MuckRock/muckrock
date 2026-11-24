@@ -13,6 +13,7 @@ from datetime import date, timedelta
 # MuckRock
 from muckrock.accounts.models import StockResponse
 from muckrock.core import autocomplete
+from muckrock.core.forms import NativeDateInput
 from muckrock.foia.models import END_STATUS, FOIANote, FOIARequest, TrackingNumber
 from muckrock.organization.forms import StripeForm
 from muckrock.task.constants import AGENCY_FLAG_CATEGORIES, PUBLIC_FLAG_CATEGORIES
@@ -24,7 +25,7 @@ class FOIAEstimatedCompletionDateForm(forms.ModelForm):
     date_estimate = forms.DateField(
         label="Estimated completion date",
         help_text="The est. completion date is declared by the agency.",
-        widget=forms.DateInput(format="%m/%d/%Y", attrs={"placeholder": "mm/dd/yyyy"}),
+        widget=NativeDateInput(attrs={"min": date.today}),
     )
 
     class Meta:
@@ -46,8 +47,11 @@ class FOIAEmbargoForm(forms.Form):
         required=False,
         label="Expiration date",
         help_text="Embargo duration are limited to a maximum of 30 days.",
-        widget=forms.DateInput(
-            attrs={"class": "datepicker", "placeholder": "Pick a date"}
+        widget=NativeDateInput(
+            attrs={
+                "min": date.today,
+                "max": lambda: date.today() + timedelta(30),
+            }
         ),
     )
 

@@ -6,32 +6,32 @@ html {
   font-size: 14px;
 }
 
-@media (min-width: 400px) {
+@media (width >= 400px) {
   html {
     font-size: 16px;
   }
 }
 
-@media (min-width: 600px) {
+@media (width >= 600px) {
   html {
     font-size: 18px;
   }
 }
 
-@media (min-width: 800px) {
+@media (width >= 800px) {
   html {
     font-size: 20px;
   }
 }
 
 body {
-  margin: 0;
-  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "avenir next", avenir, helvetica, "helvetica neue", ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
   line-height: 1.6;
   background: #f8f7f6;
   color: #362522;
+  margin: 0;
+  padding: 0;
 }
 
 main {
@@ -54,8 +54,8 @@ a:visited {
 }
 
 table {
-  width: 100%;
   border-collapse: collapse;
+  width: 100%;
 }
 
 th {
@@ -99,13 +99,13 @@ td p {
 
 .select-all {
   -webkit-user-select: all;
-  -moz-user-select: -moz-all;
   user-select: all;
+  -moz-user-select: -moz-all;
 }
 
 .nostyle {
-  list-style: none;
   padding-left: 0;
+  list-style: none;
 }
 
 .nomargin {
@@ -129,8 +129,8 @@ td p {
 }
 
 .inline li {
-  display: inline-block;
   margin-right: 1em;
+  display: inline-block;
 }
 
 .inline li:last-child {
@@ -142,48 +142,47 @@ td p {
 }
 
 .row {
-  display: flex;
   flex-wrap: wrap;
+  display: flex;
 }
 
 .row .column {
-  flex: 1 1 10em;
+  flex: 10em;
 }
 
 .row .column__wide {
-  flex: 3 1 30em;
+  flex: 3 30em;
 }
 
 .space-between {
-  display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  display: flex;
 }
 
 .align-bottom {
-  display: flex;
   align-items: flex-end;
+  display: flex;
 }
 
 .align-center,
 .exemption-search {
-  display: flex;
   align-items: center;
+  display: flex;
 }
 
 .align-top {
-  display: flex;
   align-items: flex-start;
+  display: flex;
 }
 
 .align-baseline {
-  display: flex;
   align-items: baseline;
+  display: flex;
 }
 
 .horizontal-overflow {
-  overflow: hidden;
-  overflow-x: scroll;
+  overflow: scroll hidden;
 }
 
 .w100 {
@@ -193,14 +192,14 @@ td p {
 .button {
   font-size: 1rem;
   line-height: 1.6;
-  font-weight: bold;
-  padding: 0.25em 0.75em;
-  border: none;
-  border-radius: 9999px;
   background: #fb5238;
   color: #ffffff;
   opacity: 0.8;
   cursor: pointer;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.25em 0.75em;
+  font-weight: bold;
   text-decoration: none;
 }
 
@@ -209,10 +208,7 @@ td p {
   opacity: 0.6;
 }
 
-.button:active {
-  color: #ffffff;
-}
-
+.button:active,
 .button:visited {
   color: #ffffff;
 }
@@ -236,12 +232,12 @@ td p {
 }
 
 .badge {
-  padding: 0.25em 0.5em;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 0.6em;
-  background: #666666;
   color: #ffffff;
+  background: #666666;
+  border-radius: 4px;
+  padding: 0.25em 0.5em;
+  font-size: 0.6em;
+  font-weight: bold;
 }
 
 .red.badge {
@@ -272,14 +268,14 @@ textarea {
 }
 
 textarea {
-  display: block;
   resize: vertical;
+  display: block;
 }
 
 input[type=checkbox],
 input[type=radio] {
-  width: auto;
   float: left;
+  width: auto;
   margin: 0.1em 0.5em 0 0;
   line-height: 1em;
 }
@@ -321,20 +317,20 @@ input[type=file] {
 }
 
 .field .errorlist {
-  display: inline-block;
+  color: #ff0000;
   margin: 0;
   padding: 0;
-  list-style: none;
-  color: #ff0000;
   font-size: 0.8rem;
+  list-style: none;
+  display: inline-block;
 }
 
 .message {
-  display: flex;
   align-items: center;
   max-width: 50rem;
   margin: 0 auto;
   padding: 1em;
+  display: flex;
 }
 
 .message .symbol {
@@ -347,11 +343,11 @@ input[type=file] {
 }
 
 .icon {
-  display: inline;
+  shape-rendering: geometricprecision;
+  fill-rule: evenodd;
   width: 1.25em;
   height: 1.25em;
-  shape-rendering: geometricPrecision;
-  fill-rule: evenodd;
+  display: inline;
 }
 
 .icon circle,
@@ -376,15 +372,15 @@ input[type=file] {
 }
 
 .bottomnav {
-  margin-top: 2rem;
   border-top: 1px solid #cccccc;
   text-align: center;
+  margin-top: 2rem;
 }
 
 .bottomnav .mascot.icon {
-  margin-top: 1em;
-  height: 2em;
   width: 2em;
+  height: 2em;
+  margin-top: 1em;
 }
 
 .bottomnav .mascot.icon path {
@@ -396,8 +392,8 @@ input[type=file] {
 }
 
 .toolbar {
-  display: flex;
   align-items: center;
+  display: flex;
 }
 
 .toolbar .button,
@@ -423,8 +419,8 @@ input[type=file] {
 }
 
 .filter.form .visible-fields {
-  display: flex;
   flex-wrap: wrap;
+  display: flex;
 }
 
 .filter.form .field {
@@ -436,25 +432,25 @@ input[type=file] {
 }
 
 .empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100%;
   color: #666666;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .homepage-header {
-  margin-bottom: 1rem;
-  padding: 3rem 0;
   background: #fb5238;
+  text-align: center;
   background-position: center;
   background-size: cover;
-  text-align: center;
+  margin-bottom: 1rem;
+  padding: 3rem 0;
 }
 
 .homepage-header .mascot.icon {
-  height: 4em;
   width: 4em;
+  height: 4em;
 }
 
 .homepage-header .button {
@@ -468,21 +464,21 @@ input[type=file] {
 }
 
 .homepage-header .badge {
-  background: #00000000;
   color: #362522;
+  background: none;
   border: 3px solid;
 }
 
 .homepage-header h1 {
+  text-align: center;
   margin-top: 0;
   font-size: 2em;
-  text-align: center;
 }
 
 .homepage-footer {
-  padding: 1rem;
-  justify-content: center;
   background: #fb5238;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .homepage-footer h2 {
@@ -505,14 +501,14 @@ input[type=file] {
 
 .homepage h2,
 .homepage p {
-  margin-top: 0;
   line-height: 1.6;
+  margin-top: 0;
 }
 
 .homepage .row:not(:first-child) {
+  border-top: 3px solid #cccccc;
   margin-bottom: 1rem;
   padding-top: 1rem;
-  border-top: 3px solid #cccccc;
 }
 
 .homepage h2 {
@@ -520,9 +516,9 @@ input[type=file] {
 }
 
 .communication {
-  margin-bottom: 1em;
   border: 1px solid #cccccc;
   background: #ffffff;
+  margin-bottom: 1em;
 }
 
 .communication table {
@@ -530,13 +526,13 @@ input[type=file] {
 }
 
 .communication header {
-  padding: 0.5rem 1rem;
   border-bottom: 1px solid #cccccc;
+  padding: 0.5rem 1rem;
 }
 
 .communication header .badge {
-  display: block;
   text-align: center;
+  display: block;
 }
 
 .sent.communication header {
@@ -544,20 +540,20 @@ input[type=file] {
 }
 
 .communication__message {
-  overflow: hidden;
-  padding: 0 1em;
   font-family: "Georgia", serif;
+  padding: 0 1em;
+  overflow: hidden;
 }
 
 .communication.sent {
   color: #000350;
-  border-color: #ccccff;
   background: #f5f5ff;
+  border-color: #ccccff;
 }
 
 .file {
-  padding: 0.5rem 1rem;
   border-top: 1px solid #cccccc;
+  padding: 0.5rem 1rem;
 }
 
 .sent .file {
@@ -569,8 +565,8 @@ input[type=file] {
 }
 
 .exemptionBrowser label {
-  display: block;
   margin-bottom: 0.25em;
+  display: block;
 }
 
 .exemption-search {
@@ -578,25 +574,25 @@ input[type=file] {
 }
 
 .exemption-search input {
-  flex: 1 1 auto;
-  padding-left: 1rem;
   line-height: 1.6;
   border-top-left-radius: 9999px;
   border-bottom-left-radius: 9999px;
+  flex: auto;
+  padding-left: 1rem;
 }
 
 .exemption-search button {
-  flex: 1 1 25%;
   border: 1px solid #fb5238;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  flex: 25%;
 }
 
 .exemption__results {
-  margin-bottom: 1rem;
-  padding: 1rem;
   border: 1px solid #666666;
   background: #cccccc;
+  margin-bottom: 1rem;
+  padding: 1rem;
 }
 
 .exemption__empty {
@@ -608,18 +604,18 @@ input[type=file] {
 }
 
 .exemption__detail {
-  margin: 1rem 0;
-  padding: 0 0.5em;
   border: 1px solid #cccccc;
   background: #ffffff;
+  margin: 1rem 0;
+  padding: 0 0.5em;
 }
 
 .exemption__list__item {
-  margin-bottom: 1rem;
-  padding: 0 0.5em;
   border: 1px solid #666666;
   background: #f8f7f6;
   cursor: pointer;
+  margin-bottom: 1rem;
+  padding: 0 0.5em;
 }
 
 .exemption__list__item:hover {
@@ -637,10 +633,10 @@ input[type=file] {
 }
 
 .exemption__detail__appeal blockquote {
-  font-style: italic;
   white-space: pre-line;
   -webkit-user-select: all;
   user-select: all;
+  font-style: italic;
 }
 
 .exemption__detail__appeal .quarter {
@@ -652,34 +648,31 @@ input[type=file] {
 }
 
 .exemption__form {
-  margin-bottom: 1rem;
-  padding: 0 1rem;
   border: 1px solid #cccccc;
   background: #ffffff;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
   position: relative;
 }
 
 .exemption__form footer {
+  justify-content: space-between;
   margin-bottom: 1rem;
   display: flex;
-  justify-content: space-between;
 }
 
 .exemption__form .overlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
   z-index: 1;
+  text-align: center;
   background: #f8f7f6e6;
-  display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
+  display: flex;
+  position: absolute;
+  inset: 0;
 }
 
 .exemption__form .overlay .icon {
-  height: 2rem;
   width: 2rem;
+  height: 2rem;
 }

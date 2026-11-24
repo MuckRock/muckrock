@@ -222,7 +222,7 @@ Most major models have custom QuerySet managers with `get_queryset()` methods fo
 **JavaScript Stack:**
 
 - New code: Svelte 5 components and TypeScript (`getHelp.ts`, `reviewAgency.ts`)
-- Legacy: React 15 with Redux, jQuery 3.6.4 (exposed globally, heavily used throughout), jQuery UI 1.10.x
+- Legacy: React 15 with Redux, jQuery 3.6.4 (exposed globally, heavily used throughout), jQuery UI 1.14 (only `sortable`, for the crowdsource form builder)
 
 **Key Modules:**
 

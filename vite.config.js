@@ -11,10 +11,7 @@ export default defineConfig({
   build: {
     manifest: "manifest.json",
     outDir: path.resolve(__dirname, "muckrock/assets/dist"),
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         main: path.resolve(__dirname, "muckrock/assets/entry.js"),
         foiamachine: path.resolve(__dirname, "muckrock/foiamachine/assets/entry.js"),
@@ -25,10 +22,13 @@ export default defineConfig({
       },
     },
   },
-  esbuild: {
-    include: /\.(jsx?|tsx?)$/,
-    jsxFactory: "React.createElement",
-    jsxFragment: "React.Fragment",
+  oxc: {
+    // React 15 predates the automatic JSX runtime.
+    jsx: {
+      runtime: "classic",
+      pragma: "React.createElement",
+      pragmaFrag: "React.Fragment",
+    },
   },
   plugins: [svelte()],
   resolve: {

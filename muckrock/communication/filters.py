@@ -10,7 +10,7 @@ import django_filters
 from muckrock.agency.models import Agency
 from muckrock.communication.models import CHECK_STATUS, PHONE_TYPES, Check
 from muckrock.core import autocomplete
-from muckrock.core.filters import RangeWidget
+from muckrock.core.filters import DateRangeWidget
 
 
 class CheckFilterSet(django_filters.FilterSet):
@@ -28,7 +28,7 @@ class CheckFilterSet(django_filters.FilterSet):
         field_name="created_datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
 
     minimum_amount = django_filters.NumberFilter(

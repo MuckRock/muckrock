@@ -10,6 +10,7 @@ from datetime import date, timedelta
 from decimal import ROUND_DOWN, Decimal, InvalidOperation
 
 # MuckRock
+from muckrock.core.forms import NativeDateInput
 from muckrock.crowdfund.models import Crowdfund
 
 
@@ -53,7 +54,12 @@ class CrowdfundForm(forms.ModelForm):
     date_due = forms.DateField(
         label="Deadline",
         help_text="Crowdfunding campaigns are limited to a maximum duration of 30 days",
-        widget=forms.DateInput(),
+        widget=NativeDateInput(
+            attrs={
+                "min": lambda: date.today() + timedelta(1),
+                "max": lambda: date.today() + timedelta(30),
+            }
+        ),
     )
 
     def clean_payment_required(self):

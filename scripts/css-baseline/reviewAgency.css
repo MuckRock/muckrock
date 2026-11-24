@@ -12,11 +12,11 @@
   --ra-yellow-dark: #947026;
   box-sizing: border-box;
   max-width: 60em;
-  margin: 0 auto;
   padding: calc(var(--ra-vr) / 2);
+  margin: 0 auto;
 }
 
-@media (min-width: 500px) {
+@media (width >= 500px) {
   .review-agency-detail {
     padding: var(--ra-vr);
   }
@@ -31,45 +31,42 @@
 }
 
 .review-agency-detail summary {
-  display: list-item;
   cursor: pointer;
   margin: 0;
+  display: list-item;
 }
 
 .review-agency-detail dt,
 .review-agency-detail fieldset label {
   font-size: inherit;
-  font-weight: 400;
   text-transform: none;
   letter-spacing: normal;
+  font-weight: 400;
 }
 
 .review-agency-detail .repair-field__label {
-  display: block;
-  font-size: 0.6875rem;
-  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--ra-grey-3);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  display: block;
 }
 
 .review-agency-agency {
-  display: flex;
-  flex-wrap: wrap;
   padding: var(--ra-vr);
   border-radius: 4px;
+  flex-wrap: wrap;
+  display: flex;
 }
 
-.review-agency-agency header {
-  flex: 1 1 16em;
-}
-
+.review-agency-agency header,
 .review-agency-contact {
-  flex: 1 1 16em;
+  flex: 16em;
 }
 
 .review-agency-scorecard {
-  flex: 1 1 100%;
+  flex: 100%;
 }
 
 .review-agency-agency h1 {
@@ -87,10 +84,10 @@
 }
 
 .review-agency-contact dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
   gap: calc(var(--ra-vr) / 4) var(--ra-vr);
   margin: calc(var(--ra-vr) / 2) 0 0;
+  grid-template-columns: max-content 1fr;
+  display: grid;
 }
 
 .review-agency-contact dt {
@@ -99,9 +96,9 @@
 }
 
 .review-agency-contact dd {
+  overflow-wrap: anywhere;
   grid-column: 2;
   margin: 0;
-  overflow-wrap: anywhere;
 }
 
 .review-agency-scorecard h2 {
@@ -110,23 +107,23 @@
 }
 
 .review-agency-scorecard dl {
-  display: flex;
-  flex-wrap: wrap;
   gap: calc(var(--ra-vr) / 2) var(--ra-vr);
+  flex-wrap: wrap;
   margin: 0;
+  display: flex;
 }
 
 .review-agency-stat {
-  display: flex;
   flex-direction: column-reverse;
+  flex: 8em;
   justify-content: flex-end;
-  flex: 1 1 8em;
   margin-bottom: 0;
+  display: flex;
 }
 
 .review-agency-stat dt {
-  font-size: 0.8125rem;
   margin: 0;
+  font-size: 0.8125rem;
 }
 
 .review-agency-stat dd {
@@ -143,22 +140,22 @@
 .review-agency-warning {
   margin: var(--ra-vr) 0 0;
   padding: calc(var(--ra-vr) / 2) var(--ra-vr);
-  border-radius: 4px;
   background: var(--ra-yellow-light);
   color: var(--ra-yellow-dark);
+  border-radius: 4px;
 }
 
 .review-agency-warning mark {
-  background: none;
   color: inherit;
+  background: none;
   font-weight: 500;
 }
 
 .review-agency-channels {
   padding: var(--ra-vr);
   border: 1px solid var(--ra-grey-7);
-  border-radius: 4px;
   background: var(--ra-white);
+  border-radius: 4px;
 }
 
 .review-agency-channels > h2 {
@@ -166,18 +163,18 @@
 }
 
 .review-agency-repair-form fieldset {
+  border: 0;
   margin: 0;
   padding: 0;
-  border: 0;
 }
 
 .repair-channels__header {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: calc(var(--ra-vr) / 2);
   margin-bottom: calc(var(--ra-vr) / 2);
+  flex-wrap: wrap;
+  display: flex;
 }
 
 .repair-channels__header h3 {
@@ -186,22 +183,22 @@
 }
 
 .repair-channels__actions {
-  display: flex;
   align-items: center;
   gap: calc(var(--ra-vr) / 2);
+  display: flex;
 }
 
 .repair-channels__actions button {
-  margin: 0;
   white-space: nowrap;
+  margin: 0;
 }
 
 .repair-channels__filter {
-  display: flex;
+  cursor: pointer;
   align-items: center;
   gap: 0.25em;
   margin: 0;
-  cursor: pointer;
+  display: flex;
 }
 
 .repair-channels__filter input {
@@ -210,9 +207,9 @@
 
 .repair-channels__list {
   padding: calc(var(--ra-vr) / 2);
-  border-radius: 4px;
   background: var(--ra-inset);
   border: 1px solid var(--ra-grey-7);
+  border-radius: 4px;
 }
 
 .repair-channels__list > p {
@@ -223,8 +220,8 @@
   margin-bottom: calc(var(--ra-vr) / 2);
   padding: calc(var(--ra-vr) / 2) var(--ra-vr);
   border: 1px solid var(--ra-grey-7);
-  border-radius: 4px;
   background: var(--ra-white);
+  border-radius: 4px;
 }
 
 .repair-channel:last-child {
@@ -236,11 +233,11 @@
 }
 
 .repair-channel__header {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: calc(var(--ra-vr) / 4) calc(var(--ra-vr) / 2);
   cursor: pointer;
+  flex-wrap: wrap;
+  display: flex;
 }
 
 .repair-channel details {
@@ -273,8 +270,8 @@
 }
 
 .repair-requests td:nth-child(n+3) {
-  width: 1px;
   white-space: nowrap;
+  width: 1px;
   color: var(--ra-grey-3);
 }
 
@@ -287,11 +284,11 @@
 }
 
 .repair-requests__group label {
-  display: flex;
+  cursor: pointer;
   align-items: center;
   gap: 0.5em;
   margin: 0;
-  cursor: pointer;
+  display: flex;
 }
 
 .repair-requests__group small {
@@ -317,25 +314,25 @@
 }
 
 .repair-action label {
-  display: block;
   margin-bottom: calc(var(--ra-vr) / 2);
+  display: block;
 }
 
 .repair-tabs {
-  display: flex;
   border-bottom: 1px solid var(--ra-grey-7);
   margin-bottom: var(--ra-vr);
+  display: flex;
 }
 
 .repair-tab {
-  margin-bottom: -1px;
   padding: calc(var(--ra-vr) / 2) var(--ra-vr);
-  border: 1px solid #00000000;
-  border-radius: 4px 4px 0 0;
-  background: none;
   color: var(--ra-grey-3);
   font: inherit;
   cursor: pointer;
+  background: none;
+  border: 1px solid #00000000;
+  border-radius: 4px 4px 0 0;
+  margin-bottom: -1px;
 }
 
 .repair-tab:hover {
@@ -360,10 +357,10 @@
 .repair-action input[type=url],
 .repair-action select,
 .repair-action textarea {
-  display: block;
-  width: 100%;
   box-sizing: border-box;
+  width: 100%;
   margin-bottom: 0;
+  display: block;
 }
 
 .repair-action input[type=checkbox] {
@@ -371,8 +368,8 @@
 }
 
 .email-autocomplete {
-  position: relative;
   margin-bottom: calc(var(--ra-vr) / 2);
+  position: relative;
 }
 
 .repair-action .email-autocomplete label {
@@ -380,19 +377,19 @@
 }
 
 .email-autocomplete__list {
-  position: absolute;
   z-index: 10;
+  max-height: 16em;
+  padding: calc(var(--ra-vr) / 4) 0;
+  border: 1px solid var(--ra-grey-7);
+  background: var(--ra-white);
+  border-radius: 4px;
+  margin: 2px 0 0;
+  list-style: none;
+  position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  max-height: 16em;
   overflow-y: auto;
-  margin: 2px 0 0;
-  padding: calc(var(--ra-vr) / 4) 0;
-  list-style: none;
-  border: 1px solid var(--ra-grey-7);
-  border-radius: 4px;
-  background: var(--ra-white);
   box-shadow: 0 2px 6px #0000001a;
 }
 
@@ -402,12 +399,12 @@
 
 .email-autocomplete__note,
 .email-autocomplete__option {
-  display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   gap: 0 calc(var(--ra-vr) / 2);
-  margin: 0;
   padding: calc(var(--ra-vr) / 4) calc(var(--ra-vr) / 2);
+  flex-wrap: wrap;
+  margin: 0;
+  display: flex;
 }
 
 .email-autocomplete__option {

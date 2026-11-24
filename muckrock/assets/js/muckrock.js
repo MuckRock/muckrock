@@ -35,7 +35,6 @@ import './communication';
 import './crowdfund';
 import './crowdsource';
 import './currencyField';
-import { initDatepickers } from './datepicker';
 import './dropdown';
 import './editor';
 import './exemptionBrowser/app';
@@ -50,8 +49,6 @@ import './stripe';
 import './tabs';
 import './task';
 import { initMessages } from './messages';
-
-import 'jquery.tabulator';
 
 /* Bind plugins and event handlers to frontend elements. */
 
@@ -85,7 +82,6 @@ $('document').ready(function(){
     $(this).selectAll();
   });
 
-  initDatepickers();
 
   // Loupe
   /*

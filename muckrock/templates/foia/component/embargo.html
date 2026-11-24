@@ -24,7 +24,7 @@
       {% endif %}
     </div>
     {% if embargo.add %}
-    <form method="post" action="embargo/" class="embargo-form" id="embargo-form"{% if foia.date_embargo %} data-default-date="{{ foia.date_embargo|date:"m/d/Y" }}"{% endif %}>
+    <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
         {% csrf_token %}
         {{ embargo_form.errors }}
         {{ embargo_form.non_field_errors }}
