@@ -42,6 +42,7 @@ from muckrock.core.utils import new_action, notify, parse_header
 from muckrock.core.views import NewsletterSignupView
 from muckrock.crowdsource.factories import CrowdsourceResponseFactory
 from muckrock.foia.factories import FOIARequestFactory
+from muckrock.jurisdiction.factories import StateJurisdictionFactory
 from muckrock.task.factories import (
     FlaggedTaskFactory,
     NewAgencyTaskFactory,
@@ -174,6 +175,38 @@ class TestAPIV2CountPagination(TestCase):
         response = self.client.get(self.url, {"count": "", "page_size": 1})
         assert response.json()["count"] == 3
         assert "count" not in self.next_params(response)
+
+
+class TestJurisdictionRedirect(TestCase):
+    """The short /agency/ and /foi/ jurisdiction URLs redirect to the place page"""
+
+    def setUp(self):
+        self.jurisdiction = StateJurisdictionFactory()
+
+    def test_redirects_to_the_jurisdiction_page(self):
+        for name in ("agency-jurisdiction", "foia-jurisdiction"):
+            url = reverse(
+                name,
+                kwargs={
+                    "jurisdiction": self.jurisdiction.slug,
+                    "idx": self.jurisdiction.pk,
+                },
+            )
+            response = self.client.get(url)
+            self.assertRedirects(
+                response,
+                self.jurisdiction.get_absolute_url(),
+                fetch_redirect_response=False,
+                msg_prefix=name,
+            )
+
+    def test_404s_when_the_slug_does_not_match_the_id(self):
+        for name in ("agency-jurisdiction", "foia-jurisdiction"):
+            url = reverse(
+                name, kwargs={"jurisdiction": "wrong-slug", "idx": self.jurisdiction.pk}
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 404, name)
 
 
 class TestUnit(TestCase):
