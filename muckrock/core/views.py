@@ -609,22 +609,11 @@ class DonationThanksView(TemplateView):
     template_name = "forms/donate_thanks.html"
 
 
-def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
+def jurisdiction(request, jurisdiction, idx):
     """Redirect to the jurisdiction page"""
     # pylint: disable=redefined-outer-name
-    # pylint: disable=unused-argument
-
-    if jurisdiction and idx:
-        jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=idx)
-    elif idx:
-        jmodel = get_object_or_404(Jurisdiction, pk=idx)
-    else:
-        raise ValueError("Must provide either 'idx' or 'jurisdiction+idx'")
-
-    if not view:
-        return redirect(jmodel)
-    else:
-        return redirect(jmodel.get_url(view))
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=idx)
+    return redirect(jmodel)
 
 
 def handler500(request):

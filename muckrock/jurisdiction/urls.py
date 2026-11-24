@@ -6,14 +6,12 @@ URL mappings for the jurisdiction application
 from django.urls import re_path
 
 # MuckRock
-from muckrock.core.views import jurisdiction
 from muckrock.jurisdiction import views
 
 jur_url = (
     r"(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?"
     r"(?:/(?P<local_slug>[\w\d_-]+))?"
 )
-old_jur_url = r"(?P<slug>[\w\d_-]+)/(?P<idx>\d+)"
 
 urlpatterns = [
     re_path(
@@ -23,7 +21,6 @@ urlpatterns = [
         r"^embed/$", views.JurisdictionEmbedView.as_view(), name="jurisdiction-embed"
     ),
     re_path(r"^list/$", views.List.as_view(), name="jurisdiction-list"),
-    re_path(r"^%s/flag/$" % jur_url, views.redirect_flag),
     re_path(
         r"^%s/exemption/(?P<slug>[\w-]+)-(?P<pk>\d+)/$" % jur_url,
         views.ExemptionDetailView.as_view(),
@@ -41,10 +38,4 @@ urlpatterns = [
         name="jurisdiction-state-inclusive-autocomplete",
     ),
     re_path(r"^%s/$" % jur_url, views.detail, name="jurisdiction-detail"),
-]
-
-# old url patterns go under jurisdictions, new ones switched to places
-old_urlpatterns = [
-    re_path(r"^view/%s/$" % old_jur_url, jurisdiction),
-    re_path(r"^flag/%s/$" % old_jur_url, jurisdiction, {"view": "flag"}),
 ]

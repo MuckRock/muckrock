@@ -167,7 +167,6 @@ urlpatterns = [
     re_path(r"^mailgun/", include("muckrock.mailgun.urls")),
     re_path(r"^agency/", include("muckrock.agency.urls")),
     re_path(r"^place/", include(muckrock.jurisdiction.urls.urlpatterns)),
-    re_path(r"^jurisdiction/", include(muckrock.jurisdiction.urls.old_urlpatterns)),
     re_path(r"^crowdfund/", include("muckrock.crowdfund.urls")),
     re_path(r"^assignment/", include("muckrock.crowdsource.urls")),
     re_path(r"^task/", include("muckrock.task.urls")),
