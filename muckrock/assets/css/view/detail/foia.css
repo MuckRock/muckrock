@@ -42,7 +42,7 @@
         /* align-items: flex-start; */
         /* flex-wrap: wrap; */
         justify-content: space-between;
-        label, input[type="text"] {
+        label, input[type="text"], input[type="date"] {
             /* flex: 0 1 100%; */
             margin-bottom: calc(var(--vr) * 0.5);
         }

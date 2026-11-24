@@ -207,25 +207,6 @@ fieldset {
     }
 }
 
-.input-range input, .input-range label {
-  width: 50%;
-  margin-right: 0;
-  float: left;
-  &:first-child {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right-color: var(--color-grey-6);
-  }
-  &:last-child {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-left-color: var(--color-grey-6);
-  }
-}
-.input-range, .input-range .labels {
-  overflow: hidden;
-}
-
 #build-wrap .form-wrap.form-builder .frmb .form-elements .input-wrap {
   width: 80%;
 }
