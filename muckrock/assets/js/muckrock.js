@@ -13,8 +13,13 @@
 
 import $ from 'jquery';
 import './jquery-global';
-import 'jquery-ui/widget';
-import 'jquery-ui/sortable';
+// jQuery UI modules do not import their own dependencies; keep this order.
+import 'jquery-ui/ui/version';
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/data';
+import 'jquery-ui/ui/scroll-parent';
+import 'jquery-ui/ui/widgets/mouse';
+import 'jquery-ui/ui/widgets/sortable';
 import 'formBuilder';
 import 'tooltipster';
 import '../vendor/formset';

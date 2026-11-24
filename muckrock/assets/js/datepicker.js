@@ -1,5 +1,10 @@
 import $ from "jquery";
-import "jquery-ui/datepicker";
+// jQuery UI modules attach to the global jQuery and do not import their own
+// dependencies, so the global and each dependency must load first.
+import "./jquery-global";
+import "jquery-ui/ui/version";
+import "jquery-ui/ui/keycode";
+import "jquery-ui/ui/widgets/datepicker";
 
 export const presets = {
   // Date-range filters on list pages and the FOIA log upload form.

@@ -43,7 +43,7 @@
     "autonumeric": "^1.9.43",
     "formBuilder": "^2.9.8",
     "jquery": "^3.6.4",
-    "jquery-ui": "1.10.x",
+    "jquery-ui": "^1.14.2",
     "jquery.tabulator": "^3.3.2",
     "js-cookie": "^2.1.0",
     "prosemirror": "^0.6.0",
