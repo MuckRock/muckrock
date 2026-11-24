@@ -24,7 +24,6 @@ class OrganizationAdminForm(forms.ModelForm):
     number_requests_change = forms.IntegerField(
         label="Change number requests by",
         initial=0,
-        required=False,
         min_value=-settings.MAX_REQUESTS_CHANGE,
         max_value=settings.MAX_REQUESTS_CHANGE,
         help_text=(
@@ -39,7 +38,7 @@ class OrganizationAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        number_change = cleaned_data.get("number_requests_change") or 0
+        number_change = cleaned_data.get("number_requests_change", 0)
         if self.instance.number_requests + number_change < 0:
             raise forms.ValidationError(
                 "Number requests cannot go below 0 "
@@ -104,7 +103,7 @@ class OrganizationAdmin(VersionAdmin):
         if not change:
             super().save_model(request, obj, form, change)
             return
-        number_change = form.cleaned_data.get("number_requests_change") or 0
+        number_change = form.cleaned_data["number_requests_change"]
         if number_change == 0:
             return
         obj.add_requests(number_change)

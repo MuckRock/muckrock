@@ -77,7 +77,7 @@ class Organization(models.Model):
         "these do not roll over and are just reset to `requests_per_month` on "
         "`date_update`",
     )
-    number_requests = models.IntegerField(
+    number_requests = models.PositiveIntegerField(
         default=0,
         help_text="How many individually purchased requests this organization has - "
         "these never expire and are unaffected by the monthly roll over",
