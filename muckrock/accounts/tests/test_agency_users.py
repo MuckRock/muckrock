@@ -3,6 +3,7 @@ Tests for guarding agency user accounts
 """
 
 # Django
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -49,6 +50,11 @@ class TestAgencyUserLoginLog(TestCase):
         """Ordinary logins do not add to the agency login log"""
         with self.assertNoLogs(self.logger_name, "INFO"):
             self.client.force_login(UserFactory())
+
+    def test_user_without_profile_can_log_in(self):
+        """A user with no profile, such as a createsuperuser admin, can log in"""
+        User.objects.create_user("noprofile", password="password")
+        assert self.client.login(username="noprofile", password="password")
 
 
 class TestAgencyUserFiling(TestCase):

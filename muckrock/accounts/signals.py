@@ -40,7 +40,10 @@ def log_agency_user_login(sender, request, user, **kwargs):
     record of who was signed in as the agency and from where.
     """
     # pylint: disable=unused-argument
-    if not user.profile.is_agency_user:
+    # Users made outside the Squarelet login, such as by createsuperuser, have
+    # no profile; raising here would fail their login.
+    profile = getattr(user, "profile", None)
+    if profile is None or not profile.is_agency_user:
         return
     if request is None:
         meta, path = {}, None
@@ -51,8 +54,8 @@ def log_agency_user_login(sender, request, user, **kwargs):
         "forwarded_for=%s remote_addr=%s user_agent=%s",
         user.username,
         user.pk,
-        user.profile.agency.name,
-        user.profile.agency_id,
+        profile.agency.name,
+        profile.agency_id,
         path,
         meta.get("HTTP_X_FORWARDED_FOR"),
         meta.get("REMOTE_ADDR"),
