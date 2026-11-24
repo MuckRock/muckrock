@@ -140,7 +140,7 @@
 
   {% internal_notes user_obj %}
 
-  {% if request.user == user_obj %}
+  {% if request.user == user_obj and not user_obj.profile.is_agency_user %}
     <section class="buy">
       <form method="POST" class="stripe-elements" id="buy-requests">
         {% csrf_token %}

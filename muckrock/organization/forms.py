@@ -7,6 +7,7 @@ from django import forms
 from django.conf import settings
 
 # MuckRock
+from muckrock.foia.constants import AGENCY_USER_MESSAGE
 from muckrock.organization.models import Organization
 
 
@@ -102,6 +103,9 @@ class StripeForm(forms.Form):
             )
 
         self._clean_card_required(data)
+
+        if self._user.is_authenticated and self._user.profile.is_agency_user:
+            self.add_error(None, AGENCY_USER_MESSAGE)
 
         return data
 
