@@ -31,7 +31,6 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "eslint": "^8.57.1",
-    "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "prettier": "^3.10.1",
     "prettier-plugin-svelte": "^4.2.0",

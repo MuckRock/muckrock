@@ -14,19 +14,3 @@
 </p>
 {% endblock form-info %}
 
-{% block scripts %}
-<script type="module">
-    $(document).ready(function(){
-        $('.datepicker').datepicker({
-            maxDate: '+30d',
-            minDate: 0,
-            firstDay: 1,
-            hideIfNoPrevNext: true,
-            numberOfMonths: 1,
-            {% if foia.date_embargo %}
-            defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
-            {% endif %}
-        });
-    });
-</script>
-{% endblock scripts %}

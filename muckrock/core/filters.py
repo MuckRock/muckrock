@@ -6,6 +6,7 @@ Filters and widgets shared between applications.
 import django_filters
 
 # MuckRock
+from muckrock.core.forms import NativeDateInput
 from muckrock.foia.models import STATUS
 
 BLANK_STATUS = [("", "All")] + STATUS
@@ -29,3 +30,13 @@ class RangeWidget(django_filters.widgets.RangeWidget):
                 </div>
             </div>
         """ % {"inputs": "\n".join(rendered_widgets)}
+
+
+class DateRangeWidget(RangeWidget):
+    """A from/to pair of native date inputs"""
+
+    template_name = "lib/widgets/date_range.html"
+
+    def __init__(self, attrs=None):
+        super().__init__(attrs)
+        self.widgets = [NativeDateInput(), NativeDateInput()]

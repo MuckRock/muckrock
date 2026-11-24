@@ -35,7 +35,6 @@ import './communication';
 import './crowdfund';
 import './crowdsource';
 import './currencyField';
-import { initDatepickers } from './datepicker';
 import './dropdown';
 import './editor';
 import './exemptionBrowser/app';
@@ -85,7 +84,6 @@ $('document').ready(function(){
     $(this).selectAll();
   });
 
-  initDatepickers();
 
   // Loupe
   /*
