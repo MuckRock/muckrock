@@ -14,6 +14,7 @@ from rest_framework.test import APIClient
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
 from muckrock.core.test_utils import assert_max_queries, assert_queries_do_not_scale
+from muckrock.foia.constants import AGENCY_USER_MESSAGE
 from muckrock.foia.factories import (
     FOIACommunicationFactory,
     FOIAFileFactory,
@@ -85,6 +86,24 @@ class TestFOIARequestViewset(TestCase):
             },
         )
         assert response.status_code == 403, response.json()
+        assert not FOIAComposer.objects.filter(user=user).exists()
+
+    def test_create_agency_user(self):
+        """An agency user gets a 403 explaining they are signed in as the agency"""
+        agency = AgencyFactory.create()
+        user = AgencyFactory.create().profile.user
+        _fund(user.profile.organization)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(
+            reverse("api2-requests-list"),
+            {
+                "agencies": [agency.pk],
+                "title": "Test",
+                "requested_docs": "Meeting minutes",
+            },
+        )
+        assert response.status_code == 403, response.json()
+        assert response.json()["status"] == AGENCY_USER_MESSAGE
         assert not FOIAComposer.objects.filter(user=user).exists()
 
     def test_create_missing_agencies(self):

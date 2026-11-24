@@ -25,7 +25,6 @@ from rest_framework.response import Response
 
 # MuckRock
 from muckrock.agency.models import Agency
-from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIAComposer, FOIARequest
 from muckrock.foia.serializers import (
@@ -274,9 +273,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *_args, **_kwargs):
         """Submit new request"""
-        if request.user.profile.blocked_from_filing:
+        if request.user.profile.filing_blocked_message:
             return Response(
-                {"status": BLOCKED_FROM_FILING_MESSAGE},
+                {"status": request.user.profile.filing_blocked_message},
                 status=http_status.HTTP_403_FORBIDDEN,
             )
 

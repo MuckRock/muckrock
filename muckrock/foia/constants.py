@@ -15,6 +15,14 @@ BLOCKED_FROM_FILING_MESSAGE = (
     "mistake, please contact us at info@muckrock.com."
 )
 
+# shown to anyone signed in as an agency, who may have followed an agency
+# email's login link by mistake
+AGENCY_USER_MESSAGE = (
+    "You are logged in as an agency account, which cannot file or pay for "
+    "requests.  If you meant to use your own MuckRock account, please log out "
+    "and log in to it."
+)
+
 # elements allowed in html email, from:
 # https://www.pinpointe.com/blog/email-campaign-html-and-css-support
 EMAIL_TAGS = [

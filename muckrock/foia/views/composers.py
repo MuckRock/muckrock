@@ -27,7 +27,6 @@ import requests
 from muckrock.accounts.mixins import BuyRequestsMixin, MiniregMixin
 from muckrock.accounts.utils import mixpanel_event
 from muckrock.agency.models import Agency
-from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.exceptions import BlockedFromFilingError, InsufficientRequestsError
 from muckrock.foia.forms import BaseComposerForm, ComposerForm, ContactInfoForm
 from muckrock.foia.models import FOIAComposer, FOIARequest, FOIATemplate
@@ -101,7 +100,7 @@ class GenericComposer(BuyRequestsMixin):
         context = super().get_context_data(**kwargs)
         context["blocked_from_filing"] = (
             self.request.user.is_authenticated
-            and self.request.user.profile.blocked_from_filing
+            and self.request.user.profile.filing_blocked_message is not None
         )
         if self.request.user.is_authenticated:
             foias_filed = self.request.user.composers.exclude(status="started").count()
@@ -180,7 +179,9 @@ class GenericComposer(BuyRequestsMixin):
         except InsufficientRequestsError:
             messages.warning(self.request, "You need to purchase more requests")
         except BlockedFromFilingError:
-            messages.error(self.request, BLOCKED_FROM_FILING_MESSAGE)
+            messages.error(
+                self.request, self.request.user.profile.filing_blocked_message
+            )
         else:
             self.request.session["ga"] = "request_submitted"
             mixpanel_event(

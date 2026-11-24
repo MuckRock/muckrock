@@ -189,7 +189,7 @@ def is_agency_user(user):
 @predicate
 @user_authenticated
 def is_blocked_from_filing(user):
-    return user.profile.blocked_from_filing
+    return user.profile.filing_blocked_message is not None
 
 
 @predicate
