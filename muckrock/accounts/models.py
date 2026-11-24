@@ -33,6 +33,7 @@ from muckrock.core.utils import (
     squarelet_get,
     stripe_retry_on_error,
 )
+from muckrock.foia.constants import AGENCY_USER_MESSAGE, BLOCKED_FROM_FILING_MESSAGE
 from muckrock.organization.models import Organization
 
 logger = logging.getLogger(__name__)
@@ -229,6 +230,15 @@ class Profile(models.Model):
     def is_agency_user(self):
         """Is this an agency user?"""
         return self.agency_id is not None
+
+    @property
+    def filing_blocked_message(self):
+        """Why this user may not file new requests, or None if they may"""
+        if self.agency_id is not None:
+            return AGENCY_USER_MESSAGE
+        if self.blocked_from_filing:
+            return BLOCKED_FROM_FILING_MESSAGE
+        return None
 
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""

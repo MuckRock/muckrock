@@ -1546,6 +1546,20 @@ class TestBlockedFromFilingComposerViews(TestCase):
         assert b'id="submit_button"' not in response.content
         assert b'name="requested_docs"' not in response.content
 
+    def test_get_create_composer_agency_user(self):
+        """An agency user is told which account they are in and how to leave it"""
+        agency = AgencyFactory()
+        request = self.request_factory.get(reverse("foia-create"))
+        request.user = agency.profile.user
+        request = mock_middleware(request)
+        response = CreateComposer.as_view()(request)
+        assert response.status_code == 200
+        assert response.context_data["blocked_from_filing"]
+        response.render()
+        assert f"You are logged in as {agency.name}".encode() in response.content
+        assert reverse("acct-logout").encode() in response.content
+        assert b'name="requested_docs"' not in response.content
+
     def test_post_create_composer(self):
         """A blocked user cannot submit a new composer"""
         request = self.request_factory.post(reverse("foia-create"), self.submit_data())

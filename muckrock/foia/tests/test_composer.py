@@ -14,7 +14,7 @@ import pytest
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
-from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
+from muckrock.foia.constants import AGENCY_USER_MESSAGE, BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.exceptions import BlockedFromFilingError
 from muckrock.foia.factories import FOIAComposerFactory, FOIARequestFactory
 from muckrock.foia.forms.composers import BaseComposerForm
@@ -54,6 +54,23 @@ class TestFOIAComposer(TestCase):
                 "regular": reg,
                 "monthly": monthly,
             }
+
+    def test_submit_agency_user(self):
+        """An agency user may not submit, even calling submit directly"""
+        composer = FOIAComposerFactory(
+            status="started",
+            user=AgencyFactory().profile.user,
+            agencies=AgencyFactory.create_batch(1),
+        )
+        composer.organization.number_requests = 10
+        composer.organization.save()
+
+        with pytest.raises(BlockedFromFilingError):
+            composer.submit()
+
+        composer.refresh_from_db()
+        assert composer.status == "started"
+        assert not composer.foias.exists()
 
     def test_submit_blocked_from_filing(self):
         """A user blocked from filing may not submit, even calling submit directly"""
@@ -213,9 +230,10 @@ class TestFOIAComposerForm(TestCase):
         )
         assert form.is_valid()
 
-    def _blocked_user_form(self, action):
+    def _blocked_user_form(self, action, user=None):
         """A composer form filled out by a user blocked from filing"""
-        user = UserFactory(profile__blocked_from_filing=True)
+        if user is None:
+            user = UserFactory(profile__blocked_from_filing=True)
         agency = AgencyFactory()
         return BaseComposerForm(
             {
@@ -234,6 +252,12 @@ class TestFOIAComposerForm(TestCase):
         form = self._blocked_user_form("submit")
         assert not form.is_valid()
         assert BLOCKED_FROM_FILING_MESSAGE in form.non_field_errors()
+
+    def test_agency_user_submit(self):
+        """An agency user may not submit, and is told they are the agency"""
+        form = self._blocked_user_form("submit", user=AgencyFactory().profile.user)
+        assert not form.is_valid()
+        assert AGENCY_USER_MESSAGE in form.non_field_errors()
 
     def test_blocked_from_filing_save(self):
         """A blocked user may still save a draft"""

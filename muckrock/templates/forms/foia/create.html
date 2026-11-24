@@ -47,11 +47,22 @@
           <span class="symbol">
             {% include 'lib/component/icon/error.svg' %}
           </span>
-          <h2>Your account is not able to file new requests</h2>
-          <p>You can still view and track the requests you have already filed.</p>
-          <a class="primary button" href="{% url "foia-mylist" %}">
-            View my requests
-          </a>
+          {% if request.user.profile.is_agency_user %}
+            <h2>You are logged in as {{ request.user.profile.agency.name }}</h2>
+            <p>
+              Agency accounts cannot file or pay for requests.  If you meant to
+              use your own MuckRock account, log out and log in to it.
+            </p>
+            <a class="primary button" href="{% url "acct-logout" %}">
+              Log out
+            </a>
+          {% else %}
+            <h2>Your account is not able to file new requests</h2>
+            <p>You can still view and track the requests you have already filed.</p>
+            <a class="primary button" href="{% url "foia-mylist" %}">
+              View my requests
+            </a>
+          {% endif %}
           <p class="small">
             If you believe this is a mistake, please contact us at
             <a href="mailto:info@muckrock.com">info@muckrock.com</a>.

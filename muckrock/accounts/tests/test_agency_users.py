@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.foia.constants import AGENCY_USER_MESSAGE
 from muckrock.foia.factories import FOIARequestFactory
 
 
@@ -44,3 +45,19 @@ class TestAgencyUserLoginLog(TestCase):
         """Ordinary logins do not add to the agency login log"""
         with self.assertNoLogs(self.logger_name, "INFO"):
             self.client.force_login(UserFactory())
+
+
+class TestAgencyUserFiling(TestCase):
+    """Agency users may not file requests"""
+
+    def test_agency_user_may_not_file(self):
+        """An agency user lacks the add permission and is told why"""
+        user = AgencyFactory().profile.user
+        assert not user.has_perm("foia.add_foiarequest")
+        assert user.profile.filing_blocked_message == AGENCY_USER_MESSAGE
+
+    def test_regular_user_may_file(self):
+        """Ordinary users are not blocked"""
+        user = UserFactory()
+        assert user.has_perm("foia.add_foiarequest")
+        assert user.profile.filing_blocked_message is None

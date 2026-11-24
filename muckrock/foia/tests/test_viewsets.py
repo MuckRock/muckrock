@@ -10,6 +10,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 # MuckRock
 from muckrock.core.factories import AgencyFactory, UserFactory
+from muckrock.foia.constants import AGENCY_USER_MESSAGE
 from muckrock.foia.models.composer import FOIAComposer
 from muckrock.foia.models.request import FOIARequest
 from muckrock.foia.viewsets import FOIARequestViewSet
@@ -81,6 +82,23 @@ class TestFoiaCreation(TestCase):
         force_authenticate(request, user=self.user)
         response = self.view(request)
         assert response.status_code == 403
+        assert not FOIAComposer.objects.filter(user=self.user).exists()
+
+    def test_create_agency_user(self):
+        """An agency user may not create a request"""
+
+        self.user.profile.agency = AgencyFactory(profile=None)
+        self.user.profile.save()
+        data = {
+            "agency": [self.agency.pk],
+            "title": "Test request",
+            "document_request": "Best cake recipe",
+        }
+        request = self.factory.post(self.endpoint, data, format="json")
+        force_authenticate(request, user=self.user)
+        response = self.view(request)
+        assert response.status_code == 403
+        assert response.data["status"] == AGENCY_USER_MESSAGE
         assert not FOIAComposer.objects.filter(user=self.user).exists()
 
     def test_create_org_bad(self):

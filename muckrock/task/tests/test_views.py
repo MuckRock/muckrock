@@ -222,6 +222,18 @@ class MultiRequestTaskViewTests(TestCase):
         task.refresh_from_db()
         assert not task.resolved
 
+    def test_submit_agency_user(self):
+        """Staff may not approve a multirequest made by an agency user"""
+        task = self._task(profile__agency=AgencyFactory(profile=None))
+        data = {
+            "task_submit": "truthy",
+            "task": task.pk,
+            "agencies": [a.pk for a in self.agencies],
+        }
+        http_post_response(self.url, self.view, data, self.staff)
+        task.refresh_from_db()
+        assert not task.resolved
+
 
 @mock.patch("muckrock.message.notifications.SlackNotification.send", mock_send)
 class OrphanTaskViewTests(TestCase):

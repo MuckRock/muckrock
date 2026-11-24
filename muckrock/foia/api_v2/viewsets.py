@@ -28,7 +28,6 @@ from muckrock.foia.api_v2.serializers import (
     FOIARequestDetailSerializer,
     FOIARequestSerializer,
 )
-from muckrock.foia.constants import BLOCKED_FROM_FILING_MESSAGE
 from muckrock.foia.exceptions import InsufficientRequestsError
 from muckrock.foia.models import FOIACommunication, FOIAFile, FOIARequest
 from muckrock.foia.models.composer import FOIAComposer
@@ -108,15 +107,18 @@ class FOIARequestViewSet(
                 ),
             ),
             403: OpenApiResponse(
-                description="This account has been blocked from filing new requests.",
+                description=(
+                    "This account has been blocked from filing new requests, "
+                    "or is an agency account."
+                ),
             ),
         },
     )
     def create(self, request, *args, **kwargs):
         """Submit a new request"""
-        if request.user.profile.blocked_from_filing:
+        if request.user.profile.filing_blocked_message:
             return Response(
-                {"status": BLOCKED_FROM_FILING_MESSAGE},
+                {"status": request.user.profile.filing_blocked_message},
                 status=http_status.HTTP_403_FORBIDDEN,
             )
 

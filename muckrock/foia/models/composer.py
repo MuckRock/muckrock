@@ -122,7 +122,7 @@ class FOIAComposer(models.Model):
         # MuckRock
         from muckrock.foia.tasks import composer_create_foias, composer_delayed_submit
 
-        if self.user.profile.blocked_from_filing:
+        if self.user.profile.filing_blocked_message:
             # this is the last line of defense - it catches the web form, both
             # versions of the API, and any other caller
             logger.info("Composer submit blocked: %s %s", self.pk, self.user.pk)

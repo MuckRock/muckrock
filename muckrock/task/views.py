@@ -658,7 +658,7 @@ class MultiRequestTaskList(TaskList):
     def task_post_helper(self, request, task, form_data=None):
         """Special post helper exclusive to MultiRequestTasks"""
         if request.POST.get("task_submit"):
-            if task.composer.user.profile.blocked_from_filing:
+            if task.composer.user.profile.filing_blocked_message:
                 messages.error(
                     request,
                     f"{task.composer.user.username} has been blocked from filing "
