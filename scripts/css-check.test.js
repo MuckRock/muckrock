@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { normalize } from "./css-check";
+import { lightningTargets, normalize } from "./css-check";
 
 describe("normalize()", () => {
   it("treats native CSS nesting as equal to the flattened rules Sass printed", () => {
@@ -167,6 +167,32 @@ describe("normalize()", () => {
   it("keeps bodyless at-rules and !important", () => {
     expect(normalize('@charset "UTF-8"; a { color: red !important; }')).toBe(
       '@charset "UTF-8";\n\na {\n  color: #ff0000 !important;\n}\n',
+    );
+  });
+});
+
+describe("lightningTargets()", () => {
+  it("encodes Vite's default CSS targets as Lightning CSS versions", () => {
+    expect(
+      lightningTargets([
+        "chrome111",
+        "edge111",
+        "firefox114",
+        "safari16.4",
+        "ios16.4",
+      ]),
+    ).toEqual({
+      chrome: 111 << 16,
+      edge: 111 << 16,
+      firefox: 114 << 16,
+      safari: (16 << 16) | (4 << 8),
+      ios_saf: (16 << 16) | (4 << 8),
+    });
+  });
+
+  it("rejects a target it cannot map instead of lowering for the wrong browsers", () => {
+    expect(() => lightningTargets(["es2020"])).toThrow(
+      'Unsupported CSS target "es2020"',
     );
   });
 });

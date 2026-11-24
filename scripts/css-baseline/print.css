@@ -8,11 +8,11 @@
 
 body,
 html {
+  color: #111111;
+  background: #ffffff;
   margin: 0;
   padding: 0;
-  background: #ffffff;
-  color: #111111;
-  font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  font-family: Source Sans Pro, Helvetica Neue, Arial, sans-serif;
   font-size: 11pt;
   line-height: 1.5;
 }
@@ -29,9 +29,9 @@ a {
 h1,
 h2,
 h3 {
+  margin: 0 0 0.5rem;
   font-weight: 600;
   line-height: 1.25;
-  margin: 0 0 0.5rem;
 }
 
 p {
@@ -49,45 +49,45 @@ time {
 
 .request-print__header {
   border-bottom: 2pt solid #111111;
-  padding-bottom: 1rem;
   margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
 }
 
 .request-print__brand {
-  font-size: 9pt;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #555555;
   margin: 0 0 0.5rem;
+  font-size: 9pt;
 }
 
 .request-print__title {
-  font-size: 20pt;
   margin: 0 0 0.5rem;
+  font-size: 20pt;
 }
 
 .request-print__subtitle {
-  font-size: 12pt;
   color: #333333;
   margin: 0 0 1rem;
+  font-size: 12pt;
 }
 
 .request-print__meta {
-  display: grid;
   grid-template-columns: max-content 1fr;
   gap: 0.15rem 1rem;
   margin: 0;
   font-size: 10pt;
+  display: grid;
 }
 
 .request-print__meta dt {
-  font-weight: 600;
   color: #555555;
+  font-weight: 600;
 }
 
 .request-print__meta dd {
-  margin: 0;
   color: #111111;
+  margin: 0;
 }
 
 .request-print__communication {
@@ -95,8 +95,8 @@ time {
   page-break-inside: avoid;
   border: 1pt solid #cccccc;
   border-radius: 2pt;
-  padding: 0.75rem 1rem;
   margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
 }
 
 .request-print__communication.is-outgoing {
@@ -109,8 +109,8 @@ time {
 
 .request-print__communication-header {
   border-bottom: 1pt dotted #cccccc;
-  padding-bottom: 0.5rem;
   margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
   font-size: 10pt;
 }
 
@@ -119,15 +119,15 @@ time {
 }
 
 .request-print__label {
-  font-weight: 600;
   color: #555555;
-  display: inline-block;
   min-width: 3.5rem;
+  font-weight: 600;
+  display: inline-block;
 }
 
 .request-print__communication-body {
-  font-size: 11pt;
   word-wrap: break-word;
+  font-size: 11pt;
 }
 
 .request-print__communication-body img {
@@ -136,18 +136,18 @@ time {
 }
 
 .request-print__communication-body blockquote {
+  color: #333333;
   border-left: 2pt solid #cccccc;
   margin: 0.5rem 0;
   padding-left: 0.75rem;
-  color: #333333;
 }
 
 .request-print__footer {
+  color: #555555;
+  border-top: 1pt solid #cccccc;
   margin-top: 2rem;
   padding-top: 0.75rem;
-  border-top: 1pt solid #cccccc;
   font-size: 9pt;
-  color: #555555;
 }
 
 @media print {
@@ -169,9 +169,9 @@ time {
 }
 
 @media print {
-  a[href^=http]::after {
+  a[href^=http]:after {
     content: " (" attr(href) ")";
-    font-size: 0.85em;
     color: #555555;
+    font-size: 0.85em;
   }
 }
