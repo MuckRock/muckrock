@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 # MuckRock
 from muckrock.agency.models import Agency
 from muckrock.core import autocomplete
+from muckrock.core.forms import NativeDateInput
 from muckrock.foia.models import FOIALog
 
 
@@ -33,16 +34,12 @@ class FOIALogUploadForm(forms.ModelForm):
     start_date = forms.DateField(
         required=False,
         label="Start date",
-        widget=forms.DateInput(
-            attrs={"class": "datepicker", "placeholder": "Pick a date"}
-        ),
+        widget=NativeDateInput(),
     )
     end_date = forms.DateField(
         required=False,
         label="End date",
-        widget=forms.DateInput(
-            attrs={"class": "datepicker", "placeholder": "Pick a date"}
-        ),
+        widget=NativeDateInput(),
     )
     log = forms.FileField()
 

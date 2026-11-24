@@ -44,6 +44,9 @@
         justify-content: space-between;
         align-items: flex-start;
     }
+    .expiration input[type="date"] {
+        width: 100%;
+    }
 }
 
 .request.manager .title-form {

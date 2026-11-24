@@ -14,7 +14,7 @@ from dal import forward
 from muckrock.agency.models import Agency
 from muckrock.agency.viewsets import CountWhen
 from muckrock.core import autocomplete
-from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, RangeWidget
+from muckrock.core.filters import BLANK_STATUS, BOOLEAN_CHOICES, DateRangeWidget
 from muckrock.foia.filters import JurisdictionFilterSet
 from muckrock.portal.models import PORTAL_TYPES
 from muckrock.tags.models import Tag
@@ -70,12 +70,12 @@ class TaskFilterSet(django_filters.FilterSet):
     date_created = django_filters.DateFromToRangeFilter(
         label="Date Created Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
     date_done = django_filters.DateFromToRangeFilter(
         label="Date Done Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
 
     class Meta:

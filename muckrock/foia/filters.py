@@ -17,7 +17,7 @@ import django_filters
 from muckrock.agency.models import Agency
 from muckrock.communication.models import EmailAddress, PhoneNumber
 from muckrock.core import autocomplete
-from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, RangeWidget
+from muckrock.core.filters import BLANK_STATUS, NULL_BOOLEAN_CHOICES, DateRangeWidget
 from muckrock.foia.models import EMBARGO_CHOICES, FOIACommunication, FOIARequest
 from muckrock.foia.models.log import FOIALogEntry
 from muckrock.project.models import Project
@@ -68,7 +68,7 @@ class CommunicationDateRangeFilterSet(django_filters.FilterSet):
     date_range = django_filters.DateFromToRangeFilter(
         method="filter_communication_date_range",
         label="Date Range",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
 
     def filter_communication_date_range(self, queryset, name, value):
@@ -351,7 +351,7 @@ class FOIACommunicationFilterSet(django_filters.FilterSet):
         field_name="datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
 
     def filter_type(self, queryset, name, value):
@@ -370,7 +370,7 @@ class FOIAFileFilterSet(django_filters.FilterSet):
         field_name="datetime",
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
 
 
@@ -389,7 +389,7 @@ class FOIALogEntryFilterSet(django_filters.FilterSet):
         field_name="date_requested",
         label="Date Requested",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
 
     class Meta:

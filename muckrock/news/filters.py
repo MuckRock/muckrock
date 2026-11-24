@@ -12,7 +12,7 @@ from dal import forward
 
 # MuckRock
 from muckrock.core import autocomplete
-from muckrock.core.filters import RangeWidget
+from muckrock.core.filters import DateRangeWidget
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.tags.models import Tag
@@ -44,7 +44,7 @@ class ArticleDateRangeFilterSet(django_filters.FilterSet):
     pub_date = django_filters.DateFromToRangeFilter(
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         field_name="tags__name",

@@ -1,0 +1,22 @@
+{
+  "bracketSameLine": false,
+  "plugins": ["prettier-plugin-svelte"],
+  "printWidth": 80,
+  "semi": true,
+  "singleQuote": false,
+  "svelteAllowShorthand": true,
+  "svelteIndentScriptAndStyle": true,
+  "svelteSortOrder": "options-scripts-markup-styles",
+  "svelteStrictMode": false,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false,
+  "overrides": [
+    {
+      "files": ["**/*.jsonc"],
+      "options": {
+        "trailingComma": "none"
+      }
+    }
+  ]
+}

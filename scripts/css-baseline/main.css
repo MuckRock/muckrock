@@ -1134,128 +1134,6 @@ br.nomb {
   background: #d3bc35;
 }
 
-.ui-datepicker {
-  display: none;
-  background: #f7f8fa;
-  overflow: hidden;
-  border: 1px solid #97a1ad;
-  box-shadow: 0px 4px 8px 0px #97a1ad;
-  background: #f7f8fa;
-}
-
-.ui-datepicker-header {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 0;
-  padding: 0.296875rem;
-  text-align: center;
-  font-weight: 500;
-}
-
-.ui-datepicker-header a {
-  cursor: pointer;
-}
-
-.ui-datepicker-prev {
-  order: -1;
-}
-
-.ui-datepicker-title {
-  order: 0;
-}
-
-.ui-datepicker-next {
-  order: 1;
-}
-
-a.ui-state-disabled {
-  color: #d5dae0;
-  cursor: default;
-}
-
-a.ui-state-disabled:hover {
-  color: #d5dae0;
-  text-decoration: none;
-}
-
-.ui-datepicker-calendar {
-  text-align: center;
-}
-
-.ui-datepicker-calendar tbody tr,
-.ui-datepicker-calendar thead th {
-  border-left: none;
-  border-right: none;
-}
-
-.ui-datepicker-calendar td {
-  cursor: pointer;
-  background-color: #ffffff;
-}
-
-.ui-datepicker-calendar td a {
-  color: #333c47;
-  text-decoration: none;
-}
-
-.ui-datepicker-calendar td a:hover {
-  color: #333c47;
-}
-
-.ui-datepicker-calendar td span {
-  color: #97a1ad;
-}
-
-.ui-datepicker-calendar td:hover {
-  background-color: #bbd6fa;
-}
-
-.ui-datepicker-calendar .ui-datepicker-unselectable {
-  cursor: default;
-}
-
-.ui-datepicker-calendar .ui-datepicker-unselectable:hover {
-  background-color: #ffffff;
-}
-
-.ui-datepicker-calendar .ui-datepicker-week-end {
-  background-color: #f7f8fa;
-}
-
-.ui-datepicker-calendar .ui-datepicker-week-end.ui-datepicker-unselectable:hover {
-  background-color: #f7f8fa;
-}
-
-.ui-datepicker-calendar .ui-datepicker-other-month {
-  cursor: default;
-  background-color: #d5dae0;
-}
-
-.ui-datepicker-calendar .ui-datepicker-other-month:hover {
-  background-color: #d5dae0;
-}
-
-.ui-datepicker-calendar .ui-datepicker-today {
-  background-color: #bbd6fa;
-}
-
-.ui-datepicker-calendar .ui-datepicker-current-day a {
-  color: #f7f8fa;
-}
-
-.ui-datepicker-calendar .ui-datepicker-current-day {
-  background-color: #4582cc;
-}
-
-.ui-datepicker-calendar .ui-datepicker-current-day:hover a {
-  color: #f7f8fa;
-}
-
-.ui-datepicker-calendar .ui-datepicker-current-day:hover {
-  background-color: #4582cc;
-}
-
 .dropdown {
   position: relative;
 }
@@ -3554,49 +3432,19 @@ fieldset > fieldset + fieldset {
   margin: 0;
 }
 
-.input-range input,
-.input-range label {
-  width: 50%;
-  margin-right: 0;
-  float: left;
-}
-
-.input-range input:first-child,
-.input-range label:first-child {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right-color: #b5bdc7;
-}
-
-.input-range input:last-child,
-.input-range label:last-child {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left-color: #b5bdc7;
-}
-
-.input-range,
-.input-range .labels {
-  overflow: hidden;
-}
-
 #build-wrap .form-wrap.form-builder .frmb .form-elements .input-wrap {
   width: 80%;
 }
 
-.RangeWidget.field {
+.DateRangeWidget.field {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.5em;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-.RangeWidget.field header {
-  flex: 1 1 100%;
-}
-
-.RangeWidget.field input {
-  flex: 1 1;
+.DateRangeWidget.field .date-range-separator {
+  font-size: 0.8125rem;
+  opacity: 0.75;
 }
 
 .internal-notes {
@@ -3737,6 +3585,10 @@ fieldset > fieldset + fieldset {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+
+.embargo.manager .expiration input[type=date] {
+  width: 100%;
 }
 
 .request.manager .title-form {
@@ -7914,6 +7766,7 @@ html {
   justify-content: space-between;
 }
 
+.request.properties .hidden-form input[type=date],
 .request.properties .hidden-form input[type=text],
 .request.properties .hidden-form label {
   margin-bottom: 0.59375rem;

@@ -13,9 +13,13 @@
 
 import $ from 'jquery';
 import './jquery-global';
-import 'jquery-ui/datepicker';
-import 'jquery-ui/widget';
-import 'jquery-ui/sortable';
+// jQuery UI modules do not import their own dependencies; keep this order.
+import 'jquery-ui/ui/version';
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/data';
+import 'jquery-ui/ui/scroll-parent';
+import 'jquery-ui/ui/widgets/mouse';
+import 'jquery-ui/ui/widgets/sortable';
 import 'formBuilder';
 import 'tooltipster';
 import '../vendor/formset';
@@ -45,8 +49,6 @@ import './stripe';
 import './tabs';
 import './task';
 import { initMessages } from './messages';
-
-import 'jquery.tabulator';
 
 /* Bind plugins and event handlers to frontend elements. */
 
@@ -80,24 +82,6 @@ $('document').ready(function(){
     $(this).selectAll();
   });
 
-  // Date Picker
-  $('.datepicker').datepicker({
-    changeMonth: true,
-    changeYear: true,
-    minDate: new Date(2010, 0, 1),
-    maxDate: '+1y',
-    yearRange: '2010:+1'
-  });
-  $('.datepicker-future').datepicker({
-    changeMonth: true,
-    changeYear: true,
-    minDate: 0,
-    maxDate: '+1y'
-  });
-  $('.datepicker-simple').datepicker({
-    changeMonth: true,
-    changeYear: true
-  });
 
   // Loupe
   /*

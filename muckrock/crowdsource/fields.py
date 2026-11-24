@@ -4,6 +4,9 @@
 # Django
 from django import forms
 
+# MuckRock
+from muckrock.core.forms import NativeDateInput
+
 
 class Field:
     """Base field for crowdsource form"""
@@ -71,9 +74,9 @@ class DateField(Field):
     field = forms.DateField
 
     def get_form_field(self, field, **kwargs):
-        """Set a class for date fields"""
+        """Render with the browser's date picker"""
         form_field = super().get_form_field(field)
-        form_field.widget.attrs["class"] = "datepicker-simple"
+        form_field.widget = NativeDateInput()
         return form_field
 
 

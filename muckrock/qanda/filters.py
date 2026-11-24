@@ -11,7 +11,7 @@ import django_filters
 
 # MuckRock
 from muckrock.core import autocomplete
-from muckrock.core.filters import RangeWidget
+from muckrock.core.filters import DateRangeWidget
 from muckrock.qanda.models import Question
 from muckrock.tags.models import Tag
 
@@ -29,7 +29,7 @@ class QuestionFilterSet(django_filters.FilterSet):
     date = django_filters.DateFromToRangeFilter(
         label="Date Range",
         lookup_expr="contains",
-        widget=RangeWidget(attrs={"class": "datepicker", "placeholder": "MM/DD/YYYY"}),
+        widget=DateRangeWidget(),
     )
     unanswered = django_filters.BooleanFilter(
         method="unanswered_filter", widget=forms.CheckboxInput()
