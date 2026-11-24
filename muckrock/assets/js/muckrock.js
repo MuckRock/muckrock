@@ -13,7 +13,6 @@
 
 import $ from 'jquery';
 import './jquery-global';
-import 'jquery-ui/datepicker';
 import 'jquery-ui/widget';
 import 'jquery-ui/sortable';
 import 'formBuilder';
@@ -31,6 +30,7 @@ import './communication';
 import './crowdfund';
 import './crowdsource';
 import './currencyField';
+import { initDatepickers } from './datepicker';
 import './dropdown';
 import './editor';
 import './exemptionBrowser/app';
@@ -80,24 +80,7 @@ $('document').ready(function(){
     $(this).selectAll();
   });
 
-  // Date Picker
-  $('.datepicker').datepicker({
-    changeMonth: true,
-    changeYear: true,
-    minDate: new Date(2010, 0, 1),
-    maxDate: '+1y',
-    yearRange: '2010:+1'
-  });
-  $('.datepicker-future').datepicker({
-    changeMonth: true,
-    changeYear: true,
-    minDate: 0,
-    maxDate: '+1y'
-  });
-  $('.datepicker-simple').datepicker({
-    changeMonth: true,
-    changeYear: true
-  });
+  initDatepickers();
 
   // Loupe
   /*

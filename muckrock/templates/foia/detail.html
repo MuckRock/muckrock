@@ -86,27 +86,12 @@
 {% block scripts %}
 
   <script type="module">
-    $('.datepicker').datepicker({
-      maxDate: '+30d',
-      minDate: 0,
-      firstDay: 1,
-      numberOfMonths: 1,
-      {% if foia.date_embargo %}
-        defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
-      {% endif %}
-    });
     $('#id_date_due').datepicker({
       dateFormat: 'yy-mm-dd',
       maxDate: '+30d',
       minDate: 0,
       firstDay: 1,
       hideIfNoPrevNext: true,
-    });
-    $('#id_date_estimate').datepicker({
-      changeMonth: true,
-      changeYear: true,
-      dateFormat: 'yy-mm-dd',
-      minDate: 0,
     });
   </script>
 
